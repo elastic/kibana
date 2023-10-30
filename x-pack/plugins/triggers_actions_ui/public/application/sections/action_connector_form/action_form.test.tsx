@@ -18,7 +18,6 @@ import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -28,16 +27,6 @@ jest.mock('../../lib/action_connector_api', () => ({
 const { loadActionTypes } = jest.requireMock('../../lib/action_connector_api');
 
 const setHasActionsWithBrokenConnector = jest.fn();
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
-});
-
 describe('action_form', () => {
   const mockedActionParamsFields = lazy(async () => ({
     default() {
@@ -314,66 +303,63 @@ describe('action_form', () => {
 
     const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
     const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        <ActionForm
-          ruleTypeId="test"
-          actions={initialAlert.actions}
-          messageVariables={{
-            params: [
-              { name: 'testVar1', description: 'test var1' },
-              { name: 'testVar2', description: 'test var2' },
-            ],
-            state: [],
-            context: [{ name: 'contextVar', description: 'context var1' }],
-          }}
-          featureId="alerting"
-          producerId="alerting"
-          defaultActionGroupId={'default'}
-          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
-            const recoveryActionGroupId = customRecoveredActionGroup
-              ? customRecoveredActionGroup
-              : 'recovered';
-            return isActionGroupDisabledForActionTypeId(
-              actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
-              actionTypeId
-            );
-          }}
-          setActionIdByIndex={(id: string, index: number) => {
-            initialAlert.actions[index].id = id;
-          }}
-          actionGroups={[
-            { id: 'default', name: 'Default', defaultActionMessage },
-            {
-              id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
-              name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
+      <ActionForm
+        actions={initialAlert.actions}
+        messageVariables={{
+          params: [
+            { name: 'testVar1', description: 'test var1' },
+            { name: 'testVar2', description: 'test var2' },
+          ],
+          state: [],
+          context: [{ name: 'contextVar', description: 'context var1' }],
+        }}
+        featureId="alerting"
+        producerId="alerting"
+        defaultActionGroupId={'default'}
+        isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
+          const recoveryActionGroupId = customRecoveredActionGroup
+            ? customRecoveredActionGroup
+            : 'recovered';
+          return isActionGroupDisabledForActionTypeId(
+            actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
+            actionTypeId
+          );
+        }}
+        setActionIdByIndex={(id: string, index: number) => {
+          initialAlert.actions[index].id = id;
+        }}
+        actionGroups={[
+          { id: 'default', name: 'Default', defaultActionMessage },
+          {
+            id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
+            name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
+          },
+        ]}
+        setActionGroupIdByIndex={(group: string, index: number) => {
+          initialAlert.actions[index].group = group;
+        }}
+        setActions={(_updatedActions: RuleAction[]) => {}}
+        setActionParamsProperty={(key: string, value: any, index: number) =>
+          (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+        }
+        setActionFrequencyProperty={(key: string, value: any, index: number) =>
+          (initialAlert.actions[index] = {
+            ...initialAlert.actions[index],
+            frequency: { ...initialAlert.actions[index].frequency!, [key]: value },
+          })
+        }
+        setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
+          (initialAlert.actions[index] = {
+            ...initialAlert.actions[index],
+            alertsFilter: {
+              ...initialAlert.actions[index].alertsFilter,
+              [key]: value,
             },
-          ]}
-          setActionGroupIdByIndex={(group: string, index: number) => {
-            initialAlert.actions[index].group = group;
-          }}
-          setActions={(_updatedActions: RuleAction[]) => {}}
-          setActionParamsProperty={(key: string, value: any, index: number) =>
-            (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
-          }
-          setActionFrequencyProperty={(key: string, value: any, index: number) =>
-            (initialAlert.actions[index] = {
-              ...initialAlert.actions[index],
-              frequency: { ...initialAlert.actions[index].frequency!, [key]: value },
-            })
-          }
-          setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
-            (initialAlert.actions[index] = {
-              ...initialAlert.actions[index],
-              alertsFilter: {
-                ...initialAlert.actions[index].alertsFilter,
-                [key]: value,
-              },
-            })
-          }
-          actionTypeRegistry={actionTypeRegistry}
-          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-        />
-      </QueryClientProvider>
+          })
+        }
+        actionTypeRegistry={actionTypeRegistry}
+        setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+      />
     );
 
     // Wait for active space to resolve before requesting the component to update

@@ -96,7 +96,7 @@ export type ActionTypeFormProps = {
   defaultNotifyWhenValue?: RuleNotifyWhenType;
   featureId: string;
   producerId: string;
-  ruleTypeId: string;
+  ruleTypeId?: string;
   hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 } & Pick<
@@ -204,9 +204,8 @@ export const ActionTypeForm = ({
 
   let showMustacheAutocompleteSwitch;
   try {
-    showMustacheAutocompleteSwitch = getIsExperimentalFeatureEnabled(
-      'showMustacheAutocompleteSwitch'
-    );
+    showMustacheAutocompleteSwitch =
+      getIsExperimentalFeatureEnabled('showMustacheAutocompleteSwitch') && ruleTypeId;
   } catch (e) {
     showMustacheAutocompleteSwitch = false;
   }

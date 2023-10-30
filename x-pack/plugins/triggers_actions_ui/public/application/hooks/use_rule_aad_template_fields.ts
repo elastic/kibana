@@ -39,7 +39,7 @@ async function loadRuleTypeAadTemplateFields({
 
 export function useRuleTypeAadTemplateFields(
   http: HttpStart,
-  ruleTypeId: string,
+  ruleTypeId: string | undefined,
   enabled: boolean
 ): { isLoading: boolean; fields: ActionVariable[] } {
   // Reimplement useQuery here; this hook is sometimes called in contexts without a QueryClientProvider
@@ -47,7 +47,7 @@ export function useRuleTypeAadTemplateFields(
   const [data, setData] = useState<DataViewField[]>([]);
 
   useEffect(() => {
-    if (enabled && data.length === 0) {
+    if (enabled && data.length === 0 && ruleTypeId) {
       setIsLoading(true);
       loadRuleTypeAadTemplateFields({ http, ruleTypeId }).then((res) => {
         setData(res);

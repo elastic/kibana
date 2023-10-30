@@ -24,7 +24,6 @@ import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
 import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -64,15 +63,6 @@ jest.mock('../../lib/action_variables', () => {
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
 }));
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
-});
 
 describe('action_type_form', () => {
   afterEach(() => {
@@ -131,27 +121,25 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        {getActionTypeForm({
-          index: 1,
-          actionItem: {
-            id: '123',
-            actionTypeId: '.pagerduty',
-            group: 'recovered',
-            params: {
-              eventAction: 'recovered',
-              dedupKey: undefined,
-              summary: '2323',
-              source: 'source',
-              severity: '1',
-              timestamp: new Date().toISOString(),
-              component: 'test',
-              group: 'group',
-              class: 'test class',
-            },
+      getActionTypeForm({
+        index: 1,
+        actionItem: {
+          id: '123',
+          actionTypeId: '.pagerduty',
+          group: 'recovered',
+          params: {
+            eventAction: 'recovered',
+            dedupKey: undefined,
+            summary: '2323',
+            source: 'source',
+            severity: '1',
+            timestamp: new Date().toISOString(),
+            component: 'test',
+            group: 'group',
+            class: 'test class',
           },
-        })}
-      </QueryClientProvider>
+        },
+      })
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -187,27 +175,25 @@ describe('action_type_form', () => {
 
     render(
       <I18nProvider>
-        <QueryClientProvider client={queryClient}>
-          {getActionTypeForm({
-            index: 1,
-            actionItem: {
-              id: '123',
-              actionTypeId: '.pagerduty',
-              group: 'recovered',
-              params: {
-                eventAction: 'recovered',
-                dedupKey: undefined,
-                summary: '2323',
-                source: 'source',
-                severity: '1',
-                timestamp: new Date().toISOString(),
-                component: 'test',
-                group: 'group',
-                class: 'test class',
-              },
+        {getActionTypeForm({
+          index: 1,
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: undefined,
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
             },
-          })}
-        </QueryClientProvider>
+          },
+        })}
       </I18nProvider>
     );
 
@@ -237,27 +223,25 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        {getActionTypeForm({
-          index: 1,
-          actionItem: {
-            id: '123',
-            actionTypeId: '.pagerduty',
-            group: 'recovered',
-            params: {
-              eventAction: 'recovered',
-              dedupKey: '232323',
-              summary: '2323',
-              source: 'source',
-              severity: '1',
-              timestamp: new Date().toISOString(),
-              component: 'test',
-              group: 'group',
-              class: 'test class',
-            },
+      getActionTypeForm({
+        index: 1,
+        actionItem: {
+          id: '123',
+          actionTypeId: '.pagerduty',
+          group: 'recovered',
+          params: {
+            eventAction: 'recovered',
+            dedupKey: '232323',
+            summary: '2323',
+            source: 'source',
+            severity: '1',
+            timestamp: new Date().toISOString(),
+            component: 'test',
+            group: 'group',
+            class: 'test class',
           },
-        })}
-      </QueryClientProvider>
+        },
+      })
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -291,27 +275,25 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
-        {getActionTypeForm({
-          index: 1,
-          actionItem: {
-            id: '123',
-            actionTypeId: '.pagerduty',
-            group: 'recovered',
-            params: {
-              eventAction: 'recovered',
-              dedupKey: '232323',
-              summary: '2323',
-              source: 'source',
-              severity: '1',
-              timestamp: new Date().toISOString(),
-              component: 'test',
-              group: 'group',
-              class: 'test class',
-            },
+      getActionTypeForm({
+        index: 1,
+        actionItem: {
+          id: '123',
+          actionTypeId: '.pagerduty',
+          group: 'recovered',
+          params: {
+            eventAction: 'recovered',
+            dedupKey: '232323',
+            summary: '2323',
+            source: 'source',
+            severity: '1',
+            timestamp: new Date().toISOString(),
+            component: 'test',
+            group: 'group',
+            class: 'test class',
           },
-        })}
-      </QueryClientProvider>
+        },
+      })
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -365,19 +347,17 @@ describe('action_type_form', () => {
     };
     const wrapper = render(
       <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          {getActionTypeForm({
-            index: 1,
-            actionItem,
-            setActionFrequencyProperty: () => {
-              actionItem.frequency = {
-                notifyWhen: RuleNotifyWhen.ACTIVE,
-                throttle: null,
-                summary: true,
-              };
-            },
-          })}
-        </QueryClientProvider>
+        {getActionTypeForm({
+          index: 1,
+          actionItem,
+          setActionFrequencyProperty: () => {
+            actionItem.frequency = {
+              notifyWhen: RuleNotifyWhen.ACTIVE,
+              throttle: null,
+              summary: true,
+            };
+          },
+        })}
       </IntlProvider>
     );
 
@@ -453,14 +433,12 @@ describe('action_type_form', () => {
       };
       const wrapper = render(
         <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            {getActionTypeForm({
-              index: 1,
-              actionItem,
-              notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
-              defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
-            })}
-          </QueryClientProvider>
+          {getActionTypeForm({
+            index: 1,
+            actionItem,
+            notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
+            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
+          })}
         </IntlProvider>
       );
 
@@ -509,14 +487,12 @@ describe('action_type_form', () => {
       };
       const wrapper = render(
         <IntlProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            {getActionTypeForm({
-              index: 1,
-              actionItem,
-              notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
-              defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
-            })}
-          </QueryClientProvider>
+          {getActionTypeForm({
+            index: 1,
+            actionItem,
+            notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
+            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
+          })}
         </IntlProvider>
       );
 
@@ -645,7 +621,6 @@ function getActionTypeForm({
 
   return (
     <ActionTypeForm
-      ruleTypeId="test"
       actionConnector={actionConnector ?? actionConnectorDefault}
       actionItem={actionItem ?? actionItemDefault}
       connectors={connectors ?? connectorsDefault}
