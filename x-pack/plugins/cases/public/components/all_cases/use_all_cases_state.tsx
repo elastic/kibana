@@ -121,8 +121,8 @@ const getFilterOptions = (
 
 const getSupportedFilterOptions = (filterOptions: PartialFilterOptions): PartialFilterOptions => {
   return {
-    ...(filterOptions.severity && { severity: filterOptions.severity }),
-    ...(filterOptions.status && { status: filterOptions.status }),
+    ...(filterOptions.severity?.length && { severity: filterOptions.severity }),
+    ...(filterOptions.status?.length && { status: filterOptions.status }),
   };
 };
 

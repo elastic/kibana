@@ -6,32 +6,28 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
-import type { CaseSeverityWithAll, FilterOptions } from '../../containers/types';
-import { SeverityAll } from '../../containers/types';
+import type { CaseSeverity } from '../../../common/types/domain';
+import type { FilterOptions } from '../../containers/types';
 import { severitiesWithAll } from '../severity/config';
 import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
-  selectedOptions: CaseSeverityWithAll[];
+  selectedOptions: CaseSeverity[];
   onChange: ({ filterId, options }: { filterId: keyof FilterOptions; options: string[] }) => void;
 }
 
-const options = Object.keys(severitiesWithAll) as CaseSeverityWithAll[];
+const options = Object.keys(severitiesWithAll) as CaseSeverity[];
 
 export const SeverityFilter: React.FC<Props> = ({ selectedOptions, onChange }) => {
   const renderOption = (option: EuiSelectableOption) => {
-    const severityData = severitiesWithAll[option.label as CaseSeverityWithAll];
+    const severityData = severitiesWithAll[option.label as CaseSeverity];
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={false}>
-          {option.label === SeverityAll ? (
-            <EuiText size="s">{severityData.label}</EuiText>
-          ) : (
-            <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
-          )}
+          <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

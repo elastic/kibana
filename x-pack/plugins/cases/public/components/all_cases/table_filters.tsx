@@ -9,7 +9,6 @@ import React, { useCallback, useState } from 'react';
 import { isEqual } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
-import type { CaseStatusWithAllStatus } from '../../../common/ui/types';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
 import type { FilterOptions } from '../../containers/types';
 import { MultiSelectFilter } from './multi_select_filter';
@@ -24,13 +23,14 @@ import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import type { Solution } from './types';
+import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
-  hiddenStatuses?: CaseStatusWithAllStatus[];
+  hiddenStatuses?: CaseStatuses[];
   availableSolutions: Solution[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
@@ -139,7 +139,7 @@ const CasesTableFiltersComponent = ({
           onSearch={handleOnSearch}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={0}>
+      <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <SeverityFilter selectedOptions={filterOptions.severity} onChange={onChange} />
           <StatusFilter

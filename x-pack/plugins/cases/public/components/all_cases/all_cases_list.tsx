@@ -11,16 +11,11 @@ import { EuiProgress } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
-import type {
-  CaseUI,
-  CaseStatusWithAllStatus,
-  FilterOptions,
-  CasesUI,
-} from '../../../common/ui/types';
+import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import type { EuiBasicTableOnChange, Solution } from './types';
 
-import { SortFieldCase, StatusAll } from '../../../common/ui/types';
+import { SortFieldCase } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
 import { OWNER_INFO } from '../../../common/constants';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
@@ -67,7 +62,7 @@ const mapToReadableSolutionName = (solution: string): Solution => {
 };
 
 export interface AllCasesListProps {
-  hiddenStatuses?: CaseStatusWithAllStatus[];
+  hiddenStatuses?: CaseStatuses[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
 }
@@ -167,9 +162,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           ) {
             setQueryParams({ sortField: SortFieldCase.closedAt });
           } else if (
-            [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
-              newFilterOptions.status[0]
-            ) &&
+            [CaseStatuses.open, CaseStatuses['in-progress']].includes(newFilterOptions.status[0]) &&
             queryParams.sortField === SortFieldCase.closedAt
           ) {
             setQueryParams({ sortField: SortFieldCase.createdAt });
@@ -211,7 +204,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     );
 
     const { columns } = useCasesColumns({
-      filterStatus: filterOptions.status ?? StatusAll,
+      filterStatus: filterOptions.status ?? [],
       userProfiles: userProfiles ?? new Map(),
       isSelectorView,
       connectors,
