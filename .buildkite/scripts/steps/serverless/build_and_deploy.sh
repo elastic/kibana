@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-# Defines KIBANA_IMAGE
+
+source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/docker_image.sh
 
 PROJECT_TYPE=""
