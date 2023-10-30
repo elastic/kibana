@@ -79,20 +79,20 @@ export const callAgentExecutor = async ({
       },
     ],
   });
-  //
-  // const resp = await executor.stream(
-  //   { input: latestMessage[0].content },
-  //   {
-  //     callbacks: [
-  //       {
-  //         handleLLMNewToken(token: string) {
-  //           console.log('handleLLMNewToken in stream call', token);
-  //         },
-  //       },
-  //     ],
-  //   }
-  // );
-  //
+
+  const resp = await executor.stream(
+    { input: latestMessage[0].content },
+    {
+      callbacks: [
+        {
+          handleLLMNewToken(token: string) {
+            console.log('handleLLMNewToken in stream call', token);
+          },
+        },
+      ],
+    }
+  );
+
   await executor.call(
     { input: latestMessage[0].content }
     // {

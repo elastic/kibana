@@ -61,7 +61,7 @@ interface SetConversationProps {
 
 interface UseConversation {
   appendMessage: ({ conversationId, message }: AppendMessageProps) => Message[];
-  amendMessage: ({ conversationId, content }: AmendMessageProps) => Message[];
+  amendMessage: ({ conversationId, content }: AmendMessageProps) => void;
   appendReplacements: ({
     conversationId,
     replacements,
@@ -87,8 +87,7 @@ export const useConversation = (): UseConversation => {
         const prevConversation: Conversation | undefined = prev[conversationId];
 
         if (prevConversation != null) {
-          prevConversation.messages.pop();
-          messages = prevConversation.messages;
+          messages = prevConversation.messages.slice(0, prevConversation.messages.length - 1);
           const newConversation = {
             ...prevConversation,
             messages,
@@ -111,13 +110,12 @@ export const useConversation = (): UseConversation => {
    */
   const amendMessage = useCallback(
     ({ conversationId, content }: AmendMessageProps) => {
-      let messages: Message[] = [];
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
 
         if (prevConversation != null) {
           const message = prevConversation.messages.pop() as unknown as Message;
-          messages = [...prevConversation.messages, { ...message, content }];
+          const messages = [...prevConversation.messages, { ...message, content }];
           const newConversation = {
             ...prevConversation,
             messages,
@@ -130,7 +128,6 @@ export const useConversation = (): UseConversation => {
           return prev;
         }
       });
-      return messages;
     },
     [setConversations]
   );

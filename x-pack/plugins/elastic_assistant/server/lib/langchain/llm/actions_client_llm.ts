@@ -14,6 +14,7 @@ import { Promise } from 'cypress/types/cy-bluebird';
 import { BaseLanguageModelInput } from 'langchain/base_language';
 import { CallbackManagerForLLMRun } from 'langchain/callbacks';
 import { GenerationChunk, LLMResult } from 'langchain/schema';
+import { finished } from 'stream/promises';
 import { RequestBody } from '../types';
 import { getMessageContentAndRole } from '../helpers';
 
@@ -89,23 +90,43 @@ export class ActionsClientLlm extends LLM {
     return super._streamIterator(input, options);
   }
 
-  async *_streamAsyncIterator(stream) {
-    // Get a lock on the stream
-    const reader = stream.getReader();
-    console.log('is it a reader??', reader);
+  async _getResponseFromStream(stream: Readable): Promise<string> {
+    let responseBody: string = '';
+    stream.on('data', (chunk: string) => {
+      responseBody += chunk.toString();
+    });
 
     try {
-      while (true) {
-        // Read from the stream
-        const { done, value } = await reader.read();
-        // Exit if we're done
-        if (done) return;
-        // Else yield the chunk
-        yield value;
-      }
-    } finally {
-      reader.releaseLock();
+      await finished(stream);
+    } catch {
+      // no need to handle this explicitly
     }
+
+    const response = responseBody
+      .split('\n')
+      .filter((line) => {
+        return line.startsWith('data: ') && !line.endsWith('[DONE]');
+      })
+      .map((line) => {
+        return JSON.parse(line.replace('data: ', ''));
+      })
+      .filter(
+        (
+          line
+        ): line is {
+          choices: Array<{
+            delta: { content?: string };
+          }>;
+        } => {
+          return 'object' in line && line.object === 'chat.completion.chunk';
+        }
+      )
+      .reduce((prev, line) => {
+        const newChunk = getMessageFromChunks(line);
+        return prev + newChunk;
+      }, '');
+
+    return response;
   }
   async _generate(
     prompts: string[],
@@ -183,6 +204,8 @@ export class ActionsClientLlm extends LLM {
               console.log('here 1:');
               this.#stream = (stream.data as unknown as Readable).pipe(new PassThrough());
               console.log('here 2', this.#stream);
+              const whatIsThis = await this._getResponseFromStream(this.#stream);
+              console.log('whatIsThis', whatIsThis);
 
               for await (const message of this.#stream) {
                 //   // …
@@ -373,4 +396,12 @@ export class ActionsClientLlm extends LLM {
     //   );
     // }
   }
+}
+
+function getMessageFromChunks(chunks) {
+  let message = '';
+  chunks.forEach((chunk) => {
+    message += chunk.choices[0]?.delta.content ?? '';
+  });
+  return message;
 }
