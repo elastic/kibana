@@ -25,10 +25,9 @@ export const getStreamObservable = (
     observer.next({ chunks: [], loading: true });
     const decoder = new TextDecoder();
     const chunks: Chunk[] = [];
-    let prev: string = '';
     function read() {
       reader
-        ?.read()
+        .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
             if (done) {
@@ -40,17 +39,16 @@ export const getStreamObservable = (
               observer.complete();
               return;
             }
-            let lines: string[] = (prev + decoder.decode(value)).split('\n');
-            const lastLine: string = lines[lines.length - 1];
-            const isPartialChunk: boolean = !!lastLine && lastLine !== 'data: [DONE]';
-            if (isPartialChunk) {
-              prev = lastLine;
-              lines.pop();
-            } else {
-              prev = '';
-            }
-            lines = lines.map((str) => str.substring(6)).filter((str) => !!str && str !== '[DONE]');
-            const nextChunks: Chunk[] = lines.map((line) => JSON.parse(line));
+
+            const nextChunks: Chunk[] = decoder
+              .decode(value)
+              .split('\n')
+              // every line starts with "data: ", we remove it and are left with stringified JSON or the string "[DONE]"
+              .map((str) => str.substring(6))
+              // filter out empty lines and the "[DONE]" string
+              .filter((str) => !!str && str !== '[DONE]')
+              .map((line) => JSON.parse(line));
+
             nextChunks.forEach((chunk) => {
               chunks.push(chunk);
               observer.next({
@@ -108,11 +106,7 @@ export const getStreamObservable = (
   );
 
 function getMessageFromChunks(chunks: Chunk[]) {
-  let message = '';
-  chunks.forEach((chunk) => {
-    message += chunk.choices[0]?.delta.content ?? '';
-  });
-  return message;
+  return chunks.map((chunk) => chunk.choices[0]?.delta.content ?? '').join('');
 }
 
 export const getDumbObservable = () => new Observable<PromptObservableState>();

@@ -7,20 +7,36 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useStream } from './use_stream';
-import { getReaderValue, mockUint8Arrays } from './mock';
 
 const amendMessage = jest.fn();
 const reader = jest.fn();
 const cancel = jest.fn();
+const exampleChunk = {
+  id: '1',
+  object: 'chunk',
+  created: 1635633600000,
+  model: 'model-1',
+  choices: [
+    {
+      index: 0,
+      delta: { role: 'role-1', content: 'content-1' },
+      finish_reason: null,
+    },
+  ],
+};
 const readerComplete = {
   read: reader
     .mockResolvedValueOnce({
       done: false,
-      value: getReaderValue(mockUint8Arrays[0]),
+      value: new Uint8Array(new TextEncoder().encode(`data: ${JSON.stringify(exampleChunk)}`)),
     })
     .mockResolvedValueOnce({
       done: false,
-      value: getReaderValue(mockUint8Arrays[1]),
+      value: new Uint8Array(new TextEncoder().encode(``)),
+    })
+    .mockResolvedValueOnce({
+      done: false,
+      value: new Uint8Array(new TextEncoder().encode('data: [DONE]\n')),
     })
     .mockResolvedValue({
       done: true,
@@ -53,7 +69,7 @@ describe('useStream', () => {
         error: undefined,
         isLoading: true,
         isStreaming: true,
-        pendingMessage: 'Ch',
+        pendingMessage: 'content-1',
         setComplete: expect.any(Function),
       });
     });
@@ -63,11 +79,12 @@ describe('useStream', () => {
         error: undefined,
         isLoading: false,
         isStreaming: false,
-        pendingMessage: 'Cheddar',
+        pendingMessage: 'content-1',
         setComplete: expect.any(Function),
       });
     });
-    expect(reader).toHaveBeenCalledTimes(3);
+
+    expect(reader).toHaveBeenCalledTimes(4);
   });
 
   it('should not call observable when content is provided', () => {
@@ -87,7 +104,7 @@ describe('useStream', () => {
         .fn()
         .mockResolvedValueOnce({
           done: false,
-          value: getReaderValue(mockUint8Arrays[0]),
+          value: new Uint8Array(new TextEncoder().encode(`data: ${JSON.stringify(exampleChunk)}`)),
         })
         .mockRejectedValue(new Error(errorMessage)),
       cancel,
