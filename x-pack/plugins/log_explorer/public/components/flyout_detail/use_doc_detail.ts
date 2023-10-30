@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { FlyoutContentProps } from '@kbn/discover-plugin/public';
 import { formatFieldValue } from '@kbn/discover-utils';
 import { LOG_LEVEL_FIELD, MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../../common/constants';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
-import { FlyoutDoc, LogDocument } from './types';
+import { FlyoutDoc, FlyoutProps, LogDocument } from './types';
 
 export function useDocDetail(
   doc: LogDocument,
-  { dataView }: Pick<FlyoutContentProps, 'dataView'>
+  { dataView }: Pick<FlyoutProps, 'dataView'>
 ): FlyoutDoc {
   const { services } = useKibanaContextForPlugin();
 

@@ -7,17 +7,13 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FlyoutContentProps } from '@kbn/discover-plugin/public';
 import { LogLevel } from './sub_components/log_level';
 import { Timestamp } from './sub_components/timestamp';
-import { LogDocument } from './types';
+import { FlyoutProps, LogDocument } from './types';
 import { getDocDetailRenderFlags, useDocDetail } from './use_doc_detail';
 import { Message } from './sub_components/message';
 
-export function FlyoutDetail({
-  dataView,
-  doc,
-}: Pick<FlyoutContentProps, 'dataView' | 'doc' | 'actions'>) {
+export function FlyoutDetail({ dataView, doc }: Pick<FlyoutProps, 'dataView' | 'doc' | 'actions'>) {
   const parsedDoc = useDocDetail(doc as LogDocument, { dataView });
 
   const { hasTimestamp, hasLogLevel, hasMessage, hasBadges, hasFlyoutHeader } =

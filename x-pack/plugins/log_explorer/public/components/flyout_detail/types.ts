@@ -6,7 +6,13 @@
  */
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FlyoutContentProps } from '@kbn/discover-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+
+export interface FlyoutProps extends FlyoutContentProps {
+  dataView: DataView;
+}
 
 export interface LogDocument extends DataTableRecord {
   flattened: {

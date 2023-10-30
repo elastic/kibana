@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { FlyoutContentProps } from '@kbn/discover-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
+import { FlyoutProps } from '../components/flyout_detail';
 
 export const CustomFlyoutContent = ({
   actions,
   dataView,
   doc,
   renderDefaultContent,
-}: FlyoutContentProps) => {
+}: FlyoutProps) => {
   return (
     <EuiFlexGroup direction="column">
       {/* Apply custom Log Explorer detail */}
