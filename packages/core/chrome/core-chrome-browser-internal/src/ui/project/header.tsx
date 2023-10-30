@@ -50,6 +50,7 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
       min-width: 56px; /* 56 = 40 + 8 + 8 */
       padding: 0 ${size.s};
       cursor: pointer;
+      margin-left: -${size.s}; // to get equal spacing between .euiCollapsibleNavButtonWrapper, logo and breadcrumbs
     `,
     logo: css`
       min-width: 0; /* overrides min-width: 40px */
