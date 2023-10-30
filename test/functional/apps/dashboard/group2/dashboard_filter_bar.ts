@@ -193,8 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/167175
-    describe.skip('saved search filtering', function () {
+    describe('saved search filtering', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -209,9 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         if (isLegacyDefault) {
           await testSubjects.click('docTableCellFilter');
         } else {
-          const documentCell = await dataGrid.getCellElement(1, 3);
-          await documentCell.click();
-          await testSubjects.click('filterForButton');
+          await dataGrid.clickCellFilterForButton(1, 3);
         }
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);

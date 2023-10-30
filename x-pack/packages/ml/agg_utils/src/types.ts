@@ -88,6 +88,24 @@ export interface HistogramField {
 }
 
 /**
+ * Enumeration of significant term types.
+ */
+export const SIGNIFICANT_TERM_TYPE = {
+  KEYWORD: 'keyword',
+  LOG_PATTERN: 'log_pattern',
+} as const;
+
+/**
+ * Type for significant term type keys.
+ */
+type SignificantTermTypeKeys = keyof typeof SIGNIFICANT_TERM_TYPE;
+
+/**
+ * Represents the type of significant term as determined by the SIGNIFICANT_TERM_TYPE enumeration.
+ */
+export type SignificantTermType = typeof SIGNIFICANT_TERM_TYPE[SignificantTermTypeKeys];
+
+/**
  * Represents significant term metadata for a field/value pair.
  * This interface is used as a custom type within Log Rate Analysis
  * for a p-value based variant, not related to the generic
@@ -97,6 +115,12 @@ export interface HistogramField {
  * @extends FieldValuePair
  */
 export interface SignificantTerm extends FieldValuePair {
+  /** The key associated with the significant term. */
+  key: string;
+
+  /** The type of the significant term. */
+  type: SignificantTermType;
+
   /** The document count for the significant term. */
   doc_count: number;
 
@@ -169,6 +193,12 @@ export interface SignificantTermGroupHistogram {
  * @interface
  */
 export interface SignificantTermGroupItem extends FieldValuePair {
+  /** The key associated with the significant term. */
+  key: string;
+
+  /** The type of the significant term. */
+  type: SignificantTermType;
+
   /** The document count associated with this item. */
   docCount: number;
 

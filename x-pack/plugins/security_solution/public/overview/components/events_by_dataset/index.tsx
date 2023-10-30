@@ -37,6 +37,7 @@ import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 const DEFAULT_STACK_BY = 'event.dataset';
 
@@ -61,7 +62,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   scopeId?: string;
   toggleTopN?: () => void;
   hideQueryToggle?: boolean;
-  applyGlobalQueriesAndFilters?: boolean;
+  sourcererScopeId?: SourcererScopeName;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -94,10 +95,10 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   showLegend,
   showSpacer = true,
   scopeId,
+  sourcererScopeId,
   to,
   toggleTopN,
   hideQueryToggle = false,
-  applyGlobalQueriesAndFilters = true,
 }) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
@@ -206,6 +207,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       skip={filterQuery === undefined}
       startDate={from}
       scopeId={scopeId}
+      sourcererScopeId={sourcererScopeId}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}
       chartHeight={CHART_HEIGHT}

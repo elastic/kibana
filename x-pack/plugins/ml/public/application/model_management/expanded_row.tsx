@@ -429,7 +429,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         : []),
       {
         id: 'models_map',
-        'data-test-subj': 'mlTrainedModelsMap',
+        'data-test-subj': 'mlTrainedModelMap',
         name: (
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.expandedRow.modelsMapLabel"
@@ -437,7 +437,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           />
         ),
         content: (
-          <div data-test-subj={'mlTrainedModelDetailsContent'}>
+          <div data-test-subj={'mlTrainedModelMapContent'}>
             <EuiSpacer size={'s'} />
             <EuiFlexItem css={{ height: 300 }}>
               <JobMap

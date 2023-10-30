@@ -9,12 +9,14 @@ import { isEmpty } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
+  ALERT_END,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_UNTRACKED,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 
@@ -134,7 +136,7 @@ export async function setAlertsToUntracked({
         body: {
           conflicts: 'proceed',
           script: {
-            source: UNTRACK_UPDATE_PAINLESS_SCRIPT,
+            source: getUntrackUpdatePainlessScript(new Date()),
             lang: 'painless',
           },
           query: {
@@ -183,9 +185,13 @@ export async function setAlertsToUntracked({
 }
 
 // Certain rule types don't flatten their AAD values, apply the ALERT_STATUS key to them directly
-const UNTRACK_UPDATE_PAINLESS_SCRIPT = `
+const getUntrackUpdatePainlessScript = (now: Date) => `
 if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'].empty) {
   ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
+  ctx._source.${ALERT_END} = '${now.toISOString()}';
+  ctx._source.${ALERT_TIME_RANGE}.lte = '${now.toISOString()}';
 } else {
-  ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'
+  ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}';
+  ctx._source['${ALERT_END}'] = '${now.toISOString()}';
+  ctx._source['${ALERT_TIME_RANGE}'].lte = '${now.toISOString()}';
 }`;

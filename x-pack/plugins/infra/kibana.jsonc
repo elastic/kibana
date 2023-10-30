@@ -15,6 +15,7 @@
       "charts",
       "data",
       "dataViews",
+      "dataViewEditor",
       "discover",
       "embeddable",
       "features",
@@ -34,7 +35,7 @@
       "usageCollection",
       "visTypeTimeseries"
     ],
-    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery"],
+    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery", "cloud"],
     "requiredBundles": [
       "unifiedSearch",
       "observability",
@@ -44,7 +45,8 @@
       "kibanaReact",
       "ml",
       "embeddable",
-      "controls"
+      "controls",
+      "advancedSettings"
     ]
   }
 }

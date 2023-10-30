@@ -260,6 +260,7 @@ const getApmServicesListRoute = createApmServerRoute({
       rollupInterval: RollupInterval.OneMinute,
       serviceGroup: null,
       mlClient,
+      useDurationSummary: false,
     });
 
     let mappedItems = serviceItems.items.map((item): ApmServicesListItem => {

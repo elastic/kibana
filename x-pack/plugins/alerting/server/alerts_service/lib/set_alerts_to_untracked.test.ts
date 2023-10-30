@@ -16,6 +16,10 @@ let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 
 describe('setAlertsToUntracked()', () => {
   beforeEach(() => {
+    jest.useFakeTimers();
+    const date = '2023-03-28T22:27:28.159Z';
+    jest.setSystemTime(new Date(date));
+
     logger = loggingSystemMock.createLogger();
     clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     clusterClient.search.mockResponse({
@@ -32,6 +36,11 @@ describe('setAlertsToUntracked()', () => {
       },
     });
   });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   test('should call updateByQuery on provided ruleIds', async () => {
     await setAlertsToUntracked({
       logger,
@@ -83,8 +92,12 @@ describe('setAlertsToUntracked()', () => {
               "source": "
       if (!ctx._source.containsKey('kibana.alert.status') || ctx._source['kibana.alert.status'].empty) {
         ctx._source.kibana.alert.status = 'untracked';
+        ctx._source.kibana.alert.end = '2023-03-28T22:27:28.159Z';
+        ctx._source.kibana.alert.time_range.lte = '2023-03-28T22:27:28.159Z';
       } else {
-        ctx._source['kibana.alert.status'] = 'untracked'
+        ctx._source['kibana.alert.status'] = 'untracked';
+        ctx._source['kibana.alert.end'] = '2023-03-28T22:27:28.159Z';
+        ctx._source['kibana.alert.time_range'].lte = '2023-03-28T22:27:28.159Z';
       }",
             },
           },
@@ -147,8 +160,12 @@ describe('setAlertsToUntracked()', () => {
               "source": "
       if (!ctx._source.containsKey('kibana.alert.status') || ctx._source['kibana.alert.status'].empty) {
         ctx._source.kibana.alert.status = 'untracked';
+        ctx._source.kibana.alert.end = '2023-03-28T22:27:28.159Z';
+        ctx._source.kibana.alert.time_range.lte = '2023-03-28T22:27:28.159Z';
       } else {
-        ctx._source['kibana.alert.status'] = 'untracked'
+        ctx._source['kibana.alert.status'] = 'untracked';
+        ctx._source['kibana.alert.end'] = '2023-03-28T22:27:28.159Z';
+        ctx._source['kibana.alert.time_range'].lte = '2023-03-28T22:27:28.159Z';
       }",
             },
           },

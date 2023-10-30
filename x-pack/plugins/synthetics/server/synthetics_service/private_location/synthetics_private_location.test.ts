@@ -19,6 +19,7 @@ import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { SyntheticsServerSetup } from '../../types';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
@@ -77,6 +78,7 @@ describe('SyntheticsPrivateLocation', () => {
     },
     coreStart: {
       savedObjects: savedObjectsServiceMock.createStartContract(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
     },
   } as unknown as SyntheticsServerSetup;
 

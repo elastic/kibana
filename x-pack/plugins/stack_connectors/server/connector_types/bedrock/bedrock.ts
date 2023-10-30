@@ -21,7 +21,7 @@ import type {
   InvokeAIActionParams,
   InvokeAIActionResponse,
 } from '../../../common/bedrock/types';
-import { SUB_ACTION } from '../../../common/bedrock/constants';
+import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
 
 interface SignedRequest {
   host: string;
@@ -116,6 +116,8 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       method: 'post',
       responseSchema: RunActionResponseSchema,
       data: body,
+      // give up to 2 minutes for response
+      timeout: 120000,
     });
     return response.data;
   }
@@ -141,12 +143,13 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     const req = {
       // end prompt in "Assistant:" to avoid the model starting its message with "Assistant:"
       prompt: `${combinedMessages} \n\nAssistant:`,
-      max_tokens_to_sample: 300,
+      max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+      temperature: 0.5,
       // prevent model from talking to itself
       stop_sequences: ['\n\nHuman:'],
     };
 
     const res = await this.runApi({ body: JSON.stringify(req), model });
-    return res.completion.trim();
+    return { message: res.completion.trim() };
   }
 }

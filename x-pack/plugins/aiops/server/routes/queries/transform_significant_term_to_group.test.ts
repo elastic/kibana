@@ -43,10 +43,12 @@ describe('getMissingSignificantTerms', () => {
       docCount: 1981,
       group: [
         {
-          docCount: 1981,
-          duplicate: 1,
+          key: 'user:Peter',
+          type: 'keyword',
           fieldName: 'user',
           fieldValue: 'Peter',
+          docCount: 1981,
+          duplicate: 1,
           pValue: 2.62555579103777e-21,
         },
       ],

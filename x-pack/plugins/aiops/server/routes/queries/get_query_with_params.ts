@@ -20,8 +20,13 @@ export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
 interface QueryParams {
   params: AiopsLogRateAnalysisSchema;
   termFilters?: FieldValuePair[];
+  filter?: estypes.QueryDslQueryContainer;
 }
-export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
+export const getQueryWithParams = ({
+  params,
+  termFilters,
+  filter,
+}: QueryParams): estypes.QueryDslQueryContainer => {
   const searchQuery = JSON.parse(params.searchQuery) as estypes.QueryDslQueryContainer;
   return {
     bool: {
@@ -29,6 +34,7 @@ export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
         searchQuery,
         ...getFilters(params),
         ...(Array.isArray(termFilters) ? termFilters.map(getTermsQuery) : []),
+        ...(filter ? [filter] : []),
       ] as estypes.QueryDslQueryContainer[],
     },
   };

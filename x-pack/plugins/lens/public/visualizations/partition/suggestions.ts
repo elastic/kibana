@@ -7,7 +7,6 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type {
   SuggestionRequest,
   TableSuggestionColumn,
@@ -24,6 +23,7 @@ import { isPartitionShape } from '../../../common/visualizations';
 import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { layerTypes } from '../..';
+import { getColorMappingDefaults } from '../../utils';
 
 function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
@@ -142,7 +142,7 @@ export function suggestions({
                 metrics: metricColumnIds,
                 layerType: layerTypes.DATA,
                 colorMapping: !mainPalette
-                  ? { ...DEFAULT_COLOR_MAPPING_CONFIG }
+                  ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
                   ? mainPalette.value
                   : state.layers[0].colorMapping,
@@ -157,7 +157,7 @@ export function suggestions({
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
                 colorMapping: !mainPalette
-                  ? { ...DEFAULT_COLOR_MAPPING_CONFIG }
+                  ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
                   ? mainPalette.value
                   : undefined,

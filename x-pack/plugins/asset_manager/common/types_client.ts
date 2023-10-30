@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-export interface GetHostsOptionsPublic {
+export interface SharedAssetsOptionsPublic {
   from: string;
-  to: string;
+  to?: string;
 }
 
-export interface GetServicesOptionsPublic {
-  from: string;
-  to: string;
+export type GetHostsOptionsPublic = SharedAssetsOptionsPublic;
+
+export interface GetServicesOptionsPublic extends SharedAssetsOptionsPublic {
   parent?: string;
 }

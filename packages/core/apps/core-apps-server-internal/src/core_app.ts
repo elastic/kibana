@@ -271,10 +271,5 @@ export class CoreAppsService {
       '/ui/{path*}',
       fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
     );
-
-    core.http.registerStaticDir(
-      '/node_modules/@kbn/ui-framework/dist/{path*}',
-      fromRoot('node_modules/@kbn/ui-framework/dist')
-    );
   }
 }

@@ -43,7 +43,6 @@ export interface ManagementAppDependencies {
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
-  landingPageRedirect$: BehaviorSubject<string | undefined>;
 }
 
 export const ManagementApp = ({
@@ -52,13 +51,11 @@ export const ManagementApp = ({
   theme$,
   appBasePath,
 }: ManagementAppProps) => {
-  const { setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$, landingPageRedirect$ } =
-    dependencies;
+  const { setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$ } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
   const isSidebarEnabled = useObservable(isSidebarEnabled$);
   const cardsNavigationConfig = useObservable(cardsNavigationConfig$);
-  const landingPageRedirect = useObservable(landingPageRedirect$);
 
   const onAppMounted = useCallback((id: string) => {
     setSelectedId(id);
@@ -114,9 +111,6 @@ export const ManagementApp = ({
     sections,
     cardsNavigationConfig,
     kibanaVersion: dependencies.kibanaVersion,
-    landingPageRedirect,
-    navigateToUrl: dependencies.coreStart.application.navigateToUrl,
-    basePath: dependencies.coreStart.http.basePath,
   };
 
   return (

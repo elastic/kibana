@@ -6695,202 +6695,6 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
-        "id": "def-common.SavedObjectModelBidirectionalTransformation",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectModelBidirectionalTransformation",
-        "description": [
-          "\nA bidirectional transformation.\n\nBidirectional transformations define migration functions that can be used to\ntransform a document from the lower version to the higher one (`up`), and\nthe other way around, from the higher version to the lower one (`down`)\n"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectModelBidirectionalTransformation",
-            "text": "SavedObjectModelBidirectionalTransformation"
-          },
-          "<PreviousAttributes, NewAttributes>"
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectModelBidirectionalTransformation.up",
-            "type": "Function",
-            "tags": [],
-            "label": "up",
-            "description": [
-              "\nThe upward (previous=>next) transformation."
-            ],
-            "signature": [
-              "(document: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationDoc",
-                "text": "SavedObjectModelTransformationDoc"
-              },
-              "<PreviousAttributes>, context: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationContext",
-                "text": "SavedObjectModelTransformationContext"
-              },
-              ") => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationResult",
-                "text": "SavedObjectModelTransformationResult"
-              },
-              "<NewAttributes>"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-common.SavedObjectModelBidirectionalTransformation.up.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "document",
-                "description": [],
-                "signature": [
-                  "SavedObjectDoc<InputAttributes> & { references?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
-                  "[] | undefined; }"
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-common.SavedObjectModelBidirectionalTransformation.up.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-common.SavedObjectModelTransformationContext",
-                    "text": "SavedObjectModelTransformationContext"
-                  }
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectModelBidirectionalTransformation.down",
-            "type": "Function",
-            "tags": [],
-            "label": "down",
-            "description": [
-              "\nThe downward (next=>previous) transformation."
-            ],
-            "signature": [
-              "(document: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationDoc",
-                "text": "SavedObjectModelTransformationDoc"
-              },
-              "<NewAttributes>, context: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationContext",
-                "text": "SavedObjectModelTransformationContext"
-              },
-              ") => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectModelTransformationResult",
-                "text": "SavedObjectModelTransformationResult"
-              },
-              "<PreviousAttributes>"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-common.SavedObjectModelBidirectionalTransformation.down.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "document",
-                "description": [],
-                "signature": [
-                  "SavedObjectDoc<InputAttributes> & { references?: ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
-                  "[] | undefined; }"
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-common.SavedObjectModelBidirectionalTransformation.down.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-common.SavedObjectModelTransformationContext",
-                    "text": "SavedObjectModelTransformationContext"
-                  }
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-common.SavedObjectModelDataBackfillResult",
         "type": "Interface",
         "tags": [],
@@ -6972,6 +6776,22 @@
             "label": "modelVersion",
             "description": [
               "\nThe model version this migration is registered for"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectModelTransformationContext.namespaceType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namespaceType",
+            "description": [
+              "\nThe namespace type of the savedObject type this migration is registered for"
+            ],
+            "signature": [
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
             "deprecated": false,

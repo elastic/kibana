@@ -28,9 +28,13 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { FieldIcon } from '@kbn/react-field';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
-import type { Threshold as ThresholdType } from '../../../../../common/api/detection_engine/model/rule_schema/specific_attributes/threshold_attributes';
-import type { RequiredFieldArray } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+import type {
+  AlertSuppressionMissingFieldsStrategy,
+  RequiredFieldArray,
+  RuleResponse,
+  Threshold as ThresholdType,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../../detections/components/rules/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
@@ -38,7 +42,6 @@ import { AlertSuppressionTechnicalPreviewBadge } from '../../../../detections/co
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { useLicense } from '../../../../common/hooks/use_license';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema/specific_attributes/query_attributes';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
@@ -48,6 +51,7 @@ import { MlJobsDescription } from '../../../../detections/components/rules/ml_jo
 import { MlJobLink } from '../../../../detections/components/rules/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { TechnicalPreviewBadge } from '../../../../detections/components/rules/technical_preview_badge';
 import { BadgeList } from './badge_list';
 import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
@@ -212,7 +216,7 @@ const getRuleTypeDescription = (ruleType: Type) => {
     case 'eql':
       return descriptionStepI18n.EQL_TYPE_DESCRIPTION;
     case 'esql':
-      return <TitleWithTechnicalPreviewBadge title={descriptionStepI18n.ESQL_TYPE_DESCRIPTION} />;
+      return <TechnicalPreviewBadge label={descriptionStepI18n.ESQL_TYPE_DESCRIPTION} />;
     case 'threat_match':
       return descriptionStepI18n.THREAT_MATCH_TYPE_DESCRIPTION;
     case 'new_terms':
@@ -311,11 +315,11 @@ const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
   return <EuiText size="s">{description}</EuiText>;
 };
 
-interface TitleWithTechnicalPreviewBadgeProps {
+interface AlertSuppressionTitleProps {
   title: string;
 }
 
-const TitleWithTechnicalPreviewBadge = ({ title }: TitleWithTechnicalPreviewBadgeProps) => {
+const AlertSuppressionTitle = ({ title }: AlertSuppressionTitleProps) => {
   const license = useLicense();
 
   return <AlertSuppressionTechnicalPreviewBadge label={title} license={license} />;
@@ -347,7 +351,7 @@ interface MissingFieldsStrategyProps {
 
 const MissingFieldsStrategy = ({ missingFieldsStrategy }: MissingFieldsStrategyProps) => {
   const missingFieldsDescription =
-    missingFieldsStrategy === AlertSuppressionMissingFieldsStrategy.Suppress
+    missingFieldsStrategy === AlertSuppressionMissingFieldsStrategyEnum.suppress
       ? descriptionStepI18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : descriptionStepI18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
@@ -542,17 +546,17 @@ const prepareDefinitionSectionListItems = (
 
   if ('alert_suppression' in rule && rule.alert_suppression) {
     definitionSectionListItems.push({
-      title: <TitleWithTechnicalPreviewBadge title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />,
+      title: <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />,
       description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
     });
 
     definitionSectionListItems.push({
-      title: <TitleWithTechnicalPreviewBadge title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />,
+      title: <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />,
       description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
     });
 
     definitionSectionListItems.push({
-      title: <TitleWithTechnicalPreviewBadge title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />,
+      title: <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />,
       description: (
         <MissingFieldsStrategy
           missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
@@ -578,7 +582,8 @@ const prepareDefinitionSectionListItems = (
   return definitionSectionListItems;
 };
 
-export interface RuleDefinitionSectionProps {
+export interface RuleDefinitionSectionProps
+  extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
   isInteractive?: boolean;
   dataTestSubj?: string;
@@ -588,6 +593,7 @@ export const RuleDefinitionSection = ({
   rule,
   isInteractive = false,
   dataTestSubj,
+  ...descriptionListProps
 }: RuleDefinitionSectionProps) => {
   const { savedQuery } = useGetSavedQuery({
     savedQueryId: rule.type === 'saved_query' ? rule.saved_id : '',
@@ -603,11 +609,12 @@ export const RuleDefinitionSection = ({
   return (
     <div data-test-subj={dataTestSubj}>
       <EuiDescriptionList
-        type="column"
+        type={descriptionListProps.type ?? 'column'}
+        rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={definitionSectionListItems}
         columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-        rowGutterSize="m"
         data-test-subj="listItemColumnStepRuleDescription"
+        {...descriptionListProps}
       />
     </div>
   );

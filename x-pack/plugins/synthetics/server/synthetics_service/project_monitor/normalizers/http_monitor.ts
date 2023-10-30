@@ -64,8 +64,7 @@ export const getNormalizeHTTPFields = ({
     [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
     [ConfigKey.URLS]: getOptionalArrayField(monitor.urls) || defaultFields[ConfigKey.URLS],
-    [ConfigKey.MAX_REDIRECTS]:
-      monitor[ConfigKey.MAX_REDIRECTS] || defaultFields[ConfigKey.MAX_REDIRECTS],
+    [ConfigKey.MAX_REDIRECTS]: formatMaxRedirects(monitor[ConfigKey.MAX_REDIRECTS]),
     [ConfigKey.REQUEST_BODY_CHECK]: getRequestBodyField(
       (yamlConfig as Record<keyof HTTPFields, unknown>)[ConfigKey.REQUEST_BODY_CHECK] as string,
       defaultFields[ConfigKey.REQUEST_BODY_CHECK]
@@ -112,4 +111,14 @@ export const getRequestBodyField = (
     type,
     value: parsedValue || defaultValue.value,
   };
+};
+
+export const formatMaxRedirects = (value?: string | number): string => {
+  if (typeof value === 'number') {
+    return `${value}`;
+  }
+
+  const defaultFields = DEFAULT_FIELDS[DataStream.HTTP];
+
+  return value ?? defaultFields[ConfigKey.MAX_REDIRECTS];
 };

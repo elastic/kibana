@@ -16,8 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const svlCommonApi = getService('svlCommonApi');
 
-  // FLAKY https://github.com/elastic/kibana/issues/165942
-  describe.skip('params', () => {
+  describe('params', () => {
     before(() =>
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );

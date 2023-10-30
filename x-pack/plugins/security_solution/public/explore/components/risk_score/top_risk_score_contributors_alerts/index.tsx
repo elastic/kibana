@@ -83,7 +83,6 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
       return (
         <AlertsTableComponent
           configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RISK_INPUTS}
-          flyoutSize="m"
           inputFilters={[...inputFilters, ...filters, ...groupingFilters]}
           tableId={TableId.alertsRiskInputs}
         />

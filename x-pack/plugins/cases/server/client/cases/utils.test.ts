@@ -1352,7 +1352,7 @@ describe('utils', () => {
       {
         key: 'first_key',
         type: CustomFieldTypes.TEXT,
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       },
     ];
 

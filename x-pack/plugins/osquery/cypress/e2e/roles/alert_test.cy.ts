@@ -21,12 +21,6 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
   });
 
   describe('t1_analyst role', () => {
-    before(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
-
-      cy.visit('/app/security/rules');
-      clickRuleName(ruleName);
-    });
     beforeEach(() => {
       cy.login(ServerlessRoleName.T1_ANALYST);
 

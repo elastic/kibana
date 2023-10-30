@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback, Suspense, useMemo } from 'react';
+import React, {
+  Fragment,
+  useState,
+  useEffect,
+  useCallback,
+  Suspense,
+  useMemo,
+  useRef,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -184,6 +192,7 @@ export const RuleForm = ({
   const canShowActions = hasShowActionsCapability(capabilities);
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
+  const flyoutBodyOverflowRef = useRef<HTMLDivElement | HTMLSpanElement | null>(null);
 
   const defaultRuleInterval = getInitialInterval(config.minimumScheduleInterval?.value);
   const defaultScheduleInterval = getDurationNumberInItsUnit(defaultRuleInterval);
@@ -305,6 +314,22 @@ export const RuleForm = ({
       setRuleIntervalUnit(intervalUnit);
     }
   }, [rule.schedule.interval, defaultScheduleInterval, defaultScheduleIntervalUnit]);
+
+  useEffect(() => {
+    if (!flyoutBodyOverflowRef.current) {
+      // We're using this as a reliable way to reset the scroll position
+      // of the flyout independently of the selected rule type
+      flyoutBodyOverflowRef.current = document.querySelector('.euiFlyoutBody__overflow');
+    }
+  }, []);
+
+  const resetContentScroll = useCallback(() => flyoutBodyOverflowRef?.current?.scroll?.(0, 0), []);
+
+  useEffect(() => {
+    if (rule.ruleTypeId) {
+      resetContentScroll();
+    }
+  }, [rule.ruleTypeId, resetContentScroll]);
 
   const setRuleProperty = useCallback(
     <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {

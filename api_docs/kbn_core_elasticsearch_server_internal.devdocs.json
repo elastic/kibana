@@ -3318,7 +3318,7 @@
             "section": "def-common.ConditionalType",
             "text": "ConditionalType"
           },
-          "<false, boolean, boolean>; skipStartupConnectionCheck: ",
+          "<true, boolean, boolean>; skipStartupConnectionCheck: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

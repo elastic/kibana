@@ -246,7 +246,7 @@ export function DataDriftIndexPatternsEditor({
       children: (
         <EuiFlexItem grow={false}>
           <DataViewEditor
-            key={'reference'}
+            id={'reference'}
             label={
               <FormattedMessage
                 id="xpack.ml.dataDrift.indexPatternsEditor.referenceData"
@@ -274,7 +274,7 @@ export function DataDriftIndexPatternsEditor({
       children: (
         <EuiFlexItem grow={false}>
           <DataViewEditor
-            key={'comparison'}
+            id={'comparison'}
             label={
               <FormattedMessage
                 id="xpack.ml.dataDrift.indexPatternsEditor.comparisonDataIndexPatternHelp"
@@ -329,7 +329,7 @@ export function DataDriftIndexPatternsEditor({
                   }}
                   isClearable={false}
                   isDisabled={comparisonIndexPattern === '' && referenceIndexPattern === ''}
-                  data-test-subj="timestampField"
+                  data-test-subj="mlDataDriftTimestampField"
                   aria-label={i18n.translate(
                     'xpack.ml.dataDrift.indexPatternsEditor.timestampSelectAriaLabel',
                     {
@@ -389,7 +389,7 @@ export function DataDriftIndexPatternsEditor({
                     disabled={hasError}
                     onClick={createDataViewAndRedirectToDataDriftPage.bind(null, true)}
                     iconType="visTagCloud"
-                    data-test-subj="analyzeDataDriftButton"
+                    data-test-subj="analyzeDataDriftWithoutSavingButton"
                     aria-label={i18n.translate(
                       'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftWithoutSavingLabel',
                       {

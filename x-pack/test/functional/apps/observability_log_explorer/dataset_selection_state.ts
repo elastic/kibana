@@ -6,7 +6,6 @@
  */
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import querystring from 'querystring';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -30,9 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
+          search: {
             _a: rison.encode({ index: azureActivitylogsIndex }),
-          }),
+          },
         });
 
         const datasetSelectionTitle =
@@ -44,9 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should fallback to the "All logs" selection and notify the user of an invalid encoded index', async () => {
         const invalidEncodedIndex = 'invalid-encoded-index';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
+          search: {
             _a: rison.encode({ index: invalidEncodedIndex }),
-          }),
+          },
         });
 
         const datasetSelectionTitle =
@@ -67,10 +66,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
+          search: {
             _a: rison.encode({ index: azureActivitylogsIndex }),
             controlPanels: rison.encode({}),
-          }),
+          },
         });
         const azureDatasetSelectionTitle =
           await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();

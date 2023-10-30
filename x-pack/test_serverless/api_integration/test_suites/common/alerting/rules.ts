@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createIndexConnector,
@@ -35,8 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167665
-  describe.skip('Alerting rules', () => {
+  describe('Alerting rules', function () {
+    // Timeout of 360000ms exceeded
+    this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let actionId: string;
@@ -53,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
+        conflicts: 'proceed',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
@@ -99,6 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -120,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
         instanceContextValue: '',
@@ -191,6 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -212,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
         instanceContextValue: '',
@@ -252,8 +257,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(resp2.hits.hits.length).to.be(2);
 
-      const document2 = resp2.hits.hits[1];
-      expect(document2._source).to.eql({
+      const document2 = resp2.hits.hits[0];
+      expect(omit(document2, '_source.date')._source).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
         instanceContextValue: '',
@@ -362,6 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -434,6 +440,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -511,6 +518,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -535,6 +543,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -655,6 +664,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -744,6 +754,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -831,6 +842,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },

@@ -13,7 +13,7 @@ import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-describe('Endpoints page', { tags: '@ess' }, () => {
+describe('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
 
   before(() => {

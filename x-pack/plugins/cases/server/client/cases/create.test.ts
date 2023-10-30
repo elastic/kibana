@@ -448,7 +448,7 @@ describe('create', () => {
       {
         key: 'first_key',
         type: CustomFieldTypes.TEXT,
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       },
       {
         key: 'second_key',
@@ -550,7 +550,7 @@ describe('create', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'missing field 1',
               required: true,
             },
             {
@@ -566,7 +566,53 @@ describe('create', () => {
       await expect(
         create({ ...theCase }, clientArgs, casesClient)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: first_key"`
+        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\""`
+      );
+    });
+
+    it('should throw an error when required customFields are null', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'missing field 1',
+              required: true,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'missing field 2',
+              required: true,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        create(
+          {
+            ...theCase,
+            customFields: [
+              {
+                key: 'first_key',
+                type: CustomFieldTypes.TEXT,
+                value: null,
+              },
+              {
+                key: 'second_key',
+                type: CustomFieldTypes.TOGGLE,
+                value: null,
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\", \\"missing field 2\\""`
       );
     });
 
@@ -594,7 +640,7 @@ describe('create', () => {
               {
                 key: 'duplicated_key',
                 type: CustomFieldTypes.TEXT,
-                value: ['this is a text field value', 'this is second'],
+                value: 'this is a text field value',
               },
               {
                 key: 'duplicated_key',
@@ -641,7 +687,7 @@ describe('create', () => {
               {
                 key: 'second_key',
                 type: CustomFieldTypes.TEXT,
-                value: ['this is a text field value', 'this is second'],
+                value: 'this is a text field value',
               },
             ],
           },
@@ -649,7 +695,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: first_key"`
+        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\""`
       );
     });
 
@@ -667,7 +713,7 @@ describe('create', () => {
               {
                 key: 'second_key',
                 type: CustomFieldTypes.TEXT,
-                value: ['foobar'],
+                value: 'foobar',
               },
             ],
           },
@@ -696,7 +742,7 @@ describe('create', () => {
         {
           key: 'first_customField_key',
           type: CustomFieldTypes.TEXT,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
         {
           key: 'second_customField_key',

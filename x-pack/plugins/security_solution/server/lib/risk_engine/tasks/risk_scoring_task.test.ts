@@ -449,9 +449,21 @@ describe('Risk Scoring Task', () => {
             expect.stringContaining('task was cancelled')
           );
         });
+
+        it('schedules the transform to run now', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
+          expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalledTimes(1);
+        });
       });
 
-      describe('telemetry', () => {
+      describe('when execution was successful', () => {
         it('send success telemetry event', async () => {
           await runTask({
             getRiskScoreService,
@@ -461,20 +473,35 @@ describe('Risk Scoring Task', () => {
             telemetry: mockTelemetry,
           });
 
-          expect(mockTelemetry.reportEvent).toHaveBeenCalledTimes(1);
           expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('risk_score_execution_success', {
-            executionDurationExceededInterval: false,
+            interval: '1h',
             scoresWritten: 10,
             taskDurationInSeconds: 0,
           });
         });
 
-        it('send error telemetry event', async () => {
+        it('schedules the transform to run now', async () => {
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
+          expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe('when execution was unsuccessful', () => {
+        beforeEach(() => {
           mockRiskScoreService.calculateAndPersistScores.mockReset();
           mockRiskScoreService.calculateAndPersistScores.mockImplementationOnce(() => {
             throw new Error();
           });
+        });
 
+        it('send error telemetry event', async () => {
           try {
             await runTask({
               getRiskScoreService,
@@ -490,6 +517,41 @@ describe('Risk Scoring Task', () => {
               {}
             );
           }
+        });
+
+        it('does not schedules the transform to run now', async () => {
+          await expect(
+            runTask({
+              getRiskScoreService,
+              isCancelled: mockIsCancelled,
+              logger: mockLogger,
+              taskInstance: riskScoringTaskInstanceMock,
+              telemetry: mockTelemetry,
+            })
+          ).rejects.toThrow();
+
+          expect(mockRiskScoreService.scheduleLatestTransformNow).not.toHaveBeenCalled();
+        });
+
+        it('sends a cancellation telemetry event if the task was cancelled', async () => {
+          mockIsCancelled.mockReturnValue(true);
+
+          await runTask({
+            getRiskScoreService,
+            isCancelled: mockIsCancelled,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+            telemetry: mockTelemetry,
+          });
+
+          expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+            'risk_score_execution_cancellation',
+            {
+              interval: '1h',
+              scoresWritten: 0,
+              taskDurationInSeconds: 0,
+            }
+          );
         });
       });
     });
