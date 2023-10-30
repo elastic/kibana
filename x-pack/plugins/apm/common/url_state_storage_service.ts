@@ -16,9 +16,9 @@ import {
   DEFAULT_REFRESH_INTERVAL,
   LogViewReference,
 } from '@kbn/logs-shared-plugin/common';
-import type { FilterStateInUrl } from '../public/observability_logs/log_stream_query_state';
-import type { PositionStateInUrl } from '../public/observability_logs/log_stream_position_state/src/url_state_storage_service';
-import type { TimeRange } from './time';
+import type { FilterStateInUrl } from '@kbn/infra-plugin/public/observability_logs/log_stream_query_state';
+import type { PositionStateInUrl } from '@kbn/infra-plugin/public/observability_logs/log_stream_position_state/src/url_state_storage_service';
+import type { TimeRange } from '@kbn/infra-plugin/common/time';
 
 export const defaultLogViewKey = 'crashLogView';
 
