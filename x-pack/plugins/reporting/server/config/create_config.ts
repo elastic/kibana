@@ -45,9 +45,8 @@ export function createConfig(
     !sum(ipaddr.parse(kibanaServerHostname).toByteArray())
   ) {
     logger.info(
-      `Found 'server.host: "0.0.0.0"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname.` +
-        ` To enable PNG/PDF Reporting to work, 'xpack.reporting.kibanaServer.hostname: localhost' is automatically set in the configuration.` +
-        ` You can prevent this message by adding 'xpack.reporting.kibanaServer.hostname: localhost' in kibana.yml.`
+      `Overriding server host address "0.0.0.0" in Reporting runtime config,` +
+        ` using "xpack.reporting.kibanaServer.hostname: localhost".`
     );
     kibanaServerHostname = 'localhost';
   }
