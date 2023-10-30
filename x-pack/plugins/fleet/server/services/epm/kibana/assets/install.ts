@@ -140,15 +140,22 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
-  // As we use `import` to create our saved objects, we have to install
-  // their references (the index patterns) at the same time
-  // to prevent a reference error
+  // Create index patterns separately with `overwrite: false` to prevent blowing away users' runtime fields
   const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
+  await retryImportOnConflictError(() =>
+    savedObjectsImporter.import({
+      overwrite: false,
+      readStream: createListStream(indexPatternSavedObjects),
+      createNewCopies: false,
+      refresh: false,
+      managed: true,
+    })
+  );
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
     savedObjectsImporter,
-    kibanaAssets: [...indexPatternSavedObjects, ...assetsToInstall],
+    kibanaAssets: assetsToInstall,
   });
 
   return installedAssets;
