@@ -166,7 +166,7 @@ describe('EditOutputFlyout', () => {
   it('should render the flyout if the output provided is a remote ES output', async () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ remoteESOutput: true });
     const { utils } = renderFlyout({
-      type: 'remote-elasticsearch',
+      type: 'remote_elasticsearch',
       name: 'remote es output',
       id: 'outputR',
       is_default: false,

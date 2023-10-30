@@ -107,7 +107,7 @@ const mockApiCallsWithRemoteESOutputs = (http: MockedFleetStartServices['http'])
             {
               id: 'remote1',
               name: 'Remote1',
-              type: 'remote-elasticsearch',
+              type: 'remote_elasticsearch',
               is_default: false,
               is_default_monitoring: false,
             },

@@ -56,8 +56,9 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should create a valid remote service account token', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/fleet/service_tokens?remote=true`)
+        .post(`/api/fleet/service_tokens`)
         .set('kbn-xsrf', 'xxxx')
+        .send(`{"remote":true}`)
         .expect(200);
 
       expect(apiResponse).have.property('name');

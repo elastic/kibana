@@ -70,7 +70,10 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         data-test-subj="serviceTokenCallout"
       >
         <EuiCodeBlock isCopyable={true}>
-          {`POST kbn:/api/fleet/service_tokens?remote=true`}
+          {`POST kbn:/api/fleet/service_tokens
+{
+  "remote": true
+}`}
         </EuiCodeBlock>
       </EuiCallOut>
       <EuiSpacer size="m" />

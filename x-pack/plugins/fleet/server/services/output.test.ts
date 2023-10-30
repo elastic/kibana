@@ -716,7 +716,7 @@ describe('Output Service', () => {
             is_default: true,
             is_default_monitoring: false,
             name: 'Test',
-            type: 'remote-elasticsearch',
+            type: 'remote_elasticsearch',
           },
           { id: 'output-1' }
         )
@@ -1534,7 +1534,7 @@ describe('Output Service', () => {
           is_default: true,
           is_default_monitoring: false,
           name: 'Test',
-          type: 'remote-elasticsearch',
+          type: 'remote_elasticsearch',
         })
       ).rejects.toThrow(
         `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`

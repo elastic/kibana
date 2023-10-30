@@ -4,34 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { sendGetPermissionsCheck } from '../../../hooks';
 
-export const useCheckPermissions = () => {
-  const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
-  const [permissionsError, setPermissionsError] = useState<string>();
+async function checkPermissions() {
+  let permissionsError;
 
-  useEffect(() => {
-    async function checkPermissions() {
-      setIsPermissionsLoading(false);
-      setPermissionsError(undefined);
+  try {
+    const permissionsResponse = await sendGetPermissionsCheck(true);
 
-      try {
-        setIsPermissionsLoading(true);
-        const permissionsResponse = await sendGetPermissionsCheck(true);
-
-        setIsPermissionsLoading(false);
-        if (!permissionsResponse.data?.success) {
-          setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
-        }
-      } catch (err) {
-        setPermissionsError('REQUEST_ERROR');
-      }
+    if (!permissionsResponse.data?.success) {
+      permissionsError = permissionsResponse.data?.error || 'REQUEST_ERROR';
     }
-    checkPermissions();
-  }, []);
+  } catch (err) {
+    permissionsError = 'REQUEST_ERROR';
+  }
+  return permissionsError;
+}
 
-  return { isPermissionsLoading, permissionsError };
+export const useCheckPermissions = () => {
+  const { data: permissionsError, status } = useQuery([
+    'fetch-check-permissions',
+    checkPermissions,
+  ]);
+  return { isPermissionsLoading: status === 'loading', permissionsError };
 };

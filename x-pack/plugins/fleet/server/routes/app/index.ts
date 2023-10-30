@@ -63,12 +63,12 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
 
 export const generateServiceTokenHandler: RequestHandler<
   null,
-  TypeOf<typeof GenerateServiceTokenRequestSchema.query>,
-  null
+  null,
+  TypeOf<typeof GenerateServiceTokenRequestSchema.body>
 > = async (context, request, response) => {
   // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  const serviceAccount = request.query.remote ? 'fleet-server-remote' : 'fleet-server';
+  const serviceAccount = request.body.remote ? 'fleet-server-remote' : 'fleet-server';
   appContextService
     .getLogger()
     .debug(`Creating service token for account elastic/${serviceAccount}`);

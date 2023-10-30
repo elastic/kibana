@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const GenerateServiceTokenRequestSchema = {
-  query: schema.object({
+  body: schema.object({
     remote: schema.boolean({ defaultValue: false }),
   }),
 };
