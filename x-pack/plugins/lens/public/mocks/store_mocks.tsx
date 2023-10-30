@@ -11,6 +11,8 @@ import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
+import { RenderOptions, render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { LensAppServices } from '../app_plugin/types';
 
 import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
@@ -92,6 +94,29 @@ export interface MountStoreProps {
   preloadedState?: Partial<LensAppState>;
   dispatch?: jest.Mock;
 }
+
+export const renderWithReduxStore = (
+  ui: JSX.Element,
+  options: RenderOptions,
+  { preloadedState }: { preloadedState: Partial<LensAppState> } = { preloadedState: {} }
+) => {
+  const { store } = makeLensStore({ preloadedState });
+
+  const Wrapper: React.FC<{
+    children: React.ReactNode;
+  }> = ({ children }) => (
+    <Provider store={store}>
+      <I18nProvider>{children}</I18nProvider>
+    </Provider>
+  );
+
+  const rtlRender = render(ui, { wrapper: Wrapper, ...options });
+
+  return {
+    store,
+    ...rtlRender,
+  };
+};
 
 export const mountWithProvider = async (
   component: React.ReactElement,
