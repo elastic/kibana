@@ -37,7 +37,7 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
-import { BackButton } from './back_button';
+import { BackButton } from '../../shared/back_button';
 import { WindowsInstallStep } from '../../shared/windows_install_step';
 import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 

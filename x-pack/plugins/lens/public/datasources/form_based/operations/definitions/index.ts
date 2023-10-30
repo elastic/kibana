@@ -267,8 +267,8 @@ interface BaseOperationDefinitionProps<
    */
   getDefaultLabel: (
     column: C,
-    indexPattern: IndexPattern,
-    columns: Record<string, GenericIndexPatternColumn>
+    columns: Record<string, GenericIndexPatternColumn>,
+    indexPattern?: IndexPattern
   ) => string;
   /**
    * This function is called if another column in the same layer changed or got added/removed.

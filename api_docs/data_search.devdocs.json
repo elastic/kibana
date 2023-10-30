@@ -6738,14 +6738,15 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggType.valueType",
-            "type": "CompoundType",
+            "id": "def-common.AggType.getValueType",
+            "type": "Function",
             "tags": [],
-            "label": "valueType",
+            "label": "getValueType",
             "description": [
               "\nThe type the values produced by this agg will have in the final data table.\nIf not specified, the type of the field is used."
             ],
             "signature": [
+              "((aggConfig: TAggConfig) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -6753,7 +6754,7 @@
                 "section": "def-common.DatatableColumnType",
                 "text": "DatatableColumnType"
               },
-              " | undefined"
+              ") | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
@@ -7308,7 +7309,7 @@
                     "section": "def-common.SearchSourceSearchOptions",
                     "text": "SearchSourceSearchOptions"
                   },
-                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
+                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -8224,17 +8225,48 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.BaseParamType.valueType",
-            "type": "Any",
+            "id": "def-common.BaseParamType.getValueType",
+            "type": "Function",
             "tags": [],
-            "label": "valueType",
+            "label": "getValueType",
             "description": [],
             "signature": [
-              "any"
+              "(aggConfig: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              ") => any"
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/base.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.BaseParamType.getValueType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "aggConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.AggConfig",
+                    "text": "AggConfig"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/aggs/param_types/base.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -10708,7 +10740,7 @@
               "\nserializes search source fields (which can later be passed to {@link ISearchStartSearchSource})"
             ],
             "signature": [
-              "(recurse?: boolean, includeFields?: boolean) => ",
+              "(recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -10727,21 +10759,6 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "recurse",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.SearchSource.getSerializedFields.$2",
-                "type": "boolean",
-                "tags": [],
-                "label": "includeFields",
                 "description": [],
                 "signature": [
                   "boolean"
@@ -25064,12 +25081,13 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggTypeConfig.valueType",
-            "type": "CompoundType",
+            "id": "def-common.AggTypeConfig.getValueType",
+            "type": "Function",
             "tags": [],
-            "label": "valueType",
+            "label": "getValueType",
             "description": [],
             "signature": [
+              "((aggConfig: TAggConfig) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -25077,11 +25095,29 @@
                 "section": "def-common.DatatableColumnType",
                 "text": "DatatableColumnType"
               },
-              " | undefined"
+              ") | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.getValueType.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "aggConfig",
+                "description": [],
+                "signature": [
+                  "TAggConfig"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -34298,7 +34334,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -38572,7 +38608,15 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          "[] | undefined) | undefined; options?: any[] | undefined; valueType?: any; onChange?: ((agg: ",
+          "[] | undefined) | undefined; options?: any[] | undefined; getValueType?: ((aggConfig: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggConfig",
+            "text": "AggConfig"
+          },
+          ") => any) | undefined; onChange?: ((agg: ",
           {
             "pluginId": "data",
             "scope": "common",
