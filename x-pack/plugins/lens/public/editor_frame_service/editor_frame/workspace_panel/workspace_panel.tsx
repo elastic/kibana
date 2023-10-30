@@ -53,6 +53,7 @@ import {
   UserMessagesGetter,
   AddUserMessages,
   isMessageRemovable,
+  VisualizationDisplayOptions,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
@@ -462,6 +463,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [plugins.data.datatableUtilities, plugins.uiActions, activeVisualization, dispatchLens]
   );
 
+  const displayOptions = activeVisualization?.getDisplayOptions?.();
+
   const hasCompatibleActions = useCallback(
     async (event: ExpressionRendererEvent) => {
       if (!plugins.uiActions) {
@@ -605,6 +608,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         onComponentRendered={() => {
           visualizationRenderStartTime.current = performance.now();
         }}
+        displayOptions={displayOptions}
       />
     );
   };
@@ -701,6 +705,7 @@ export const VisualizationWrapper = ({
   onRender$,
   onData$,
   onComponentRendered,
+  displayOptions,
 }: {
   expression: string | null | undefined;
   lensInspector: LensInspector;
@@ -714,6 +719,7 @@ export const VisualizationWrapper = ({
   onRender$: () => void;
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onComponentRendered: () => void;
+  displayOptions: VisualizationDisplayOptions | undefined;
 }) => {
   useEffect(() => {
     onComponentRendered();
@@ -818,7 +824,7 @@ export const VisualizationWrapper = ({
     >
       <ExpressionRendererComponent
         className="lnsExpressionRenderer__component"
-        padding="m"
+        padding={displayOptions?.noPadding ? undefined : 'm'}
         expression={expression!}
         searchContext={searchContext}
         searchSessionId={searchSessionId}

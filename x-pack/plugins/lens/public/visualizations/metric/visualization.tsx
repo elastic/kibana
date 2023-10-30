@@ -41,7 +41,7 @@ export const showingBar = (
   Boolean(state.showBar && state.maxAccessor);
 
 export const getDefaultColor = (state: MetricVisualizationState) =>
-  showingBar(state) ? euiLightVars.euiColorPrimary : euiThemeVars.euiColorLightestShade;
+  showingBar(state) ? euiLightVars.euiColorPrimary : euiThemeVars.euiColorEmptyShade;
 
 export interface MetricVisualizationState {
   layerId: string;

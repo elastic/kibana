@@ -45,7 +45,7 @@ import { VisParams } from '../../common';
 import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
-export const defaultColor = euiThemeVars.euiColorLightestShade;
+export const defaultColor = euiThemeVars.euiColorEmptyShade;
 
 function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
   const formatId = serializedFieldFormat?.id || 'number';
