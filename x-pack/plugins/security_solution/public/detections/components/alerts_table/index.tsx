@@ -71,11 +71,11 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
       }};
     }
   }
-  div .euiDataGridRowCell__contentByHeight {
-    height: auto;
-    align-self: center;
+  div .euiDataGridRowCell__contentWrapper {
+    display: flex;
+    align-items: center;
   }
-  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
+  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__content {
     flex-grow: 0;
     width: 100%;
   }
@@ -258,7 +258,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       id: `detection-engine-alert-table-${configId}-${tableView}`,
       featureIds: ['siem'],
       query: finalBoolQuery,
-      showExpandToDetails: false,
       gridStyle,
       shouldHighlightRow,
       rowHeightsOptions,

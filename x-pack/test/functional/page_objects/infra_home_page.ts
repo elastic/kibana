@@ -347,6 +347,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await thresholdInput.type([threshold]);
     },
 
+    async ensureAlertsAndRulesDropdownIsMissing() {
+      await testSubjects.missingOrFail('infrastructure-alerts-and-rules');
+    },
+
     async clickAlertsAndRules() {
       await testSubjects.click('infrastructure-alerts-and-rules');
     },

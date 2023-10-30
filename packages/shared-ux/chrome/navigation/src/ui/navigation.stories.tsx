@@ -201,6 +201,154 @@ export const SimpleObjectDefinition = (args: NavigationServices) => {
   );
 };
 
+const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
+  navigationTree: {
+    body: [
+      // My custom project
+      {
+        type: 'navGroup',
+        id: 'example_projet',
+        title: 'Example project',
+        icon: 'logoObservability',
+        defaultIsCollapsed: false,
+        children: [
+          {
+            title: 'Block group',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
+          },
+          {
+            title: 'Accordion group',
+            renderAs: 'accordion',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
+          },
+          {
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Block group',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'without',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'title',
+              },
+            ],
+          },
+          {
+            id: 'group:settings',
+            link: 'item1',
+            title: 'Panel group',
+            renderAs: 'panelOpener',
+            children: [
+              {
+                title: 'Group 1',
+                children: [
+                  {
+                    link: 'group:settings.logs',
+                    title: 'Logs',
+                  },
+                  {
+                    link: 'group:settings.signals',
+                    title: 'Signals',
+                  },
+                  {
+                    id: 'group:settings.signals-2',
+                    link: 'group:settings.signals',
+                    title: 'Signals - should NOT appear',
+                    sideNavStatus: 'hidden', // Should not appear
+                  },
+                  {
+                    link: 'group:settings.tracing',
+                    title: 'Tracing',
+                  },
+                ],
+              },
+              {
+                id: 'group.nestedGroup',
+                link: 'group:settings.tracing',
+                title: 'Group 2',
+                children: [
+                  {
+                    id: 'item1',
+                    link: 'group:settings.signals',
+                    title: 'Some link title',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    footer: [
+      {
+        type: 'navGroup',
+        ...getPresets('devtools'),
+      },
+    ],
+  },
+};
+
+export const GroupsExamples = (args: NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    navLinks$: of([...navLinksMock, ...deepLinks]),
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
+  });
+
+  return (
+    <NavigationWrapper>
+      <NavigationProvider {...services}>
+        <DefaultNavigation {...groupExamplesDefinition} />
+      </NavigationProvider>
+    </NavigationWrapper>
+  );
+};
+
 const navigationDefinition: ProjectNavigationDefinition<any> = {
   navigationTree: {
     body: [
@@ -215,6 +363,26 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
           {
             link: 'item1',
             title: 'Get started',
+          },
+          {
+            title: 'Group 1',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1',
+                title: 'Item 1',
+              },
+              {
+                id: 'item2',
+                link: 'item1',
+                title: 'Item 2',
+              },
+              {
+                id: 'item3',
+                link: 'item1',
+                title: 'Item 3',
+              },
+            ],
           },
           {
             link: 'item2',
@@ -463,9 +631,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
         title: 'Example project',
         icon: 'logoObservability',
         defaultIsCollapsed: false,
-        accordionProps: {
-          arrowProps: { css: { display: 'none' } },
-        },
+        isCollapsible: false,
         children: [
           {
             link: 'item1',
@@ -683,7 +849,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                 id: 'root',
                 children: [
                   {
-                    title: 'Should act as item 1',
+                    title: 'Group renders as "item" (1)',
                     link: 'item1',
                     renderAs: 'item',
                     children: [
@@ -699,7 +865,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   },
                   {
                     link: 'group:settings.logs',
-                    title: 'Normal item',
+                    title: 'Item 2',
                   },
                   {
                     link: 'group:settings.logs2',
@@ -723,25 +889,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                     ],
                   },
                   {
-                    title: 'Should act as item 2',
-                    renderAs: 'item', // This group renders as a normal item
-                    children: [
-                      {
-                        link: 'group:settings.logs',
-                        title: 'Logs',
-                      },
-                      {
-                        link: 'group:settings.signals',
-                        title: 'Signals',
-                      },
-                    ],
-                  },
-                ],
-              },
-              {
-                children: [
-                  {
-                    title: 'Another group as Item',
+                    title: 'Group renders as "item" (2)',
                     id: 'group2.renderAsItem',
                     renderAs: 'item',
                     children: [
@@ -797,7 +945,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                     children: [
                       {
                         id: 'group2-B',
-                        title: 'Group 2 (render as Item)',
+                        title: 'Group renders as "item" (3)',
                         renderAs: 'item', // This group renders as a normal item
                         children: [
                           {
@@ -994,6 +1142,19 @@ export const WithUIComponents = (args: NavigationServices) => {
                 </div>
               </Navigation.Item>
               <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
+
+              <Navigation.Group<any> id="group:block" title="This is a block group">
+                <Navigation.Group id="group1">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" withBadge />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+                <Navigation.Group id="group2" title="Nested group" renderAs="accordion">
+                  <Navigation.Item<any> link="group:settings.logs" title="Logs" />
+                  <Navigation.Item<any> link="group:settings.signals" title="Signals" />
+                  <Navigation.Item<any> link="group:settings.tracing" title="Tracing" />
+                </Navigation.Group>
+              </Navigation.Group>
 
               <Navigation.Group<any>
                 id="group:openPanel"

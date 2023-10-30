@@ -49,7 +49,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     await testSubjects.click(subject);
   };
 
-  describe('application deep links navigation', function describeDeepLinksTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/166893
+  describe.skip('application deep links navigation', function describeDeepLinksTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('dl');

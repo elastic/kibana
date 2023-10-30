@@ -36,4 +36,5 @@ export interface ClientConfigType {
   enableLegacyTemplates?: boolean;
   enableIndexStats?: boolean;
   editableIndexSettings?: 'all' | 'limited';
+  enableDataStreamsStorageColumn?: boolean;
 }

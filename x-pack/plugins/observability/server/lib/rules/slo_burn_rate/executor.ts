@@ -19,7 +19,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { ALL_VALUE, toDurationUnit } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
 import {
   SLO_ID_FIELD,
@@ -89,22 +89,10 @@ export const getRuleExecutor = ({
       return { state: {} };
     }
 
-    const burnRateWindows = getBurnRateWindows(params.windows);
-    const longestLookbackWindow = burnRateWindows.reduce((acc, winDef) => {
-      return winDef.longDuration.isShorterThan(acc.longDuration) ? acc : winDef;
-    }, burnRateWindows[0]);
-    const { dateStart, dateEnd } = getTimeRange(
-      `${longestLookbackWindow.longDuration.value}${longestLookbackWindow.longDuration.unit}`
-    );
-
-    const results = await evaluate(
-      esClient.asCurrentUser,
-      slo,
-      params,
-      dateStart,
-      dateEnd,
-      burnRateWindows
-    );
+    // We only need the end timestamp to base all of queries on. The length of the time range
+    // doesn't matter for our use case since we allow the user to customize the window sizes,
+    const { dateEnd } = getTimeRange('1m');
+    const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
     if (results.length > 0) {
       for (const result of results) {
@@ -211,19 +199,6 @@ export const getRuleExecutor = ({
 
     return { state: {} };
   };
-
-export function getBurnRateWindows(windows: WindowSchema[]) {
-  return windows.map((winDef) => {
-    return {
-      ...winDef,
-      longDuration: new Duration(winDef.longWindow.value, toDurationUnit(winDef.longWindow.unit)),
-      shortDuration: new Duration(
-        winDef.shortWindow.value,
-        toDurationUnit(winDef.shortWindow.unit)
-      ),
-    };
-  });
-}
 
 function getActionGroupName(id: string) {
   switch (id) {

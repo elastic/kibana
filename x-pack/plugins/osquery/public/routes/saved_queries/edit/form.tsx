@@ -67,7 +67,7 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="m">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty color="ghost" {...savedQueryListProps}>
+                    <EuiButtonEmpty color="text" {...savedQueryListProps}>
                       <FormattedMessage
                         id="xpack.osquery.editSavedQuery.form.cancelButtonLabel"
                         defaultMessage="Cancel"
