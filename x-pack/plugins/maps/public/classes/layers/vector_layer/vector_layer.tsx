@@ -640,20 +640,27 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     style: IVectorStyle,
     featureCollection?: FeatureCollection
   ): Promise<JoinState[]> {
-    const joinsWithIndex = this.getJoins().map((join, index) => {
-      return {
-        join,
-        joinIndex: index,
-      };
-    }).filter(({ join }) => {
-      return join.hasCompleteConfig();
-    });
+    const joinsWithIndex = this.getJoins()
+      .map((join, index) => {
+        return {
+          join,
+          joinIndex: index,
+        };
+      })
+      .filter(({ join }) => {
+        return join.hasCompleteConfig();
+      });
 
     const joinStates: JoinState[] = [];
     await asyncForEach(joinsWithIndex, async ({ join, joinIndex }) => {
       await this._syncJoinStyleMeta(syncContext, join, style);
       await this._syncJoinFormatters(syncContext, join, style);
-      const joinState = await this._syncJoin({ join, joinIndex, featureCollection, ...syncContext });
+      const joinState = await this._syncJoin({
+        join,
+        joinIndex,
+        featureCollection,
+        ...syncContext,
+      });
       joinStates.push(joinState);
     });
     return joinStates;

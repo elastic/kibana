@@ -451,10 +451,7 @@ function setGotoWithBounds(bounds: MapExtent) {
 }
 
 function setJoinError(layerId: string, joinIndex: number, error?: string) {
-  return (
-    dispatch: Dispatch,
-    getState: () => MapStoreState
-  ) => {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (!layer || !('getJoins' in layer)) {
       return;
@@ -470,13 +467,12 @@ function setJoinError(layerId: string, joinIndex: number, error?: string) {
 
     dispatch({
       type: SET_JOINS,
-      layerId: layerId,
+      layerId,
       joins: [
         ...joins.slice(0, joinIndex),
         { ...joins[joinIndex], error },
-        ...joins.slice(joinIndex + 1)
+        ...joins.slice(joinIndex + 1),
       ],
     });
   };
 }
-

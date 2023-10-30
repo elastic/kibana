@@ -297,7 +297,7 @@ export class LayerGroup implements ILayer {
 
   getErrors(): LayerError[] {
     return this.hasErrors()
-      ?[
+      ? [
           {
             title: i18n.translate('xpack.maps.layerGroup.childrenErrorMessage', {
               defaultMessage: `An error occurred when loading nested layers`,

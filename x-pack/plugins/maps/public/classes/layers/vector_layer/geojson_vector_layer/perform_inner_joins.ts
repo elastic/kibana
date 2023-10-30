@@ -114,7 +114,7 @@ async function getJoinError(joinStatus: {
   if (!hasTerms || joinStatus.joinedWithAtLeastOneFeature) {
     return;
   }
-    
+
   const leftFieldName = await joinStatus.joinState.join.getLeftField().getLabel();
   const termJoinSource = joinStatus.joinState.join.getRightJoinSource() as ITermJoinSource;
   const rightFieldName = await termJoinSource.getTermField().getLabel();
