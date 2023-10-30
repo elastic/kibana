@@ -43,6 +43,7 @@ import {
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
+import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { betaBadgeProps } from './beta_badge_props';
 import {
@@ -186,6 +187,9 @@ export const ActionTypeForm = ({
   const [useAadTemplateFields, setUseAadTemplateField] = useState(
     actionItem?.useAlertDataForTemplate ?? false
   );
+  const [storedActionParamsForAadToggle, setStoredActionParamsForAadToggle] = useState<
+    Record<string, SavedObjectAttribute>
+  >({});
 
   const { fields: aadTemplateFields } = useRuleTypeAadTemplateFields(
     http,
@@ -207,16 +211,26 @@ export const ActionTypeForm = ({
     showMustacheAutocompleteSwitch = false;
   }
 
-  const handleUseAadTemplateFields = useCallback(
-    () =>
-      setUseAadTemplateField((prevVal) => {
-        if (setActionUseAlertDataForTemplate) {
-          setActionUseAlertDataForTemplate(!prevVal, index);
-        }
-        return !prevVal;
-      }),
-    [setActionUseAlertDataForTemplate, index]
-  );
+  const handleUseAadTemplateFields = useCallback(() => {
+    setUseAadTemplateField((prevVal) => {
+      if (setActionUseAlertDataForTemplate) {
+        setActionUseAlertDataForTemplate(!prevVal, index);
+      }
+      return !prevVal;
+    });
+    const currentActionParams = { ...actionItem.params };
+    for (const key of Object.keys(currentActionParams)) {
+      setActionParamsProperty(key, storedActionParamsForAadToggle[key] ?? '', index);
+    }
+    setStoredActionParamsForAadToggle(currentActionParams);
+  }, [
+    setActionUseAlertDataForTemplate,
+    storedActionParamsForAadToggle,
+    setStoredActionParamsForAadToggle,
+    setActionParamsProperty,
+    actionItem.params,
+    index,
+  ]);
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -312,6 +326,12 @@ export const ActionTypeForm = ({
       setQueryError(validateActionFilterQuery(actionItem));
     })();
   }, [actionItem, disableErrorMessages]);
+
+  useEffect(() => {
+    if (isEmpty(storedActionParamsForAadToggle) && actionItem.params.subAction) {
+      setStoredActionParamsForAadToggle(actionItem.params);
+    }
+  }, [actionItem.params, storedActionParamsForAadToggle]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -527,6 +547,7 @@ export const ActionTypeForm = ({
                           availableActionVariables
                         )
                       );
+                      console.trace('setActionParamsProperty', key, value, i);
                       setActionParamsProperty(key, value, i);
                     }}
                     messageVariables={templateFields}
