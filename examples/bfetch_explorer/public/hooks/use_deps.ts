@@ -9,4 +9,4 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { BfetchDeps } from '../mount';
 
-export const useDeps = () => useKibana().services as BfetchDeps;
+export const useDeps = () => useKibana().services as unknown as BfetchDeps;

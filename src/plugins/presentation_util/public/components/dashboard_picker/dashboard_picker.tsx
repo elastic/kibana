@@ -117,6 +117,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
       panelPaddingSize="none"
       input={
         <ToolbarButton
+          isDisabled={isDisabled}
           fullWidth
           isLoading={isLoading}
           data-test-subj="open-dashboard-picker"
@@ -160,14 +161,9 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
         onChange={(newOptions, event, selected) => {
           setIsPopoverOpen(false);
 
-          const nextSelectedDashboard: DashboardOption | null =
-            selected.value === selectedDashboard?.value ? null : selected;
-          setSelectedDashboard(nextSelectedDashboard);
-          onChange(
-            nextSelectedDashboard
-              ? { name: nextSelectedDashboard.label, id: nextSelectedDashboard.value }
-              : null
-          );
+          if (!selected || selected.value === selectedDashboard?.value) return;
+          setSelectedDashboard(selected);
+          onChange({ name: selected.label, id: selected.value });
         }}
         renderOption={(option) => <EuiHighlight search={query}>{option.label}</EuiHighlight>}
       >

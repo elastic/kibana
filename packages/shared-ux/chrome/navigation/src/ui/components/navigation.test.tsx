@@ -15,6 +15,8 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject, of, type Observable } from 'rxjs';
+import { EuiThemeProvider } from '@elastic/eui';
+
 import { getServicesMock } from '../../../mocks/src/jest';
 import { NavigationProvider } from '../../services';
 import { Navigation } from './navigation';
@@ -38,20 +40,32 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation>
-            <Navigation.Group id="group1" defaultIsCollapsed={false}>
-              <Navigation.Item id="item1" title="Item 1" href="https://foo" />
-              <Navigation.Item id="item2" title="Item 2" href="https://foo" />
-              <Navigation.Group id="group1A" title="Group1A" defaultIsCollapsed={false}>
-                <Navigation.Item id="item1" title="Group 1A Item 1" href="https://foo" />
-                <Navigation.Group id="group1A_1" title="Group1A_1" defaultIsCollapsed={false}>
-                  <Navigation.Item id="item1" title="Group 1A_1 Item 1" href="https://foo" />
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <Navigation>
+              <Navigation.Group id="group1" renderAs="accordion" defaultIsCollapsed={false}>
+                <Navigation.Item id="item1" title="Item 1" href="https://foo" />
+                <Navigation.Item id="item2" title="Item 2" href="https://foo" />
+                <Navigation.Group
+                  id="group1A"
+                  renderAs="accordion"
+                  title="Group1A"
+                  defaultIsCollapsed={false}
+                >
+                  <Navigation.Item id="item1" title="Group 1A Item 1" href="https://foo" />
+                  <Navigation.Group
+                    id="group1A_1"
+                    renderAs="accordion"
+                    title="Group1A_1"
+                    defaultIsCollapsed={false}
+                  >
+                    <Navigation.Item id="item1" title="Group 1A_1 Item 1" href="https://foo" />
+                  </Navigation.Group>
                 </Navigation.Group>
               </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -74,60 +88,117 @@ describe('<Navigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTree] = lastCall;
 
-      expect(navTree.navigationTree).toEqual([
-        {
-          children: [
-            {
-              href: 'https://foo',
-              id: 'item1',
-              isActive: false,
-              path: ['group1', 'item1'],
-              title: 'Item 1',
-            },
-            {
-              href: 'https://foo',
-              id: 'item2',
-              isActive: false,
-              path: ['group1', 'item2'],
-              title: 'Item 2',
-            },
-            {
-              children: [
-                {
-                  href: 'https://foo',
-                  id: 'item1',
-                  isActive: false,
-                  path: ['group1', 'group1A', 'item1'],
-                  title: 'Group 1A Item 1',
-                },
-                {
-                  children: [
-                    {
-                      href: 'https://foo',
-                      id: 'item1',
-                      isActive: false,
-                      path: ['group1', 'group1A', 'group1A_1', 'item1'],
-                      title: 'Group 1A_1 Item 1',
-                    },
-                  ],
-                  id: 'group1A_1',
-                  isActive: true,
-                  path: ['group1', 'group1A', 'group1A_1'],
-                  title: 'Group1A_1',
-                },
-              ],
-              id: 'group1A',
-              isActive: true,
-              path: ['group1', 'group1A'],
-              title: 'Group1A',
-            },
-          ],
-          id: 'group1',
-          isActive: true,
-          path: ['group1'],
-          title: '',
-        },
-      ]);
+      expect(navTree.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": undefined,
+                "deepLink": undefined,
+                "href": "https://foo",
+                "id": "item1",
+                "isActive": false,
+                "isGroup": false,
+                "path": Array [
+                  "group1",
+                  "item1",
+                ],
+                "sideNavStatus": "visible",
+                "title": "Item 1",
+              },
+              Object {
+                "children": undefined,
+                "deepLink": undefined,
+                "href": "https://foo",
+                "id": "item2",
+                "isActive": false,
+                "isGroup": false,
+                "path": Array [
+                  "group1",
+                  "item2",
+                ],
+                "sideNavStatus": "visible",
+                "title": "Item 2",
+              },
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": undefined,
+                    "href": "https://foo",
+                    "id": "item1",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "group1",
+                      "group1A",
+                      "item1",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Group 1A Item 1",
+                  },
+                  Object {
+                    "children": Array [
+                      Object {
+                        "children": undefined,
+                        "deepLink": undefined,
+                        "href": "https://foo",
+                        "id": "item1",
+                        "isActive": false,
+                        "isGroup": false,
+                        "path": Array [
+                          "group1",
+                          "group1A",
+                          "group1A_1",
+                          "item1",
+                        ],
+                        "sideNavStatus": "visible",
+                        "title": "Group 1A_1 Item 1",
+                      },
+                    ],
+                    "deepLink": undefined,
+                    "href": undefined,
+                    "id": "group1A_1",
+                    "isActive": true,
+                    "isGroup": true,
+                    "path": Array [
+                      "group1",
+                      "group1A",
+                      "group1A_1",
+                    ],
+                    "renderAs": "accordion",
+                    "sideNavStatus": "visible",
+                    "title": "Group1A_1",
+                  },
+                ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1A",
+                "isActive": true,
+                "isGroup": true,
+                "path": Array [
+                  "group1",
+                  "group1A",
+                ],
+                "renderAs": "accordion",
+                "sideNavStatus": "visible",
+                "title": "Group1A",
+              },
+            ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "group1",
+            "isActive": true,
+            "isGroup": true,
+            "path": Array [
+              "group1",
+            ],
+            "renderAs": "accordion",
+            "sideNavStatus": "visible",
+            "title": "",
+          },
+        ]
+      `);
     });
 
     test('should read the title from props, children or deeplink', async () => {
@@ -144,23 +215,25 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                {/* Title from deeplink */}
-                <Navigation.Item<any> id="item1" link="item1" />
-                <Navigation.Item<any> id="item2" link="item1" title="Overwrite deeplink title" />
-                <Navigation.Item id="item3" title="Title in props" />
-                <Navigation.Item id="item4">Title in children</Navigation.Item>
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <Navigation>
+              <Navigation.Group id="root">
+                <Navigation.Group id="group1">
+                  {/* Title from deeplink */}
+                  <Navigation.Item<any> id="item1" link="item1" />
+                  <Navigation.Item<any> id="item2" link="item1" title="Overwrite deeplink title" />
+                  <Navigation.Item id="item3" title="Title in props" />
+                  <Navigation.Item id="item4">Title in children</Navigation.Item>
+                </Navigation.Group>
               </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -172,62 +245,111 @@ describe('<Navigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTree] = lastCall;
 
-      expect(navTree.navigationTree).toEqual([
-        {
-          id: 'root',
-          path: ['root'],
-          title: '',
-          isActive: false,
-          children: [
-            {
-              id: 'group1',
-              path: ['root', 'group1'],
-              title: '',
-              isActive: false,
-              children: [
-                {
-                  id: 'item1',
-                  path: ['root', 'group1', 'item1'],
-                  title: 'Title from deeplink',
-                  isActive: false,
-                  deepLink: {
-                    id: 'item1',
-                    title: 'Title from deeplink',
-                    baseUrl: '',
-                    url: '',
-                    href: '',
+      expect(navTree.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Title from deeplink",
+                      "url": "",
+                    },
+                    "href": undefined,
+                    "id": "item1",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item1",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Title from deeplink",
                   },
-                },
-                {
-                  id: 'item2',
-                  title: 'Overwrite deeplink title',
-                  path: ['root', 'group1', 'item2'],
-                  isActive: false,
-                  deepLink: {
-                    id: 'item1',
-                    title: 'Title from deeplink',
-                    baseUrl: '',
-                    url: '',
-                    href: '',
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Title from deeplink",
+                      "url": "",
+                    },
+                    "href": undefined,
+                    "id": "item2",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item2",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Overwrite deeplink title",
                   },
-                },
-                {
-                  id: 'item3',
-                  title: 'Title in props',
-                  isActive: false,
-                  path: ['root', 'group1', 'item3'],
-                },
-                {
-                  id: 'item4',
-                  path: ['root', 'group1', 'item4'],
-                  title: 'Title in children',
-                  isActive: false,
-                },
-              ],
-            },
-          ],
-        },
-      ]);
+                  Object {
+                    "children": undefined,
+                    "deepLink": undefined,
+                    "href": undefined,
+                    "id": "item3",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item3",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Title in props",
+                  },
+                  Object {
+                    "children": undefined,
+                    "deepLink": undefined,
+                    "href": undefined,
+                    "id": "item4",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item4",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Title in children",
+                  },
+                ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1",
+                "isActive": false,
+                "isGroup": true,
+                "path": Array [
+                  "root",
+                  "group1",
+                ],
+                "sideNavStatus": "visible",
+                "title": "",
+              },
+            ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "root",
+            "isActive": false,
+            "isGroup": true,
+            "path": Array [
+              "root",
+            ],
+            "sideNavStatus": "visible",
+            "title": "",
+          },
+        ]
+      `);
     });
 
     test('should filter out unknown deeplinks', async () => {
@@ -244,22 +366,28 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       const { findByTestId } = render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Group id="root" defaultIsCollapsed={false}>
-              <Navigation.Group id="group1" defaultIsCollapsed={false}>
-                {/* Title from deeplink */}
-                <Navigation.Item<any> id="item1" link="item1" />
-                {/* Should not appear */}
-                <Navigation.Item<any> id="unknownLink" link="unknown" title="Should NOT be there" />
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <Navigation>
+              <Navigation.Group id="root" defaultIsCollapsed={false}>
+                <Navigation.Group id="group1" defaultIsCollapsed={false}>
+                  {/* Title from deeplink */}
+                  <Navigation.Item<any> id="item1" link="item1" />
+                  {/* Should not appear */}
+                  <Navigation.Item<any>
+                    id="unknownLink"
+                    link="unknown"
+                    title="Should NOT be there"
+                  />
+                </Navigation.Group>
               </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -274,37 +402,60 @@ describe('<Navigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTree] = lastCall;
 
-      expect(navTree.navigationTree).toEqual([
-        {
-          id: 'root',
-          path: ['root'],
-          title: '',
-          isActive: true,
-          children: [
-            {
-              id: 'group1',
-              path: ['root', 'group1'],
-              title: '',
-              isActive: true,
-              children: [
-                {
-                  id: 'item1',
-                  path: ['root', 'group1', 'item1'],
-                  title: 'Title from deeplink',
-                  isActive: false,
-                  deepLink: {
-                    id: 'item1',
-                    title: 'Title from deeplink',
-                    baseUrl: '',
-                    url: '',
-                    href: '',
+      expect(navTree.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Title from deeplink",
+                      "url": "",
+                    },
+                    "href": undefined,
+                    "id": "item1",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "root",
+                      "group1",
+                      "item1",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Title from deeplink",
                   },
-                },
-              ],
-            },
-          ],
-        },
-      ]);
+                ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1",
+                "isActive": true,
+                "isGroup": true,
+                "path": Array [
+                  "root",
+                  "group1",
+                ],
+                "sideNavStatus": "visible",
+                "title": "",
+              },
+            ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "root",
+            "isActive": true,
+            "isGroup": true,
+            "path": Array [
+              "root",
+            ],
+            "sideNavStatus": "visible",
+            "title": "",
+          },
+        ]
+      `);
     });
 
     test('should not render the group if it does not have children AND no href or deeplink', async () => {
@@ -320,22 +471,24 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       const { queryByTestId } = render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Group id="root" defaultIsCollapsed={false}>
-              <Navigation.Group id="group1" defaultIsCollapsed={false}>
-                <Navigation.Item<any> id="item1" link="notRegistered" />
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <Navigation>
+              <Navigation.Group id="root" defaultIsCollapsed={false}>
+                <Navigation.Group id="group1" defaultIsCollapsed={false}>
+                  <Navigation.Item<any> id="item1" link="notRegistered" />
+                </Navigation.Group>
+                <Navigation.Group id="group2" defaultIsCollapsed={false}>
+                  <Navigation.Item<any> id="item1" link="item1" />
+                </Navigation.Group>
               </Navigation.Group>
-              <Navigation.Group id="group2" defaultIsCollapsed={false}>
-                <Navigation.Item<any> id="item1" link="item1" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -350,57 +503,90 @@ describe('<Navigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTree] = lastCall;
 
-      expect(navTree.navigationTree).toEqual([
-        {
-          children: [
-            {
-              id: 'group1',
-              isActive: true,
-              path: ['root', 'group1'],
-              title: '',
-            },
-            {
-              children: [
-                {
-                  deepLink: {
-                    baseUrl: '',
-                    href: '',
-                    id: 'item1',
-                    title: 'Title from deeplink',
-                    url: '',
+      expect(navTree.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": undefined,
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group1",
+                "isActive": true,
+                "isGroup": true,
+                "path": Array [
+                  "root",
+                  "group1",
+                ],
+                "sideNavStatus": "visible",
+                "title": "",
+              },
+              Object {
+                "children": Array [
+                  Object {
+                    "children": undefined,
+                    "deepLink": Object {
+                      "baseUrl": "",
+                      "href": "",
+                      "id": "item1",
+                      "title": "Title from deeplink",
+                      "url": "",
+                    },
+                    "href": undefined,
+                    "id": "item1",
+                    "isActive": false,
+                    "isGroup": false,
+                    "path": Array [
+                      "root",
+                      "group2",
+                      "item1",
+                    ],
+                    "sideNavStatus": "visible",
+                    "title": "Title from deeplink",
                   },
-                  id: 'item1',
-                  isActive: false,
-                  path: ['root', 'group2', 'item1'],
-                  title: 'Title from deeplink',
-                },
-              ],
-              id: 'group2',
-              isActive: true,
-              path: ['root', 'group2'],
-              title: '',
-            },
-          ],
-          id: 'root',
-          isActive: true,
-          path: ['root'],
-          title: '',
-        },
-      ]);
+                ],
+                "deepLink": undefined,
+                "href": undefined,
+                "id": "group2",
+                "isActive": true,
+                "isGroup": true,
+                "path": Array [
+                  "root",
+                  "group2",
+                ],
+                "sideNavStatus": "visible",
+                "title": "",
+              },
+            ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "root",
+            "isActive": true,
+            "isGroup": true,
+            "path": Array [
+              "root",
+            ],
+            "sideNavStatus": "visible",
+            "title": "",
+          },
+        ]
+      `);
     });
 
     test('should render group preset (analytics, ml...)', async () => {
       const onProjectNavigationChange = jest.fn();
 
       render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation>
-            <Navigation.Group preset="analytics" />
-            <Navigation.Group preset="ml" />
-            <Navigation.Group preset="devtools" />
-            <Navigation.Group preset="management" />
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <Navigation>
+              <Navigation.Group preset="analytics" />
+              <Navigation.Group preset="ml" />
+              <Navigation.Group preset="devtools" />
+              <Navigation.Group preset="management" />
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -424,15 +610,17 @@ describe('<Navigation />', () => {
       ]);
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
-          <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                <Navigation.RecentlyAccessed />
+        <EuiThemeProvider>
+          <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
+            <Navigation>
+              <Navigation.Group id="root">
+                <Navigation.Group id="group1">
+                  <Navigation.RecentlyAccessed />
+                </Navigation.Group>
               </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -449,13 +637,15 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation>
-            <Navigation.Group id="group1">
-              <Navigation.Item id="item1" title="Item 1" href="https://example.com" />
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <Navigation>
+              <Navigation.Group id="group1">
+                <Navigation.Item id="item1" title="Item 1" href="https://example.com" />
+              </Navigation.Group>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -467,23 +657,38 @@ describe('<Navigation />', () => {
         onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
       const [navTreeGenerated] = lastCall;
 
-      expect(navTreeGenerated.navigationTree).toEqual([
-        {
-          id: 'group1',
-          path: ['group1'],
-          title: '',
-          isActive: false,
-          children: [
-            {
-              id: 'item1',
-              title: 'Item 1',
-              isActive: false,
-              href: 'https://example.com',
-              path: ['group1', 'item1'],
-            },
-          ],
-        },
-      ]);
+      expect(navTreeGenerated.navigationTree).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "children": Array [
+              Object {
+                "children": undefined,
+                "deepLink": undefined,
+                "href": "https://example.com",
+                "id": "item1",
+                "isActive": false,
+                "isGroup": false,
+                "path": Array [
+                  "group1",
+                  "item1",
+                ],
+                "sideNavStatus": "visible",
+                "title": "Item 1",
+              },
+            ],
+            "deepLink": undefined,
+            "href": undefined,
+            "id": "group1",
+            "isActive": false,
+            "isGroup": true,
+            "path": Array [
+              "group1",
+            ],
+            "sideNavStatus": "visible",
+            "title": "",
+          },
+        ]
+      `);
     });
 
     test('should throw if href is not an absolute links', async () => {
@@ -498,13 +703,15 @@ describe('<Navigation />', () => {
 
       const expectToThrow = () => {
         render(
-          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-            <Navigation>
-              <Navigation.Group id="group1">
-                <Navigation.Item id="item1" title="Item 1" href="../dashboards" />
-              </Navigation.Group>
-            </Navigation>
-          </NavigationProvider>
+          <EuiThemeProvider>
+            <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+              <Navigation>
+                <Navigation.Group id="group1">
+                  <Navigation.Item id="item1" title="Item 1" href="../dashboards" />
+                </Navigation.Group>
+              </Navigation>
+            </NavigationProvider>
+          </EuiThemeProvider>
         );
       };
 
@@ -550,14 +757,16 @@ describe('<Navigation />', () => {
       const getActiveNodes$ = () => activeNodes$;
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} activeNodes$={getActiveNodes$()} navLinks$={navLinks$}>
-          <Navigation>
-            <Navigation.Group id="group1">
-              <Navigation.Item<any> link="item1" title="Item 1" />
-              <Navigation.Item<any> link="item2" title="Item 2" />
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} activeNodes$={getActiveNodes$()} navLinks$={navLinks$}>
+            <Navigation>
+              <Navigation.Group id="group1">
+                <Navigation.Item<any> link="item1" title="Item 1" />
+                <Navigation.Item<any> link="item2" title="Item 2" />
+              </Navigation.Group>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
@@ -619,24 +828,26 @@ describe('<Navigation />', () => {
       };
 
       const { findByTestId } = render(
-        <NavigationProvider
-          {...services}
-          activeNodes$={getActiveNodes$()}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Group id="group1">
-              <Navigation.Item<any>
-                link="item1"
-                title="Item 1"
-                getIsActive={() => {
-                  return true;
-                }}
-              />
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            activeNodes$={getActiveNodes$()}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <Navigation>
+              <Navigation.Group id="group1">
+                <Navigation.Item<any>
+                  link="item1"
+                  title="Item 1"
+                  getIsActive={() => {
+                    return true;
+                  }}
+                />
+              </Navigation.Group>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
@@ -652,15 +863,17 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation>
-            <Navigation.Group id="group1" defaultIsCollapsed={false}>
-              <Navigation.Item id="cloudLink1" cloudLink="userAndRoles" />
-              <Navigation.Item id="cloudLink2" cloudLink="performance" />
-              <Navigation.Item id="cloudLink3" cloudLink="billingAndSub" />
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <Navigation>
+              <Navigation.Group id="group1" defaultIsCollapsed={false}>
+                <Navigation.Item id="cloudLink1" cloudLink="userAndRoles" />
+                <Navigation.Item id="cloudLink2" cloudLink="performance" />
+                <Navigation.Item id="cloudLink3" cloudLink="billingAndSub" />
+              </Navigation.Group>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       expect(await findByTestId(/nav-item-group1.cloudLink1/)).toBeVisible();

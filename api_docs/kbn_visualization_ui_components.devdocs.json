@@ -11,7 +11,7 @@
         "label": "ColorPicker",
         "description": [],
         "signature": [
-          "({ overwriteColor, defaultColor, setConfig, label, disableHelpTooltip, disabledMessage, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabledMessage?: string | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
+          "({ overwriteColor, defaultColor, isClearable, setConfig, label, disableHelpTooltip, disabledMessage, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; isClearable?: boolean | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabledMessage?: string | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.ColorPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  overwriteColor,\n  defaultColor,\n  setConfig,\n  label,\n  disableHelpTooltip,\n  disabledMessage,\n  showAlpha,\n}",
+            "label": "{\n  overwriteColor,\n  defaultColor,\n  isClearable,\n  setConfig,\n  label,\n  disableHelpTooltip,\n  disabledMessage,\n  showAlpha,\n}",
             "description": [],
             "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
             "deprecated": false,
@@ -51,6 +51,20 @@
                 "description": [],
                 "signature": [
                   "string | null | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.isClearable",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isClearable",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
                 "deprecated": false,

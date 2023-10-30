@@ -9,13 +9,17 @@
 import React, { Fragment } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
+import type {
+  DataTableRecord,
+  ShouldShowFieldInTableHandler,
+  FormattedHit,
+} from '@kbn/discover-utils/types';
 import { formatHit } from '@kbn/discover-utils';
 
 import './row_formatter.scss';
 
 interface Props {
-  defPairs: Array<readonly [string, string]>;
+  defPairs: FormattedHit;
 }
 const TemplateComponent = ({ defPairs }: Props) => {
   return (
@@ -57,8 +61,8 @@ export const formatTopLevelObject = (
   maxEntries: number
 ) => {
   const highlights = row.highlight ?? {};
-  const highlightPairs: Array<[string, string]> = [];
-  const sourcePairs: Array<[string, string]> = [];
+  const highlightPairs: FormattedHit = [];
+  const sourcePairs: FormattedHit = [];
   const sorted = Object.entries(fields).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
   sorted.forEach(([key, values]) => {
     const field = dataView.getFieldByName(key);
@@ -76,7 +80,7 @@ export const formatTopLevelObject = (
       )
       .join(', ');
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    pairs.push([displayKey ? displayKey : key, formatted]);
+    pairs.push([displayKey ? displayKey : key, formatted, key]);
   });
   return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
 };

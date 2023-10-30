@@ -12,13 +12,10 @@ import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_
 import { Configurations } from './configurations';
 import { TestProvider } from '../../test/test_provider';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import * as TEST_SUBJECTS from './test_subjects';
 import type { DataView } from '@kbn/data-plugin/common';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
@@ -27,11 +24,9 @@ import { useCspIntegrationLink } from '../../common/navigation/use_csp_integrati
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { render } from '@testing-library/react';
 import { expectIdsInDoc } from '../../test/utils';
-import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
@@ -39,6 +34,7 @@ jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
+jest.mock('../../common/hooks/use_cloud_posture_table');
 
 const chance = new Chance();
 
@@ -58,21 +54,18 @@ beforeEach(() => {
       data: true,
     })
   );
+
+  (useCloudPostureTable as jest.Mock).mockImplementation(() => ({
+    getRowsFromPages: jest.fn(),
+    columnsLocalStorageKey: 'test',
+    filters: [],
+    sort: [],
+  }));
 });
 
 const renderFindingsPage = () => {
   render(
-    <TestProvider
-      deps={{
-        data: dataPluginMock.createStartContract(),
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        charts: chartPluginMock.createStartContract(),
-        discover: discoverPluginMock.createStartContract(),
-        fleet: fleetMock.createStartMock(),
-        licensing: licensingMock.createStart(),
-        share: sharePluginMock.createStartContract(),
-      }}
-    >
+    <TestProvider>
       <Configurations />
     </TestProvider>
   );

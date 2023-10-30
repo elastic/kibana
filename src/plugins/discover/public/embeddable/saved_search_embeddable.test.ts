@@ -118,6 +118,7 @@ describe('saved search embeddable', () => {
       columns: ['message', 'extension'],
       rowHeight: 30,
       rowsPerPage: 50,
+      sampleSize: 250,
     };
     const searchInput: SearchInput = byValue
       ? { ...baseInput, attributes: {} as SavedSearchByValueAttributes }
@@ -193,6 +194,11 @@ describe('saved search embeddable', () => {
     searchProps.onUpdateRowsPerPage!(100);
     await waitOneTick();
     expect(searchProps.rowsPerPageState).toEqual(100);
+
+    expect(searchProps.sampleSizeState).toEqual(250);
+    searchProps.onUpdateSampleSize!(300);
+    await waitOneTick();
+    expect(searchProps.sampleSizeState).toEqual(300);
 
     searchProps.onFilter!({ name: 'customer_id', type: 'string', scripted: false }, [17], '+');
     await waitOneTick();

@@ -8,17 +8,8 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSwitch,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { selectShowOnlyFinalAttempts, showOnlyFinalAttemptsAction } from '../../../state';
 import { StatusFilter } from './status_filter';
 import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
 import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
@@ -43,10 +34,6 @@ export const TestRunsTableHeader = ({
 
   const { monitor } = useSelectedMonitor();
 
-  const showOnlyFinalAttempts = useSelector(selectShowOnlyFinalAttempts);
-
-  const dispatch = useDispatch();
-
   return (
     <EuiFlexGroup alignItems="center" gutterSize="l">
       <EuiFlexItem grow={false}>
@@ -57,14 +44,6 @@ export const TestRunsTableHeader = ({
       <EuiFlexItem grow={true} />
       <EuiFlexItem grow={false}>
         <StatusFilter />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          compressed
-          label={ONLY_SHOW_RETEST}
-          checked={showOnlyFinalAttempts}
-          onChange={(e) => dispatch(showOnlyFinalAttemptsAction(e.target.checked))}
-        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {showViewHistoryButton ? (
@@ -103,10 +82,6 @@ export const TestRunsTableHeader = ({
 
 const TEST_RUNS = i18n.translate('xpack.synthetics.monitorDetails.summary.testRuns', {
   defaultMessage: 'Test Runs',
-});
-
-const ONLY_SHOW_RETEST = i18n.translate('xpack.synthetics.monitorDetails.summary.onlyRetests', {
-  defaultMessage: 'Only show retests',
 });
 
 export const LAST_10_TEST_RUNS = i18n.translate(

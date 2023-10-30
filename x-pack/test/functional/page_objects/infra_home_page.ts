@@ -347,6 +347,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await thresholdInput.type([threshold]);
     },
 
+    async ensureAlertsAndRulesDropdownIsMissing() {
+      await testSubjects.missingOrFail('infrastructure-alerts-and-rules');
+    },
+
     async clickAlertsAndRules() {
       await testSubjects.click('infrastructure-alerts-and-rules');
     },
@@ -357,6 +361,14 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async ensurePopoverClosed() {
       await testSubjects.missingOrFail('metrics-alert-menu');
+    },
+
+    async ensureCustomThresholdAlertMenuItemIsVisible() {
+      await testSubjects.existOrFail('custom-threshold-alerts-menu-option');
+    },
+
+    async ensureCustomThresholdAlertMenuItemIsMissing() {
+      await testSubjects.missingOrFail('custom-threshold-alerts-menu-option');
     },
 
     async dismissDatePickerTooltip() {

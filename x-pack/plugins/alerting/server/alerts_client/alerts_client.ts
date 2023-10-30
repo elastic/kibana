@@ -86,6 +86,7 @@ export class AlertsClient<
     primaryTerm: Record<string, number | undefined>;
   };
 
+  private startedAtString: string | null = null;
   private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
 
@@ -114,6 +115,7 @@ export class AlertsClient<
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
+    this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
     await this.legacyAlertsClient.initializeExecution(opts);
 
     if (!this.ruleType.alerts?.shouldWrite) {
@@ -227,7 +229,7 @@ export class AlertsClient<
 
     return {
       uuid: legacyAlert.getUuid(),
-      start: legacyAlert.getStart(),
+      start: legacyAlert.getStart() ?? this.startedAtString,
     };
   }
 
@@ -280,7 +282,7 @@ export class AlertsClient<
       );
       return;
     }
-    const currentTime = new Date().toISOString();
+    const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
     const { alertsToReturn, recoveredAlertsToReturn } =

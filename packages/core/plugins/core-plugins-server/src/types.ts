@@ -216,6 +216,12 @@ export interface PluginManifest {
   readonly optionalPlugins: readonly PluginName[];
 
   /**
+   * An optional list of plugin dependencies that can be resolved dynamically at runtime
+   * using the dynamic contract resolving capabilities from the plugin service.
+   */
+  readonly runtimePluginDependencies: readonly string[];
+
+  /**
    * Specifies whether plugin includes some client/browser specific functionality
    * that should be included into client bundle via `public/ui_plugin.js` file.
    */

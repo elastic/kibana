@@ -7,14 +7,6 @@
 
 export { REFRESH_RATE_INDEX_LIST } from './refresh_intervals';
 
-export {
-  TAB_SUMMARY,
-  TAB_SETTINGS,
-  TAB_MAPPING,
-  TAB_STATS,
-  TAB_EDIT_SETTINGS,
-} from './detail_panel_tabs';
-
 export const REACT_ROOT_ID = 'indexManagementReactRoot';
 
 export * from './ilm_locator';

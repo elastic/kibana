@@ -21,7 +21,7 @@ import { RULE_NAME_HEADER } from '../../../screens/rule_details';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
-  createAndEnableRuleOnly,
+  createAndEnableRule,
   expandAdvancedSettings,
   fillCustomInvestigationFields,
   fillDescription,
@@ -93,8 +93,9 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
     cy.get(SCHEDULE_CONTINUE_BUTTON).click();
 
-    createAndEnableRuleOnly();
+    createAndEnableRule();
 
+    // UI redirects to rule creation page of a created rule
     cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
   });
 });

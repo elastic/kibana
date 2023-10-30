@@ -110,7 +110,8 @@ const assertFilterControlsWithFilterObject = (
 
 // Failing: See https://github.com/elastic/kibana/issues/167914
 // Failing: See https://github.com/elastic/kibana/issues/167915
-describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/167914
+describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
@@ -360,6 +361,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
       openAddFilterPopover();
       fillAddFilterForm({
         key: 'kibana.alert.workflow_status',
+        operator: 'is',
         value: 'invalid',
       });
       waitForPageFilters();

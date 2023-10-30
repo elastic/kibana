@@ -83,7 +83,7 @@ import {
   TIMELINE_QUERY,
   PROVIDER_BADGE,
   PROVIDER_BADGE_DELETE,
-  DISCOVER_TAB,
+  ESQL_TAB,
   OPEN_TIMELINE_MODAL_TIMELINE_NAMES,
   OPEN_TIMELINE_MODAL_SEARCH_BAR,
   OPEN_TIMELINE_MODAL,
@@ -102,7 +102,7 @@ export const addDescriptionToTimeline = (
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
-  cy.get(TIMELINE_DESCRIPTION_INPUT).type(description);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled').type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -112,7 +112,7 @@ export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = fals
   if (!modalAlreadyOpen) {
     cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   }
-  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -140,9 +140,9 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.get(NOTES_TAB_BUTTON);
 };
 
-export const gotToDiscoverTab = () => {
+export const gotToEsqlTab = () => {
   recurse(
-    () => cy.get(DISCOVER_TAB).click(),
+    () => cy.get(ESQL_TAB).should('be.visible').click({ force: true }),
     ($el) => expect($el).to.have.class('euiTab-isSelected'),
     {
       delay: 500,
@@ -314,8 +314,8 @@ export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
   cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
   // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
+  cy.wait(1000);
+  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click({ force: true });
 };
 
 export const openCreateTimelineOptionsPopover = () => {

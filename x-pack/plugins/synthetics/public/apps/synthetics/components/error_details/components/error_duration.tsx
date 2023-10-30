@@ -9,8 +9,8 @@ import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import moment, { Moment } from 'moment';
+import { useErrorFailedTests } from '../hooks/use_error_failed_tests';
 import { useFindMyKillerState } from '../hooks/use_find_my_killer_state';
-import { useErrorFailedTests } from '../hooks/use_last_error_state';
 
 export const ErrorDuration: React.FC = () => {
   const { failedTests } = useErrorFailedTests();

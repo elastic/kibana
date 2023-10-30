@@ -8,7 +8,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '../../../test/global_mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 import { getComposableTemplate } from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';

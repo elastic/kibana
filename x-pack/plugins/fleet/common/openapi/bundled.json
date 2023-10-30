@@ -1420,6 +1420,56 @@
         }
       ]
     },
+    "/epm/templates/{pkgName}/{pkgVersion}/inputs": {
+      "get": {
+        "summary": "Get inputs template",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "get-inputs-template",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgName",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgVersion",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string",
+            "enum": [
+              "json",
+              "yaml",
+              "yml"
+            ]
+          },
+          "name": "format",
+          "description": "Format of response - json or yaml",
+          "in": "query"
+        }
+      ]
+    },
     "/agents/setup": {
       "get": {
         "summary": "Get agent setup info",
@@ -4523,7 +4573,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/output_create_request"
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output_create_request"
+                    }
+                  }
                 }
               }
             }
@@ -4600,7 +4655,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/output_update_request"
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output_update_request"
+                    }
+                  }
                 }
               }
             }
@@ -6976,6 +7036,11 @@
               ]
             }
           },
+          "keep_monitoring_alive": {
+            "description": "When set to true, monitoring will be enabled but logs/metrics collection will be disabled",
+            "type": "boolean",
+            "nullable": true
+          },
           "data_output_id": {
             "type": "string",
             "nullable": true
@@ -8056,6 +8121,22 @@
           },
           "required_acks": {
             "type": "number"
+          },
+          "secrets": {
+            "type": "object",
+            "properties": {
+              "password": {
+                "type": "string"
+              },
+              "ssl": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           }
         },
         "required": [
@@ -8149,6 +8230,19 @@
               },
               "loadbalance": {
                 "type": "boolean"
+              }
+            }
+          },
+          "secrets": {
+            "type": "object",
+            "properties": {
+              "ssl": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  }
+                }
               }
             }
           }

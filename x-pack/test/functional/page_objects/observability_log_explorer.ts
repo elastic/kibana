@@ -5,6 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
+import querystring from 'querystring';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -99,6 +101,9 @@ const packages: IntegrationPackage[] = [
 const initialPackages = packages.slice(0, 3);
 const additionalPackages = packages.slice(3);
 
+const FROM = '2023-08-03T10:24:14.035Z';
+const TO = '2023-08-03T10:24:14.091Z';
+
 export function ObservabilityLogExplorerPageObject({
   getPageObjects,
   getService,
@@ -109,7 +114,12 @@ export function ObservabilityLogExplorerPageObject({
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
-  type NavigateToAppOptions = Parameters<typeof PageObjects['common']['navigateToApp']>[1];
+  type NavigateToAppOptions = Omit<
+    Parameters<typeof PageObjects['common']['navigateToApp']>[1],
+    'search'
+  > & {
+    search?: Record<string, string>;
+  };
 
   return {
     uninstallPackage: ({ name, version }: IntegrationPackage) => {
@@ -172,8 +182,19 @@ export function ObservabilityLogExplorerPageObject({
       };
     },
 
-    async navigateTo(options?: NavigateToAppOptions) {
-      return await PageObjects.common.navigateToApp('observabilityLogExplorer', options);
+    async navigateTo(options: NavigateToAppOptions = {}) {
+      const { search = {}, ...extraOptions } = options;
+      const composedSearch = querystring.stringify({
+        ...search,
+        _g: rison.encode({
+          time: { from: FROM, to: TO },
+        }),
+      });
+
+      return await PageObjects.common.navigateToApp('observabilityLogExplorer', {
+        search: composedSearch,
+        ...extraOptions,
+      });
     },
 
     getDatasetSelector() {
@@ -181,7 +202,7 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     getDatasetSelectorButton() {
-      return testSubjects.find('datasetSelectorPopoverButton', 30000); // Increase timeout if refresh takes longer before opening the selector
+      return testSubjects.find('datasetSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
     },
 
     getDatasetSelectorContent() {
@@ -290,7 +311,7 @@ export function ObservabilityLogExplorerPageObject({
       const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
 
       await searchField.clearValueWithKeyboard();
-      return searchField.type(name);
+      return searchField.type(name, { charByChar: true });
     },
 
     async clearSearchField() {

@@ -32,6 +32,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const comboBox = getService('comboBox');
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const queryBar = getService('queryBar');
 
   const PageObjects = getPageObjects([
     'common',
@@ -1875,6 +1876,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (isSuggestionPanelOpen) {
         await testSubjects.click('lensSuggestionsPanelToggleButton');
       }
+    },
+
+    /**
+     * Enables elastic charts debug state with *soft* refresh
+     */
+    async enableEchDebugState() {
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await queryBar.clickQuerySubmitButton();
     },
 
     async changeColorMappingPalette(selector: string, paletteId: string) {

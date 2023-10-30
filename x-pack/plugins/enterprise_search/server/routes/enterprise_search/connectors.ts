@@ -19,13 +19,7 @@ import {
   updateFilteringDraft,
 } from '@kbn/search-connectors';
 
-import {
-  ConnectorStatus,
-  FilteringPolicy,
-  FilteringRule,
-  FilteringRuleRule,
-  SyncJobType,
-} from '@kbn/search-connectors';
+import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -38,7 +32,7 @@ import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { validateEnum } from '../../utils/validate_enum';
+import { isAccessControlDisabledException } from '../../utils/identify_exceptions';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
@@ -203,9 +197,27 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      await startSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
-      return response.ok();
+      try {
+        const { client } = (await context.core).elasticsearch;
+        await startSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
+        return response.ok();
+      } catch (error) {
+        if (isAccessControlDisabledException(error)) {
+          return createError({
+            errorCode: ErrorCode.ACCESS_CONTROL_DISABLED,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.connectors.accessControlSync.accessControlDisabledError',
+              {
+                defaultMessage:
+                  'Access control sync cannot be created. You must first enable Document Level Security.',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
     })
   );
 
@@ -372,12 +384,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
               field: schema.string(),
               id: schema.string(),
               order: schema.number(),
-              policy: schema.string({
-                validate: validateEnum(FilteringPolicy, 'policy'),
-              }),
-              rule: schema.string({
-                validate: validateEnum(FilteringRuleRule, 'rule'),
-              }),
+              policy: schema.string(),
+              rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
             })
@@ -414,12 +422,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
               field: schema.string(),
               id: schema.string(),
               order: schema.number(),
-              policy: schema.string({
-                validate: validateEnum(FilteringPolicy, 'policy'),
-              }),
-              rule: schema.string({
-                validate: validateEnum(FilteringRuleRule, 'rule'),
-              }),
+              policy: schema.string(),
+              rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
             })

@@ -2187,6 +2187,10 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts"
             },
             {
+              "plugin": "aiops",
+              "path": "x-pack/plugins/aiops/server/plugin.ts"
+            },
+            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/plugin.ts"
             },

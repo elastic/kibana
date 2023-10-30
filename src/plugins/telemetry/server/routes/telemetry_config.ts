@@ -85,7 +85,8 @@ export function registerTelemetryConfigRoutes({
           optIn: schema.oneOf([schema.boolean(), schema.literal(null)]),
           sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')]),
           telemetryNotifyUserAboutOptInDefault: schema.boolean(),
-          labels: labelsSchema,
+          // Declare the `serverless` label as optional in both offerings while we fix https://github.com/elastic/kibana/issues/167862
+          labels: labelsSchema.extends({ serverless: schema.maybe(schema.string()) }),
         }),
       },
     },

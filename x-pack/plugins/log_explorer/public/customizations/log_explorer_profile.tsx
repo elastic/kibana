@@ -12,6 +12,7 @@ import { dynamic } from '../utils/dynamic';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 import { LogExplorerStateContainer } from '../components/log_explorer';
 import { LogExplorerStartDeps } from '../types';
+import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
@@ -69,14 +70,20 @@ export const createLogExplorerProfileCustomizations =
      */
     customizations.set({
       id: 'search_bar',
-      CustomDataViewPicker: () => (
-        <LazyCustomDatasetSelector
-          datasetsClient={datasetsClient}
-          dataViews={dataViews}
-          discover={discover}
-          logExplorerProfileStateService={logExplorerProfileStateService}
-        />
-      ),
+      CustomDataViewPicker: () => {
+        const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
+
+        return (
+          <KibanaContextProviderForPlugin>
+            <LazyCustomDatasetSelector
+              datasetsClient={datasetsClient}
+              dataViews={dataViews}
+              discover={discover}
+              logExplorerProfileStateService={logExplorerProfileStateService}
+            />
+          </KibanaContextProviderForPlugin>
+        );
+      },
       PrependFilterBar: () => (
         <LazyCustomDatasetFilters
           logExplorerProfileStateService={logExplorerProfileStateService}

@@ -24,7 +24,7 @@ import {
 } from '../../tasks/isolate';
 import { login } from '../../tasks/login';
 
-describe('Response console', { tags: '@ess' }, () => {
+describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -34,7 +34,7 @@ describe('Response console', { tags: '@ess' }, () => {
     let endpointHostname: string;
     let isolateRequestResponse: ActionDetails;
 
-    before(() => {
+    beforeEach(() => {
       indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
         (indexEndpoints) => {
           endpointData = indexEndpoints;
@@ -43,7 +43,7 @@ describe('Response console', { tags: '@ess' }, () => {
       );
     });
 
-    after(() => {
+    afterEach(() => {
       if (endpointData) {
         endpointData.cleanup();
         // @ts-expect-error ignore setting to undefined
@@ -76,14 +76,14 @@ describe('Response console', { tags: '@ess' }, () => {
     let endpointHostname: string;
     let releaseRequestResponse: ActionDetails;
 
-    before(() => {
+    beforeEach(() => {
       indexEndpointHosts({ withResponseActions: false, isolation: true }).then((indexEndpoints) => {
         endpointData = indexEndpoints;
         endpointHostname = endpointData.data.hosts[0].host.name;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       if (endpointData) {
         endpointData.cleanup();
         // @ts-expect-error ignore setting to undefined
@@ -115,7 +115,7 @@ describe('Response console', { tags: '@ess' }, () => {
     let endpointHostname: string;
     let processesRequestResponse: ActionDetails;
 
-    before(() => {
+    beforeEach(() => {
       indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
         (indexEndpoints) => {
           endpointData = indexEndpoints;
@@ -124,7 +124,7 @@ describe('Response console', { tags: '@ess' }, () => {
       );
     });
 
-    after(() => {
+    afterEach(() => {
       if (endpointData) {
         endpointData.cleanup();
         // @ts-expect-error ignore setting to undefined
@@ -155,7 +155,7 @@ describe('Response console', { tags: '@ess' }, () => {
     let endpointHostname: string;
     let killProcessRequestResponse: ActionDetails;
 
-    before(() => {
+    beforeEach(() => {
       indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
         (indexEndpoints) => {
           endpointData = indexEndpoints;
@@ -164,7 +164,7 @@ describe('Response console', { tags: '@ess' }, () => {
       );
     });
 
-    after(() => {
+    afterEach(() => {
       if (endpointData) {
         endpointData.cleanup();
         // @ts-expect-error ignore setting to undefined
@@ -194,7 +194,7 @@ describe('Response console', { tags: '@ess' }, () => {
     let endpointHostname: string;
     let suspendProcessRequestResponse: ActionDetails;
 
-    before(() => {
+    beforeEach(() => {
       indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
         (indexEndpoints) => {
           endpointData = indexEndpoints;
@@ -203,7 +203,7 @@ describe('Response console', { tags: '@ess' }, () => {
       );
     });
 
-    after(() => {
+    afterEach(() => {
       if (endpointData) {
         endpointData.cleanup();
         // @ts-expect-error ignore setting to undefined
@@ -228,13 +228,12 @@ describe('Response console', { tags: '@ess' }, () => {
     });
   });
 
-  // Broken until this is fixed: https://github.com/elastic/kibana/issues/162760
-  describe.skip('`get-file` command', () => {
+  describe('`get-file` command', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let endpointHostname: string;
     let getFileRequestResponse: ActionDetails;
 
-    before(() => {
+    beforeEach(() => {
       indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
         (indexEndpoints) => {
           endpointData = indexEndpoints;
@@ -243,7 +242,7 @@ describe('Response console', { tags: '@ess' }, () => {
       );
     });
 
-    after(() => {
+    afterEach(() => {
       if (endpointData) {
         endpointData.cleanup();
         // @ts-expect-error ignore setting to undefined
@@ -283,7 +282,7 @@ describe('Response console', { tags: '@ess' }, () => {
     let endpointHostname: string;
     let executeRequestResponse: ActionDetails;
 
-    before(() => {
+    beforeEach(() => {
       indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
         (indexEndpoints) => {
           endpointData = indexEndpoints;
@@ -292,7 +291,7 @@ describe('Response console', { tags: '@ess' }, () => {
       );
     });
 
-    after(() => {
+    afterEach(() => {
       if (endpointData) {
         endpointData.cleanup();
         // @ts-expect-error ignore setting to undefined

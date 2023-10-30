@@ -33,14 +33,6 @@ export function FrameInformationAIAssistant({ frame }: Props) {
         {
           '@timestamp': now,
           message: {
-            role: MessageRole.System,
-            content: `You are perf-gpt, a helpful assistant for performance analysis and optimisation
-            of software. Answer as concisely as possible.`,
-          },
-        },
-        {
-          '@timestamp': now,
-          message: {
             role: MessageRole.User,
             content: `I am a software engineer. I am trying to understand what a function in a particular
             software library does.

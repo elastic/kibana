@@ -65,7 +65,11 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   describe('alerts as data', () => {
     afterEach(() => objectRemover.removeAll());
     after(async () => {
-      await es.deleteByQuery({ index: alertsAsDataIndex, query: { match_all: {} } });
+      await es.deleteByQuery({
+        index: alertsAsDataIndex,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
     });
 
     it('should write alert docs during rule execution', async () => {

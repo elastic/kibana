@@ -182,6 +182,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         defaultMessage: 'Edit colors',
                       })
                 }
+                isInlineEditing={props.isInlineEditing}
               >
                 <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
                   <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
