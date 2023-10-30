@@ -30,10 +30,6 @@ import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../../shared/time_comparison/get_comparison_options';
 
-const GroupIdLink = euiStyled(ErrorDetailLink)`
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-`;
-
 const MessageAndCulpritCell = euiStyled.div`
   ${truncate('100%')};
 `;
