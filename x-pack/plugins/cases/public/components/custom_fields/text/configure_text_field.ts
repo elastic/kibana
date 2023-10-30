@@ -9,7 +9,7 @@ import type { CaseCustomFieldText } from '../../../../common/types/domain';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import * as i18n from '../translations';
-import { getColumn } from './get_column';
+import { getEuiTableColumn } from './get_eui_table_column';
 import { Edit } from './edit';
 import { View } from './view';
 import { Configure } from './configure';
@@ -18,7 +18,7 @@ import { Create } from './create';
 export const configureTextCustomFieldFactory: CustomFieldFactory<CaseCustomFieldText> = () => ({
   id: CustomFieldTypes.TEXT,
   label: i18n.TEXT_LABEL,
-  getColumn,
+  getEuiTableColumn,
   build: () => ({
     Configure,
     Edit,

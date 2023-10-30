@@ -11,7 +11,7 @@ import type { EuiTableComputedColumnType } from '@elastic/eui';
 import type { CaseUI } from '../../../containers/types';
 import { getEmptyTagValue } from '../../empty_value';
 
-export const getColumn = ({
+export const getEuiTableColumn = ({
   key,
   label,
 }: {

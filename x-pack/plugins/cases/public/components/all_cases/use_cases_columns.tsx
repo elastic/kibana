@@ -354,7 +354,7 @@ export const useCasesColumns = ({
   // we need to extend the columnsDict with the columns of
   // the customFields
   customFields.forEach(({ key, type, label }) => {
-    columnsDict[key] = customFieldsBuilderMap[type]().getColumn({ key, label });
+    columnsDict[key] = customFieldsBuilderMap[type]().getEuiTableColumn({ key, label });
   });
 
   const columns: CasesColumns[] = [];

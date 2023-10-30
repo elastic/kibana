@@ -36,7 +36,7 @@ export interface CustomFieldType<T extends CaseUICustomField> {
 export type CustomFieldFactory<T extends CaseUICustomField> = () => {
   id: string;
   label: string;
-  getColumn: (params: { key: string; label: string }) => EuiTableComputedColumnType<CaseUI>;
+  getEuiTableColumn: (params: { key: string; label: string }) => EuiTableComputedColumnType<CaseUI>;
   build: () => CustomFieldType<T>;
 };
 

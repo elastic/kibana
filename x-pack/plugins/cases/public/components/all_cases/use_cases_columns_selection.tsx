@@ -26,16 +26,13 @@ export function useCasesColumnsSelection() {
     getTableColumnsLocalStorageKey(appId)
   );
 
+  const columns = selectedColumns || DEFAULT_CASES_TABLE_COLUMNS;
+
   return {
-    selectedColumns: selectedColumns
-      ? mergeSelectedColumnsWithConfiguration({
-          selectedColumns,
-          casesColumnsConfig,
-        })
-      : mergeSelectedColumnsWithConfiguration({
-          selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
-          casesColumnsConfig,
-        }),
+    selectedColumns: mergeSelectedColumnsWithConfiguration({
+      selectedColumns: columns,
+      casesColumnsConfig,
+    }),
     setSelectedColumns,
   };
 }

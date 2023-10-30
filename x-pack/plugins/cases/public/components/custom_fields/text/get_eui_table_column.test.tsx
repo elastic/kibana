@@ -11,9 +11,9 @@ import { render, screen } from '@testing-library/react';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import { basicCase } from '../../../containers/mock';
 import { TestProviders } from '../../../common/mock';
-import { getColumn } from './get_column';
+import { getEuiTableColumn } from './get_eui_table_column';
 
-describe('getColumn ', () => {
+describe('getEuiTableColumn ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -21,7 +21,7 @@ describe('getColumn ', () => {
   it('returns a name and a render function', async () => {
     const label = 'MockLabel';
 
-    expect(getColumn({ key: 'test_key_1', label })).toEqual({
+    expect(getEuiTableColumn({ key: 'test_key_1', label })).toEqual({
       name: label,
       render: expect.any(Function),
     });
@@ -30,7 +30,7 @@ describe('getColumn ', () => {
   it('render function renders a text column correctly', async () => {
     const key = 'test_key_1';
     const value = 'foobar';
-    const column = getColumn({ key, label: 'MockLabel' });
+    const column = getEuiTableColumn({ key, label: 'MockLabel' });
     const theCase = { ...basicCase };
 
     theCase.customFields = [{ key, type: CustomFieldTypes.TEXT, value }];
@@ -43,7 +43,7 @@ describe('getColumn ', () => {
 
   it('render function renders a null text column correctly', async () => {
     const key = 'test_key_1';
-    const column = getColumn({ key, label: 'MockLabel' });
+    const column = getEuiTableColumn({ key, label: 'MockLabel' });
     const theCase = { ...basicCase };
 
     theCase.customFields = [{ key, type: CustomFieldTypes.TEXT, value: null }];
@@ -55,7 +55,7 @@ describe('getColumn ', () => {
 
   it('render function handles a missing custom field correctly', async () => {
     const key = 'test_key_1';
-    const column = getColumn({ key, label: 'MockLabel' });
+    const column = getEuiTableColumn({ key, label: 'MockLabel' });
     const theCase = basicCase;
 
     render(<TestProviders>{column.render(theCase)}</TestProviders>);

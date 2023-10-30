@@ -11,9 +11,9 @@ import { render, screen } from '@testing-library/react';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import { TestProviders } from '../../../common/mock';
 import { basicCase } from '../../../containers/mock';
-import { getColumn } from './get_column';
+import { getEuiTableColumn } from './get_eui_table_column';
 
-describe('getColumn ', () => {
+describe('getEuiTableColumn ', () => {
   const key = 'test_key_1';
 
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe('getColumn ', () => {
   it('returns a name and a render function', async () => {
     const label = 'MockLabel';
 
-    expect(getColumn({ key: 'test_key_1', label })).toEqual({
+    expect(getEuiTableColumn({ key: 'test_key_1', label })).toEqual({
       name: label,
       render: expect.any(Function),
     });
@@ -38,7 +38,7 @@ describe('getColumn ', () => {
     'render function renders a toggle column with value %s correctly',
     async (_, expectedResult, customFields) => {
       const label = 'MockLabel';
-      const column = getColumn({ key, label });
+      const column = getEuiTableColumn({ key, label });
       const theCase = { ...basicCase };
 
       theCase.customFields = customFields;
@@ -54,7 +54,7 @@ describe('getColumn ', () => {
   );
 
   it('render function handles a wrong type custom field error correctly', async () => {
-    const column = getColumn({ key, label: 'MockLabel' });
+    const column = getEuiTableColumn({ key, label: 'MockLabel' });
     const theCase = { ...basicCase };
 
     theCase.customFields = [{ key, type: CustomFieldTypes.TEXT as const, value: 'true' }];

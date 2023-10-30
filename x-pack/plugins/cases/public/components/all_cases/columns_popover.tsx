@@ -25,6 +25,8 @@ import {
 
 import type { CasesColumnSelection } from '../../../common/ui/types';
 
+import * as i18n from './translations';
+
 interface Props {
   selectedColumns: CasesColumnSelection[];
   onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
@@ -77,7 +79,7 @@ export const ColumnsPopover: React.FC<Props> = ({
           onClick={togglePopover}
           size="xs"
         >
-          {'Columns'}
+          {i18n.COLUMNS}
         </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}

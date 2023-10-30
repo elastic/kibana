@@ -14,7 +14,7 @@ import type { CaseUI } from '../../../containers/types';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import { getEmptyTagValue } from '../../empty_value';
 
-export const getColumn = ({
+export const getEuiTableColumn = ({
   key,
   label,
 }: {

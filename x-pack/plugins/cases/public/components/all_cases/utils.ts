@@ -42,13 +42,6 @@ export const mergeSelectedColumnsWithConfiguration = ({
   selectedColumns: CasesColumnSelection[];
   casesColumnsConfig: CasesColumnsConfiguration;
 }): CasesColumnSelection[] => {
-  // selectedColumns is the master
-  // iterate over selectedColumns
-  //   filter out those not in the configuration
-  //   filter out those that !canDisplay
-  //   add columnName
-  // add missing fields/columns from configuration
-
   const result = selectedColumns.reduce((accumulator, { field, isChecked }) => {
     if (
       field in casesColumnsConfig &&
