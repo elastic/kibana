@@ -123,11 +123,13 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
   useEffect(() => {
     if (consumers.length === 1) {
       onChange(consumers[0] as RuleCreationValidConsumer);
+    } else if (consumers.includes(AlertConsumers.OBSERVABILITY)) {
+      onChange(AlertConsumers.OBSERVABILITY as RuleCreationValidConsumer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [consumers]);
 
-  if (consumers.length <= 1) {
+  if (consumers.length <= 1 || consumers.includes(AlertConsumers.OBSERVABILITY)) {
     return null;
   }
   return (
