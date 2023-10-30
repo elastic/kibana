@@ -242,19 +242,19 @@ const createVagrantVm = async ({
     throw e;
   }
 
-  return createVagrantHostVmClient(name, log);
+  return createVagrantHostVmClient(name, undefined, log);
 };
 
 /**
- * Creates a generic interface (`HotVm`) for interacting with a VM creatd by Vagrant
+ * Creates a generic interface (`HotVm`) for interacting with a VM created by Vagrant
  * @param name
  * @param log
  * @param vagrantFile
  */
 export const createVagrantHostVmClient = (
   name: string,
-  log: ToolingLog = createToolingLogger(),
-  vagrantFile: string = DEFAULT_VAGRANTFILE
+  vagrantFile: string = DEFAULT_VAGRANTFILE,
+  log: ToolingLog = createToolingLogger()
 ): HostVm => {
   const VAGRANT_CWD = dirname(vagrantFile);
   const execaOptions: execa.Options = {
@@ -266,53 +266,7 @@ export const createVagrantHostVmClient = (
   log.verbose(`Creating Vagrant VM client for [${name}] with vagrantfile [${vagrantFile}]`);
 
   const exec = async (command: string): Promise<HostVmExecResponse> => {
-    //
-    //
-    //
-    // FIXME:PT Remove once output is captured
-    //
-    //
-    //
-    log.info(`${'-'.repeat(100)}
-Machine name: ${name}
-${'-'.repeat(100)}
-VAGRANT COMMAND: vagrant global-status
-${'-'.repeat(100)}
-
-${(await execa.command('vagrant global-status', execaOptions)).stdout}
-
-${'='.repeat(100)}
-${'-'.repeat(100)}
-VAGRANT COMMAND: vagrant global-status --machine-readable
-${'-'.repeat(100)}
-
-${(await execa.command('vagrant global-status --machine-readable', execaOptions)).stdout}
-
-${'='.repeat(100)}
-${'-'.repeat(100)}
-VAGRANT COMMAND: vagrant status --machine-readable
-${'-'.repeat(100)}
-
-${(await execa.command('vagrant status --machine-readable', execaOptions)).stdout}
-
-${'='.repeat(100)}
-${'-'.repeat(100)}
-VAGRANT COMMAND: vagrant box list
-${'-'.repeat(100)}
-
-${(await execa.command('vagrant box list', execaOptions)).stdout}
-
-${'='.repeat(100)}
-${'-'.repeat(100)}
-VAGRANT COMMAND: vagrant box list  --machine-readable
-${'-'.repeat(100)}
-
-${(await execa.command('vagrant box list --machine-readable', execaOptions)).stdout}
-
-${'='.repeat(100)}
-`);
-
-    const execResponse = await execa.command(`vagrant ssh ${name} -- ${command}`, execaOptions);
+    const execResponse = await execa.command(`vagrant ssh -- ${command}`, execaOptions);
 
     log.verbose(execResponse);
 
