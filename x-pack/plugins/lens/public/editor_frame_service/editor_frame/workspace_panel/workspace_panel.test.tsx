@@ -28,7 +28,7 @@ jest.mock('../../../debounced_component', () => {
 
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
-import { DragDrop, ChildDragDropProvider } from '@kbn/dom-drag-drop';
+import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -63,8 +63,8 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
   return core;
 }
 
-let mockVisualization: jest.Mocked<Visualization>;
-let mockVisualization2: jest.Mocked<Visualization>;
+let mockVisualization = createMockVisualization();
+let mockVisualization2 = createMockVisualization();
 let mockDatasource: DatasourceMock;
 
 let expressionRendererMock: jest.Mock<React.ReactElement, [ReactExpressionRendererProps]>;
@@ -906,7 +906,7 @@ describe('workspace_panel', () => {
   describe.skip('suggestions from dropping in workspace panel', () => {
     const draggedField = { id: faker.lorem.word(), humanData: { label: faker.lorem.word() } };
 
-    function renderWithDndAndStore(propsOverrides = {}, draggingContext = draggedField) {
+    function renderWithDndAndRedux(propsOverrides = {}, draggingContext = draggedField) {
       return renderWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingContext })}>
           <WorkspacePanel
@@ -925,7 +925,7 @@ describe('workspace_panel', () => {
     }
 
     it('should immediately transition if exactly one suggestion is returned', () => {
-      const { store } = renderWithDndAndStore({
+      const { store } = renderWithDndAndRedux({
         getSuggestionForField: jest.fn().mockReturnValue({
           visualizationId: 'testVis',
           visualizationState: {},
@@ -949,7 +949,7 @@ describe('workspace_panel', () => {
     });
 
     it('should allow to drop if there are suggestions', () => {
-      renderWithDndAndStore({
+      renderWithDndAndRedux({
         getSuggestionForField: jest.fn().mockReturnValue({
           visualizationId: 'testVis',
           visualizationState: {},
@@ -961,7 +961,7 @@ describe('workspace_panel', () => {
     });
 
     it('should refuse to drop if there are no suggestions', () => {
-      renderWithDndAndStore();
+      renderWithDndAndRedux();
       expect(screen.getByTestId('lnsWorkspace').classList).not.toContain(
         'domDragDrop-isDropTarget'
       );
