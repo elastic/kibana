@@ -488,8 +488,10 @@ describe('builds navigation tree', () => {
         const [navTree] = lastCall;
         const [rootNode] = navTree.navigationTree;
         expect(rootNode.id).toBe('root');
-        expect(rootNode.children?.length).toBe(1); // only 1 group --> "group1" has been removed
-        expect(rootNode.children?.[0]?.id).toBe('group2');
+        expect(rootNode.children?.length).toBe(2);
+        expect(rootNode.children?.[0]?.id).toBe('group1');
+        expect(rootNode.children?.[0]?.children).toBeUndefined(); // No children mounted and registered itself
+        expect(rootNode.children?.[1]?.id).toBe('group2');
         return navTree;
       } catch (e) {
         errorHandler(type)(e);
