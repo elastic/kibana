@@ -779,13 +779,13 @@ export function trainedModelsRoutes(
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /internal/ml/trained_models/download_model/:modelId Downloads ELSER model
-   * @apiName DownloadTrainedModel
-   * @apiDescription Downloads ELSER model.
+   * @api {post} /internal/ml/trained_models/install_elastic_model/:modelId Installs ELSER model
+   * @apiName InstallElasticTrainedModel
+   * @apiDescription Downloads and installs ELSER model.
    */
   router.versioned
     .post({
-      path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_model/{modelId}`,
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_model/{modelId}`,
       access: 'internal',
       options: {
         tags: ['access:ml:canCreateTrainedModels'],
@@ -804,7 +804,7 @@ export function trainedModelsRoutes(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
             const { modelId } = request.params;
-            const body = await modelsProvider(client, mlClient, cloud).downloadModel(
+            const body = await modelsProvider(client, mlClient, cloud).installElasticModel(
               modelId,
               mlSavedObjectService
             );

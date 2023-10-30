@@ -533,7 +533,7 @@ export class ModelsProvider {
    * @param modelId
    * @param mlSavedObjectService
    */
-  async downloadModel(modelId: string, mlSavedObjectService: MLSavedObjectService) {
+  async installElasticModel(modelId: string, mlSavedObjectService: MLSavedObjectService) {
     const availableModels = await this.getModelDownloads();
     const model = availableModels.find((m) => m.name === modelId);
     if (!model) {
