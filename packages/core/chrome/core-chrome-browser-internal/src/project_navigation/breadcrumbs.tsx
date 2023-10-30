@@ -107,13 +107,13 @@ function buildRootCrumb({
           <EuiContextMenuItem key="project" href={projectUrl} icon={'gear'}>
             <FormattedMessage
               id="core.ui.primaryNav.cloud.linkToProject"
-              defaultMessage={'Manage project'}
+              defaultMessage="Manage project"
             />
           </EuiContextMenuItem>,
           <EuiContextMenuItem key="projects" href={projectsUrl} icon={'grid'}>
             <FormattedMessage
               id="core.ui.primaryNav.cloud.linkToAllProjects"
-              defaultMessage={'View all projects'}
+              defaultMessage="View all projects"
             />
           </EuiContextMenuItem>,
         ]}
