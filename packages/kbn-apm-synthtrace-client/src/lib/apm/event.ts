@@ -13,12 +13,6 @@ export class Event extends Serializable<ApmFields> {
   constructor(fields: ApmFields) {
     super({
       ...fields,
-
-      // Real log events don't have the "processor.event" attribute. See: https://github.com/elastic/apm-server/pull/11494
-      // This is a hack needed for the tests in "mobile/mobile_location_stats.spec.ts" to pass since the "SynthtraceEsClient.index" function
-      // inside "packages/kbn-apm-synthtrace/src/lib/shared/base_client.ts" requires this "processor.event" attr to be available,
-      // otherwise it'd throw this error: "Could not determine operation: _index and _action not defined in document".
-      'processor.event': 'error',
     });
   }
 
