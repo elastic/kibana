@@ -15,8 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const tagManagementPage = PageObjects.tagManagement;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/167812
-  describe.skip('create tag', () => {
+  describe('create tag', () => {
     let tagModal: typeof tagManagementPage['tagModal'];
 
     before(async () => {
@@ -45,7 +44,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           description: 'I just added this tag',
           color: '#FF00CC',
         },
-        { submit: true }
+        {
+          submit: true,
+          clearWithKeyboard: true,
+        }
       );
       await tagModal.waitUntilClosed();
       await tagManagementPage.waitUntilTableIsLoaded();
