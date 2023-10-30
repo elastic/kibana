@@ -15,12 +15,9 @@ import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_so
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import {
-  createMetricThresholdExecutor,
-  FIRED_ACTIONS,
-  MetricThresholdAlertContext,
-  NO_DATA_ACTIONS,
-} from './custom_threshold_executor';
+import { createCustomThresholdExecutor } from './custom_threshold_executor';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { CustomThresholdAlertContext } from './types';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -237,10 +234,9 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBeUndefined();
-      expect(action.reason).toContain('is 1');
-      expect(action.reason).toContain('Alert when > 0.75');
-      expect(action.reason).toContain('test.metric.1');
-      expect(action.reason).toContain('in the last 1 min');
+      expect(action.reason).toBe(
+        'test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedIndexPattern)'
+      );
     });
   });
 
@@ -997,16 +993,10 @@ describe('The metric threshold alert type', () => {
       const instanceID = '*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       const { action } = mostRecentAction(instanceID);
-      const reasons = action.reason.split('\n');
-      expect(reasons.length).toBe(2);
-      expect(reasons[0]).toContain('test.metric.1');
-      expect(reasons[1]).toContain('test.metric.2');
-      expect(reasons[0]).toContain('is 1');
-      expect(reasons[1]).toContain('is 3');
-      expect(reasons[0]).toContain('Alert when >= 1');
-      expect(reasons[1]).toContain('Alert when >= 3');
-      expect(reasons[0]).toContain('in the last 1 min');
-      expect(reasons[1]).toContain('in the last 1 min');
+      const reasons = action.reason;
+      expect(reasons).toBe(
+        'test.metric.1 is 1, above the threshold of 1; test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedIndexPattern)'
+      );
     });
   });
   describe('querying with the count aggregator', () => {
@@ -1750,7 +1740,7 @@ const mockLibs: any = {
   },
 };
 
-const executor = createMetricThresholdExecutor(mockLibs);
+const executor = createCustomThresholdExecutor(mockLibs);
 
 const alertsServices = alertsMock.createRuleExecutorServices();
 const mockedIndex = {
@@ -1768,7 +1758,7 @@ const mockedSearchSource = {
   getField: jest.fn(() => mockedDataView),
 } as any as ISearchSource;
 const services: RuleExecutorServicesMock &
-  LifecycleAlertServices<AlertState, MetricThresholdAlertContext, string> = {
+  LifecycleAlertServices<AlertState, CustomThresholdAlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
   searchSourceClient: {
@@ -1836,7 +1826,7 @@ interface Action {
 
 expect.extend({
   toBeAlertAction(action?: Action) {
-    const pass = action?.id === FIRED_ACTIONS.id && !action?.action.reason.includes('no data');
+    const pass = action?.id === FIRED_ACTION.id && !action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be an ALERT action`;
     return {
       message,
@@ -1844,7 +1834,7 @@ expect.extend({
     };
   },
   toBeNoDataAction(action?: Action) {
-    const pass = action?.id === NO_DATA_ACTIONS.id && action?.action.reason.includes('no data');
+    const pass = action?.id === NO_DATA_ACTION.id && action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be a NO DATA action`;
     return {
       message,
