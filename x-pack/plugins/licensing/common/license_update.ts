@@ -17,6 +17,7 @@ import {
   takeUntil,
   finalize,
   startWith,
+  throttleTime,
 } from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import type { ILicense } from './types';
@@ -29,11 +30,15 @@ export function createLicenseUpdate(
 ) {
   const manuallyRefresh$ = new Subject<void>();
 
-  const fetched$ = merge(triggerRefresh$, manuallyRefresh$).pipe(
-    takeUntil(stop$),
-    exhaustMap(fetcher),
-    share()
-  );
+  const fetched$ = merge(
+    triggerRefresh$,
+    manuallyRefresh$.pipe(
+      throttleTime(1000, undefined, {
+        leading: true,
+        trailing: true,
+      })
+    )
+  ).pipe(takeUntil(stop$), exhaustMap(fetcher), share());
 
   // provide a first, empty license, so that we can compare in the filter below
   const startWithArgs = initialValues ? [undefined, initialValues] : [undefined];
