@@ -29,7 +29,6 @@ xpack.fleet.agentIdVerificationEnabled: false
 ## The value need to be a featureId observability Or stackAlerts Or siem
 xpack.alerting.rules.overwriteProducer: 'observability'
 xpack.observability.createO11yGenericFeatureId: true
-e
 
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
