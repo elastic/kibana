@@ -1650,6 +1650,8 @@
       "@kbn/xstate-utils/*": ["packages/kbn-xstate-utils/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
+      "@kbn/zod-helpers": ["packages/kbn-zod-helpers"],
+      "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": [
@@ -1725,6 +1727,6 @@
       "@kbn/ambient-ui-types",
       "@kbn/ambient-common-types",
       "@kbn/ambient-storybook-types"
-    ]
+    ],
   }
 }
