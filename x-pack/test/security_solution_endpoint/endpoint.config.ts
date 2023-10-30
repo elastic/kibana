@@ -7,7 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
-import { generateConfig } from './config.base';
+import { ESS_FILTER, generateConfig } from './config.base';
 
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
   const { readConfigFile } = ftrConfigProviderContext;
@@ -21,6 +21,6 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
     baseConfig: xpackFunctionalConfig,
     testFiles: [resolve(__dirname, './apps/endpoint')],
     junitReportName: 'X-Pack Endpoint Functional Tests on ESS',
-    mochaGrep: '@ess',
+    mochaGrep: ESS_FILTER,
   });
 }

@@ -14,6 +14,9 @@ import {
   createEndpointDockerConfig,
 } from '../security_solution_endpoint_api_int/registry';
 
+export const ESS_FILTER = '@ess';
+export const SERVERLESS_FILTER = '/^(?!.*@brokenInServerless|.*@skipInServerless).*@serverless.*/';
+
 export const generateConfig = async ({
   ftrConfigProviderContext,
   baseConfig,
