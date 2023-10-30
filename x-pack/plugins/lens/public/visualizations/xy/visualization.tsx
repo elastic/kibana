@@ -1007,15 +1007,6 @@ const getMappedAccessors = ({
   return mappedAccessors;
 };
 
-function getChartType(state: XYState): SeriesType | undefined {
-  for (const layer of state.layers) {
-    if (isDataLayer(layer)) {
-      return layer.seriesType;
-    }
-  }
-  return undefined;
-}
-
 function getVisualizationInfo(
   state: XYState,
   frame: Partial<FramePublicAPI> | undefined,
@@ -1026,11 +1017,12 @@ function getVisualizationInfo(
   const visualizationLayersInfo = state.layers.map((layer) => {
     const palette = [];
     const dimensions = [];
-    const chartType: SeriesType | undefined = getChartType(state);
+    let chartType: SeriesType | undefined;
     let icon;
     let label;
 
     if (isDataLayer(layer)) {
+      chartType = layer.seriesType;
       const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
       icon = layerVisType?.icon;
       label = layerVisType?.fullLabel || layerVisType?.label;
