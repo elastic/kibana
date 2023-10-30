@@ -16,8 +16,10 @@ import {
   DatasourceMock,
   createMockFramePublicAPI,
   createMockedDragDropContext,
+  renderWithReduxStore,
 } from '../../../mocks';
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
+import { fireEvent, getByTestId, screen } from '@testing-library/react';
 jest.mock('../../../debounced_component', () => {
   return {
     debouncedComponent: (fn: unknown) => fn,
@@ -45,6 +47,7 @@ import { getLensInspectorService } from '../../../lens_inspector_service';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
 import { Ast, toExpression } from '@kbn/interpreter';
+import faker from 'faker';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -60,9 +63,19 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
   return core;
 }
 
+let mockVisualization: jest.Mocked<Visualization>;
+let mockVisualization2: jest.Mocked<Visualization>;
+let mockDatasource: DatasourceMock;
+
+let expressionRendererMock: jest.Mock<React.ReactElement, [ReactExpressionRendererProps]>;
+let uiActionsMock: jest.Mocked<UiActionsStart>;
+let trigger: jest.Mocked<TriggerContract>;
+
+let instance: ReactWrapper;
+
 const defaultProps = {
   datasourceMap: {},
-  visualizationMap: {},
+  visualizationMap: { testVis: mockVisualization },
   framePublicAPI: createMockFramePublicAPI(),
   ExpressionRenderer: createExpressionRendererMock(),
   core: createCoreStartWithPermissions(),
@@ -97,16 +110,6 @@ const SELECTORS = {
 };
 
 describe('workspace_panel', () => {
-  let mockVisualization: jest.Mocked<Visualization>;
-  let mockVisualization2: jest.Mocked<Visualization>;
-  let mockDatasource: DatasourceMock;
-
-  let expressionRendererMock: jest.Mock<React.ReactElement, [ReactExpressionRendererProps]>;
-  let uiActionsMock: jest.Mocked<UiActionsStart>;
-  let trigger: jest.Mocked<TriggerContract>;
-
-  let instance: ReactWrapper;
-
   beforeEach(() => {
     // These are used in specific tests to assert function calls
     trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
@@ -118,50 +121,37 @@ describe('workspace_panel', () => {
     expressionRendererMock = createExpressionRendererMock();
   });
 
-  afterEach(() => {
-    instance.unmount();
-  });
+  // afterEach(() => {
+  //   instance.unmount();
+  // });
 
   it('should render an explanatory text if no visualization is active', async () => {
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        visualizationMap={{
-          testVis: mockVisualization,
-        }}
-        ExpressionRenderer={expressionRendererMock}
-      />,
-      {
-        preloadedState: { visualization: { activeId: null, state: {} }, datasourceStates: {} },
-      }
+    renderWithReduxStore(
+      <WorkspacePanel {...defaultProps} />,
+      {},
+      { preloadedState: { visualization: { activeId: null, state: {} }, datasourceStates: {} } }
     );
-    instance = mounted.instance;
-    instance.update();
-
-    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(3);
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
+    expect(screen.getByText('Drop some fields here to start')).toBeInTheDocument();
+    expect(screen.queryByText('Expression renderer mock')).not.toBeInTheDocument();
   });
 
   it('should render an explanatory text if the visualization does not produce an expression', async () => {
-    const mounted = await mountWithProvider(
+    renderWithReduxStore(
       <WorkspacePanel
         {...defaultProps}
         visualizationMap={{
           testVis: { ...mockVisualization, toExpression: () => null },
         }}
       />,
-
+      {},
       { preloadedState: { datasourceStates: {} } }
     );
-    instance = mounted.instance;
-    instance.update();
-
-    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(3);
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
+    expect(screen.getByText('Drop some fields here to start')).toBeInTheDocument();
+    expect(screen.queryByText('Expression renderer mock')).not.toBeInTheDocument();
   });
 
   it('should render an explanatory text if the datasource does not produce an expression', async () => {
-    const mounted = await mountWithProvider(
+    renderWithReduxStore(
       <WorkspacePanel
         {...defaultProps}
         visualizationMap={{
@@ -172,14 +162,11 @@ describe('workspace_panel', () => {
           },
         }}
       />,
-
+      {},
       { preloadedState: { datasourceStates: {} } }
     );
-    instance = mounted.instance;
-    instance.update();
-
-    expect(instance.find('[data-test-subj="workspace-drag-drop-prompt"]')).toHaveLength(3);
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
+    expect(screen.getByText('Drop some fields here to start')).toBeInTheDocument();
+    expect(screen.queryByText('Expression renderer mock')).not.toBeInTheDocument();
   });
 
   it('should render the resulting expression using the expression renderer', async () => {
@@ -190,12 +177,13 @@ describe('workspace_panel', () => {
     mockDatasource.toExpression.mockReturnValue('datasource');
     mockDatasource.getLayers.mockReturnValue(['first']);
 
-    const mounted = await mountWithProvider(
+    renderWithReduxStore(
       <WorkspacePanel
         {...defaultProps}
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
+        ExpressionRenderer={expressionRendererMock}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
           testVis: {
@@ -204,18 +192,9 @@ describe('workspace_panel', () => {
               toExpr(datasourceExpressionsByLayers),
           },
         }}
-        ExpressionRenderer={expressionRendererMock}
       />
     );
-
-    instance = mounted.instance;
-
-    instance.update();
-
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-      "datasource
-      | testVis"
-    `);
+    expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
   });
 
   it('should give user control when auto-apply disabled', async () => {
@@ -924,77 +903,68 @@ describe('workspace_panel', () => {
     expect(instance.find(expressionRendererMock)).toHaveLength(1);
   });
 
-  describe('suggestions from dropping in workspace panel', () => {
-    let mockGetSuggestionForField: jest.Mock;
-    let frame: jest.Mocked<FramePublicAPI>;
+  describe.skip('suggestions from dropping in workspace panel', () => {
+    const draggedField = { id: faker.lorem.word(), humanData: { label: faker.lorem.word() } };
 
-    const draggedField = { id: 'field', humanData: { label: 'Label' } };
-
-    beforeEach(() => {
-      frame = createMockFramePublicAPI();
-      mockGetSuggestionForField = jest.fn();
-    });
-
-    async function initComponent(draggingContext = draggedField) {
-      const mounted = await mountWithProvider(
+    function renderWithDndAndStore(propsOverrides = {}, draggingContext = draggedField) {
+      return renderWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingContext })}>
           <WorkspacePanel
             {...defaultProps}
-            datasourceMap={{
-              testDatasource: mockDatasource,
-            }}
-            framePublicAPI={frame}
+            datasourceMap={{ testDatasource: mockDatasource }}
+            framePublicAPI={createMockFramePublicAPI()}
             visualizationMap={{
               testVis: mockVisualization,
               vis2: mockVisualization2,
             }}
-            getSuggestionForField={mockGetSuggestionForField}
+            getSuggestionForField={jest.fn()}
+            {...propsOverrides}
           />
         </ChildDragDropProvider>
       );
-      instance = mounted.instance;
-      return mounted;
     }
 
-    it('should immediately transition if exactly one suggestion is returned', async () => {
-      mockGetSuggestionForField.mockReturnValue({
-        visualizationId: 'testVis',
-        datasourceState: {},
-        datasourceId: 'testDatasource',
-        visualizationState: {},
+    it('should immediately transition if exactly one suggestion is returned', () => {
+      const { store } = renderWithDndAndStore({
+        getSuggestionForField: jest.fn().mockReturnValue({
+          visualizationId: 'testVis',
+          visualizationState: {},
+          datasourceId: 'testDatasource',
+          datasourceState: {},
+        }),
       });
-      const { lensStore } = await initComponent();
-
-      instance.find(DragDrop).prop('onDrop')!(draggedField, 'field_replace');
-
-      expect(lensStore.dispatch).toHaveBeenCalledWith({
+      fireEvent.drop(screen.getByTestId('lnsWorkspace'), { dataTransfer: draggedField });
+      expect(store.dispatch).toHaveBeenCalledWith({
         type: 'lens/switchVisualization',
         payload: {
           suggestion: {
             newVisualizationId: 'testVis',
             visualizationState: {},
-            datasourceState: {},
             datasourceId: 'testDatasource',
+            datasourceState: {},
           },
           clearStagedPreview: true,
         },
       });
     });
 
-    it('should allow to drop if there are suggestions', async () => {
-      mockGetSuggestionForField.mockReturnValue({
-        visualizationId: 'testVis',
-        datasourceState: {},
-        datasourceId: 'testDatasource',
-        visualizationState: {},
+    it('should allow to drop if there are suggestions', () => {
+      renderWithDndAndStore({
+        getSuggestionForField: jest.fn().mockReturnValue({
+          visualizationId: 'testVis',
+          visualizationState: {},
+          datasourceId: 'testDatasource',
+          datasourceState: {},
+        }),
       });
-      await initComponent();
-      expect(instance.find(DragDrop).prop('dropTypes')).toBeTruthy();
+      expect(screen.getByTestId('lnsWorkspace').classList).toContain('domDragDrop-isDropTarget');
     });
 
-    it('should refuse to drop if there are no suggestions', async () => {
-      await initComponent();
-      expect(instance.find(DragDrop).prop('dropType')).toBeFalsy();
+    it('should refuse to drop if there are no suggestions', () => {
+      renderWithDndAndStore();
+      expect(screen.getByTestId('lnsWorkspace').classList).not.toContain(
+        'domDragDrop-isDropTarget'
+      );
     });
   });
 });

@@ -13,46 +13,44 @@ import {
   createMockVisualization,
   renderWithReduxStore,
 } from '../../../mocks';
-import { Visualization } from '../../../types';
 import { LayerSettings } from './layer_settings';
 
 describe('LayerSettings', () => {
-  let mockVisualization: jest.Mocked<Visualization>;
-  const frame = createMockFramePublicAPI();
-
-  function getDefaultProps() {
-    return {
-      activeVisualization: mockVisualization,
-      layerConfigProps: {
-        layerId: 'myLayer',
-        state: {},
-        frame,
-        dateRange: { fromDate: 'now-7d', toDate: 'now' },
-        activeData: frame.activeData,
-        setState: jest.fn(),
-        onChangeIndexPattern: jest.fn(),
-      },
-    };
-  }
-
-  beforeEach(() => {
-    mockVisualization = createMockVisualization();
-  });
+  const renderLayerSettings = (propsOverrides = {}) => {
+    return renderWithReduxStore(
+      <LayerSettings
+        activeVisualization={createMockVisualization()}
+        layerConfigProps={{
+          layerId: 'myLayer',
+          state: {},
+          frame: createMockFramePublicAPI(),
+          setState: jest.fn(),
+          onChangeIndexPattern: jest.fn(),
+        }}
+        {...propsOverrides}
+      />
+    );
+  };
 
   it('should render a static header if visualization has only a description value', () => {
-    mockVisualization.getDescription.mockReturnValue({
-      icon: 'myIcon',
-      label: 'myVisualizationType',
+    renderLayerSettings({
+      activeVisualization: {
+        ...createMockVisualization(),
+        getDescription: () => ({ icon: 'myIcon', label: 'myVisualizationType' }),
+      },
     });
-    renderWithReduxStore(<LayerSettings {...getDefaultProps()} />);
     expect(screen.getByText('myVisualizationType')).toBeInTheDocument();
   });
 
   it('should use custom renderer if passed', () => {
     const customLayerHeader = faker.lorem.word();
-    mockVisualization.LayerHeaderComponent = () => <div>{customLayerHeader}</div>;
 
-    renderWithReduxStore(<LayerSettings {...getDefaultProps()} />);
+    renderLayerSettings({
+      activeVisualization: {
+        ...createMockVisualization(),
+        LayerHeaderComponent: () => <div>{customLayerHeader}</div>,
+      },
+    });
     expect(screen.getByText(customLayerHeader)).toBeInTheDocument();
   });
 });
