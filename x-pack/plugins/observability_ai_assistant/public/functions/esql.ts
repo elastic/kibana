@@ -99,20 +99,18 @@ export function registerEsqlFunction({
       1. ES|QL is not Elasticsearch SQL. Do not apply Elasticsearch SQL
       commands, functions and concepts. Only use information available
       in the context of this conversation.
-      2. Use the WHERE clause as early as possible, because it limits
-      the number of documents that need to be evaluated.
-      3. DO NOT UNDER ANY CIRCUMSTANCES wrap a data source in single or
-      double quotes when using FROM.
-      4. DO NOT UNDER ANY CIRCUMSTANCES use anything other than aggregation
-      functions (MIN/MAX/SUM/COUNT/AVG etc) in STATS commands. Math or
-      other functions are NOT ALLOWED.
-      5. DO NOT UNDER ANY CIRCUMSTANCES use aggregation functions in EVAL
-      commands.
-      6. DO NOT UNDER ANY CIRCUMSTANCES use COUNT(*) or COUNT(). A single
-      argument (field name) is required, like COUNT(my.field.name).
-      7. DO NOT UNDER ANY CIRCUMSTANCES use the AS keyword. create a new
-      column by using the = operator. this is wrong: 
-      \`STATS SUM(field) AS sum_field.\`
+      2. Use a WHERE clause as early and often as possible, because
+      it limits the number of documents that need to be evaluated.
+      3. Use EVAL to create new columns that require mathemetical
+      operations or non-aggregation functions like CASE, ROUND or
+      DATE_EXTRACT. YOU MUST DO THIS before using these operations
+      in a STATS command.
+      4. DO NOT UNDER ANY CIRCUMSTANCES:
+      - wrap a data source in single or double quotes when using FROM
+      - use COUNT(*) or COUNT(). A single argument (field name) is
+      required, like COUNT(my.field.name).
+      - use the AS keyword. create a new column by using the = operator.
+      this is wrong: STATS SUM(field) AS sum_field.
 
       When constructing a query, break it down into the following steps.
       Ask these questions out loud so the user can see your reasoning.
@@ -120,10 +118,15 @@ export function registerEsqlFunction({
 
       - What are the critical rules I need to think of?
       - What data source is the user requesting? What command should I
-      select for this data source?
+      select for this data source? Don't use any quotes to wrap the
+      source.
+      - Does the data set need to be filtered? Use the WHERE clause for
+      this, as it improves performance.
       - Do I need to add columns that use math or other non-aggregation
       functions like CASE using the EVAL command before I run the STATS
       BY command with aggregation functions?
+      - If I run a STATS command, what columns are available after the
+      command?
       - What are the steps needed to get the result that the user needs?
       Break each operation down into its own step. Reason about what data
       is the outcome of each command or function.
@@ -215,12 +218,14 @@ export function registerEsqlFunction({
       ### FROM
 
       \`FROM\` selects a data source, usually an Elasticsearch index or
-      pattern. You can also specify multiple indices.
+      pattern. You can also specify multiple indices. DO NOT UNDER ANY
+      CIRCUMSTANCES wrap an index or pattern in single or double quotes
+      as such: \`FROM "my_index.pattern-*"\`.
       Some examples:
 
       - \`FROM employees\`
-      - \`FROM employees*\`
-      - \`FROM employees*,my-alias\`
+      - \`FROM employees.annual_salaries-*\`
+      - \`FROM employees*,my-alias,my-index.with-a-dot*\`
 
       # Processing commands
 
@@ -264,9 +269,9 @@ export function registerEsqlFunction({
       - \`| SORT my_field\`
       - \`| SORT height DESC\`
 
-      DO NOT UNDER ANY CIRCUMSTANCES use functions as part of the sort
-      statement. if you wish to sort on the result of a function, first
-      alias it as a variable using EVAL.
+      DO NOT UNDER ANY CIRCUMSTANCES use functions or math as part of the
+      sort statement. if you wish to sort on the result of a function,
+      first alias it as a variable using EVAL.
       This is wrong: \`| SORT AVG(cpu)\`.
       This is right: \`| STATS avg_cpu = AVG(cpu) | SORT avg_cpu\`
 
@@ -302,13 +307,16 @@ export function registerEsqlFunction({
       aggregated values and the optional grouping column are dropped.
       Mention the retained columns when explaining the STATS command.
 
-      STATS ... BY does not support nested functions, hoist them to an
-      EVAL statement. 
+      DO NOT UNDER ANY CIRCUMSTANCES use non-aggregation functions (like
+      CASE or DATE_EXTRACT) or mathemetical operators in the STATS
+      command. YOU MUST USE an EVAL command before the STATS command
+      to append the new calculated column.
 
       Some examples:
 
       - \`| STATS count = COUNT(emp_no) BY languages\`
       - \`| STATS salary = AVG(salary)\`
+      - \`| EVAL monthly_salary = salary / 12 | STATS avg_monthly_salary = AVG(monthly_salary) BY emp_country\`
 
       ### LIMIT
 
@@ -520,6 +528,7 @@ export function registerEsqlFunction({
             } else {
               next = content;
             }
+
             return {
               ...message,
               message: {
