@@ -345,6 +345,6 @@ describe('execute()', () => {
       rogue: '*bold*',
     };
     const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
-    expect(params.message).toBe('*bold*');
+    expect(params.message).toBe('`*bold*`');
   });
 });
