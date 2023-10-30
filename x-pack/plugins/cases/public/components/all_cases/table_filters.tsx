@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { isEqual } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
+import type { CaseStatuses } from '../../../common/types/domain';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
 import type { FilterOptions } from '../../containers/types';
 import { MultiSelectFilter } from './multi_select_filter';
@@ -23,7 +24,6 @@ import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import type { Solution } from './types';
-import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
