@@ -46,8 +46,8 @@ export interface BaseFlameGraph {
   /** sampling rate */
   SamplingRate: number;
   TotalSamples: number;
-  TotalCountInclusive: number;
-  TotalCountExclusive: number;
+  TotalCPU: number;
+  SelfCPU: number;
 }
 
 /**
@@ -82,8 +82,8 @@ export function createBaseFlameGraph(
 
     TotalSeconds: totalSeconds,
     TotalSamples: tree.TotalSamples,
-    TotalCountExclusive: tree.TotalCountExclusive,
-    TotalCountInclusive: tree.TotalCountInclusive,
+    SelfCPU: tree.SelfCPU,
+    TotalCPU: tree.TotalCPU,
   };
 
   for (let i = 0; i < tree.Size; i++) {
@@ -139,8 +139,8 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
 
     TotalSeconds: base.TotalSeconds,
     TotalSamples: base.TotalSamples,
-    TotalCountExclusive: base.TotalCountExclusive,
-    TotalCountInclusive: base.TotalCountInclusive,
+    SelfCPU: base.SelfCPU,
+    TotalCPU: base.TotalCPU,
   };
 
   const rootFrameGroupID = createFrameGroupID(

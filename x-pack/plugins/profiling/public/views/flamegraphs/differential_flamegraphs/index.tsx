@@ -127,8 +127,8 @@ export function DifferentialFlameGraphsView() {
               state.data?.primaryFlamegraph
                 ? {
                     duration: totalSeconds,
-                    selfCPU: state.data.primaryFlamegraph.TotalCountExclusive,
-                    totalCPU: state.data.primaryFlamegraph.TotalCountInclusive,
+                    selfCPU: state.data.primaryFlamegraph.SelfCPU,
+                    totalCPU: state.data.primaryFlamegraph.TotalCPU,
                     totalCount: state.data.primaryFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? baselineTime : baseline,
                   }
@@ -138,8 +138,8 @@ export function DifferentialFlameGraphsView() {
               state.data?.comparisonFlamegraph
                 ? {
                     duration: totalComparisonSeconds,
-                    selfCPU: state.data.comparisonFlamegraph.TotalCountExclusive,
-                    totalCPU: state.data.comparisonFlamegraph.TotalCountInclusive,
+                    selfCPU: state.data.comparisonFlamegraph.SelfCPU,
+                    totalCPU: state.data.comparisonFlamegraph.TotalCPU,
                     totalCount: state.data.comparisonFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
                   }

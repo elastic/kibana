@@ -53,8 +53,8 @@ export interface CalleeTree {
   /** self cpu */
   CountExclusive: number[];
   TotalSamples: number;
-  TotalCountInclusive: number;
-  TotalCountExclusive: number;
+  TotalCPU: number;
+  SelfCPU: number;
 }
 
 /**
@@ -90,8 +90,8 @@ export function createCalleeTree(
     CountInclusive: new Array(totalFrames),
     CountExclusive: new Array(totalFrames),
     TotalSamples: 0,
-    TotalCountExclusive: 0,
-    TotalCountInclusive: 0,
+    SelfCPU: 0,
+    TotalCPU: 0,
   };
 
   // The inverse of the sampling rate is the number with which to multiply the number of
@@ -195,7 +195,7 @@ export function createCalleeTree(
   return {
     ...tree,
     TotalSamples: totalSamples,
-    TotalCountExclusive: sumSelfCPU,
-    TotalCountInclusive: sumTotalCPU,
+    SelfCPU: sumSelfCPU,
+    TotalCPU: sumTotalCPU,
   };
 }
