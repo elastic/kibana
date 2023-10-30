@@ -69,7 +69,6 @@ export const cli = () => {
       });
 
       const { argv } = yargs(process.argv.slice(2))
-        
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('env', (arg: string) =>
