@@ -5,7 +5,7 @@ preview::[]
 
 The Elasticsearch Query Language, ES|QL, has been created to make exploring your data faster and easier using the Discover application. 
 
-in the tutorial below we use the kibana sample logs
+in the tutorial below we'll use the kibana sample logs. Using Discover and Lens suggestions to explore the data and visualization. 
 
 [float]
 [[prerequisite]]
@@ -31,54 +31,49 @@ To ....[provide steps]:
 [role="screenshot"]
 image:images/try-esql.png[An image of the Discover UI where users can try the new ES|QL feature]
 
-
-
-[float]
-[[esql-kibana-query-bar]]
-=== The query bar
-
-After switching to {esql} mode, the query bar shows a sample query. For example:
-
-[source,esql]
-----
-from kibana_sample_data_logs | limit 10
-----
-
-Every query starts with a <<esql-commands,source command>>. In this query, the
-source command is <<esql-from>>. `FROM` retrieves data from data streams, indices, or
-aliases. In this example, the data is retrieved from `kibana_sample_data_logs`.
-
-A source command can be followed by one or more <<esql-commands,processing
-commands>>. In this query, the processing command is <<esql-limit>>. `LIMIT`
-limits the number of rows that are retrieved.
-
-TIP: Click the help icon (image:images/esql/esql-icon-help.svg[]) to open the
-in-product reference documentation for all commands and functions.
-
-To make it easier to write queries, auto-complete offers suggestions with
-possible commands and functions:
+Let's say we want to find out what machine operating system users have and how much ram is on their machine.  
 
 [NOTE]
 ====
-{esql} keywords are case-insensitive. The following query is identical to the
-previous one:
-[source,esql]
-----
-FROM kibana_sample_data_logs | LIMIT 10
-----
+{esql} keywords are not case sensitive. 
 ====
 
-[float]
-==== Expand the query bar
-
-For readability, you can put each processing command on a new line. The
-following query is identical to the previous one:
-
+. Set the time range to **Last 7 days**.
+. Expand image:images/expand-icon-2.png[An image of the expand icon] the query bar.
+. Put each processing command on a new line for better readability.
+. Copy the query below:
++
 [source,esql]
 ----
-FROM kibana_sample_data_logs 
-| LIMIT 10
+from kibana_sample_data_logs 
+| keep machine.os, machine.ram
 ----
++
+. Click **Update**.
++
+[role="screenshot"]
+image:images/esql-machine-os-ram.png[An image of the query result]
+
+Let's add to our query to find out the geographical destination of the visits and limit the results. 
+
+. Copy the query below:
++
+[source,esql]
+----
+from kibana_sample_data_logs 
+| keep machine.os, machine.ram, geo.dest
+| limit 10
+----
++
+. Click **Update**.
++
+[role="screenshot"]
+image:images/esql-limit.png[An image of the extended query result]
+
+
+
+[role="screenshot"]
+image:images/esql-full-query.png[]
 
 ////
 When you develop your task content, use the following guidelines:
