@@ -45,7 +45,6 @@ export default defineCypressConfig({
       setupUserDataLoader(on, config, { additionalRoleName: 'viewer' });
 
       on('after:spec', (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {
-        console.log({ results });
         if (results && results.video) {
           // Do we have failures for any retry attempts?
           const failures = results.tests.some((test) =>
