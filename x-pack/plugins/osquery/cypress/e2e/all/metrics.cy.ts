@@ -12,6 +12,7 @@ import { triggerLoadData } from '../../tasks/inventory';
 import { ServerlessRoleName } from '../../support/roles';
 
 // FLAKY: https://github.com/elastic/kibana/issues/169574
+// FLAKY: https://github.com/elastic/kibana/issues/169575
 describe.skip('ALL - Inventory', { tags: ['@ess'] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
