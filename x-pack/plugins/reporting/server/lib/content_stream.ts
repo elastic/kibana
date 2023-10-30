@@ -74,7 +74,6 @@ export class ContentStream extends Duplex {
   private jobSize?: number;
   private maxChunkSize?: number;
   private parameters: Required<ContentStreamParameters>;
-  private uuid = uuidv4();
   private primaryTerm?: number;
   private seqNo?: number;
 
@@ -233,7 +232,7 @@ export class ContentStream extends Duplex {
 
   private async writeChunk(content: string) {
     const { id: parentId, index } = this.document;
-    const id = this.uuid;
+    const id = uuidv4();
 
     this.logger.debug(`Writing chunk #${this.chunksWritten} (${id}).`);
 
