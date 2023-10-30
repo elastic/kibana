@@ -10,14 +10,19 @@ import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 
 import React from 'react';
-import { IndexDetailsSection } from '../../../common/constants';
+import {
+  IndexDetailsSection,
+  IndexDetailsTab,
+  IndexDetailsTabIds,
+} from '../../../common/constants';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
 import {
-  testIndexEditableSettings,
+  testIndexEditableSettingsAll,
+  testIndexEditableSettingsLimited,
   testIndexMappings,
   testIndexMock,
   testIndexName,
@@ -429,13 +434,30 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.settings.clickEditModeSwitch();
       });
 
-      it('displays the editable settings (flattened and filtered)', () => {
+      it('displays all editable settings (flattened and filtered)', () => {
         const editorContent = testBed.actions.settings.getCodeEditorContent();
-        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsAll, null, 2));
+      });
+
+      it('displays limited editable settings (flattened and filtered)', async () => {
+        await act(async () => {
+          testBed = await setup({
+            httpSetup,
+            dependencies: {
+              config: { editableIndexSettings: 'limited' },
+            },
+          });
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+        await testBed.actions.settings.clickEditModeSwitch();
+        const editorContent = testBed.actions.settings.getCodeEditorContent();
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsLimited, null, 2));
       });
 
       it('updates the settings', async () => {
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.saveSettings();
         expect(httpSetup.put).toHaveBeenLastCalledWith(
@@ -452,7 +474,7 @@ describe('<IndexDetailsPage />', () => {
       it('reloads the settings after an update', async () => {
         const numberOfRequests = 2;
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.saveSettings();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
@@ -463,11 +485,11 @@ describe('<IndexDetailsPage />', () => {
       });
 
       it('resets the changes in the editor', async () => {
-        const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+        const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
         await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
         await testBed.actions.settings.resetChanges();
         const editorContent = testBed.actions.settings.getCodeEditorContent();
-        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettings, null, 2));
+        expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsAll, null, 2));
       });
     });
   });
@@ -664,7 +686,7 @@ describe('<IndexDetailsPage />', () => {
     it('updates settings with the encoded index name', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
       await testBed.actions.settings.clickEditModeSwitch();
-      const updatedSettings = { ...testIndexEditableSettings, 'index.priority': '2' };
+      const updatedSettings = { ...testIndexEditableSettingsAll, 'index.priority': '2' };
       await testBed.actions.settings.updateCodeEditorContent(JSON.stringify(updatedSettings));
       await testBed.actions.settings.saveSettings();
       expect(httpSetup.put).toHaveBeenLastCalledWith(
@@ -683,6 +705,60 @@ describe('<IndexDetailsPage />', () => {
         `${API_BASE_PATH}/stats/${encodeURIComponent(percentSignName)}`,
         requestOptions
       );
+    });
+  });
+  describe('extension service tabs', () => {
+    const testTabId = 'testTab' as IndexDetailsTabIds;
+    const testContent = 'Test content';
+    const additionalTab: IndexDetailsTab = {
+      id: testTabId,
+      name: 'Test tab',
+      renderTabContent: () => {
+        return <span>{testContent}</span>;
+      },
+      order: 1,
+    };
+    beforeAll(async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [additionalTab],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+    });
+
+    it('renders an additional tab', async () => {
+      await testBed.actions.clickIndexDetailsTab(testTabId);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toEqual(testContent);
+    });
+
+    it('additional tab is the first in the order', () => {
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Test tab', 'Overview', 'Mappings', 'Settings', 'Statistics']);
+    });
+
+    it('additional tab is the last in the order', async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [{ ...additionalTab, order: 100 }],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Overview', 'Mappings', 'Settings', 'Statistics', 'Test tab']);
     });
   });
 });

@@ -427,6 +427,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                               },
                             },
                           }}
+                          locale={i18n.getLocale()}
                         />
                         <Axis
                           id="bottom"

@@ -84,6 +84,7 @@ export const createAppContextStartContractMock = (
     config$,
     kibanaVersion: '8.99.0', // Fake version :)
     kibanaBranch: 'main',
+    kibanaInstanceId: '1',
     telemetryEventsSender: createMockTelemetryEventsSender(),
     bulkActionsResolver: {} as any,
     messageSigningService: createMessageSigningServiceMock(),

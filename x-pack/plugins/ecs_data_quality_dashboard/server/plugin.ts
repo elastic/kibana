@@ -29,10 +29,10 @@ export class EcsDataQualityDashboardPlugin
     const router = core.http.createRouter(); // this would be deleted when plugin is removed
 
     // Register server side APIs
-    getIndexMappingsRoute(router);
-    getIndexStatsRoute(router);
-    getUnallowedFieldValuesRoute(router);
-    getILMExplainRoute(router);
+    getIndexMappingsRoute(router, this.logger);
+    getIndexStatsRoute(router, this.logger);
+    getUnallowedFieldValuesRoute(router, this.logger);
+    getILMExplainRoute(router, this.logger);
     return {};
   }
 

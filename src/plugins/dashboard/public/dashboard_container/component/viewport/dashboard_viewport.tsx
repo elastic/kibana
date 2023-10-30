@@ -16,7 +16,6 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DashboardGrid } from '../grid';
-import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
@@ -35,9 +34,6 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
 };
 
 export const DashboardViewportComponent = () => {
-  const {
-    settings: { isProjectEnabledInLabs },
-  } = pluginServices.getServices();
   const controlsRoot = useRef(null);
 
   const dashboard = useDashboardContainer();
@@ -60,7 +56,6 @@ export const DashboardViewportComponent = () => {
   const description = dashboard.select((state) => state.explicitInput.description);
   const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
   const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
-  const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
   const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver(!!focusedPanelId);
 
@@ -71,7 +66,7 @@ export const DashboardViewportComponent = () => {
 
   return (
     <div className={'dshDashboardViewportWrapper'}>
-      {controlsEnabled && controlGroup && viewMode !== ViewMode.PRINT ? (
+      {controlGroup && viewMode !== ViewMode.PRINT ? (
         <div
           className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
           ref={controlsRoot}

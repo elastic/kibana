@@ -7,12 +7,14 @@
 
 import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { KNOWLEDGE_BASE } from '../../../common/constants';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
+import { getKbResource } from './get_kb_resource';
 import { PostKnowledgeBasePathParams } from '../../schemas/knowledge_base/post_knowledge_base';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 
@@ -41,17 +43,16 @@ export const postKnowledgeBaseRoute = (
       const logger = (await context.elasticAssistant).logger;
 
       try {
-        const kbResource =
-          request.params.resource != null ? decodeURIComponent(request.params.resource) : undefined;
-
         // Get a scoped esClient for creating the Knowledge Base index, pipeline, and documents
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+        const kbResource = getKbResource(request);
         const esStore = new ElasticsearchStore(
           esClient,
           KNOWLEDGE_BASE_INDEX_PATTERN,
           logger,
-          elserId
+          elserId,
+          kbResource
         );
 
         // Pre-check on index/pipeline

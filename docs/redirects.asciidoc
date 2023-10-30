@@ -427,3 +427,9 @@ This content has moved. Refer to <<enhancements-and-bug-fixes-v8.10.0-revised>> 
 == Generative AI connector and action
 
 This connector was renamed. Refer to <<openai-action-type>>.
+
+[role="exclude",id="apis"]
+== APIs
+
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[alerting], {kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[cases], {kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[connectors], and {kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[machine learning] open API specifications.

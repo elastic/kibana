@@ -55,6 +55,10 @@ const TabIdRT = rt.union([
 ]);
 
 const AssetDetailsUrlStateRT = rt.partial({
+  autoRefresh: rt.partial({
+    isPaused: rt.boolean,
+    interval: rt.number,
+  }),
   dateRange: rt.type({
     from: rt.string,
     to: rt.string,

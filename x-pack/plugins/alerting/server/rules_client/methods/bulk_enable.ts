@@ -19,6 +19,7 @@ import {
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
 } from '../common';
+import { getRuleCircuitBreakerErrorMessage } from '../../../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
@@ -143,13 +144,18 @@ const bulkEnableRulesWithOCC = async (
         .filter((rule) => !rule.attributes.enabled)
         .map((rule) => rule.attributes.schedule?.interval);
 
-      try {
-        await validateScheduleLimit({
-          context,
-          updatedInterval,
+      const validationPayload = await validateScheduleLimit({
+        context,
+        updatedInterval,
+      });
+
+      if (validationPayload) {
+        scheduleValidationError = getRuleCircuitBreakerErrorMessage({
+          interval: validationPayload.interval,
+          intervalAvailable: validationPayload.intervalAvailable,
+          action: 'bulkEnable',
+          rules: updatedInterval.length,
         });
-      } catch (error) {
-        scheduleValidationError = `Error validating enable rule data - ${error.message}`;
       }
 
       await pMap(rulesFinderRules, async (rule) => {

@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./es_errors'));
+    loadTestFile(require.resolve('./existing_indices_route'));
     loadTestFile(require.resolve('./fields_for_wildcard_route'));
     loadTestFile(require.resolve('./data_views_crud'));
     // TODO: Removed `scripted_fields_crud` since

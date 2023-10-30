@@ -35,13 +35,13 @@ import {
 } from '../../../../../shared_imports';
 
 import { documentationService } from '../../../../services/documentation';
-import { splitSizeAndUnits } from '../../../../../../common';
+import { splitSizeAndUnits, DataStream } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';
 import { updateDataRetention } from '../../../../services/api';
 
 interface Props {
-  dataRetention: string;
+  lifecycle: DataStream['lifecycle'];
   dataStreamName: string;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
@@ -83,33 +83,6 @@ export const timeUnits = [
       }
     ),
   },
-  {
-    value: 'ms',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.millisecondsLabel',
-      {
-        defaultMessage: 'milliseconds',
-      }
-    ),
-  },
-  {
-    value: 'micros',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.microsecondsLabel',
-      {
-        defaultMessage: 'microseconds',
-      }
-    ),
-  },
-  {
-    value: 'nanos',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.nanosecondsLabel',
-      {
-        defaultMessage: 'nanoseconds',
-      }
-    ),
-  },
 ];
 
 const configurationFormSchema: FormSchema = {
@@ -124,7 +97,12 @@ const configurationFormSchema: FormSchema = {
     formatters: [fieldFormatters.toInt],
     validations: [
       {
-        validator: ({ value }) => {
+        validator: ({ value, formData }) => {
+          // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
+          if (formData.infiniteRetentionPeriod) {
+            return undefined;
+          }
+
           if (!value) {
             return {
               message: i18n.translate(
@@ -171,11 +149,11 @@ const configurationFormSchema: FormSchema = {
 };
 
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
-  dataRetention,
+  lifecycle,
   dataStreamName,
   onClose,
 }) => {
-  const { size, unit } = splitSizeAndUnits(dataRetention);
+  const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
   const {
     services: { notificationService },
   } = useAppContext();
@@ -184,7 +162,10 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     defaultValue: {
       dataRetention: size,
       timeUnit: unit || 'd',
-      infiniteRetentionPeriod: !dataRetention,
+      // When data retention is not set and lifecycle is enabled, is the only scenario in
+      // which data retention will be infinite. If lifecycle isnt set or is not enabled, we
+      // dont have inifinite data retention.
+      infiniteRetentionPeriod: lifecycle?.enabled && !lifecycle?.data_retention,
     },
     schema: configurationFormSchema,
     id: 'editDataRetentionForm',

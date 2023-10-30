@@ -1102,6 +1102,40 @@
       },
       {
         "parentPluginId": "eventAnnotation",
+        "id": "def-common.EventAnnotationGroupCrudTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAnnotationGroupCrudTypes",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.ContentManagementCrudTypes",
+            "text": "ContentManagementCrudTypes"
+          },
+          "<\"event-annotation-group\", ",
+          {
+            "pluginId": "eventAnnotation",
+            "scope": "common",
+            "docId": "kibEventAnnotationPluginApi",
+            "section": "def-common.EventAnnotationGroupSavedObjectAttributes",
+            "text": "EventAnnotationGroupSavedObjectAttributes"
+          },
+          ", ",
+          "CreateOptions",
+          ", ",
+          "UpdateOptions",
+          ", {}>"
+        ],
+        "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventAnnotation",
         "id": "def-common.EventAnnotationGroupDeleteIn",
         "type": "Type",
         "tags": [],
