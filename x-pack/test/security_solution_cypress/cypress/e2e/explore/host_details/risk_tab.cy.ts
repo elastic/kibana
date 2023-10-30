@@ -16,7 +16,7 @@ import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
 import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytics';
 import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 
-describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   // FLAKY: https://github.com/elastic/kibana/issues/169033
   // FLAKY: https://github.com/elastic/kibana/issues/169034
   describe.skip('with legacy risk score', () => {
@@ -62,7 +62,7 @@ describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, (
     before(() => {
       cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
-      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
       login();
       enableRiskEngine();
     });

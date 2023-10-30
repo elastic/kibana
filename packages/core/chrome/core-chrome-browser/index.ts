@@ -43,4 +43,5 @@ export type {
   NodeDefinition,
   NodeDefinitionWithChildren,
   NodeRenderAs,
+  EuiThemeSize,
 } from './src';

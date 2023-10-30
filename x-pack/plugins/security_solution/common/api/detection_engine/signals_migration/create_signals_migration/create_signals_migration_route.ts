@@ -8,7 +8,9 @@
 import * as t from 'io-ts';
 
 import { PositiveInteger, PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
-import { IndexPatternArray } from '../../model';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
+import { IndexPatternArray } from '../../model/rule_schema_legacy';
 
 export const signalsReindexOptions = t.partial({
   requests_per_second: t.number,

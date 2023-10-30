@@ -27,6 +27,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
     defaultMessage: 'Management',
   }),
   icon: 'gear',
+  renderAs: 'accordion',
   children: [
     {
       link: 'monitoring',
@@ -36,6 +37,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
       title: i18n.translate('defaultNavigation.management.integrationManagement', {
         defaultMessage: 'Integration management',
       }),
+      renderAs: 'accordion',
       children: [
         {
           link: 'integrations',
@@ -53,12 +55,14 @@ export const defaultNavigation: ManagementNodeDefinition = {
       title: i18n.translate('defaultNavigation.management.stackManagement', {
         defaultMessage: 'Stack management',
       }),
+      renderAs: 'accordion',
       children: [
         {
           id: 'ingest',
           title: i18n.translate('defaultNavigation.management.ingest', {
             defaultMessage: 'Ingest',
           }),
+          renderAs: 'accordion',
           children: [
             {
               link: 'management:ingest_pipelines',
@@ -73,6 +77,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
           title: i18n.translate('defaultNavigation.management.stackManagementData', {
             defaultMessage: 'Data',
           }),
+          renderAs: 'accordion',
           children: [
             {
               link: 'management:index_management',
@@ -87,6 +92,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
           title: i18n.translate('defaultNavigation.management.alertAndInsights', {
             defaultMessage: 'Alerts and insights',
           }),
+          renderAs: 'accordion',
           children: [
             {
               // Rules
@@ -108,6 +114,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
         {
           id: 'kibana',
           title: 'Kibana',
+          renderAs: 'accordion',
           children: [
             {
               link: 'management:dataViews',

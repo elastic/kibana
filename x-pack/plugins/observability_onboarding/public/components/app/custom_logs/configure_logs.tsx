@@ -41,7 +41,7 @@ import {
   StepPanelContent,
   StepPanelFooter,
 } from '../../shared/step_panel';
-import { BackButton } from './back_button';
+import { BackButton } from '../../shared/back_button';
 import { getFilename } from './get_filename';
 
 const customIntegrationsTestSubjects = {
@@ -235,7 +235,10 @@ export function ConfigureLogsContent() {
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
                           iconType="trash"
-                          aria-label="Delete"
+                          aria-label={i18n.translate(
+                            'xpack.observability_onboarding.configureLogsContent.euiButtonIcon.deleteLabel',
+                            { defaultMessage: 'Delete' }
+                          )}
                           onClick={() => removeLogFilePath(index)}
                           data-test-subj={`obltOnboardingLogFilePathDelete-${index}`}
                         />
