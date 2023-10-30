@@ -9,7 +9,7 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
+  - url: /
     description: local
 security:
   - basicAuth: []
@@ -27,7 +27,7 @@ paths:
 
         If a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
 
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -84,9 +84,9 @@ paths:
               schema:
                 type: object
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/_bulk_create:
     post:
       summary: Create multiple Kibana saved objects.
@@ -123,9 +123,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/_bulk_delete:
     post:
       summary: Remove multiple Kibana saved objects.
@@ -166,9 +166,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/_bulk_get:
     post:
       summary: Retrieve multiple Kibana saved objects by identifier.
@@ -200,9 +200,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/_bulk_resolve:
     post:
       summary: Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist.
@@ -225,7 +225,7 @@ paths:
       responses:
         '200':
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
           content:
             application/json:
               schema:
@@ -237,9 +237,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/_bulk_update:
     post:
       summary: Update the attributes for multiple Kibana saved objects.
@@ -260,7 +260,7 @@ paths:
       responses:
         '200':
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
           content:
             application/json:
               schema:
@@ -272,9 +272,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/_export:
     post:
       summary: Retrieve sets of saved objects that you want to import into Kibana.
@@ -285,7 +285,7 @@ paths:
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
 
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -337,9 +337,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/_find:
     get:
       summary: Retrieve a paginated set of Kibana saved objects.
@@ -442,9 +442,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/_import:
     post:
       summary: Create sets of Kibana saved objects from a file created by the export API.
@@ -452,7 +452,7 @@ paths:
       description: |
         Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -532,21 +532,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/_resolve_import_errors:
     post:
       summary: Resolve errors from the Import objects API.
       operationId: resolveImportErrors
       description: |
-        To resolve errors, you can: 
+        To resolve errors, you can:
 
         * Retry certain saved objects
         * Overwrite specific saved objects
         * Change references to different saved objects
 
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - saved objects
       parameters:
@@ -659,9 +659,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/{type}:
     post:
       summary: Create Kibana saved objects with randomly generated identifiers.
@@ -706,7 +706,7 @@ paths:
               schema:
                 type: object
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/{type}/{id}:
     get:
       summary: Retrieve a single Kibana saved object by identifier.
@@ -731,7 +731,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     post:
       summary: Create Kibana saved objects.
       operationId: createSavedObjectId
@@ -811,7 +811,7 @@ paths:
               schema:
                 type: object
     servers:
-      - url: https://localhost:5601
+      - url: /
   /api/saved_objects/resolve/{type}/{id}:
     get:
       summary: Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists.
@@ -838,9 +838,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
       servers:
-        - url: https://localhost:5601
+        - url: /
     servers:
-      - url: https://localhost:5601
+      - url: /
 components:
   securitySchemes:
     basicAuth:

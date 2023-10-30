@@ -12,7 +12,7 @@ tags:
   - name: saved objects
     description: Manage Kibana saved objects, including dashboards, visualizations, and more.
 servers:
-  - url: 'http://localhost:5601'
+  - url: '/'
     description: local
 paths:
 # Paths in the default space

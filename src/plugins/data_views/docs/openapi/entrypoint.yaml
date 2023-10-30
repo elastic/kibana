@@ -12,7 +12,8 @@ tags:
   - name: data views
     description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
 servers:
-  - url: /
+  - url: '/'
+    description: local
 paths:
 # Default space
   '/api/data_views':

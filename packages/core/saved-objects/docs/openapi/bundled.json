@@ -14,7 +14,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601",
+      "url": "/",
       "description": "local"
     }
   ],
@@ -37,7 +37,7 @@
       "post": {
         "summary": "Rotate the encryption key for encrypted saved objects.",
         "operationId": "rotateEncryptionKey",
-        "description": "Superuser role required.\n\nIf a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Superuser role required.\n\nIf a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -115,13 +115,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -183,13 +183,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -252,13 +252,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -312,13 +312,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -351,7 +351,7 @@
         },
         "responses": {
           "200": {
-            "description": "Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. \n",
+            "description": "Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -373,13 +373,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -411,7 +411,7 @@
         },
         "responses": {
           "200": {
-            "description": "Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. \n",
+            "description": "Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -433,13 +433,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -447,7 +447,7 @@
       "post": {
         "summary": "Retrieve sets of saved objects that you want to import into Kibana.",
         "operationId": "exportSavedObjects",
-        "description": "\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -533,13 +533,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -711,13 +711,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -725,7 +725,7 @@
       "post": {
         "summary": "Create sets of Kibana saved objects from a file created by the export API.",
         "operationId": "importSavedObjects",
-        "description": "Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -834,13 +834,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -848,7 +848,7 @@
       "post": {
         "summary": "Resolve errors from the Import objects API.",
         "operationId": "resolveImportErrors",
-        "description": "To resolve errors, you can: \n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "To resolve errors, you can:\n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -1004,13 +1004,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -1087,7 +1087,7 @@
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -1131,7 +1131,7 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
@@ -1271,7 +1271,7 @@
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     },
@@ -1316,13 +1316,13 @@
         },
         "servers": [
           {
-            "url": "https://localhost:5601"
+            "url": "/"
           }
         ]
       },
       "servers": [
         {
-          "url": "https://localhost:5601"
+          "url": "/"
         }
       ]
     }

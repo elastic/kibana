@@ -19,7 +19,7 @@ post:
       description: >
         Indicates a successful call.
         NOTE: This HTTP response code indicates that the bulk operation succeeded.
-        Errors pertaining to individual objects will be returned in the response body. 
+        Errors pertaining to individual objects will be returned in the response body.
       content:
          application/json:
           schema:
@@ -31,6 +31,6 @@ post:
             schema:
               $ref: '../components/schemas/400_response.yaml'
   servers:
-     - url: https://localhost:5601
+     - url: /
 servers:
-      - url: https://localhost:5601
+      - url: /

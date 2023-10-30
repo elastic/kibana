@@ -23,7 +23,7 @@ paths:
       summary: Retrieve sets of saved objects that you want to import into Kibana.
       operationId: exportSavedObjects
       description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
       tags:
         - saved objects
       parameters:
@@ -88,7 +88,7 @@ paths:
       summary: Create sets of Kibana saved objects from a file created by the export API.
       operationId: importSavedObjects
       description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
       tags:
         - saved objects
       parameters:

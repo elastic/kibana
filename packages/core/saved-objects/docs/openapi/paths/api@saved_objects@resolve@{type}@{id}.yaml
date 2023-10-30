@@ -25,7 +25,7 @@ get:
           schema:
             $ref: '../components/schemas/400_response.yaml'
   servers:
-     - url: https://localhost:5601
+     - url: /
 
 servers:
-      - url: https://localhost:5601
+      - url: /
