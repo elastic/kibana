@@ -68,4 +68,6 @@ export {
   buildModelVersionTransformFn,
   aggregateMappingAdditions,
   convertModelVersionBackwardConversionSchema,
+  unsafeTransformToLegacyMigration,
+  legacyMigrationToUnsafeTransform,
 } from './src/model_version';
