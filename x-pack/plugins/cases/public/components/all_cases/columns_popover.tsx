@@ -21,9 +21,10 @@ import {
   euiDragDropReorder,
   EuiIcon,
   EuiSwitch,
+  useEuiTheme,
 } from '@elastic/eui';
 
-import type { CasesColumnSelection } from '../../../common/ui/types';
+import type { CasesColumnSelection } from './types';
 
 import * as i18n from './translations';
 
@@ -36,20 +37,18 @@ export const ColumnsPopover: React.FC<Props> = ({
   selectedColumns,
   onSelectedColumnsChange,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const togglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const onDragEnd = ({ source, destination }: DropResult) => {
     if (source && destination) {
-      const newSelectedColumns = euiDragDropReorder(
-        selectedColumns,
-        source.index,
-        destination.index
-      );
+      const reorderedColumns = euiDragDropReorder(selectedColumns, source.index, destination.index);
 
-      onSelectedColumnsChange(newSelectedColumns);
+      onSelectedColumnsChange(reorderedColumns);
     }
   };
 
@@ -90,9 +89,12 @@ export const ColumnsPopover: React.FC<Props> = ({
       zIndex={0}
     >
       <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiFlexGroup style={{ width: 300 }}>
+        <EuiFlexGroup css={{ width: 300 }}>
           <EuiFlexItem>
-            <EuiDroppable droppableId="DROPPABLE_AREA_BARE" style={{ paddingBottom: 15 }}>
+            <EuiDroppable
+              droppableId="DROPPABLE_AREA_BARE"
+              css={{ paddingBottom: euiTheme.size.base }}
+            >
               {selectedColumns.map(({ field, name, isChecked }, idx) => (
                 <EuiDraggable
                   key={field}
@@ -100,7 +102,7 @@ export const ColumnsPopover: React.FC<Props> = ({
                   draggableId={field}
                   customDragHandle={true}
                   hasInteractiveChildren={true}
-                  style={{ height: 35, paddingLeft: 16 }}
+                  css={{ height: euiTheme.size.xl, paddingLeft: euiTheme.size.base }}
                 >
                   {(provided) => (
                     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">

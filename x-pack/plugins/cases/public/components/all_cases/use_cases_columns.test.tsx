@@ -153,7 +153,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
-        "isFetchingColumns": false,
+        "isLoadingColumns": false,
       }
     `);
   });
@@ -247,7 +247,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
-        "isFetchingColumns": false,
+        "isLoadingColumns": false,
       }
     `);
   });
@@ -301,7 +301,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
-        "isFetchingColumns": false,
+        "isLoadingColumns": false,
       }
     `);
   });
@@ -349,12 +349,12 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
-        "isFetchingColumns": false,
+        "isLoadingColumns": false,
       }
     `);
   });
 
-  it('does not shows the actions if isSelectorView=true', async () => {
+  it('shows the correct columns if isSelectorView=true', async () => {
     const { result } = renderHook(
       () => useCasesColumns({ ...useCasesColumnsProps, isSelectorView: true }),
       {
@@ -397,7 +397,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
-        "isFetchingColumns": false,
+        "isLoadingColumns": false,
       }
     `);
   });
@@ -482,7 +482,7 @@ describe('useCasesColumns ', () => {
             "width": "90px",
           },
         ],
-        "isFetchingColumns": false,
+        "isLoadingColumns": false,
       }
     `);
   });
@@ -602,7 +602,7 @@ describe('useCasesColumns ', () => {
             "render": [Function],
           },
         ],
-        "isFetchingColumns": false,
+        "isLoadingColumns": false,
       }
     `);
   });

@@ -6,11 +6,8 @@
  */
 
 import { difference } from 'lodash';
-import type {
-  CasesColumnSelection,
-  ParsedUrlQueryParams,
-  PartialQueryParams,
-} from '../../../common/ui/types';
+import type { ParsedUrlQueryParams, PartialQueryParams } from '../../../common/ui/types';
+import type { CasesColumnSelection } from './types';
 import type { CasesColumnsConfiguration } from './use_cases_columns_configuration';
 
 export const parseUrlQueryParams = (parsedUrlParams: ParsedUrlQueryParams): PartialQueryParams => {

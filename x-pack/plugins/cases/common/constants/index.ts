@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CasesColumnSelection, CasesFeaturesAllRequired } from '../ui/types';
+import type { CasesColumnSelection } from '../../public/components/all_cases/types';
+import type { CasesFeaturesAllRequired } from '../ui/types';
 
 export * from './owners';
 export * from './files';

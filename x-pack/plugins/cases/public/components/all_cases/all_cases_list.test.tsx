@@ -103,7 +103,7 @@ describe('AllCasesListGeneric', () => {
     filterStatus: CaseStatuses.open,
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
-    isFetchingColumns: false,
+    isLoadingColumns: false,
     isSelectorView: false,
     userProfiles: new Map(),
     currentUserProfile: undefined,

@@ -66,6 +66,4 @@ describe('ColumnsPopover', () => {
       ]);
     });
   });
-
-  it.skip('drag and rop calls onSelectedColumnsChange with the right params', async () => {});
 });

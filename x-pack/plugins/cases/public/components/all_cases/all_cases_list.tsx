@@ -212,7 +212,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const { selectedColumns, setSelectedColumns } = useCasesColumnsSelection();
 
-    const { columns, isFetchingColumns } = useCasesColumns({
+    const { columns, isLoadingColumns } = useCasesColumns({
       filterStatus: filterOptions.status ?? StatusAll,
       userProfiles: userProfiles ?? new Map(),
       isSelectorView,
@@ -264,7 +264,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           size="xs"
           color="accent"
           className="essentialAnimation"
-          $isShow={isLoading || isLoadingCases || isFetchingColumns}
+          $isShow={isLoading || isLoadingCases || isLoadingColumns}
         />
         {!isSelectorView ? <CasesMetrics /> : null}
         <CasesTableFilters
@@ -295,7 +295,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           data={data}
           goToCreateCase={onRowClick ? onCreateCasePressed : undefined}
           isCasesLoading={isLoadingCases}
-          isFetchingColumns={isFetchingColumns}
+          isLoadingColumns={isLoadingColumns}
           isCommentUpdating={isLoadingCases}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}

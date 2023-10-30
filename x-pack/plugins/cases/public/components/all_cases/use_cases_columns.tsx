@@ -28,7 +28,8 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
-import type { CasesColumnSelection, CaseUI } from '../../../common/ui/types';
+import type { CaseUI } from '../../../common/ui/types';
+import type { CasesColumnSelection } from './types';
 import { OWNER_INFO, SELECTOR_VIEW_CASES_TABLE_COLUMNS } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -83,7 +84,7 @@ export interface GetCasesColumn {
 
 export interface UseCasesColumnsReturnValue {
   columns: CasesColumns[];
-  isFetchingColumns: boolean;
+  isLoadingColumns: boolean;
 }
 
 export const useCasesColumns = ({
@@ -99,7 +100,7 @@ export const useCasesColumns = ({
 
   const {
     data: { customFields },
-    isFetching: isFetchingColumns,
+    isFetching: isLoadingColumns,
   } = useGetCaseConfiguration();
 
   const assignCaseAction = useCallback(
@@ -375,7 +376,7 @@ export const useCasesColumns = ({
     }
   }
 
-  return { columns, isFetchingColumns };
+  return { columns, isLoadingColumns };
 };
 
 interface Props {

@@ -22,7 +22,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import type { CasesColumnSelection, CasesUI } from '../../../common/ui/types';
+import type { CasesUI } from '../../../common/ui/types';
+import type { CasesColumnSelection } from './types';
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';

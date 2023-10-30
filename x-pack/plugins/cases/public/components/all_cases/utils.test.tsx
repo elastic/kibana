@@ -6,7 +6,7 @@
  */
 
 import type { CasesColumnsConfiguration } from './use_cases_columns_configuration';
-import type { CasesColumnSelection } from '../../containers/types';
+import type { CasesColumnSelection } from './types';
 
 import { mergeSelectedColumnsWithConfiguration, parseUrlQueryParams } from './utils';
 import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';

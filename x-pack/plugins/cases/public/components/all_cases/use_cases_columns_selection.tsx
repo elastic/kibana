@@ -7,7 +7,7 @@
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import type { CasesColumnSelection } from '../../../common/ui/types';
+import type { CasesColumnSelection } from './types';
 
 import { DEFAULT_CASES_TABLE_COLUMNS, LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
