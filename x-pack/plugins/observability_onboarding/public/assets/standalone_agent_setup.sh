@@ -143,7 +143,7 @@ ELASTIC_AGENT_MESSAGE="$(elastic-agent status --output json | sed -n '/component
 # Get elastic-agent status in json format | removing extra ids in the json | finding "id":value | removing , | removing "id": | trimming the result | removing ""
 ELASTIC_AGENT_ID="$(elastic-agent status --output json | sed -n '/components/q;p' | grep id | sed 's/\(.*\),/\1 /' | sed 's/"id": //' | sed 's/\s//g' | sed 's/\"//g')"
 if [ "${ELASTIC_AGENT_STATE}" = "2" ] && [ "${ELASTIC_AGENT_MESSAGE}" = "Running" ]; then
-  echo "Elastic Agent running"
+  echo "Elastic Agent running (id: ${ELASTIC_AGENT_ID})"
   echo "Download and save configuration to ${cfg}"
   updateStepProgress "ea-status" "complete" "" "{\"agentId\": \"${ELASTIC_AGENT_ID}\"}"
 else
