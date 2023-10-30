@@ -35,7 +35,7 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
-import { AssistantAvailability, AssistantTelemetry } from './types';
+import { AssistantAvailability, AssistantTelemetry, Message } from './types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -104,10 +104,20 @@ export interface UseAssistantContext {
     currentConversation,
     lastCommentRef,
     showAnonymizedValues,
+    amendMessage,
+    isFetchingResponse,
   }: {
     currentConversation: Conversation;
+    isFetchingResponse: boolean;
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
-
+    amendMessage: ({
+      conversationId,
+      content,
+    }: {
+      conversationId: string;
+      content: string;
+    }) => Message[];
+    regenerateMessage: () => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;

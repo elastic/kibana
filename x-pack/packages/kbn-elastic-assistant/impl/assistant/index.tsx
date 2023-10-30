@@ -31,6 +31,7 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
 import { AssistantHeader } from './assistant_header';
@@ -93,7 +94,7 @@ const AssistantComponent: React.FC<Props> = ({
     [selectedPromptContexts]
   );
 
-  const { createConversation } = useConversation();
+  const { amendMessage, createConversation } = useConversation();
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
@@ -321,15 +322,42 @@ const AssistantComponent: React.FC<Props> = ({
 
   const createCodeBlockPortals = useCallback(
     () =>
-      messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[]) => {
-        return codeBlocks.map((codeBlock: CodeBlockDetails) => {
-          const getElement = codeBlock.getControlContainer;
-          const element = getElement?.();
-          return element ? createPortal(codeBlock.button, element) : <></>;
-        });
+      messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[], i: number) => {
+        return (
+          <span key={`${i}`}>
+            {codeBlocks.map((codeBlock: CodeBlockDetails, j: number) => {
+              const getElement = codeBlock.getControlContainer;
+              const element = getElement?.();
+              return (
+                <span key={`${i}+${j}`}>
+                  {element ? createPortal(codeBlock.button, element) : <></>}
+                </span>
+              );
+            })}
+          </span>
+        );
       }),
     [messageCodeBlocks]
   );
+
+  const {
+    handleButtonSendMessage,
+    handleOnChatCleared,
+    handlePromptChange,
+    handleSendMessage,
+    handleRegenerateResponse,
+    isLoading: isLoadingChatSend,
+  } = useChatSend({
+    allSystemPrompts,
+    currentConversation,
+    setPromptTextPreview,
+    setUserPrompt,
+    editingSystemPromptId,
+    http,
+    setEditingSystemPromptId,
+    selectedPromptContexts,
+    setSelectedPromptContexts,
+  });
 
   const chatbotComments = useMemo(
     () => (
@@ -339,6 +367,9 @@ const AssistantComponent: React.FC<Props> = ({
             currentConversation,
             lastCommentRef,
             showAnonymizedValues,
+            amendMessage,
+            regenerateMessage: handleRegenerateResponse,
+            isFetchingResponse: isLoadingChatSend,
           })}
           css={css`
             margin-right: 20px;
@@ -368,10 +399,13 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
+      amendMessage,
       currentConversation,
       editingSystemPromptId,
       getComments,
       handleOnSystemPromptSelectionChange,
+      handleRegenerateResponse,
+      isLoadingChatSend,
       isSettingsModalVisible,
       promptContexts,
       promptTextPreview,
@@ -482,18 +516,15 @@ const AssistantComponent: React.FC<Props> = ({
           isWelcomeSetup={isWelcomeSetup}
         />
         <ChatSend
-          allSystemPrompts={allSystemPrompts}
-          currentConversation={currentConversation}
           isDisabled={isSendingDisabled}
           shouldRefocusPrompt={shouldRefocusPrompt}
-          setPromptTextPreview={setPromptTextPreview}
           userPrompt={userPrompt}
-          setUserPrompt={setUserPrompt}
-          editingSystemPromptId={editingSystemPromptId}
-          http={http}
-          setEditingSystemPromptId={setEditingSystemPromptId}
-          selectedPromptContexts={selectedPromptContexts}
-          setSelectedPromptContexts={setSelectedPromptContexts}
+          handleButtonSendMessage={handleButtonSendMessage}
+          handleOnChatCleared={handleOnChatCleared}
+          handlePromptChange={handlePromptChange}
+          handleSendMessage={handleSendMessage}
+          handleRegenerateResponse={handleRegenerateResponse}
+          isLoading={isLoadingChatSend}
         />
         {!isDisabled && (
           <QuickPrompts
