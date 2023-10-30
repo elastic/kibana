@@ -70,3 +70,24 @@ export const FILTER_OR_SEARCH_WITH_KQL = i18n.translate(
     defaultMessage: 'Filter or Search with KQL',
   }
 );
+
+export const DATA_PROVIDER_HIDDEN_POPULATED = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.dataProviderToggle.hiddenAndPopulated',
+  {
+    defaultMessage: 'Query Builder is hidden. Click here to see the existing Queries',
+  }
+);
+
+export const DATA_PROVIDER_VISIBLE = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.dataProviderToggle.visible',
+  {
+    defaultMessage: 'Click here to hide Query builder',
+  }
+);
+
+export const DATA_PROVIDER_HIDDEN_EMPTY = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.dataProviderToggle.hiddenAndEmpty',
+  {
+    defaultMessage: 'Click here to show the empty Query builder',
+  }
+);

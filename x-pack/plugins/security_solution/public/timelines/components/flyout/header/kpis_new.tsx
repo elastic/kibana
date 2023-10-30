@@ -65,12 +65,10 @@ export const TimelineKPIs2 = React.memo(
 
     const getColor = useCallback((count) => {
       if (count === 0) {
-        return 'danger';
+        return 'hollow';
       }
       return 'hollow';
     }, []);
-
-    if (!kpis) return null;
 
     return (
       <EuiFlexGroup wrap data-test-subj="siem-timeline-kpis">

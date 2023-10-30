@@ -152,7 +152,12 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
     [activeTimelineDataProviders, browserFields, dataProviders, dispatch, onAddedToTimeline]
   );
   return (
-    <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture} sensors={sensors}>
+    <DragDropContext
+      onBeforeDragStart={onBeforeCapture}
+      onDragEnd={onDragEnd}
+      // onBeforeCapture={onBeforeCapture}
+      sensors={sensors}
+    >
       {children}
     </DragDropContext>
   );
@@ -169,6 +174,7 @@ export const DragDropContextWrapper = React.memo(
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';
 
 const onBeforeCapture = (before: BeforeCapture) => {
+  document.body.classList.add(IS_DRAGGING_CLASS_NAME);
   if (!draggableIsField(before)) {
     document.body.classList.add(IS_DRAGGING_CLASS_NAME);
   }

@@ -77,8 +77,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   flex-direction: column;
 
   &.euiFlyoutHeader {
-    ${({ theme }) =>
-      `padding: ${theme.eui.euiSizeS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS};`}
+    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
   }
 `;
 
@@ -316,10 +315,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
-  const isDatePickerDisabled = useMemo(() => {
-    return (combinedQueries && combinedQueries.kqlError != null) || false;
-  }, [combinedQueries]);
-
   const leadingControlColumns = useMemo(
     () =>
       getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
@@ -342,35 +337,43 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         skip={!canQueryTimeline}
       />
-      <FullWidthFlexGroup gutterSize="none">
+      <FullWidthFlexGroup gutterSize="s">
         <ScrollableFlexItem grow={2}>
           <StyledEuiFlyoutHeader
             data-test-subj={`${activeTab}-tab-flyout-header`}
             hasBorder={false}
           >
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              data-test-subj="timeline-date-picker-container"
-            >
+            <EuiFlexGroup gutterSize="s" direction="column">
               {timelineFullScreen && setTimelineFullScreen != null && (
-                <ExitFullScreen
-                  fullScreen={timelineFullScreen}
-                  setFullScreen={setTimelineFullScreen}
-                />
+                <EuiFlexItem>
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                    data-test-subj="timeline-date-picker-container"
+                  >
+                    <ExitFullScreen
+                      fullScreen={timelineFullScreen}
+                      setFullScreen={setTimelineFullScreen}
+                    />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               )}
+              <EuiFlexItem>
+                <TimelineHeaderContainer data-test-subj="timelineHeader">
+                  <TimelineHeader
+                    filterManager={filterManager}
+                    show={show && activeTab === TimelineTabs.query}
+                    showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+                    status={status}
+                    timelineId={timelineId}
+                  />
+                </TimelineHeaderContainer>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TimelineKpi timelineId={timelineId} />
+              </EuiFlexItem>
             </EuiFlexGroup>
-            <TimelineHeaderContainer data-test-subj="timelineHeader">
-              <TimelineHeader
-                filterManager={filterManager}
-                show={show && activeTab === TimelineTabs.query}
-                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                status={status}
-                timelineId={timelineId}
-              />
-            </TimelineHeaderContainer>
           </StyledEuiFlyoutHeader>
-          <TimelineKpi timelineId={timelineId} />
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
               data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}

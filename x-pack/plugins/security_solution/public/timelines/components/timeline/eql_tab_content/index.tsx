@@ -73,8 +73,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   padding: 0;
 
   &.euiFlyoutHeader {
-    ${({ theme }) =>
-      `padding: 0 ${theme.eui.euiSizeM} ${theme.eui.euiSizeS} ${theme.eui.euiSizeS};`}
+    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
   }
 `;
 
@@ -110,6 +109,7 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
   overflow: hidden;
 `;
 
@@ -274,7 +274,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>
-              <EuiFlexItem grow={1}>
+              <EuiFlexItem grow={false}>
                 {activeTab === TimelineTabs.eql && (
                   <Sourcerer scope={SourcererScopeName.timeline} />
                 )}

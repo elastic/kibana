@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
@@ -22,6 +22,11 @@ import { QueryBarTimeline } from '../query_bar';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { Sourcerer } from '../../../../common/components/sourcerer';
+import {
+  DATA_PROVIDER_HIDDEN_EMPTY,
+  DATA_PROVIDER_HIDDEN_POPULATED,
+  DATA_PROVIDER_VISIBLE,
+} from './translations';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
@@ -42,10 +47,6 @@ const SearchOrFilterGlobalStyle = createGlobalStyle`
   }
 `;
 
-const SourcererFlex = styled(EuiFlexItem)`
-  align-items: flex-end;
-`;
-
 interface Props {
   dataProviders: DataProvider[];
   filterManager: FilterManager;
@@ -64,12 +65,11 @@ interface Props {
   to: string;
   toStr: string;
   updateReduxTime: DispatchUpdateReduxTime;
+  isDataProviderVisible: boolean;
+  toggleDataProviderVisibility: () => void;
 }
 
-const SearchOrFilterContainer = styled.div`
-  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXS};`}
-  user-select: none; // This should not be here, it makes the entire page inaccessible
-`;
+const SearchOrFilterContainer = styled.div``;
 
 SearchOrFilterContainer.displayName = 'SearchOrFilterContainer';
 
@@ -98,12 +98,9 @@ export const SearchOrFilter = React.memo<Props>(
     toStr,
     updateKqlMode,
     updateReduxTime,
+    isDataProviderVisible,
+    toggleDataProviderVisibility,
   }) => {
-    const handleChange = useCallback(
-      (mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode }),
-      [timelineId, updateKqlMode]
-    );
-
     return (
       <>
         <SearchOrFilterContainer>
@@ -112,20 +109,6 @@ export const SearchOrFilter = React.memo<Props>(
             gutterSize="xs"
             alignItems="center"
           >
-            {/* <ModeFlexItem grow={false}> */}
-            {/*   <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}> */}
-            {/*     <EuiSuperSelect */}
-            {/*       data-test-subj="timeline-select-search-or-filter" */}
-            {/*       hasDividers={true} */}
-            {/*       itemLayoutAlign="top" */}
-            {/*       itemClassName={timelineSelectModeItemsClassName} */}
-            {/*       onChange={handleChange} */}
-            {/*       options={options} */}
-            {/*       popoverProps={{ className: searchOrFilterPopoverClassName }} */}
-            {/*       valueOfSelected={kqlMode} */}
-            {/*     /> */}
-            {/*   </EuiToolTip> */}
-            {/* </ModeFlexItem> */}
             <EuiFlexItem grow={false}>
               <Sourcerer scope={SourcererScopeName.timeline} />
             </EuiFlexItem>
@@ -149,6 +132,45 @@ export const SearchOrFilter = React.memo<Props>(
                 updateReduxTime={updateReduxTime}
               />
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="none"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <EuiToolTip
+                  content={
+                    dataProviders?.length > 0 && !isDataProviderVisible
+                      ? DATA_PROVIDER_HIDDEN_POPULATED
+                      : dataProviders?.length === 0 && !isDataProviderVisible
+                      ? DATA_PROVIDER_HIDDEN_EMPTY
+                      : DATA_PROVIDER_VISIBLE
+                  }
+                >
+                  <EuiButtonIcon
+                    color={
+                      dataProviders?.length > 0 && !isDataProviderVisible ? 'warning' : 'primary'
+                    }
+                    isSelected={isDataProviderVisible}
+                    iconType={'timeline'}
+                    size="m"
+                    display="base"
+                    aria-label={
+                      dataProviders?.length > 0 && !isDataProviderVisible
+                        ? DATA_PROVIDER_HIDDEN_POPULATED
+                        : dataProviders?.length === 0 && !isDataProviderVisible
+                        ? DATA_PROVIDER_HIDDEN_EMPTY
+                        : DATA_PROVIDER_VISIBLE
+                    }
+                    onClick={toggleDataProviderVisibility}
+                  />
+                </EuiToolTip>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TimelineDatePickerLock />
+            </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <SuperDatePicker
@@ -157,9 +179,6 @@ export const SearchOrFilter = React.memo<Props>(
                 timelineId={timelineId}
                 disabled={false}
               />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <TimelineDatePickerLock />
             </EuiFlexItem>
           </EuiFlexGroup>
         </SearchOrFilterContainer>

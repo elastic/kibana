@@ -19,6 +19,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { TableId } from '@kbn/securitysolution-data-table';
+import { createPortal } from 'react-dom';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
@@ -37,6 +38,11 @@ import { useDraggableKeyboardWrapper } from './draggable_keyboard_wrapper_hook';
 export const DragEffects = styled.div``;
 
 DragEffects.displayName = 'DragEffects';
+const portal: HTMLElement = document.createElement('div');
+portal.classList.add('my-super-cool-portal');
+portal.style.position = 'absolute';
+portal.style.top = 'auto';
+portal.style.left = 'auto';
 
 /**
  * Wraps the `@hello-pangea/dnd` error boundary. See also:
@@ -180,6 +186,10 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     [providerRegistered, dispatch, dataProvider.id]
   );
 
+  useEffect(() => {
+    document.body.append(portal);
+  }, []);
+
   useEffect(
     () => () => {
       unRegisterProvider();
@@ -188,24 +198,29 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   );
 
   const RenderClone = useCallback(
-    (provided, snapshot) => (
-      <ConditionalPortal registerProvider={registerProvider}>
-        <div
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          style={getStyle(provided.draggableProps.style, snapshot)}
-          ref={provided.innerRef}
-          data-test-subj="providerContainer"
-          tabIndex={-1}
-        >
-          <ProviderContentWrapper
-            data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+    (provided, snapshot) => {
+      const output = (
+        <ConditionalPortal registerProvider={registerProvider}>
+          <div
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            style={getStyle(provided.draggableProps.style, snapshot)}
+            ref={provided.innerRef}
+            data-test-subj="providerContainer"
+            tabIndex={-1}
           >
-            {render(dataProvider, provided, snapshot)}
-          </ProviderContentWrapper>
-        </div>
-      </ConditionalPortal>
-    ),
+            <ProviderContentWrapper
+              data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+            >
+              {render(dataProvider, provided, snapshot)}
+            </ProviderContentWrapper>
+          </div>
+        </ConditionalPortal>
+      );
+
+      if (snapshot.isDragging) return createPortal(output, portal);
+      return output;
+    },
     [dataProvider, registerProvider, render]
   );
 

@@ -61,6 +61,7 @@ import {
   clearEventsLoading,
   updateSavedSearchId,
   setIsDiscoverSavedSearchLoaded,
+  setDataProviderVisibility,
 } from './actions';
 
 import {
@@ -552,4 +553,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
+  .case(setDataProviderVisibility, (state, { id, isDataProviderVisible }) => {
+    return {
+      ...state,
+      timelineById: {
+        ...state.timelineById,
+        [id]: {
+          ...state.timelineById[id],
+          isDataProviderVisible,
+        },
+      },
+    };
+  })
   .build();

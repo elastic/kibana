@@ -26,6 +26,8 @@ import { timelineDefaults } from '../../../store/timeline/defaults';
 
 import * as i18n from './translations';
 import { options } from '../search_or_filter/helpers';
+import type { KqlMode } from '../../../store/timeline/model';
+import { updateKqlMode } from '../../../store/timeline/actions';
 
 interface Props {
   timelineId: string;
@@ -33,7 +35,7 @@ interface Props {
 
 const DropTargetDataProvidersContainer = styled.div`
   position: relative;
-  padding: 2px 0 4px 0;
+  padding: 16px 0 0px 0;
 
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
     background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
@@ -53,13 +55,13 @@ const DropTargetDataProviders = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-bottom: 2px;
-  padding-top: 20px;
+  padding-bottom: 8px;
+  padding-top: 28px;
   position: relative;
   border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 5px;
   /* padding: ${({ theme }) => theme.eui.euiSizeXS} 0; */
-  margin: 2px 0 2px 0;
+  margin: 0px 0 0px 0;
   max-height: 33vh;
   min-height: 100px;
   overflow: auto;
@@ -128,10 +130,12 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
   );
   const droppableId = useMemo(() => getDroppableId(timelineId), [timelineId]);
 
+  const kqlMode = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).kqlMode
+  );
+
   const handleChange = useCallback(
-    () =>
-      // (mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode }),
-      console.log(timelineId),
+    () => (mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode }),
     [timelineId]
   );
 
@@ -142,8 +146,8 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
         aria-label={i18n.QUERY_AREA_ARIA_LABEL}
         className="drop-target-data-providers-container"
       >
-        <EuiToolTip className="testing-abc" content={'filter-or-select-with-KQL'}>
-          <CustomTooltipDiv>
+        <CustomTooltipDiv>
+          <EuiToolTip className="testing-abc" content={'filter-or-select-with-KQL'}>
             <EuiSuperSelect
               data-test-subj="timeline-select-search-or-filter"
               hasDividers={true}
@@ -152,10 +156,10 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
               onChange={handleChange}
               options={options}
               popoverProps={{ className: searchOrFilterPopoverClassName }}
-              valueOfSelected={'filter'}
+              valueOfSelected={kqlMode}
             />
-          </CustomTooltipDiv>
-        </EuiToolTip>
+          </EuiToolTip>
+        </CustomTooltipDiv>
         <DropTargetDataProviders
           className="drop-target-data-providers"
           data-test-subj="dataProviders"

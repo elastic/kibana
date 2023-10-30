@@ -8,7 +8,7 @@
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import { useDispatch, connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import type { Filter } from '@kbn/es-query';
@@ -16,9 +16,9 @@ import type { Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -30,10 +30,9 @@ import { timelineDefaults } from '../../../store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
 import type { SerializedFilterQuery } from '../../../../../common/types/timeline';
+import { setDataProviderVisibility } from '../../../store/timeline/actions';
 
-const FilterItemsContainer = styled(EuiFlexGroup)`
-  margin-top: ${euiThemeVars.euiSizeXS};
-`;
+const FilterItemsContainer = styled(EuiFlexGroup)``;
 
 interface OwnProps {
   filterManager: FilterManager;
@@ -65,12 +64,23 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     updateKqlMode,
     updateReduxTime,
   }) => {
+    const dispatch = useDispatch();
+
     const [dataView, setDataView] = useState<DataView>();
     const {
       services: { data },
     } = useKibana();
 
     const { indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
+
+    const getIsDataProviderVisible = useMemo(
+      () => timelineSelectors.dataProviderVisibilitySelector(),
+      []
+    );
+
+    const isDataProviderVisible = useDeepEqualSelector((state) =>
+      getIsDataProviderVisible(state, timelineId)
+    );
 
     useEffect(() => {
       let dv: DataView;
@@ -117,36 +127,66 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       [timelineId, setSavedQueryId]
     );
 
-    return (
-      <>
-        <SearchOrFilter
-          dataProviders={dataProviders}
-          filters={filters}
-          filterManager={filterManager}
-          filterQuery={filterQuery}
-          from={from}
-          fromStr={fromStr}
-          isRefreshPaused={isRefreshPaused}
-          kqlMode={kqlMode}
-          refreshInterval={refreshInterval}
-          savedQueryId={savedQueryId}
-          setFilters={setFiltersInTimeline}
-          setSavedQueryId={setSavedQueryInTimeline}
-          timelineId={timelineId}
-          to={to}
-          toStr={toStr}
-          updateKqlMode={updateKqlMode}
-          updateReduxTime={updateReduxTime}
-        />
+    const toggleDataProviderVisibility = useCallback(() => {
+      dispatch(
+        setDataProviderVisibility({ id: timelineId, isDataProviderVisible: !isDataProviderVisible })
+      );
+    }, [isDataProviderVisible, timelineId, dispatch]);
 
-        <FilterItemsContainer direction="row" gutterSize="xs" wrap={true} responsive={false}>
-          <FilterItems
-            filters={filters}
-            onFiltersUpdated={onFiltersUpdated}
-            indexPatterns={arrDataView}
-          />
-        </FilterItemsContainer>
-      </>
+    useEffect(() => {
+      /*
+       * If there is a change in data providers and data provider was hidden,
+       * it must be made visible
+       *
+       * */
+      if (dataProviders?.length > 0) {
+        dispatch(setDataProviderVisibility({ id: timelineId, isDataProviderVisible: true }));
+      } else if (dataProviders?.length === 0) {
+        dispatch(setDataProviderVisibility({ id: timelineId, isDataProviderVisible: false }));
+      }
+    }, [dataProviders, dispatch, timelineId]);
+
+    return (
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <EuiFlexGroup direction="row" justifyContent="center" alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={true}>
+              <SearchOrFilter
+                dataProviders={dataProviders}
+                filters={filters}
+                filterManager={filterManager}
+                filterQuery={filterQuery}
+                from={from}
+                fromStr={fromStr}
+                isRefreshPaused={isRefreshPaused}
+                kqlMode={kqlMode}
+                refreshInterval={refreshInterval}
+                savedQueryId={savedQueryId}
+                setFilters={setFiltersInTimeline}
+                setSavedQueryId={setSavedQueryInTimeline}
+                timelineId={timelineId}
+                to={to}
+                toStr={toStr}
+                updateKqlMode={updateKqlMode}
+                updateReduxTime={updateReduxTime}
+                toggleDataProviderVisibility={toggleDataProviderVisibility}
+                isDataProviderVisible={isDataProviderVisible}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {filters && filters.length > 0 ? (
+          <EuiFlexItem>
+            <FilterItemsContainer direction="row" gutterSize="xs" wrap={true} responsive={false}>
+              <FilterItems
+                filters={filters}
+                onFiltersUpdated={onFiltersUpdated}
+                indexPatterns={arrDataView}
+              />
+            </FilterItemsContainer>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
     );
   },
   (prevProps, nextProps) => {
@@ -197,6 +237,7 @@ const makeMapStateToProps = () => {
       toStr: input.timerange.toStr!,
     };
   };
+
   return mapStateToProps;
 };
 

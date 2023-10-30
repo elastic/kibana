@@ -100,19 +100,19 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
         justifyContent="flexStart"
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={tooltipContent}>
-            <EuiHealthStyled
-              color={timelineStatus === TimelineStatus.draft ? 'warning' : 'success'}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
         <TitleConatiner grow={false}>{title}</TitleConatiner>
         {!isOpen && (
           <EuiFlexItem grow={false}>
             <TimelineEventsCountBadge />
           </EuiFlexItem>
         )}
+        {timelineStatus === TimelineStatus.draft ? (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip position="top" content={tooltipContent}>
+              <EuiHealthStyled color="warning" />
+            </EuiToolTip>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </StyledEuiButtonEmpty>
   );

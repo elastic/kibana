@@ -136,6 +136,7 @@ export interface TimelineModel {
   /* discover saved search Id */
   savedSearchId: string | null;
   isDiscoverSavedSearchLoaded?: boolean;
+  isDataProviderVisible: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -191,6 +192,7 @@ export type SubsetTimelineModel = Readonly<
     | 'filterManager'
     | 'savedSearchId'
     | 'isDiscoverSavedSearchLoaded'
+    | 'isDataProviderVisible'
   >
 >;
 

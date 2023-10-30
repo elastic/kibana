@@ -77,12 +77,16 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
     [dispatch, timelineId, isFavorite]
   );
 
+  const label = isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES;
+
   return compact ? (
     <EuiButtonIcon
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+      isSelected={isFavorite}
       onClick={handleClick}
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
       disabled={disableFavoriteButton}
+      aria-label={label}
     />
   ) : (
     <EuiButton
@@ -92,8 +96,9 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
       onClick={handleClick}
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
       disabled={disableFavoriteButton}
+      aria-label={label}
     >
-      {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
+      {label}
     </EuiButton>
   );
 };

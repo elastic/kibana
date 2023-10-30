@@ -162,13 +162,6 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     [dataProviders, filters, kqlQueryTest, combinedQueries]
   );
 
-  const [loading, kpis] = useTimelineKpis({
-    defaultIndex: selectedPatterns,
-    timerange,
-    isBlankTimeline,
-    filterQuery: combinedQueries?.filterQuery ?? '',
-  });
-
   const handleClose = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     focusActiveTimelineButton();
@@ -176,19 +169,21 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
 
   const { euiTheme } = useEuiTheme();
 
-  const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
-
   return (
     <>
       <EuiPanel
         borderRadius="none"
         grow={false}
-        paddingSize={show ? 's' : 's'}
         hasShadow={false}
         data-test-subj="timeline-flyout-header-panel"
-        style={{ backgroundColor: euiTheme.colors.emptyShade, color: euiTheme.colors.text }}
+        style={{
+          backgroundColor: euiTheme.colors.emptyShade,
+          color: euiTheme.colors.text,
+          paddingBlock: euiTheme.size.s,
+          paddingInline: euiTheme.size.m,
+        }}
       >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <ActiveTimelinesContainer grow={false}>
             <ActiveTimelines
               timelineId={timelineId}
@@ -199,9 +194,10 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
               updated={updated}
             />
           </ActiveTimelinesContainer>
-          {/* <EditTimelineButton timelineId={timelineId} initialFocus="title" /> */}
           <AddToFavoritesButton timelineId={timelineId} compact={true} />
-          {/* <AddToCaseButton timelineId={timelineId} /> */}
+          <TimelineStatusInfoContainer>
+            <TimelineStatusInfo timelineId={timelineId} />
+          </TimelineStatusInfoContainer>
           <EuiFlexItem>
             <EuiFlexGroup
               justifyContent="flexEnd"
@@ -209,19 +205,21 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
               responsive={false}
               alignItems="center"
             >
-              <EuiFlexItem grow={false}>
-                <TimelineActionMenu
-                  mode={show ? 'normal' : 'compact'}
-                  timelineId={timelineId}
-                  showInspectButton={
-                    show && (activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql)
-                  }
-                  isInspectButtonDisabled={
-                    !isDataInTimeline || combinedQueries?.filterQuery === undefined
-                  }
-                  activeTab={activeTab}
-                />
-              </EuiFlexItem>
+              {show ? (
+                <EuiFlexItem grow={false}>
+                  <TimelineActionMenu
+                    mode={show ? 'normal' : 'compact'}
+                    timelineId={timelineId}
+                    showInspectButton={
+                      show && (activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql)
+                    }
+                    isInspectButtonDisabled={
+                      !isDataInTimeline || combinedQueries?.filterQuery === undefined
+                    }
+                    activeTab={activeTab}
+                  />
+                </EuiFlexItem>
+              ) : null}
               {show && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}>

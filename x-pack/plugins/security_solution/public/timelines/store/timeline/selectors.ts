@@ -58,3 +58,6 @@ export const getKqlFilterKuerySelector = () =>
       ? timeline.kqlQuery.filterQuery.kuery
       : null
   );
+
+export const dataProviderVisibilitySelector = () =>
+  createSelector(selectTimeline, (timeline) => timeline.isDataProviderVisible);

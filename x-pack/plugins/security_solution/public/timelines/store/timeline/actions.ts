@@ -281,3 +281,8 @@ export const setIsDiscoverSavedSearchLoaded = actionCreator<{
   id: string;
   isDiscoverSavedSearchLoaded: boolean;
 }>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
+
+export const setDataProviderVisibility = actionCreator<{
+  id: string;
+  isDataProviderVisible: boolean;
+}>('SET_DATA_PROVIDER_VISIBLITY');
