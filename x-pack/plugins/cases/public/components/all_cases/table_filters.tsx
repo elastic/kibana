@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
 import { isEqual } from 'lodash/fp';
-import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
-import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
+import type { CaseStatusWithAllStatus } from '../../../common/ui/types';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
-import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
 import { MultiSelectFilter } from './multi_select_filter';
 import { SolutionFilter } from './solution_filter';
@@ -22,7 +19,6 @@ import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
-import { DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
 import { AssigneesFilterPopover } from './assignees_filter';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
@@ -42,19 +38,6 @@ interface CasesTableFiltersProps {
   currentUserProfile: CurrentUserProfile;
   filterOptions: FilterOptions;
 }
-
-// Fix the width of the status dropdown to prevent hiding long text items
-const StatusFilterWrapper = styled(EuiFlexItem)`
-  && {
-    flex-basis: 180px;
-  }
-`;
-
-const SeverityFilterWrapper = styled(EuiFlexItem)`
-  && {
-    flex-basis: 180px;
-  }
-`;
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
@@ -126,30 +109,6 @@ const CasesTableFiltersComponent = ({
     [onFilterChanged, search]
   );
 
-  const onStatusChanged = useCallback(
-    (status: CaseStatusWithAllStatus) => {
-      onFilterChanged({ status: [status] });
-    },
-    [onFilterChanged]
-  );
-
-  const onSeverityChanged = useCallback(
-    (severity: CaseSeverityWithAll) => {
-      onFilterChanged({ severity: [severity] });
-    },
-    [onFilterChanged]
-  );
-
-  const stats = useMemo(
-    () => ({
-      [StatusAll]: null,
-      [CaseStatuses.open]: countOpenCases ?? 0,
-      [CaseStatuses['in-progress']]: countInProgressCases ?? 0,
-      [CaseStatuses.closed]: countClosedCases ?? 0,
-    }),
-    [countClosedCases, countInProgressCases, countOpenCases]
-  );
-
   const handleOnCreateCasePressed = useCallback(() => {
     if (onCreateCasePressed) {
       onCreateCasePressed();
@@ -157,54 +116,40 @@ const CasesTableFiltersComponent = ({
   }, [onCreateCasePressed]);
 
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s">
-          {isSelectorView && onCreateCasePressed ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={handleOnCreateCasePressed}
-                iconType="plusInCircle"
-                data-test-subj="cases-table-add-case-filter-bar"
-              >
-                {i18n.CREATE_CASE_TITLE}
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>
-            <EuiFieldSearch
-              aria-label={i18n.SEARCH_CASES}
-              data-test-subj="search-cases"
-              fullWidth
-              incremental={false}
-              placeholder={i18n.SEARCH_PLACEHOLDER}
-              onSearch={handleOnSearch}
-            />
-          </EuiFlexItem>
-          <SeverityFilterWrapper grow={false} data-test-subj="severity-filter-wrapper">
-            <SeverityFilter
-              selectedSeverity={filterOptions.severity}
-              onSeverityChange={onSeverityChanged}
-              isLoading={false}
-              isDisabled={false}
-            />
-          </SeverityFilterWrapper>
-          <StatusFilterWrapper grow={false} data-test-subj="status-filter-wrapper">
-            <StatusFilter
-              selectedOptions={filterOptions?.status}
-              onStatusChanged={onStatusChanged}
-              hiddenStatuses={hiddenStatuses}
-              countClosedCases={countClosedCases}
-              countInProgressCases={countInProgressCases}
-              countOpenCases={countOpenCases}
-              onChange={onChange}
-            />
-          </StatusFilterWrapper>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+      {isSelectorView && onCreateCasePressed ? (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={handleOnCreateCasePressed}
+            iconType="plusInCircle"
+            data-test-subj="cases-table-add-case-filter-bar"
+          >
+            {i18n.CREATE_CASE_TITLE}
+          </EuiButton>
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>
+        <EuiFieldSearch
+          aria-label={i18n.SEARCH_CASES}
+          data-test-subj="search-cases"
+          fullWidth
+          incremental={false}
+          placeholder={i18n.SEARCH_PLACEHOLDER}
+          onSearch={handleOnSearch}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={0}>
         <EuiFilterGroup>
+          <SeverityFilter selectedOptions={filterOptions.severity} onChange={onChange} />
+          <StatusFilter
+            selectedOptions={filterOptions?.status}
+            onChange={onChange}
+            hiddenStatuses={hiddenStatuses}
+            countClosedCases={countClosedCases}
+            countInProgressCases={countInProgressCases}
+            countOpenCases={countOpenCases}
+          />
           {caseAssignmentAuthorized && !isSelectorView ? (
             <AssigneesFilterPopover
               selectedAssignees={selectedAssignees}
