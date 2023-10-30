@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addFilterIn } from '@kbn/cell-actions';
+import { addFilterIn, addFilterOut } from '@kbn/cell-actions';
 import {
   isValueSupportedByDefaultActions,
   valueToArray,
@@ -15,15 +15,14 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
+import { i18n } from '@kbn/i18n';
 import { KibanaServices } from '../../../common/lib/kibana';
-import type { SecurityAppStore } from '../../../common/store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
 import { TimelineId } from '../../../../common/types';
 import { SecurityCellActionType } from '../../constants';
+import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
-
-export const ACTION_ID = 'embeddable_filterIn';
 
 function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   return (
@@ -33,14 +32,18 @@ function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   );
 }
 
-export const createFilterInLensAction = ({
-  store,
+export const createLensFilterLegendAction = ({
+  id,
   order,
+  store,
   services,
+  negate,
 }: {
-  store: SecurityAppStore;
+  id: string;
   order: number;
+  store: SecurityAppStore;
   services: StartServices;
+  negate?: boolean;
 }) => {
   const { application: applicationService } = KibanaServices.get();
   let currentAppId: string | undefined;
@@ -52,10 +55,17 @@ export const createFilterInLensAction = ({
   const { notifications } = services;
 
   return createAction<CellValueContext>({
-    id: ACTION_ID,
+    id,
     order,
-    getIconType: () => 'plusInCircle',
-    getDisplayName: () => 'Filter for', // TODO: translate
+    getIconType: () => (negate ? 'minusInCircle' : 'plusInCircle'),
+    getDisplayName: () =>
+      negate
+        ? i18n.translate('xpack.securitySolution.actions.filterOutTimeline', {
+            defaultMessage: `Filter out`,
+          })
+        : i18n.translate('xpack.securitySolution.actions.filterForTimeline', {
+            defaultMessage: `Filter for`,
+          }),
     type: SecurityCellActionType.FILTER,
     isCompatible: async ({ embeddable, data }) =>
       !isErrorEmbeddable(embeddable) &&
@@ -64,7 +74,6 @@ export const createFilterInLensAction = ({
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {
       const field = data[0]?.columnMeta?.field;
-      console.log('!!! META: ', data[0]?.columnMeta);
       const rawValue = data[0]?.value;
       const value = filterOutNullableValues(valueToArray(rawValue));
 
@@ -77,21 +86,36 @@ export const createFilterInLensAction = ({
 
       if (!field) return;
 
-      // if negateFilters is true we have to perform the opposite operation, we can just execute filterOut with the same params
       const timeline = getTimelineById(store.getState(), TimelineId.active);
 
-      if (timeline.show) {
-        addFilterIn({
-          filterManager: timeline.filterManager,
-          fieldName: field,
-          value,
-        });
+      if (!negate) {
+        if (timeline.show) {
+          addFilterIn({
+            filterManager: timeline.filterManager,
+            fieldName: field,
+            value,
+          });
+        } else {
+          addFilterIn({
+            filterManager,
+            fieldName: field,
+            value,
+          });
+        }
       } else {
-        addFilterIn({
-          filterManager,
-          fieldName: field,
-          value,
-        });
+        if (timeline.show) {
+          addFilterOut({
+            filterManager: timeline.filterManager,
+            fieldName: field,
+            value,
+          });
+        } else {
+          addFilterOut({
+            filterManager,
+            fieldName: field,
+            value,
+          });
+        }
       }
     },
   });

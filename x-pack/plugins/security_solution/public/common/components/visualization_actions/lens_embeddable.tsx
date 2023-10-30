@@ -218,6 +218,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [attributes?.state?.adHocDataViews]
   );
 
+  const shouldShowDefaultLegendAction = useCallback(() => scopeId !== 'timeline', [scopeId]);
+
   if (!searchSessionId) {
     return null;
   }
@@ -281,6 +283,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             showInspector={false}
             syncTooltips={false}
             syncCursor={false}
+            shouldShowLegendAction={shouldShowDefaultLegendAction}
           />
         </LensComponentWrapper>
       )}

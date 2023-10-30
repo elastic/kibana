@@ -36,6 +36,7 @@ export interface ExpressionRenderHandlerParams {
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
   getCompatibleCellValueActions?: (data: object[]) => Promise<unknown[]>;
   executionContext?: KibanaExecutionContext;
+  shouldShowLegendAction?: () => boolean;
 }
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
@@ -66,6 +67,7 @@ export class ExpressionRenderHandler {
       hasCompatibleActions = async () => false,
       getCompatibleCellValueActions = async () => [],
       executionContext,
+      shouldShowLegendAction,
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
@@ -118,6 +120,10 @@ export class ExpressionRenderHandler {
       },
       hasCompatibleActions,
       getCompatibleCellValueActions,
+      shouldShowLegendAction: () => {
+        console.log('shouldShowLegendAction=====', shouldShowLegendAction);
+        return shouldShowLegendAction?.() ?? true;
+      },
     };
   }
 

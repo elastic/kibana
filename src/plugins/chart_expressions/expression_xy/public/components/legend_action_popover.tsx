@@ -29,31 +29,20 @@ export interface LegendActionPopoverProps {
    * Compatible actions to be added to the popover actions
    */
   legendCellValueActions?: LegendCellValueActions;
+  shouldShowLegendAction: () => boolean;
 }
 
 export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverProps> = ({
   label,
   onFilter,
   legendCellValueActions = [],
+  shouldShowLegendAction,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
-  const legendCellValueActionPanelItems = legendCellValueActions.map((action) => ({
-    name: action.displayName,
-    'data-test-subj': `legend-${label}-${action.id}`,
-    icon: <EuiIcon type={action.iconType} size="m" />,
-    onClick: () => {
-      action.execute();
-      setPopoverOpen(false);
-    },
-  }));
-
-  const panels: EuiContextMenuPanelDescriptor[] = [
-    {
-      id: 'main',
-      title: label,
-      items: [
+  const defaultActions = shouldShowLegendAction()
+    ? [
         {
           name: i18n.translate('expressionXY.legend.filterForValueButtonAriaLabel', {
             defaultMessage: 'Filter for',
@@ -76,8 +65,24 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
             onFilter({ negate: true });
           },
         },
-        ...legendCellValueActionPanelItems,
-      ],
+      ]
+    : [];
+
+  const legendCellValueActionPanelItems = legendCellValueActions.map((action) => ({
+    name: action.displayName,
+    'data-test-subj': `legend-${label}-${action.id}`,
+    icon: <EuiIcon type={action.iconType} size="m" />,
+    onClick: () => {
+      action.execute();
+      setPopoverOpen(false);
+    },
+  }));
+
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 'main',
+      title: label,
+      items: [...defaultActions, ...legendCellValueActionPanelItems],
     },
   ];
 
