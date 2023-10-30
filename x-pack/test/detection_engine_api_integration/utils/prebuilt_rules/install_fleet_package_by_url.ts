@@ -10,7 +10,7 @@ import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 
 /**
- * Installs prebuilt rules package `security_detection_engine` by version.
+ * Installs latest available non-prerelease prebuilt rules package `security_detection_engine`.
  *
  * @param es Elasticsearch client
  * @param supertest SuperTest instance
@@ -48,7 +48,8 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
   return fleetResponse.body as InstallPackageResponse;
 };
 /**
- * Installs prebuilt rules package `security_detection_engine` by version.
+ * Installs prebuilt rules package `security_detection_engine`, passing in the version
+ * of the package as a parameter to the utl.
  *
  * @param es Elasticsearch client
  * @param supertest SuperTest instance
