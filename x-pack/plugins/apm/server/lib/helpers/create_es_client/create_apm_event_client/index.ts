@@ -16,7 +16,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { ESFilter } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
@@ -215,14 +214,6 @@ export class APMEventClient {
     // Reusing indices configured for errors since both events and errors are stored as logs.
     const index = processorEventsToIndex([ProcessorEvent.error], this.indices);
 
-    const filters: ESFilter[] = [
-      {
-        terms: {
-          ['event.kind']: ['event'],
-        },
-      },
-    ];
-
     const searchParams = {
       ...omit(params, 'body'),
       index,
@@ -230,7 +221,6 @@ export class APMEventClient {
         ...params.body,
         query: {
           bool: {
-            filter: filters,
             must: compact([params.body.query]),
           },
         },

@@ -13,7 +13,6 @@ export class Event extends Serializable<ApmFields> {
   constructor(fields: ApmFields) {
     super({
       ...fields,
-      'event.kind': 'event',
 
       // Real log events don't have the "processor.event" attribute. See: https://github.com/elastic/apm-server/pull/11494
       // This is a hack needed for the tests in "mobile/mobile_location_stats.spec.ts" to pass since the "SynthtraceEsClient.index" function
@@ -24,6 +23,7 @@ export class Event extends Serializable<ApmFields> {
   }
 
   lifecycle(state: string): this {
+    this.fields['event.action'] = 'lifecycle';
     this.fields['labels.lifecycle_state'] = state;
     return this;
   }
