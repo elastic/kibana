@@ -15,7 +15,7 @@ if [ -z "${PROJECT_TYPE}" ]; then
   exit 10
 fi
 
-PROJECT_NAME="kibana-$PROJECT_TYPE-pr-$BUILDKITE_PULL_REQUEST"
+PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE"
 PROJECT_CREATE_CONFIGURATION='{
   "name": "'"$PROJECT_NAME"'",
   "region_id": "aws-eu-west-1",
