@@ -20,7 +20,10 @@ const searchResult = await client.search({
 
 console.log(searchResult.hits.hits)
 `,
-  configureClient: ({ url, apiKey }) => `const { Client } = require('@elastic/elasticsearch-serverless');
+  configureClient: ({
+    url,
+    apiKey,
+  }) => `const { Client } = require('@elastic/elasticsearch-serverless');
 const client = new Client({
   node: '${url}',
   auth: {
