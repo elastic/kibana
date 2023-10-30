@@ -241,11 +241,11 @@ export default function AlertDetailsRelatedEvents({
                     <EuiText textAlign="right" size="s" style={{ marginTop: 3 }}>
                       {metricAggType}
                       <FormattedMessage
-                        id="xpack.observability.relatedEventsTab.TextLabel"
+                        id="xpack.observability.relatedEventsTab.TextLabelLeft"
                         defaultMessage="("
                       />
                       {relatedMetric}
-                      {i18n.translate('xpack.observability.relatedEventsTab.TextLabel', {
+                      {i18n.translate('xpack.observability.relatedEventsTab.TextLabelRight', {
                         defaultMessage: ')',
                       })}
                     </EuiText>
