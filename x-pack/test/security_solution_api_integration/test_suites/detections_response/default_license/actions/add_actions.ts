@@ -8,9 +8,8 @@
 import expect from '@kbn/expect';
 
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   removeServerGeneratedProperties,
   getWebHookAction,
@@ -19,27 +18,35 @@ import {
   waitForRuleSuccess,
   createRule,
   deleteAllAlerts,
+  updateUsername,
 } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
+  // TODO: add a new service
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('add_actions', () => {
+  describe('@serverless @ess add_actions', () => {
     describe('adding actions', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(path);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(path);
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -52,17 +59,18 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
           .send(getWebHookAction())
           .expect(200);
 
         const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
         const bodyToCompare = removeServerGeneratedProperties(rule);
-        expect(bodyToCompare).to.eql(
-          getSimpleRuleOutputWithWebHookAction(
-            `${bodyToCompare?.actions?.[0].id}`,
-            `${bodyToCompare?.actions?.[0].uuid}`
-          )
+        const expected = getSimpleRuleOutputWithWebHookAction(
+          `${bodyToCompare?.actions?.[0].id}`,
+          `${bodyToCompare?.actions?.[0].uuid}`
         );
+        const expectedRuleWithUserUpdated = updateUsername(expected, ELASTICSEARCH_USERNAME);
+        expect(bodyToCompare).to.eql(expectedRuleWithUserUpdated);
       });
 
       it('should be able to create a new webhook action and attach it to a rule without a meta field and run it correctly', async () => {
@@ -70,6 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
           .send(getWebHookAction())
           .expect(200);
 
@@ -86,6 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
           .send(getWebHookAction())
           .expect(200);
 
