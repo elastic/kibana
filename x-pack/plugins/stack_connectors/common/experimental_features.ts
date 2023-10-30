@@ -35,7 +35,6 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
     if (!isValidExperimentalValue(value)) {
       throw new InvalidExperimentalValue(`[${value}] is not valid.`);
     }
-    // @ts-expect-error ts upgrade v4.7.4
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
