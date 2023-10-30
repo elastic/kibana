@@ -101,15 +101,18 @@ export function registerEsqlFunction({
       in the context of this conversation.
       2. Use the WHERE clause as early as possible, because it limits
       the number of documents that need to be evaluated.
-      3. DO NOT UNDER ANY CIRCUMSTANCES:
-      - wrap a data source in single or double quotes when using FROM
-      - use anything other than aggregation functions (MIN/MAX/SUM/
-      COUNT/AVG etc) in STATS commands.
-      - use aggregation functions in EVAL commands.
-      - use COUNT(*) or COUNT(). A single argument (field name) is
-      required, like COUNT(my.field.name).
-      - use the AS keyword. create a new column by using the = operator.
-      this is wrong: STATS SUM(field) AS sum_field.
+      3. DO NOT UNDER ANY CIRCUMSTANCES wrap a data source in single or
+      double quotes when using FROM.
+      4. DO NOT UNDER ANY CIRCUMSTANCES use anything other than aggregation
+      functions (MIN/MAX/SUM/COUNT/AVG etc) in STATS commands. Math or
+      other functions are NOT ALLOWED.
+      5. DO NOT UNDER ANY CIRCUMSTANCES use aggregation functions in EVAL
+      commands.
+      6. DO NOT UNDER ANY CIRCUMSTANCES use COUNT(*) or COUNT(). A single
+      argument (field name) is required, like COUNT(my.field.name).
+      7. DO NOT UNDER ANY CIRCUMSTANCES use the AS keyword. create a new
+      column by using the = operator. this is wrong: 
+      \`STATS SUM(field) AS sum_field.\`
 
       When constructing a query, break it down into the following steps.
       Ask these questions out loud so the user can see your reasoning.
