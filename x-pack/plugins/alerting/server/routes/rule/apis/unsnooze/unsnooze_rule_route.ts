@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TypeOf } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import {
   unsnoozeBodySchema,
@@ -14,6 +15,8 @@ import { ILicenseState, RuleMutedError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformUnsnoozeBodyV1 } from './transforms';
+
+export type UnsnoozeRuleRequestParamsV1 = TypeOf<typeof unsnoozeParamsSchema>;
 
 export const unsnoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -30,7 +33,7 @@ export const unsnoozeRuleRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const params = req.params;
+        const params: UnsnoozeRuleRequestParamsV1 = req.params;
         const body = transformUnsnoozeBodyV1(req.body);
         try {
           await rulesClient.unsnooze({ ...params, ...body });

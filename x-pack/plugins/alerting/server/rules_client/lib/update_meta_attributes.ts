@@ -13,8 +13,13 @@ export function updateMetaAttributes<T extends Partial<RuleAttributes>>(
   alertAttributes: T
 ): T {
   if (alertAttributes.hasOwnProperty('apiKey') || alertAttributes.hasOwnProperty('apiKeyOwner')) {
-    alertAttributes.meta = alertAttributes.meta ?? {};
-    alertAttributes.meta.versionApiKeyLastmodified = context.kibanaVersion;
+    return {
+      ...alertAttributes,
+      meta: {
+        ...(alertAttributes.meta ?? {}),
+        versionApiKeyLastmodified: context.kibanaVersion,
+      },
+    };
   }
   return alertAttributes;
 }

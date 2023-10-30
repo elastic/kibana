@@ -35,7 +35,7 @@ export async function unsnoozeRule(
 
 async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }: UnsnoozeParams) {
   try {
-    unsnoozeRuleParamsSchema.validate({ id });
+    unsnoozeRuleParamsSchema.validate({ id, scheduleIds });
   } catch (error) {
     throw Boom.badRequest(`Error validating unsnooze params - ${error.message}`);
   }
