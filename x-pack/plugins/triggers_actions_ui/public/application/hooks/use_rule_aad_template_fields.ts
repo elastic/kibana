@@ -9,8 +9,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
 import { EcsFlat } from '@kbn/ecs';
 import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 import { isEmpty } from 'lodash';
@@ -43,16 +42,19 @@ export function useRuleTypeAadTemplateFields(
   ruleTypeId: string,
   enabled: boolean
 ): { isLoading: boolean; fields: ActionVariable[] } {
-  const queryFn = () => {
-    return loadRuleTypeAadTemplateFields({ http, ruleTypeId });
-  };
+  // Reimplement useQuery here; this hook is sometimes called in contexts without a QueryClientProvider
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<DataViewField[]>([]);
 
-  const { data = [], isLoading = false } = useQuery({
-    queryKey: ['loadRuleTypeAadTemplateFields'],
-    queryFn,
-    refetchOnWindowFocus: false,
-    enabled,
-  });
+  useEffect(() => {
+    if (enabled && data.length === 0) {
+      setIsLoading(true);
+      loadRuleTypeAadTemplateFields({ http, ruleTypeId }).then((res) => {
+        setData(res);
+        setIsLoading(false);
+      });
+    }
+  }, [data, enabled, http, ruleTypeId]);
 
   return useMemo(
     () => ({
