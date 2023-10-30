@@ -10,7 +10,8 @@ import { checkActionItemsInResults, loadRuleAlerts } from '../../tasks/live_quer
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe('Alert Flyout Automated Action Results', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/169727
+describe.skip('Alert Flyout Automated Action Results', () => {
   let ruleId: string;
 
   beforeEach(() => {

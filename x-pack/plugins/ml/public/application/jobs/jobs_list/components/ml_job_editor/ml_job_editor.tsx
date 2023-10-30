@@ -7,8 +7,8 @@
 
 import React, { FC } from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { type EuiCodeEditorProps, XJson } from '@kbn/es-ui-shared-plugin/public';
+import { CodeEditor, type CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { expandLiteralStrings } = XJson;
 
@@ -20,7 +20,7 @@ interface MlJobEditorProps {
   width?: string;
   mode?: typeof ML_EDITOR_MODE[keyof typeof ML_EDITOR_MODE];
   readOnly?: boolean;
-  onChange?: EuiCodeEditorProps['onChange'];
+  onChange?: CodeEditorProps['onChange'];
   'data-test-subj'?: string;
   schema?: object;
 }
