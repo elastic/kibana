@@ -40,7 +40,53 @@ ex:
 
 In the `package.json` file, you'll find commands to configure the server for each environment and to run tests against that specific environment. These commands adhere to the Mocha tagging system, allowing for the inclusion and exclusion of tags, mirroring the setup of the CI pipeline.
 
+## Running Commands with Different Parameters
+
+In this project, you can run various commands to execute tests and workflows, each of which can be customized by specifying different parameters. Below, how to define the commands based on the parameters and their order.
+
+### Command Structure
+
+The command structure follows this pattern:
+
+- `<command-name>`: The name of the specific command or test case.
+- `<folder>`: The test folder or workflow you want to run.
+- `<type>`: The type of operation, either "server" or "runner."
+- `<environment>`: The testing environment, such as "serverlessEnv," "essEnv," or "qaEnv."
+- `<licenseFolder>`: The license folder the test is defined under such as "default_license", by default the value is "default_license"
+- `<area>`: The area the test is defined under, such as "detection_engine", by default the value is "detection_engine"
+
+### Serverless and Ess Configuration
+
+- When using "serverless" or "ess" in the script, it specifies the correct configuration file for the tests.
+- "Serverless" and "ess" help determine the configuration specific to the chosen test.
+
+### serverlessEnv, essEnv, qaEnv Grep Command
+
+- When using "serverlessEnv,.." in the script, it appends the correct grep command for filtering tests in the serverless testing environment.
+- "serverlessEnv,..." is used to customize the test execution based on the serverless environment.
 
 
+### Command Examples
 
+Here are some command examples using the provided parameters:
 
+1. **Run the server for "exception_workflows" in the "serverlessEnv" environment:**
+   ```shell
+   npm run initialize-server exceptions/workflows serverless
+   ```
+2. **To run tests for the "exception_workflows" using the serverless runner in the "serverlessEnv" environment, you can use the following command:**
+    ```shell
+    npm run run-tests exceptions/workflows serverless serverlessEnv
+    ```
+3. **Run tests for "exception_workflows" using the serverless runner in the "qaEnv" environment:**
+    ```shell
+    npm run run-tests exceptions/workflows serverless qaEnv
+    ```
+4. **Run the server for "exception_workflows" in the "essEnv" environment:**
+   ```shell
+    npm run initialize-server exceptions/workflows ess
+   ```
+5. **Run tests for "exception_workflows" using the ess runner in the "essEnv" environment:**   
+   ```shell
+   npm run run-tests exceptions/workflows ess essEnv
+   ```
