@@ -49,3 +49,4 @@ export {
 export { MAJOR_VERSION } from './plugin';
 
 export { Section, IndexDetailsSection } from './home_sections';
+export type { IndexDetailsTab, IndexDetailsTabIds } from './home_sections';

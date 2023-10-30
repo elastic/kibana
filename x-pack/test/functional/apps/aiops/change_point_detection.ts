@@ -94,5 +94,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.addChangePointConfig();
       await aiops.changePointDetectionPage.assertPanelExist(1);
     });
+
+    it('attaches change point charts to a dashboard', async () => {
+      await aiops.changePointDetectionPage.assertPanelExist(0);
+      await aiops.changePointDetectionPage.attachChartsToDashboard(0, {
+        applyTimeRange: true,
+        maxSeries: 1,
+      });
+    });
   });
 }

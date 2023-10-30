@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export {
-  SearchResponseWarnings,
-  type SearchResponseWarningsProps,
-} from './search_response_warnings';
+export { SearchResponseWarningsBadge } from './badge';
+export { SearchResponseWarningsBadgePopoverContent } from './badge_popover_content';
+export { SearchResponseWarningsCallout } from './callout';
+export { SearchResponseWarningsEmptyPrompt } from './empty_prompt';
