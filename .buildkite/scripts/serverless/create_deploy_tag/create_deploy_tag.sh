@@ -19,6 +19,7 @@ git config user.name "$BUILDKITE_BUILD_CREATOR"
 git tag -a "$DEPLOY_TAG" "$KIBANA_COMMIT_SHA" \
  -m "Tagging release $KIBANA_COMMIT_SHA as: $DEPLOY_TAG, by $BUILDKITE_BUILD_CREATOR_EMAIL"
 
+# Set meta-data for the deploy tag
 buildkite-agent meta-data set deploy-tag "$DEPLOY_TAG"
 
 # Push the tag to GitHub
