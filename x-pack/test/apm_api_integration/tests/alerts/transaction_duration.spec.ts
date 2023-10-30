@@ -15,7 +15,6 @@ import {
   createApmRule,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-  clearKibanaApmEventLog,
   ApmAlertFields,
   createIndexConnector,
   getIndexAction,
