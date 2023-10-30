@@ -581,12 +581,24 @@ const ensureAuthorizedToExecute = async ({
   authorization,
 }: EnsureAuthorizedToExecuteOpts) => {
   try {
-    if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
-      const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
-        actionTypeId,
-        params
-      );
+    const additionalPrivileges: string[] = [];
+    const actionType = actionTypeRegistry.get(actionTypeId);
 
+    if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
+      additionalPrivileges.push(
+        ...actionTypeRegistry.getSystemActionKibanaPrivileges(actionTypeId, params)
+      );
+    }
+
+    if (params.subAction && actionType.getSubActionPrivileges) {
+      additionalPrivileges.push(
+        ...actionType.getSubActionPrivileges({
+          subActionName: (params.subAction as string) ?? '',
+        })
+      );
+    }
+
+    if (additionalPrivileges.length) {
       await authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
     }
   } catch (error) {
