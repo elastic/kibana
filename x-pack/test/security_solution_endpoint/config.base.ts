@@ -14,8 +14,16 @@ import {
   createEndpointDockerConfig,
 } from '../security_solution_endpoint_api_int/registry';
 
-export const ESS_FILTER = '@ess';
-export const SERVERLESS_FILTER = '/^(?!.*@brokenInServerless|.*@skipInServerless).*@serverless.*/';
+const SUITE_TAGS = {
+  ess: {
+    include: ['@ess'],
+    exclude: ['@skipInEss'],
+  },
+  serverless: {
+    include: ['@serverless'],
+    exclude: ['@skipInServerless', '@brokenInServerless'],
+  },
+};
 
 export const generateConfig = async ({
   ftrConfigProviderContext,
@@ -23,14 +31,14 @@ export const generateConfig = async ({
   testFiles,
   junitReportName,
   kbnServerArgs = [],
-  mochaGrep,
+  target,
 }: {
   ftrConfigProviderContext: FtrConfigProviderContext;
   baseConfig: Config;
   testFiles: string[];
   junitReportName: string;
-  mochaGrep: string;
   kbnServerArgs?: string[];
+  target: keyof typeof SUITE_TAGS;
 }): Promise<Config> => {
   const { readConfigFile } = ftrConfigProviderContext;
 
@@ -45,6 +53,11 @@ export const generateConfig = async ({
     dockerServers: createEndpointDockerConfig(),
     junit: {
       reportName: junitReportName,
+    },
+    suiteTags: {
+      ...baseConfig.get('suiteTags'),
+      include: [...baseConfig.get('suiteTags.include'), ...SUITE_TAGS[target].include],
+      exclude: [...baseConfig.get('suiteTags.exclude'), ...SUITE_TAGS[target].exclude],
     },
     services,
     apps: {
@@ -74,10 +87,6 @@ export const generateConfig = async ({
         `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
         ...kbnServerArgs,
       ],
-    },
-    mochaOpts: {
-      ...baseConfig.get('mochaOpts'),
-      grep: mochaGrep,
     },
     layout: {
       fixedHeaderHeight: 200,

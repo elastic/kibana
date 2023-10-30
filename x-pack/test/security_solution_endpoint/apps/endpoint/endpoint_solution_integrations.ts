@@ -24,7 +24,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'timeline']);
 
-  describe('@ess App level Endpoint functionality', () => {
+  describe('App level Endpoint functionality', function () {
+    this.tags(['@ess']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let indexedAlerts: IndexedEndpointRuleAlerts;
     let endpointAgentId: string;

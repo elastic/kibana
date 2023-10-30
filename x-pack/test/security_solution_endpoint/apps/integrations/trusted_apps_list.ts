@@ -15,7 +15,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('@ess @serverless When on the Trusted Apps list', function () {
+  describe('When on the Trusted Apps list', function () {
+    this.tags(['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();

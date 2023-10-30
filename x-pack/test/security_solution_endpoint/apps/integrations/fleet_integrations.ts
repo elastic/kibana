@@ -18,7 +18,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('@ess When in the Fleet application', function () {
+  describe('When in the Fleet application', function () {
+    this.tags(['@ess']);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
         useCreate: true,

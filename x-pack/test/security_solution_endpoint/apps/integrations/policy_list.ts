@@ -24,7 +24,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('@ess @serverless When on the Endpoint Policy List Page', () => {
+  describe('When on the Endpoint Policy List Page', function () {
+    this.tags(['@ess', '@serverless']);
+
     before(async () => {
       await browser.refresh();
     });

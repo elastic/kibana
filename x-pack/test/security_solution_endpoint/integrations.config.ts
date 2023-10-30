@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { ESS_FILTER, generateConfig } from './config.base';
+import { generateConfig } from './config.base';
 
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
   const { readConfigFile } = ftrConfigProviderContext;
@@ -21,7 +21,7 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
     baseConfig: xpackFunctionalConfig,
     testFiles: [resolve(__dirname, './apps/integrations')],
     junitReportName: 'X-Pack Endpoint Integrations Functional Tests on ESS',
-    mochaGrep: ESS_FILTER,
+    target: 'ess',
     kbnServerArgs: [
       // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
       '--xpack.securitySolution.packagerTaskInterval=5s',

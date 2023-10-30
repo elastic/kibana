@@ -84,7 +84,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return tableData;
   };
 
-  describe('@ess @serverless endpoint list', function () {
+  describe('endpoint list', function () {
+    this.tags(['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
       before(async () => {

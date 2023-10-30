@@ -81,7 +81,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  describe('@ess @serverless Response Actions Responder', function () {
+  describe('Response Actions Responder', function () {
+    this.tags(['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 

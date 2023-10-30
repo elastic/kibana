@@ -7,7 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
-import { generateConfig, SERVERLESS_FILTER } from './config.base';
+import { generateConfig } from './config.base';
 
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
   const { readConfigFile } = ftrConfigProviderContext;
@@ -22,6 +22,6 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
     testFiles: [resolve(__dirname, './apps/endpoint')],
     junitReportName: 'X-Pack Endpoint Functional Tests on Serverless',
     kbnServerArgs: ['--serverless=security'],
-    mochaGrep: SERVERLESS_FILTER,
+    target: 'serverless',
   });
 }

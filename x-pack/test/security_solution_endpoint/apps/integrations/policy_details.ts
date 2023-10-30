@@ -27,7 +27,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
 
-  describe('@ess @serverless When on the Endpoint Policy Details Page', function () {
+  describe('When on the Endpoint Policy Details Page', function () {
+    this.tags(['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     const formTestSubjects = getPolicySettingsFormTestSubjects();
 
@@ -74,7 +76,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      it('@skipInServerless should not hide the side navigation', async () => {
+      it('should not hide the side navigation', async function () {
+        this.tags('@skipInServerless');
+
         await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
         // ensure center of button is visible and not hidden by sticky bottom bar
         await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
