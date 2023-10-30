@@ -20,7 +20,7 @@ const searchResult = await client.search({
 
 console.log(searchResult.hits.hits)
 `,
-  configureClient: ({ url, apiKey }) => `const { Client } = require('@elastic/elasticsearch');
+  configureClient: ({ url, apiKey }) => `const { Client } = require('@elastic/elasticsearch-serverless');
 const client = new Client({
 node: '${url}',
 auth: {
@@ -71,7 +71,7 @@ aborted: false
     apiKey,
     url,
     indexName,
-  }) => `const { Client } = require('@elastic/elasticsearch');
+  }) => `const { Client } = require('@elastic/elasticsearch-serverless');
 const client = new Client({
   node: '${url}',
   auth: {
@@ -91,7 +91,7 @@ const result = await client.helpers.bulk({
 });
 console.log(result);
 `,
-  installClient: 'npm install @elastic/elasticsearch@8',
+  installClient: 'npm install @elastic/elasticsearch-serverless',
   name: i18n.translate('xpack.serverlessSearch.languages.javascript', {
     defaultMessage: 'JavaScript',
   }),
