@@ -246,6 +246,9 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('recreate data view used by job');
       await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
 
+      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToJobManagement();
+
       // Refresh page to ensure page has correct cache of data views
       await browser.refresh();
 
