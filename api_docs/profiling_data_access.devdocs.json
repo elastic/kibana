@@ -495,36 +495,6 @@
       },
       {
         "parentPluginId": "profilingDataAccess",
-        "id": "def-common.METADATA_VERSION",
-        "type": "number",
-        "tags": [],
-        "label": "METADATA_VERSION",
-        "description": [],
-        "signature": [
-          "1"
-        ],
-        "path": "x-pack/plugins/profiling_data_access/common/security_role.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "profilingDataAccess",
-        "id": "def-common.PROFILING_READER_ROLE_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "PROFILING_READER_ROLE_NAME",
-        "description": [],
-        "signature": [
-          "\"profiling-reader\""
-        ],
-        "path": "x-pack/plugins/profiling_data_access/common/security_role.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "profilingDataAccess",
         "id": "def-common.SYMBOLIZER_PACKAGE_POLICY_NAME",
         "type": "string",
         "tags": [],
