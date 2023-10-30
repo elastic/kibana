@@ -11,6 +11,10 @@ import { isEqual } from 'lodash';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
+import {
+  removeLegacyValuesFromOptions,
+  removeNonStoreableFilters,
+} from './utils/sanitize_filter_options';
 import type {
   FilterOptions,
   PartialFilterOptions,
@@ -114,15 +118,7 @@ const getFilterOptions = (
   return {
     ...filterOptions,
     ...params,
-    severity,
-    status,
-  };
-};
-
-const getSupportedFilterOptions = (filterOptions: PartialFilterOptions): PartialFilterOptions => {
-  return {
-    ...(filterOptions.severity?.length && { severity: filterOptions.severity }),
-    ...(filterOptions.status?.length && { status: filterOptions.status }),
+    ...removeLegacyValuesFromOptions({ status, severity }),
   };
 };
 
@@ -187,7 +183,7 @@ export function useAllCasesState(
       );
 
       const newPersistedFilterOptions: PartialFilterOptions =
-        getSupportedFilterOptions(newFilterOptions);
+        removeNonStoreableFilters(newFilterOptions);
 
       const newLocalStorageFilterOptions: PartialFilterOptions = {
         ...localStorageFilterOptions,
@@ -210,7 +206,7 @@ export function useAllCasesState(
     const stateUrlParams = {
       ...parsedUrlParams,
       ...queryParams,
-      ...getSupportedFilterOptions(filterOptions),
+      ...removeNonStoreableFilters(filterOptions),
       page: queryParams.page.toString(),
       perPage: queryParams.perPage.toString(),
     };

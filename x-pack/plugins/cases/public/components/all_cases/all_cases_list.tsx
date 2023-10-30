@@ -155,6 +155,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
+        // FIXME: how should this work with multiple options?
         if (newFilterOptions?.status) {
           if (
             newFilterOptions.status[0] === CaseStatuses.closed &&
