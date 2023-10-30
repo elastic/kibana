@@ -97,7 +97,7 @@ function convertForStringify(aggs: Aggregation[], fields: Field[]): void {
  */
 export function dataFrameAnalyticsRoutes(
   { router, mlLicense, routeGuard, getEnabledFeatures }: RouteInitialization,
-  { cloud }: { cloud: CloudSetup }
+  cloud: CloudSetup
 ) {
   async function userCanDeleteIndex(
     client: IScopedClusterClient,
