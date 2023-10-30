@@ -58,7 +58,7 @@ export default function (providerContext: FtrProviderContext) {
       const { body: apiResponse } = await supertest
         .post(`/api/fleet/service_tokens`)
         .set('kbn-xsrf', 'xxxx')
-        .send(`{"remote":true}`)
+        .send({ remote: true })
         .expect(200);
 
       expect(apiResponse).have.property('name');
