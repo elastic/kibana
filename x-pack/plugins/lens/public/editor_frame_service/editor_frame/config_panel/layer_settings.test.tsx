@@ -8,12 +8,9 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import faker from 'faker';
-import {
-  createMockFramePublicAPI,
-  createMockVisualization,
-  renderWithReduxStore,
-} from '../../../mocks';
+import { createMockFramePublicAPI, createMockVisualization } from '../../../mocks';
 import { LayerSettings } from './layer_settings';
+import { renderWithReduxStore } from '../../../test-utils';
 
 describe('LayerSettings', () => {
   const renderLayerSettings = (propsOverrides = {}) => {

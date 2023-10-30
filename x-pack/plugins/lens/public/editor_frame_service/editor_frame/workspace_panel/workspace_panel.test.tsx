@@ -8,7 +8,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
-import { FramePublicAPI, UserMessage, Visualization } from '../../../types';
+import { UserMessage, Visualization } from '../../../types';
+import { fireEvent, screen } from '@testing-library/react';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -16,10 +17,9 @@ import {
   DatasourceMock,
   createMockFramePublicAPI,
   createMockedDragDropContext,
-  renderWithReduxStore,
 } from '../../../mocks';
+import { renderWithReduxStore } from '../../../test-utils';
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
-import { fireEvent, getByTestId, screen } from '@testing-library/react';
 jest.mock('../../../debounced_component', () => {
   return {
     debouncedComponent: (fn: unknown) => fn,
@@ -121,9 +121,11 @@ describe('workspace_panel', () => {
     expressionRendererMock = createExpressionRendererMock();
   });
 
-  // afterEach(() => {
-  //   instance.unmount();
-  // });
+  afterEach(() => {
+    if (instance) {
+      instance?.unmount?.();
+    }
+  });
 
   it('should render an explanatory text if no visualization is active', async () => {
     renderWithReduxStore(
@@ -903,7 +905,7 @@ describe('workspace_panel', () => {
     expect(instance.find(expressionRendererMock)).toHaveLength(1);
   });
 
-  describe.skip('suggestions from dropping in workspace panel', () => {
+  describe('suggestions from dropping in workspace panel', () => {
     const draggedField = { id: faker.lorem.word(), humanData: { label: faker.lorem.word() } };
 
     function renderWithDndAndRedux(propsOverrides = {}, draggingContext = draggedField) {
