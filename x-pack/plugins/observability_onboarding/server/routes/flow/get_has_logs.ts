@@ -6,6 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { AGENT_ID } from '../../../common/es_fields';
 import {
   LogFilesState,
   ObservabilityOnboardingType,
@@ -33,11 +35,20 @@ export async function getHasLogs({
     const index =
       type === 'logFiles'
         ? `logs-${(state as LogFilesState).datasetName}-${namespace}`
-        : `logs-system.syslog-${namespace}`;
+        : [`logs-system.syslog-${namespace}`, `logs-system.auth-${namespace}`];
+
+    const agentId = payload?.agentId;
 
     const { hits } = await esClient.search({
       index,
       terminate_after: 1,
+      body: {
+        query: {
+          bool: {
+            filter: [...termQuery(AGENT_ID, agentId)],
+          },
+        },
+      },
     });
     const total = hits.total as { value: number };
     return total.value > 0;

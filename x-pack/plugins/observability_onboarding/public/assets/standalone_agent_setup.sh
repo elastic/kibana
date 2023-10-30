@@ -63,7 +63,6 @@ updateStepProgress() {
   else
     data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
   fi
-  echo $data
   curl --request POST \
     --url "${API_ENDPOINT}/flow/${ONBOARDING_ID}/step/${STEPNAME}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
@@ -71,6 +70,7 @@ updateStepProgress() {
     --header "kbn-xsrf: true" \
     --header "x-elastic-internal-origin: Kibana" \
     --data "$data" \
+    --output /dev/null \
     --no-progress-meter
 }
 
