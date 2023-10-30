@@ -7,8 +7,16 @@
 
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useCallback } from 'react';
+import type { RiskScoreEntity } from '../../../../common/risk_engine';
+import { RiskInputsPanelKey } from '../../risk_inputs';
 
-export const useExpandDetailsFlyout = () => {
+export const useExpandDetailsFlyout = ({
+  riskEntity,
+  scopeId,
+}: {
+  riskEntity: RiskScoreEntity;
+  scopeId: string;
+}) => {
   const { closeLeftPanel, openLeftPanel, panels } = useExpandableFlyoutContext();
   const isExpanded: boolean = panels.left != null;
 
@@ -17,10 +25,14 @@ export const useExpandDetailsFlyout = () => {
       closeLeftPanel();
     } else {
       openLeftPanel({
-        id: 'all-risk-inputs',
+        id: RiskInputsPanelKey,
+        params: {
+          scopeId,
+          riskEntity,
+        },
       });
     }
-  }, [closeLeftPanel, isExpanded, openLeftPanel]);
+  }, [closeLeftPanel, isExpanded, openLeftPanel, riskEntity, scopeId]);
 
   return { isExpanded, onToggle };
 };

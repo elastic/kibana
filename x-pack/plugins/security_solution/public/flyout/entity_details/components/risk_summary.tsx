@@ -21,10 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
-import {
-  FormattedRelativePreferenceDate,
-  PreferenceFormattedDate,
-} from '../../../common/components/formatted_date';
+import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/risk_engine';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
 
@@ -35,6 +32,7 @@ import { useExpandDetailsFlyout } from '../hooks/use_expand_details_flyout';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;
+  scopeId: string;
 }
 
 interface TableItem {
@@ -42,7 +40,7 @@ interface TableItem {
   count: number;
 }
 
-export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
+export const RiskSummary = ({ riskScoreData, scopeId }: RiskSummaryProps) => {
   const { data: userRisk, isAuthorized: isRiskScoreAuthorized } = riskScoreData;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
@@ -76,7 +74,10 @@ export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
     []
   );
 
-  const { isExpanded, onToggle } = useExpandDetailsFlyout();
+  const { isExpanded, onToggle } = useExpandDetailsFlyout({
+    riskEntity: RiskScoreEntity.user,
+    scopeId,
+  });
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 

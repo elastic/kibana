@@ -6,7 +6,6 @@
  */
 
 import React, { memo, type FC } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import {
   ExpandableFlyout,
   type ExpandableFlyoutProps,
@@ -28,7 +27,10 @@ import {
 import type { PreviewPanelProps } from './document_details/preview';
 import { PreviewPanel, PreviewPanelKey } from './document_details/preview';
 import { PreviewPanelProvider } from './document_details/preview/context';
-import { UserDetailsPanel } from './entity_details/user_details';
+import type { UserDetailsExpandableFlyoutProps } from './entity_details/user_details';
+import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details';
+import type { RiskInputsExpandableFlyoutProps } from './risk_inputs';
+import { RiskInputsPanel, RiskInputsPanelKey } from './risk_inputs';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -68,24 +70,18 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: 'user-details',
-    component: (props) => <UserDetailsPanel {...(props as UserDetailsPanelProps).params} />,
+    key: UserDetailsPanelKey,
+    component: (props) => (
+      <UserDetailsPanel {...(props as UserDetailsExpandableFlyoutProps).params} />
+    ),
   },
   {
-    key: 'all-risk-inputs',
-    component: (props) => <>{'olá'}</>,
+    key: RiskInputsPanelKey,
+    component: (props) => (
+      <RiskInputsPanel {...(props as RiskInputsExpandableFlyoutProps).params} />
+    ),
   },
 ];
-
-export interface UserDetailsPanelProps extends FlyoutPanelProps {
-  key: 'user-details';
-  params: {
-    userName: string;
-    contextID: string;
-    scopeId: string;
-    isDraggable: boolean;
-  };
-}
 
 const OuterProviders: FC = ({ children }) => {
   return <SecuritySolutionFlyoutUrlSyncProvider>{children}</SecuritySolutionFlyoutUrlSyncProvider>;

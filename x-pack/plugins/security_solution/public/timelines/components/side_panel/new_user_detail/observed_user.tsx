@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiSpacer,
-  EuiTitle,
-  useEuiTheme,
-  EuiPanel,
-  useEuiFontSize,
-} from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiTitle, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';

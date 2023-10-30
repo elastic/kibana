@@ -148,7 +148,7 @@ export const UserDetailsContentComponent = ({
       )}
 
       <EuiPanel hasShadow={false}>
-        <RiskSummary riskScoreData={riskScoreState} />
+        <RiskSummary riskScoreData={riskScoreState} scopeId={scopeId} />
       </EuiPanel>
 
       <EuiHorizontalRule margin="xs" />
