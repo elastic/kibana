@@ -115,8 +115,6 @@ export type InfraMetadataInfo = rt.TypeOf<typeof InfraMetadataInfoRT>;
 
 export type InfraMetadataCloud = rt.TypeOf<typeof InfraMetadataCloudRT>;
 
-export type InfraMetadataAgent = rt.TypeOf<typeof InfraMetadataAgentRT>;
-
 export type InfraMetadataInstance = rt.TypeOf<typeof InfraMetadataInstanceRT>;
 
 export type InfraMetadataProject = rt.TypeOf<typeof InfraMetadataProjectRT>;
