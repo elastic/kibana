@@ -37,7 +37,7 @@ export const responseActionTasks = (
     },
 
     // previousActionDoc is used to determine when a new action doc is received
-    tamperActionDoc: async ({ previousActionDoc, agentId }) => {
+    tamperActionDoc: async (previousActionDoc) => {
       const { esClient } = await stackServicesPromise;
       const newActionDoc = await waitForNewActionDoc(esClient, previousActionDoc);
 
@@ -48,10 +48,9 @@ export const responseActionTasks = (
       const signed = get(newActionDoc, '_source.signed');
       const signedDataBuffer = Buffer.from(signed.data, 'base64');
       const signedDataJson = JSON.parse(signedDataBuffer.toString());
-      const tamperedAgentsList = [...signedDataJson.agents, agentId];
       const tamperedData = {
         ...signedDataJson,
-        agents: tamperedAgentsList,
+        comment: 'tampered data',
       };
       const tamperedDataString = Buffer.from(JSON.stringify(tamperedData), 'utf8').toString(
         'base64'

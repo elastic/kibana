@@ -26,7 +26,6 @@ describe('Document signing', { tags: ['@ess', '@serverless', '@brokenInServerles
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
-  let createdHostNew: CreateAndEnrollEndpointHostResponse;
 
   before(() => {
     getEndpointIntegrationVersion().then((version) =>
@@ -60,19 +59,6 @@ describe('Document signing', { tags: ['@ess', '@serverless', '@brokenInServerles
 
   beforeEach(() => {
     login();
-    return createEndpointHost(policy.policy_id).then((host) => {
-      createdHostNew = host as CreateAndEnrollEndpointHostResponse;
-    });
-  });
-
-  afterEach(() => {
-    if (createdHostNew) {
-      cy.task('destroyEndpointHost', createdHostNew);
-    }
-
-    if (createdHostNew) {
-      deleteAllLoadedEndpointData({ endpointAgentIds: [createdHostNew.agentId] });
-    }
   });
 
   it('should fail if data tampered', () => {
@@ -86,7 +72,7 @@ describe('Document signing', { tags: ['@ess', '@serverless', '@brokenInServerles
     // get action doc before we submit command, so we know when the new action doc is indexed
     cy.task('getLatestActionDoc').then((previousActionDoc) => {
       submitCommand();
-      cy.task('tamperActionDoc', { previousActionDoc, agentId: createdHostNew.agentId });
+      cy.task('tamperActionDoc', previousActionDoc);
     });
     cy.task('startEndpointHost', createdHost.hostname);
 
