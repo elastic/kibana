@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
-import { isNotCountOrCustom } from './metric_expression_params';
 import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
   CONTAINER_ID,
@@ -45,20 +44,9 @@ export const createBaseFilters = (
     },
   ];
 
-  const metricFieldFilters =
-    isNotCountOrCustom(metricParams) && metricParams.metric
-      ? [
-          {
-            exists: {
-              field: metricParams.metric,
-            },
-          },
-        ]
-      : [];
-
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
-  return [...rangeFilters, ...metricFieldFilters, ...parsedFilterQuery];
+  return [...rangeFilters, ...parsedFilterQuery];
 };
 
 export const getElasticsearchMetricQuery = (
