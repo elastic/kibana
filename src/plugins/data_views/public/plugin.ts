@@ -34,7 +34,11 @@ import { LATEST_VERSION } from '../common/content_management/v1/constants';
 import { StaleWhileRevalidateCache } from './data_views/stale_while_revalidate_cache';
 
 const SWR_CACHE_NAME = 'data-views';
-const SWR_CACHE_ENTRY_LIFETIME_MS = 1000 * 60 * 5; // 5 minutes
+const SWR_CACHE_ENTRY_FRESH_TIME_MS = 1000 * 60 * 5; // 5 minutes
+const SWR_CACHE_MAX_AGE_MS = 1000; // 30 days
+// const SWR_CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
+const SWR_CACHE_MAX_SIZE_BYTES = 500 * 1024 * 1024; // 500 MB
+const SWR_CACHE_PRUNE_INTERVAL_MS = 1000 * 60 * 60; // 1 hour
 
 export class DataViewsPublicPlugin
   implements
@@ -47,6 +51,7 @@ export class DataViewsPublicPlugin
 {
   private readonly hasData = new HasData();
   private rollupsEnabled: boolean = false;
+  private stopSwrCachePruning?: () => void;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -90,10 +95,17 @@ export class DataViewsPublicPlugin
     const staleWhileRevalidateCache = new StaleWhileRevalidateCache({
       http,
       cacheName: SWR_CACHE_NAME,
-      cacheEntryLifetimeMs: SWR_CACHE_ENTRY_LIFETIME_MS,
+      cacheEntryFreshTimeMs: SWR_CACHE_ENTRY_FRESH_TIME_MS,
+      cacheEntryMaxAgeMs: SWR_CACHE_MAX_AGE_MS,
+      cacheMaxSizeBytes: SWR_CACHE_MAX_SIZE_BYTES,
+      cachePruneIntervalMs: SWR_CACHE_PRUNE_INTERVAL_MS,
       getIdentityHash: createGetIdentityHash(core),
       onOpenCacheError: console.error,
+      onPruneError: console.error,
     });
+
+    debugger;
+    this.stopSwrCachePruning = staleWhileRevalidateCache.startPruning();
 
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),
@@ -118,7 +130,9 @@ export class DataViewsPublicPlugin
     });
   }
 
-  public stop() {}
+  public stop() {
+    this.stopSwrCachePruning?.();
+  }
 }
 
 const createGetIdentityHash = (core: CoreStart) => {
