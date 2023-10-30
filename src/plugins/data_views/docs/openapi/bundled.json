@@ -14,8 +14,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601",
-      "description": "local"
+      "url": "/"
     }
   ],
   "security": [
@@ -96,12 +95,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
+      }
     },
     "/api/data_views/data_view": {
       "post": {
@@ -152,18 +146,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/data_views/data_view/{viewId}": {
       "get": {
@@ -232,12 +216,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Updates a data view.",
@@ -290,18 +269,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/data_views/data_view/{viewId}/fields": {
       "post": {
@@ -369,18 +338,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/data_views/data_view/{viewId}/runtime_field": {
       "post": {
@@ -512,18 +471,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/data_views/data_view/{viewId}/runtime_field/{fieldName}": {
       "get": {
@@ -664,18 +613,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/api/data_views/default": {
       "get": {
@@ -788,18 +727,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     }
   },
   "components": {

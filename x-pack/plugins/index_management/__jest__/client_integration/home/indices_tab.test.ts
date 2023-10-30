@@ -366,7 +366,7 @@ describe('<IndexManagementHome />', () => {
       const { tableCellsValues } = table.getMetaData('indexTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'test', 'green', 'open', '1', '1', '10000', '156kb', ''],
+        ['', 'test', 'green', 'open', '1', '1', '10,000', '156kb', ''],
       ]);
     });
 
