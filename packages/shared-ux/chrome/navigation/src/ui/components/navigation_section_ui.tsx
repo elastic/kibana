@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
-
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import classNames from 'classnames';
+import { css } from '@emotion/css';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -26,12 +27,14 @@ import { nodePathToString, isAbsoluteLink, getNavigationNodeHref } from '../../u
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
+const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
+const DEFAULT_IS_COLLAPSED = true;
+const DEFAULT_IS_COLLAPSIBLE = true;
+
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
   Boolean(navNode.deepLink) || Boolean(navNode.href);
 
 const nodeHasChildren = (navNode: ChromeProjectNavigationNode) => Boolean(navNode.children?.length);
-
-const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
 
 /**
  * Predicate to determine if a node should be visible in the main side nav.
@@ -103,7 +106,6 @@ const renderBlockTitle: (
         css={({ euiTheme }: any) => {
           return {
             marginTop: spaceBefore ? euiTheme.size[spaceBefore] : undefined,
-            // marginTop: euiTheme.size.base,
             paddingBlock: euiTheme.size.xs,
             paddingInline: euiTheme.size.s,
           };
@@ -148,12 +150,14 @@ const nodeToEuiCollapsibleNavProps = (
     closePanel,
     isSideNavCollapsed,
     treeDepth,
+    itemsState,
   }: {
     navigateToUrl: NavigateToUrlFn;
     openPanel: PanelContext['open'];
     closePanel: PanelContext['close'];
     isSideNavCollapsed: boolean;
     treeDepth: number;
+    itemsState: AccordionItemsState;
   }
 ): {
   items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps>;
@@ -172,7 +176,11 @@ const nodeToEuiCollapsibleNavProps = (
     spaceBefore: _spaceBefore,
   } = navNode;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
-  const isSelected = hasChildren && !isItem ? false : isActive;
+
+  const isAccordion = hasChildren && !isItem;
+  const isAccordionExpanded = (itemsState[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED) === false;
+  const isSelected = isAccordion && isAccordionExpanded ? false : isActive;
+
   const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,
@@ -219,6 +227,7 @@ const nodeToEuiCollapsibleNavProps = (
             closePanel,
             isSideNavCollapsed,
             treeDepth: treeDepth + 1,
+            itemsState,
           })
         )
         .filter(({ isVisible }) => isVisible)
@@ -244,13 +253,6 @@ const nodeToEuiCollapsibleNavProps = (
       }
     : undefined;
 
-  const accordionProps: Partial<EuiAccordionProps> | undefined = isItem
-    ? undefined
-    : {
-        initialIsOpen: treeDepth === 0 ? isActive : true, // FIXME open state is controlled on component mount
-        ...navNode.accordionProps,
-      };
-
   if (renderAs === 'block' && treeDepth > 0 && subItems) {
     // Render as a group block (bold title + list of links underneath)
     return {
@@ -267,7 +269,6 @@ const nodeToEuiCollapsibleNavProps = (
       id,
       title,
       isSelected,
-      accordionProps,
       linkProps,
       onClick,
       href,
@@ -290,6 +291,16 @@ const nodeToEuiCollapsibleNavProps = (
   return { items, isVisible };
 };
 
+interface AccordionItemsState {
+  [navNodeId: string]: {
+    isCollapsible: boolean;
+    isCollapsed: boolean;
+    // We want to auto expand the group automatically if the node is active (URL match)
+    // but once the user manually expand a group we don't want to close it afterward automatically.
+    doCollapseFromActiveState: boolean;
+  };
+}
+
 interface Props {
   navNode: ChromeProjectNavigationNode;
 }
@@ -298,23 +309,161 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
   const { navigateToUrl, isSideNavCollapsed } = useServices();
   const { open: openPanel, close: closePanel } = usePanel();
 
-  const { items, isVisible } = nodeToEuiCollapsibleNavProps(navNode, {
-    navigateToUrl,
-    openPanel,
-    closePanel,
-    isSideNavCollapsed,
-    treeDepth: 0,
+  const navNodesById = useMemo(() => {
+    const byId = {
+      [nodePathToString(navNode)]: navNode,
+    };
+
+    const parse = (navNodes?: ChromeProjectNavigationNode[]) => {
+      if (!navNodes) return;
+      navNodes.forEach((childNode) => {
+        byId[nodePathToString(childNode)] = childNode;
+        parse(childNode.children);
+      });
+    };
+    parse(navNode.children);
+
+    return byId;
+  }, [navNode]);
+
+  const [itemsState, setItemsState] = useState<AccordionItemsState>(() => {
+    return Object.entries(navNodesById).reduce<AccordionItemsState>((acc, [_id, node]) => {
+      if (node.children) {
+        acc[_id] = {
+          isCollapsed: !node.isActive ?? DEFAULT_IS_COLLAPSED,
+          isCollapsible: node.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE,
+          doCollapseFromActiveState: true,
+        };
+      }
+      return acc;
+    }, {});
   });
 
+  const [subItems, setSubItems] = useState<EuiCollapsibleNavSubItemProps[] | undefined>();
+
+  const toggleAccordion = useCallback((id: string) => {
+    setItemsState((prev) => {
+      const prevValue = prev[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED;
+      return {
+        ...prev,
+        [id]: {
+          ...prev[id],
+          isCollapsed: !prevValue,
+          doCollapseFromActiveState: false, // once we manually toggle we don't want to auto-close it when URL changes
+        },
+      };
+    });
+  }, []);
+
+  const setAccordionProps = useCallback(
+    (
+      id: string,
+      _accordionProps?: Partial<EuiAccordionProps>
+    ): Partial<EuiAccordionProps> | undefined => {
+      const isCollapsed = itemsState[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED;
+      const isCollapsible = itemsState[id]?.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE;
+
+      let forceState: EuiAccordionProps['forceState'] = isCollapsed ? 'closed' : 'open';
+      if (!isCollapsible) forceState = 'open'; // Allways open if the accordion is not collapsible
+
+      const arrowProps: EuiAccordionProps['arrowProps'] = {
+        css: isCollapsible ? undefined : { display: 'none' },
+        'data-test-subj': classNames(`accordionArrow`, `accordionArrow-${id}`),
+      };
+
+      const updated: Partial<EuiAccordionProps> = {
+        ..._accordionProps,
+        arrowProps,
+        forceState,
+        onToggle: () => {
+          toggleAccordion(id);
+        },
+      };
+
+      return updated;
+    },
+    [itemsState, toggleAccordion]
+  );
+
+  const { items, isVisible } = useMemo(() => {
+    return nodeToEuiCollapsibleNavProps(navNode, {
+      navigateToUrl,
+      openPanel,
+      closePanel,
+      isSideNavCollapsed,
+      treeDepth: 0,
+      itemsState,
+    });
+  }, [closePanel, isSideNavCollapsed, navNode, navigateToUrl, openPanel, itemsState]);
+
   const [props] = items;
+  const { items: accordionItems } = props;
 
   if (!isEuiCollapsibleNavItemProps(props)) {
     throw new Error(`Invalid EuiCollapsibleNavItem props for node ${props.id}`);
   }
 
+  /**
+   * Effect to set our internal state of each of the accordions (isCollapsed) based on the
+   * "isActive" state of the navNode.
+   */
+  useEffect(() => {
+    setItemsState((prev) => {
+      return Object.entries(navNodesById).reduce<AccordionItemsState>((acc, [_id, node]) => {
+        if (node.children && (!prev[_id] || prev[_id].doCollapseFromActiveState)) {
+          acc[_id] = {
+            isCollapsed: !node.isActive ?? DEFAULT_IS_COLLAPSED,
+            isCollapsible: node.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE,
+            doCollapseFromActiveState: true,
+          };
+        }
+        return acc;
+      }, prev);
+    });
+  }, [navNodesById]);
+
+  useEffect(() => {
+    // Serializer to add recursively the accordionProps to each of the items
+    // that will control its "open"/"closed" state + handler to toggle the state.
+    const serializeAccordionItems = (
+      _items?: EuiCollapsibleNavSubItemProps[]
+    ): EuiCollapsibleNavSubItemProps[] | undefined => {
+      if (!_items) return;
+
+      return _items.map((item: EuiCollapsibleNavSubItemProps) => {
+        if (item.renderItem) {
+          return item;
+        }
+        const parsed: EuiCollapsibleNavSubItemProps = {
+          ...item,
+          items: serializeAccordionItems(item.items),
+          accordionProps: setAccordionProps(item.id!, item.accordionProps),
+        };
+        return parsed;
+      });
+    };
+
+    setSubItems(serializeAccordionItems(accordionItems));
+  }, [accordionItems, setAccordionProps]);
+
   if (!isVisible) {
     return null;
   }
 
-  return <EuiCollapsibleNavItem {...props} />;
+  return (
+    <EuiCollapsibleNavItem
+      {...props}
+      // We add this css to prevent showing the outline when the page load when the
+      // accordion is auto-expanded if one of its children is active
+      className={css`
+        .euiAccordion__childWrapper,
+        .euiAccordion__children,
+        .euiCollapsibleNavAccordion__children {
+          outline: none;
+        }
+      `}
+      items={subItems}
+      accordionProps={setAccordionProps(navNode.id)}
+    />
+  );
 };
