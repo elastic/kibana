@@ -36,7 +36,7 @@ steps:
     env:
       SKIP_KIBANA_HOOKS: 1
     commands:
-      - "buildkite-agent annotate --context lower-banner --style warning \"<br />Review the information above, and unblock the build to proceed.\""
+      - "buildkite-agent annotate --context top-banner --style warning \":mag: Review the information below, and unblock the build to proceed.\""
 
   - block: "Confirm deployment"
     prompt: "Are you sure you want to deploy to production?"
