@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler, RouteValidationResultFactory } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -16,8 +16,8 @@ import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
-import type { FleetRequestHandler } from '../../types';
-import { CheckPermissionsRequestSchema, GenerateServiceTokenRequestSchema } from '../../types';
+import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
+import { CheckPermissionsRequestSchema } from '../../types';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
   unknown,
@@ -96,6 +96,15 @@ export const generateServiceTokenHandler: RequestHandler<
   }
 };
 
+const serviceTokenBodyValidation = (data: any, validationResult: RouteValidationResultFactory) => {
+  const { ok } = validationResult;
+  if (!data) {
+    return ok({ remote: false });
+  }
+  const { remote } = data;
+  return ok({ remote });
+};
+
 export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
@@ -120,7 +129,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: GenerateServiceTokenRequestSchema,
+          request: { body: serviceTokenBodyValidation },
         },
       },
       generateServiceTokenHandler
