@@ -11,6 +11,7 @@ import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '@kbn/security-solu
 import { getPolicySettingsFormTestSubjects } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/mocks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import { targetTags } from '../../target_tags';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -28,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('When on the Endpoint Policy Details Page', function () {
-    this.tags(['@ess', '@serverless']);
+    targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
     const formTestSubjects = getPolicySettingsFormTestSubjects();
@@ -77,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should not hide the side navigation', async function () {
-        this.tags('@skipInServerless');
+        targetTags(this, ['@skipInServerless']);
 
         await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
         // ensure center of button is visible and not hidden by sticky bottom bar

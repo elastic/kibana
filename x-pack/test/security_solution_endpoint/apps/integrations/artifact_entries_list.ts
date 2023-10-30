@@ -26,6 +26,7 @@ import {
   MultipleArtifactActionsType,
 } from './mocks';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'artifactEntriesList']);
@@ -52,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('For each artifact list under management', function () {
-    this.tags(['@ess', '@serverless']);
+    targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(60_000 * 5);
     let indexedData: IndexedHostsAndAlertsResponse;

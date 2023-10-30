@@ -11,6 +11,7 @@ import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timel
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { targetTags } from '../../target_tags';
 
 /**
  * Test suite is meant to cover usages of endpoint functionality or access to endpoint
@@ -25,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'timeline']);
 
   describe('App level Endpoint functionality', function () {
-    this.tags(['@ess']);
+    targetTags(this, ['@ess']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
     let indexedAlerts: IndexedEndpointRuleAlerts;

@@ -13,6 +13,7 @@ import {
   deleteUserAndRole,
   ROLES,
 } from '../../../common/services/security_solution';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
@@ -20,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
 
   describe('Endpoint permissions:', function () {
-    this.tags(['@ess']);
+    targetTags(this, ['@ess']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
 
