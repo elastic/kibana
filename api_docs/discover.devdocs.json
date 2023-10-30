@@ -845,6 +845,22 @@
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.Content",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Content",
+            "description": [],
+            "signature": [
+              "React.ComponentType<",
+              "FlyoutContentProps",
+              "> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -903,7 +919,8 @@
                 "docId": "kibSavedSearchPluginApi",
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
-              }
+              },
+              " | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
             "deprecated": false,
