@@ -99,12 +99,17 @@ export function registerEsqlFunction({
       1. ES|QL is not Elasticsearch SQL. Do not apply Elasticsearch SQL
       commands, functions and concepts. Only use information available
       in the context of this conversation.
-      2. When using FROM, never wrap a data source in single or double
-      quotes.
-      3. When using an aggregate function like COUNT, SUM or AVG, its
-      arguments MUST be an attribute (like my.field.name) or literal
-      (100). Math (AVG(my.field.name / 2)) or functions 
-      (AVG(CASE(my.field.name, "foo", 1))) are not allowed.
+      2. Use the WHERE clause as early as possible, because it limits
+      the number of documents that need to be evaluated.
+      3. DO NOT UNDER ANY CIRCUMSTANCES:
+      - wrap a data source in single or double quotes when using FROM
+      - use anything other than aggregation functions (MIN/MAX/SUM/
+      COUNT/AVG etc) in STATS commands.
+      - use aggregation functions in EVAL commands.
+      - use COUNT(*) or COUNT(). A single argument (field name) is
+      required, like COUNT(my.field.name).
+      - use the AS keyword. create a new column by using the = operator.
+      this is wrong: STATS SUM(field) AS sum_field.
 
       When constructing a query, break it down into the following steps.
       Ask these questions out loud so the user can see your reasoning.
@@ -113,6 +118,9 @@ export function registerEsqlFunction({
       - What are the critical rules I need to think of?
       - What data source is the user requesting? What command should I
       select for this data source?
+      - Do I need to add columns that use math or other non-aggregation
+      functions like CASE using the EVAL command before I run the STATS
+      BY command with aggregation functions?
       - What are the steps needed to get the result that the user needs?
       Break each operation down into its own step. Reason about what data
       is the outcome of each command or function.
@@ -253,8 +261,9 @@ export function registerEsqlFunction({
       - \`| SORT my_field\`
       - \`| SORT height DESC\`
 
-      Important: functions are not supported for SORT. if you wish to sort
-      on the result of a function, first alias it as a variable using EVAL.
+      DO NOT UNDER ANY CIRCUMSTANCES use functions as part of the sort
+      statement. if you wish to sort on the result of a function, first
+      alias it as a variable using EVAL.
       This is wrong: \`| SORT AVG(cpu)\`.
       This is right: \`| STATS avg_cpu = AVG(cpu) | SORT avg_cpu\`
 
@@ -274,7 +283,9 @@ export function registerEsqlFunction({
 
       \`WHERE\` filters the documents for which the provided condition
       evaluates to true. Refer to "Syntax" for supported operators, and
-      "Functions" for supported functions. Some examples:
+      "Functions" for supported functions. When using WHERE, make sure
+      that the columns in your statement are still available. Some
+      examples:
 
       - \`| WHERE height <= 180 AND GREATEST(hire_date, birth_date)\`
       - \`| WHERE @timestamp <= NOW()\`
@@ -457,10 +468,9 @@ export function registerEsqlFunction({
       ### COUNT
 
       \`COUNT\` counts the number of field values. It requires a single
-      argument, and does not support wildcards. Important: COUNT() and
-      COUNT(*) are NOT supported. One single argument is required. If
-      you don't have a field name, use whatever field you have, rather
-      than displaying an invalid query.
+      argument, and does not support wildcards. One single argument is
+      required. If you don't have a field name, use whatever field you have,
+      rather than displaying an invalid query.
       
       Some examples:
 
