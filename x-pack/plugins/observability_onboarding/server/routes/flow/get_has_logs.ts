@@ -41,6 +41,7 @@ export async function getHasLogs({
 
     const { hits } = await esClient.search({
       index,
+      ignore_unavailable: true,
       terminate_after: 1,
       body: {
         query: {
