@@ -24,6 +24,7 @@ import {
   EuiPageHeader,
   EuiPageTemplate,
   EuiSearchBarOnChangeArgs,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,38 +46,79 @@ import { useLoadWatches } from '../../lib/api';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../lib/navigation';
 import { useAppContext } from '../../app_context';
 import { PageError as GenericPageError } from '../../shared_imports';
-import { ColumnHeader } from './components';
 
 /*
  * EuiMemoryTable relies on referential equality of a column's name field when sorting by that column.
  * Therefore, we want the JSX elements preserved through renders.
  */
 const stateColumnHeader = (
-  <ColumnHeader field={'state'} name={'State'} tooltipText={'Active, inactive, or error.'} />
+  <EuiToolTip
+    content={i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader.tooltipText', {
+      defaultMessage: 'Active, inactive, or error.',
+    })}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
+        defaultMessage: 'State',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
 );
 
 const conditionLastMetHeader = (
-  <ColumnHeader
-    field={'lastFired'}
-    name={'Condition last met'}
-    tooltipText={'The last time the condition was met and action taken.'}
-  />
+  <EuiToolTip
+    content={i18n.translate(
+      'xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText',
+      {
+        defaultMessage: `The last time the condition was met and action taken.`,
+      }
+    )}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
+        defaultMessage: 'Condition last met',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
 );
 
 const lastCheckedHeader = (
-  <ColumnHeader
-    field={'lastTriggered'}
-    name={'Last checked'}
-    tooltipText={'The last time the condition was checked.'}
-  />
+  <EuiToolTip
+    content={i18n.translate(
+      'xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader.tooltipText',
+      {
+        defaultMessage: `The last time the condition was checked.`,
+      }
+    )}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
+        defaultMessage: 'Last checked',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
 );
 
 const commentHeader = (
-  <ColumnHeader
-    field={'comment'}
-    name={'Comment'}
-    tooltipText={'Whether any actions have been acknowledged, throttled, or failed to execute.'}
-  />
+  <EuiToolTip
+    content={i18n.translate(
+      'xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText',
+      {
+        defaultMessage:
+          'Whether any actions have been acknowledged, throttled, or failed to execute.',
+      }
+    )}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
+        defaultMessage: 'Comment',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
 );
 
 export const WatchListPage = () => {
