@@ -1,0 +1,94 @@
+[[try-esql]]
+== Try ES|QL
+
+preview::[]
+
+The Elasticsearch Query Language, ES|QL, has been created to make exploring your data faster and easier using the {kib} Discover application. 
+
+
+For easy navigation, include the links to the key sections in a bulleted 
+list. This way, users can click exactly where they want to go instead of 
+scrolling down the page:
+
+* <<task-section-description, esql elasticsearch docs link>>
+* <<section2-description, a link to using esql in kibana?>>
+
+TIP: Need introduction inspiration? Here are some good examples:
+
+* <<canvas, Canvas>>
+
+
+[float]
+[[task-section-description]]
+=== Task section title
+
+Provide an example or walkthrough of how to use the feature. Whenever possible, 
+use the <<add-sample-data, sample data>>.
+
+To ....[provide steps]:
+
+. On the home page, click **Try sample data**.
+. Click **Other sample data sets**.
+. On the Sample web logs card, click **Add data**.
+. Open the main menu and select *Discover*.
+. From the Data views menu, select *Try ES|QL*.
++
+[role="screenshot"]
+image:images/try-esql.png[An image of the Discover UI where users can try the new ES|QL feature]
+
+[float]
+[[esql-kibana-query-bar]]
+=== The query bar
+
+After switching to {esql} mode, the query bar shows a sample query. For example:
+
+[source,esql]
+----
+from kibana_sample_data_logs | limit 10
+----
+
+Every query starts with a <<esql-commands,source command>>. In this query, the
+source command is <<esql-from>>. `FROM` retrieves data from data streams, indices, or
+aliases. In this example, the data is retrieved from `kibana_sample_data_logs`.
+
+A source command can be followed by one or more <<esql-commands,processing
+commands>>. In this query, the processing command is <<esql-limit>>. `LIMIT`
+limits the number of rows that are retrieved.
+
+TIP: Click the help icon (image:images/esql/esql-icon-help.svg[]) to open the
+in-product reference documentation for all commands and functions.
+
+To make it easier to write queries, auto-complete offers suggestions with
+possible commands and functions:
+
+[NOTE]
+====
+{esql} keywords are case-insensitive. The following query is identical to the
+previous one:
+[source,esql]
+----
+FROM kibana_sample_data_logs | LIMIT 10
+----
+====
+
+[float]
+==== Expand the query bar
+
+For readability, you can put each processing command on a new line. The
+following query is identical to the previous one:
+
+[source,esql]
+----
+FROM kibana_sample_data_logs 
+| LIMIT 10
+----
+
+////
+When you develop your task content, use the following guidelines:
+* Match your text to the UI.
+* For clickable items, use *bold*.
+* When you refer to a UI button, use `click`. For example, `Click *New*.`
+* When you refer to a UI checkbox or path, use `select`. For example, `Select all index checkboxes` and `Select *Manage index* > *Add lifecycle policy*.`
+* Avoid using `button` and similar words. For example, use `Click *Save*.` instead of `Click on the *Save* button.` 
+////
+

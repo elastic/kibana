@@ -1,0 +1,68 @@
+[[esql]]
+=== ES|QL
+
+preview::[]
+
+The Elasticsearch Query Language, ES|QL, has been created to make exploring your data faster and easier using the {kib} Discover application. ES|QL was designed to combine the 9 other languages that can be used in {es} (KQL, SQL, EQL, DSL Lucene, Painless, Canvas, Timelion, and Vega). From version 8.11.0 you can try this new language. 
+
+[role="screenshot"]
+image:images/try-esql.png[]
+
+This new piped language allows you to chain together multiple commands to query your data. Based on the query, Lens suggestions in Discover create a visualization of the query results.
+
+[role="screenshot"]
+image:images/esql-activated.png[An image of the Discover UI where users can try the new ES|QL feature]
+
+ES|QL comes with it's own dedicated {es} Query Engine for greater efficiency. This engine delivers new capabilities like lookup[insert link]. From one query, search, aggregate, calculate and perform data transformations. Write your query directly in Discover or use the ES|QL API. 
+
+for api post/_query or use discover. 
+
+
+[role="screenshot"]
+image:images/esql-in-app-help.png[An image of the Discover UI where users can browse the in-app help]
+*In-app help** include image
+
+
+Fast Time to Insights: Create visualizations, calculations, and aggregations directly from Kibana Discover to condense investigation workflows in one screen to get answers faster.
+
+* <<discover, Try ES|QL>>
+
+
+For easy navigation, include the links to the key sections in a bulleted 
+list. This way, users can click exactly where they want to go instead of 
+scrolling down the page:
+
+* <<task-section-description, Task section title>>
+* <<section2-description, Task section title>>
+* <<section3-description, Task section title>>
+
+TIP: Keep lists to 5-7 items, plus or minus 2 when absolutely necessary.
+
+
+TIP: Need introduction inspiration? Here are some good examples:
+* <<dashboard, Dashboard>>
+* <<canvas, Canvas>>
+
+[float]
+[[observability]]
+==== {observability}
+
+Include content that further describes the feature and its capabilities.
+
+TIP: Need concept inspiration? Here are some good examples:
+* <<elasticsearch-version, Elasticsearch version>>
+* <<getting-started, Sample data>>
+
+[float]
+[[security]]
+==== Security 
+
+Include content that further describes the feature and its capabilities.
+
+TIP: Need concept inspiration? Here are some good examples:
+* <<elasticsearch-version, Elasticsearch version>>
+* <<getting-started, Sample data>>
+
+Alterting
+
+Alerting: With ES|QL write observability and security alerts with aggregated values as thresholds. Enhance detection accuracy by emphasizing meaningful trends over isolated incidents, reducing false positives, and providing more actionable notifications.
