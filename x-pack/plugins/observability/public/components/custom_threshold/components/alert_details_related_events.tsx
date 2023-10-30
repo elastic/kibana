@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -56,37 +57,37 @@ export default function AlertDetailsRelatedEvents({
     } as ChangePointAnnotation;
   });
 
-  useEffect(() => {
-    const isCpuOrMemoryCriterion = (criterion: MetricExpression) =>
-      criterion.metrics?.some(
-        (metric: CustomThresholdExpressionMetric) =>
+  const isCpuOrMemoryCriterion = (criterion: MetricExpression) =>
+    criterion.metrics?.some(
+      (metric: CustomThresholdExpressionMetric) =>
+        metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
+    );
+
+  const relatedMetricsPerCriteria = useCallback(() => {
+    const hasCpuOrMemoryCriteria = ruleParams.criteria.some((criterion) =>
+      isCpuOrMemoryCriterion(criterion)
+    );
+
+    const relatedMetricsInDataView = hasCpuOrMemoryCriteria
+      ? dataView?.fields
+          .map((field) => field.name)
+          .filter((fieldName) => predefinedMetrics.includes(fieldName))
+      : [];
+
+    const aggType = ruleParams.criteria
+      .find((criterion) => isCpuOrMemoryCriterion(criterion))
+      ?.metrics?.find(
+        (metric) =>
           metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
-      );
+      )?.aggType;
 
-    const relatedMetricsPerCriteria = () => {
-      const hasCpuOrMemoryCriteria = ruleParams.criteria.some((criterion) =>
-        isCpuOrMemoryCriterion(criterion)
-      );
-
-      const relatedMetricsInDataView = hasCpuOrMemoryCriteria
-        ? dataView?.fields
-            .map((field) => field.name)
-            .filter((fieldName) => predefinedMetrics.includes(fieldName))
-        : [];
-
-      const aggType = ruleParams.criteria
-        .find((criterion) => isCpuOrMemoryCriterion(criterion))
-        ?.metrics?.find(
-          (metric) =>
-            metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
-        )?.aggType;
-
-      setRelatedMetrics(relatedMetricsInDataView ?? []);
-      setMetricAggType(aggType ? (fnList.includes(aggType) ? aggType : 'avg') : 'avg');
-    };
-
-    relatedMetricsPerCriteria();
+    setRelatedMetrics(relatedMetricsInDataView ?? []);
+    setMetricAggType(aggType ? (fnList.includes(aggType) ? aggType : 'avg') : 'avg');
   }, [dataView, ruleParams.criteria]);
+
+  useEffect(() => {
+    relatedMetricsPerCriteria();
+  }, [relatedMetricsPerCriteria]);
 
   const relatedEventsTimeRangeEnd = moment(alert.start).add(
     (ruleParams.criteria[0].timeSize ?? 5) * 2,
@@ -135,6 +136,7 @@ export default function AlertDetailsRelatedEvents({
   };
 
   const onRefresh = () => {
+    relatedMetricsPerCriteria();
     setLastReloadRequestTime(moment(new Date()).valueOf());
   };
 
@@ -161,7 +163,9 @@ export default function AlertDetailsRelatedEvents({
           <RelatedEventsSortBar loading={false} onChangeSort={onChangeSort} />
         </EuiFlexItem>
         <EuiButton data-test-subj="o11yAlertDetailsRelatedEventsRefreshButton" onClick={onRefresh}>
-          Refresh
+          {i18n.translate('xpack.observability.alertDetailsRelatedEvents.refreshButtonLabel', {
+            defaultMessage: 'Refresh',
+          })}
         </EuiButton>
       </EuiFlexGroup>
       <EuiFlexGroup
