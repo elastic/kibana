@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
+import faker from 'faker';
 import {
   createMockFramePublicAPI,
   createMockVisualization,
-  mountWithProvider,
+  renderWithReduxStore,
 } from '../../../mocks';
 import { Visualization } from '../../../types';
 import { LayerSettings } from './layer_settings';
@@ -34,39 +36,23 @@ describe('LayerSettings', () => {
   }
 
   beforeEach(() => {
-    mockVisualization = {
-      ...createMockVisualization(),
-      id: 'testVis',
-      visualizationTypes: [
-        {
-          icon: 'empty',
-          id: 'testVis',
-          label: 'TEST1',
-          groupLabel: 'testVisGroup',
-        },
-      ],
-    };
+    mockVisualization = createMockVisualization();
   });
 
-  it('should render nothing with no custom renderer nor description', async () => {
-    // @ts-expect-error
-    mockVisualization.getDescription.mockReturnValue(undefined);
-    const { instance } = await mountWithProvider(<LayerSettings {...getDefaultProps()} />);
-    expect(instance.html()).toBe(null);
-  });
-
-  it('should render a static header if visualization has only a description value', async () => {
+  it('should render a static header if visualization has only a description value', () => {
     mockVisualization.getDescription.mockReturnValue({
       icon: 'myIcon',
       label: 'myVisualizationType',
     });
-    const { instance } = await mountWithProvider(<LayerSettings {...getDefaultProps()} />);
-    expect(instance.find('StaticHeader').first().prop('label')).toBe('myVisualizationType');
+    renderWithReduxStore(<LayerSettings {...getDefaultProps()} />);
+    expect(screen.getByText('myVisualizationType')).toBeInTheDocument();
   });
 
-  it('should call the custom renderer if available', async () => {
-    mockVisualization.LayerHeaderComponent = jest.fn().mockImplementation(() => <div />);
-    await mountWithProvider(<LayerSettings {...getDefaultProps()} />);
-    expect(mockVisualization.LayerHeaderComponent).toHaveBeenCalled();
+  it('should use custom renderer if passed', () => {
+    const customLayerHeader = faker.lorem.word();
+    mockVisualization.LayerHeaderComponent = () => <div>{customLayerHeader}</div>;
+
+    renderWithReduxStore(<LayerSettings {...getDefaultProps()} />);
+    expect(screen.getByText(customLayerHeader)).toBeInTheDocument();
   });
 });

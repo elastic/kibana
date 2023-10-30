@@ -97,7 +97,7 @@ export interface MountStoreProps {
 
 export const renderWithReduxStore = (
   ui: JSX.Element,
-  options: RenderOptions,
+  options?: RenderOptions,
   { preloadedState }: { preloadedState: Partial<LensAppState> } = { preloadedState: {} }
 ) => {
   const { store } = makeLensStore({ preloadedState });
