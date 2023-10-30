@@ -46,10 +46,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 function TestComponent() {
-    return (
-        <div>{i18n.translate('app_not_found_in_i18nrc.testComponent.div.thisIsATestLabel', { defaultMessage: "This is a test"})}</div>
-    )
-}`,
+      return (
+          <div>{i18n.translate('app_not_found_in_i18nrc.testComponent.div.thisIsATestLabel', { defaultMessage: 'This is a test'})}</div>
+      )
+  }`,
   },
   {
     filename: 'x-pack/plugins/observability/public/another_component.tsx',
@@ -58,30 +58,42 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 function AnotherComponent() {
-    return (
-        <EuiPanel>
-            <EuiFlexGroup>
-                <EuiFlexItem>
-                    <EuiButton>{i18n.translate('app_not_found_in_i18nrc.anotherComponent.thisIsATestButtonLabel', { defaultMessage: "This is a test"})}</EuiButton>
-                </EuiFlexItem>
-            </EuiFlexGroup>
-        </EuiPanel>
-    )
-}`,
+        return (
+            <EuiPanel>
+                <EuiFlexGroup>
+                    <EuiFlexItem>
+                        <EuiButton>{i18n.translate('app_not_found_in_i18nrc.anotherComponent.thisIsATestButtonLabel', { defaultMessage: 'This is a test'})}</EuiButton>
+                    </EuiFlexItem>
+                </EuiFlexGroup>
+            </EuiPanel>
+        )
+    }`,
   },
   {
     filename: 'x-pack/plugins/observability/public/yet_another_component.tsx',
     code: `
+  import React from 'react';
+import { i18n } from '@kbn/i18n';
+
+  function YetAnotherComponent() {
+        return (
+            <div>
+                <EuiSelect>{i18n.translate('app_not_found_in_i18nrc.yetAnotherComponent.selectMeSelectLabel', { defaultMessage: 'Select me'})}</EuiSelect>
+            </div>
+        )
+    }`,
+  },
+  {
+    filename: 'x-pack/plugins/observability/public/test_component.tsx',
+    code: `
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-function YetAnotherComponent() {
-    return (
-        <div>
-            <EuiSelect>{i18n.translate('app_not_found_in_i18nrc.yetAnotherComponent.selectMeSelectLabel', { defaultMessage: "Select me"})}</EuiSelect>
-        </div>
-    )
-}`,
+function TestComponent() {
+      return (
+          <SomeChildComponent label={i18n.translate('app_not_found_in_i18nrc.testComponent.someChildComponent.thisIsATestLabel', { defaultMessage: 'This is a test'})} />
+      )
+  }`,
   },
 ];
 
@@ -92,10 +104,10 @@ const invalid = [
 import React from 'react';
 
 function TestComponent() {
-    return (
-        <div>This is a test</div>
-    )
-}`,
+      return (
+          <div>This is a test</div>
+      )
+  }`,
     errors: [
       {
         line: 6,
@@ -110,16 +122,16 @@ function TestComponent() {
 import React from 'react';
 
 function AnotherComponent() {
-    return (
-        <EuiPanel>
-            <EuiFlexGroup>
-                <EuiFlexItem>
-                    <EuiButton>This is a test</EuiButton>
-                </EuiFlexItem>
-            </EuiFlexGroup>
-        </EuiPanel>
-    )
-}`,
+        return (
+            <EuiPanel>
+                <EuiFlexGroup>
+                    <EuiFlexItem>
+                        <EuiButton>This is a test</EuiButton>
+                    </EuiFlexItem>
+                </EuiFlexGroup>
+            </EuiPanel>
+        )
+    }`,
     errors: [
       {
         line: 9,
@@ -131,15 +143,15 @@ function AnotherComponent() {
   {
     filename: valid[2].filename,
     code: `
-import React from 'react';
+  import React from 'react';
 
-function YetAnotherComponent() {
-    return (
-        <div>
-            <EuiSelect>Select me</EuiSelect>
-        </div>
-    )
-}`,
+  function YetAnotherComponent() {
+        return (
+            <div>
+                <EuiSelect>Select me</EuiSelect>
+            </div>
+        )
+    }`,
     errors: [
       {
         line: 7,
@@ -147,6 +159,25 @@ function YetAnotherComponent() {
       },
     ],
     output: valid[2].code,
+  },
+  {
+    filename: valid[3].filename,
+    code: `
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+      return (
+          <SomeChildComponent label="This is a test" />
+      )
+  }`,
+    errors: [
+      {
+        line: 7,
+        message: `Strings should be translated with i18n. Use the autofix suggestion or add your own.`,
+      },
+    ],
+    output: valid[3].code,
   },
 ];
 

@@ -15,14 +15,25 @@ import type {
   GetAgentsResponse,
   GetPackagePoliciesRequest,
   GetPackagePoliciesResponse,
+  CreateAgentPolicyRequest,
+  AgentPolicy,
+  CreateAgentPolicyResponse,
+  CreatePackagePolicyResponse,
+  CreatePackagePolicyRequest,
+  PackagePolicy,
+  GetInfoResponse,
+  GetOneAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
+  AGENT_POLICY_API_ROUTES,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   agentPolicyRouteService,
   agentRouteService,
   AGENTS_INDEX,
   API_VERSIONS,
   APP_API_ROUTES,
+  epmRouteService,
   PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -44,16 +55,23 @@ import type {
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
+import { userInfo } from 'os';
+import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
+import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
+import { downloadAndStoreAgent } from './agent_downloads_service';
+import type { HostVm } from './types';
 import {
   createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
+  wrapErrorAndRejectPromise,
 } from '../../../common/endpoint/data_loaders/utils';
 import { fetchKibanaStatus } from './stack_services';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
+const CURRENT_USERNAME = userInfo().username.toLowerCase();
 
 export const checkInFleetAgent = async (
   esClient: Client,
@@ -273,6 +291,25 @@ export const fetchAgentPolicyList = async (
 };
 
 /**
+ * Fetch a single Fleet Agent Policy
+ * @param kbnClient
+ * @param agentPolicyId
+ */
+export const fetchAgentPolicy = async (
+  kbnClient: KbnClient,
+  agentPolicyId: string
+): Promise<AgentPolicy> => {
+  return kbnClient
+    .request<GetOneAgentPolicyResponse>({
+      method: 'GET',
+      path: agentPolicyRouteService.getInfoPath(agentPolicyId),
+      headers: { 'elastic-api-version': '2023-10-31' },
+    })
+    .then((response) => response.data.item)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+/**
  * Retrieves a list of Fleet Integration policies
  * @param kbnClient
  * @param options
@@ -340,6 +377,14 @@ interface ElasticArtifactSearchResponse {
   };
 }
 
+interface GetAgentDownloadUrlResponse {
+  url: string;
+  /** The file name (ex. the `*.tar.gz` file) */
+  fileName: string;
+  /** The directory name that the download archive will be extracted to (same as `fileName` but no file extensions) */
+  dirName: string;
+}
+
 /**
  * Retrieves the download URL to the Linux installation package for a given version of the Elastic Agent
  * @param version
@@ -354,12 +399,13 @@ export const getAgentDownloadUrl = async (
    */
   closestMatch: boolean = false,
   log?: ToolingLog
-): Promise<string> => {
+): Promise<GetAgentDownloadUrlResponse> => {
   const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
   const downloadArch =
     { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
     `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
-  const agentFile = `elastic-agent-${agentVersion}-linux-${downloadArch}.tar.gz`;
+  const fileNameNoExtension = `elastic-agent-${agentVersion}-linux-${downloadArch}`;
+  const agentFile = `${fileNameNoExtension}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
   log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
@@ -382,7 +428,11 @@ export const getAgentDownloadUrl = async (
     throw new Error(`Unable to find an Agent download URL for version [${agentVersion}]`);
   }
 
-  return searchResult.packages[agentFile].url;
+  return {
+    url: searchResult.packages[agentFile].url,
+    fileName: agentFile,
+    dirName: fileNameNoExtension,
+  };
 };
 
 /**
@@ -509,4 +559,536 @@ export const getFleetElasticsearchOutputHost = async (kbnClient: KbnClient): Pro
   }
 
   return host;
+};
+
+interface EnrollHostVmWithFleetOptions {
+  hostVm: HostVm;
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  /**
+   * The Fleet Agent Policy ID that should be used to enroll the agent.
+   * If undefined, then a default agent policy wil be created and used to enroll the host
+   */
+  agentPolicyId?: string;
+  /** Agent version. Defaults to the version that the stack is running with */
+  version?: string;
+  closestVersionMatch?: boolean;
+  useAgentCache?: boolean;
+  timeoutMs?: number;
+}
+
+/**
+ * Installs the Elastic agent on the provided Host VM and enrolls with it Fleet
+ * @param hostVm
+ * @param kbnClient
+ * @param log
+ * @param agentPolicyId
+ * @param version
+ * @param closestVersionMatch
+ * @param useAgentCache
+ * @param timeoutMs
+ */
+export const enrollHostVmWithFleet = async ({
+  hostVm,
+  kbnClient,
+  log,
+  agentPolicyId,
+  version,
+  closestVersionMatch = true,
+  useAgentCache = true,
+  timeoutMs = 240000,
+}: EnrollHostVmWithFleetOptions): Promise<Agent> => {
+  log.info(`Enrolling host VM [${hostVm.name}] with Fleet`);
+
+  const agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
+  const agentUrlInfo = await getAgentDownloadUrl(agentVersion, closestVersionMatch, log);
+
+  const agentDownload: DownloadAndStoreAgentResponse = useAgentCache
+    ? await downloadAndStoreAgent(agentUrlInfo.url)
+    : { url: agentUrlInfo.url, directory: '', filename: agentUrlInfo.fileName, fullFilePath: '' };
+
+  log.info(`Installing Elastic Agent`);
+
+  // Mount the directory where the agent download cache is located
+  if (useAgentCache) {
+    const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
+
+    log.debug(
+      `Mounting agents download cache directory [${agentDownload.directory}] to Host VM at [${hostVmDownloadsDir}]`
+    );
+    const downloadsMount = await hostVm.mount(agentDownload.directory, hostVmDownloadsDir);
+
+    log.debug(`Extracting download archive on host VM`);
+    await hostVm.exec(`tar -zxf ${downloadsMount.hostDir}/${agentDownload.filename}`);
+
+    await downloadsMount.unmount();
+  } else {
+    log.debug(`Downloading Elastic Agent to host VM`);
+    await hostVm.exec(`curl -L ${agentDownload.url} -o ${agentDownload.filename}`);
+
+    log.debug(`Extracting download archive on host VM`);
+    await hostVm.exec(`tar -zxf ${agentDownload.filename}`);
+    await hostVm.exec(`rm -f ${agentDownload.filename}`);
+  }
+
+  const policyId = agentPolicyId || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
+  const [fleetServerUrl, enrollmentToken] = await Promise.all([
+    fetchFleetServerUrl(kbnClient),
+    fetchAgentPolicyEnrollmentKey(kbnClient, policyId),
+  ]);
+
+  const agentEnrollCommand = [
+    'sudo',
+
+    `/home/ubuntu/${agentUrlInfo.dirName}/elastic-agent`,
+
+    'install',
+
+    '--insecure',
+
+    '--force',
+
+    '--url',
+    fleetServerUrl,
+
+    '--enrollment-token',
+    enrollmentToken,
+  ].join(' ');
+
+  log.info(`Enrolling Elastic Agent with Fleet`);
+  log.verbose('Enrollment command:', agentEnrollCommand);
+
+  await hostVm.exec(agentEnrollCommand);
+
+  log.info(`Waiting for Agent to check-in with Fleet`);
+  const agent = await waitForHostToEnroll(kbnClient, hostVm.name, timeoutMs);
+
+  return agent;
+};
+
+interface GetOrCreateDefaultAgentPolicyOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+}
+
+/**
+ * Creates a default Fleet Agent policy (if it does not yet exist) for testing. If
+ * policy already exists, then it will be reused.
+ * @param kbnClient
+ * @param log
+ */
+export const getOrCreateDefaultAgentPolicy = async ({
+  kbnClient,
+  log,
+}: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
+  const agentPolicyName = `${CURRENT_USERNAME} test policy`;
+  const existingPolicy = await fetchAgentPolicyList(kbnClient, {
+    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${agentPolicyName}"`,
+  });
+
+  if (existingPolicy.items[0]) {
+    log.info(`Re-using existing Fleet test agent policy`);
+    log.verbose(existingPolicy.items[0]);
+
+    return existingPolicy.items[0];
+  }
+
+  log.info(`Creating new default test/dev Fleet agent policy`);
+
+  const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
+    name: agentPolicyName,
+    description: `Policy created by security solution tooling`,
+    namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
+  };
+
+  const newAgentPolicy = kbnClient
+    .request<CreateAgentPolicyResponse>({
+      path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+      method: 'POST',
+      body: newAgentPolicyData,
+    })
+    .then((response) => response.data.item)
+    .catch(wrapErrorAndRejectPromise);
+
+  log.verbose(newAgentPolicy);
+
+  return newAgentPolicy;
+};
+
+/**
+ * Creates a Fleet Integration Policy using the API
+ * @param kbnClient
+ * @param policyData
+ */
+export const createIntegrationPolicy = async (
+  kbnClient: KbnClient,
+  policyData: CreatePackagePolicyRequest['body']
+): Promise<PackagePolicy> => {
+  return kbnClient
+    .request<CreatePackagePolicyResponse>({
+      path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+      method: 'POST',
+      body: policyData,
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
+    })
+    .then((response) => response.data.item)
+    .catch(wrapErrorAndRejectPromise);
+};
+
+/**
+ * Gets package information from fleet
+ * @param kbnClient
+ * @param packageName
+ */
+export const fetchPackageInfo = async (
+  kbnClient: KbnClient,
+  packageName: string
+): Promise<GetInfoResponse['item']> => {
+  return kbnClient
+    .request<GetInfoResponse>({
+      path: epmRouteService.getInfoPath(packageName),
+      headers: { 'Elastic-Api-Version': '2023-10-31' },
+      method: 'GET',
+    })
+    .then((response) => response.data.item)
+    .catch(wrapErrorAndRejectPromise);
+};
+
+interface AddSentinelOneIntegrationToAgentPolicyOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  agentPolicyId: string;
+  /** The URL to the SentinelOne Management console */
+  consoleUrl: string;
+  /** The SentinelOne API token */
+  apiToken: string;
+  integrationPolicyName?: string;
+  /** Set to `true` if wanting to add the integration to the agent policy even if that agent policy already has one  */
+  force?: boolean;
+}
+
+/**
+ * Creates a Fleet SentinelOne Integration Policy and adds it to the provided Fleet Agent Policy.
+ *
+ * NOTE: by default, a new SentinelOne integration policy will only be created if one is not already
+ * part of the provided Agent policy. Use `force` if wanting to still add it.
+ *
+ * @param kbnClient
+ * @param log
+ * @param agentPolicyId
+ * @param consoleUrl
+ * @param apiToken
+ * @param integrationPolicyName
+ * @param force
+ */
+export const addSentinelOneIntegrationToAgentPolicy = async ({
+  kbnClient,
+  log,
+  agentPolicyId,
+  consoleUrl,
+  apiToken,
+  integrationPolicyName = `SentinelOne policy (${Math.random().toString().substring(3)})`,
+  force = false,
+}: AddSentinelOneIntegrationToAgentPolicyOptions): Promise<PackagePolicy> => {
+  // If `force` is `false and agent policy already has a SentinelOne integration, exit here
+  if (!force) {
+    log.debug(
+      `Checking to see if agent policy [] already includes a SentinelOne integration policy`
+    );
+
+    const agentPolicy = await fetchAgentPolicy(kbnClient, agentPolicyId);
+
+    log.verbose(agentPolicy);
+
+    const integrationPolicies = agentPolicy.package_policies ?? [];
+
+    for (const integrationPolicy of integrationPolicies) {
+      if (integrationPolicy.package?.name === 'sentinel_one') {
+        log.debug(
+          `Returning existing SentinelOne Integration Policy included in agent policy [${agentPolicyId}]`
+        );
+        return integrationPolicy;
+      }
+    }
+  }
+
+  const {
+    version: packageVersion,
+    name: packageName,
+    title: packageTitle,
+  } = await fetchPackageInfo(kbnClient, 'sentinel_one');
+
+  log.debug(
+    `Creating new SentinelOne integration policy [package v${packageVersion}] and adding it to agent policy [${agentPolicyId}]`
+  );
+
+  return createIntegrationPolicy(kbnClient, {
+    name: integrationPolicyName,
+    description: `Created by script: ${__filename}`,
+    namespace: 'default',
+    policy_id: agentPolicyId,
+    enabled: true,
+    inputs: [
+      {
+        type: 'httpjson',
+        policy_template: 'sentinel_one',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.activity',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '1m',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-activity'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.agent',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-agent'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.alert',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-alert'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.group',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-group'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'sentinel_one.threat',
+            },
+            vars: {
+              initial_interval: {
+                value: '24h',
+                type: 'text',
+              },
+              interval: {
+                value: '5m',
+                type: 'text',
+              },
+              tags: {
+                value: ['forwarded', 'sentinel_one-threat'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+        vars: {
+          url: {
+            type: 'text',
+            value: consoleUrl,
+          },
+          enable_request_tracer: {
+            type: 'bool',
+          },
+          api_token: {
+            type: 'password',
+            value: apiToken,
+          },
+          proxy_url: {
+            type: 'text',
+          },
+          ssl: {
+            value:
+              '#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n',
+            type: 'yaml',
+          },
+        },
+      },
+    ],
+    package: {
+      name: packageName,
+      title: packageTitle,
+      version: packageVersion,
+    },
+  });
+};
+
+interface AddEndpointIntegrationToAgentPolicyOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  agentPolicyId: string;
+  name?: string;
+}
+
+/**
+ * Adds Endpoint integration to the Fleet agent policy provided on input
+ * @param kbnClient
+ * @param log
+ * @param agentPolicyId
+ * @param name
+ */
+export const addEndpointIntegrationToAgentPolicy = async ({
+  kbnClient,
+  log,
+  agentPolicyId,
+  name = `${CURRENT_USERNAME} test policy`,
+}: AddEndpointIntegrationToAgentPolicyOptions): Promise<PackagePolicy> => {
+  const agentPolicy = await fetchAgentPolicy(kbnClient, agentPolicyId);
+
+  log.verbose('Agent policy', agentPolicy);
+
+  const integrationPolicies = agentPolicy.package_policies ?? [];
+
+  for (const integrationPolicy of integrationPolicies) {
+    if (integrationPolicy.package?.name === 'endpoint') {
+      log.debug(
+        `Returning existing Endpoint Integration Policy included in agent policy [${agentPolicyId}]`
+      );
+      log.verbose(integrationPolicy);
+
+      return integrationPolicy;
+    }
+  }
+
+  const {
+    version: packageVersion,
+    name: packageName,
+    title: packageTitle,
+  } = await getEndpointPackageInfo(kbnClient);
+
+  const newIntegrationPolicy = await createIntegrationPolicy(kbnClient, {
+    name,
+    description: `Created by: ${__filename}`,
+    namespace: 'default',
+    policy_id: agentPolicyId,
+    enabled: true,
+    inputs: [
+      {
+        enabled: true,
+        streams: [],
+        type: 'ENDPOINT_INTEGRATION_CONFIG',
+        config: {
+          _config: {
+            value: {
+              type: 'endpoint',
+              endpointConfig: {
+                preset: 'EDRComplete',
+              },
+            },
+          },
+        },
+      },
+    ],
+    package: {
+      name: packageName,
+      title: packageTitle,
+      version: packageVersion,
+    },
+  });
+
+  log.verbose(
+    `New Endpoint integration policy created: Name[${name}], Id[${newIntegrationPolicy.id}]`
+  );
+  log.debug(newIntegrationPolicy);
+
+  return newIntegrationPolicy;
 };
