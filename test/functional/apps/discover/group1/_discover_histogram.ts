@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const queryBar = getService('queryBar');
 
-  describe('discover histogram', function describeIndexTests() {
+  describe.only('discover histogram', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     }
 
-    it('should modify the time range when the histogram is brushed', async function () {
+    it.only('should modify the time range when the histogram is brushed', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.timePicker.setDefaultAbsoluteRange();

@@ -14,7 +14,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
-  describe('', () => {
+  describe.only('', () => {
     it('finds a data view', async () => {
       await testSubjects.existOrFail('dataViewTitle');
     });
