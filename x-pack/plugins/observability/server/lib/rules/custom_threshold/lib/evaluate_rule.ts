@@ -14,7 +14,6 @@ import {
   MetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
 import { AdditionalContext, getIntervalInSeconds } from '../utils';
-import { SearchConfigurationType } from '../custom_threshold_executor';
 import {
   AVERAGE_I18N,
   CARDINALITY_I18N,
@@ -24,6 +23,7 @@ import {
   MIN_I18N,
   SUM_I18N,
 } from '../translations';
+import { SearchConfigurationType } from '../types';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';

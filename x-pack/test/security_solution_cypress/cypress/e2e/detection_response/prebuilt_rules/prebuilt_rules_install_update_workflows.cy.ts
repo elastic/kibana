@@ -42,8 +42,7 @@ import {
 } from '../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
-// Failing: See https://github.com/elastic/kibana/issues/168897
-describe.skip(
+describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
   { tags: ['@ess', '@serverless'] },
   () => {
@@ -61,6 +60,9 @@ describe.skip(
         cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackageBulk');
         cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*').as(
           'installPackage'
+        );
+        cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
+          'installPrebuiltRules'
         );
       });
 
@@ -119,9 +121,17 @@ describe.skip(
             addElasticRulesButtonClick();
 
             cy.get(INSTALL_ALL_RULES_BUTTON).should('be.enabled').click();
-            cy.get(TOASTER)
-              .should('be.visible')
-              .should('have.text', `${numberOfRulesToInstall} rules installed successfully.`);
+            cy.wait('@installPrebuiltRules', {
+              timeout: 60000,
+            }).then(() => {
+              cy.get(TOASTER)
+                .should('be.visible')
+                .should(
+                  'have.text',
+                  // i18n uses en-US format for numbers, which uses a comma as a thousands separator
+                  `${numberOfRulesToInstall.toLocaleString('en-US')} rules installed successfully.`
+                );
+            });
           });
         };
         /* Retrieve how many rules were installed from the Fleet package */

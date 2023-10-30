@@ -16,7 +16,7 @@ import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/ser
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
-import { isAlertType } from '../../../rule_schema';
+import { hasValidRuleType } from '../../../rule_schema';
 import { findRules } from '../search/find_rules';
 import { transformRuleToExportableFormat } from '../../utils/utils';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
@@ -126,7 +126,7 @@ export const getRulesFromObjects = async (
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
     if (
       matchingRule != null &&
-      isAlertType(matchingRule) &&
+      hasValidRuleType(matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
       return {
