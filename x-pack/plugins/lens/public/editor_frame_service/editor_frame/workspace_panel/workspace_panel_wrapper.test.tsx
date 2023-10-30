@@ -11,40 +11,15 @@ import {
   createMockVisualization,
   createMockFramePublicAPI,
   FrameMock,
-  makeLensStore,
+  renderWithReduxStore,
 } from '../../../mocks';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { updateVisualizationState, LensAppState } from '../../../state_management';
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { LensInspector } from '../../../lens_inspector_service';
-import { RenderOptions, render, screen } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n-react';
+import { screen } from '@testing-library/react';
 import faker from 'faker';
 import { SettingsMenu } from '../../../app_plugin/settings_menu';
-
-const renderWithReduxStore = (
-  ui: JSX.Element,
-  options: RenderOptions,
-  { preloadedState }: { preloadedState: Partial<LensAppState> } = { preloadedState: {} }
-) => {
-  const { store } = makeLensStore({ preloadedState });
-
-  const Wrapper: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => (
-    <Provider store={store}>
-      <I18nProvider>{children}</I18nProvider>
-    </Provider>
-  );
-
-  const rtlRender = render(ui, { wrapper: Wrapper, ...options });
-
-  return {
-    store,
-    ...rtlRender,
-  };
-};
 
 describe('workspace_panel_wrapper', () => {
   let mockVisualization: jest.Mocked<Visualization>;

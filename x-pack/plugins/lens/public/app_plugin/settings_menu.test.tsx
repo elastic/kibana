@@ -6,34 +6,21 @@
  */
 
 import React from 'react';
-import { makeLensStore } from '../mocks';
+import { renderWithReduxStore } from '../mocks';
 import { SettingsMenu } from './settings_menu';
-import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { Provider } from 'react-redux';
+import { screen, waitFor } from '@testing-library/react';
 
 describe('settings menu', () => {
   const onCloseMock = jest.fn();
 
   const renderSettingsMenu = (propsOverrides = {}) => {
-    const { store: lensStore } = makeLensStore({});
-
-    const Wrapper: React.FC<{
-      children: React.ReactNode;
-    }> = ({ children }) => (
-      <Provider store={lensStore}>
-        <I18nProvider>{children}</I18nProvider>
-      </Provider>
-    );
-
-    const rtlRender = render(
+    const rtlRender = renderWithReduxStore(
       <SettingsMenu
         anchorElement={document.createElement('button')}
         isOpen
         onClose={onCloseMock}
         {...propsOverrides}
-      />,
-      { wrapper: Wrapper }
+      />
     );
 
     const toggleAutoApply = () => {

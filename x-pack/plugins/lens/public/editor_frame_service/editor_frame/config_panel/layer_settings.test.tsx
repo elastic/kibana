@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 import faker from 'faker';
 import { createMockFramePublicAPI, createMockVisualization } from '../../../mocks';
 import { LayerSettings } from './layer_settings';
-import { renderWithReduxStore } from '../../../test-utils';
+import { renderWithReduxStore } from '../../../mocks';
 
 describe('LayerSettings', () => {
   const renderLayerSettings = (propsOverrides = {}) => {

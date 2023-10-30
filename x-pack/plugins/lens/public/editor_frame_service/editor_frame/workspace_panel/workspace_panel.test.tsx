@@ -15,8 +15,9 @@ import {
   createExpressionRendererMock,
   createMockFramePublicAPI,
   createMockedDragDropContext,
+  renderWithReduxStore,
 } from '../../../mocks';
-import { renderWithReduxStore } from '../../../test-utils';
+
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
 jest.mock('../../../debounced_component', () => {
   return {
