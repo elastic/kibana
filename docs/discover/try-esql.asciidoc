@@ -3,24 +3,19 @@
 
 preview::[]
 
-The Elasticsearch Query Language, ES|QL, has been created to make exploring your data faster and easier using the {kib} Discover application. 
+The Elasticsearch Query Language, ES|QL, has been created to make exploring your data faster and easier using the Discover application. 
 
-
-For easy navigation, include the links to the key sections in a bulleted 
-list. This way, users can click exactly where they want to go instead of 
-scrolling down the page:
-
-* <<task-section-description, esql elasticsearch docs link>>
-* <<section2-description, a link to using esql in kibana?>>
-
-TIP: Need introduction inspiration? Here are some good examples:
-
-* <<canvas, Canvas>>
-
+in the tutorial below we use the kibana sample logs
 
 [float]
-[[task-section-description]]
-=== Task section title
+[[prerequisite]]
+=== Prerequisite 
+
+To be able to select **Try {esql}** from the Data views menu the `discover:enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
+
+[float]
+[[tutorial]]
+=== Tutorial 
 
 Provide an example or walkthrough of how to use the feature. Whenever possible, 
 use the <<add-sample-data, sample data>>.
@@ -35,6 +30,8 @@ To ....[provide steps]:
 +
 [role="screenshot"]
 image:images/try-esql.png[An image of the Discover UI where users can try the new ES|QL feature]
+
+
 
 [float]
 [[esql-kibana-query-bar]]

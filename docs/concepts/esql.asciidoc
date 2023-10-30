@@ -3,66 +3,43 @@
 
 preview::[]
 
-The Elasticsearch Query Language, ES|QL, has been created to make exploring your data faster and easier using the {kib} Discover application. ES|QL was designed to combine the 9 other languages that can be used in {es} (KQL, SQL, EQL, DSL Lucene, Painless, Canvas, Timelion, and Vega). From version 8.11.0 you can try this new language. 
+The Elasticsearch Query Language, {esql}, has been created to make exploring your data faster and easier using the **Discover** application. {esql} was designed to combine the 9 other languages that can be used in {es} (KQL, SQL, EQL, DSL Lucene, Painless, Canvas, Timelion, and Vega). From version 8.11 you can try this new feature, which is enabled by default. 
 
 [role="screenshot"]
-image:images/try-esql.png[]
+image:images/try-esql.png[An image of the Discover UI where users can access the ES|QL feature, width=30%]
 
 This new piped language allows you to chain together multiple commands to query your data. Based on the query, Lens suggestions in Discover create a visualization of the query results.
 
-[role="screenshot"]
-image:images/esql-activated.png[An image of the Discover UI where users can try the new ES|QL feature]
+{esql} comes with it's own dedicated {esql} Compute Engine for greater efficiency. From one query you can search, aggregate, calculate and perform data transformations without leaving **Discover**. Write your query directly in **Discover** or use the **{kib} Dev Tools** with the {ref}/esql-rest.html[ES|QL API]. 
 
-ES|QL comes with it's own dedicated {es} Query Engine for greater efficiency. This engine delivers new capabilities like lookup[insert link]. From one query, search, aggregate, calculate and perform data transformations. Write your query directly in Discover or use the ES|QL API. 
-
-for api post/_query or use discover. 
-
-
+{esql} also features in-app help...so you can get started faster.... 
 [role="screenshot"]
 image:images/esql-in-app-help.png[An image of the Discover UI where users can browse the in-app help]
-*In-app help** include image
 
-
-Fast Time to Insights: Create visualizations, calculations, and aggregations directly from Kibana Discover to condense investigation workflows in one screen to get answers faster.
+For more detailed information about the {esql} language, refer to {ref}/esql-language.html[Learning {esql}].
 
 * <<discover, Try ES|QL>>
 
-
-For easy navigation, include the links to the key sections in a bulleted 
-list. This way, users can click exactly where they want to go instead of 
-scrolling down the page:
-
-* <<task-section-description, Task section title>>
-* <<section2-description, Task section title>>
-* <<section3-description, Task section title>>
-
-TIP: Keep lists to 5-7 items, plus or minus 2 when absolutely necessary.
-
-
-TIP: Need introduction inspiration? Here are some good examples:
-* <<dashboard, Dashboard>>
 * <<canvas, Canvas>>
 
 [float]
 [[observability]]
 ==== {observability}
 
-Include content that further describes the feature and its capabilities.
+{esql} makes it much easier to analyze metrics, logs and traces from a single query. Find performance issues fast by defining fields on the fly, enriching data with lookups, and using simultaneous query processing. Combining {esql} with {ml} and AiOps can improve detection accuracy and use aggregated value thresholds.   
 
-TIP: Need concept inspiration? Here are some good examples:
-* <<elasticsearch-version, Elasticsearch version>>
-* <<getting-started, Sample data>>
+* <<discover, Try ES|QL>>
 
 [float]
 [[security]]
 ==== Security 
 
-Include content that further describes the feature and its capabilities.
+Use {esql} to retrieve important information for investigation by using lookups. Enrich data and create new fields on the go to gain valuable insight for faster decision-making and actions. For example, perform a lookup on an IP address to identify its geographical location, its association with known malicious entities, or whether it belongs to a known cloud service provider all from one search bar. 
 
-TIP: Need concept inspiration? Here are some good examples:
-* <<elasticsearch-version, Elasticsearch version>>
-* <<getting-started, Sample data>>
+{esql} ensures more accurate alerts by incorporating aggregated values in detection rules.
 
 Alterting
 
 Alerting: With ES|QL write observability and security alerts with aggregated values as thresholds. Enhance detection accuracy by emphasizing meaningful trends over isolated incidents, reducing false positives, and providing more actionable notifications.
+
+Limitations
