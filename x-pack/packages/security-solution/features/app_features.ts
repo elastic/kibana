@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { getSecurityFeature } from './src/security';
+export { getSecurityFeature, PRIVILEGE_API_TAGS } from './src/security';
 export { getCasesFeature } from './src/cases';
 export { getAssistantFeature } from './src/assistant';

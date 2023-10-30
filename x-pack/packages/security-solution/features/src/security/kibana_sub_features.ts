@@ -14,6 +14,16 @@ import { SecuritySubFeatureId } from '../app_features_keys';
 import { APP_ID } from '../constants';
 import type { SecurityFeatureParams } from './types';
 
+/**
+ * List of Kibana tags defined for sub-feature privileges.
+ */
+export const PRIVILEGE_API_TAGS = Object.freeze({
+  hostIsolationAll: Object.freeze([`${APP_ID}-writeHostIsolationRelease`]),
+  processOperationsAll: Object.freeze([`${APP_ID}-writeProcessOperations`]),
+  endpointListRead: Object.freeze([`${APP_ID}-readEndpointList`]),
+  responseActionsHistoryLogRead: Object.freeze([`${APP_ID}-readActionsLogManagement`]),
+});
+
 const endpointListSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
@@ -51,7 +61,7 @@ const endpointListSubFeature: SubFeatureConfig = {
           ui: ['writeEndpointList', 'readEndpointList'],
         },
         {
-          api: [`${APP_ID}-readEndpointList`],
+          api: PRIVILEGE_API_TAGS.endpointListRead,
           id: 'endpoint_list_read',
           includeIn: 'none',
           name: 'Read',
@@ -378,7 +388,7 @@ const responseActionsHistorySubFeature: SubFeatureConfig = {
           ui: ['writeActionsLogManagement', 'readActionsLogManagement'],
         },
         {
-          api: [`${APP_ID}-readActionsLogManagement`],
+          api: PRIVILEGE_API_TAGS.responseActionsHistoryLogRead,
           id: 'actions_log_management_read',
           includeIn: 'none',
           name: 'Read',
@@ -415,7 +425,7 @@ const hostIsolationSubFeature: SubFeatureConfig = {
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: [`${APP_ID}-writeHostIsolationRelease`],
+          api: PRIVILEGE_API_TAGS.hostIsolationAll,
           id: 'host_isolation_all',
           includeIn: 'none',
           name: 'All',
@@ -455,7 +465,7 @@ const processOperationsSubFeature: SubFeatureConfig = {
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: [`${APP_ID}-writeProcessOperations`],
+          api: PRIVILEGE_API_TAGS.processOperationsAll,
           id: 'process_operations_all',
           includeIn: 'none',
           name: 'All',

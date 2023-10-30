@@ -10,6 +10,8 @@ import { getSecurityBaseKibanaFeature } from './kibana_features';
 import { securitySubFeaturesMap, getSecurityBaseKibanaSubFeatureIds } from './kibana_sub_features';
 import type { SecurityFeatureParams } from './types';
 
+export { PRIVILEGE_API_TAGS } from './kibana_sub_features';
+
 export const getSecurityFeature = (
   params: SecurityFeatureParams
 ): AppFeatureParams<SecuritySubFeatureId> => ({
