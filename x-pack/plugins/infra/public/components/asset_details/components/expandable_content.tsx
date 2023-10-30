@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useToggle from 'react-use/lib/useToggle';
+import type { Field } from '../tabs/metadata/utils';
 
 interface ExpandableContentProps {
-  values: string | string[] | undefined;
+  values?: Field['value'];
 }
 export const ExpandableContent = (props: ExpandableContentProps) => {
   const { values } = props;
