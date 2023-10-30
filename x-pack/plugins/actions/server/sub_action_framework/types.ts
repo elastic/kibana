@@ -89,7 +89,7 @@ export interface SubActionConnectorType<Config, Secrets> {
    * when the features were registered with kibana.
    * @param args
    */
-  getSubActionPrivileges?: (args: { subActionName: string }) => string[];
+  getSubActionPrivileges?: (args: { subActionName: string }) => string[] | readonly string[];
 }
 
 export interface ExecutorParams extends ActionTypeParams {

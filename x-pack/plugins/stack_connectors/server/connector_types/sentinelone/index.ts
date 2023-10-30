@@ -11,7 +11,12 @@ import {
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
+import { PRIVILEGE_API_TAGS } from '@kbn/security-solution-features/app_features';
+import {
+  SENTINELONE_CONNECTOR_ID,
+  SENTINELONE_TITLE,
+  SUB_ACTION,
+} from '../../../common/sentinelone/constants';
 import {
   SentinelOneConfigSchema,
   SentinelOneSecretsSchema,
@@ -35,4 +40,26 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
   supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
+  getSubActionPrivileges: (params) => {
+    const subActionName = params.subActionName as SUB_ACTION;
+
+    switch (subActionName) {
+      case SUB_ACTION.ISOLATE_AGENT:
+      case SUB_ACTION.RELEASE_AGENT:
+        return PRIVILEGE_API_TAGS.hostIsolationAll;
+
+      case SUB_ACTION.KILL_PROCESS:
+        return PRIVILEGE_API_TAGS.processOperationsAll;
+
+      case SUB_ACTION.GET_AGENTS:
+        return PRIVILEGE_API_TAGS.endpointListRead;
+
+      case SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS:
+      case SUB_ACTION.GET_REMOTE_SCRIPT_STATUS:
+        return PRIVILEGE_API_TAGS.responseActionsHistoryLogRead;
+    }
+
+    // trigger authz to fail since we don't recognize the sub-action name
+    return [`unknown-sub-action-name-${subActionName}`];
+  },
 });
