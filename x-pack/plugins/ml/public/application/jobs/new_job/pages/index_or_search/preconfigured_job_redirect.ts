@@ -8,7 +8,7 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { mlJobService } from '../../../../services/job_service';
-import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { Job, Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(
@@ -19,7 +19,7 @@ export async function preConfiguredJobRedirect(
   const { createdBy, job, datafeed } = mlJobService.tempJobCloningObjects;
 
   if (job && datafeed) {
-    const dataViewId = await getDataViewIdFromName(datafeed, dataViewsService);
+    const dataViewId = await getDataViewIdFromName(job, datafeed, dataViewsService);
     if (dataViewId === null) {
       return Promise.resolve();
     }
@@ -73,6 +73,7 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
 }
 
 async function getDataViewIdFromName(
+  job: Job,
   datafeed: Datafeed,
   dataViewsService: DataViewsContract
 ): Promise<string | null> {
@@ -80,9 +81,19 @@ async function getDataViewIdFromName(
     throw new Error('Data views are not initialized!');
   }
 
-  const [dv] = await dataViewsService?.find(datafeed.indices.join(','));
-  if (!dv) {
-    return null;
+  const indexPattern = datafeed.indices.join(',');
+
+  const [dv] = await dataViewsService?.find(indexPattern);
+  if (!dv || dv.getIndexPattern() !== indexPattern) {
+    // create a temporary data view if we can't find one
+    // matching the index pattern
+    const dataView = await dataViewsService.create({
+      id: undefined,
+      name: indexPattern,
+      title: indexPattern,
+      timeFieldName: job.data_description.time_field!,
+    });
+    return dataView.id ?? null;
   }
   return dv.id ?? dv.title;
 }
