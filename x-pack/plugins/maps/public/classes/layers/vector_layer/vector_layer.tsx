@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { asyncForEach } from '@kbn/std';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
@@ -281,7 +282,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       const error = joinDataRequest?.getError();
       if (error) {
         errors.push({
-          title: i18n.translate('xpack.maps.vectorLayer.joinErrorTitle', {
+          title: i18n.translate('xpack.maps.vectorLayer.joinFetchErrorTitle', {
             defaultMessage: `An error occurred when loading join metrics`,
           }),
           error,
@@ -560,6 +561,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
   async _syncJoin({
     join,
+    joinIndex,
     featureCollection,
     startLoading,
     stopLoading,
@@ -571,6 +573,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     inspectorAdapters,
   }: {
     join: InnerJoin;
+    joinIndex: number;
     featureCollection?: FeatureCollection;
   } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
@@ -601,6 +604,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       return {
         dataHasChanged: false,
         join,
+        joinIndex,
         propertiesMap: prevDataRequest?.getData() as PropertiesMap,
       };
     }
@@ -620,6 +624,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       return {
         dataHasChanged: true,
         join,
+        joinIndex,
         propertiesMap,
       };
     } catch (error) {
@@ -634,14 +639,24 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     syncContext: DataRequestContext,
     style: IVectorStyle,
     featureCollection?: FeatureCollection
-  ) {
-    const joinSyncs = this.getValidJoins().map(async (join) => {
-      await this._syncJoinStyleMeta(syncContext, join, style);
-      await this._syncJoinFormatters(syncContext, join, style);
-      return this._syncJoin({ join, featureCollection, ...syncContext });
+  ): Promise<JoinState[]> {
+    const joinsWithIndex = this.getJoins().map((join, index) => {
+      return {
+        join,
+        joinIndex: index,
+      };
+    }).filter(({ join }) => {
+      return join.hasCompleteConfig();
     });
 
-    return await Promise.all(joinSyncs);
+    const joinStates: JoinState[] = [];
+    await asyncForEach(joinsWithIndex, async ({ join, joinIndex }) => {
+      await this._syncJoinStyleMeta(syncContext, join, style);
+      await this._syncJoinFormatters(syncContext, join, style);
+      const joinState = await this._syncJoin({ join, joinIndex, featureCollection, ...syncContext });
+      joinStates.push(joinState);
+    });
+    return joinStates;
   }
 
   async _syncJoinStyleMeta(syncContext: DataRequestContext, join: InnerJoin, style: IVectorStyle) {

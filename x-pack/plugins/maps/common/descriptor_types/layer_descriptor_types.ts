@@ -27,6 +27,7 @@ export type Attribution = {
 export type JoinDescriptor = {
   leftField?: string;
   right: Partial<JoinSourceDescriptor>;
+  error?: string;
 };
 
 export type TileMetaFeature = Feature & {
