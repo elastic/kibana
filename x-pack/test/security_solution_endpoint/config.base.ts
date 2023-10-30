@@ -6,6 +6,7 @@
  */
 
 import { Config } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import {
@@ -13,58 +14,70 @@ import {
   createEndpointDockerConfig,
 } from '../security_solution_endpoint_api_int/registry';
 
-export const generateConfig = ({
+export const generateConfig = async ({
+  ftrConfigProviderContext,
   baseConfig,
   testFiles,
   junitReportName,
   kbnServerArgs = [],
   mochaGrep,
 }: {
+  ftrConfigProviderContext: FtrConfigProviderContext;
   baseConfig: Config;
   testFiles: string[];
   junitReportName: string;
   mochaGrep: string;
   kbnServerArgs?: string[];
-}): Config => ({
-  ...baseConfig.getAll(),
-  pageObjects,
-  testFiles,
-  dockerServers: createEndpointDockerConfig(),
-  junit: {
-    reportName: junitReportName,
-  },
-  services,
-  apps: {
-    ...baseConfig.get('apps'),
-    ['securitySolutionManagement']: {
-      pathname: '/app/security/administration',
+}): Promise<Config> => {
+  const { readConfigFile } = ftrConfigProviderContext;
+
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
+
+  return {
+    ...baseConfig.getAll(),
+    pageObjects,
+    testFiles,
+    dockerServers: createEndpointDockerConfig(),
+    junit: {
+      reportName: junitReportName,
     },
-    ['security']: {
-      pathname: '/app/security',
+    services,
+    apps: {
+      ...xpackFunctionalConfig.get('apps'),
+      ...baseConfig.get('apps'),
+
+      ['securitySolutionManagement']: {
+        pathname: '/app/security/administration',
+      },
+      ['security']: {
+        pathname: '/app/security',
+      },
+      ['securitySolutionTimelines']: {
+        pathname: '/app/security/timelines',
+      },
     },
-    ['securitySolutionTimelines']: {
-      pathname: '/app/security/timelines',
+    kbnTestServer: {
+      ...baseConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseConfig.get('kbnTestServer.serverArgs'),
+        // if you return an empty string here the kibana server will not start properly but an empty array works
+        ...getRegistryUrlAsArray(),
+        // always install Endpoint package by default when Fleet sets up
+        `--xpack.fleet.packages.0.name=endpoint`,
+        `--xpack.fleet.packages.0.version=latest`,
+        // this will be removed in 8.7 when the file upload feature is released
+        `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
+        ...kbnServerArgs,
+      ],
     },
-  },
-  kbnTestServer: {
-    ...baseConfig.get('kbnTestServer'),
-    serverArgs: [
-      ...baseConfig.get('kbnTestServer.serverArgs'),
-      // if you return an empty string here the kibana server will not start properly but an empty array works
-      ...getRegistryUrlAsArray(),
-      // always install Endpoint package by default when Fleet sets up
-      `--xpack.fleet.packages.0.name=endpoint`,
-      `--xpack.fleet.packages.0.version=latest`,
-      // this will be removed in 8.7 when the file upload feature is released
-      `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
-      ...kbnServerArgs,
-    ],
-  },
-  mochaOpts: {
-    ...baseConfig.get('mochaOpts'),
-    grep: mochaGrep,
-  },
-  layout: {
-    fixedHeaderHeight: 200,
-  },
-});
+    mochaOpts: {
+      ...baseConfig.get('mochaOpts'),
+      grep: mochaGrep,
+    },
+    layout: {
+      fixedHeaderHeight: 200,
+    },
+  };
+};

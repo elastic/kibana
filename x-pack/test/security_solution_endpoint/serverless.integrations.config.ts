@@ -9,12 +9,15 @@ import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
+  const { readConfigFile } = ftrConfigProviderContext;
+
   const svlBaseConfig = await readConfigFile(
     require.resolve('../../test_serverless/shared/config.base.ts')
   );
 
   return generateConfig({
+    ftrConfigProviderContext,
     baseConfig: svlBaseConfig,
     testFiles: [resolve(__dirname, './apps/integrations')],
     junitReportName: 'X-Pack Endpoint Integrations Functional Tests on Serverless',

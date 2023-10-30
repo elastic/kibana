@@ -9,12 +9,15 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 import { generateConfig } from './config.base';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
+  const { readConfigFile } = ftrConfigProviderContext;
+
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
   );
 
   return generateConfig({
+    ftrConfigProviderContext,
     baseConfig: xpackFunctionalConfig,
     testFiles: [resolve(__dirname, './apps/endpoint')],
     junitReportName: 'X-Pack Endpoint Functional Tests on ESS',
