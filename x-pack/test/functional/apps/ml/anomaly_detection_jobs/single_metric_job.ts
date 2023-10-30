@@ -236,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
       await browser.refresh();
 
       await ml.testExecution.logTestStep(
-        'job cloning clicks the clone action and displays an error toast'
+        'job cloning clicks the clone action and loads the single metric wizard'
       );
       await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
     });
