@@ -11,44 +11,35 @@ export interface Field {
   name: string;
   value?: string | string[];
 }
-
-export interface FieldsByCategoryValue {
-  value?: string | boolean | string[] | { [key: string]: string };
-}
-export interface FieldsByCategory {
-  [key: string]: FieldsByCategoryValue['value'];
+interface FieldsByCategory {
+  [key: string]: string | boolean | string[] | { [key: string]: string };
 }
 
 export const getAllFields = (metadata: InfraMetadata | null) => {
   if (!metadata?.info) return [];
-  const tempPropertyMap = new Map<string, FieldsByCategoryValue['value']>();
 
   const mapNestedProperties = (category: 'cloud' | 'host' | 'agent', property: string) => {
     const fieldsByCategory: FieldsByCategory = metadata?.info?.[`${category}`] ?? {};
     if (fieldsByCategory.hasOwnProperty(property)) {
-      tempPropertyMap.set(property, fieldsByCategory[property]);
-      const isBooleanValue = typeof tempPropertyMap.get(property) === 'boolean';
+      const value = fieldsByCategory[property];
 
-      if (
-        typeof tempPropertyMap.get(property) === 'string' ||
-        isBooleanValue ||
-        Array.isArray(tempPropertyMap.get(property))
-      ) {
+      if (typeof value === 'boolean') {
         return {
           name: `${category}.${property}`,
-          value: isBooleanValue
-            ? String(tempPropertyMap.get(property))
-            : tempPropertyMap.get(property),
+          value: String(value),
+        };
+      }
+
+      if (typeof value === 'string' || Array.isArray(value)) {
+        return {
+          name: `${category}.${property}`,
+          value,
         };
       } else {
-        const subProps = [];
-        for (const [prop, subProp] of Object.entries(tempPropertyMap.get(property) ?? {})) {
-          subProps.push({
-            name: `${category}.${property}.${prop}`,
-            value: subProp,
-          });
-        }
-        return subProps;
+        return Object.entries(value ?? {}).map(([prop, subProp]) => ({
+          name: `${category}.${property}.${prop}`,
+          value: subProp,
+        }));
       }
     }
     return [];
