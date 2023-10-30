@@ -7,7 +7,7 @@
 
 // THIS IS A PARSER FOR A SUB operations/expression/statement of TinyMath  A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =
 
-interface AggMap {
+export interface AggMap {
   [key: string]: any;
 }
 interface PainlessTinyMathParserProps {

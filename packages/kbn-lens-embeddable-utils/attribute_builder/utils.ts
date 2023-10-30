@@ -27,7 +27,7 @@ export type DateHistogramColumnParams = DateHistogramIndexPatternColumn['params'
 
 export type TopValuesColumnParams = Pick<
   TermsIndexPatternColumn['params'],
-  'size' | 'orderDirection' | 'orderBy'
+  'size' | 'orderDirection' | 'orderBy' | 'secondaryFields' | 'accuracyMode'
 >;
 
 export const getHistogramColumn = ({
