@@ -13,8 +13,9 @@ import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
-import { createApmRule, deleteApmRules } from './helpers/alerting_api_helper';
+import { createApmRule } from './helpers/alerting_api_helper';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
+import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -35,6 +36,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const spikeEnd = moment().subtract(1, 'hours').valueOf();
 
       before(async () => {
+        await cleanup();
+
         const serviceA = apm
           .service({ name: 'a', environment: 'production', agentName: 'java' })
           .instance('a');
@@ -64,19 +67,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await createAndRunApmMlJobs({ es, ml, environments: ['production'], logger });
       });
 
-      after(async () => {
-        await cleanup();
-      });
+      // after(async () => {
+      //   await cleanup();
+      // });
 
       async function cleanup() {
-        try {
-          await synthtraceEsClient.clean();
-          await deleteApmRules(supertest);
-          await ml.cleanMlIndices();
-          logger.info('Completed cleaned up');
-        } catch (e) {
-          logger.info('Could not cleanup', e);
-        }
+        await synthtraceEsClient.clean();
+        await cleanupRuleAndAlertState({ es, supertest, logger });
+        await ml.cleanMlIndices();
       }
 
       describe('with ml jobs', () => {

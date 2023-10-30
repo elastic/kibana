@@ -252,6 +252,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               )
             );
           });
+
           it('returns model plots with latest bucket matching the end time', () => {
             expect(allAnomalyTimeseries.every((spec) => last(spec.bounds)?.x === endTimeMs));
           });
