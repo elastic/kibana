@@ -52,7 +52,7 @@ function generateLogsData({ from, to, count = 1 }: { from: string; to: string; c
   return range
     .interval('1m')
     .rate(1)
-    .generator((timestamp, index) =>
+    .generator((timestamp) =>
       services.map((service) => service.message('A sample log').timestamp(timestamp))
     );
 }

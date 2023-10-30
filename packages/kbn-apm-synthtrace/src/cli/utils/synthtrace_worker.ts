@@ -13,6 +13,8 @@ import { getEsClient } from './get_es_client';
 import { getScenario } from './get_scenario';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
+import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../../..';
+import { getLogsEsClient } from './get_logs_es_client';
 
 export interface WorkerData {
   bucketFrom: Date;
@@ -34,7 +36,20 @@ async function start() {
     version,
   });
 
+  const logsEsClient = getLogsEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
+  const clientType = runOptions.type;
+
   const file = runOptions.file;
+
+  let client: ApmSynthtraceEsClient | LogsSynthtraceEsClient = apmEsClient;
+  if (clientType === 'log') {
+    client = logsEsClient;
+  }
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
@@ -65,8 +80,8 @@ async function start() {
   }, 5000);
 
   await logger.perf('index_scenario', async () => {
-    await apmEsClient.index(generators);
-    await apmEsClient.refresh();
+    await client.index(generators);
+    await client.refresh();
   });
 }
 

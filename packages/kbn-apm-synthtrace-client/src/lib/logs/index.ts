@@ -9,17 +9,19 @@
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
-export interface LogDocument extends Fields {
-  'input.type': string;
-  'log.file.path'?: string;
-  'service.name': string;
-  'data_stream.namespace': string;
-  'data_stream.type': string;
-  'data_stream.dataset': string;
-  message?: string;
-  'event.dataset': string;
-  'log.level'?: string;
-}
+export type LogDocument = Fields &
+  Partial<{
+    'input.type': string;
+    'log.file.path'?: string;
+    'service.name': string;
+    'data_stream.namespace': string;
+    'data_stream.type': string;
+    'data_stream.dataset': string;
+    message?: string;
+    'event.dataset': string;
+    'log.level'?: string;
+    'host.name'?: string;
+  }>;
 
 class Log extends Serializable<LogDocument> {
   service(name: string) {
@@ -57,6 +59,7 @@ function service(serviceName: string = 'synth-service'): Log {
     'data_stream.type': 'logs',
     'data_stream.dataset': 'synth',
     'event.dataset': 'synth',
+    'host.name': 'synth-host',
   });
 }
 

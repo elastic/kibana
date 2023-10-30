@@ -10,6 +10,7 @@ import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray } from 'lodash';
 import { PassThrough, Readable, Writable } from 'stream';
 import { isGeneratorObject } from 'util/types';
+import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../../..';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
@@ -23,9 +24,14 @@ export async function startLiveDataUpload({
   start: Date;
 }) {
   const file = runOptions.file;
+  const clientType = runOptions.type;
 
-  const { logger, apmEsClient } = await bootstrap(runOptions);
+  const { logger, apmEsClient, logsEsClient } = await bootstrap(runOptions);
 
+  let client: ApmSynthtraceEsClient | LogsSynthtraceEsClient = apmEsClient;
+  if (clientType === 'log') {
+    client = logsEsClient;
+  }
   const scenario = await getScenario({ file, logger });
   const { generate } = await scenario({ ...runOptions, logger });
 
@@ -36,7 +42,7 @@ export async function startLiveDataUpload({
     objectMode: true,
   });
 
-  apmEsClient.index(stream);
+  client.index(stream);
 
   function closeStream() {
     stream.end(() => {
@@ -74,7 +80,7 @@ export async function startLiveDataUpload({
 
       await awaitStream(concatenatedStream);
 
-      await apmEsClient.refresh();
+      await client.refresh();
 
       requestedUntil = bucketTo;
     }
@@ -85,6 +91,7 @@ export async function startLiveDataUpload({
     await delay(bucketSizeInMs);
   } while (true);
 }
+
 async function delay(ms: number) {
   return await new Promise((resolve) => setTimeout(resolve, ms));
 }
