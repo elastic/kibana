@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -239,15 +238,7 @@ export default function AlertDetailsRelatedEvents({
                     style={{ marginTop: 10, height: 400 }}
                   >
                     <EuiText textAlign="right" size="s" style={{ marginTop: 3 }}>
-                      {metricAggType}
-                      <FormattedMessage
-                        id="xpack.observability.relatedEventsTab.TextLabel"
-                        defaultMessage="("
-                      />
-                      {relatedMetric}
-                      {i18n.translate('xpack.observability.relatedEventsTab.TextLabel', {
-                        defaultMessage: ')',
-                      })}
+                      {metricAggType} ({relatedMetric})
                     </EuiText>
                     <EuiHorizontalRule size="full" margin="xs" />
                     <lens.EmbeddableComponent
