@@ -4656,6 +4656,16 @@
           "section": "def-public.SloEditLocatorParams",
           "text": "SloEditLocatorParams"
         },
+        ">; sloListLocator: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        "SloListLocatorParams",
         ">; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -13744,7 +13754,7 @@
                 "label": "requiresPageReload",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -13839,7 +13849,7 @@
                 "label": "requiresPageReload",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -13934,7 +13944,7 @@
                 "label": "requiresPageReload",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "x-pack/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -15464,6 +15474,21 @@
         "description": [],
         "signature": [
           "\"slo\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.sloListLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloListLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_LIST_LOCATOR\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,

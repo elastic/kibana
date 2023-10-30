@@ -10,22 +10,16 @@ import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect, useRe
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiButtonIcon,
   EuiDataGridStyle,
   EuiSkeletonText,
   EuiDataGridRefProps,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
-import {
-  ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
-  ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
-} from './translations';
+import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
@@ -216,12 +210,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   ])();
 
   const leadingControlColumns = useMemo(() => {
-    const isActionButtonsColumnActive =
-      props.showExpandToDetails || Boolean(renderCustomActionsRow);
-
     let controlColumns = [...props.leadingControlColumns];
 
-    if (isActionButtonsColumnActive) {
+    if (renderCustomActionsRow) {
       controlColumns = [
         {
           id: 'expandColumn',
@@ -238,38 +229,24 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               visibleRowIndex: number;
             };
 
+            if (!ecsAlertsData[visibleRowIndex]) {
+              return null;
+            }
+
             return (
               <EuiFlexGroup gutterSize="none" responsive={false}>
-                {props.showExpandToDetails && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
-                      <EuiButtonIcon
-                        size="s"
-                        iconType="expand"
-                        color="primary"
-                        onClick={() => {
-                          setFlyoutAlertIndex(visibleRowIndex);
-                        }}
-                        data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
-                        aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-                {renderCustomActionsRow &&
-                  ecsAlertsData[visibleRowIndex] &&
-                  renderCustomActionsRow({
-                    alert: alerts[visibleRowIndex],
-                    ecsAlert: ecsAlertsData[visibleRowIndex],
-                    nonEcsData: oldAlertsData[visibleRowIndex],
-                    rowIndex: visibleRowIndex,
-                    setFlyoutAlert: handleFlyoutAlert,
-                    id: props.id,
-                    cveProps,
-                    setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
-                    refresh,
-                    clearSelection,
-                  })}
+                {renderCustomActionsRow({
+                  alert: alerts[visibleRowIndex],
+                  ecsAlert: ecsAlertsData[visibleRowIndex],
+                  nonEcsData: oldAlertsData[visibleRowIndex],
+                  rowIndex: visibleRowIndex,
+                  setFlyoutAlert: handleFlyoutAlert,
+                  id: props.id,
+                  cveProps,
+                  setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
+                  refresh,
+                  clearSelection,
+                })}
               </EuiFlexGroup>
             );
           },
@@ -293,9 +270,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     isBulkActionsColumnActive,
     props.id,
     props.leadingControlColumns,
-    props.showExpandToDetails,
     renderCustomActionsRow,
-    setFlyoutAlertIndex,
     getSetIsActionLoadingCallback,
     refresh,
     clearSelection,

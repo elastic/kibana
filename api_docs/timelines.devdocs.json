@@ -4419,7 +4419,7 @@
         "signature": [
           "{ type?: ",
           "DataProviderType",
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; name: string; enabled: boolean; kqlQuery: string; excluded: boolean; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
