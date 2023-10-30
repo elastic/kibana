@@ -467,12 +467,16 @@ describe('EPM index template install', () => {
       ingest_pipeline: 'default',
     } as RegistryDataStream;
 
-    const { assetsToAdd } = prepareToInstallTemplates({
-      name: 'package',
-      version: '0.0.1',
-      data_streams: [dataStreamDatasetIsPrefixUnset],
-    } as ArchivePackage, [], []);
+    const { assetsToAdd } = prepareToInstallTemplates(
+      {
+        name: 'package',
+        version: '0.0.1',
+        data_streams: [dataStreamDatasetIsPrefixUnset],
+      } as ArchivePackage,
+      [],
+      []
+    );
 
     expect(assetsToAdd).not.toContainEqual({ id: 'logs@settings', type: 'component_template' });
-  })
+  });
 });

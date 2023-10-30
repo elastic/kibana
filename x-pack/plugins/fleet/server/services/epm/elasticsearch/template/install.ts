@@ -38,6 +38,7 @@ import {
   FLEET_COMPONENT_TEMPLATES,
   PACKAGE_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
+  STACK_COMPONENT_TEMPLATES,
 } from '../../../../constants';
 
 import { getESAssetMetadata } from '../meta';
@@ -618,13 +619,7 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
         (componentTemplateId) => !FLEET_COMPONENT_TEMPLATE_NAMES.includes(componentTemplateId)
       )
       // Filter stack component templates shared between integrations
-      .filter(
-        (componentTemplateId) => [
-          `metrics@tsdb-settings`,
-          `logs@settings`,
-          `metrics@settings`
-        ].indexOf(componentTemplateId) === -1
-      )
+      .filter((componentTemplateId) => !STACK_COMPONENT_TEMPLATES.includes(componentTemplateId))
       .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,

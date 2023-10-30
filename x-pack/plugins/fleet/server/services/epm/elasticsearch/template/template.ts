@@ -27,6 +27,9 @@ import { getRegistryDataStreamAssetBaseName } from '../../../../../common/servic
 import {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -117,15 +120,17 @@ export function getTemplate({
 }
 
 const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): string[] => {
-  if (type === 'traces') {
-    return [];
+  if (type === 'metrics') {
+    if (isIndexModeTimeSeries) {
+      return [STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS];
+    }
+
+    return [STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS];
+  } else if (type === 'logs') {
+    return [STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
   }
 
-  if (type === 'metrics' && isIndexModeTimeSeries) {
-    return [`metrics@tsdb-settings`];
-  }
-
-  return [`${type}@settings`];
+  return [];
 };
 
 /**
