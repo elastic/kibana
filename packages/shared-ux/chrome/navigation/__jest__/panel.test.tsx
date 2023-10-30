@@ -98,4 +98,81 @@ describe('Panel', () => {
       await runTests('uiComponents', renderResult);
     }
   });
+
+  test('should not render group if all children are hidden', async () => {
+    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
+
+    const runTests = async (type: TestType, { queryByTestId }: RenderResult) => {
+      try {
+        expect(queryByTestId(/panelOpener-root.group1/)).toBeNull();
+        expect(queryByTestId(/panelOpener-root.group2/)).toBeNull();
+        expect(queryByTestId(/panelOpener-root.group3/)).toBeVisible();
+      } catch (e) {
+        errorHandler(type)(e);
+      }
+    };
+
+    // -- Default navigation
+    {
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          isCollapsible: false,
+          children: [
+            {
+              id: 'group1',
+              link: 'dashboards',
+              renderAs: 'panelOpener',
+              children: [{ link: 'unknown' }],
+            },
+            {
+              id: 'group2',
+              link: 'dashboards',
+              renderAs: 'panelOpener',
+              children: [{ link: 'management', sideNavStatus: 'hidden' }],
+            },
+            {
+              id: 'group3',
+              link: 'dashboards',
+              renderAs: 'panelOpener',
+              children: [{ link: 'management' }], // sideNavStatus is "visible" by default
+            },
+          ],
+        },
+      ];
+
+      const renderResult = renderNavigation({
+        navTreeDef: { body: navigationBody },
+        onProjectNavigationChange,
+      });
+
+      await runTests('treeDef', renderResult);
+
+      renderResult.unmount();
+    }
+
+    // -- With UI Components
+    {
+      const renderResult = renderNavigation({
+        navigationElement: (
+          <Navigation>
+            <Navigation.Group id="root" isCollapsible={false}>
+              <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
+                <Navigation.Item<any> link="unknown" />
+              </Navigation.Group>
+              <Navigation.Group id="group2" link="dashboards" renderAs="panelOpener">
+                <Navigation.Item link="management" sideNavStatus="hidden" />
+              </Navigation.Group>
+              <Navigation.Group id="group3" link="dashboards" renderAs="panelOpener">
+                <Navigation.Item link="management" />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        ),
+        onProjectNavigationChange,
+      });
+      await runTests('uiComponents', renderResult);
+    }
+  });
 });
