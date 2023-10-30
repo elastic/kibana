@@ -9,11 +9,11 @@ import type { InfraMetadata } from '../../../../../common/http_api';
 
 export interface Field {
   name: string;
-  value?: string | boolean | string[] | undefined;
+  value?: string | string[];
 }
 
 export interface FieldsByCategoryValue {
-  value?: string | boolean | string[] | undefined | { [key: string]: string };
+  value?: string | boolean | string[] | { [key: string]: string };
 }
 export interface FieldsByCategory {
   [key: string]: FieldsByCategoryValue['value'];
@@ -27,18 +27,18 @@ export const getAllFields = (metadata: InfraMetadata | null) => {
     const fieldsByCategory: FieldsByCategory = metadata?.info?.[`${category}`] ?? {};
     if (fieldsByCategory.hasOwnProperty(property)) {
       tempPropertyMap.set(property, fieldsByCategory[property]);
+      const isBooleanValue = typeof tempPropertyMap.get(property) === 'boolean';
 
       if (
         typeof tempPropertyMap.get(property) === 'string' ||
-        typeof tempPropertyMap.get(property) === 'boolean' ||
+        isBooleanValue ||
         Array.isArray(tempPropertyMap.get(property))
       ) {
         return {
           name: `${category}.${property}`,
-          value:
-            tempPropertyMap.get(property) === false
-              ? String(tempPropertyMap.get(property))
-              : tempPropertyMap.get(property),
+          value: isBooleanValue
+            ? String(tempPropertyMap.get(property))
+            : tempPropertyMap.get(property),
         };
       } else {
         const subProps = [];
