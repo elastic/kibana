@@ -112,7 +112,7 @@ async function getJoinError(joinStatus: {
     joinStatus.joinState.propertiesMap && joinStatus.joinState.propertiesMap.size > 0;
 
   if (!hasTerms || joinStatus.joinedWithAtLeastOneFeature) {
-    return undefined;
+    return;
   }
     
   const leftFieldName = await joinStatus.joinState.join.getLeftField().getLabel();
