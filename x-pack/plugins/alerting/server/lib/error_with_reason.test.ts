@@ -7,10 +7,15 @@
 
 import { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
 import { RuleExecutionStatusErrorReasons } from '../types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 describe('ErrorWithReason', () => {
   const plainError = new Error('well, actually');
-  const errorWithReason = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, plainError);
+  const errorWithReason = new ErrorWithReason(
+    RuleExecutionStatusErrorReasons.Decrypt,
+    plainError,
+    TaskErrorSource.FRAMEWORK
+  );
 
   test('ErrorWithReason class', () => {
     expect(errorWithReason.message).toBe(plainError.message);

@@ -34,7 +34,7 @@ export interface RuleTaskRunResult {
   state: RuleTaskState;
   schedule: IntervalSchedule | undefined;
   monitoring: RuleMonitoring | undefined;
-  controlledError?: TaskRunError;
+  taskRunError?: TaskRunError;
 }
 
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state

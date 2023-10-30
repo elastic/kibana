@@ -1393,7 +1393,7 @@ describe('TaskManagerRunner', () => {
         );
       });
 
-      test('emits TaskEvent when a recurring task returns a success result with controlledError', async () => {
+      test('emits TaskEvent when a recurring task returns a success result with taskRunError', async () => {
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
         const onTaskEvent = jest.fn();
@@ -1411,7 +1411,7 @@ describe('TaskManagerRunner', () => {
                   return {
                     runAt,
                     state: {},
-                    controlledError: createTaskRunError(new Error('test')),
+                    taskRunError: createTaskRunError(new Error('test')),
                   };
                 },
               }),
@@ -1437,7 +1437,7 @@ describe('TaskManagerRunner', () => {
         );
       });
 
-      test('emits TaskEvent when a recurring task returns a success result with controlledError but completes after timeout', async () => {
+      test('emits TaskEvent when a recurring task returns a success result with taskRunError but completes after timeout', async () => {
         fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
@@ -1457,7 +1457,7 @@ describe('TaskManagerRunner', () => {
                   return {
                     runAt,
                     state: {},
-                    controlledError: createTaskRunError(new Error('test')),
+                    taskRunError: createTaskRunError(new Error('test')),
                   };
                 },
               }),
@@ -2094,7 +2094,7 @@ describe('TaskManagerRunner', () => {
                   return { data: { indirectParams: { foo: 'bar' } } };
                 },
                 async run() {
-                  return { state: {}, controlledError: createTaskRunError(new Error('test')) };
+                  return { state: {}, taskRunError: createTaskRunError(new Error('test')) };
                 },
               }),
               indirectParamsSchema: schema.object({
@@ -2112,7 +2112,7 @@ describe('TaskManagerRunner', () => {
         expect(instance.numSkippedRuns).toBe(mockTaskInstance.numSkippedRuns);
         expect(logger.warn).not.toHaveBeenCalled();
         expect(result).toEqual(
-          asOk({ state: {}, controlledError: createTaskRunError(new Error('test')) })
+          asOk({ state: {}, taskRunError: createTaskRunError(new Error('test')) })
         );
       });
 
@@ -2248,7 +2248,7 @@ describe('TaskManagerRunner', () => {
                   return { data: { indirectParams: { baz: 'bar' } } };
                 },
                 async run() {
-                  return { state: {}, controlledError: createTaskRunError(new Error('test')) };
+                  return { state: {}, taskRunError: createTaskRunError(new Error('test')) };
                 },
               }),
               indirectParamsSchema: schema.object({
@@ -2278,7 +2278,7 @@ describe('TaskManagerRunner', () => {
           'Task Manager has reached the max skip attempts for task bar/foo'
         );
         expect(result).toEqual(
-          asOk({ state: {}, controlledError: createTaskRunError(new Error('test')) })
+          asOk({ state: {}, taskRunError: createTaskRunError(new Error('test')) })
         );
       });
     });

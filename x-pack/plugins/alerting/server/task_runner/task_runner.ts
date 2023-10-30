@@ -21,20 +21,20 @@ import {
   ErrorWithReason,
   executionStatusFromError,
   executionStatusFromState,
-  ruleExecutionStatusToRaw,
+  getNextRun,
   isRuleSnoozed,
   lastRunFromError,
-  getNextRun,
+  ruleExecutionStatusToRaw,
 } from '../lib';
 import {
-  RuleExecutionStatus,
-  RuleExecutionStatusErrorReasons,
   IntervalSchedule,
   RawRuleExecutionStatus,
+  RawRuleLastRun,
   RawRuleMonitoring,
+  RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
   RuleTaskState,
   RuleTypeRegistry,
-  RawRuleLastRun,
 } from '../types';
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -43,18 +43,18 @@ import { partiallyUpdateAlert } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  RuleTypeParams,
-  RuleTypeState,
   parseDuration,
   RawAlertInstance,
-  RuleLastRunOutcomeOrderMap,
   RuleAlertData,
-  SanitizedRule,
+  RuleLastRunOutcomeOrderMap,
   RuleNotifyWhen,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
 import {
   RuleTaskInstance,
   RuleTaskRunResult,
@@ -542,7 +542,7 @@ export class TaskRunner<
             throw new ErrorWithReason(
               RuleExecutionStatusErrorReasons.Execute,
               err,
-              TaskErrorSource.RULE_TYPE
+              TaskErrorSource.USER
             );
           }
         }
@@ -803,7 +803,11 @@ export class TaskRunner<
         const data = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
         this.ruleData = { data };
       } catch (err) {
-        const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
+        const error = new ErrorWithReason(
+          RuleExecutionStatusErrorReasons.Decrypt,
+          err,
+          TaskErrorSource.FRAMEWORK
+        );
         this.ruleData = { error };
       }
       return this.ruleData;
@@ -945,7 +949,7 @@ export class TaskRunner<
       }
     );
 
-    const getControlledError = (scheduleResult: Result<IntervalSchedule, ErrorWithReason>) => {
+    const getTaskRunError = (scheduleResult: Result<IntervalSchedule, ErrorWithReason>) => {
       if (isErr(scheduleResult)) {
         const { error, source } = scheduleResult.error;
         return createTaskRunError(error, source);
@@ -956,7 +960,7 @@ export class TaskRunner<
       state: transformedState,
       schedule: scheduleWithInterval,
       monitoring: this.ruleMonitoring.getMonitoring(),
-      controlledError: getControlledError(schedule),
+      taskRunError: getTaskRunError(schedule),
     };
   }
 

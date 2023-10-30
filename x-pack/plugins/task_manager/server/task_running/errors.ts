@@ -62,14 +62,9 @@ export function isRetryableError(error: Error | TaskRunError) {
   return null;
 }
 
-export function throwRetryableError(
-  error: Error,
-  shouldRetry: Date | boolean,
-  errorSource = TaskErrorSource.FRAMEWORK
-) {
+export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
   (error as TaskRunError)[code] = CODE_RETRYABLE;
   (error as TaskRunError)[retry] = shouldRetry;
-  (error as TaskRunError)[source] = errorSource;
   throw error;
 }
 

@@ -45,7 +45,7 @@ import {
 } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
 import { ActionTypeDisabledError } from './errors';
 
 export interface TaskRunnerContext {
@@ -136,7 +136,8 @@ export class TaskRunnerFactory {
             },
           };
           return actionData;
-        } catch (error) {
+        } catch (err) {
+          const error = err.source ? err : createTaskRunError(err, TaskErrorSource.FRAMEWORK);
           actionData = { error };
           return { error };
         }
@@ -188,9 +189,9 @@ export class TaskRunnerFactory {
           logger.error(`Action '${actionId}' failed: ${e.message}`);
           if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
-            throwUnrecoverableError(e, TaskErrorSource.USER);
+            throwUnrecoverableError(e, TaskErrorSource.CONNECTOR_TYPE);
           }
-          throw createTaskRunError(e); // FRAMEWORK
+          throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
@@ -201,9 +202,8 @@ export class TaskRunnerFactory {
           // So what we have to do is throw when the return status is `error`.
 
           throw throwRetryableError(
-            new Error(executorResult.message),
-            executorResult.retry as boolean | Date,
-            TaskErrorSource.USER
+            createTaskRunError(new Error(executorResult.message), TaskErrorSource.USER),
+            executorResult.retry as boolean | Date
           );
         }
       },

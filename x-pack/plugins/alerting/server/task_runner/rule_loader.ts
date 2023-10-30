@@ -73,7 +73,7 @@ export function validateRule<Params extends RuleTypeParams>(
     throw new ErrorWithReason(
       RuleExecutionStatusErrorReasons.Disabled,
       new Error(`Rule failed to execute because rule ran after it was disabled.`),
-      TaskErrorSource.USER
+      TaskErrorSource.FRAMEWORK
     );
   }
   alertingEventLogger.setRuleName(rule.name);
@@ -91,11 +91,7 @@ export function validateRule<Params extends RuleTypeParams>(
   try {
     validatedParams = validateRuleTypeParams<Params>(rule.params, paramValidator);
   } catch (err) {
-    throw new ErrorWithReason(
-      RuleExecutionStatusErrorReasons.Validate,
-      err,
-      TaskErrorSource.RULE_TYPE
-    );
+    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err, TaskErrorSource.USER);
   }
 
   if (rule.monitoring) {

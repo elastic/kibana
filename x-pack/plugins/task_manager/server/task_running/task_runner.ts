@@ -664,12 +664,12 @@ export class TaskManagerRunner implements TaskRunner {
           skipAttempts,
         }: SuccessfulRunResult & { attempts: number; skipAttempts: number }) => {
           const { startedAt, schedule, numSkippedRuns } = this.instance.task;
-          const { controlledError } = unwrap(result);
+          const { taskRunError } = unwrap(result);
           let requeueInvalidTaskAttempts = skipAttempts || numSkippedRuns || 0;
 
           // Alerting TaskRunner returns SuccessResult even though there is an error
-          // therefore we use "controlledError" to be sure that there wasn't any error
-          if (isUndefined(skipAttempts) && controlledError === undefined) {
+          // therefore we use "taskRunError" to be sure that there wasn't any error
+          if (isUndefined(skipAttempts) && taskRunError === undefined) {
             requeueInvalidTaskAttempts = 0;
           }
 
@@ -747,7 +747,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     await eitherAsync(
       result,
-      async ({ runAt, schedule, controlledError }: SuccessfulRunResult) => {
+      async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
         const processedResult = {
           task,
           persistence:
@@ -757,12 +757,12 @@ export class TaskManagerRunner implements TaskRunner {
             : this.processResultWhenDone()),
         };
 
-        // Alerting task runner returns SuccessfulRunResult with controlledError
+        // Alerting task runner returns SuccessfulRunResult with taskRunError
         // when the alerting task fails, so we check for this condition in order
         // to emit the correct task run event for metrics collection
-        // controlledError contains the "source" (TaskErrorSource) data
+        // taskRunError contains the "source" (TaskErrorSource) data
         const taskRunEvent =
-          controlledError !== undefined
+          taskRunError !== undefined
             ? asTaskRunEvent(
                 this.id,
                 asErr({

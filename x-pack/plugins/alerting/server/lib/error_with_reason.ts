@@ -13,11 +13,11 @@ export class ErrorWithReason extends Error {
   public readonly error: Error;
   public readonly source: TaskErrorSource;
 
-  constructor(reason: RuleExecutionStatusErrorReasons, error: Error, source?: TaskErrorSource) {
+  constructor(reason: RuleExecutionStatusErrorReasons, error: Error, source: TaskErrorSource) {
     super(error.message);
     this.error = error;
     this.reason = reason;
-    this.source = source || TaskErrorSource.FRAMEWORK;
+    this.source = source;
   }
 }
 
