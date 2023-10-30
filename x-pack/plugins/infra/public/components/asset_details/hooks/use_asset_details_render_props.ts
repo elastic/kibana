@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import type { AssetDetailsProps } from '../types';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
-import { useMetadataStateProviderContext } from './use_metadata_state';
+import { useMetadataStateContext } from './use_metadata_state';
 
 export type UseAssetDetailsRenderProps = Pick<
   AssetDetailsProps,
@@ -17,7 +17,7 @@ export type UseAssetDetailsRenderProps = Pick<
 
 export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
   const [urlState] = useAssetDetailsUrlState();
-  const { metadata } = useMetadataStateProviderContext();
+  const { metadata } = useMetadataStateContext();
   const { assetId, assetName, assetType, ...rest } = props;
 
   // When the asset asset.name is known we can load the page faster
