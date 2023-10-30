@@ -14,9 +14,11 @@ import {
   EuiSkeletonText,
   EuiDataGridRefProps,
   EuiFlexGroup,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
+import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
@@ -64,6 +66,55 @@ const Row = styled.div`
   display: flex;
   min-width: fit-content;
 `;
+
+type CustomGridBodyProps = Pick<
+  Parameters<Exclude<EuiDataGridProps['renderCustomGridBody'], undefined>>['0'],
+  'Cell' | 'visibleColumns'
+> & {
+  alertsData: FetchAlertData['oldAlertsData'];
+  isLoading: boolean;
+  pagination: RuleRegistrySearchRequestPagination;
+  actualGridStyle: EuiDataGridStyle;
+  stripes?: boolean;
+};
+
+const CustomGridBody = ({
+  alertsData,
+  isLoading,
+  pagination,
+  actualGridStyle,
+  visibleColumns,
+  Cell,
+  stripes,
+}: CustomGridBodyProps) => {
+  return (
+    <>
+      {alertsData
+        .concat(isLoading ? Array.from({ length: pagination.pageSize - alertsData.length }) : [])
+        .map((_row, rowIndex) => (
+          <Row
+            role="row"
+            key={`${rowIndex},${pagination.pageIndex}`}
+            // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
+            // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
+            // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
+            // shouldHighlightRow is correct
+            className={`euiDataGridRow ${
+              stripes && rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
+            } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
+          >
+            {visibleColumns.map((_col, colIndex) => (
+              <Cell
+                colIndex={colIndex}
+                visibleRowIndex={rowIndex}
+                key={`${rowIndex},${colIndex}`}
+              />
+            ))}
+          </Row>
+        ))}
+    </>
+  );
+};
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -291,14 +342,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     if (shouldHighlightRowCheck) {
       mappedRowClasses = alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
         (rowClasses, alert, index) => {
-          if (props.gridStyle?.stripes && index % 2 !== 0) {
-            // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
-            // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
-            // Adding strips only on even rows. It will be replace by alertsTableHighlightedRow if
-            // shouldHighlightRow is correct
-            rowClasses[index + pagination.pageIndex * pagination.pageSize] =
-              'euiDataGridRow--striped';
-          }
           if (shouldHighlightRowCheck(alert)) {
             rowClasses[index + pagination.pageIndex * pagination.pageSize] =
               'alertsTableHighlightedRow';
@@ -310,13 +353,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       );
     }
     return mappedRowClasses;
-  }, [
-    props.shouldHighlightRow,
-    alerts,
-    pagination.pageIndex,
-    pagination.pageSize,
-    props.gridStyle,
-  ]);
+  }, [props.shouldHighlightRow, alerts, pagination.pageIndex, pagination.pageSize]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
@@ -447,6 +484,23 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     return mergedGridStyle;
   }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
 
+  const renderCustomGridBody = useCallback<
+    Exclude<EuiDataGridProps['renderCustomGridBody'], undefined>
+  >(
+    ({ visibleColumns: _visibleColumns, Cell }) => (
+      <CustomGridBody
+        visibleColumns={_visibleColumns}
+        Cell={Cell}
+        actualGridStyle={actualGridStyle}
+        alertsData={oldAlertsData}
+        pagination={pagination}
+        isLoading={isLoading}
+        stripes={props.gridStyle?.stripes}
+      />
+    ),
+    [actualGridStyle, oldAlertsData, pagination, isLoading, props.gridStyle?.stripes]
+  );
+
   return (
     <InspectButtonContainer>
       <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
@@ -486,40 +540,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             rowHeightsOptions={props.rowHeightsOptions}
             onColumnResize={onColumnResize}
             ref={dataGridRef}
-            renderCustomGridBody={
-              props.dynamicRowHeight
-                ? ({ visibleColumns: _visibleColumns, Cell }) => {
-                    return (
-                      <>
-                        {oldAlertsData
-                          .concat(
-                            isLoading
-                              ? Array.from({ length: pagination.pageSize - oldAlertsData.length })
-                              : []
-                          )
-                          .map((_row, rowIndex) => (
-                            <Row
-                              role="row"
-                              className={`euiDataGridRow ${
-                                rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
-                              } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
-                              key={rowIndex}
-                            >
-                              {_visibleColumns.map((_col, colIndex) => (
-                                <Cell
-                                  colIndex={colIndex}
-                                  visibleRowIndex={rowIndex}
-                                  key={`${rowIndex},${colIndex}`}
-                                  style={{ flexShrink: 0 }}
-                                />
-                              ))}
-                            </Row>
-                          ))}
-                      </>
-                    );
-                  }
-                : undefined
-            }
+            renderCustomGridBody={props.dynamicRowHeight ? renderCustomGridBody : undefined}
           />
         )}
       </section>
