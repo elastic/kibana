@@ -223,7 +223,8 @@ export function registerEsqlFunction({
       \`DISSECT\` enables you to extract structured data out of a string.
       It matches the string against a delimiter-based pattern, and extracts
       the specified keys as columns. It uses the same syntax as the
-      Elasticsearch Dissect Processor. Some examples:
+      Elasticsearch Dissect Processor. DO NOT UNDER ANY CIRCUMSTANCES use
+      single quotes instead of double quotes. Some examples:
 
       - \`ROW a = "foo bar" | DISSECT a "%{b} %{c}";\`
       - \`ROW a = "foo bar baz" | DISSECT a "%{b} %{?c} %{d}";\`
@@ -432,9 +433,10 @@ export function registerEsqlFunction({
       ### TO_BOOLEAN, TO_DATETIME, TO_DOUBLE, TO_INTEGER, TO_IP, TO_LONG,
       TO_RADIANS, TO_STRING,TO_UNSIGNED_LONG, TO_VERSION
 
-      Converts a column to another type. Supported types are: . Some examples:
+      Converts a column to another type. Some examples:
       - \`| EVAL version = TO_VERSION("1.2.3")\`
       - \`| EVAL as_bool = TO_BOOLEAN(my_boolean_string)\`
+      - \`| EVAL percent = TO_DOUBLE(part) / TO_DOUBLE(total)\`
       
       ### TRIM
 
