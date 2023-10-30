@@ -13,6 +13,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { getServicesMock } from '../mocks/src/jest';
 import { NavigationProvider } from '../src/services';
 import { DefaultNavigation } from '../src/ui/default_navigation';
+import type { PanelContentProvider } from '../src/ui';
 import type { NavigationTreeDefinition, ProjectNavigationTreeDefinition } from '../src/ui/types';
 import { NavigationServices } from '../types';
 
@@ -27,15 +28,21 @@ export const renderNavigation = ({
   navigationElement,
   services: overrideServices = {},
   onProjectNavigationChange = () => undefined,
+  panelContentProvider,
 }: {
   navTreeDef?: NavigationTreeDefinition;
   projectNavigationTree?: ProjectNavigationTreeDefinition;
   navigationElement?: React.ReactElement;
   services?: Partial<NavigationServices>;
   onProjectNavigationChange?: ProjectNavigationChangeListener;
+  panelContentProvider?: PanelContentProvider;
 }): RenderResult => {
   const element = navigationElement ?? (
-    <DefaultNavigation projectNavigationTree={projectNavigationTree} navigationTree={navTreeDef} />
+    <DefaultNavigation
+      projectNavigationTree={projectNavigationTree}
+      navigationTree={navTreeDef}
+      panelContentProvider={panelContentProvider}
+    />
   );
 
   const renderResult = render(

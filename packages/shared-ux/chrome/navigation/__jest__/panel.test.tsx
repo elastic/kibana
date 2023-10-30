@@ -8,6 +8,8 @@
 import './setup_jest_mocks';
 import React from 'react';
 import { type RenderResult } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
@@ -19,6 +21,7 @@ import {
   getMockFn,
   ProjectNavigationChangeListener,
 } from './utils';
+import { PanelContentProvider } from '../src/ui';
 
 describe('Panel', () => {
   test('should render group as panel opener', async () => {
@@ -174,5 +177,111 @@ describe('Panel', () => {
       });
       await runTests('uiComponents', renderResult);
     }
+  });
+
+  describe('custom content', () => {
+    test('should render custom component inside the panel', async () => {
+      const panelContentProvider: PanelContentProvider = (id) => {
+        return {
+          content: ({ closePanel, selectedNode, activeNodes }) => {
+            const [path0 = []] = activeNodes;
+            return (
+              <div data-test-subj="customPanelContent">
+                <p data-test-subj="customPanelSelectedNode">{selectedNode.id}</p>
+                <ul data-test-subj="customPanelActiveNodes">
+                  {path0.map((node) => (
+                    <li key={node.id}>{node.id}</li>
+                  ))}
+                </ul>
+                <button data-test-subj="customPanelCloseBtn" onClick={closePanel}>
+                  Close panel
+                </button>
+              </div>
+            );
+          },
+        };
+      };
+
+      const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([
+        [
+          {
+            id: 'activeGroup1',
+            title: 'Group 1',
+            path: ['activeGroup1'],
+          },
+          {
+            id: 'activeItem1',
+            title: 'Item 1',
+            path: ['activeGroup1', 'activeItem1'],
+          },
+        ],
+      ]);
+
+      const runTests = async (type: TestType, { queryByTestId }: RenderResult) => {
+        try {
+          queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+
+          expect(queryByTestId(/customPanelContent/)).toBeVisible();
+          // Test that the selected node is correclty passed
+          expect(queryByTestId(/customPanelSelectedNode/)?.textContent).toBe('root.group1');
+          // Test that the active nodes are correclty passed
+          expect(queryByTestId(/customPanelActiveNodes/)?.textContent).toBe(
+            'activeGroup1activeItem1'
+          );
+          // Test that handler to close the panel is correctly passed
+          queryByTestId(/customPanelCloseBtn/)?.click(); // close the panel
+          expect(queryByTestId(/customPanelContent/)).toBeNull();
+          expect(queryByTestId(/sideNavPanel/)).toBeNull();
+        } catch (e) {
+          errorHandler(type)(e);
+        }
+      };
+
+      // -- Default navigation
+      {
+        const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+          {
+            type: 'navGroup',
+            id: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                link: 'dashboards',
+                renderAs: 'panelOpener',
+                children: [{ link: 'management' }],
+              },
+            ],
+          },
+        ];
+
+        const renderResult = renderNavigation({
+          navTreeDef: { body: navigationBody },
+          panelContentProvider,
+          services: { activeNodes$ },
+        });
+
+        await runTests('treeDef', renderResult);
+
+        renderResult.unmount();
+      }
+
+      // -- With UI Components
+      {
+        const renderResult = renderNavigation({
+          navigationElement: (
+            <Navigation panelContentProvider={panelContentProvider}>
+              <Navigation.Group id="root" isCollapsible={false}>
+                <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
+                  <Navigation.Item link="management" />
+                </Navigation.Group>
+              </Navigation.Group>
+            </Navigation>
+          ),
+          services: { activeNodes$ },
+        });
+        await runTests('uiComponents', renderResult);
+      }
+    });
   });
 });
