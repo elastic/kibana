@@ -263,7 +263,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   it(`URL is updated when filters are updated`, () => {
     openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
-    cy.get(OPTION_SELECTABLE(1, 'high')).click({});
+    cy.get(OPTION_SELECTABLE(1, 'high')).click();
     closePageFilterPopover(1);
 
     const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
@@ -327,14 +327,11 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('Impact of inputs', () => {
-    afterEach(() => {
-      resetFilters();
-    });
     it('should recover from invalid kql Query result', () => {
       // do an invalid search
       //
       kqlSearch('\\');
-      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      cy.get(ALERTS_REFRESH_BTN).click();
       waitForPageFilters();
       cy.get(TOASTER).should('contain.text', 'KQLSyntaxError');
       togglePageFilterPopover(0);
