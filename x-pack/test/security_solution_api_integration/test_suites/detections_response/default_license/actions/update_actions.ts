@@ -10,9 +10,8 @@ import { omit } from 'lodash';
 
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
   removeServerGeneratedProperties,
@@ -29,32 +28,40 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
   getSimpleRuleOutput,
   ruleToUpdateSchema,
+  updateUsername,
 } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  // TODO: add a new service
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   const getImmutableRule = async () => {
     await installMockPrebuiltRules(supertest, es);
     return getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
   };
 
-  describe('update_actions', () => {
+  describe('@serverless @ess update_actions', () => {
     describe('updating actions', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(path);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(path);
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -70,14 +77,16 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
         const bodyToCompare = removeServerGeneratedProperties(updatedRule);
 
-        const expected = {
+        const expectedRule = {
           ...getSimpleRuleOutputWithWebHookAction(
             `${bodyToCompare.actions?.[0].id}`,
             `${bodyToCompare.actions?.[0].uuid}`
           ),
           revision: 1, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
         };
-        expect(bodyToCompare).to.eql(expected);
+        const expectedRuleWithUserUpdated = updateUsername(expectedRule, ELASTICSEARCH_USERNAME);
+
+        expect(bodyToCompare).to.eql(expectedRuleWithUserUpdated);
       });
 
       it('should be able to add a new webhook action and then remove the action from the rule again', async () => {
@@ -92,7 +101,8 @@ export default ({ getService }: FtrProviderContext) => {
           ...getSimpleRuleOutput(),
           revision: 2, // revision bump is required since this is an updated rule and this is part of the testing that we do bump the revision number on update
         };
-        expect(bodyToCompare).to.eql(expected);
+        const expectedRuleWithUserUpdated = updateUsername(expected, ELASTICSEARCH_USERNAME);
+        expect(bodyToCompare).to.eql(expectedRuleWithUserUpdated);
       });
 
       it('should be able to create a new webhook action and attach it to a rule without a meta field and run it correctly', async () => {
@@ -104,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
-      it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
+      it('@skipInQA should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
         const hookAction = await createNewAction(supertest, log);
         const rule = getSimpleRule();
         await createRule(supertest, log, rule);
@@ -116,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id: updatedRule.id });
       });
 
-      it('should not change properties of immutable rule when applying actions to it', async () => {
+      it('@skipInQA should not change properties of immutable rule when applying actions to it', async () => {
         // actions and throttle to be removed from assertion (it asserted in a separate test case)
         const actionsProps = ['actions', 'throttle'];
 
@@ -139,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(expected.immutable).to.be(true); // It should stay immutable true when returning
       });
 
-      it('should be able to create a new webhook action and attach it to an immutable rule', async () => {
+      it('@skipInQA should be able to create a new webhook action and attach it to an immutable rule', async () => {
         const immutableRule = await getImmutableRule();
         const hookAction = await createNewAction(supertest, log);
         const ruleToUpdate = getRuleWithWebHookAction(
@@ -155,11 +165,12 @@ export default ({ getService }: FtrProviderContext) => {
           `${bodyToCompare.actions?.[0].uuid}`
         );
 
-        expect(bodyToCompare.actions).to.eql(expected.actions);
-        expect(bodyToCompare.throttle).to.eql(expected.throttle);
+        const expectedRuleWithUserUpdated = updateUsername(expected, ELASTICSEARCH_USERNAME);
+        expect(bodyToCompare.actions).to.eql(expectedRuleWithUserUpdated.actions);
+        expect(bodyToCompare.throttle).to.eql(expectedRuleWithUserUpdated.throttle);
       });
 
-      it('should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
+      it('@skipInQA should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
         const immutableRule = await getImmutableRule();
         const hookAction = await createNewAction(supertest, log);
         const ruleToUpdate = getRuleWithWebHookAction(
@@ -173,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status.rules_not_installed).to.eql(0);
       });
 
-      it('should be able to create a new webhook action, attach it to an immutable rule and the rule should stay immutable when searching against immutable tags', async () => {
+      it('@skipInQA should be able to create a new webhook action, attach it to an immutable rule and the rule should stay immutable when searching against immutable tags', async () => {
         const immutableRule = await getImmutableRule();
         const hookAction = await createNewAction(supertest, log);
         const ruleToUpdate = getRuleWithWebHookAction(
@@ -190,8 +201,8 @@ export default ({ getService }: FtrProviderContext) => {
           `${bodyToCompare.actions?.[0].id}`,
           `${bodyToCompare.actions?.[0].uuid}`
         );
-
-        expect(bodyToCompare.actions).to.eql(expected.actions);
+        const expectedRuleWithUserUpdated = updateUsername(expected, ELASTICSEARCH_USERNAME);
+        expect(bodyToCompare.actions).to.eql(expectedRuleWithUserUpdated.actions);
         expect(bodyToCompare.immutable).to.be(true);
       });
     });
