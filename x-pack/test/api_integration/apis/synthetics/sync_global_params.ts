@@ -22,8 +22,6 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/162594
-  // Failing: See https://github.com/elastic/kibana/issues/162594
   describe('SyncGlobalParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
@@ -278,8 +276,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const deleteResponse = await supertestAPI
         .delete(SYNTHETICS_API_URLS.PARAMS)
-        .query({ ids: JSON.stringify(ids) })
         .set('kbn-xsrf', 'true')
+        .send({ ids })
         .expect(200);
 
       expect(deleteResponse.body).to.have.length(2);
