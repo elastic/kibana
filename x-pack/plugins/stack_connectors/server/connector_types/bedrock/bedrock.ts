@@ -93,6 +93,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
         },
         body,
         path,
+        service: 'bedrock',
       },
       {
         secretAccessKey: this.secrets.secret,
