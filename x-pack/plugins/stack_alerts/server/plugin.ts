@@ -16,8 +16,7 @@ export class AlertingBuiltinsPlugin
 {
   private readonly logger: Logger;
 
-  constructor(private readonly ctx: PluginInitializerContext) {
-    this.ctx = ctx;
+  constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
   }
 
