@@ -142,7 +142,7 @@ export interface SignificantItem extends FieldValuePair {
   /** The normalized score for the significant item. */
   normalizedScore: number;
 
-  /** An optional histogram of significant item items. */
+  /** An optional histogram for the significant item. */
   histogram?: SignificantItemHistogramItem[];
 
   /** Indicates if the significant item is unique within a group. */
