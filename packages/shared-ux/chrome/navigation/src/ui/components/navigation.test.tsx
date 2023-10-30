@@ -15,6 +15,8 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject, of, type Observable } from 'rxjs';
+import { EuiThemeProvider } from '@elastic/eui';
+
 import { getServicesMock } from '../../../mocks/src/jest';
 import { NavigationProvider } from '../../services';
 import { Navigation } from './navigation';
@@ -38,20 +40,32 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation>
-            <Navigation.Group id="group1" defaultIsCollapsed={false}>
-              <Navigation.Item id="item1" title="Item 1" href="https://foo" />
-              <Navigation.Item id="item2" title="Item 2" href="https://foo" />
-              <Navigation.Group id="group1A" title="Group1A" defaultIsCollapsed={false}>
-                <Navigation.Item id="item1" title="Group 1A Item 1" href="https://foo" />
-                <Navigation.Group id="group1A_1" title="Group1A_1" defaultIsCollapsed={false}>
-                  <Navigation.Item id="item1" title="Group 1A_1 Item 1" href="https://foo" />
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <Navigation>
+              <Navigation.Group id="group1" renderAs="accordion" defaultIsCollapsed={false}>
+                <Navigation.Item id="item1" title="Item 1" href="https://foo" />
+                <Navigation.Item id="item2" title="Item 2" href="https://foo" />
+                <Navigation.Group
+                  id="group1A"
+                  renderAs="accordion"
+                  title="Group1A"
+                  defaultIsCollapsed={false}
+                >
+                  <Navigation.Item id="item1" title="Group 1A Item 1" href="https://foo" />
+                  <Navigation.Group
+                    id="group1A_1"
+                    renderAs="accordion"
+                    title="Group1A_1"
+                    defaultIsCollapsed={false}
+                  >
+                    <Navigation.Item id="item1" title="Group 1A_1 Item 1" href="https://foo" />
+                  </Navigation.Group>
                 </Navigation.Group>
               </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -152,6 +166,7 @@ describe('<Navigation />', () => {
                       "group1A",
                       "group1A_1",
                     ],
+                    "renderAs": "accordion",
                     "sideNavStatus": "visible",
                     "title": "Group1A_1",
                   },
@@ -165,6 +180,7 @@ describe('<Navigation />', () => {
                   "group1",
                   "group1A",
                 ],
+                "renderAs": "accordion",
                 "sideNavStatus": "visible",
                 "title": "Group1A",
               },
@@ -177,6 +193,7 @@ describe('<Navigation />', () => {
             "path": Array [
               "group1",
             ],
+            "renderAs": "accordion",
             "sideNavStatus": "visible",
             "title": "",
           },
@@ -198,23 +215,25 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                {/* Title from deeplink */}
-                <Navigation.Item<any> id="item1" link="item1" />
-                <Navigation.Item<any> id="item2" link="item1" title="Overwrite deeplink title" />
-                <Navigation.Item id="item3" title="Title in props" />
-                <Navigation.Item id="item4">Title in children</Navigation.Item>
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <Navigation>
+              <Navigation.Group id="root">
+                <Navigation.Group id="group1">
+                  {/* Title from deeplink */}
+                  <Navigation.Item<any> id="item1" link="item1" />
+                  <Navigation.Item<any> id="item2" link="item1" title="Overwrite deeplink title" />
+                  <Navigation.Item id="item3" title="Title in props" />
+                  <Navigation.Item id="item4">Title in children</Navigation.Item>
+                </Navigation.Group>
               </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -347,22 +366,28 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       const { findByTestId } = render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Group id="root" defaultIsCollapsed={false}>
-              <Navigation.Group id="group1" defaultIsCollapsed={false}>
-                {/* Title from deeplink */}
-                <Navigation.Item<any> id="item1" link="item1" />
-                {/* Should not appear */}
-                <Navigation.Item<any> id="unknownLink" link="unknown" title="Should NOT be there" />
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <Navigation>
+              <Navigation.Group id="root" defaultIsCollapsed={false}>
+                <Navigation.Group id="group1" defaultIsCollapsed={false}>
+                  {/* Title from deeplink */}
+                  <Navigation.Item<any> id="item1" link="item1" />
+                  {/* Should not appear */}
+                  <Navigation.Item<any>
+                    id="unknownLink"
+                    link="unknown"
+                    title="Should NOT be there"
+                  />
+                </Navigation.Group>
               </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -446,22 +471,24 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       const { queryByTestId } = render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Group id="root" defaultIsCollapsed={false}>
-              <Navigation.Group id="group1" defaultIsCollapsed={false}>
-                <Navigation.Item<any> id="item1" link="notRegistered" />
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <Navigation>
+              <Navigation.Group id="root" defaultIsCollapsed={false}>
+                <Navigation.Group id="group1" defaultIsCollapsed={false}>
+                  <Navigation.Item<any> id="item1" link="notRegistered" />
+                </Navigation.Group>
+                <Navigation.Group id="group2" defaultIsCollapsed={false}>
+                  <Navigation.Item<any> id="item1" link="item1" />
+                </Navigation.Group>
               </Navigation.Group>
-              <Navigation.Group id="group2" defaultIsCollapsed={false}>
-                <Navigation.Item<any> id="item1" link="item1" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -550,14 +577,16 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation>
-            <Navigation.Group preset="analytics" />
-            <Navigation.Group preset="ml" />
-            <Navigation.Group preset="devtools" />
-            <Navigation.Group preset="management" />
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <Navigation>
+              <Navigation.Group preset="analytics" />
+              <Navigation.Group preset="ml" />
+              <Navigation.Group preset="devtools" />
+              <Navigation.Group preset="management" />
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -581,15 +610,17 @@ describe('<Navigation />', () => {
       ]);
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
-          <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                <Navigation.RecentlyAccessed />
+        <EuiThemeProvider>
+          <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
+            <Navigation>
+              <Navigation.Group id="root">
+                <Navigation.Group id="group1">
+                  <Navigation.RecentlyAccessed />
+                </Navigation.Group>
               </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -606,13 +637,15 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation>
-            <Navigation.Group id="group1">
-              <Navigation.Item id="item1" title="Item 1" href="https://example.com" />
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <Navigation>
+              <Navigation.Group id="group1">
+                <Navigation.Item id="item1" title="Item 1" href="https://example.com" />
+              </Navigation.Group>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       await act(async () => {
@@ -670,13 +703,15 @@ describe('<Navigation />', () => {
 
       const expectToThrow = () => {
         render(
-          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-            <Navigation>
-              <Navigation.Group id="group1">
-                <Navigation.Item id="item1" title="Item 1" href="../dashboards" />
-              </Navigation.Group>
-            </Navigation>
-          </NavigationProvider>
+          <EuiThemeProvider>
+            <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+              <Navigation>
+                <Navigation.Group id="group1">
+                  <Navigation.Item id="item1" title="Item 1" href="../dashboards" />
+                </Navigation.Group>
+              </Navigation>
+            </NavigationProvider>
+          </EuiThemeProvider>
         );
       };
 
@@ -722,14 +757,16 @@ describe('<Navigation />', () => {
       const getActiveNodes$ = () => activeNodes$;
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} activeNodes$={getActiveNodes$()} navLinks$={navLinks$}>
-          <Navigation>
-            <Navigation.Group id="group1">
-              <Navigation.Item<any> link="item1" title="Item 1" />
-              <Navigation.Item<any> link="item2" title="Item 2" />
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} activeNodes$={getActiveNodes$()} navLinks$={navLinks$}>
+            <Navigation>
+              <Navigation.Group id="group1">
+                <Navigation.Item<any> link="item1" title="Item 1" />
+                <Navigation.Item<any> link="item2" title="Item 2" />
+              </Navigation.Group>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
@@ -791,24 +828,26 @@ describe('<Navigation />', () => {
       };
 
       const { findByTestId } = render(
-        <NavigationProvider
-          {...services}
-          activeNodes$={getActiveNodes$()}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Group id="group1">
-              <Navigation.Item<any>
-                link="item1"
-                title="Item 1"
-                getIsActive={() => {
-                  return true;
-                }}
-              />
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider
+            {...services}
+            activeNodes$={getActiveNodes$()}
+            navLinks$={navLinks$}
+            onProjectNavigationChange={onProjectNavigationChange}
+          >
+            <Navigation>
+              <Navigation.Group id="group1">
+                <Navigation.Item<any>
+                  link="item1"
+                  title="Item 1"
+                  getIsActive={() => {
+                    return true;
+                  }}
+                />
+              </Navigation.Group>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
@@ -824,15 +863,17 @@ describe('<Navigation />', () => {
       const onProjectNavigationChange = jest.fn();
 
       const { findByTestId } = render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation>
-            <Navigation.Group id="group1" defaultIsCollapsed={false}>
-              <Navigation.Item id="cloudLink1" cloudLink="userAndRoles" />
-              <Navigation.Item id="cloudLink2" cloudLink="performance" />
-              <Navigation.Item id="cloudLink3" cloudLink="billingAndSub" />
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
+        <EuiThemeProvider>
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <Navigation>
+              <Navigation.Group id="group1" defaultIsCollapsed={false}>
+                <Navigation.Item id="cloudLink1" cloudLink="userAndRoles" />
+                <Navigation.Item id="cloudLink2" cloudLink="performance" />
+                <Navigation.Item id="cloudLink3" cloudLink="billingAndSub" />
+              </Navigation.Group>
+            </Navigation>
+          </NavigationProvider>
+        </EuiThemeProvider>
       );
 
       expect(await findByTestId(/nav-item-group1.cloudLink1/)).toBeVisible();

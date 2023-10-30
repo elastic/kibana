@@ -38,7 +38,6 @@ export interface Props<
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
-  defaultIsCollapsed?: boolean;
 }
 
 function NavigationGroupInternalComp<
@@ -84,6 +83,8 @@ function NavigationGroupInternalComp<
     if (!path || !navNodeWithChildren) {
       return null;
     }
+
+    if (navNodeWithChildren.sideNavStatus === 'hidden') return null;
 
     if (unstyled) {
       // No UI for unstyled groups

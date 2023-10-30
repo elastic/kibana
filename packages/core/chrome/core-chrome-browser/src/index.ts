@@ -42,4 +42,5 @@ export type {
   NodeDefinition,
   NodeDefinitionWithChildren,
   RenderAs as NodeRenderAs,
+  EuiThemeSize,
 } from './project_navigation';
