@@ -177,5 +177,8 @@
       "file": "datafeed_v3_linux_anomalous_network_activity.json",
       "job_id": "v3_linux_anomalous_network_activity"
     }
+  ],
+  "tags": [
+    "security"
   ]
 }
