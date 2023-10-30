@@ -49,6 +49,7 @@ describe('streamFactory', () => {
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',
       'X-Accel-Buffering': 'no',
+      'X-Content-Type-Options': 'nosniff',
     });
     expect(streamResult).toBe('push1push2');
   });
@@ -75,6 +76,7 @@ describe('streamFactory', () => {
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',
       'X-Accel-Buffering': 'no',
+      'X-Content-Type-Options': 'nosniff',
     });
     expect(parsedItems).toHaveLength(2);
     expect(parsedItems[0]).toStrictEqual(mockItem1);
@@ -121,6 +123,7 @@ describe('streamFactory', () => {
           'content-encoding': 'gzip',
           'Transfer-Encoding': 'chunked',
           'X-Accel-Buffering': 'no',
+          'X-Content-Type-Options': 'nosniff',
         });
         expect(streamResult).toBe('push1push2');
 
@@ -165,6 +168,7 @@ describe('streamFactory', () => {
           'content-encoding': 'gzip',
           'Transfer-Encoding': 'chunked',
           'X-Accel-Buffering': 'no',
+          'X-Content-Type-Options': 'nosniff',
         });
         expect(parsedItems).toHaveLength(2);
         expect(parsedItems[0]).toStrictEqual(mockItem1);
