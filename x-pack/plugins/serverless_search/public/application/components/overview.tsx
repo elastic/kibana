@@ -32,13 +32,14 @@ import {
   getConsoleRequest,
 } from '@kbn/search-api-panels';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 import { useQuery } from '@tanstack/react-query';
 import { Connector } from '@kbn/search-connectors';
+import { useLocation } from 'react-router-dom';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
@@ -70,6 +71,16 @@ export const ElasticsearchOverview = () => {
     apiKey: clientApiKey,
     cloudId,
   };
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash) {
+      const id = hash.replace('#', '');
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [hash]);
 
   const { data: _data } = useQuery({
     queryKey: ['fetchConnectors'],
@@ -279,6 +290,7 @@ export const ElasticsearchOverview = () => {
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
+        id="ingestData"
         color="subdued"
         bottomBorder="extended"
         data-test-subj="ingest-client-section"
