@@ -618,6 +618,10 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
       .filter(
         (componentTemplateId) => !FLEET_COMPONENT_TEMPLATE_NAMES.includes(componentTemplateId)
       )
+      // Filter stack component templates shared between integrations
+      .filter(
+        (componentTemplateId) => [`metrics@tsdb-settings`, `logs@settings`, `metrics@settings`, `traces@settings`].indexOf(componentTemplateId) === -1
+      )
       .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,

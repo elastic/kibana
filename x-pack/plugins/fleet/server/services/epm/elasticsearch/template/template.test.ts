@@ -82,13 +82,13 @@ describe('EPM template', () => {
       isILMPolicyDisabled: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs-settings',
+      'logs@settings',
       ...composedOfTemplates,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
 
-  it('supplies metrics-tsdb-settings for time series', () => {
+  it('supplies metrics@tsdb-settings for time series', () => {
     const composedOfTemplates = ['component1', 'component2'];
 
     const template = getTemplate({
@@ -102,7 +102,7 @@ describe('EPM template', () => {
       isILMPolicyDisabled: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'metrics-tsdb-settings',
+      'metrics@tsdb-settings',
       ...composedOfTemplates,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
@@ -143,7 +143,7 @@ describe('EPM template', () => {
       isILMPolicyDisabled: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs-settings',
+      'logs@settings',
       ...composedOfTemplates,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ]);
@@ -163,7 +163,7 @@ describe('EPM template', () => {
       isILMPolicyDisabled: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs-settings',
+      'logs@settings',
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });

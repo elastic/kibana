@@ -115,9 +115,6 @@ export function getTemplate({
       : []),
   ];
 
-  // For now, if stack templates are disabled just ignore it
-  template.ignore_missing_component_templates = esBaseComponents;
-
   if (isILMPolicyDisabled) {
     // Explicitly set ILM policy to null when it's disabled globally
     template.template.settings.index.lifecycle = null;
