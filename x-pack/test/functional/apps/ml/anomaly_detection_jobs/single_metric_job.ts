@@ -238,6 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         'job cloning clicks the clone action and loads the single metric wizard'
       );
+      await ml.jobTable.clickCloneJobAction(jobId);
       await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
     });
 
