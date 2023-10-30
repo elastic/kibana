@@ -9,10 +9,9 @@ import { omit } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
-import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/specific_attributes/threshold_attributes';
-import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/specific_attributes/query_attributes';
+import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 
-import { AlertSuppressionMissingFieldsStrategy } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   INSTALL_PREBUILT_RULE_BUTTON,
@@ -178,7 +177,7 @@ describe(
           'Endpoint.policy.applied.id',
         ],
         duration: { unit: 'm', value: 5 },
-        missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.Suppress,
+        missing_fields_strategy: 'suppress',
       },
     });
 
@@ -197,7 +196,7 @@ describe(
           'Endpoint.policy.applied.id',
         ],
         duration: { unit: 'm', value: 5 },
-        missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.Suppress,
+        missing_fields_strategy: 'suppress',
       },
       query: '',
     });
@@ -688,7 +687,7 @@ describe(
             alert_suppression: {
               group_by: ['Endpoint.policy.applied.id'],
               duration: { unit: 'm', value: 10 },
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.Suppress,
+              missing_fields_strategy: 'suppress',
             },
             version: 2,
           },
