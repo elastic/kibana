@@ -228,7 +228,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
           : ''
       }
 
-      Do not mention indidivual p-values from the analysis results.
+      Do not mention individual p-values from the analysis results.
       Do not repeat the full list of field names and field values back to the user.
       Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
 
