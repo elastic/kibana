@@ -8,13 +8,7 @@
 import { APMBaseDoc } from './apm_base_doc';
 import { TimestampUs } from './fields/timestamp_us';
 
-export interface Processor {
-  name: 'event';
-  event: 'event';
-}
-
 export interface EventRaw extends APMBaseDoc {
-  processor: Processor;
   timestamp: TimestampUs;
   transaction?: {
     id: string;
