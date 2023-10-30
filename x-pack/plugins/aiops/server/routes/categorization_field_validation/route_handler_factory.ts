@@ -20,7 +20,7 @@ import { AIOPS_API_ENDPOINT } from '../../../common/api';
 import type { AiopsLicense } from '../../types';
 import type { CategorizationFieldValidationSchema } from '../../../common/api/log_categorization/schema';
 
-export const categorizationFieldValidationHandlerFactory: (
+export const routeHandlerFactory: (
   license: AiopsLicense,
   usageCounter?: UsageCounter
 ) => RequestHandler<unknown, unknown, CategorizationFieldValidationSchema> =

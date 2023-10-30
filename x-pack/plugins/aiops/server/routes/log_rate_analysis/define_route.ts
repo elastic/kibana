@@ -69,7 +69,7 @@ const PROGRESS_STEP_GROUPING = 0.1;
 const PROGRESS_STEP_HISTOGRAMS = 0.1;
 const PROGRESS_STEP_HISTOGRAMS_GROUPS = 0.1;
 
-export const defineLogRateAnalysisRoute = (
+export const defineRoute = (
   router: IRouter<DataRequestHandlerContext>,
   license: AiopsLicense,
   logger: Logger,

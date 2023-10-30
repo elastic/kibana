@@ -11,9 +11,9 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { categorizationFieldValidationSchema } from '../../../common/api/log_categorization/schema';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 import type { AiopsLicense } from '../../types';
-import { categorizationFieldValidationHandlerFactory } from './categorization_field_validation_handler_factory';
+import { routeHandlerFactory } from './route_handler_factory';
 
-export const defineCategorizationFieldValidationRoute = (
+export const defineRoute = (
   router: IRouter<DataRequestHandlerContext>,
   license: AiopsLicense,
   usageCounter?: UsageCounter
@@ -32,6 +32,6 @@ export const defineCategorizationFieldValidationRoute = (
           },
         },
       },
-      categorizationFieldValidationHandlerFactory(license, usageCounter)
+      routeHandlerFactory(license, usageCounter)
     );
 };

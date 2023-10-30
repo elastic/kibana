@@ -19,9 +19,8 @@ import {
   AiopsPluginSetupDeps,
   AiopsPluginStartDeps,
 } from './types';
-
-import { defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_log_rate_analysis_route';
-import { defineCategorizationFieldValidationRoute } from './routes/log_categorization/define_categorization_field_validation_route';
+import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
+import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
 import { registerCasesPersistableState } from './register_cases';
 
 export class AiopsPlugin
