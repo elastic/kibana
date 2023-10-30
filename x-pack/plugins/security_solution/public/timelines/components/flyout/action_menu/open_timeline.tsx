@@ -9,12 +9,11 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
 import type { ActionTimelineToShow } from '../../open_timeline/types';
-
-export interface OpenTimelineModalButtonProps {}
+import * as i18n from './translations';
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['createFrom'];
 
-export const OpenTimelineAction = React.memo<OpenTimelineModalButtonProps>(() => {
+export const OpenTimelineAction = React.memo<{}>(() => {
   const [showTimelineModal, setShowTimelineModal] = useState(false);
   const onCloseTimelineModal = useCallback(() => setShowTimelineModal(false), []);
   const onOpenTimelineModal = useCallback(() => {
@@ -23,8 +22,12 @@ export const OpenTimelineAction = React.memo<OpenTimelineModalButtonProps>(() =>
 
   return (
     <>
-      <EuiButtonEmpty data-test-subj="open-timeline-button" onClick={onOpenTimelineModal}>
-        {'Open'}
+      <EuiButtonEmpty
+        data-test-subj="open-timeline-button"
+        onClick={onOpenTimelineModal}
+        aria-label={i18n.OPEN_TIMELINE_BTN_LABEL}
+      >
+        {i18n.OPEN_TIMELINE_BTN}
       </EuiButtonEmpty>
 
       {showTimelineModal ? (

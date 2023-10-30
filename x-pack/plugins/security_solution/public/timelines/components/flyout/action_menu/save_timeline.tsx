@@ -8,6 +8,7 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { useEditTimelineOperation } from '../../timeline/header/edit_timeline_button';
+import * as i18n from './translations';
 
 interface SaveTimelineActionProps {
   timelineId: string;
@@ -20,8 +21,14 @@ export const SaveTimelineAction = ({ timelineId }: SaveTimelineActionProps) => {
   return (
     <>
       {editTimelineModal}
-      <EuiButton fill size="s" onClick={openEditTimeline} iconType="save">
-        {'Save'}
+      <EuiButton
+        fill
+        size="s"
+        onClick={openEditTimeline}
+        iconType="save"
+        aria-label={i18n.SAVE_TIMELINE_BTN_LABEL}
+      >
+        {i18n.SAVE_TIMELINE_BTN}
       </EuiButton>
     </>
   );

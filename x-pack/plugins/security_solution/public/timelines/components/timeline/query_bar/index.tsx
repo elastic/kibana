@@ -56,18 +56,18 @@ const SearchBarContainer = styled.div`
   * Filters are displayed with QueryBar so below is how is the layout with default filters.
   *
   *
-  *                    ------------------------------
+  *                    --------------------------------
   *   -----------------|                              |------------
   *   | DataViewPicker |        QueryBar              | Date      |
   *   -------------------------------------------------------------
   *                    |      Filters                 |
   *                    --------------------------------
   *
-  * This component makes sure that default filters are not rendered and we can saperate display
+  * The tree under this component makes sure that default filters are not rendered and we can saperately display
   * them outside query component so that layout is as below:
   *
   *   -----------------------------------------------------------
-  *   | DataViewPicker |      QueryBar              | Date      |
+  *   | DataViewPicker |      QueryBar              |   Date    |
   *   -----------------------------------------------------------
   *   |                       Filters                           |
   *   -----------------------------------------------------------

@@ -13,13 +13,8 @@ import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-
 import { TimeHistory } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
-import { FilterItems, SearchBar } from '@kbn/unified-search-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { HtmlPortalNode } from 'react-reverse-portal';
-import { InPortal } from 'react-reverse-portal';
-import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiFlexGroup } from '@elastic/eui';
 import { useKibana } from '../../lib/kibana';
 import { convertToQueryType } from './convert_to_query_type';
 
@@ -41,17 +36,7 @@ export interface QueryBarComponentProps {
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
   displayStyle?: SearchBarProps['displayStyle'];
   isDisabled?: boolean;
-  /*
-   * If filtersPortalNode provided, filters will rendered in that portal instead
-   * of in place.
-   *
-   * */
-  filtersPortalNode?: HtmlPortalNode;
 }
-
-const FilterItemsContainer = styled(EuiFlexGroup)`
-  margin-top: ${euiThemeVars.euiSizeXS};
-`;
 
 export const isDataView = (obj: unknown): obj is DataView =>
   obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
@@ -75,7 +60,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
     dataTestSubj,
     displayStyle,
     isDisabled,
-    filtersPortalNode,
   }) => {
     const { data } = useKibana().services;
     const [dataView, setDataView] = useState<DataView>();
@@ -185,18 +169,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
           displayStyle={displayStyle}
           isDisabled={isDisabled}
         />
-
-        {filtersPortalNode ? (
-          <InPortal node={filtersPortalNode}>
-            <FilterItemsContainer direction="row" gutterSize="xs" wrap={true} responsive={false}>
-              <FilterItems
-                filters={filters}
-                onFiltersUpdated={onFiltersUpdated}
-                indexPatterns={arrDataView}
-              />
-            </FilterItemsContainer>
-          </InPortal>
-        ) : null}
       </>
     );
   }

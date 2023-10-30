@@ -30,31 +30,6 @@ interface AddToFavoritesButtonProps {
   compact?: boolean;
 }
 
-export const useTimelineAddToFavoriteAction = ({ timelineId }: { timelineId: string }) => {
-  const dispatch = useDispatch();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
-  const isFavorite = useShallowEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isFavorite
-  );
-
-  const status = useShallowEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).status
-  );
-
-  const disableFavoriteButton = status === TimelineStatus.immutable;
-  const toggleFavorite = useCallback(
-    () => dispatch(timelineActions.updateIsFavorite({ id: timelineId, isFavorite: !isFavorite })),
-    [dispatch, timelineId, isFavorite]
-  );
-
-  return {
-    toggleFavorite,
-    isFavorite,
-    isFavouriteDisabled: disableFavoriteButton,
-  };
-};
-
 const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
   timelineId,
   compact,

@@ -64,13 +64,6 @@ export const SEARCH_KQL_SELECTED_TEXT = i18n.translate(
   }
 );
 
-export const FILTER_OR_SEARCH_WITH_KQL = i18n.translate(
-  'xpack.securitySolution.timeline.searchOrFilter.filterOrSearchWithKql',
-  {
-    defaultMessage: 'Filter or Search with KQL',
-  }
-);
-
 export const DATA_PROVIDER_HIDDEN_POPULATED = i18n.translate(
   'xpack.securitySolution.timeline.searchOrFilter.dataProviderToggle.hiddenAndPopulated',
   {

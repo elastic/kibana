@@ -17,7 +17,7 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { State } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { TimelineKPIs2 } from '../../flyout/header/kpis_new';
+import { TimelineKPIs } from '../../flyout/header/kpis';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useKibana } from '../../../../common/lib/kibana';
 import { timelineSelectors } from '../../../store/timeline';
@@ -119,7 +119,7 @@ export const TimelineKpi = ({ timelineId }: KpiExpandedProps) => {
     [dataProviders, filters, kqlQueryTest, combinedQueries]
   );
 
-  const [loading, kpis] = useTimelineKpis({
+  const [, kpis] = useTimelineKpis({
     defaultIndex: selectedPatterns,
     timerange,
     isBlankTimeline,
@@ -128,7 +128,7 @@ export const TimelineKpi = ({ timelineId }: KpiExpandedProps) => {
 
   return (
     <EuiPanel paddingSize="m" hasBorder>
-      <TimelineKPIs2 kpis={kpis} isLoading={loading} />
+      <TimelineKPIs kpis={kpis} />
     </EuiPanel>
   );
 };

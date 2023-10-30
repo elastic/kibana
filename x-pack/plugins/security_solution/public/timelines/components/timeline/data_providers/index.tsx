@@ -6,6 +6,7 @@
  */
 
 import { rgba } from 'polished';
+import { useDispatch } from 'react-redux';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
@@ -35,7 +36,7 @@ interface Props {
 
 const DropTargetDataProvidersContainer = styled.div`
   position: relative;
-  padding: 16px 0 0px 0;
+  padding: 20px 0 0px 0;
 
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
     background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
@@ -109,16 +110,21 @@ const SearchOrFilterGlobalStyle = createGlobalStyle`
       width: ${searchOrFilterPopoverWidth} !important;
     }
   }
+
+  [data-test-subj="timeline-select-search-or-filter"] {
+    height: auto
+  }
 `;
 
 const CustomTooltipDiv = styled.div`
   position: absolute;
   left: 20px;
-  transform: translateY(-35%);
+  transform: translateY(-50%);
   z-index: 9999;
 `;
 
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
+  const dispatch = useDispatch();
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -135,8 +141,10 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
   );
 
   const handleChange = useCallback(
-    () => (mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode }),
-    [timelineId]
+    (mode: KqlMode) => {
+      dispatch(updateKqlMode({ id: timelineId, kqlMode: mode }));
+    },
+    [timelineId, dispatch]
   );
 
   return (
@@ -147,7 +155,10 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
         className="drop-target-data-providers-container"
       >
         <CustomTooltipDiv>
-          <EuiToolTip className="testing-abc" content={'filter-or-select-with-KQL'}>
+          <EuiToolTip
+            className="timeline-select-search-filter-tooltip"
+            content={i18n.FILTER_OR_SEARCH_WITH_KQL}
+          >
             <EuiSuperSelect
               data-test-subj="timeline-select-search-or-filter"
               hasDividers={true}
@@ -155,7 +166,10 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
               itemClassName={timelineSelectModeItemsClassName}
               onChange={handleChange}
               options={options}
-              popoverProps={{ className: searchOrFilterPopoverClassName }}
+              popoverProps={{
+                className: searchOrFilterPopoverClassName,
+                panelClassName: searchOrFilterPopoverClassName,
+              }}
               valueOfSelected={kqlMode}
             />
           </EuiToolTip>

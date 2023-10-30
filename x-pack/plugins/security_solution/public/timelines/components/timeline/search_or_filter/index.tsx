@@ -135,8 +135,12 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     useEffect(() => {
       /*
-       * If there is a change in data providers and data provider was hidden,
-       * it must be made visible
+       * If there is a change in data providers
+       *    - data provider has some data and it was hidden,
+       *        * it must be made visible
+       *
+       *    - data provider has no data and it was visible,
+       *        * it must be hidden
        *
        * */
       if (dataProviders?.length > 0) {

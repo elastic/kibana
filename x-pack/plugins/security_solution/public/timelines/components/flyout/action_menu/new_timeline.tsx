@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/
 import React, { useMemo, useState, useCallback } from 'react';
 import { NewTimeline } from '../../timeline/properties/helpers';
 import { NewTemplateTimeline } from '../../timeline/properties/new_template_timeline';
+import * as i18n from './translations';
 
 interface NewTimelineActionProps {
   timelineId: string;
@@ -30,7 +31,7 @@ export const NewTimelineAction = ({ timelineId }: NewTimelineActionProps) => {
   const newTimelineActionbtn = useMemo(() => {
     return (
       <EuiButtonEmpty iconType="arrowDown" size="s" iconSide="right" onClick={onActionBtnClick}>
-        {`New`}
+        {i18n.NEW_TIMELINE_BTN}
       </EuiButtonEmpty>
     );
   }, [onActionBtnClick]);
@@ -46,10 +47,10 @@ export const NewTimelineAction = ({ timelineId }: NewTimelineActionProps) => {
     >
       <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
         <EuiFlexItem>
-          <NewTimeline timelineId={timelineId} title={'New Timeline'} />
+          <NewTimeline timelineId={timelineId} title={i18n.NEW_TIMELINE} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <NewTemplateTimeline timelineId={timelineId} title={'New Template Timeline'} />
+          <NewTemplateTimeline timelineId={timelineId} title={i18n.NEW_TEMPLATE_TIMELINE} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopover>
