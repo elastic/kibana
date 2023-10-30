@@ -7,6 +7,12 @@
 
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
+import {
+  SENTINELONE_CONNECTOR_ID,
+  SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { Role } from '@kbn/security-plugin/common';
+import { PRIVILEGE_ID } from '@kbn/security-solution-features/src/security/kibana_sub_features';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -54,16 +60,21 @@ const executeSubAction = async ({
   subAction,
   subActionParams,
   expectedHttpCode = 200,
+  username = 'elastic',
+  password = 'changeme',
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   connectorId: string;
   subAction: string;
   subActionParams: Record<string, unknown>;
   expectedHttpCode?: number;
+  username?: string;
+  password?: string;
 }) => {
   const response = await supertest
     .post(`${getUrlPrefix('default')}/api/actions/connector/${connectorId}/_execute`)
     .set('kbn-xsrf', 'foo')
+    .auth(username, password)
     .send({
       params: {
         subAction,
@@ -78,6 +89,7 @@ const executeSubAction = async ({
 // eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const securityService = getService('security');
 
   describe('Sub action framework', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -312,6 +324,173 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           retry: true,
           connector_id: res.body.id,
           service_message: 'You should register at least one subAction for your connector type',
+        });
+      });
+
+      describe('SentinelOne Connector sub-actions authz', () => {
+        interface CreatedUser {
+          username: string;
+          password: string;
+          deleteUser: () => Promise<void>;
+        }
+
+        // SentinelOne supported sub-actions and associated Security Solution kibana privilege needed
+        const s1SubActions = {
+          [SUB_ACTION.KILL_PROCESS]: [PRIVILEGE_ID.processOperationsAll],
+          [SUB_ACTION.GET_AGENTS]: [PRIVILEGE_ID.endpointListRead],
+          [SUB_ACTION.ISOLATE_AGENT]: [PRIVILEGE_ID.hostIsolationAll],
+          [SUB_ACTION.RELEASE_AGENT]: [PRIVILEGE_ID.hostIsolationAll],
+          [SUB_ACTION.GET_REMOTE_SCRIPT_STATUS]: [PRIVILEGE_ID.responseActionsHistoryLogRead],
+          [SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS]: [PRIVILEGE_ID.responseActionsHistoryLogRead],
+        };
+
+        // 'actions_log_management_all',
+        // 'host_isolation_all',
+        // 'process_operations_all',
+
+        let connectorId: string;
+
+        const getExpectedAuthzError = () => ({
+          status: 'error',
+          message: 'Unauthorized to execute actions',
+          retry: false,
+          connector_id: 'b8c2b050-772b-11ee-a142-41aacf030956',
+        });
+        const createUser = async ({
+          username,
+          password = 'changeme',
+          siemPrivileges = [],
+        }: {
+          username: string;
+          password?: string;
+          siemPrivileges?: string[];
+        }): Promise<CreatedUser> => {
+          const role: Role = {
+            name: `role_${username}`,
+            metadata: {},
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  siem: ['minimal_all', ...siemPrivileges],
+                  actions: ['all'],
+                },
+                spaces: ['*'],
+              },
+            ],
+          };
+
+          await securityService.role.create(role.name, {
+            kibana: role.kibana,
+            elasticsearch: role.elasticsearch,
+          });
+
+          await securityService.user.create(role.name, {
+            password: 'changeme',
+            full_name: role.name,
+            roles: [role.name],
+          });
+
+          return {
+            username,
+            password,
+            deleteUser: async () => {
+              // FIXME:PT implement
+            },
+          };
+        };
+
+        before(async () => {
+          connectorId = await (
+            await createSubActionConnector({
+              supertest,
+              connectorTypeId: SENTINELONE_CONNECTOR_ID,
+              config: { url: 'https://one.two.three.co' },
+              secrets: { token: 'abc-123' },
+            })
+          ).body.id;
+        });
+
+        after(async () => {
+          if (connectorId) {
+            await supertest
+              .delete(`${getUrlPrefix('default')}/api/actions/connector/${connectorId}`)
+              .set('kbn-xsrf', 'true')
+              .send()
+              .expect(({ ok, status }) => {
+                // Should cover all success codes (ex. 204 (no content), 200, etc...)
+                if (!ok) {
+                  throw new Error(
+                    `Expected delete to return a status code in the 200, but got ${status}`
+                  );
+                }
+              });
+
+            connectorId = '';
+          }
+        });
+
+        describe('and user has NO privileges', () => {
+          let user: CreatedUser;
+
+          before(async () => {
+            user = await createUser({ username: 'base_user' });
+          });
+
+          after(async () => {
+            if (user) {
+              await user.deleteUser();
+            }
+          });
+
+          for (const s1SubAction of Object.keys(s1SubActions)) {
+            it(`should deny execute of ${s1SubAction} if no privileges`, async () => {
+              const execRes = await executeSubAction({
+                supertest,
+                connectorId,
+                subAction: s1SubAction,
+                subActionParams: { foo: 'foo' },
+                username: user.username,
+                password: user.password,
+              });
+
+              expect(execRes.body).to.equal(getExpectedAuthzError());
+            });
+          }
+        });
+
+        describe('and user has proper privileges', () => {
+          let user: CreatedUser;
+
+          afterEach(async () => {
+            if (user) {
+              await user.deleteUser();
+              // @ts-expect-error
+              user = undefined;
+            }
+          });
+
+          for (const [s1SubAction, siemPrivileges] of Object.entries(s1SubActions)) {
+            it(`should allow execute of ${s1SubAction}`, async () => {
+              user = await createUser({ username: s1SubAction.toLowerCase(), siemPrivileges });
+
+              const execRes = await executeSubAction({
+                supertest,
+                connectorId,
+                subAction: s1SubAction,
+                subActionParams: { foo: 'foo' },
+                username: user.username,
+                password: user.password,
+              });
+
+              expect(execRes.body).to.equal({ to: 'do' });
+            });
+          }
         });
       });
     });
