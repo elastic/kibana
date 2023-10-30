@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Section, IndexDetailsSection } from '../../../common/constants';
+import { Section } from '../../../common/constants';
+import type { IndexDetailsTabIds } from '../../../common/constants';
 
 export const getTemplateListLink = () => `/templates`;
 
@@ -57,7 +58,7 @@ export const getDataStreamDetailsLink = (name: string) => {
   return encodeURI(`/data_streams/${encodeURIComponent(name)}`);
 };
 
-export const getIndexDetailsLink = (indexName: string, tab?: IndexDetailsSection) => {
+export const getIndexDetailsLink = (indexName: string, tab?: IndexDetailsTabIds) => {
   let link = `/${Section.Indices}/index_details?indexName=${encodeURIComponent(indexName)}`;
   if (tab) {
     link = `${link}&tab=${tab}`;

@@ -142,8 +142,15 @@ export function FlameGraph({
                       const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
                       const totalSeconds = primaryFlamegraph.TotalSeconds;
                       const nodeID = primaryFlamegraph.ID[valueIndex];
-
+                      const inline = primaryFlamegraph.Inline[valueIndex];
                       const comparisonNode = columnarData.comparisonNodesById[nodeID];
+
+                      const parentLabel = inline
+                        ? // If it's an inline frame, look up for its parent frame
+                          primaryFlamegraph.Label[
+                            primaryFlamegraph.Edges.findIndex((edge) => edge.includes(valueIndex))
+                          ]
+                        : undefined;
 
                       return (
                         <FlameGraphTooltip
@@ -164,6 +171,8 @@ export function FlameGraph({
                             toggleShowInformationWindow();
                             setHighlightedVmIndex(valueIndex);
                           }}
+                          inline={inline}
+                          parentLabel={parentLabel}
                         />
                       );
                     }}

@@ -268,22 +268,6 @@ const VulnerabilitiesDataGrid = ({
     isFetching,
   ]);
 
-  const onPaginateFlyout = useCallback(
-    (nextVulnerabilityIndex: number) => {
-      // the index of the vulnerability in the current page
-      const newVulnerabilityIndex = nextVulnerabilityIndex % pageSize;
-
-      // if the vulnerability is not in the current page, we need to change the page
-      const flyoutPageIndex = Math.floor(nextVulnerabilityIndex / pageSize);
-
-      setUrlQuery({
-        pageIndex: flyoutPageIndex,
-        vulnerabilityIndex: newVulnerabilityIndex,
-      });
-    },
-    [pageSize, setUrlQuery]
-  );
-
   const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
   if (data?.page.length === 0) {
@@ -372,7 +356,6 @@ const VulnerabilitiesDataGrid = ({
           flyoutIndex={selectedVulnerabilityIndex}
           vulnerabilityRecord={selectedVulnerability}
           totalVulnerabilitiesCount={limitedTotalItemCount}
-          onPaginate={onPaginateFlyout}
           closeFlyout={onCloseFlyout}
           isLoading={isFetching}
         />

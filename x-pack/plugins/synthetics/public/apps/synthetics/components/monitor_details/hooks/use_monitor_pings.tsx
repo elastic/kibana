@@ -13,7 +13,6 @@ import { useSelectedLocation } from './use_selected_location';
 import {
   getMonitorRecentPingsAction,
   selectMonitorPingsMetadata,
-  selectShowOnlyFinalAttempts,
   selectStatusFilter,
 } from '../../../state';
 
@@ -34,8 +33,6 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
   const monitorId = monitor?.id;
   const locationLabel = location?.label;
 
-  const showOnlyFinalAttempts = useSelector(selectShowOnlyFinalAttempts);
-
   const statusFilter = useSelector(selectStatusFilter);
 
   useEffect(() => {
@@ -48,7 +45,6 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
           pageIndex: props?.pageIndex,
           from: props?.from,
           to: props?.to,
-          finalAttempt: showOnlyFinalAttempts,
           statusFilter,
         })
       );
@@ -62,7 +58,6 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
     props?.pageIndex,
     props?.from,
     props?.to,
-    showOnlyFinalAttempts,
     statusFilter,
   ]);
 

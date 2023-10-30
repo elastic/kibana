@@ -16,7 +16,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { Prompt } from '@kbn/observability-shared-plugin/public';
+import { Prompt, useEditableSettings } from '@kbn/observability-shared-plugin/public';
+import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
@@ -28,6 +29,7 @@ import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { settingsTitle } from '../../../translations';
 
 import { MetricsPageTemplate } from '../page_template';
+import { FeaturesConfigurationPanel } from './features_configuration_panel';
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
 }
@@ -59,21 +61,32 @@ export const SourceConfigurationSettings = ({
     formState,
     formStateChanges,
   } = useSourceConfigurationFormState(source && source.configuration);
+  const infraUiSettings = useEditableSettings('infra_metrics', [enableInfrastructureHostsView]);
+
+  const resetAllUnsavedChanges = useCallback(() => {
+    resetForm();
+    infraUiSettings.cleanUnsavedChanges();
+  }, [infraUiSettings, resetForm]);
+
   const persistUpdates = useCallback(async () => {
-    if (sourceExists) {
-      await updateSourceConfiguration(formStateChanges);
-    } else {
-      await createSourceConfiguration(formState);
-    }
+    await Promise.all([
+      sourceExists
+        ? updateSourceConfiguration(formStateChanges)
+        : createSourceConfiguration(formState),
+      infraUiSettings.saveAll(),
+    ]);
     resetForm();
   }, [
     sourceExists,
-    updateSourceConfiguration,
-    createSourceConfiguration,
     resetForm,
-    formState,
+    updateSourceConfiguration,
     formStateChanges,
+    infraUiSettings,
+    createSourceConfiguration,
+    formState,
   ]);
+
+  const hasUnsavedChanges = isFormDirty || Object.keys(infraUiSettings.unsavedChanges).length > 0;
 
   const isWriteable = shouldAllowEdit && (!Boolean(source) || source?.origin !== 'internal');
 
@@ -132,6 +145,10 @@ export const SourceConfigurationSettings = ({
           <EuiSpacer />
         </>
       )}
+      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
+        <FeaturesConfigurationPanel readOnly={!isWriteable} {...infraUiSettings} />
+      </EuiPanel>
+      <EuiSpacer />
       {errors.length > 0 ? (
         <>
           <EuiCallOut color="danger">
@@ -148,7 +165,7 @@ export const SourceConfigurationSettings = ({
       <EuiFlexGroup>
         {isWriteable && (
           <EuiFlexItem>
-            {isLoading ? (
+            {isLoading || infraUiSettings.isSaving ? (
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -157,7 +174,9 @@ export const SourceConfigurationSettings = ({
                     isLoading
                     fill
                   >
-                    Loading
+                    {i18n.translate('xpack.infra.sourceConfiguration.loadingButtonLabel', {
+                      defaultMessage: 'Loading',
+                    })}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -169,10 +188,8 @@ export const SourceConfigurationSettings = ({
                       data-test-subj="discardSettingsButton"
                       color="danger"
                       iconType="cross"
-                      isDisabled={isLoading || !isFormDirty}
-                      onClick={() => {
-                        resetForm();
-                      }}
+                      isDisabled={!hasUnsavedChanges}
+                      onClick={resetAllUnsavedChanges}
                     >
                       <FormattedMessage
                         id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
@@ -184,7 +201,7 @@ export const SourceConfigurationSettings = ({
                     <EuiButton
                       data-test-subj="applySettingsButton"
                       color="primary"
-                      isDisabled={!isFormDirty || !isFormValid}
+                      isDisabled={!hasUnsavedChanges || !isFormValid}
                       fill
                       onClick={persistUpdates}
                     >
