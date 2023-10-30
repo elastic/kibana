@@ -13,7 +13,6 @@ import type { Filter } from '@kbn/es-query';
 import { useCallback } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import type { inputsModel, State } from '../../../common/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store';
@@ -21,6 +20,7 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
+import { useAssigneesActionItems } from './use_assignees_actions';
 
 // check to see if the query is a known "empty" shape
 export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
@@ -94,7 +94,7 @@ export const getBulkActionHook =
       refetch: refetchGlobalQuery,
     });
 
-    const { alertAssigneesItems, alertAssigneesPanels } = useBulkAlertAssigneesItems({
+    const { alertAssigneesItems, alertAssigneesPanels } = useAssigneesActionItems({
       refetch: refetchGlobalQuery,
     });
 

@@ -15,6 +15,7 @@ import {
 import type { Filter } from '@kbn/es-query';
 import { tableDefaults } from '@kbn/securitysolution-data-table';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
+import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import {
   getColumns,
@@ -153,17 +154,21 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
       ]
     : [];
 
-export const buildAlertAssigneesFilter = (assigneesIds: string[]): Filter[] => {
+export const buildAlertAssigneesFilter = (assigneesIds: AssigneesIdsSelection[]): Filter[] => {
   if (!assigneesIds.length) {
     return [];
   }
   const combinedQuery = {
     bool: {
-      should: assigneesIds.map((id) => ({
-        term: {
-          [ALERT_WORKFLOW_ASSIGNEE_IDS]: id,
-        },
-      })),
+      should: assigneesIds.map((id) =>
+        id
+          ? {
+              term: {
+                [ALERT_WORKFLOW_ASSIGNEE_IDS]: id,
+              },
+            }
+          : { bool: { must_not: { exists: { field: ALERT_WORKFLOW_ASSIGNEE_IDS } } } }
+      ),
     },
   };
 

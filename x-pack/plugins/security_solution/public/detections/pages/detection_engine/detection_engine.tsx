@@ -32,6 +32,8 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { isEqual } from 'lodash';
+import { FilterByAssigneesPopover } from '../../../common/components/filter_group/filter_by_assignees';
+import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -137,9 +139,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const [assignees, setAssignees] = useState<string[]>([]);
+  const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
   const handleSelectedAssignees = useCallback(
-    (newAssignees: string[]) => {
+    (newAssignees: AssigneesIdsSelection[]) => {
       if (!isEqual(newAssignees, assignees)) {
         setAssignees(newAssignees);
       }
@@ -374,24 +376,20 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           }}
           chainingSystem={'HIERARCHICAL'}
           onInit={setDetectionPageFilterHandler}
-          assignees={assignees}
-          onAssigneesChange={handleSelectedAssignees}
         />
       ),
     [
-      topLevelFilters,
       arePageFiltersEnabled,
-      statusFilter,
+      from,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
-      showUpdating,
-      from,
       query,
+      showUpdating,
+      statusFilter,
       timelinesUi,
       to,
+      topLevelFilters,
       updatedAt,
-      assignees,
-      handleSelectedAssignees,
     ]
   );
 
@@ -466,14 +464,24 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           >
             <Display show={!globalFullScreen}>
               <HeaderPage title={i18n.PAGE_TITLE}>
-                <SecuritySolutionLinkButton
-                  onClick={goToRules}
-                  deepLinkId={SecurityPageName.rules}
-                  data-test-subj="manage-alert-detection-rules"
-                  fill
-                >
-                  {i18n.BUTTON_MANAGE_RULES}
-                </SecuritySolutionLinkButton>
+                <EuiFlexGroup gutterSize="m">
+                  <EuiFlexItem>
+                    <FilterByAssigneesPopover
+                      assignedUserIds={assignees}
+                      onSelectionChange={handleSelectedAssignees}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <SecuritySolutionLinkButton
+                      onClick={goToRules}
+                      deepLinkId={SecurityPageName.rules}
+                      data-test-subj="manage-alert-detection-rules"
+                      fill
+                    >
+                      {i18n.BUTTON_MANAGE_RULES}
+                    </SecuritySolutionLinkButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </HeaderPage>
               <EuiHorizontalRule margin="none" />
               <EuiSpacer size="l" />

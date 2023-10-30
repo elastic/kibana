@@ -5,27 +5,40 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { UserAvatar } from '@kbn/user-profile-components';
 import { noop } from 'lodash';
-import { useGetUserProfiles } from '../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
+import type { FC } from 'react';
+import React, { memo, useCallback, useState } from 'react';
+
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { removeNoAssigneesSelection } from '../../../../common/components/assignees/utils';
+import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
+import { AssigneesPopover } from '../../../../common/components/assignees/assignees_popover';
+import { AssigneesAvatarsPanel } from '../../../../common/components/assignees/assignees_avatars_panel';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
-import {
-  ASSIGNEE_AVATAR_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
-  ASSIGNEES_VALUE_TEST_ID,
-  ASSIGNEES_COUNT_BADGE_TEST_ID,
-} from './test_ids';
-import { AssigneesPopover } from './assignees_popover';
+import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_TITLE_TEST_ID } from './test_ids';
+
+const UpdateAssigneesButton: FC<{ togglePopover: () => void }> = memo(({ togglePopover }) => (
+  <EuiToolTip
+    position="left"
+    content={i18n.translate(
+      'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
+      {
+        defaultMessage: 'Assignees',
+      }
+    )}
+  >
+    <EuiButtonIcon
+      aria-label="Update assignees"
+      data-test-subj={ASSIGNEES_ADD_BUTTON_TEST_ID}
+      iconType={'plusInCircle'}
+      onClick={togglePopover}
+    />
+  </EuiToolTip>
+));
+UpdateAssigneesButton.displayName = 'UpdateAssigneesButton';
 
 export interface AssigneesProps {
   /**
@@ -36,7 +49,7 @@ export interface AssigneesProps {
   /**
    * The array of ids of the users assigned to the alert
    */
-  alertAssignees: string[];
+  assignedUserIds: string[];
 
   /**
    * Callback to handle the successful assignees update
@@ -48,62 +61,37 @@ export interface AssigneesProps {
  * Document assignees details displayed in flyout right section header
  */
 export const Assignees: FC<AssigneesProps> = memo(
-  ({ eventId, alertAssignees, onAssigneesUpdated }) => {
-    const { userProfiles } = useGetUserProfiles(alertAssignees);
+  ({ eventId, assignedUserIds, onAssigneesUpdated }) => {
     const setAlertAssignees = useSetAlertAssignees();
 
-    const assignees = userProfiles?.filter((user) => alertAssignees.includes(user.uid)) ?? [];
-
-    const [selectedAssignees, setSelectedAssignees] = useState<string[] | undefined>();
-    const [needToUpdateAssignees, setNeedToUpdateAssignees] = useState(false);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const onSuccess = useCallback(() => {
       if (onAssigneesUpdated) onAssigneesUpdated();
     }, [onAssigneesUpdated]);
 
-    const handleOnAlertAssigneesSubmit = useCallback(async () => {
-      if (setAlertAssignees && selectedAssignees) {
-        const existingIds = alertAssignees;
-        const updatedIds = selectedAssignees;
-
-        const assigneesToAddArray = updatedIds.filter((uid) => !existingIds.includes(uid));
-        const assigneesToRemoveArray = existingIds.filter((uid) => !updatedIds.includes(uid));
-
-        const assigneesToUpdate = {
-          assignees_to_add: assigneesToAddArray,
-          assignees_to_remove: assigneesToRemoveArray,
-        };
-
-        await setAlertAssignees(assigneesToUpdate, [eventId], onSuccess, noop);
-      }
-    }, [alertAssignees, eventId, onSuccess, selectedAssignees, setAlertAssignees]);
-
     const togglePopover = useCallback(() => {
       setIsPopoverOpen((value) => !value);
-      setNeedToUpdateAssignees(true);
     }, []);
 
-    const onClosePopover = useCallback(() => {
-      // Order matters here because needToUpdateAssignees will likely be true already
-      // from the togglePopover call when opening the popover, so if we set the popover to false
-      // first, we'll get a rerender and then get another after we set needToUpdateAssignees to true again
-      setNeedToUpdateAssignees(true);
-      setIsPopoverOpen(false);
-    }, []);
+    const onAssigneesApply = useCallback(
+      async (assigneesIds: AssigneesIdsSelection[]) => {
+        setIsPopoverOpen(false);
+        if (setAlertAssignees) {
+          const updatedIds = removeNoAssigneesSelection(assigneesIds);
+          const assigneesToAddArray = updatedIds.filter((uid) => !assignedUserIds.includes(uid));
+          const assigneesToRemoveArray = assignedUserIds.filter((uid) => !updatedIds.includes(uid));
 
-    const onUsersChange = useCallback((users: string[]) => {
-      setSelectedAssignees(users);
-    }, []);
+          const assigneesToUpdate = {
+            assignees_to_add: assigneesToAddArray,
+            assignees_to_remove: assigneesToRemoveArray,
+          };
 
-    useEffect(() => {
-      // selectedAssignees will be undefined on initial render or a rerender occurs, so we only want to update the assignees
-      // after the users have been changed in some manner not when it is an initial value
-      if (isPopoverOpen === false && needToUpdateAssignees && selectedAssignees) {
-        setNeedToUpdateAssignees(false);
-        handleOnAlertAssigneesSubmit();
-      }
-    }, [handleOnAlertAssigneesSubmit, isPopoverOpen, needToUpdateAssignees, selectedAssignees]);
+          await setAlertAssignees(assigneesToUpdate, [eventId], onSuccess, noop);
+        }
+      },
+      [assignedUserIds, eventId, onSuccess, setAlertAssignees]
+    );
 
     return (
       <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
@@ -118,39 +106,15 @@ export const Assignees: FC<AssigneesProps> = memo(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <span data-test-subj={ASSIGNEES_VALUE_TEST_ID}>
-            {assignees.length > 2 ? (
-              <EuiToolTip
-                position="top"
-                content={assignees.map((user) => (
-                  <div>{user.user.email ?? user.user.username}</div>
-                ))}
-                repositionOnScroll={true}
-              >
-                <EuiNotificationBadge data-test-subj={ASSIGNEES_COUNT_BADGE_TEST_ID}>
-                  {assignees.length}
-                </EuiNotificationBadge>
-              </EuiToolTip>
-            ) : (
-              assignees.map((user) => (
-                <UserAvatar
-                  key={user.uid}
-                  data-test-subj={ASSIGNEE_AVATAR_TEST_ID(user.user.username)}
-                  user={user.user}
-                  avatar={user.data.avatar}
-                  size={'s'}
-                />
-              ))
-            )}
-          </span>
+          <AssigneesAvatarsPanel assignedUserIds={assignedUserIds} maxVisibleAvatars={2} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AssigneesPopover
-            existingAssigneesIds={alertAssignees}
+            assignedUserIds={assignedUserIds}
+            button={<UpdateAssigneesButton togglePopover={togglePopover} />}
             isPopoverOpen={isPopoverOpen}
-            onUsersChange={onUsersChange}
-            onClosePopover={onClosePopover}
-            togglePopover={togglePopover}
+            closePopover={togglePopover}
+            onAssigneesApply={onAssigneesApply}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

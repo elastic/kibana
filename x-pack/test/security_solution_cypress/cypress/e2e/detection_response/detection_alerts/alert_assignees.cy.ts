@@ -30,7 +30,6 @@ import {
 describe('Alert assigning', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
-    cy.task('esArchiverResetKibana');
   });
 
   beforeEach(() => {

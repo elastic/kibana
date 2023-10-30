@@ -6,21 +6,14 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import {
-  EuiIcon,
-  EuiToolTip,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import { UserAvatar } from '@kbn/user-profile-components';
+import { AssigneesAvatarsPanel } from '../../../common/components/assignees/assignees_avatars_panel';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -44,7 +37,6 @@ import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import { eventRenderedViewColumns, getColumns } from './columns';
-import { useGetUserProfiles } from '../../containers/detection_engine/user_profiles/use_get_user_profiles';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -81,38 +73,10 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
       | undefined;
     return ecsAssignees ?? dataAssignees ?? [];
   }, [props.data, props.ecsData?.kibana?.alert.workflow_assignee_ids]);
-  const { loading: isLoadingProfiles, userProfiles } = useGetUserProfiles(actualAssignees);
-  const assignees = userProfiles?.filter((user) => actualAssignees.includes(user.uid)) ?? [];
-  if (
-    columnId === SIGNAL_ASSIGNEE_IDS_FIELD_NAME &&
-    (actualAssignees.length || isLoadingProfiles)
-  ) {
-    // Show spinner if loading profiles or if there are no fetched profiles yet
-    if (isLoadingProfiles || !assignees.length) {
-      return <EuiLoadingSpinner size="s" />;
-    }
+  if (columnId === SIGNAL_ASSIGNEE_IDS_FIELD_NAME && actualAssignees.length) {
     return (
       <span>
-        {assignees.length > 2 ? (
-          <EuiToolTip
-            position="top"
-            content={assignees.map((user) => (
-              <div>{user.user.email ?? user.user.username}</div>
-            ))}
-            repositionOnScroll={true}
-          >
-            <EuiNotificationBadge>{assignees.length}</EuiNotificationBadge>
-          </EuiToolTip>
-        ) : (
-          assignees.map((user) => (
-            <UserAvatar
-              user={user.user}
-              avatar={user.data.avatar}
-              size={'s'}
-              data-test-subj="alertTableAssigneeAvatar"
-            />
-          ))
-        )}
+        <AssigneesAvatarsPanel assignedUserIds={actualAssignees} maxVisibleAvatars={4} />
       </span>
     );
   }

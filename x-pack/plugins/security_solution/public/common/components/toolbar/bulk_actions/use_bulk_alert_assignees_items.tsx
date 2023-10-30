@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
 import type { RenderContentPanelProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import React, { useCallback, useMemo } from 'react';
+import { ASSIGNEES_PANEL_WIDTH } from '../../assignees/constants';
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import * as i18n from './translations';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
@@ -21,6 +22,7 @@ export interface UseBulkAlertAssigneesPanel {
   title: JSX.Element;
   'data-test-subj': string;
   renderContent: (props: RenderContentPanelProps) => JSX.Element;
+  width?: number;
 }
 
 export const useBulkAlertAssigneesItems = ({ refetch }: UseBulkAlertAssigneesItemsProps) => {
@@ -88,6 +90,7 @@ export const useBulkAlertAssigneesItems = ({ refetch }: UseBulkAlertAssigneesIte
         title: TitleContent,
         'data-test-subj': 'alert-assignees-context-menu-panel',
         renderContent,
+        width: ASSIGNEES_PANEL_WIDTH,
       },
     ],
     [TitleContent, renderContent]
