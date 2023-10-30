@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiInMemoryTable,
+  EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -24,7 +25,6 @@ import {
   EuiPageHeader,
   EuiPageTemplate,
   EuiSearchBarOnChangeArgs,
-  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
