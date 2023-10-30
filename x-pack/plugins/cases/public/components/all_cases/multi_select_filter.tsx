@@ -26,6 +26,7 @@ const fromRawOptionsToEuiSelectableOptions = (options: string[], selectedOptions
     if (selectedOptions.includes(option)) {
       selectableOption.checked = 'on';
     }
+    selectableOption['data-test-subj'] = `options-filter-popover-item-${option}`;
     return selectableOption;
   });
 };
@@ -35,7 +36,7 @@ const fromEuiSelectableOptionToRawOption = (options: EuiSelectableOption[]) =>
 
 const getEuiSelectableCheckedOptions = (options: EuiSelectableOption[]) =>
   options.filter((option) => option.checked === 'on');
-
+const counter = 0;
 interface UseFilterParams {
   buttonLabel?: string;
   id: keyof FilterOptions;

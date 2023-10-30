@@ -48,4 +48,9 @@ describe('parseURLWithFilterOptions', () => {
       status: ['foo', 'bar', 'baz', 'qux', 'quux'],
     });
   });
+
+  it('parses a url with status=', () => {
+    const url = 'status=';
+    expect(parseURLWithFilterOptions(url)).toStrictEqual({ status: [] });
+  });
 });

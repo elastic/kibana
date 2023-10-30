@@ -47,7 +47,7 @@ export const StatusFilterComponent = ({
     [hiddenStatuses]
   );
   const renderOption = (option: EuiSelectableOption) => {
-    const selectedStatus = (option?.label || 'all') as CaseStatuses;
+    const selectedStatus = option.label as CaseStatuses;
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={1}>

@@ -178,7 +178,7 @@ export const NO_ATTACHMENTS_ADDED = i18n.translate(
 );
 
 export const EMPTY_FILTER_MESSAGE = i18n.translate(
-  'x-pack.cases.table_filters.use_filters.empty_message',
+  'xpack.cases.table_filters.use_filters.empty_message',
   {
     defaultMessage: 'No options',
   }
