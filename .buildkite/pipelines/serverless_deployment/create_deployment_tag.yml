@@ -19,10 +19,11 @@ steps:
 
   - wait: ~
 
-  - label: "Update banner"
+  - label: "Update banner after selection"
     env:
       SKIP_KIBANA_HOOKS: 1
     commands:
+      - "buildkite-agent annotate --append --context banner --style info \"<br/>:dizzy: Selected commit: <a href='https://github.com/elastic/kibana/commit/$$(buildkite-agent meta-data get selected-commit-hash)'>$$(buildkite-agent meta-data get selected-commit-hash)</a>.\""
       - "buildkite-agent annotate --append --context banner --style info \"<br/>:hourglass: Please wait while we're collecting info about the commit.\""
 
   - label: "Collect commit info"
@@ -56,4 +57,4 @@ steps:
       SKIP_KIBANA_HOOKS: 1
     commands:
       - "buildkite-agent annotate --context lower-banner --style success \"<h3>Deploy tag successfully created</h3><br/>\""
-      - "buildkite-agent annotate --context lower-banner --style success --append \"Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=$(buildkite-agent meta-data get deploy-tag)'>here on buildkite.</a>\""
+      - "buildkite-agent annotate --context lower-banner --style success --append \"Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=$$(buildkite-agent meta-data get deploy-tag)'>here on buildkite.</a>\""
