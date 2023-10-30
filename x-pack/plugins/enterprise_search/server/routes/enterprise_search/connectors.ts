@@ -19,13 +19,7 @@ import {
   updateFilteringDraft,
 } from '@kbn/search-connectors';
 
-import {
-  ConnectorStatus,
-  FilteringPolicy,
-  FilteringRule,
-  FilteringRuleRule,
-  SyncJobType,
-} from '@kbn/search-connectors';
+import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -39,7 +33,6 @@ import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isAccessControlDisabledException } from '../../utils/identify_exceptions';
-import { validateEnum } from '../../utils/validate_enum';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
@@ -391,12 +384,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
               field: schema.string(),
               id: schema.string(),
               order: schema.number(),
-              policy: schema.string({
-                validate: validateEnum(FilteringPolicy, 'policy'),
-              }),
-              rule: schema.string({
-                validate: validateEnum(FilteringRuleRule, 'rule'),
-              }),
+              policy: schema.string(),
+              rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
             })
@@ -433,12 +422,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
               field: schema.string(),
               id: schema.string(),
               order: schema.number(),
-              policy: schema.string({
-                validate: validateEnum(FilteringPolicy, 'policy'),
-              }),
-              rule: schema.string({
-                validate: validateEnum(FilteringRuleRule, 'rule'),
-              }),
+              policy: schema.string(),
+              rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
             })

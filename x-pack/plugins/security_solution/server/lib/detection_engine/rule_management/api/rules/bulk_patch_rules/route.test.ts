@@ -191,9 +191,7 @@ describe('Bulk patch rules route', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type",Invalid value "kuery" supplied to "language"'
-      );
+      expect(result.badRequest).toHaveBeenCalledWith('0: Invalid input');
     });
 
     test('allows rule type of query and custom from and interval', async () => {
@@ -220,7 +218,9 @@ describe('Bulk patch rules route', () => {
         ],
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '0.from: Failed to parse date-math expression'
+      );
     });
   });
 });

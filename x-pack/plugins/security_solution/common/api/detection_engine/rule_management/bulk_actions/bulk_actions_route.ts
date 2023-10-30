@@ -20,13 +20,15 @@ import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '../../model';
 import type { BulkActionsDryRunErrCode } from '../../../../constants';
 
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
 import {
   IndexPatternArray,
   RuleQuery,
   RuleTagArray,
   TimelineTemplateId,
   TimelineTemplateTitle,
-} from '../../model';
+} from '../../model/rule_schema_legacy';
 
 export enum BulkActionType {
   'enable' = 'enable',

@@ -151,7 +151,7 @@ export const percentileOperation: OperationDefinition<
         (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentiles)
     );
   },
-  getDefaultLabel: (column, indexPattern, columns) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.params.percentile,
