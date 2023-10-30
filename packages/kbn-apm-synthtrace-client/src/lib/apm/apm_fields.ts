@@ -95,6 +95,7 @@ export type ApmFields = Fields<{
     'error.type': string;
     'event.ingested': number;
     'event.name': string;
+    'event.action': string;
     'event.outcome': string;
     'event.outcome_numeric':
       | number
