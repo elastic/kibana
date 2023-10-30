@@ -10,6 +10,7 @@ export const KIBANA_SAVED_OBJECTS = '/app/management/kibana/objects';
 export const LOGOUT_URL = '/logout';
 
 // Common
+export const GET_STARTED_URL = '/app/security/get_started';
 export const MANAGE_URL = '/app/security/manage';
 export const DASHBOARDS_URL = '/app/security/dashboards';
 
