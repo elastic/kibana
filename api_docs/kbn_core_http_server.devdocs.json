@@ -4297,11 +4297,11 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "profiling",
@@ -6711,7 +6711,7 @@
               },
               {
                 "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+                "path": "x-pack/plugins/profiling/server/routes/setup/route.ts"
               },
               {
                 "plugin": "reporting",
@@ -13602,6 +13602,10 @@
                 "path": "x-pack/plugins/session_view/server/routes/get_total_io_bytes_route.ts"
               },
               {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/server.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/transforms_audit_messages.ts"
               },
@@ -13988,6 +13992,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/tags/routes/create_tag.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "transform",
@@ -14834,6 +14842,10 @@
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
               },
               {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/server.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/field_histograms.ts"
               },
@@ -15268,6 +15280,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/stored_scripts/delete_script_route.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",

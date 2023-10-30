@@ -38,7 +38,6 @@ export interface Props<
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
-  defaultIsCollapsed?: boolean;
 }
 
 function NavigationGroupInternalComp<

@@ -26,9 +26,6 @@ export interface SetupState {
   data: {
     available: boolean;
   };
-  permissions: {
-    configured: boolean;
-  };
   resource_management: {
     enabled: boolean;
   };
@@ -48,9 +45,6 @@ export function createDefaultSetupState(): SetupState {
     data: {
       available: false,
     },
-    permissions: {
-      configured: false,
-    },
     resource_management: {
       enabled: false,
     },
@@ -65,12 +59,7 @@ export function createDefaultSetupState(): SetupState {
 }
 
 export function areResourcesSetup(state: SetupState): boolean {
-  return (
-    state.resource_management.enabled &&
-    state.resources.created &&
-    state.permissions.configured &&
-    state.settings.configured
-  );
+  return state.resource_management.enabled && state.resources.created && state.settings.configured;
 }
 
 function mergeRecursivePartial<T>(base: T, partial: RecursivePartial<T>): T {

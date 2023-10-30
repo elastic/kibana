@@ -7,7 +7,6 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
 import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { SearchResponseWarning } from './types';
@@ -19,6 +18,7 @@ export function extractWarnings(
   rawResponse: estypes.SearchResponse,
   inspectorService: InspectorStartContract,
   requestAdapter: RequestAdapter,
+  requestName: string,
   requestId?: string
 ): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
@@ -35,9 +35,7 @@ export function extractWarnings(
   if (isPartial) {
     warnings.push({
       type: 'incomplete',
-      message: i18n.translate('searchResponseWarnings.incompleteResultsMessage', {
-        defaultMessage: 'Results are partial and may be incomplete.',
-      }),
+      requestName,
       clusters: rawResponse._clusters
         ? (
             rawResponse._clusters as estypes.ClusterStatistics & {
