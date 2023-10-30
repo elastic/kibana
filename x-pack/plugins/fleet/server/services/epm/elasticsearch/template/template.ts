@@ -124,6 +124,10 @@ export function getTemplate({
 }
 
 const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): string[] => {
+  if (type === 'traces') {
+    return [];
+  }
+
   if (type === 'metrics' && isIndexModeTimeSeries) {
     return [`metrics@tsdb-settings`];
   }

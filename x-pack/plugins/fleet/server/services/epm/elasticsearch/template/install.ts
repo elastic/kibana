@@ -620,7 +620,7 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
       )
       // Filter stack component templates shared between integrations
       .filter(
-        (componentTemplateId) => [`metrics@tsdb-settings`, `logs@settings`, `metrics@settings`, `traces@settings`].indexOf(componentTemplateId) === -1
+        (componentTemplateId) => [`metrics@tsdb-settings`, `logs@settings`, `metrics@settings`].indexOf(componentTemplateId) === -1
       )
       .map((componentTemplateId) => ({
         id: componentTemplateId,
