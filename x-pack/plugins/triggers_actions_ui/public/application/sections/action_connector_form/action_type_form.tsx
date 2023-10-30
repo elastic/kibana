@@ -547,7 +547,6 @@ export const ActionTypeForm = ({
                           availableActionVariables
                         )
                       );
-                      console.trace('setActionParamsProperty', key, value, i);
                       setActionParamsProperty(key, value, i);
                     }}
                     messageVariables={templateFields}
