@@ -82,4 +82,22 @@ describe('Registration', () => {
     expect(mockRenderParameterTemplates).toHaveBeenCalledWith(params, variables, actionId);
     expect(rendered).toBe(renderedVariables);
   });
+
+  it('registers the getSubActionPrivileges() correctly', async () => {
+    const getSubActionPrivileges = jest.fn(() => ['foo']);
+
+    register<TestConfig, TestSecrets>({
+      actionTypeRegistry,
+      connector: {
+        ...connector,
+        getSubActionPrivileges,
+      },
+      configurationUtilities: mockedActionsConfig,
+      logger,
+    });
+
+    expect(actionTypeRegistry.register).toHaveBeenCalledWith(
+      expect.objectContaining({ getSubActionPrivileges })
+    );
+  });
 });
