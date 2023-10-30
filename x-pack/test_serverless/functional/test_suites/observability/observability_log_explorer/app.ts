@@ -5,8 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
