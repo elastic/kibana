@@ -558,10 +558,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           description: i18n.translate(
             'contentManagement.tableList.listing.table.editActionDescription',
             {
-              defaultMessage: 'Edit',
+              defaultMessage: 'Clone and edit',
             }
           ),
-          icon: 'pencil',
+          icon: 'copy',
           type: 'icon',
           available: (item) => isEditable(item),
           enabled: (v) => !(v as unknown as { error: string })?.error,

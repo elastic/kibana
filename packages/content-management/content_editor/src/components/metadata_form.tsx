@@ -56,7 +56,9 @@ export const MetadataForm: FC<Props> = ({
 
   const readOnlyToolTip = i18n.translate(
     'contentManagement.contentEditor.metadataForm.readOnlyToolTip',
-    { defaultMessage: 'To edit these details, contact your administrator for access.' }
+    {
+      defaultMessage: 'This dashboard is managed by Elastic. Clone it to make changes.',
+    }
   );
 
   return (

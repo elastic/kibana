@@ -26,7 +26,7 @@ export const getRandomColor = (): string => {
 export const duplicateTagNameErrorMessage = i18n.translate(
   'xpack.savedObjectsTagging.validation.name.duplicateError',
   {
-    defaultMessage: 'Name has already been taken.',
+    defaultMessage: 'This name belongs to a tag managed by Elastic.',
   }
 );
 

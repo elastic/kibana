@@ -130,6 +130,12 @@ export const AddPanelFlyout = ({
             savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
             uiSettings: core.uiSettings,
           }}
+          getDisabledText={(item) => {
+            console.log(item);
+            return item.managed
+              ? 'This item is managed by Elastic. Clone it to add it to dashboards.'
+              : undefined;
+          }}
           onChoose={onChoose}
           savedObjectMetaData={metaData}
           showFilter={true}

@@ -47,6 +47,7 @@ export interface SavedObjectWithMetadata<T = unknown> {
   created_at?: string;
   updated_at?: string;
   attributes: T;
+  managed?: boolean;
   namespaces?: string[];
   references: SavedObjectReference[];
 }

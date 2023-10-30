@@ -31,12 +31,12 @@ export const createDashboardSavedObjectType = ({
     getTitle(obj) {
       return obj.attributes.title;
     },
-    getInAppUrl(obj) {
-      return {
-        path: `/app/dashboards#/view/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'dashboard.show',
-      };
-    },
+    // getInAppUrl(obj) {
+    //   return {
+    //     path: `/app/dashboards#/view/${encodeURIComponent(obj.id)}`,
+    //     uiCapabilitiesPath: 'dashboard.show',
+    //   };
+    // },
   },
   mappings: {
     properties: {

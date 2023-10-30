@@ -387,6 +387,7 @@ export class Table extends PureComponent<TableProps, TableState> {
 
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
+    console.log(selectedSavedObjects);
 
     return (
       <Fragment>
@@ -403,7 +404,8 @@ export class Table extends PureComponent<TableProps, TableState> {
               color="danger"
               onClick={onDelete}
               isDisabled={
-                selectedSavedObjects.length === 0 || !capabilities.savedObjectsManagement.delete
+                selectedSavedObjects.filter(({ managed }) => !managed).length === 0 ||
+                !capabilities.savedObjectsManagement.delete
               }
               title={
                 capabilities.savedObjectsManagement.delete

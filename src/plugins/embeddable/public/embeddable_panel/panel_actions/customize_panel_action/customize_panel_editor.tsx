@@ -24,6 +24,7 @@ import {
   EuiFlexItem,
   EuiSuperDatePicker,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
@@ -177,6 +178,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               defaultMessage="Description"
             />
           }
+          fullWidth={true}
           labelAppend={
             <EuiButtonEmpty
               size="xs"
@@ -203,21 +205,27 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             </EuiButtonEmpty>
           }
         >
-          <EuiTextArea
-            id="panelDescriptionInput"
-            className="panelDescriptionInputText"
-            data-test-subj="customEmbeddablePanelDescriptionInput"
-            disabled={hideTitle || !editMode}
-            name="description"
-            value={panelDescription ?? ''}
-            onChange={(e) => setPanelDescription(e.target.value)}
-            aria-label={i18n.translate(
-              'embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionAriaLabel',
-              {
-                defaultMessage: 'Enter a custom description for your panel',
-              }
-            )}
-          />
+          <EuiToolTip
+            display="block"
+            content="This visualization is managed by Elastic. Clone it to make changes to the description."
+          >
+            <EuiTextArea
+              fullWidth={true}
+              id="panelDescriptionInput"
+              className="panelDescriptionInputText"
+              data-test-subj="customEmbeddablePanelDescriptionInput"
+              disabled={true}
+              name="description"
+              value={panelDescription ?? ''}
+              onChange={(e) => setPanelDescription(e.target.value)}
+              aria-label={i18n.translate(
+                'embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionAriaLabel',
+                {
+                  defaultMessage: 'Enter a custom description for your panel',
+                }
+              )}
+            />
+          </EuiToolTip>
         </EuiFormRow>
       </>
     );

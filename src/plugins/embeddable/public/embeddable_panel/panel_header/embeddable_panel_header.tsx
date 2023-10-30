@@ -8,7 +8,7 @@
 
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiBadge, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 
 import { isSelfStyledEmbeddable, ViewMode } from '../../lib';
 import { EmbeddablePanelTitle } from './embeddable_panel_title';
@@ -107,6 +107,11 @@ export const EmbeddablePanelHeader = ({
           customizePanelAction={universalActions.customizePanel}
         />
         {showBadges && badgeComponents}
+        <EuiToolTip content="This visualization is managed by Elastic.">
+          <EuiBadge color="primary" iconType="glasses">
+            Managed
+          </EuiBadge>
+        </EuiToolTip>
       </h2>
       {showNotifications && notificationComponents}
       {embeddablePanelContextMenu}

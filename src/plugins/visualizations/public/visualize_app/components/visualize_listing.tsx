@@ -383,12 +383,15 @@ export const VisualizeListing = () => {
             entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
               defaultMessage: 'visualizations',
             })}
-            getDetailViewLink={({ attributes: { editApp, editUrl, error, readOnly } }) =>
-              readOnly
-                ? undefined
-                : getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
-            }
+            getDetailViewLink={({ attributes: { editApp, editUrl, error, readOnly } }) => undefined}
+            itemIsEditable={({ attributes: { readOnly } }) => false}
             tableCaption={visualizeLibraryTitle}
+            rowItemActions={(item) => ({
+              delete: {
+                enabled: false,
+                reason: 'This visualization is managed by Elastic. It cannot be deleted.',
+              },
+            })}
             {...tableViewProps}
             {...propsFromParent}
           />

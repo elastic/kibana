@@ -18,6 +18,7 @@ export function toSavedObjectWithMeta(so: SavedObject): SavedObjectWithMetadata 
     updated_at: so.updated_at,
     attributes: so.attributes,
     created_at: so.created_at,
+    managed: so.managed,
     error: so.error,
     meta: {},
   };

@@ -53,7 +53,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   }, [selectedObjects]);
   const deletableObjects = useMemo(() => {
     return selectedObjects
-      .filter((obj) => !obj.meta.hiddenType)
+      .filter((obj) => !obj.meta.hiddenType && !obj.managed)
       .map(({ type, id, meta, namespaces = [] }) => {
         const { title = '', icon = 'apps' } = meta;
         const isShared = namespaces.length > 1 || namespaces.includes('*');
@@ -159,7 +159,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               field: 'id',
               name: i18n.translate(
                 'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
-                { defaultMessage: 'Id' }
+                { defaultMessage: 'ID' }
               ),
             },
             {

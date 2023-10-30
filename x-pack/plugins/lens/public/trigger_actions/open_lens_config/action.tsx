@@ -31,6 +31,7 @@ export class ConfigureInLensPanelAction implements Action<Context> {
   ) {}
 
   public getDisplayName({ embeddable }: Context): string {
+    return 'Duplicate and edit';
     const language = isLensEmbeddable(embeddable) ? embeddable.getTextBasedLanguage() : undefined;
     return i18n.translate('xpack.lens.app.editVisualizationLabel', {
       defaultMessage: 'Edit {lang} visualization',
@@ -39,7 +40,7 @@ export class ConfigureInLensPanelAction implements Action<Context> {
   }
 
   public getIconType() {
-    return 'pencil';
+    return 'copy';
   }
 
   public async isCompatible({ embeddable }: Context) {

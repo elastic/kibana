@@ -73,6 +73,7 @@ interface BaseSavedObjectFinder {
   ) => void;
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
+  getDisabledText?: (item: SavedObjectFinderItem) => string | undefined;
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
@@ -288,8 +289,11 @@ export class SavedObjectFinderUi extends React.Component<
             ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
             : `${item.name} (${currentSavedObjectMetaData!.name})`;
 
-          return (
+          const disabledText = this.props.getDisabledText?.(item);
+
+          const link = (
             <EuiLink
+              disabled={Boolean(disabledText)}
               onClick={
                 onChoose
                   ? () => {
@@ -303,6 +307,8 @@ export class SavedObjectFinderUi extends React.Component<
               {item.name}
             </EuiLink>
           );
+
+          return disabledText ? <EuiToolTip content={disabledText}>{link}</EuiToolTip> : link;
         },
       },
       ...(tagColumn ? [tagColumn] : []),
