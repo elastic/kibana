@@ -16,6 +16,7 @@ import {
   SavedObjectReference,
   Logger,
 } from '@kbn/core/server';
+import { SubActionConnectorType } from './sub_action_framework/types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -153,6 +154,7 @@ export interface ActionType<
    * For all other scenarios they will be ignored
    */
   getKibanaPrivileges?: (args?: { params?: Params }) => string[];
+  getSubActionPrivileges?: SubActionConnectorType<Config, Secrets>['getSubActionPrivileges'];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }

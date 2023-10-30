@@ -81,6 +81,15 @@ export interface SubActionConnectorType<Config, Secrets> {
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
+  /**
+   * Callback that should return the additional list of Kibana feature privileges that a user must
+   * have in order to execute the sub-action. The values returned should be those that are defined
+   * in the `api` property of the `FeatureKibanaPrivileges`
+   * ([link](https://github.com/elastic/kibana/blob/3800ce4c9cbbceaa861b62de2fd217f0c1961b98/x-pack/plugins/features/common/feature_kibana_privileges.ts#L49-L75))
+   * when the features were registered with kibana.
+   * @param args
+   */
+  getSubActionPrivileges?: (args: { subActionName: string }) => string[];
 }
 
 export interface ExecutorParams extends ActionTypeParams {
