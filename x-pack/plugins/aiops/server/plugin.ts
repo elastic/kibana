@@ -20,8 +20,8 @@ import {
   AiopsPluginStartDeps,
 } from './types';
 
-import { defineLogRateAnalysisRoute } from './routes';
-import { defineLogCategorizationRoutes } from './routes/log_categorization';
+import { defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_log_rate_analysis_route';
+import { defineCategorizationFieldValidationRoute } from './routes/log_categorization/define_categorization_field_validation_route';
 import { registerCasesPersistableState } from './register_cases';
 
 export class AiopsPlugin
@@ -59,7 +59,7 @@ export class AiopsPlugin
     // Register server side APIs
     core.getStartServices().then(([coreStart, depsStart]) => {
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
-      defineLogCategorizationRoutes(router, aiopsLicense, this.usageCounter);
+      defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
     });
 
     return {};
