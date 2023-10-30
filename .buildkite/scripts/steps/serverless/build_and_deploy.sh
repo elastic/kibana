@@ -77,12 +77,13 @@ else
 fi
 
 PROJECT_KIBANA_URL=$(jq -r --slurp '.[1].endpoints.kibana' $DEPLOY_LOGS)
+PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
 PROJECT_ELASTICSEARCH_URL=$(jq -r --slurp '.[1].endpoints.elasticsearch' $DEPLOY_LOGS)
 
 cat << EOF | buildkite-agent annotate --style "info" --context project
   ### Project Deployment
 
-  Kibana: $PROJECT_KIBANA_URL
+  Kibana: $PROJECT_KIBANA_LOGIN_URL
 
   Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
