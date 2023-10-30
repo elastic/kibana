@@ -16,6 +16,7 @@ import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_
 import { createApmRule } from './helpers/alerting_api_helper';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
 import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
+import { beforeOrAfter } from '../../common/utils/before_or_after';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -34,6 +35,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const spikeStart = moment().subtract(2, 'hours').valueOf();
       const spikeEnd = moment().subtract(1, 'hours').valueOf();
+
+      beforeOrAfter(async () => {
+        await cleanup();
+      });
 
       before(async () => {
         const serviceA = apm
@@ -63,10 +68,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await synthtraceEsClient.index(events);
 
         await createAndRunApmMlJobs({ es, ml, environments: ['production'], logger });
-      });
-
-      after(async () => {
-        await cleanup();
       });
 
       async function cleanup() {
