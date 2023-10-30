@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ProfilingStatus } from '@kbn/profiling-utils';
 import { areCloudResourcesSetup } from '../../../common/cloud_setup';
 import { areResourcesSetup } from '../../../common/setup';
@@ -14,7 +14,7 @@ import { getSetupState } from '../setup_state';
 
 export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
+  esClient: IScopedClusterClient;
   spaceId?: string;
 }
 

@@ -50,7 +50,7 @@ because you can put data in different resource tiers.
 have backups of your cluster in case something goes wrong.
 
 | <<data-rollups, Rollup Jobs>>
-|Create a job that periodically aggregates data from one or more indices, and then
+| deprecated:[8.11.0,'Rollups are deprecated and will be removed in a future version. Use downsampling instead.'] Create a job that periodically aggregates data from one or more indices, and then
 rolls it into a new, compact index. Rollup indices are a good way to store months or
 years of historical data in combination with your raw data.
 

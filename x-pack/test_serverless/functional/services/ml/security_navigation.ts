@@ -11,7 +11,7 @@ export function MachineLearningNavigationProviderSecurity({ getService }: FtrPro
   const testSubjects = getService('testSubjects');
 
   async function navigateToArea(id: string) {
-    await testSubjects.click('~solutionSideNavItemButton-machine_learning-landing');
+    await testSubjects.click('~panelOpener-deepLinkId-securitySolutionUI:machine_learning-landing');
     await testSubjects.existOrFail(`~solutionSideNavPanelLink-ml:${id}`, {
       timeout: 60 * 1000,
     });
