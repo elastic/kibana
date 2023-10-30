@@ -41,4 +41,4 @@ post:
           schema:
             type: object
 servers:
-      - url: /
+      - url: https://localhost:5601

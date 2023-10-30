@@ -10,7 +10,6 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: /
-    description: local
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -60,8 +59,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-    servers:
-      - url: /
   /api/data_views/data_view:
     post:
       summary: Creates a data view.
@@ -94,10 +91,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: /
-    servers:
-      - url: /
   /api/data_views/data_view/{viewId}:
     get:
       summary: Retrieves a single data view by identifier.
@@ -142,13 +135,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: /
     post:
       summary: Updates a data view.
       operationId: updateDataView
       description: |
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       tags:
         - data views
       parameters:
@@ -176,10 +167,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: /
-    servers:
-      - url: /
   /api/data_views/data_view/{viewId}/fields:
     post:
       summary: Update fields presentation metadata such as count, customLabel and format.
@@ -222,10 +209,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: /
-    servers:
-      - url: /
   /api/data_views/data_view/{viewId}/runtime_field:
     post:
       summary: Creates a runtime field.
@@ -316,10 +299,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: /
-    servers:
-      - url: /
   /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     get:
       summary: Retrieves a runtime field.
@@ -413,10 +392,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: /
-    servers:
-      - url: /
   /api/data_views/default:
     get:
       summary: Retrieves the default data view identifier.
@@ -491,10 +466,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: /
-    servers:
-      - url: /
 components:
   securitySchemes:
     basicAuth:

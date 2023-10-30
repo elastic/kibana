@@ -92,7 +92,3 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
-  servers:
-    - url: /
-servers:
-  - url: /

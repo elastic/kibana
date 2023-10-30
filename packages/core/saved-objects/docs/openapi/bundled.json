@@ -14,7 +14,7 @@
   },
   "servers": [
     {
-      "url": "/",
+      "url": "http://localhost:5601",
       "description": "local"
     }
   ],
@@ -115,13 +115,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -183,13 +183,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -252,13 +252,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -312,13 +312,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -351,7 +351,7 @@
         },
         "responses": {
           "200": {
-            "description": "Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.\n",
+            "description": "Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. \n",
             "content": {
               "application/json": {
                 "schema": {
@@ -373,13 +373,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -411,7 +411,7 @@
         },
         "responses": {
           "200": {
-            "description": "Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.\n",
+            "description": "Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. \n",
             "content": {
               "application/json": {
                 "schema": {
@@ -433,13 +433,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -533,13 +533,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -711,13 +711,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -834,13 +834,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -848,7 +848,7 @@
       "post": {
         "summary": "Resolve errors from the Import objects API.",
         "operationId": "resolveImportErrors",
-        "description": "To resolve errors, you can:\n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "To resolve errors, you can: \n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -1004,13 +1004,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -1087,7 +1087,7 @@
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -1131,7 +1131,7 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
@@ -1271,7 +1271,7 @@
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     },
@@ -1316,13 +1316,13 @@
         },
         "servers": [
           {
-            "url": "/"
+            "url": "https://localhost:5601"
           }
         ]
       },
       "servers": [
         {
-          "url": "/"
+          "url": "https://localhost:5601"
         }
       ]
     }

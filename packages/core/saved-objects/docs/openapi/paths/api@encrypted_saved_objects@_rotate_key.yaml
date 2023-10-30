@@ -63,6 +63,6 @@ post:
           schema:
             type: object
   servers:
-    - url: /
+    - url: https://localhost:5601
 servers:
-  - url: /
+  - url: https://localhost:5601

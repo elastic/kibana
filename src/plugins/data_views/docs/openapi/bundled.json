@@ -14,8 +14,7 @@
   },
   "servers": [
     {
-      "url": "/",
-      "description": "local"
+      "url": "/"
     }
   ],
   "security": [
@@ -96,12 +95,7 @@
             }
           }
         }
-      },
-      "servers": [
-        {
-          "url": "/"
-        }
-      ]
+      }
     },
     "/api/data_views/data_view": {
       "post": {
@@ -152,18 +146,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "/"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "/"
         }
-      ]
+      }
     },
     "/api/data_views/data_view/{viewId}": {
       "get": {
@@ -232,17 +216,12 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "/"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Updates a data view.",
         "operationId": "updateDataView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -290,18 +269,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "/"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "/"
         }
-      ]
+      }
     },
     "/api/data_views/data_view/{viewId}/fields": {
       "post": {
@@ -369,18 +338,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "/"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "/"
         }
-      ]
+      }
     },
     "/api/data_views/data_view/{viewId}/runtime_field": {
       "post": {
@@ -512,18 +471,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "/"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "/"
         }
-      ]
+      }
     },
     "/api/data_views/data_view/{viewId}/runtime_field/{fieldName}": {
       "get": {
@@ -664,18 +613,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "/"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "/"
         }
-      ]
+      }
     },
     "/api/data_views/default": {
       "get": {
@@ -788,18 +727,8 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "/"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "/"
         }
-      ]
+      }
     }
   },
   "components": {

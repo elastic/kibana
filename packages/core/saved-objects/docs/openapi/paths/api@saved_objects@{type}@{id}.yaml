@@ -21,7 +21,7 @@ get:
           schema:
             $ref: '../components/schemas/400_response.yaml'
   servers:
-     - url: /
+     - url: https://localhost:5601
 
 post:
   summary: Create Kibana saved objects.
@@ -103,4 +103,4 @@ put:
           schema:
             type: object
 servers:
-      - url: /
+      - url: https://localhost:5601
