@@ -115,7 +115,7 @@ export const validateRequiredCustomFields = ({
     requiredCustomFields,
     requestCustomFields ?? [],
     (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
-  ).map((e) => e.key);
+  ).map((e) => `"${e.label}"`);
 
   requiredCustomFields.forEach((requiredField) => {
     const found = requestCustomFields?.find(
@@ -123,11 +123,13 @@ export const validateRequiredCustomFields = ({
     );
 
     if (found && found.value === null) {
-      missingRequiredCustomFields.push(found.key);
+      missingRequiredCustomFields.push(`"${requiredField.label}"`);
     }
   });
 
   if (missingRequiredCustomFields.length) {
-    throw Boom.badRequest(`Missing required custom fields: ${missingRequiredCustomFields}`);
+    throw Boom.badRequest(
+      `Missing required custom fields: ${missingRequiredCustomFields.join(', ')}`
+    );
   }
 };
