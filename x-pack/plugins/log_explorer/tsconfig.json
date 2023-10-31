@@ -24,7 +24,10 @@
     "@kbn/unified-data-table",
     "@kbn/core-ui-settings-browser",
     "@kbn/discover-utils",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": ["target/**/*"]
 }
