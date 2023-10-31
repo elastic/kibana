@@ -138,6 +138,6 @@ export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Prom
   return version;
 };
 
-export const generateRandomString = (length) => {
+export const generateRandomString = (length: number) => {
   return [...Array(length)].map(() => Math.random().toString(36)[2]).join('');
 };
