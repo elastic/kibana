@@ -38,6 +38,6 @@
     "@kbn/lists-plugin",
     "@kbn/securitysolution-list-constants",
     "@kbn/security-plugin",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
   ]
 }

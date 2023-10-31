@@ -9,6 +9,7 @@
     "server/**/*",
     "scripts/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "common/**/*.json",
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",

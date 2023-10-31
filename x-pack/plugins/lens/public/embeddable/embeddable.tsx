@@ -176,6 +176,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export type LensByValueInput = {
@@ -1103,6 +1104,7 @@ export class Embeddable
               }}
               noPadding={this.visDisplayOptions.noPadding}
               docLinks={this.deps.coreStart.docLinks}
+              shouldShowLegendAction={input.shouldShowLegendAction}
             />
           </KibanaThemeProvider>
           <MessagesBadge
