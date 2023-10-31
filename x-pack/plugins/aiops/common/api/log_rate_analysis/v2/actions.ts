@@ -1,0 +1,161 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  SignificantTerm,
+  SignificantTermHistogram,
+  SignificantTermGroup,
+  SignificantTermGroupHistogram,
+} from '@kbn/ml-agg-utils';
+
+export const API_ACTION_NAME = {
+  ADD_SIGNIFICANT_ITEMS: 'add_significant_items',
+  ADD_SIGNIFICANT_ITEMS_HISTOGRAM: 'add_significant_items_histogram',
+  ADD_SIGNIFICANT_ITEMS_GROUP: 'add_significant_items_group',
+  ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM: 'add_significant_items_group_histogram',
+  ADD_ERROR: 'add_error',
+  PING: 'ping',
+  RESET_ALL: 'reset_all',
+  RESET_ERRORS: 'reset_errors',
+  RESET_GROUPS: 'reset_groups',
+  UPDATE_LOADING_STATE: 'update_loading_state',
+} as const;
+export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
+
+interface ApiActionAddSignificantItems {
+  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS;
+  payload: SignificantTerm[];
+}
+
+export function addSignificantItemsAction(
+  payload: ApiActionAddSignificantItems['payload']
+): ApiActionAddSignificantItems {
+  return {
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS,
+    payload,
+  };
+}
+
+interface ApiActionAddSignificantItemsHistogram {
+  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM;
+  payload: SignificantTermHistogram[];
+}
+
+export function addSignificantItemsHistogramAction(
+  payload: ApiActionAddSignificantItemsHistogram['payload']
+): ApiActionAddSignificantItemsHistogram {
+  return {
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM,
+    payload,
+  };
+}
+
+interface ApiActionAddSignificantItemsGroup {
+  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP;
+  payload: SignificantTermGroup[];
+}
+
+export function addSignificantItemsGroupAction(
+  payload: ApiActionAddSignificantItemsGroup['payload']
+) {
+  return {
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP,
+    payload,
+  };
+}
+
+interface ApiActionAddSignificantItemsGroupHistogram {
+  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM;
+  payload: SignificantTermGroupHistogram[];
+}
+
+export function addSignificantItemsGroupHistogramAction(
+  payload: ApiActionAddSignificantItemsGroupHistogram['payload']
+): ApiActionAddSignificantItemsGroupHistogram {
+  return {
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM,
+    payload,
+  };
+}
+
+interface ApiActionAddError {
+  type: typeof API_ACTION_NAME.ADD_ERROR;
+  payload: string;
+}
+
+export function addErrorAction(payload: ApiActionAddError['payload']): ApiActionAddError {
+  return {
+    type: API_ACTION_NAME.ADD_ERROR,
+    payload,
+  };
+}
+
+interface ApiActionResetErrors {
+  type: typeof API_ACTION_NAME.RESET_ERRORS;
+}
+
+export function resetErrorsAction() {
+  return {
+    type: API_ACTION_NAME.RESET_ERRORS,
+  };
+}
+
+interface ApiActionPing {
+  type: typeof API_ACTION_NAME.PING;
+}
+
+export function pingAction(): ApiActionPing {
+  return { type: API_ACTION_NAME.PING };
+}
+
+interface ApiActionResetAll {
+  type: typeof API_ACTION_NAME.RESET_ALL;
+}
+
+export function resetAllAction(): ApiActionResetAll {
+  return { type: API_ACTION_NAME.RESET_ALL };
+}
+
+interface ApiActionResetGroups {
+  type: typeof API_ACTION_NAME.RESET_GROUPS;
+}
+
+export function resetGroupsAction(): ApiActionResetGroups {
+  return { type: API_ACTION_NAME.RESET_GROUPS };
+}
+
+interface ApiActionUpdateLoadingState {
+  type: typeof API_ACTION_NAME.UPDATE_LOADING_STATE;
+  payload: {
+    ccsWarning: boolean;
+    loaded: number;
+    loadingState: string;
+    remainingFieldCandidates?: string[];
+    groupsMissing?: boolean;
+  };
+}
+
+export function updateLoadingStateAction(
+  payload: ApiActionUpdateLoadingState['payload']
+): ApiActionUpdateLoadingState {
+  return {
+    type: API_ACTION_NAME.UPDATE_LOADING_STATE,
+    payload,
+  };
+}
+
+export type AiopsLogRateAnalysisApiAction =
+  | ApiActionAddSignificantItems
+  | ApiActionAddSignificantItemsGroup
+  | ApiActionAddSignificantItemsHistogram
+  | ApiActionAddSignificantItemsGroupHistogram
+  | ApiActionAddError
+  | ApiActionPing
+  | ApiActionResetAll
+  | ApiActionResetErrors
+  | ApiActionResetGroups
+  | ApiActionUpdateLoadingState;

@@ -10,12 +10,14 @@ import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { aiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/v1/schema';
+import { aiopsLogRateAnalysisSchema as schemaV1 } from '../../../common/api/log_rate_analysis/v1/schema';
+import { aiopsLogRateAnalysisSchema as schemaV2 } from '../../../common/api/log_rate_analysis/v2/schema';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
 import type { AiopsLicense } from '../../types';
 
-import { routeHandlerFactory } from './route_handler_factory';
+import { routeHandlerFactoryV1 } from './route_handler_factory_v1';
+import { routeHandlerFactoryV2 } from './route_handler_factory_v2';
 
 export const defineRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -34,10 +36,21 @@ export const defineRoute = (
         version: '1',
         validate: {
           request: {
-            body: aiopsLogRateAnalysisSchema,
+            body: schemaV1,
           },
         },
       },
-      routeHandlerFactory(license, logger, coreStart, usageCounter)
+      routeHandlerFactoryV1(license, logger, coreStart, usageCounter)
+    )
+    .addVersion(
+      {
+        version: '2',
+        validate: {
+          request: {
+            body: schemaV2,
+          },
+        },
+      },
+      routeHandlerFactoryV2(license, logger, coreStart, usageCounter)
     );
 };
