@@ -3,9 +3,9 @@
 
 preview::[]
 
-The Elasticsearch Query Language, ES|QL, has been created to make exploring your data faster and easier using the Discover application. 
+The Elasticsearch Query Language, ES|QL, has been created to make exploring your data easier without leaving the Discover application. 
 
-in the tutorial below we'll use the kibana sample logs. Using Discover and Lens suggestions to explore the data and visualization. 
+In the tutorial below we'll use the {kib} Sample Data Logs in Discover and Lens suggestions to explore the data and visualization. 
 
 [float]
 [[prerequisite]]
@@ -14,13 +14,12 @@ in the tutorial below we'll use the kibana sample logs. Using Discover and Lens 
 To be able to select **Try {esql}** from the Data views menu the `discover:enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
 
 [float]
-[[tutorial]]
-=== Tutorial 
+[[tutorial-try-esql]]
+=== Trying ES|QL 
 
-Provide an example or walkthrough of how to use the feature. Whenever possible, 
-use the <<add-sample-data, sample data>>.
+Learn how to build queries to pull information out of your data and create visualizations using {esql}. 
 
-To ....[provide steps]:
+To get the sample data into Discover:
 
 . On the home page, click **Try sample data**.
 . Click **Other sample data sets**.
@@ -70,17 +69,28 @@ from kibana_sample_data_logs
 [role="screenshot"]
 image:images/esql-limit.png[An image of the extended query result]
 
+Let's sort the data by machine ram and filter out the destination GB. 
 
-
+. Copy the query below:
++
+[source,esql]
+----
+from kibana_sample_data_logs 
+| keep machine.os, machine.ram, geo.dest
+| sort machine.ram desc
+| where geo.dest != "GB"
+| limit 10
+----
++
+. Click **Update**.
++
 [role="screenshot"]
 image:images/esql-full-query.png[]
++
+. Click **Save** to save the query and visualization to a dashboard. 
 
-////
-When you develop your task content, use the following guidelines:
-* Match your text to the UI.
-* For clickable items, use *bold*.
-* When you refer to a UI button, use `click`. For example, `Click *New*.`
-* When you refer to a UI checkbox or path, use `select`. For example, `Select all index checkboxes` and `Select *Manage index* > *Add lifecycle policy*.`
-* Avoid using `button` and similar words. For example, use `Click *Save*.` instead of `Click on the *Save* button.` 
-////
+To make changes to the visualization you can use the visualization drop-down. To make changes to the colors used or the axes, or click the pencil icon. This opens an in-line editor where you can change the colors and axes of the visualization. 
+
+To learn more about {esql}, try other tutorials, see more examples and reference material, refer to {ref}/esql.html[{esql}].
+
 
