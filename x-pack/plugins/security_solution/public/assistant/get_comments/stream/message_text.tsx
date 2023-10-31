@@ -47,7 +47,9 @@ const cursorCss = css`
   background: rgba(0, 0, 0, 0.25);
 `;
 
-const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
+const Cursor = () => (
+  <span data-test-subj="cursor" key="cursor" className={classNames(cursorCss, 'cursor')} />
+);
 
 // a weird combination of different whitespace chars to make sure it stays
 // invisible even when we cannot properly parse the text while still being
@@ -158,6 +160,7 @@ export function MessageText({ loading, content }: Props) {
   return (
     <EuiText className={containerClassName}>
       <EuiMarkdownFormat
+        data-test-subj={'messageText'}
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
       >

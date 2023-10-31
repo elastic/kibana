@@ -61,6 +61,8 @@ export const StreamComment = ({
       </EuiFlexGroup>
     );
   }, [isAnythingLoading, isLastComment, reader, regenerateMessage, setComplete]);
+
+  console.log('error???', error);
   return (
     <MessagePanel
       body={<MessageText content={message} loading={isAnythingLoading} />}

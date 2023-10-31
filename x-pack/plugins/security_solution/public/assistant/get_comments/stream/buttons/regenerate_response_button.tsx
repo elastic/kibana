@@ -14,7 +14,7 @@ export function RegenerateResponseButton(props: Partial<EuiButtonEmptyProps>) {
   return (
     <EuiButtonEmpty
       size="s"
-      data-test-subj="aiAssistantRegenerateResponseButton"
+      data-test-subj="regenerateResponseButton"
       iconType="sparkles"
       {...props}
     >
