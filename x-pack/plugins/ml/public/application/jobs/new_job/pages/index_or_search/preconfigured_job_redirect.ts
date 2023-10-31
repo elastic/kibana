@@ -19,7 +19,7 @@ export async function preConfiguredJobRedirect(
   const { createdBy, job, datafeed } = mlJobService.tempJobCloningObjects;
 
   if (job && datafeed) {
-    const dataViewId = await getDataViewIdFromName(job, datafeed, dataViewsService);
+    const dataViewId = await getDataViewIdFromDatafeed(job, datafeed, dataViewsService);
     if (dataViewId === null) {
       return Promise.resolve();
     }
@@ -72,7 +72,7 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
   return `jobs/new_job/${page}?index=${dataViewId}&_g=()`;
 }
 
-async function getDataViewIdFromName(
+async function getDataViewIdFromDatafeed(
   job: Job,
   datafeed: Datafeed,
   dataViewsService: DataViewsContract
@@ -83,17 +83,18 @@ async function getDataViewIdFromName(
 
   const indexPattern = datafeed.indices.join(',');
 
-  const [dv] = await dataViewsService?.find(indexPattern);
-  if (!dv || dv.getIndexPattern() !== indexPattern) {
+  const dataViews = await dataViewsService?.find(indexPattern);
+  const dataView = dataViews.find((dv) => dv.getIndexPattern() === indexPattern);
+  if (dataView === undefined) {
     // create a temporary data view if we can't find one
     // matching the index pattern
-    const dataView = await dataViewsService.create({
+    const tempDataView = await dataViewsService.create({
       id: undefined,
       name: indexPattern,
       title: indexPattern,
       timeFieldName: job.data_description.time_field!,
     });
-    return dataView.id ?? null;
+    return tempDataView.id ?? null;
   }
-  return dv.id ?? dv.title;
+  return dataView.id ?? null;
 }
