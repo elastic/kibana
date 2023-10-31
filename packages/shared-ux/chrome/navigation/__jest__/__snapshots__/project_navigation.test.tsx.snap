@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<DefaultNavigation /> builds the full navigation tree when only custom project is provided reading the title from config or deeplink 1`] = `
+exports[`Default navigation builds the full navigation tree when only the project is provided 1`] = `
 Array [
   Object {
     "children": Array [
