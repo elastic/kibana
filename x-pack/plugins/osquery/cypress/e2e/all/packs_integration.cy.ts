@@ -113,7 +113,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       cy.get('tbody > tr').should('have.length.above', 5);
     });
 
-    it.only('should be able to activate pack', () => {
+    it('should be able to activate pack', () => {
       activatePack(PREBUILD_PACK_NAME);
       deactivatePack(PREBUILD_PACK_NAME);
     });
