@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('When in the Fleet application', function () {
-    targetTags(this, ['@ess']);
+    targetTags(this, ['@ess', '@serverless']);
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
