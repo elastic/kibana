@@ -25,6 +25,10 @@ export const services = {
   detections: DetectionsTestService,
   endpointArtifactTestResources: EndpointArtifactsTestResources,
   policyTestResources: EndpointPolicyTestResourcesProvider,
+};
+
+export const svlServices = {
+  ...services,
 
   supertest: KibanaSupertestWithCertProvider,
 };

@@ -8,7 +8,6 @@
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
-import { services } from './services';
 import {
   getRegistryUrlAsArray,
   createEndpointDockerConfig,
@@ -33,6 +32,7 @@ export const generateConfig = async ({
   junitReportName,
   kbnServerArgs = [],
   target,
+  services,
 }: {
   ftrConfigProviderContext: FtrConfigProviderContext;
   baseConfig: Config;
@@ -40,6 +40,7 @@ export const generateConfig = async ({
   junitReportName: string;
   kbnServerArgs?: string[];
   target: keyof typeof SUITE_TAGS;
+  services: any;
 }): Promise<Config> => {
   const { readConfigFile } = ftrConfigProviderContext;
 

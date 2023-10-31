@@ -8,6 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 import { generateConfig } from './config.base';
+import { services } from './services';
 
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
   const { readConfigFile } = ftrConfigProviderContext;
@@ -22,5 +23,6 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
     testFiles: [resolve(__dirname, './apps/endpoint')],
     junitReportName: 'X-Pack Endpoint Functional Tests on ESS',
     target: 'ess',
+    services,
   });
 }

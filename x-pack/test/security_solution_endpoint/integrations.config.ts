@@ -8,6 +8,7 @@
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
+import { services } from './services';
 
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
   const { readConfigFile } = ftrConfigProviderContext;
@@ -26,5 +27,6 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
       // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
       '--xpack.securitySolution.packagerTaskInterval=5s',
     ],
+    services,
   });
 }
