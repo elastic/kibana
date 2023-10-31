@@ -1,6 +1,7 @@
 {
   "paths": {
     "advancedSettings": "src/plugins/advanced_settings",
+    "aiAssistantManagement": "src/plugins/ai_assistant_management",
     "alerts": "packages/kbn-alerts/src",
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",
     "apmOss": "src/plugins/apm_oss",

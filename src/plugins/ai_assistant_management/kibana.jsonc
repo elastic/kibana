@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ai-assistant-management-plugin",
+  "owner": "@elastic/obs-ai-assistant",
+  "plugin": {
+    "id": "aiAssistantManagement",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["management", "data", "dataViews"],
+    "optionalPlugins": ["home", "spaces"],
+    "requiredBundles": ["kibanaReact"]
+  }
+}
