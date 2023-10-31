@@ -8,71 +8,76 @@
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  createSignalsIndex,
+  createDetectionEngineIndices,
   deleteAllRules,
   waitForRulePartialFailure,
-  getRuleForSignalTesting,
   createRuleWithAuth,
-  getThresholdRuleForSignalTesting,
   deleteAllAlerts,
+  getCustomQueryRule,
+  getThresholdRule,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
 
-  describe('check_privileges', () => {
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
-      await createSignalsIndex(supertest, log);
-    });
+  const INDEX_WITH_ACCESS = 'logs-test';
+  const INDEX_WITH_ACCESS_PATTERN = 'logs-*';
+  const INDEX_WITHOUT_ACCESS = 'unknown';
+  const INDEX_WITHOUT_ACCESS_PATTERN = 'unknown';
 
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
+  describe('@ess @serverless Rule privileges', () => {
+    before(async () => {
+      await createDetectionEngineIndices(supertest, log);
       await deleteAllAlerts(supertest, log, es);
+      await es.indices.delete({ index: INDEX_WITH_ACCESS, ignore_unavailable: true });
+      await es.indices.delete({ index: INDEX_WITHOUT_ACCESS, ignore_unavailable: true });
+      // @timestamp mapping is required for the Threshold rule testing
+      await es.indices.create({
+        index: 'logs-test',
+        mappings: {
+          properties: {
+            '@timestamp': {
+              type: 'date',
+            },
+          },
+        },
+      });
     });
 
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
 
-    afterEach(async () => {
-      await deleteAllRules(supertest, log);
-    });
-
     describe('should set status to partial failure when user has no access', () => {
-      const indexTestCases = [
-        ['host_alias'],
-        ['host_alias', 'auditbeat-8.0.0'],
-        ['host_alias*'],
-        ['host_alias*', 'auditbeat-*'],
-      ];
-      indexTestCases.forEach((index) => {
-        it(`for KQL rule with index param: ${index}`, async () => {
-          const rule = {
-            ...getRuleForSignalTesting(index),
+      [
+        [INDEX_WITHOUT_ACCESS],
+        [INDEX_WITH_ACCESS, INDEX_WITHOUT_ACCESS],
+        [INDEX_WITHOUT_ACCESS_PATTERN],
+        [INDEX_WITH_ACCESS_PATTERN, INDEX_WITHOUT_ACCESS_PATTERN],
+      ].forEach((indices) => {
+        it(`for KQL rule with index param: ${indices}`, async () => {
+          const rule = getCustomQueryRule({
+            index: indices,
             query: 'process.executable: "/usr/bin/sudo"',
-          };
-          await createUserAndRole(getService, ROLES.detections_admin);
+            from: 'now-1h',
+            enabled: true,
+          });
           const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
+
           await waitForRulePartialFailure({
             supertest,
             log,
             id,
           });
+
           const { body } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -82,36 +87,36 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+            `This rule may not have the required read privileges to the following index patterns: ["${INDEX_WITHOUT_ACCESS}"]`
           );
-
-          await deleteUserAndRole(getService, ROLES.detections_admin);
         });
       });
 
-      const thresholdIndexTestCases = [
-        ['host_alias', 'auditbeat-8.0.0'],
-        ['host_alias*', 'auditbeat-*'],
-      ];
-      thresholdIndexTestCases.forEach((index) => {
-        it(`for threshold rule with index param: ${index}`, async () => {
-          const rule: ThresholdRuleCreateProps = {
-            ...getThresholdRuleForSignalTesting(index),
+      [
+        [INDEX_WITH_ACCESS, INDEX_WITHOUT_ACCESS],
+        [INDEX_WITH_ACCESS_PATTERN, INDEX_WITHOUT_ACCESS_PATTERN],
+      ].forEach((indices) => {
+        it(`for threshold rule with index param: ${indices}`, async () => {
+          const rule = getThresholdRule({
+            index: indices,
             threshold: {
               field: [],
-              value: 700,
+              value: 1,
             },
-          };
-          await createUserAndRole(getService, ROLES.detections_admin);
+            from: 'now-1h',
+            enabled: true,
+          });
           const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
+
           await waitForRulePartialFailure({
             supertest,
             log,
             id,
           });
+
           const { body } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -121,10 +126,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+            `This rule may not have the required read privileges to the following index patterns: ["${INDEX_WITHOUT_ACCESS}"]`
           );
-
-          await deleteUserAndRole(getService, ROLES.detections_admin);
         });
       });
     });

@@ -36,6 +36,10 @@
     "actions:runner:serverless": "npm run run-tests:dr:default actions serverless serverlessEnv",
     "actions:qa:serverless": "npm run run-tests:dr:default actions serverless qaEnv",
     "actions:server:ess": "npm run initialize-server:dr:default actions ess",
-    "actions:runner:ess": "npm run run-tests:dr:default actions ess essEnv"
+    "actions:runner:ess": "npm run run-tests:dr:default actions ess essEnv",
+    "privileges:server:serverless": "npm run initialize-server:dr:default privileges serverless",
+    "privileges:runner:serverless": "npm run run-tests:dr:default privileges serverless serverlessEnv",
+    "privileges:server:ess": "npm run initialize-server:dr:default privileges ess",
+    "privileges:runner:ess": "npm run run-tests:dr:default privileges ess essEnv"
   }
 }
