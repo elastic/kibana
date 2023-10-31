@@ -75,7 +75,20 @@ Object {
 exports[`IndexPattern toSpec should match snapshot 1`] = `
 Object {
   "allowNoIndex": false,
-  "fieldAttrs": Object {},
+  "fieldAttrs": Object {
+    "@timestamp": Object {
+      "count": 30,
+    },
+    "bytes": Object {
+      "count": 10,
+    },
+    "ssl": Object {
+      "count": 20,
+    },
+    "time": Object {
+      "count": 30,
+    },
+  },
   "fieldFormats": Object {},
   "fields": Object {
     "@tags": Object {
@@ -220,6 +233,14 @@ Object {
     },
     "custom_user_field": Object {
       "aggregatable": true,
+      "conflictDescriptions": Object {
+        "keyword": Array [
+          "index_a",
+        ],
+        "long": Array [
+          "index_b",
+        ],
+      },
       "count": 0,
       "esTypes": Array [
         "conflict",

@@ -11,6 +11,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
 import {
   Comparator,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -81,10 +82,15 @@ const groupActionVariableDescription = i18n.translate(
   }
 );
 
-export async function registerMetricInventoryThresholdRuleType(
+export async function registerInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
-  libs: InfraBackendLibs
+  libs: InfraBackendLibs,
+  { featureFlags }: InfraConfig
 ) {
+  if (!featureFlags.inventoryThresholdAlertRuleEnabled) {
+    return;
+  }
+
   alertingPlugin.registerType({
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.inventory.alertName', {

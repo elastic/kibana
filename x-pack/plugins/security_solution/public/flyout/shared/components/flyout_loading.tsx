@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FLYOUT_LOADING_TEST_ID } from '../test_ids';
+import { FLYOUT_LOADING_TEST_ID } from './test_ids';
 
-interface FlyoutLoadingProps {
+export interface FlyoutLoadingProps {
   /**
   Data test subject string for testing
   */

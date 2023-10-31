@@ -7,12 +7,7 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_helpers';
-import type {
-  DatasourceMap,
-  VisualizationMap,
-  VisualizeEditorContext,
-  SuggestionRequest,
-} from './types';
+import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from './types';
 import type { DataViewsState } from './state_management';
 
 interface SuggestionsApi {
@@ -22,14 +17,6 @@ interface SuggestionsApi {
   datasourceMap?: DatasourceMap;
   excludedVisualizations?: string[];
 }
-
-const PREFERRED_PALETTE: SuggestionRequest['mainPalette'] = {
-  type: 'legacyPalette',
-  value: {
-    name: 'default',
-    type: 'palette',
-  },
-};
 
 export const suggestionsApi = ({
   context,
@@ -75,7 +62,6 @@ export const suggestionsApi = ({
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
     dataViews,
-    mainPalette: PREFERRED_PALETTE,
   });
   if (!suggestions.length) return [];
   const activeVisualization = suggestions[0];
@@ -98,7 +84,6 @@ export const suggestionsApi = ({
     activeVisualization: visualizationMap[activeVisualization.visualizationId],
     visualizationState: activeVisualization.visualizationState,
     dataViews,
-    mainPalette: PREFERRED_PALETTE,
   }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
   const suggestionsList = [activeVisualization, ...newSuggestions];
   // until we separate the text based suggestions logic from the dataview one,

@@ -14,11 +14,7 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
-  ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/core",
     {
@@ -177,6 +173,9 @@
     "@kbn/core-application-common",
     "@kbn/openapi-generator",
     "@kbn/es",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/zod-helpers"
   ]
 }

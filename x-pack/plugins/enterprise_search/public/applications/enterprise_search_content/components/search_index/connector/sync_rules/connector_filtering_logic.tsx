@@ -11,9 +11,7 @@ import { isEqual } from 'lodash';
 
 import {
   FilteringConfig,
-  FilteringPolicy,
   FilteringRule,
-  FilteringRuleRule,
   FilteringValidation,
   FilteringValidationState,
 } from '@kbn/search-connectors';
@@ -90,15 +88,15 @@ interface ConnectorFilteringValues {
   status: Status;
 }
 
-function createDefaultRule(order: number) {
+function createDefaultRule(order: number): FilteringRule {
   const now = new Date().toISOString();
   return {
     created_at: now,
     field: '_',
     id: 'DEFAULT',
     order,
-    policy: FilteringPolicy.INCLUDE,
-    rule: FilteringRuleRule.REGEX,
+    policy: 'include',
+    rule: 'regex',
     updated_at: now,
     value: '.*',
   };
@@ -237,7 +235,7 @@ export const ConnectorFilteringLogic = kea<
       [],
       {
         addFilteringRule: (filteringRules, filteringRule) => {
-          const newFilteringRules = filteringRules.length
+          const newFilteringRules: FilteringRule[] = filteringRules.length
             ? [
                 ...filteringRules.slice(0, filteringRules.length - 1),
                 filteringRule,

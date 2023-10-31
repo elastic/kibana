@@ -18,6 +18,8 @@ import {
   installLegacyRiskScore,
   getLegacyRiskScoreDashboards,
   clearLegacyDashboards,
+  deleteRiskEngineTask,
+  deleteAllRiskScores,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -29,6 +31,16 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   describe('Risk Engine', () => {
+    beforeEach(async () => {
+      await cleanRiskEngineConfig({ kibanaServer });
+      await deleteRiskEngineTask({ es, log });
+      await deleteAllRiskScores(log, es);
+      await clearTransforms({
+        es,
+        log,
+      });
+    });
+
     afterEach(async () => {
       await cleanRiskEngineConfig({
         kibanaServer,
@@ -45,10 +57,11 @@ export default ({ getService }: FtrProviderContext) => {
         supertest,
         log,
       });
+      await deleteRiskEngineTask({ es, log });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/168376
-    describe.skip('init api', () => {
+    describe('init api', () => {
       it('should return response with success status', async () => {
         const response = await riskEngineRoutes.init();
         expect(response.body).to.eql({
@@ -231,8 +244,6 @@ export default ({ getService }: FtrProviderContext) => {
                 limit: '1000',
               },
             },
-            hidden: 'true',
-            auto_expand_replicas: '0-1',
           },
         });
 
@@ -261,7 +272,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(dataStream?.settings?.index?.hidden).to.eql('true');
         expect(dataStream?.settings?.index?.number_of_shards).to.eql(1);
-        expect(dataStream?.settings?.index?.auto_expand_replicas).to.eql('0-1');
 
         const indexExist = await es.indices.exists({
           index: latestIndexName,
@@ -350,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/168355
-    describe.skip('status api', () => {
+    describe('status api', () => {
       it('should disable / enable risk engine', async () => {
         const status1 = await riskEngineRoutes.getStatus();
 

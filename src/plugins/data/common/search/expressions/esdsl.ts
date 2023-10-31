@@ -188,7 +188,7 @@ export const getEsdslFn = ({
           body: rawResponse,
         };
       } catch (e) {
-        request.error({ json: e });
+        request.error({ json: 'attributes' in e ? e.attributes : { message: e.message } });
         throw e;
       }
     },
