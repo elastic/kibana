@@ -164,7 +164,7 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(
           <EuiFlexItem grow={false}>
             <Assignees
               eventId={eventId}
-              alertAssignees={alertAssignees}
+              assignedUserIds={alertAssignees}
               onAssigneesUpdated={onAssigneesUpdated}
             />
           </EuiFlexItem>

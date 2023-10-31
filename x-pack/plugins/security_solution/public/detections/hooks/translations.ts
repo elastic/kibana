@@ -111,3 +111,10 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
     defaultMessage: 'Mark as closed',
   }
 );
+
+export const BULK_REMOVE_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.removeAssignessContextMenuTitle',
+  {
+    defaultMessage: 'Remove all assignees',
+  }
+);

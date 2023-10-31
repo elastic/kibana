@@ -44,7 +44,6 @@ import {
   LEGEND_ACTIONS,
   SESSION_VIEWER_BUTTON,
   ALERT_ASSIGNING_CONTEXT_MENU_ITEM,
-  ALERT_ASSIGNING_CONTEXT_MENU,
   ALERT_ASSIGNING_SELECTABLE_MENU_ITEM,
   ALERT_ASSIGNING_UPDATE_BUTTON,
   ALERT_TAGGING_CONTEXT_MENU_ITEM,
@@ -502,7 +501,7 @@ export const openAlertAssigningBulkActionMenu = () => {
 };
 
 export const clickAlertAssignee = (assignee: string) => {
-  cy.get(ALERT_ASSIGNING_CONTEXT_MENU).contains(assignee).click();
+  cy.get(ALERT_ASSIGNING_SELECTABLE_MENU_ITEM).contains(assignee).click();
 };
 
 export const updateAlertAssignees = () => {

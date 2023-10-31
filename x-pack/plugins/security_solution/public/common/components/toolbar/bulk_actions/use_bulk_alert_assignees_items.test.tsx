@@ -17,6 +17,7 @@ import { useBulkAlertAssigneesItems } from './use_bulk_alert_assignees_items';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
 import { useGetUserProfiles } from '../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
 import { useSuggestUsers } from '../../../../detections/containers/detection_engine/user_profiles/use_suggest_users';
+import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 
 jest.mock('./use_set_alert_assignees');
 jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles');
@@ -106,7 +107,7 @@ describe('useBulkAlertAssigneesItems', () => {
       fireEvent.click(wrapper.getByText('fakeUser2')); // Won't fire unless component assignees selection has been changed
     });
     act(() => {
-      fireEvent.click(wrapper.getByTestId('alert-assignees-update-button'));
+      fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
     });
     expect(mockSetAlertAssignees).toHaveBeenCalled();
   });

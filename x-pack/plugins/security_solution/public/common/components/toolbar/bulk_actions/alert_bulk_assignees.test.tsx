@@ -14,6 +14,7 @@ import { useSuggestUsers } from '../../../../detections/containers/detection_eng
 
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 
 jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles');
 jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_suggest_users');
@@ -87,7 +88,7 @@ describe('BulkAlertAssigneesPanel', () => {
   test('it renders', () => {
     const wrapper = renderAssigneesMenu(mockAlertsWithAssignees);
 
-    expect(wrapper.getByTestId('alert-assignees-update-button')).toBeInTheDocument();
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(useSuggestUsers).toHaveBeenCalled();
   });
 
@@ -104,7 +105,7 @@ describe('BulkAlertAssigneesPanel', () => {
     );
 
     act(() => {
-      fireEvent.click(wrapper.getByTestId('alert-assignees-update-button'));
+      fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
     });
     expect(mockedClosePopover).toHaveBeenCalled();
     expect(mockedOnSubmit).not.toHaveBeenCalled();
@@ -165,7 +166,7 @@ describe('BulkAlertAssigneesPanel', () => {
     });
 
     act(() => {
-      fireEvent.click(wrapper.getByTestId('alert-assignees-update-button'));
+      fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
     });
     expect(mockedClosePopover).toHaveBeenCalled();
     expect(mockedOnSubmit).toHaveBeenCalled();

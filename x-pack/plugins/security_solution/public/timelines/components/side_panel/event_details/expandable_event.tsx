@@ -177,7 +177,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
             <EuiFlexItem grow={false}>
               <Assignees
                 eventId={eventId}
-                alertAssignees={alertAssignees}
+                assignedUserIds={alertAssignees}
                 onAssigneesUpdated={onAssigneesUpdated}
               />
             </EuiFlexItem>

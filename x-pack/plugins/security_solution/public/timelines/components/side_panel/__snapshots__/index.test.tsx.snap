@@ -94,8 +94,9 @@ Array [
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <span
-                data-test-subj="securitySolutionFlyoutHeaderAssigneesValue"
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
+                data-test-subj="securitySolutionAssigneesAvatarsPanel"
               />
             </div>
             <div
@@ -269,8 +270,9 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                <span
-                  data-test-subj="securitySolutionFlyoutHeaderAssigneesValue"
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
+                  data-test-subj="securitySolutionAssigneesAvatarsPanel"
                 />
               </div>
               <div

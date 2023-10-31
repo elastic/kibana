@@ -11,6 +11,7 @@ import { render } from '@testing-library/react';
 import { FilterByAssigneesPopover } from './filter_by_assignees';
 import { TEST_IDS } from './constants';
 import { TestProviders } from '../../mock';
+import type { AssigneesIdsSelection } from '../assignees/types';
 
 const mockUserProfiles = [
   {
@@ -41,12 +42,15 @@ jest.mock('../../../detections/containers/detection_engine/user_profiles/use_sug
   };
 });
 
-const renderFilterByAssigneesPopover = (alertAssignees?: string[], onUsersChange = jest.fn()) =>
+const renderFilterByAssigneesPopover = (
+  alertAssignees: AssigneesIdsSelection[] = [],
+  onUsersChange = jest.fn()
+) =>
   render(
     <TestProviders>
       <FilterByAssigneesPopover
-        existingAssigneesIds={alertAssignees}
-        onUsersChange={onUsersChange}
+        assignedUserIds={alertAssignees}
+        onSelectionChange={onUsersChange}
       />
     </TestProviders>
   );
