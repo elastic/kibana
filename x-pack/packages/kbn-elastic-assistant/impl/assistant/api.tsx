@@ -62,7 +62,7 @@ export const fetchConnectorExecuteAction = async ({
   // My "Feature Flag", turn to false before merging
   // In part 2 I will make enhancements to invokeAI to make it work with both openA, but to keep it to a Security Soltuion only review on this PR,
   // I'm calling the stream action directly
-  const isStream = true;
+  const isStream = false;
   const requestBody = isStream
     ? {
         params: {
@@ -119,6 +119,7 @@ export const fetchConnectorExecuteAction = async ({
     }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
       body: JSON.stringify(requestBody),
+      headers: { 'Content-Type': 'application/json' },
       signal,
     });
 
