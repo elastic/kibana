@@ -15,9 +15,11 @@ const scriptAllowedTypesKey = 'script.allowed_types';
 export const isInlineScriptingEnabled = async ({
   client,
   maxRetries = 20,
+  maxRetryDelay = 64,
 }: {
   client: ElasticsearchClient;
   maxRetries?: number;
+  maxRetryDelay?: number;
 }): Promise<boolean> => {
   return firstValueFrom(
     defer(() => {
@@ -30,7 +32,7 @@ export const isInlineScriptingEnabled = async ({
         count: maxRetries,
         delay: (error, retryIndex) => {
           if (isRetryableEsClientError(error)) {
-            const retryDelay = 1000 * Math.min(Math.pow(2, retryIndex), 64); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
+            const retryDelay = 1000 * Math.min(Math.pow(2, retryIndex), maxRetryDelay); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
             return timer(retryDelay);
           } else {
             return throwError(error);
