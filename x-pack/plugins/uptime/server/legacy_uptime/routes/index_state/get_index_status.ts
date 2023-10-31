@@ -19,8 +19,22 @@ export const createGetIndexStatusRoute: UMRestApiRouteFactory = (libs: UMServerL
       to: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ uptimeEsClient, request }): Promise<any> => {
+  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { from, to } = request.query;
-    return await libs.requests.getIndexStatus({ uptimeEsClient, range: { from, to } });
+    try {
+      return await libs.requests.getIndexStatus({ uptimeEsClient, range: { from, to } });
+    } catch (e) {
+      if (e.meta?.statusCode === 403) {
+        return response.customError({
+          statusCode: 403,
+          body: {
+            message:
+              'unauthorized: You do not have the required permissions to read uptime indices',
+          },
+        });
+      }
+
+      throw e;
+    }
   },
 });
