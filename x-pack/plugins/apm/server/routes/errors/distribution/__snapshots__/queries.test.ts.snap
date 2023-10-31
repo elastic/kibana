@@ -39,6 +39,11 @@ Object {
             },
           },
         ],
+        "must_not": Object {
+          "term": Object {
+            "error.type": "crash",
+          },
+        },
       },
     },
     "size": 0,
@@ -91,6 +96,11 @@ Object {
             },
           },
         ],
+        "must_not": Object {
+          "term": Object {
+            "error.type": "crash",
+          },
+        },
       },
     },
     "size": 0,
