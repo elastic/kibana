@@ -291,7 +291,7 @@ describe('useConversation', () => {
     });
   });
 
-  it.only('amendMessage updates the last message of conversation[] for a given conversationId with provided content', async () => {
+  it('amendMessage updates the last message of conversation[] for a given conversationId with provided content', async () => {
     await act(async () => {
       const setConversations = jest.fn();
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {

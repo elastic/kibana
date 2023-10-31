@@ -64,12 +64,24 @@ export interface AssistantProviderProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getComments: ({
+    amendMessage,
     currentConversation,
+    isFetchingResponse,
     lastCommentRef,
+    regenerateMessage,
     showAnonymizedValues,
   }: {
+    amendMessage: ({
+      conversationId,
+      content,
+    }: {
+      conversationId: string;
+      content: string;
+    }) => void;
     currentConversation: Conversation;
+    isFetchingResponse: boolean;
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+    regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;

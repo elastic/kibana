@@ -6,7 +6,7 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation, Message } from '@kbn/elastic-assistant';
+import type { Conversation } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiLoadingSpinner, tint } from '@elastic/eui';
 import React from 'react';
 
@@ -26,13 +26,7 @@ export const getComments = ({
   regenerateMessage,
   showAnonymizedValues,
 }: {
-  amendMessage: ({
-    conversationId,
-    content,
-  }: {
-    conversationId: string;
-    content: string;
-  }) => Message[];
+  amendMessage: ({ conversationId, content }: { conversationId: string; content: string }) => void;
   currentConversation: Conversation;
   isFetchingResponse: boolean;
   lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
