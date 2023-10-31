@@ -20,7 +20,6 @@ export interface XYChartProps {
   syncColors: boolean;
   canNavigateToLens?: boolean;
   overrides?: AllowedXYOverrides & AllowedSettingsOverrides & AllowedChartOverrides;
-  shouldShowLegendAction: (actionId: string) => boolean;
 }
 
 export interface XYRender {

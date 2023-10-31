@@ -18,6 +18,8 @@ import {
 import { useLegendAction } from '@elastic/charts';
 import type { CellValueAction } from '../types';
 
+const shouldShowLegendActionDefault = () => true;
+
 export type LegendCellValueActions = Array<
   Omit<CellValueAction, 'execute'> & { execute: () => void }
 >;
@@ -35,14 +37,14 @@ export interface LegendActionPopoverProps {
    * Compatible actions to be added to the popover actions
    */
   legendCellValueActions?: LegendCellValueActions;
-  shouldShowLegendAction: (actionId: string) => boolean;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverProps> = ({
   label,
   onFilter,
   legendCellValueActions = [],
-  shouldShowLegendAction,
+  shouldShowLegendAction = shouldShowLegendActionDefault,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
