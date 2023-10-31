@@ -55,12 +55,10 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
               ignore_above: 256,
             },
             name: {
-              type: 'keyword',
-              ignore_above: 256,
+              type: 'text',
             },
             description: {
-              type: 'keyword',
-              ignore_above: 256,
+              type: 'text',
             },
             tags: {
               type: 'keyword',
