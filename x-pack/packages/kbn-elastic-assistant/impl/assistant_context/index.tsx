@@ -35,7 +35,7 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
-import { AssistantAvailability, AssistantTelemetry, Message } from './types';
+import { AssistantAvailability, AssistantTelemetry } from './types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -116,7 +116,7 @@ export interface UseAssistantContext {
     }: {
       conversationId: string;
       content: string;
-    }) => Message[];
+    }) => void;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];

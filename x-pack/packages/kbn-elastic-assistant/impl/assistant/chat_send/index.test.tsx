@@ -16,11 +16,13 @@ const handleButtonSendMessage = jest.fn();
 const handleOnChatCleared = jest.fn();
 const handlePromptChange = jest.fn();
 const handleSendMessage = jest.fn();
+const handleRegenerateResponse = jest.fn();
 const testProps: Props = {
   handleButtonSendMessage,
   handleOnChatCleared,
   handlePromptChange,
   handleSendMessage,
+  handleRegenerateResponse,
   isLoading: false,
   isDisabled: false,
   shouldRefocusPrompt: false,
