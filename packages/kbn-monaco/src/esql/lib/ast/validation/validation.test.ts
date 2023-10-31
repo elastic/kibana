@@ -36,6 +36,7 @@ function getCallbackMocks() {
               name: `listField`,
               type: `list`,
             },
+            { name: '@timestamp', type: 'date' },
           ]
         : [
             { name: 'otherField', type: 'string' },
