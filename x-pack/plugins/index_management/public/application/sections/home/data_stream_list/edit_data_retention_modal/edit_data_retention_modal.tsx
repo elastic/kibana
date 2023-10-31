@@ -164,10 +164,6 @@ const configurationFormSchema: FormSchema = {
 };
 
 interface MixedIndicesCalloutProps {
-  dslWithIlmIndices: {
-    ilmIndices: Array<{ name: string }>;
-    dslIndices: Array<{ name: string }>;
-  };
   history: ScopedHistory;
   ilmPolicyLink: string;
   ilmPolicyName?: string;
@@ -175,7 +171,6 @@ interface MixedIndicesCalloutProps {
 }
 
 const MixedIndicesCallout = ({
-  dslWithIlmIndices,
   ilmPolicyLink,
   ilmPolicyName,
   dataStreamName,
@@ -307,7 +302,6 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           {dslWithIlmIndices && (
             <>
               <MixedIndicesCallout
-                dslWithIlmIndices={dslWithIlmIndices}
                 history={history}
                 ilmPolicyLink={ilmPolicyLink}
                 ilmPolicyName={ilmPolicyName}
