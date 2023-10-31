@@ -13,12 +13,12 @@ import type { StartServices } from '../types';
 import {
   createFilterInCellActionFactory,
   createFilterInDiscoverCellActionFactory,
-  createFilterInHistogramTimelineLegendAction,
-  createFilterInHistogramTopNLegendAction,
+  createTimelineHistogramFilterInLegendActionFactory,
+  createFilterInHistogramLegendActionFactory,
   createFilterOutCellActionFactory,
   createFilterOutDiscoverCellActionFactory,
-  createFilterOutHistogramLegendAction,
-  createFilterOutHistogramTimelineLegendAction,
+  createFilterOutHistogramLegendActionFactory,
+  createTimelineHistogramFilterOutLegendActionFactory,
 } from './filter';
 import {
   createAddToTimelineLensAction,
@@ -63,28 +63,28 @@ const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartS
   const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
 
-  const filterInTimelineLegendActions = createFilterInHistogramTimelineLegendAction({
+  const filterInTimelineLegendActions = createTimelineHistogramFilterInLegendActionFactory({
     store,
     order: 0,
     services,
   });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInTimelineLegendActions);
 
-  const filterOutTimelineLegendActions = createFilterOutHistogramTimelineLegendAction({
+  const filterOutTimelineLegendActions = createTimelineHistogramFilterOutLegendActionFactory({
     store,
     order: 1,
     services,
   });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutTimelineLegendActions);
 
-  const filterInLegendActions = createFilterInHistogramTopNLegendAction({
+  const filterInLegendActions = createFilterInHistogramLegendActionFactory({
     store,
     order: 2,
     services,
   });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInLegendActions);
 
-  const filterOutLegendActions = createFilterOutHistogramLegendAction({
+  const filterOutLegendActions = createFilterOutHistogramLegendActionFactory({
     store,
     order: 3,
     services,

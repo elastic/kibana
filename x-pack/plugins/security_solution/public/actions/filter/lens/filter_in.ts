@@ -8,11 +8,11 @@
 import type { SecurityAppStore } from '../../../common/store';
 
 import type { StartServices } from '../../../types';
-import { createLensFilterLegendAction } from './helpers';
+import { createHistogramFilterLegendActionFactory } from './helpers';
 
 export const HISTOGRAM_LEGEND_ACTION_FILTER_IN = 'histogramLegendActionFilterIn';
 
-export const createFilterInHistogramTopNLegendAction = ({
+export const createFilterInHistogramLegendActionFactory = ({
   store,
   order,
   services,
@@ -21,4 +21,9 @@ export const createFilterInHistogramTopNLegendAction = ({
   order: number;
   services: StartServices;
 }) =>
-  createLensFilterLegendAction({ id: HISTOGRAM_LEGEND_ACTION_FILTER_IN, order, store, services });
+  createHistogramFilterLegendActionFactory({
+    id: HISTOGRAM_LEGEND_ACTION_FILTER_IN,
+    order,
+    store,
+    services,
+  });

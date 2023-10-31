@@ -34,7 +34,7 @@ function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   );
 }
 
-export const createLensFilterLegendAction = ({
+export const createHistogramFilterLegendActionFactory = ({
   id,
   order,
   store,
