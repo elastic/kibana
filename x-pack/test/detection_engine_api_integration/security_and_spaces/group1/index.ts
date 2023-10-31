@@ -15,13 +15,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // existence being near 0.
 
     loadTestFile(require.resolve('./aliases'));
-    loadTestFile(require.resolve('./add_actions'));
-    loadTestFile(require.resolve('./update_actions'));
     loadTestFile(require.resolve('./check_privileges'));
     loadTestFile(require.resolve('./create_index'));
     loadTestFile(require.resolve('./preview_rules'));
     loadTestFile(require.resolve('./create_rules_bulk'));
-    loadTestFile(require.resolve('./create_new_terms'));
     loadTestFile(require.resolve('./delete_rules'));
     loadTestFile(require.resolve('./delete_rules_bulk'));
     loadTestFile(require.resolve('./export_rules'));
