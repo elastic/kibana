@@ -116,11 +116,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       expect(searchResults[0].name).toEqual('ES QueryElasticsearch query');
     });
 
-    it('should create an ES Query rule but not display it when consumer is alerts', async () => {
+    it('should create an ES Query rule but not display it when consumer is stackAlerts', async () => {
       const esQuery = await createEsQueryRule({
         supertest,
         name: 'ES Query',
-        consumer: 'alerts',
+        consumer: 'stackAlerts',
         ruleTypeId: '.es-query',
         params: {
           size: 100,
