@@ -34,6 +34,7 @@ describe('Header', () => {
     navControlsCenter$: Rx.of([]),
     navControlsRight$: Rx.of([]),
     prependBasePath: (str) => `hello/world/${str}`,
+    isSideNavCollapsed$: Rx.of(false),
     toggleSideNav: jest.fn(),
   };
 

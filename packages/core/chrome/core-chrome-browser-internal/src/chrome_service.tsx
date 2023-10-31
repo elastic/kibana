@@ -527,8 +527,8 @@ export class ChromeService {
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
-      getIsSideNavCollapsed$: () => isSideNavCollapsed$.asObservable(),
       setIsSideNavCollapsed: (isCollapsed) => isSideNavCollapsed$.next(isCollapsed),
+      getIsSideNavCollapsed$: () => isSideNavCollapsed$.asObservable(),
       project: {
         setHome: setProjectHome,
         setProjectsUrl,
