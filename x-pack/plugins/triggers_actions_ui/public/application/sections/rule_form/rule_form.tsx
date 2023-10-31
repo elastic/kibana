@@ -251,21 +251,18 @@ export const RuleForm = ({
             validConsumers,
           })
         )
-        .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
+        .filter((item) => {
+          return rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer
-        );
+            : item.ruleType!.producer === rule.consumer;
+        });
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
 
     const solutionsResult = availableRuleTypesResult.reduce(
       (result: Map<string, string>, ruleTypeItem) => {
-        if (
-          !result.has(ruleTypeItem.ruleType.producer) &&
-          ruleTypeItem.ruleType.producer !== AlertConsumers.OBSERVABILITY
-        ) {
+        if (!result.has(ruleTypeItem.ruleType.producer)) {
           result.set(
             ruleTypeItem.ruleType.producer,
             (kibanaFeatures
@@ -279,7 +276,10 @@ export const RuleForm = ({
       new Map()
     );
     const solutionsEntries = [...solutionsResult.entries()];
-    if (solutionsEntries.length > 0) {
+    const isOnlyO11y =
+      availableRuleTypesResult.length === 1 &&
+      availableRuleTypesResult.every((rt) => rt.ruleType.producer === AlertConsumers.OBSERVABILITY);
+    if (!isOnlyO11y) {
       setSolutions(new Map(solutionsEntries.sort(([, a], [, b]) => a.localeCompare(b))));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
