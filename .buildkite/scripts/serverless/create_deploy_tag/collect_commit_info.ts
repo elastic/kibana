@@ -23,29 +23,41 @@ import {
   compareSOSnapshots,
   toSOComparisonBlockHtml,
 } from './info_sections/so_snapshot_comparison';
+import { getUsefulLinksHtml } from './info_sections/useful_links';
 
 async function main() {
-  // Current commit info
   const previousSha = await getCurrentQARelease();
+  const selectedSha = getSelectedCommitHash();
+
+  // Useful links
+  await addBuildkiteInfoSection(
+    getUsefulLinksHtml('Useful links:', {
+      previousCommitHash: previousSha,
+      selectedCommitHash: selectedSha,
+    })
+  );
+
+  // Current commit info
   const previousCommit = await hashToCommit(previousSha);
   const previousCommitInfo = getCommitExtract(previousCommit);
   await addBuildkiteInfoSection(toCommitInfoHtml('Current commit:', previousCommitInfo));
 
   // Target commit info
-  const selectedSha = getSelectedCommitHash();
   const selectedCommit = await hashToCommit(selectedSha);
   const selectedCommitInfo = getCommitExtract(selectedCommit);
   await addBuildkiteInfoSection(toCommitInfoHtml('Target commit:', selectedCommitInfo));
 
   // Buildkite build info
   const buildkiteBuild = await getOnMergePRBuild(selectedSha);
-  await addBuildkiteInfoSection(toBuildkiteBuildInfoHtml('Merge build', buildkiteBuild));
   const qafBuilds = await getQAFTestBuilds(selectedCommitInfo.date!);
-  for (const build of qafBuilds) {
-    if (build) {
-      await addBuildkiteInfoSection(toBuildkiteBuildInfoHtml('QAF test', build));
-    }
-  }
+  await addBuildkiteInfoSection(
+    toBuildkiteBuildInfoHtml('Relevant build info:', {
+      'Merge build': buildkiteBuild,
+      'QAF test build': qafBuilds[0],
+      'QAF test build (n+1)': qafBuilds[1],
+      'QAF test build (n+2)': qafBuilds[2],
+    })
+  );
 
   // Save Object migration comparison
   const comparisonResult = compareSOSnapshots(previousSha, selectedSha);
