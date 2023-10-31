@@ -211,7 +211,6 @@ To use series data interactions, click a data series in the panel.
 +
 To use saved search interactions, open the panel menu, then click *More > View saved search*.
 
-[float]
 [[dashboard-links]]
 === Create links to other dashboards
 
