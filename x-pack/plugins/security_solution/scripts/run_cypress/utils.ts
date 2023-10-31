@@ -82,16 +82,6 @@ export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeB
   return {};
 };
 
-const ProducTypeSchema = schema.object({
-  product_line: schema.oneOf([
-    schema.literal('security'),
-    schema.literal('endpoint'),
-    schema.literal('cloud'),
-  ]),
-
-  product_tier: schema.oneOf([schema.literal('essentials'), schema.literal('complete')]),
-});
-
 const TestFileFtrConfigSchema = schema.object(
   {
     license: schema.maybe(schema.string()),
@@ -112,11 +102,20 @@ const TestFileFtrConfigSchema = schema.object(
     ),
     productTypes: schema.maybe(
       // TODO:PT write validate function to ensure that only the correct combinations are used
-      schema.arrayOf(ProducTypeSchema)
+      schema.arrayOf(
+        schema.object({
+          product_line: schema.oneOf([
+            schema.literal('security'),
+            schema.literal('endpoint'),
+            schema.literal('cloud'),
+          ]),
+
+          product_tier: schema.oneOf([schema.literal('essentials'), schema.literal('complete')]),
+        })
+      )
     ),
   },
   { defaultValue: {}, unknowns: 'forbid' }
 );
 
 export type SecuritySolutionDescribeBlockFtrConfig = TypeOf<typeof TestFileFtrConfigSchema>;
-export type ProductType = TypeOf<typeof ProducTypeSchema>;
