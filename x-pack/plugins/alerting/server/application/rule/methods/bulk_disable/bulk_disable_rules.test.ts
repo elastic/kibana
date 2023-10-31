@@ -95,6 +95,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
 };
@@ -656,25 +657,25 @@ describe('bulkDisableRules', () => {
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
       expect(migrateLegacyActions).toHaveBeenCalledTimes(4);
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+      expect(migrateLegacyActions).toHaveBeenNthCalledWith(1, expect.any(Object), {
         attributes: enabledRuleForBulkOps1.attributes,
         ruleId: enabledRuleForBulkOps1.id,
         actions: [],
         references: [],
       });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+      expect(migrateLegacyActions).toHaveBeenNthCalledWith(2, expect.any(Object), {
         attributes: enabledRuleForBulkOps2.attributes,
         ruleId: enabledRuleForBulkOps2.id,
         actions: [],
         references: [],
       });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+      expect(migrateLegacyActions).toHaveBeenNthCalledWith(3, expect.any(Object), {
         attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         ruleId: siemRuleForBulkOps1.id,
         actions: [],
         references: [],
       });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+      expect(migrateLegacyActions).toHaveBeenNthCalledWith(4, expect.any(Object), {
         attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
         ruleId: siemRuleForBulkOps2.id,
         actions: [],
