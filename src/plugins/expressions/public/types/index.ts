@@ -67,7 +67,7 @@ export interface IExpressionLoaderParams {
    * By default, it equals 1000.
    */
   throttle?: number;
-  shouldShowLegendAction?: () => boolean;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export interface ExpressionRenderError extends Error {
