@@ -16,7 +16,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 import { parseStream } from '../../parse_stream';
-import { logRateAnalysisTestData } from '../../test_data';
+import { logRateAnalysisTestData } from './test_data';
 
 const API_VERSION = '1';
 
@@ -27,8 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169325
-  describe.skip('POST /internal/aiops/log_rate_analysis - groups only', () => {
+  describe('POST /internal/aiops/log_rate_analysis - groups only', () => {
     logRateAnalysisTestData.forEach((testData) => {
       const overrides = {
         loaded: 0,

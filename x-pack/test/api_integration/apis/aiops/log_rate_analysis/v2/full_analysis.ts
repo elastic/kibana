@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
-import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/log_rate_analysis/v1/schema';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/log_rate_analysis/v2/schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -18,7 +18,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { parseStream } from '../../parse_stream';
 import { logRateAnalysisTestData } from './test_data';
 
-const API_VERSION = '1';
+const API_VERSION = '2';
 
 export default ({ getService }: FtrProviderContext) => {
   const aiops = getService('aiops');
@@ -55,26 +55,26 @@ export default ({ getService }: FtrProviderContext) => {
             expect(typeof d.type).to.be('string');
           });
 
-          const addSignificantTermsActions = data.filter(
-            (d) => d.type === testData.expected.significantTermFilter
+          const addSignificantItemsActions = data.filter(
+            (d) => d.type === testData.expected.significantItemFilter
           );
-          expect(addSignificantTermsActions.length).to.greaterThan(0);
+          expect(addSignificantItemsActions.length).to.greaterThan(0);
 
-          const significantTerms = orderBy(
-            addSignificantTermsActions.flatMap((d) => d.payload),
+          const significantItems = orderBy(
+            addSignificantItemsActions.flatMap((d) => d.payload),
             ['doc_count'],
             ['desc']
           );
 
-          expect(significantTerms).to.eql(
-            testData.expected.significantTerms,
-            'Significant terms do not match expected values.'
+          expect(significantItems).to.eql(
+            testData.expected.significantItems,
+            'Significant items do not match expected values.'
           );
 
           const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
           const histograms = histogramActions.flatMap((d) => d.payload);
-          // for each significant term we should get a histogram
-          expect(histogramActions.length).to.be(significantTerms.length);
+          // for each significant item we should get a histogram
+          expect(histogramActions.length).to.be(significantItems.length);
           // each histogram should have a length of 20 items.
           histograms.forEach((h, index) => {
             expect(h.histogram.length).to.be(20);
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
             (d) => d.type === testData.expected.groupHistogramFilter
           );
           const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
-          // for each significant terms group we should get a histogram
+          // for each significant items group we should get a histogram
           expect(groupHistograms.length).to.be(groups.length);
           // each histogram should have a length of 20 items.
           groupHistograms.forEach((h, index) => {

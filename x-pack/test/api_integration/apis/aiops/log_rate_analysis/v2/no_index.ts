@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 import { logRateAnalysisTestData } from './test_data';
 
-const API_VERSION = '1';
+const API_VERSION = '2';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/log_rate_analysis/v1/schema';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
-import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';
+import type { LogRateAnalysisDataGenerator } from '../../../../../functional/services/aiops/log_rate_analysis_data_generator';
 
 export interface TestData {
   testName: string;
   esArchive?: string;
   dataGenerator?: LogRateAnalysisDataGenerator;
-  requestBody: AiopsApiLogRateAnalysis['body'];
+  requestBody: AiopsLogRateAnalysisSchema;
   expected: {
     chunksLength: number;
     chunksLengthGroupOnly: number;
