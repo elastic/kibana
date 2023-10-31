@@ -32,7 +32,7 @@ const GUIDED_ONBOARDING_RULES_FILTER = {
   filter: '',
   showCustomRules: false,
   showElasticRules: true,
-  tags: ['Guided Onboarding'],
+  tags: ['Use Case: Guided Onboarding'],
 };
 
 export enum GuidedOnboardingRulesStatus {
@@ -48,10 +48,11 @@ export const RulesManagementTour = () => {
   const { executeBulkAction } = useExecuteBulkAction();
   const { actions } = useRulesTableContext();
 
-  const isRulesStepActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
-    false
-  );
+  // const isRulesStepActive = useObservable(
+  //   guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
+  //   false
+  // );
+  const isRulesStepActive = true;
 
   const { data: onboardingRules } = useFindRulesQuery(
     { filterOptions: GUIDED_ONBOARDING_RULES_FILTER },
@@ -84,7 +85,7 @@ export const RulesManagementTour = () => {
     }
 
     if (onboardingRules.total === 0) {
-      // Onboarding rules are not installed - show the install/update rules step
+      // Onboarding rules are not installed - show the intall rule step
       return GuidedOnboardingRulesStatus.installRules;
     }
 
