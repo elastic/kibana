@@ -20,10 +20,15 @@ import { latestIndexConfigs } from './latest_indices';
 import { IndexConfig, IndexTemplateParams } from './types';
 
 import { CloudSecurityPostureConfig } from '../config';
+import { STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS } from '../../../fleet/server/constants';
 
 interface IndexTemplateSettings {
   index: {
     default_pipeline: string;
+    codec?: string;
+    mapping?: {
+      ignore_malformed: boolean;
+    }
   };
   lifecycle?: { name: string };
 }
@@ -226,6 +231,10 @@ const updateIndexTemplate = async (
     ...template?.settings, // nothing inside
     index: {
       default_pipeline: latestFindingsPipelineIngestConfig.id,
+      codec: 'best_compression',
+      mapping: {
+        ignore_malformed: true
+      }
     },
     lifecycle: { name: '' },
   };
@@ -242,7 +251,7 @@ const updateIndexTemplate = async (
         aliases: template?.aliases,
       },
       _meta,
-      composed_of: composedOf,
+      composed_of: composedOf.filter(ct => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
     });
 
     logger.info(`Updated index template successfully [Name: ${indexTemplateName}]`);
