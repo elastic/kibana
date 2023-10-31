@@ -19,6 +19,7 @@ const testProps = {
   content,
   isLastComment: true,
   regenerateMessage: jest.fn(),
+  transformMessage: jest.fn(),
 };
 
 const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
