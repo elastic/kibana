@@ -333,6 +333,52 @@ Copy panels from one dashboard to another dashboard.
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
 
 [float]
+[[links-panels]]
+== Links panels
+
+preview::[]
+
+Links panels intro
+
+[float]
+[[add-links-panel]]
+=== Add a links panel
+
+To add a links panel to your dashboards:
+
+. On the **Dashboards** page, click the dashboard **Title** you want to open. 
+. Click **Add panel > Links**.
+. In the **Create links panel** flyout choose between the panel displaying vertically or horizontally on your dashboard. 
+. Click **Add link**.
+. Specify the following:
+* **Go to** - Dashboard to link to another dashboard, or URL to link to an external URL. 
+* **Choose destination** - Use the dropdown to select another dashboard or enter an external URL.
+* **Text** - Enter text for the link. <--- this is weird phrasing.
+* **Options** - When linking to another dashboard use the sliders to use the filters and queries from the original dashboard, use the date range from the original dashboard, or open the dashboard in a new tab. When linking to an external URL use the sliders to open the URL in a new tab, or encode the URL. 
+. Click **Add link**.
+. Click **Save**.
+. Enter the **Title** and **Description**, then click **Save**.
+
+[float]
+[[add-links-panel-from-library]]
+=== Add a links panel from the library
+
+By default links panels are saved to the library. To add a links panel to another dashboard:
+
+. On the **Dashboards** page, click the dashboard **Title** you want to open. 
+. Click **Add from library**.
+. Select the links panel from the **Add from library** flyout.  
+
+[float]
+[[edit-links-panel]]
+=== Edit links panels
+
+
+[float]
+[[delete-links-panels]]
+=== Delete links panels
+
+[float]
 [[add-dashboard-settings]]
 == Add the dashboard settings
 
