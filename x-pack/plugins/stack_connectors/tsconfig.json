@@ -38,6 +38,7 @@
     "@kbn/securitysolution-ecs",
     "@kbn/ui-theme",
     "@kbn/cases-components",
+    "@kbn/security-solution-features",
   ],
   "exclude": [
     "target/**/*",
