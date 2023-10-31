@@ -57,7 +57,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
     deletePrebuiltRulesAssets();
     preventPrebuiltRulesPackageInstallation();
     visit(COVERAGE_OVERVIEW_URL);
-    createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
+    createAndInstallMockedPrebuiltRules(prebuiltRules);
     createRule(
       getNewRule({ rule_id: 'enabled_custom_rule', enabled: true, name: 'Enabled custom rule' })
     );
