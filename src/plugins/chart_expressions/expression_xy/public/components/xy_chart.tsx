@@ -144,6 +144,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderComplete: () => void;
   uiState?: PersistedState;
   timeFormat: string;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -206,6 +207,7 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
+  shouldShowLegendAction,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -838,6 +840,7 @@ export function XYChart({
                     fieldFormats,
                     formattedDatatables,
                     titles,
+                    shouldShowLegendAction,
                     singleTable
                   )
                 : undefined
