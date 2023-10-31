@@ -631,9 +631,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
         title: 'Example project',
         icon: 'logoObservability',
         defaultIsCollapsed: false,
-        accordionProps: {
-          arrowProps: { css: { display: 'none' } },
-        },
+        isCollapsible: false,
         children: [
           {
             link: 'item1',

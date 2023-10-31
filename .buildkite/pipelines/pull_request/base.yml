@@ -135,7 +135,7 @@ steps:
       queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 10
     retry:
       automatic:
         - exit_status: '*'
@@ -147,7 +147,7 @@ steps:
       queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '*'
