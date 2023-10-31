@@ -65,7 +65,7 @@ async function enrichWithStatuses(
       );
 
       const combinedState = statusesResponse.data.state;
-      const emoji = buildStateToEmoji(combinedState);
+      const emoji = buildStateToEmoji(combinedState, true);
 
       return {
         message: `${emoji} ${commit.message}`,

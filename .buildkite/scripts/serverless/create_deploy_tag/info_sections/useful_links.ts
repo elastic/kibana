@@ -17,5 +17,6 @@ export function getUsefulLinksHtml(
   return `<h4>${heading}</h4>
     <ul>
         <li>${getCommitDiffLink(data.previousCommitHash, data.selectedCommitHash)}</li>
-</ul>`;
+    </ul>
+`;
 }

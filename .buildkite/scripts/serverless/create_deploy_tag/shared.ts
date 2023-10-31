@@ -16,14 +16,24 @@ const exec = getExec(!process.env.CI);
 
 const buildkite = new BuildkiteClient({ exec });
 
-const buildStateToEmoji = (state: string) => {
-  return (
-    {
-      failure: ':x:',
-      pending: ':hourglass:',
-      success: ':white_check_mark:',
-    }[state] || ':question:'
-  );
+const buildStateToEmoji = (state: string, useRealEmoji = false) => {
+  if (useRealEmoji) {
+    return (
+      {
+        failure: '❌',
+        pending: '⏳',
+        success: '✅',
+      }[state] || '❓'
+    );
+  } else {
+    return (
+      {
+        failure: ':x:',
+        pending: ':hourglass:',
+        success: ':white_check_mark:',
+      }[state] || ':question:'
+    );
+  }
 };
 
 export { octokit, exec, buildkite, buildStateToEmoji, SELECTED_COMMIT_META_KEY };
