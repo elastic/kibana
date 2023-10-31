@@ -353,11 +353,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   // Google/GCP
   google_workspace: {
     actor: {
-      email: true,
-      key: true,
-      profile: {
-        id: true,
-      },
       type: true,
     },
     etag: true,
@@ -380,7 +375,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     admin: {
       application: {
         edition: true,
-        name: true,
         enabled: true,
         licences_order_number: true,
         licences_purchased: true,
@@ -389,7 +383,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         package_id: true,
       },
       group: {
-        email: true,
         priorities: true,
         allowed_list: true,
       },
@@ -417,11 +410,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       resource: {
         id: true,
       },
-      user: {
-        email: true,
-        nickname: true,
-        birthdate: true,
-      },
       gateway: {
         name: true,
       },
@@ -429,8 +417,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         session_type: true,
       },
       device: {
-        serial_number: true,
-        id: true,
         type: true,
         command_details: true,
       },
@@ -467,12 +453,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
           message_id: true,
           start_date: true,
           end_date: true,
-          recipient: {
-            value: true,
-          },
-          sender: {
-            value: true,
-          },
         },
       },
       oauth2: {
@@ -504,10 +484,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       },
       info_type: true,
       email_monitor: {
-        dest_email: true,
         level: {
-          chat: true,
-          draft: true,
           incoming: true,
           outgoing: true,
         },
@@ -530,12 +507,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         action: {
           name: true,
         },
-        actor: {
-          email: true,
-        },
-        affected: {
-          user_emails: true,
-        },
         alert_details: true,
         appeal_window: true,
         attachment: {
@@ -544,7 +515,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
               data_rows: {
                 entries: true,
               },
-              headers: true,
             },
           },
         },
@@ -557,12 +527,10 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         domain_id: {
           customer_primary_domain: true,
         },
-        email: true,
         events: {
           device_compromised_state: true,
           device: {
             property: true,
-            id: true,
             model: true,
             type: true,
           },
@@ -579,7 +547,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
           display_name: true,
           entity: {
             display_name: true,
-            email_address: true,
           },
           from_header: true,
         },
@@ -594,7 +561,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
               subject: true,
             },
           },
-          recipient: true,
           subject_text: true,
         },
         name: true,
@@ -603,8 +569,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
           admin: {
             changed_event: {
               domain: true,
-              previous_admin_email: true,
-              updated_admin_email: true,
             },
           },
         },
@@ -629,7 +593,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
                 },
               },
             },
-            recipients: true,
             resource_info: {
               document: {
                 id: true,
@@ -647,9 +610,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
               },
             },
             trigger: {
-              user: {
-                email: true,
-              },
               value: true,
             },
           },
@@ -681,7 +641,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       },
       application: true,
       device: {
-        id: true,
         state: true,
       },
     },
@@ -689,12 +648,10 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       account_state: true,
       action: {
         execution_status: true,
-        id: true,
         type: true,
       },
       apk_sha256_hash: true,
       application: {
-        id: true,
         message: true,
         report: {
           key: true,
@@ -740,7 +697,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       setting: true,
       status_on_apple_portal: true,
       type: true,
-      user_email: true,
       value: true,
       windows_syncml_policy_status_code: true,
     },
@@ -753,7 +709,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         id: true,
         type: true,
         owner: {
-          email: true,
           is_shared_drive: true,
         },
       },
@@ -773,11 +728,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       removed_role: true,
       target: true,
     },
-    gcp: {
-      user_email: true,
-    },
     login: {
-      affected_email_address: true,
       challenge_method: true,
       failure_type: true,
       challenge_status: true,
@@ -792,7 +743,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       conference_id: true,
       data_source: true,
       device: {
-        id: true,
         type: true,
       },
       drive_shared_drive_id: true,
@@ -813,8 +763,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       resource: {
         id: true,
         name: true,
-        owner_email: true,
-        recipients: true,
         recipients_omitted_count: true,
         title: true,
         type: true,
@@ -850,9 +798,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         data: true,
         value: true,
       },
-    },
-    user_accounts: {
-      email_forwarding_destination_address: true,
     },
   },
   // kubernetes
@@ -957,14 +902,12 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   okta: {
     actor: {
       alternate_id: true,
-      display_name: true,
       id: true,
       type: true,
     },
     client: {
       device: true,
       id: true,
-      ip: true,
       user_agent: {
         raw_user_agent: true,
       },
@@ -1022,9 +965,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       domain: true,
       is_proxy: true,
       isp: true,
-    },
-    request: {
-      ip_chain: true,
     },
     uuid: true,
     version: true,
