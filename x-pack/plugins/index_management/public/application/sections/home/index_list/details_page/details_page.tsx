@@ -40,6 +40,7 @@ import { DetailsPageStats } from './details_page_stats';
 import { DetailsPageMappings } from './details_page_mappings';
 import { DetailsPageOverview } from './details_page_overview';
 import { DetailsPageSettings } from './details_page_settings';
+import { DetailsPageTab } from './details_page_tab';
 
 const defaultTabs: IndexDetailsTab[] = [
   {
@@ -47,9 +48,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.overviewTitle" defaultMessage="Overview" />
     ),
-    renderTabContent: (indexName: string, index: Index) => (
-      <DetailsPageOverview indexDetails={index} />
-    ),
+    renderTabContent: ({ indexName, index }) => <DetailsPageOverview indexDetails={index} />,
     order: 10,
   },
   {
@@ -57,9 +56,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.mappingsTitle" defaultMessage="Mappings" />
     ),
-    renderTabContent: (indexName: string, index: Index) => (
-      <DetailsPageMappings indexName={indexName} />
-    ),
+    renderTabContent: ({ indexName, index }) => <DetailsPageMappings indexName={indexName} />,
     order: 20,
   },
   {
@@ -67,7 +64,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.settingsTitle" defaultMessage="Settings" />
     ),
-    renderTabContent: (indexName: string, index: Index) => (
+    renderTabContent: ({ indexName, index }) => (
       <DetailsPageSettings indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
     ),
     order: 30,
@@ -77,71 +74,49 @@ const defaultTabs: IndexDetailsTab[] = [
 const statsTab: IndexDetailsTab = {
   id: IndexDetailsSection.Stats,
   name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Statistics" />,
-  renderTabContent: (indexName: string, index: Index) => (
+  renderTabContent: ({ indexName, index }) => (
     <DetailsPageStats indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
   ),
   order: 40,
 };
 
-const getSelectedTabContent = ({
-  tabs,
-  indexDetailsSection,
-  index,
-  indexName,
-}: {
-  tabs: IndexDetailsTab[];
-  indexDetailsSection: IndexDetailsTabIds;
-  index?: Index | null;
-  indexName: string;
-}) => {
-  // if there is no index data, the tab content won't be rendered, so it's safe to return null here
-  if (!index) {
-    return null;
-  }
-  const selectedTab = tabs.find((tab) => tab.id === indexDetailsSection);
-  return selectedTab ? (
-    selectedTab.renderTabContent(indexName, index)
-  ) : (
-    <DetailsPageOverview indexDetails={index} />
-  );
-};
 export const DetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
 > = ({ location: { search }, history }) => {
   const {
     config,
+    core: { getUrlForApp },
     services: { extensionsService },
   } = useAppContext();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [index, setIndex] = useState<Index | null>();
 
   const tabs = useMemo(() => {
     const sortedTabs = [...defaultTabs];
     if (config.enableIndexStats) {
       sortedTabs.push(statsTab);
     }
-    sortedTabs.push(...extensionsService.indexDetailsTabs);
+    // sortedTabs.push(...extensionsService.indexDetailsTabs);
+    extensionsService.indexDetailsTabs.forEach((dynamicTab) => {
+      if (dynamicTab.renderTab && dynamicTab.renderTab({ index, indexName })) {
+        sortedTabs.push(dynamicTab);
+      }
+    });
 
     sortedTabs.sort((tabA, tabB) => {
       return tabA.order - tabB.order;
     });
     return sortedTabs;
-  }, [config.enableIndexStats, extensionsService.indexDetailsTabs]);
-
+  }, [config.enableIndexStats, extensionsService.indexDetailsTabs, index, indexName]);
   const tabQueryParam = queryParams.get('tab') ?? IndexDetailsSection.Overview;
   let indexDetailsSection = IndexDetailsSection.Overview;
   if (tabs.map((tab) => tab.id).includes(tabQueryParam as IndexDetailsTabIds)) {
     indexDetailsSection = tabQueryParam as IndexDetailsSection;
   }
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [index, setIndex] = useState<Index | null>();
-
-  const selectedTabContent = useMemo(() => {
-    return getSelectedTabContent({ tabs, indexDetailsSection, index, indexName });
-  }, [index, indexDetailsSection, indexName, tabs]);
-
   const fetchIndexDetails = useCallback(async () => {
     if (indexName) {
       setIsLoading(true);
@@ -269,7 +244,13 @@ export const DetailsPage: FunctionComponent<
           height: 100%;
         `}
       >
-        {selectedTabContent}
+        <DetailsPageTab
+          indexName={indexName}
+          index={index}
+          indexDetailsSection={indexDetailsSection}
+          getUrlForApp={getUrlForApp}
+          tabs={tabs}
+        />
       </div>
     </>
   );

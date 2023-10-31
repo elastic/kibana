@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
+import { FunctionComponent, ReactNode } from 'react';
+import { ApplicationStart } from '@kbn/core-application-browser';
 import { Index } from '../types';
 
 export enum Section {
@@ -31,7 +32,12 @@ export interface IndexDetailsTab {
   // a text that is displayed on the tab label, usually a Formatted message component
   name: ReactNode;
   // a function that renders the content of the tab
-  renderTabContent: (indexName: string, index: Index) => ReactNode;
+  renderTabContent: (args: {
+    indexName: string;
+    index: Index;
+    getUrlForApp: ApplicationStart['getUrlForApp'];
+  }) => ReturnType<FunctionComponent>;
   // a number to specify the order of the tabs
   order: number;
+  renderTab?: (args: { indexName: string; index?: Index | null }) => boolean;
 }

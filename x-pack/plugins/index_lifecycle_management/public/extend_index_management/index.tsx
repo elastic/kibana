@@ -8,6 +8,7 @@
 import React from 'react';
 import { get, every, some } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSearchBar } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
 
@@ -225,5 +226,18 @@ export const addAllExtensions = (
   extensionsService.addBanner(ilmBannerExtension);
   extensionsService.addFilter(ilmFilterExtension);
 
-  extensionsService.addIndexOverviewCard({ renderCardContent: IndexLifecycleSummary });
+  extensionsService.addIndexDetailsTab({
+    id: 'ilm',
+    name: (
+      <FormattedMessage
+        defaultMessage="ILM"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.tabHeaderLabel"
+      />
+    ),
+    order: 50,
+    renderTabContent: IndexLifecycleSummary,
+    renderTab: ({ index }) => {
+      return !!index && !!index.ilm && index.ilm.managed;
+    },
+  });
 };
