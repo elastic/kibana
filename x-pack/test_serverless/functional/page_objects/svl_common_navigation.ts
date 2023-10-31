@@ -65,6 +65,17 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
           expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
         }
       },
+      async expectLinkMissing(
+        by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
+      ) {
+        if ('deepLinkId' in by) {
+          await testSubjects.missingOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
+        } else if ('navId' in by) {
+          await testSubjects.missingOrFail(`~nav-item-id-${by.navId}`);
+        } else {
+          expect(await getByVisibleText('~nav-item', by.text)).be(null);
+        }
+      },
       async expectLinkActive(
         by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
       ) {
@@ -141,9 +152,6 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
     breadcrumbs: {
       async expectExists() {
         await testSubjects.existOrFail('breadcrumbs');
-      },
-      async clickHome() {
-        await testSubjects.click('~breadcrumb-home');
       },
       async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
         log.debug(
