@@ -13,7 +13,11 @@ import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public'
 import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { getSeverityColor } from '@kbn/ml-anomaly-utils';
 import { EuiHealth } from '@elastic/eui';
-import { ALERT_ANOMALY_SCORE, ALERT_ANOMALY_TIMESTAMP } from '../../../common/constants/alerts';
+import {
+  alertFieldNameMap,
+  ALERT_ANOMALY_SCORE,
+  ALERT_ANOMALY_TIMESTAMP,
+} from '../../../common/constants/alerts';
 import { getFieldFormatterProvider } from '../../application/contexts/kibana/use_field_formatter';
 
 interface Props {
@@ -94,6 +98,17 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
       default:
         return <>{value}</>;
     }
+  };
+}
+
+export function getAlertEntryFormatter(fieldFormats: FieldFormatsRegistry) {
+  const alertValueFormatter = getAlertFormatters(fieldFormats);
+
+  return (columnId: string, value: any): { title: string; description: any } => {
+    return {
+      title: alertFieldNameMap[columnId],
+      description: alertValueFormatter(columnId, value),
+    };
   };
 }
 

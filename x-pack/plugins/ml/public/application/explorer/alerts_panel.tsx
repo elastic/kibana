@@ -11,7 +11,7 @@ import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_START, AlertConsumers } from '@kbn/rule-data-utils';
 import { ML_ALERTS_CONFIG_ID } from '../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
 import { CollapsiblePanel } from '../components/collapsible_panel';
 import { useFieldFormatter, useMlKibana } from '../contexts/kibana';
@@ -49,15 +49,15 @@ export const AlertsPanel: FC = () => {
   const yValueMap: Record<string, number> = {};
   const chartData = alertsData
     ?.map((alert, i) => {
-      if (!yValueMap.hasOwnProperty(alert.ruleName)) {
-        yValueMap[alert.ruleName] = Math.max(...Object.values(yValueMap), -1) + 1;
+      if (!yValueMap.hasOwnProperty(alert[ALERT_RULE_NAME])) {
+        yValueMap[alert[ALERT_RULE_NAME]] = Math.max(...Object.values(yValueMap), -1) + 1;
       }
-      const yV = yValueMap[alert.ruleName];
+      const yV = yValueMap[alert[ALERT_RULE_NAME]];
       return [
         // null is required to make isolated points
-        [alert.timestamp, null, alert.ruleName],
-        [alert.timestamp, yV, alert.ruleName],
-        [alert.end_timestamp, yV, alert.ruleName],
+        [alert[ALERT_START], null, alert[ALERT_RULE_NAME]],
+        [alert[ALERT_START], yV, alert[ALERT_RULE_NAME]],
+        [alert.end_timestamp, yV, alert[ALERT_RULE_NAME]],
       ];
     })
     .flat();

@@ -98,11 +98,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
 
-    const {
-      anomalyExplorerCommonStateService,
-      anomalyTimelineStateService,
-      anomalyDetectionAlertsStateService,
-    } = useAnomalyExplorerContext();
+    const { anomalyExplorerCommonStateService, anomalyTimelineStateService } =
+      useAnomalyExplorerContext();
 
     const setSelectedCells = anomalyTimelineStateService.setSelectedCells.bind(
       anomalyTimelineStateService
@@ -161,11 +158,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const { viewByPerPage, viewByFromPage } = useObservable(
       anomalyTimelineStateService.getSwimLanePagination$(),
       anomalyTimelineStateService.getSwimLanePagination()
-    );
-
-    const alertsData = useObservable(
-      anomalyDetectionAlertsStateService.anomalyDetectionAlerts$,
-      []
     );
 
     const [severityUpdate, setSeverityUpdate] = useState(
