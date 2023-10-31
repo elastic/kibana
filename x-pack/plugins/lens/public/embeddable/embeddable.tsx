@@ -176,7 +176,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
-  shouldShowLegendAction: (actionId: string) => boolean;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export type LensByValueInput = {
