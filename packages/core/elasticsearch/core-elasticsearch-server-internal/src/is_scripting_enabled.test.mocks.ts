@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { Navigation } from './navigation';
-export type { Props as RecentlyAccessedProps } from './recently_accessed';
-export type {
-  PanelContent,
-  PanelComponentProps,
-  ContentProvider as PanelContentProvider,
-} from './panel';
+export const isRetryableEsClientErrorMock = jest.fn();
+
+jest.doMock('./retryable_es_client_errors', () => {
+  return {
+    isRetryableEsClientError: isRetryableEsClientErrorMock,
+  };
+});
