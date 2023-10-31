@@ -126,23 +126,33 @@ export default function AlertDetailsRelatedEvents({
     return lensDoc.getAttributes();
   };
 
+  const relatedEventsTimeRangeStart = moment(alert.start).subtract(
+    (ruleParams.criteria[0].timeSize ?? 5) * 2,
+    ruleParams.criteria[0].timeUnit ?? 'minutes'
+  );
+
   const relatedEventsTimeRangeEnd = moment(alert.start).add(
     (ruleParams.criteria[0].timeSize ?? 5) * 2,
     ruleParams.criteria[0].timeUnit ?? 'minutes'
   );
 
+  const relatedEventsTimeRangeDiff =
+    relatedEventsTimeRangeStart.diff(relatedEventsTimeRangeEnd, 'minutes') > 10;
+
+  const relatedEventsTimeRangeFrom = relatedEventsTimeRangeDiff
+    ? relatedEventsTimeRangeStart.toISOString()
+    : moment(alert.start).subtract(10, 'minutes').toISOString();
+
+  const relatedEventsTimeRangeTo = relatedEventsTimeRangeDiff
+    ? relatedEventsTimeRangeEnd.valueOf() > moment.now()
+      ? moment().toISOString()
+      : relatedEventsTimeRangeEnd.toISOString()
+    : moment(alert.start).add(10, 'minutes').toISOString();
+
   const relatedEventsTimeRange = (): TimeRange => {
     return {
-      from: moment(alert.start)
-        .subtract(
-          (ruleParams.criteria[0].timeSize ?? 5) * 2,
-          ruleParams.criteria[0].timeUnit ?? 'minutes'
-        )
-        .toISOString(),
-      to:
-        relatedEventsTimeRangeEnd.valueOf() > moment.now()
-          ? moment().toISOString()
-          : relatedEventsTimeRangeEnd.toISOString(),
+      from: relatedEventsTimeRangeFrom,
+      to: relatedEventsTimeRangeTo,
       mode: 'absolute',
     };
   };
@@ -236,7 +246,7 @@ export default function AlertDetailsRelatedEvents({
                     paddingSize="xs"
                     hasShadow={false}
                     hasBorder={true}
-                    style={{ marginTop: 10, height: 400 }}
+                    style={{ marginTop: 10, height: 450 }}
                   >
                     <EuiText textAlign="right" size="s" style={{ marginTop: 3 }}>
                       {metricAggType}
