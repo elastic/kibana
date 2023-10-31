@@ -22,7 +22,8 @@ export interface TemplateContext {
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
   publicArtifactSubdomain: string;
-  ubi?: boolean;
+  ubi8?: boolean;
+  ubi9?: boolean;
   ubuntu?: boolean;
   cloud?: boolean;
   metricbeatTarball?: string;
