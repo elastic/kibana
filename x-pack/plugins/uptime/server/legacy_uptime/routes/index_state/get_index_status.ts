@@ -33,6 +33,8 @@ export const createGetIndexStatusRoute: UMRestApiRouteFactory = (libs: UMServerL
           },
         });
       }
+
+      throw e;
     }
   },
 });
