@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
+import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
@@ -47,8 +48,15 @@ import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plu
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
+import type { RouteProps } from 'react-router-dom';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -59,16 +67,22 @@ import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
-import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-import type { NavigationLink } from './common/links';
+import type { AppLinksSwitcher, NavigationLink } from './common/links';
+import type { EntityAnalytics } from './entity_analytics';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
+import type { BreadcrumbsNav } from './common/breadcrumbs/types';
+import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import type { DeepLinksFormatter } from './common/links/deep_links';
+import type { SetComponents, GetComponent$ } from './contract_components';
+import type { ConfigSettings } from '../common/config_settings';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -80,6 +94,15 @@ export interface SetupPlugins {
   ml?: MlPluginSetup;
 }
 
+/**
+ * IMPORTANT - PLEASE READ: When adding new plugins to the
+ * security solution, please ensure you add that plugin
+ * name to the kibana.jsonc file located in ../kibana.jsonc
+ *
+ * Without adding the plugin name there, the plugin will not
+ * fulfill at runtime, despite the types showing up correctly
+ * in the code.
+ */
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
@@ -109,19 +132,34 @@ export interface StartPlugins {
   threatIntelligence: ThreatIntelligencePluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
   dataViews: DataViewsServicePublic;
+  fieldFormats: FieldFormatsStartCommon;
+  discover: DiscoverStart;
+  navigation: NavigationPublicPluginStart;
+  expressions: ExpressionsStart;
+  dataViewEditor: DataViewEditorStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
+export interface ContractStartServices {
+  extraRoutes$: Observable<RouteProps[]>;
+  getComponent$: GetComponent$;
+  upselling: UpsellingService;
+}
+
 export type StartServices = CoreStart &
-  StartPlugins & {
+  StartPlugins &
+  ContractStartServices & {
+    configSettings: ConfigSettings;
     storage: Storage;
     sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     onAppLeave: (handler: AppLeaveHandler) => void;
 
     /**
@@ -131,18 +169,25 @@ export type StartServices = CoreStart &
     securityLayout: {
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
-    savedObjectsManagement: SavedObjectsManagementPluginStart;
-    isSidebarEnabled$: BehaviorSubject<boolean>;
+    contentManagement: ContentManagementPublicStart;
     telemetry: TelemetryClientStart;
+    customDataService: DataPublicPluginStart;
+    topValuesPopover: TopValuesPopoverService;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
+  experimentalFeatures: ExperimentalFeatures;
+  setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
+  setDeepLinksFormatter: (deepLinksFormatter: DeepLinksFormatter) => void;
 }
 
 export interface PluginStart {
-  navLinks$: Observable<NavigationLink[]>;
-  setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
+  getNavLinks$: () => Observable<NavigationLink[]>;
+  setExtraRoutes: (extraRoutes: RouteProps[]) => void;
+  setComponents: SetComponents;
+  getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
+  getUpselling: () => UpsellingService;
 }
 
 export interface AppObservableLibs {
@@ -161,12 +206,12 @@ export interface SubPlugins {
   exceptions: Exceptions;
   explore: Explore;
   kubernetes: Kubernetes;
-  landingPages: LandingPages;
   management: Management;
   overview: Overview;
   rules: Rules;
   threatIntelligence: ThreatIntelligence;
   timelines: Timelines;
+  entityAnalytics: EntityAnalytics;
 }
 
 // TODO: find a better way to defined these types
@@ -179,10 +224,10 @@ export interface StartedSubPlugins {
   exceptions: ReturnType<Exceptions['start']>;
   explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;
-  landingPages: ReturnType<LandingPages['start']>;
   management: ReturnType<Management['start']>;
   overview: ReturnType<Overview['start']>;
   rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;
+  entityAnalytics: ReturnType<EntityAnalytics['start']>;
 }

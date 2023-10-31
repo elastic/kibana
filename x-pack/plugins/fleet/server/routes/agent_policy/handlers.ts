@@ -51,7 +51,7 @@ import type {
 import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
-async function populateAssignedAgentsCount(
+export async function populateAssignedAgentsCount(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentPolicies: AgentPolicy[]
@@ -81,7 +81,9 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
+      esClient,
       ...restOfQuery,
+      withAgentCount: !noAgentCount,
     });
 
     const body: GetAgentPoliciesResponse = {
@@ -90,11 +92,6 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       page,
       perPage,
     };
-    if (!noAgentCount) {
-      await populateAssignedAgentsCount(esClient, soClient, items);
-    } else {
-      items.forEach((item) => (item.agents = 0));
-    }
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
@@ -213,6 +210,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const { force, ...data } = request.body;
+
   const spaceId = fleetContext.spaceId;
   try {
     const agentPolicy = await agentPolicyService.update(
@@ -299,9 +297,12 @@ export const getFullAgentPolicy: FleetRequestHandler<
 
   if (request.query.kubernetes === true) {
     try {
+      const agentVersion =
+        await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
       const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
         soClient,
         request.params.agentPolicyId,
+        agentVersion,
         { standalone: request.query.standalone === true }
       );
       if (fullAgentConfigMap) {
@@ -358,9 +359,12 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
 
   if (request.query.kubernetes === true) {
     try {
+      const agentVersion =
+        await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
       const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
         soClient,
         request.params.agentPolicyId,
+        agentVersion,
         { standalone: request.query.standalone === true }
       );
       if (fullAgentConfigMap) {
@@ -413,10 +417,18 @@ export const getK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(fleetServer, token);
+    const agentVersion =
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
+      fleetServer,
+      token,
+      agentVersion
+    );
     if (fullAgentManifest) {
       const body: GetFullAgentManifestResponse = {
         item: fullAgentManifest,
@@ -439,10 +451,18 @@ export const downloadK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(fleetServer, token);
+    const agentVersion =
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
+      fleetServer,
+      token,
+      agentVersion
+    );
     if (fullAgentManifest) {
       const body = fullAgentManifest;
       const headers: ResponseHeaders = {

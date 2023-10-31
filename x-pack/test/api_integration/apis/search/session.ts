@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_SEARCH_SESSION_REST_VERSION } from '@kbn/data-plugin/server';
 import expect from '@kbn/expect';
 import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -22,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -36,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -46,17 +50,26 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
+        await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
       });
 
       it('should fail to delete an unknown session', async () => {
-        await supertest.delete(`/internal/session/123`).set('kbn-xsrf', 'foo').expect(404);
+        await supertest
+          .delete(`/internal/session/123`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
+          .set('kbn-xsrf', 'foo')
+          .expect(404);
       });
 
       it('should create and delete a session', async () => {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -67,15 +80,24 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        await supertest.delete(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
+        await supertest
+          .delete(`/internal/session/${sessionId}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
 
-        await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(404);
+        await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
+          .set('kbn-xsrf', 'foo')
+          .expect(404);
       });
 
       it('should create and cancel a session', async () => {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -88,11 +110,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertest
           .post(`/internal/session/${sessionId}/cancel`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
         const resp = await supertest
           .get(`/internal/session/${sessionId}/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
@@ -108,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: { attributes: originalSession },
         } = await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -122,6 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: { attributes: updatedSession },
         } = await supertest
           .put(`/internal/session/${sessionId}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             name: newName,
@@ -138,6 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
         // run search, this will not be persisted because session is not saved yet
         const searchRes1 = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -159,6 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
         // save session
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -172,6 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
         // run search
         const searchRes2 = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -192,6 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
         await retry.waitFor('a search persisted into session', async () => {
           const resp = await supertest
             .get(`/internal/session/${sessionId}`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
             .set('kbn-xsrf', 'foo')
             .expect(200);
 
@@ -210,6 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -222,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertest
           .post(`/internal/session/${sessionId}/_extend`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             expires: '2021-02-26T21:02:43.742Z',
@@ -233,6 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should fail to extend a nonexistent session', async () => {
       await supertest
         .post(`/internal/session/123/_extend`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
         .set('kbn-xsrf', 'foo')
         .send({
           expires: '2021-02-26T21:02:43.742Z',
@@ -256,6 +289,7 @@ export default function ({ getService }: FtrProviderContext) {
       // run search
       const searchRes = await supertest
         .post(`/internal/search/ese`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
         .set('kbn-xsrf', 'foo')
         .send({
           sessionId,
@@ -268,6 +302,7 @@ export default function ({ getService }: FtrProviderContext) {
       // persist session
       await supertest
         .post(`/internal/session`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
         .set('kbn-xsrf', 'foo')
         .send({
           sessionId,
@@ -281,6 +316,7 @@ export default function ({ getService }: FtrProviderContext) {
       // run search to persist into a session
       await supertest
         .post(`/internal/search/ese/${id}`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
         .set('kbn-xsrf', 'foo')
         .send({
           sessionId,
@@ -292,6 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.waitFor('searches persisted into session', async () => {
         const resp = await supertest
           .get(`/internal/session/${sessionId}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
@@ -308,6 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
         async () => {
           const resp = await supertest
             .get(`/internal/session/${sessionId}/status`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
             .set('kbn-xsrf', 'foo')
             .expect(200);
 
@@ -337,6 +375,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -349,6 +388,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertestWithoutAuth
           .get(`/internal/session/${sessionId}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .auth('other_user', 'password')
           .expect(404);
@@ -358,6 +398,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -370,6 +411,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertestWithoutAuth
           .delete(`/internal/session/${sessionId}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .auth('other_user', 'password')
           .expect(404);
@@ -379,6 +421,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -391,6 +434,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertestWithoutAuth
           .post(`/internal/session/${sessionId}/cancel`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .auth('other_user', 'password')
           .expect(404);
@@ -400,6 +444,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -412,6 +457,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertestWithoutAuth
           .post(`/internal/session/${sessionId}/_extend`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .auth('other_user', 'password')
           .send({
@@ -424,6 +470,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionId = `my-session-${Math.random()}`;
         await supertestWithoutAuth
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -464,6 +511,7 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionId = `my-session-${Math.random()}`;
         await supertestWithoutAuth
           .post(`/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .auth('analyst', 'analyst-password')
           .set('kbn-xsrf', 'foo')
           .send({
@@ -477,6 +525,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertestWithoutAuth
           .get(`/internal/session/${sessionId}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .auth('analyst', 'analyst-password')
           .set('kbn-xsrf', 'foo')
           .expect(403);
@@ -517,6 +566,7 @@ export default function ({ getService }: FtrProviderContext) {
         // run search
         const searchRes = await supertest
           .post(`/s/${spaceId}/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -529,6 +579,7 @@ export default function ({ getService }: FtrProviderContext) {
         // persist session
         await supertest
           .post(`/s/${spaceId}/internal/session`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -542,6 +593,7 @@ export default function ({ getService }: FtrProviderContext) {
         // run search to persist into a session
         await supertest
           .post(`/s/${spaceId}/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
           .set('kbn-xsrf', 'foo')
           .send({
             sessionId,
@@ -553,6 +605,7 @@ export default function ({ getService }: FtrProviderContext) {
         await retry.waitFor('searches persisted into session', async () => {
           const resp = await supertest
             .get(`/s/${spaceId}/internal/session/${sessionId}`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
             .set('kbn-xsrf', 'foo')
             .expect(200);
 
@@ -569,6 +622,7 @@ export default function ({ getService }: FtrProviderContext) {
           async () => {
             const resp = await supertest
               .get(`/s/${spaceId}/internal/session/${sessionId}/status`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
               .set('kbn-xsrf', 'foo')
               .expect(200);
 

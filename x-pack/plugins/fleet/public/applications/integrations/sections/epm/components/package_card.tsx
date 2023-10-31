@@ -19,7 +19,7 @@ import {
 } from '../screens/detail/assets/deferred_assets_warning';
 
 import { CardIcon } from '../../../../../components/package_icon';
-import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
+import type { IntegrationCardItem } from '../screens/home';
 
 import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
 import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';

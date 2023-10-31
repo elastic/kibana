@@ -7,16 +7,18 @@
 
 import type {
   EqlQueryLanguage,
+  EsqlQueryLanguage,
   KqlQueryLanguage,
   RuleFilterArray,
   RuleQuery,
-} from '../../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type {
   InlineKqlQuery,
   RuleEqlQuery,
+  RuleEsqlQuery,
   RuleKqlQuery,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_field_types';
-import { KqlQueryType } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_field_types';
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+import { KqlQueryType } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 export const extractRuleKqlQuery = (
   query: RuleQuery | undefined,
@@ -56,5 +58,15 @@ export const extractRuleEqlQuery = (
     query,
     language,
     filters: filters ?? [],
+  };
+};
+
+export const extractRuleEsqlQuery = (
+  query: RuleQuery,
+  language: EsqlQueryLanguage
+): RuleEsqlQuery => {
+  return {
+    query,
+    language,
   };
 };

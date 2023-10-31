@@ -7,31 +7,29 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
-import { Route } from '@kbn/shared-ux-router';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';
+import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
+  config: ConfigType;
 }
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager }: CreateParams) {
+  create({ getStartServices, spacesManager, config }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
     });
@@ -63,6 +61,7 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               history={history}
               getUrlForApp={application.getUrlForApp}
+              maxSpaces={config.maxSpaces}
             />
           );
         };
@@ -84,6 +83,7 @@ export const spacesManagementApp = Object.freeze({
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
+              allowFeatureVisibility={config.allowFeatureVisibility}
             />
           );
         };
@@ -109,6 +109,7 @@ export const spacesManagementApp = Object.freeze({
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
               history={history}
+              allowFeatureVisibility={config.allowFeatureVisibility}
             />
           );
         };
@@ -117,9 +118,9 @@ export const spacesManagementApp = Object.freeze({
           <KibanaContextProvider services={coreStart}>
             <i18nStart.Context>
               <KibanaThemeProvider theme$={theme$}>
-                <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
+                <RedirectAppLinks coreStart={coreStart}>
                   <Router history={history}>
-                    <Switch>
+                    <Routes>
                       <Route path={['', '/']} exact>
                         <SpacesGridPageWithBreadcrumbs />
                       </Route>
@@ -129,7 +130,7 @@ export const spacesManagementApp = Object.freeze({
                       <Route path="/edit/:spaceId">
                         <EditSpacePageWithBreadcrumbs />
                       </Route>
-                    </Switch>
+                    </Routes>
                   </Router>
                 </RedirectAppLinks>
               </KibanaThemeProvider>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
+
 import { SpacesPlugin } from './plugin';
 
 export { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_avatar';
@@ -42,6 +44,6 @@ export type { SpacesContextProps, SpacesReactContextValue } from './spaces_conte
 
 export type { LazyComponentFn, SpacesApiUi, SpacesApiUiComponent } from './ui_api';
 
-export const plugin = () => {
-  return new SpacesPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) => {
+  return new SpacesPlugin(initializerContext);
 };

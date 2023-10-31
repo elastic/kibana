@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '../../../common/api';
+import { CaseSeverity } from '../../../common/types/domain';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';

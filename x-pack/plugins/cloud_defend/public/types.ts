@@ -16,6 +16,7 @@ import type {
 import type { CloudDefendRouterProps } from './application/router';
 import type { CloudDefendPageId } from './common/navigation/types';
 import * as i18n from './components/control_general_view/translations';
+import { SelectorType, SelectorCondition, Selector, Response } from '../common';
 
 /**
  * cloud_defend plugin types
@@ -53,32 +54,12 @@ export interface CloudDefendSecuritySolutionContext {
  * cloud_defend/control types
  */
 
-// Currently we support file and process selectors (which match on their respective set of lsm hook points)
-export type SelectorType = 'file' | 'process';
-
 /*
  * 'stringArray' uses a EuiComboBox
  * 'flag' is a boolean value which is always 'true'
  * 'boolean' can be true or false
  */
 export type SelectorConditionType = 'stringArray' | 'flag' | 'boolean';
-
-export type SelectorCondition =
-  | 'containerImageFullName'
-  | 'containerImageName'
-  | 'containerImageTag'
-  | 'kubernetesClusterId'
-  | 'kubernetesClusterName'
-  | 'kubernetesNamespace'
-  | 'kubernetesResourceLabel'
-  | 'kubernetesResourceName'
-  | 'targetFilePath'
-  | 'ignoreVolumeFiles'
-  | 'ignoreVolumeMounts'
-  | 'operation'
-  | 'processExecutable'
-  | 'processName'
-  | 'sessionLeaderInteractive';
 
 export interface SelectorConditionOptions {
   type: SelectorConditionType;
@@ -104,24 +85,24 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
   containerImageFullName: {
     type: 'stringArray',
     pattern:
-      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$',
+      '^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$',
     patternError: i18n.errorInvalidFullContainerImageName,
     not: ['containerImageName'],
   },
   containerImageName: {
     type: 'stringArray',
-    pattern: '^[a-z0-9]+$',
+    pattern: '^([a-z0-9]+(?:[._-][a-z0-9]+)*)$',
     not: ['containerImageFullName'],
   },
   containerImageTag: { type: 'stringArray' },
   kubernetesClusterId: { type: 'stringArray' },
   kubernetesClusterName: { type: 'stringArray' },
   kubernetesNamespace: { type: 'stringArray' },
-  kubernetesResourceName: { type: 'stringArray' },
-  kubernetesResourceLabel: {
+  kubernetesPodName: { type: 'stringArray' },
+  kubernetesPodLabel: {
     type: 'stringArray',
     pattern: '^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$',
-    patternError: i18n.errorInvalidResourceLabel,
+    patternError: i18n.errorInvalidPodLabel,
   },
   operation: {
     type: 'stringArray',
@@ -134,54 +115,26 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
     selectorType: 'file',
     type: 'stringArray',
     maxValueBytes: 255,
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidTargetFilePath,
   },
   ignoreVolumeFiles: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeMounts'] },
   ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
-  processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
-  processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
+  processExecutable: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processName'],
+    pattern: '^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$',
+    patternError: i18n.errorInvalidProcessExecutable,
+  },
+  processName: {
+    selectorType: 'process',
+    type: 'stringArray',
+    not: ['processExecutable'],
+    maxValueBytes: 15,
+  },
   sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
 };
-
-export type ResponseAction = 'log' | 'alert' | 'block';
-
-export interface Selector {
-  name: string;
-  operation?: string[];
-  containerImageFullName?: string[];
-  containerImageName?: string[];
-  containerImageTag?: string[];
-  kubernetesClusterId?: string[];
-  kubernetesClusterName?: string[];
-  kubernetesNamespace?: string[];
-  kubernetesResourceLabel?: string[];
-  kubernetesResourceName?: string[];
-
-  // selector properties
-  targetFilePath?: string[];
-  ignoreVolumeFiles?: boolean;
-  ignoreVolumeMounts?: boolean;
-
-  // process selector properties
-  processExecutable?: string[];
-  processName?: string[];
-  sessionLeaderInteractive?: string[];
-
-  // non yaml fields
-  type: SelectorType;
-  // used to track selector error state in UI
-  hasErrors?: boolean;
-}
-
-export interface Response {
-  match: string[];
-  exclude?: string[];
-  actions: ResponseAction[];
-
-  // non yaml fields
-  type: SelectorType;
-  // used to track response error state in UI
-  hasErrors?: boolean;
-}
 
 export const DefaultFileSelector: Selector = {
   type: 'file',

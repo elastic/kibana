@@ -179,6 +179,63 @@ describe('Create Remote cluster', () => {
       });
     });
 
+    describe('Setup Trust', () => {
+      beforeEach(async () => {
+        await act(async () => {
+          ({ actions, component } = await setup(httpSetup, {
+            canUseAPIKeyTrustModel: true,
+          }));
+        });
+
+        component.update();
+
+        actions.nameInput.setValue('remote_cluster_test');
+        actions.seedsInput.setValue('192.168.1.1:3000');
+
+        await actions.saveButton.click();
+      });
+
+      test('should contain two cards for setting up trust', () => {
+        // Cards exist
+        expect(actions.setupTrust.apiCardExist()).toBe(true);
+        expect(actions.setupTrust.certCardExist()).toBe(true);
+        // Each card has its doc link
+        expect(actions.setupTrust.apiCardDocsExist()).toBe(true);
+        expect(actions.setupTrust.certCardDocsExist()).toBe(true);
+      });
+
+      test('on submit should open confirm modal', async () => {
+        await actions.setupTrust.setupTrustConfirmClick();
+
+        expect(actions.setupTrust.isSubmitInConfirmDisabled()).toBe(true);
+        await actions.setupTrust.toggleConfirmSwitch();
+        expect(actions.setupTrust.isSubmitInConfirmDisabled()).toBe(false);
+      });
+
+      test('back button goes to first step', async () => {
+        await actions.setupTrust.backToFirstStepClick();
+        expect(actions.isOnFirstStep()).toBe(true);
+      });
+
+      test('shows only cert based config if API key trust model is not available', async () => {
+        await act(async () => {
+          ({ actions, component } = await setup(httpSetup, {
+            canUseAPIKeyTrustModel: false,
+          }));
+        });
+
+        component.update();
+
+        actions.nameInput.setValue('remote_cluster_test');
+        actions.seedsInput.setValue('192.168.1.1:3000');
+
+        await actions.saveButton.click();
+
+        expect(actions.setupTrust.apiCardExist()).toBe(false);
+        expect(actions.setupTrust.certCardExist()).toBe(true);
+      });
+    });
+
     describe('on prem', () => {
       beforeEach(async () => {
         await act(async () => {

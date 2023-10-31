@@ -147,7 +147,7 @@ export function MachineLearningSettingsCalendarProvider(
 
     async assertJobSelectionEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
-        'mlCalendarJobSelection > comboBoxToggleListButton'
+        'mlCalendarJobSelection > comboBoxSearchInput'
       );
       expect(isEnabled).to.eql(
         expectedValue,
@@ -159,7 +159,7 @@ export function MachineLearningSettingsCalendarProvider(
 
     async assertJobGroupSelectionEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
-        'mlCalendarJobGroupSelection > comboBoxToggleListButton'
+        'mlCalendarJobGroupSelection > comboBoxSearchInput'
       );
       expect(isEnabled).to.eql(
         expectedValue,

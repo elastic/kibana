@@ -12,8 +12,8 @@ import type { RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionEditType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { invariant } from '../../../../../../common/utils/invariant';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
@@ -85,6 +85,10 @@ const applyBulkActionEditToRuleParams = (
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
+      invariant(
+        ruleParams.type !== 'esql',
+        "Index patterns can't be added. ES|QL rule doesn't have index patterns property"
+      );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
         isActionSkipped = true;
@@ -102,6 +106,10 @@ const applyBulkActionEditToRuleParams = (
       invariant(
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'esql',
+        "Index patterns can't be deleted. ES|QL rule doesn't have index patterns property"
       );
 
       if (
@@ -125,6 +133,10 @@ const applyBulkActionEditToRuleParams = (
       invariant(
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'esql',
+        "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {

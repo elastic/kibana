@@ -20,6 +20,7 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -140,7 +141,7 @@ export const CodeEditor: React.FC<Props> = ({
   overrideEditorWillMount,
   editorDidMount,
   editorWillMount,
-  useDarkTheme,
+  useDarkTheme: useDarkThemeProp,
   transparentBackground,
   suggestionProvider,
   signatureProvider,
@@ -153,6 +154,9 @@ export const CodeEditor: React.FC<Props> = ({
   isCopyable = false,
   allowFullScreen = false,
 }) => {
+  const { colorMode } = useEuiTheme();
+  const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
+
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
   const MonacoEditor: typeof ReactMonacoEditor = useMemo(() => {
@@ -357,6 +361,15 @@ export const CodeEditor: React.FC<Props> = ({
     ]
   );
 
+  useEffect(() => {
+    // Register themes when 'useDarkThem' changes
+    monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+    monaco.editor.defineTheme(
+      'euiColorsTransparent',
+      useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+    );
+  }, [useDarkTheme]);
+
   const _editorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
       if (__monaco !== monaco) {
@@ -426,7 +439,7 @@ export const CodeEditor: React.FC<Props> = ({
   const { CopyButton } = useCopy({ isCopyable, value });
 
   return (
-    <div className="kibanaCodeEditor" onKeyDown={onKeyDown}>
+    <div className="kibanaCodeEditor" onKeyDown={onKeyDown} data-test-subj="kibanaCodeEditor">
       {renderPrompt()}
 
       <FullScreenDisplay>

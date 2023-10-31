@@ -8,7 +8,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { ContentManagementPlugin } from './plugin';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core-http-server';
 import type { ProcedureName } from '../common';
 import { procedureNames } from '../common/rpc';
 import { MSearchService } from './core/msearch';

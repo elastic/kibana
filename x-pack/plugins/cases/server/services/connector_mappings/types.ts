@@ -6,8 +6,8 @@
  */
 
 import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ConnectorMappingsAttributes } from '../../../common/types/domain';
 
-import type { ConnectorMappings } from '../../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type { IndexRefresh } from '../types';
 
@@ -19,12 +19,12 @@ export interface FindConnectorMappingsArgs extends ClientArgs {
 }
 
 export interface PostConnectorMappingsArgs extends ClientArgs, IndexRefresh {
-  attributes: ConnectorMappings;
+  attributes: ConnectorMappingsAttributes;
   references: SavedObjectReference[];
 }
 
 export interface UpdateConnectorMappingsArgs extends ClientArgs, IndexRefresh {
   mappingId: string;
-  attributes: Partial<ConnectorMappings>;
+  attributes: Partial<ConnectorMappingsAttributes>;
   references: SavedObjectReference[];
 }

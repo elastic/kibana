@@ -11,7 +11,7 @@ import type {
   BulkCreateRulesRequestBody,
   BulkPatchRulesRequestBody,
   BulkUpdateRulesRequestBody,
-} from '../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../common/api/detection_engine/rule_management';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 /**
  * Check if rule has duplicated default exceptions lits

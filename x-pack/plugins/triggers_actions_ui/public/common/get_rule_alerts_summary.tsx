@@ -15,7 +15,14 @@ const AlertSummaryWidgetLazy: React.FC<AlertSummaryWidgetProps> = lazy(
 
 export const getAlertSummaryWidgetLazy = (props: AlertSummaryWidgetProps) => {
   return (
-    <Suspense fallback={<AlertSummaryWidgetLoader fullSize={props.fullSize} />}>
+    <Suspense
+      fallback={
+        <AlertSummaryWidgetLoader
+          fullSize={props.fullSize}
+          isLoadingWithoutChart={props.hideChart}
+        />
+      }
+    >
       <AlertSummaryWidgetLazy {...props} />
     </Suspense>
   );

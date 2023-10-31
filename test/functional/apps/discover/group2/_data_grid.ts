@@ -12,11 +12,13 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid tests', function describeDiscoverDataGrid() {
     const esArchiver = getService('esArchiver');
-    const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+    const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
     const kibanaServer = getService('kibanaServer');
     const defaultSettings = { defaultIndex: 'logstash-*' };
     const testSubjects = getService('testSubjects');
     const security = getService('security');
+    const retry = getService('retry');
+    const browser = getService('browser');
 
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -34,17 +36,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await getTitles()).to.be('@timestamp Document');
 
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
       expect(await getTitles()).to.be('@timestamp bytes');
 
-      await PageObjects.discover.clickFieldListItemAdd('agent');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
       expect(await getTitles()).to.be('@timestamp bytes agent');
 
-      await PageObjects.discover.clickFieldListItemRemove('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemRemove('bytes');
       expect(await getTitles()).to.be('@timestamp agent');
 
-      await PageObjects.discover.clickFieldListItemRemove('agent');
+      await PageObjects.unifiedFieldList.clickFieldListItemRemove('agent');
       expect(await getTitles()).to.be('@timestamp Document');
+    });
+
+    const isVisible = async (selector: string) => {
+      const element = await testSubjects.find(selector);
+      const { x, y, width, height } = await element.getPosition();
+      return browser.execute(
+        (innerSelector, innerX, innerY) => {
+          let currentElement = document.elementFromPoint(innerX, innerY);
+          while (currentElement) {
+            if (currentElement.matches(`[data-test-subj="${innerSelector}"]`)) {
+              return true;
+            }
+            currentElement = currentElement.parentElement;
+          }
+          return false;
+        },
+        selector,
+        x + width / 2,
+        y + height / 2
+      );
+    };
+
+    it('should hide elements beneath the table when in full screen mode regardless of their z-index', async () => {
+      await retry.try(async () => {
+        expect(await isVisible('unifiedHistogramQueryHits')).to.be(true);
+        expect(await isVisible('unifiedHistogramResizableButton')).to.be(true);
+      });
+      await testSubjects.click('dataGridFullScreenButton');
+      await retry.try(async () => {
+        expect(await isVisible('unifiedHistogramQueryHits')).to.be(false);
+        expect(await isVisible('unifiedHistogramResizableButton')).to.be(false);
+      });
+      await testSubjects.click('dataGridFullScreenButton');
+      await retry.try(async () => {
+        expect(await isVisible('unifiedHistogramQueryHits')).to.be(true);
+        expect(await isVisible('unifiedHistogramResizableButton')).to.be(true);
+      });
+    });
+
+    it('should show the the grid toolbar', async () => {
+      await testSubjects.existOrFail('dscGridToolbar');
     });
   });
 }

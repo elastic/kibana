@@ -9,31 +9,49 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
-import { StepScheduleRule } from '.';
-import { getStepScheduleDefaultValue } from '../../../pages/detection_engine/rules/utils';
+import { StepScheduleRule, StepScheduleRuleReadOnly } from '.';
+import {
+  getStepScheduleDefaultValue,
+  defaultSchedule,
+  stepAboutDefaultValue,
+  stepDefineDefaultValue,
+} from '../../../pages/detection_engine/rules/utils';
+import { useRuleForms } from '../../../../detection_engine/rule_creation_ui/pages/form';
+import { stepActionsDefaultValue } from '../step_rule_actions';
+import type { FormHook } from '../../../../shared_imports';
+import type { ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
 
 describe('StepScheduleRule', () => {
+  const TestComp = ({
+    setFormRef,
+  }: {
+    setFormRef: (form: FormHook<ScheduleStepRule, ScheduleStepRule>) => void;
+  }) => {
+    const { scheduleStepForm } = useRuleForms({
+      defineStepDefault: stepDefineDefaultValue,
+      aboutStepDefault: stepAboutDefaultValue,
+      scheduleStepDefault: defaultSchedule,
+      actionsStepDefault: stepActionsDefaultValue,
+    });
+
+    setFormRef(scheduleStepForm);
+
+    return <StepScheduleRule isLoading={false} form={scheduleStepForm} />;
+  };
   it('renders correctly', () => {
-    const wrapper = mount(
-      <StepScheduleRule
-        isReadOnlyView={false}
-        isLoading={false}
-        defaultValues={getStepScheduleDefaultValue('query')}
-      />,
-      {
-        wrappingComponent: TestProviders,
-      }
-    );
+    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
+      wrappingComponent: TestProviders,
+    });
 
     expect(wrapper.find('Form[data-test-subj="stepScheduleRule"]')).toHaveLength(1);
   });
 
   it('renders correctly if isReadOnlyView', () => {
     const wrapper = shallow(
-      <StepScheduleRule
-        isReadOnlyView={true}
-        isLoading={false}
+      <StepScheduleRuleReadOnly
+        addPadding={false}
         defaultValues={getStepScheduleDefaultValue('query')}
+        descriptionColumns="singleSplit"
       />
     );
 

@@ -36,8 +36,9 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
     query,
   } = requestArgs;
 
-  const response = await fetch(`/api/ml/modules/setup/${moduleId}`, {
+  const response = await fetch(`/internal/ml/modules/setup/${moduleId}`, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
         start,

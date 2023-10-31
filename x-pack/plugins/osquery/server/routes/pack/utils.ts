@@ -8,7 +8,7 @@
 import { isEmpty, pick, reduce, isArray, filter, uniq, map, mapKeys } from 'lodash';
 import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { Shard } from '../../../common/schemas/common/utils';
+import type { Shard } from '../../../common/utils/converters';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';

@@ -20,4 +20,3 @@
  * would not be in the camera's viewport would be ignored.
  */
 export { cameraReducer } from './reducer';
-export type { CameraAction } from './action';

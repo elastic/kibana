@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
+import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { LastRefreshed } from '../components/last_refreshed';
 import { AutoRefreshButton } from '../components/auto_refresh_button';
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -26,7 +27,7 @@ const ANALYZE_DATA = i18n.translate('xpack.synthetics.analyzeDataButtonLabel', {
 
 const ANALYZE_MESSAGE = i18n.translate('xpack.synthetics.analyzeDataButtonLabel.message', {
   defaultMessage:
-    'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+    'Go to Explore Data, where you can select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
 
 export function ActionMenuContent(): React.ReactElement {
@@ -102,8 +103,8 @@ export function ActionMenuContent(): React.ReactElement {
           {ANALYZE_DATA}
         </EuiHeaderLink>
       </EuiToolTip>
-
       <InspectorHeaderLink />
+      <ObservabilityAIAssistantActionMenuItem />
     </EuiHeaderLinks>
   );
 }

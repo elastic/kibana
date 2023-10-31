@@ -29,6 +29,8 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   esClient: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
+  getRuleType: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -419,9 +421,9 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
-            Error: Error: Unauthorized for fake.rule and apm"
-          `);
+      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
+      Error: Error: Unauthorized for fake.rule and apm"
+    `);
 
     expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
       message: `Failed attempt to access alert [id=${fakeAlertId}]`,
@@ -449,9 +451,9 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
-            Error: Error: something went wrong"
-          `);
+      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
+      Error: Error: something went wrong"
+    `);
   });
 
   describe('authorization', () => {

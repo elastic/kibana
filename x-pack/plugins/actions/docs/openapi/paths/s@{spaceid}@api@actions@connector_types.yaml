@@ -1,6 +1,6 @@
 get:
   summary: Retrieves a list of all connector types.
-  operationId: getConnectorTypes
+  operationId: getConnectorTypesWithSpaceId
   description: >
     You do not need any Kibana feature privileges to run this API.
   tags:

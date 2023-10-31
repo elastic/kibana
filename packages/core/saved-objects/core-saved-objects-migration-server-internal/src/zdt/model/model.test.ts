@@ -30,6 +30,7 @@ describe('model', () => {
     retryCount: 0,
     retryDelay: 0,
     logs: [],
+    skipDocumentMigration: false,
   };
 
   const retryableError: RetryableEsClientError = {

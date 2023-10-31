@@ -14,17 +14,14 @@ import { ThemeService, LegacyColorsService } from './services';
 import { PaletteService } from './services/palettes/service';
 import { ActiveCursor } from './services/active_cursor';
 
-export type Theme = Omit<ThemeService, 'init'>;
-export type Color = Omit<LegacyColorsService, 'init'>;
-
 interface SetupDependencies {
   expressions: ExpressionsSetup;
 }
 
 /** @public */
 export interface ChartsPluginSetup {
-  legacyColors: Color;
-  theme: Theme;
+  legacyColors: Omit<LegacyColorsService, 'init'>;
+  theme: Omit<ThemeService, 'init'>;
   palettes: ReturnType<PaletteService['setup']>;
 }
 
@@ -45,7 +42,7 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
   public setup(core: CoreSetup, dependencies: SetupDependencies): ChartsPluginSetup {
     dependencies.expressions.registerFunction(palette);
     dependencies.expressions.registerFunction(systemPalette);
-    this.themeService.init(core.uiSettings);
+    this.themeService.init(core.theme);
     this.legacyColorsService.init(core.uiSettings);
     this.palettes = this.paletteService.setup(this.legacyColorsService);
 

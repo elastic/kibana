@@ -126,7 +126,7 @@ describe('esaggs expression function - public', () => {
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
       timeFields: args.timeFields,
-      disableShardWarnings: false,
+      disableWarningToasts: false,
       timeRange: undefined,
       getNow: undefined,
     });
@@ -149,6 +149,30 @@ describe('esaggs expression function - public', () => {
       expect.objectContaining({
         filters: input.filters,
         query: input.query,
+        timeRange: input.timeRange,
+      })
+    );
+  });
+
+  test('does not forward filters and query if ignoreGlobalFilters is enabled', async () => {
+    const input = {
+      type: 'kibana_context' as 'kibana_context',
+      filters: [{ $state: {}, meta: {}, query: {} }],
+      query: {
+        query: 'hiya',
+        language: 'painless',
+      },
+      timeRange: { from: 'a', to: 'b' },
+    } as KibanaContext;
+
+    await definition()
+      .fn(input, { ...args, ignoreGlobalFilters: true }, mockHandlers)
+      .toPromise();
+
+    expect(handleEsaggsRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: undefined,
+        query: undefined,
         timeRange: input.timeRange,
       })
     );

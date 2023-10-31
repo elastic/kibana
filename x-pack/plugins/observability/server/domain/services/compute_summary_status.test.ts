@@ -24,7 +24,7 @@ describe('ComputeSummaryStatus', () => {
     ).toBe('HEALTHY');
   });
 
-  it("returns 'Degrading' when sliValue < target objective with some remaining error budget", () => {
+  it("returns 'DEGRADING' when sliValue < target objective with some remaining error budget", () => {
     expect(
       computeSummaryStatus(
         createSLO({ objective: { target: 0.9 } }),

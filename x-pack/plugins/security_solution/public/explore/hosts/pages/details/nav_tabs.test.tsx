@@ -81,18 +81,4 @@ describe('navTabsHostDetails', () => {
 
     expect(sessionsTab).not.toBeTruthy();
   });
-
-  test('it should display Beta badge for risk tab', () => {
-    const tabs = navTabsHostDetails({
-      hasMlUserPermissions: false,
-      isRiskyHostsEnabled: true,
-      hostName: mockHostName,
-    });
-
-    const riskTab = Object.values<TabNavigationItemProps>(tabs).find(
-      (item) => item.id === HostsTableType.risk
-    );
-
-    expect(riskTab?.isBeta).toEqual(true);
-  });
 });

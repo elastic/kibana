@@ -48,7 +48,6 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
             uiActionsApi: depsStart.uiActions,
             basename: params.appBasePath,
             uiSettingsClient: coreStart.uiSettings,
-            savedObject: coreStart.savedObjects,
             overlays: coreStart.overlays,
             navigateToApp: coreStart.application.navigateToApp,
             embeddableExamples: depsStart.embeddableExamples,

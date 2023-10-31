@@ -24,6 +24,7 @@ export const addFeatureToIndex = async (
   return await getHttp().fetch({
     path: `${INDEX_FEATURE_PATH}`,
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       index: indexName,
       data,
@@ -35,6 +36,7 @@ export const deleteFeatureFromIndex = async (indexName: string, featureId: strin
   return await getHttp().fetch({
     path: `${INDEX_FEATURE_PATH}/${featureId}`,
     method: 'DELETE',
+    version: '1',
     body: JSON.stringify({
       index: indexName,
     }),
@@ -48,6 +50,7 @@ export const getMatchingIndexes = async (indexPattern: string) => {
   }>({
     path: GET_MATCHING_INDEXES_PATH,
     method: 'GET',
+    version: '1',
     query: { indexPattern },
   });
 };
@@ -59,6 +62,7 @@ export const getIsDrawLayer = async (index: string) => {
   }>({
     path: CHECK_IS_DRAWING_INDEX,
     method: 'GET',
+    version: '1',
     query: { index },
   });
 };

@@ -1,4 +1,4 @@
-title: Custom KQL indicator type definition
+title: Custom KQL
 required:
   - type
   - params
@@ -12,6 +12,8 @@ properties:
     required:
       - index
       - timestampField
+      - good
+      - total
     properties:
       index:
         description: The index or index pattern to use
@@ -31,7 +33,7 @@ properties:
         example: ''
       timestampField:
         description: >
-          The timestamp field used in the source indice. If not specified, @timestamp will be used.
+          The timestamp field used in the source indice.
         type: string
         example: timestamp
   type:

@@ -1,6 +1,10 @@
 {
   "ml.delete_datafeed": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "force": "__flag__"
     },
     "methods": [
@@ -9,6 +13,10 @@
     "patterns": [
       "_ml/datafeeds/{datafeed_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-delete-datafeed.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ml-delete-datafeed.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

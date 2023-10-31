@@ -48,7 +48,7 @@ export const retryCallCluster = <T extends Promise<unknown>>(apiCaller: () => T)
  * Retries the provided Elasticsearch API call when an error such as
  * `AuthenticationException` `NoConnections`, `ConnectionFault`,
  * `ServiceUnavailable` or `RequestTimeout` are encountered. The API call will
- * be retried once a second, indefinitely, until a successful response or a
+ * be retried once every `delay` millis, indefinitely, until a successful response or a
  * different error is received.
  *
  * @example

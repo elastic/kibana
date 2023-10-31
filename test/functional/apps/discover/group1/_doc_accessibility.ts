@@ -40,20 +40,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
-    it('should navigate to the single doc view and give focus to the title h1 on navigate', async () => {
+    it('should give focus to the first tab link when Tab is pressed', async () => {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[0].click();
-      const titleElement = await testSubjects.find('discoverSingleDocTitle');
-      const activeElement = await find.activeElement();
-      expect(await titleElement.getAttribute('data-test-subj')).to.eql(
-        await activeElement.getAttribute('data-test-subj')
-      );
-    });
-
-    it('should give focus to the first tab link when Tab is pressed', async () => {
-      const tableTab = await testSubjects.find('docViewerTab-0');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await browser.pressKeys(browser.keys.TAB);
+      await browser.pressKeys(browser.keys.SPACE);
+      await browser.pressKeys(browser.keys.TAB);
+      const tableTab = await testSubjects.find('docViewerTab-0');
       const activeElement = await find.activeElement();
       expect(await tableTab.getAttribute('data-test-subj')).to.eql(
         await activeElement.getAttribute('data-test-subj')

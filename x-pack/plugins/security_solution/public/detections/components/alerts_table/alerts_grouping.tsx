@@ -6,22 +6,22 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import type { GroupOption } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { groupSelectors } from '../../../common/store/grouping';
-import type { State } from '../../../common/store';
-import { updateGroupSelector } from '../../../common/store/grouping/actions';
-import type { Status } from '../../../../common/detection_engine/schemas/common';
+import { groupIdSelector } from '../../../common/store/grouping/selectors';
+import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { updateGroups } from '../../../common/store/grouping/actions';
+import type { Status } from '../../../../common/api/detection_engine';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './grouping_settings';
+import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
+import { renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
@@ -36,7 +36,7 @@ export interface AlertsTableComponentProps {
   hasIndexWrite: boolean;
   loading: boolean;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   signalIndexName: string | null;
   tableId: TableIdLiteral;
   to: string;
@@ -89,7 +89,19 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [telemetry]
   );
 
-  const { groupSelector, getGrouping, selectedGroups } = useGrouping({
+  const onOptionsChange = useCallback(
+    (options) => {
+      dispatch(
+        updateGroups({
+          tableId: props.tableId,
+          options,
+        })
+      );
+    },
+    [dispatch, props.tableId]
+  );
+
+  const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
       groupStatsRenderer: getStats,
@@ -101,27 +113,30 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     groupingId: props.tableId,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     onGroupChange,
+    onOptionsChange,
     tracker: track,
   });
 
-  const getGroupSelector = groupSelectors.getGroupSelector();
-
-  const groupSelectorInRedux = useSelector((state: State) => getGroupSelector(state));
-  const selectorOptions = useRef<GroupOption[]>([]);
+  const groupInRedux = useDeepEqualSelector((state) => groupIdSelector()(state, props.tableId));
+  useEffect(() => {
+    // only ever set to `none` - siem only handles group selector when `none` is selected
+    if (isNoneGroup(selectedGroups)) {
+      // set active groups from selected groups
+      dispatch(
+        updateGroups({
+          activeGroups: selectedGroups,
+          tableId: props.tableId,
+        })
+      );
+    }
+  }, [dispatch, props.tableId, selectedGroups]);
 
   useEffect(() => {
-    if (
-      isNoneGroup(selectedGroups) &&
-      groupSelector.props.options.length > 0 &&
-      (groupSelectorInRedux == null ||
-        !isEqual(selectorOptions.current, groupSelector.props.options))
-    ) {
-      selectorOptions.current = groupSelector.props.options;
-      dispatch(updateGroupSelector({ groupSelector }));
-    } else if (!isNoneGroup(selectedGroups) && groupSelectorInRedux !== null) {
-      dispatch(updateGroupSelector({ groupSelector: null }));
+    if (groupInRedux != null && !isNoneGroup(groupInRedux.activeGroups)) {
+      // set selected groups from active groups
+      setSelectedGroups(groupInRedux.activeGroups);
     }
-  }, [dispatch, groupSelector, groupSelectorInRedux, selectedGroups]);
+  }, [groupInRedux, setSelectedGroups]);
 
   const [pageIndex, setPageIndex] = useState<number[]>(
     Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_INDEX)
@@ -147,6 +162,12 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           const newArr = [...currentIndex];
           newArr[groupingLevel] = newNumber;
           setStoragePageSize(newArr);
+          return newArr;
+        });
+        // set page index to 0 when page size is changed
+        setPageIndex((currentIndex) => {
+          const newArr = [...currentIndex];
+          newArr[groupingLevel] = 0;
           return newArr;
         });
       }

@@ -6,13 +6,15 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { basename } from 'path';
 import * as cborx from 'cbor-x';
-import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
   ActionDetails,
+  EndpointAction,
   EndpointActionData,
   EndpointActionResponse,
   FileUploadMetadata,
@@ -176,6 +178,7 @@ export const sendEndpointActionResponse = async (
     const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
       action_id: action.id,
       agent_id: action.agents[0],
+      upload_start: Date.now(),
       contents: [
         {
           sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
@@ -206,8 +209,9 @@ export const sendEndpointActionResponse = async (
     const fileMeta = await esClient.index({
       index: FILE_STORAGE_METADATA_INDEX,
       id: getFileDownloadId(action, action.agents[0]),
-      body: fileMetaDoc,
+      op_type: 'create',
       refresh: 'wait_for',
+      body: fileMetaDoc,
     });
 
     // Index the file content (just one chunk)
@@ -221,12 +225,14 @@ export const sendEndpointActionResponse = async (
           document: cborx.encode({
             bid: fileMeta._id,
             last: true,
+            '@timestamp': new Date().toISOString(),
             data: Buffer.from(
               'UEsDBAoACQAAAFZeRFWpAsDLHwAAABMAAAAMABwAYmFkX2ZpbGUudHh0VVQJAANTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAMOcoyEq/Q4VyG02U9O0LRbGlwP/y5SOCfRKqLz1rsBQSwcIqQLAyx8AAAATAAAAUEsBAh4DCgAJAAAAVl5EVakCwMsfAAAAEwAAAAwAGAAAAAAAAQAAAKSBAAAAAGJhZF9maWxlLnR4dFVUBQADU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFIAAAB1AAAAAAA=',
               'base64'
             ),
           }),
           refresh: 'wait_for',
+          op_type: 'create',
         },
         {
           headers: {
@@ -309,3 +315,54 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       return { output: undefined };
   }
 };
+
+export async function getLatestActionDoc(
+  esClient: Client
+): Promise<SearchHit<EndpointAction> | undefined> {
+  return (
+    await esClient.search<EndpointAction>({
+      index: AGENT_ACTIONS_INDEX,
+      ignore_unavailable: true,
+      query: {
+        match: {
+          type: 'INPUT_ACTION',
+        },
+      },
+      sort: {
+        '@timestamp': {
+          order: 'desc',
+        },
+      },
+      size: 1,
+    })
+  ).hits.hits.at(0);
+}
+
+export async function waitForNewActionDoc(
+  esClient: Client,
+  previousActionDoc?: SearchHit<EndpointAction>,
+  options: {
+    maxAttempts: number;
+    interval: number;
+  } = { maxAttempts: 3, interval: 10000 }
+): Promise<SearchHit<EndpointAction> | undefined> {
+  const { maxAttempts, interval } = options;
+  let attempts = 1;
+  let latestDoc = await getLatestActionDoc(esClient);
+  while ((!latestDoc || latestDoc._id === previousActionDoc?._id) && attempts <= maxAttempts) {
+    await new Promise((res) => setTimeout(res, interval));
+    latestDoc = await getLatestActionDoc(esClient);
+    attempts++;
+  }
+
+  return latestDoc;
+}
+
+export function updateActionDoc<T = unknown>(esClient: Client, id: string, doc: T) {
+  return esClient.update({
+    index: AGENT_ACTIONS_INDEX,
+    id,
+    doc,
+    refresh: 'wait_for',
+  });
+}

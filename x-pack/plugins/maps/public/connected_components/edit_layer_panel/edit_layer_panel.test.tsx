@@ -43,6 +43,13 @@ jest.mock('../../kibana_services', () => {
     getCore() {
       return {};
     },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
   };
 });
 
@@ -61,12 +68,6 @@ const mockLayer = {
   },
   getDisplayName: () => {
     return 'layer 1';
-  },
-  getImmutableSourceProperties: () => {
-    return [{ label: 'source prop1', value: 'you get one chance to set me' }];
-  },
-  showJoinEditor: () => {
-    return true;
   },
   canShowTooltip: () => {
     return true;
@@ -94,6 +95,13 @@ const mockLayer = {
   },
   getStyleForEditing: () => {
     return {};
+  },
+  getSource: () => {
+    return {
+      supportsJoins: () => {
+        return true;
+      },
+    };
   },
 } as unknown as ILayer;
 

@@ -67,6 +67,7 @@ describe('defaults', () => {
     urls: '',
     id: '',
     config_id: '',
+    max_attempts: 2,
   } as SyntheticsMonitor;
 
   it('correctly formats monitor type to form type', () => {

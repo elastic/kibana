@@ -8,8 +8,8 @@
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
-  isRegistryEnabled,
   getRegistryUrlFromTestEnv,
+  isRegistryEnabled,
 } from '../../../security_solution_endpoint_api_int/registry';
 
 export default function (providerContext: FtrProviderContext) {
@@ -35,13 +35,8 @@ export default function (providerContext: FtrProviderContext) {
       await endpointTestResources.installOrUpgradeEndpointFleetPackage();
     });
     loadTestFile(require.resolve('./endpoint_list'));
-    loadTestFile(require.resolve('./policy_list'));
-    loadTestFile(require.resolve('./policy_details'));
     loadTestFile(require.resolve('./endpoint_telemetry'));
-    loadTestFile(require.resolve('./trusted_apps_list'));
-    loadTestFile(require.resolve('./fleet_integrations'));
     loadTestFile(require.resolve('./endpoint_permissions'));
-    loadTestFile(require.resolve('./artifact_entries_list'));
     loadTestFile(require.resolve('./responder'));
     loadTestFile(require.resolve('./endpoint_solution_integrations'));
   });

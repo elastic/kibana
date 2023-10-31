@@ -288,7 +288,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
       <EuiSpacer size="s" />
       <EuiFormRow
         helpText={i18n.translate('xpack.stackAlerts.threshold.ui.filterKQLHelpText', {
-          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
+          defaultMessage: 'Use a KQL expression to limit the scope of your alerts.',
         })}
         fullWidth
         display="rowCompressed"

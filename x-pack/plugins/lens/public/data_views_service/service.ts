@@ -8,20 +8,18 @@
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import type { IndexPattern, IndexPatternMap, IndexPatternRef } from '../types';
-import { ensureIndexPattern, loadIndexPatternRefs, loadIndexPatterns } from './loader';
+import type { IndexPattern, IndexPatternMap } from '../types';
+import { ensureIndexPattern, loadIndexPatterns } from './loader';
 import type { DataViewsState } from '../state_management';
 import { generateId } from '../id_generator';
 
 export interface IndexPatternServiceProps {
   core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
-  data: DataPublicPluginStart;
   dataViews: DataViewsContract;
   uiActions: UiActionsStart;
   contextDataViewSpec?: DataViewSpec;
@@ -54,10 +52,7 @@ export interface IndexPatternServiceAPI {
     cache: IndexPatternMap;
     onIndexPatternRefresh?: () => void;
   }) => Promise<IndexPatternMap>;
-  /**
-   * Load indexPatternRefs with title and ids
-   */
-  loadIndexPatternRefs: (options: { isFullEditor: boolean }) => Promise<IndexPatternRef[]>;
+
   /**
    * Ensure an indexPattern is loaded in the cache, usually used in conjuction with a indexPattern change action.
    */
@@ -81,16 +76,15 @@ export interface IndexPatternServiceAPI {
   ) => void;
 }
 
-export function createIndexPatternService({
+export const createIndexPatternService = ({
   core,
   dataViews,
-  data,
   updateIndexPatterns,
   replaceIndexPattern,
   uiActions,
   contextDataViewSpec,
-}: IndexPatternServiceProps): IndexPatternServiceAPI {
-  const onChangeError = (err: Error) =>
+}: IndexPatternServiceProps): IndexPatternServiceAPI => {
+  const showLoadingDataViewError = (err: Error) =>
     core.notifications.toasts.addError(err, {
       title: i18n.translate('xpack.lens.indexPattern.dataViewLoadError', {
         defaultMessage: 'Error loading data view',
@@ -131,9 +125,7 @@ export function createIndexPatternService({
       } as ActionExecutionContext);
     },
     ensureIndexPattern: (args) =>
-      ensureIndexPattern({ onError: onChangeError, dataViews, ...args }),
-    loadIndexPatternRefs: async ({ isFullEditor }) =>
-      isFullEditor ? loadIndexPatternRefs(dataViews) : [],
+      ensureIndexPattern({ onError: showLoadingDataViewError, dataViews, ...args }),
     getDefaultIndex: () => core.uiSettings.get('defaultIndex'),
   };
-}
+};

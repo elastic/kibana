@@ -53,6 +53,10 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'enterpriseSearch',
                 'enterpriseSearchContent',
                 'enterpriseSearchAnalytics',
+                'enterpriseSearchApplications',
+                'enterpriseSearchAISearch',
+                'enterpriseSearchVectorSearch',
+                'enterpriseSearchElasticsearch',
                 'appSearch',
                 'workplaceSearch'
               )
@@ -69,9 +73,15 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'enterpriseSearch',
                 'enterpriseSearchContent',
                 'enterpriseSearchAnalytics',
+                'enterpriseSearchApplications',
+                'enterpriseSearchAISearch',
+                'enterpriseSearchVectorSearch',
+                'enterpriseSearchElasticsearch',
+                'observabilityAIAssistant',
                 'appSearch',
                 'workplaceSearch',
-                'guidedOnboardingFeature'
+                'guidedOnboardingFeature',
+                'securitySolutionAssistant'
               )
             );
             break;

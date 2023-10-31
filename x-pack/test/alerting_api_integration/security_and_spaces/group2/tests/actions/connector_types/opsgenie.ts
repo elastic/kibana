@@ -55,6 +55,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'An opsgenie action',
           connector_type_id: '.opsgenie',

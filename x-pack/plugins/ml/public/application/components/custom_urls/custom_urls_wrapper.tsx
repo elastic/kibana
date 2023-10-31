@@ -6,17 +6,19 @@
  */
 
 import React, { FC } from 'react';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import { useDashboardService } from '../../services/dashboard_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
-import { UrlConfig } from '../../../../common/types/custom_urls';
-import { type DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import { CustomUrls } from './custom_urls';
 
 export interface CustomUrlsWrapperProps {
   job: Job | DataFrameAnalyticsConfig;
-  jobCustomUrls: UrlConfig[];
-  setCustomUrls: (customUrls: UrlConfig[]) => void;
+  jobCustomUrls: MlUrlConfig[];
+  setCustomUrls: (customUrls: MlUrlConfig[]) => void;
   editMode?: 'inline' | 'modal';
+  isPartialDFAJob?: boolean;
 }
 
 export const CustomUrlsWrapper: FC<CustomUrlsWrapperProps> = (props) => {
@@ -29,6 +31,13 @@ export const CustomUrlsWrapper: FC<CustomUrlsWrapperProps> = (props) => {
       },
     },
   } = useMlKibana();
+  const dashboardService = useDashboardService();
 
-  return <CustomUrls {...props} currentTimeFilter={timefilter.getTime()} />;
+  return (
+    <CustomUrls
+      {...props}
+      currentTimeFilter={timefilter.getTime()}
+      dashboardService={dashboardService}
+    />
+  );
 };

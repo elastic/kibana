@@ -14,7 +14,9 @@ import { SettingsStorage } from './settings_storage';
 
 export interface DownloadedAgentInfo {
   filename: string;
+  /** The local directory where downloads are stored */
   directory: string;
+  /** The full local file path and name */
   fullFilePath: string;
 }
 
@@ -85,9 +87,16 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
 
     try {
       const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
-      const { body } = await nodeFetch(agentDownloadUrl);
 
-      await finished(body.pipe(outputStream));
+      await handleProcessInterruptions(
+        async () => {
+          const { body } = await nodeFetch(agentDownloadUrl);
+          await finished(body.pipe(outputStream));
+        },
+        () => {
+          fs.unlinkSync(newDownloadInfo.fullFilePath);
+        }
+      );
     } catch (e) {
       // Try to clean up download case it failed halfway through
       await unlink(newDownloadInfo.fullFilePath);
@@ -134,7 +143,47 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
   }
 }
 
+const handleProcessInterruptions = async <T>(
+  runFn: (() => T) | (() => Promise<T>),
+  /** The synchronous cleanup callback */
+  cleanup: () => void
+): Promise<T> => {
+  const eventNames = ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'];
+  const stopListeners = () => {
+    for (const eventName of eventNames) {
+      process.off(eventName, cleanup);
+    }
+  };
+
+  for (const eventName of eventNames) {
+    process.on(eventName, cleanup);
+  }
+
+  let runnerResponse: T | Promise<T>;
+
+  try {
+    runnerResponse = runFn();
+  } catch (e) {
+    stopListeners();
+    throw e;
+  }
+
+  if ('finally' in runnerResponse) {
+    (runnerResponse as Promise<T>).finally(() => {
+      stopListeners();
+    });
+  } else {
+    stopListeners();
+  }
+
+  return runnerResponse;
+};
+
 const agentDownloadsClient = new AgentDownloadStorage();
+
+export interface DownloadAndStoreAgentResponse extends DownloadedAgentInfo {
+  url: string;
+}
 
 /**
  * Downloads the agent file provided via the input URL to a local folder on disk. If the file
@@ -144,7 +193,7 @@ const agentDownloadsClient = new AgentDownloadStorage();
  */
 export const downloadAndStoreAgent = async (
   agentDownloadUrl: string
-): Promise<DownloadedAgentInfo & { url: string }> => {
+): Promise<DownloadAndStoreAgentResponse> => {
   const downloadedAgent = await agentDownloadsClient.downloadAndStore(agentDownloadUrl);
 
   return {

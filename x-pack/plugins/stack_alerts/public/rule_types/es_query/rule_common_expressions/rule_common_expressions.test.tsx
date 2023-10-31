@@ -217,6 +217,33 @@ describe('RuleCommonExpressions', () => {
     );
   });
 
+  test(`should use multiple group by terms`, async () => {
+    const aggType = 'avg';
+    const thresholdComparator = 'between';
+    const timeWindowSize = 987;
+    const timeWindowUnit = 's';
+    const threshold = [3, 1003];
+    const groupBy = 'top';
+    const termSize = '27';
+    const termField = ['term', 'term2'];
+
+    const wrapper = await setup({
+      ruleParams: getCommonParams({
+        aggType,
+        thresholdComparator,
+        timeWindowSize,
+        timeWindowUnit,
+        termSize,
+        termField,
+        groupBy,
+        threshold,
+      }),
+    });
+    expect(wrapper.find('button[data-test-subj="groupByExpression"]').text()).toEqual(
+      `grouped over ${groupBy} ${termSize} 'term,term2'`
+    );
+  });
+
   test(`should disable excludeHitsFromPreviousRuns when groupBy is not all`, async () => {
     const aggType = 'avg';
     const thresholdComparator = 'between';

@@ -13,3 +13,10 @@ export const ERROR_INDEX_FIELDS_SEARCH = i18n.translate(
     defaultMessage: `An error has occurred creating the ad-hoc data view`,
   }
 );
+
+export const FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR = i18n.translate(
+  'xpack.securitySolution.dataView.fetchFields.warning',
+  {
+    defaultMessage: 'Failed to fetch detailed fields information',
+  }
+);

@@ -17,7 +17,7 @@ import {
   EuiStat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';

@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { DatePickerContext } from '../context/date_picker_context';
+import { DatePickerContext } from '../context/date_picker_context/date_picker_context';
 
 export function useDatePickerContext() {
   return useContext(DatePickerContext);

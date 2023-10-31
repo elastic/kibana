@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { memoize } from 'lodash';
 import React, { LazyExoticComponent, PureComponent } from 'react';
@@ -62,10 +62,10 @@ export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorS
           <React.Suspense
             fallback={
               // We specify minHeight to avoid too mitigate layout shifts while loading an editor
-              // ~430 corresponds to "4 lines" of EuiLoadingContent
+              // ~430 corresponds to "4 lines" of EuiSkeletonText
               <div style={{ minHeight: 430, marginTop: 8 }}>
                 <EuiDelayRender>
-                  <EuiLoadingContent lines={4} />
+                  <EuiSkeletonText lines={4} />
                 </EuiDelayRender>
               </div>
             }

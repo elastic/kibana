@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useEffect } from 'react';
 import {

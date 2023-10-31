@@ -8,7 +8,10 @@
 import React, { FC, Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { OUTLIER_ANALYSIS_METHOD, ANALYSIS_ADVANCED_FIELDS } from '../../../../common/analytics';
+import {
+  OUTLIER_ANALYSIS_METHOD,
+  ANALYSIS_ADVANCED_FIELDS,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { AdvancedParamErrors, getNumberValue } from './advanced_step_form';
 

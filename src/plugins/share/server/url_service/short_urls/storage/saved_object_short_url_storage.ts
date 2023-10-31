@@ -118,7 +118,7 @@ export class SavedObjectShortUrlStorage implements ShortUrlStorage {
     const attributes = createAttributes(data);
 
     const savedObject = await savedObjects.create(savedObjectType, attributes, {
-      refresh: true,
+      refresh: 'wait_for',
       references,
     });
 
@@ -134,7 +134,7 @@ export class SavedObjectShortUrlStorage implements ShortUrlStorage {
     const attributes = createAttributes(data);
 
     await savedObjects.update(savedObjectType, id, attributes, {
-      refresh: true,
+      refresh: 'wait_for',
       references,
     });
   }

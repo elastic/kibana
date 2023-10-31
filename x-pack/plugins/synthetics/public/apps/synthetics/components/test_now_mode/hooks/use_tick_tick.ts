@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export function useTickTick(interval?: number) {
   const [nextTick, setNextTick] = useState(Date.now());
 
-  const [tickTick] = useState<NodeJS.Timer>(() =>
+  const [tickTick] = useState<NodeJS.Timeout>(() =>
     setInterval(() => {
       setNextTick(Date.now());
     }, interval ?? 5 * 1000)
   );
 
-  useEffect(() => {
-    return () => {
-      clearInterval(tickTick);
-    };
+  const clear = useCallback(() => {
+    clearInterval(tickTick);
   }, [tickTick]);
 
-  return { refreshTimer: tickTick, lastRefresh: nextTick };
+  useEffect(() => {
+    return () => {
+      clear();
+    };
+  }, [clear]);
+
+  return { refreshTimer: tickTick, lastRefresh: nextTick, clearTicks: clear };
 }

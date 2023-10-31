@@ -6,10 +6,10 @@
  */
 
 import { useMemo } from 'react';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 import type { Annotation, GetAnnotationsResponse } from '../../../../common/types/annotations';
-import { basePath } from '.';
 
 export const annotationsApiProvider = (httpService: HttpService) => ({
   getAnnotations$(obj: {
@@ -22,9 +22,10 @@ export const annotationsApiProvider = (httpService: HttpService) => ({
   }) {
     const body = JSON.stringify(obj);
     return httpService.http$<GetAnnotationsResponse>({
-      path: `${basePath()}/annotations`,
+      path: `${ML_INTERNAL_BASE_PATH}/annotations`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
@@ -38,24 +39,27 @@ export const annotationsApiProvider = (httpService: HttpService) => ({
   }) {
     const body = JSON.stringify(obj);
     return httpService.http<GetAnnotationsResponse>({
-      path: `${basePath()}/annotations`,
+      path: `${ML_INTERNAL_BASE_PATH}/annotations`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
   indexAnnotation(obj: Annotation) {
     const body = JSON.stringify(obj);
     return httpService.http<any>({
-      path: `${basePath()}/annotations/index`,
+      path: `${ML_INTERNAL_BASE_PATH}/annotations/index`,
       method: 'PUT',
       body,
+      version: '1',
     });
   },
   deleteAnnotation(id: string) {
     return httpService.http<any>({
-      path: `${basePath()}/annotations/delete/${id}`,
+      path: `${ML_INTERNAL_BASE_PATH}/annotations/delete/${id}`,
       method: 'DELETE',
+      version: '1',
     });
   },
 });

@@ -27,10 +27,10 @@ import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
+import { ManageSpacesButton } from './manage_spaces_button';
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
-import { ManageSpacesButton } from './manage_spaces_button';
 
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))

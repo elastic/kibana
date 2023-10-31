@@ -20,11 +20,15 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
+
+import { BetaConnectorCallout } from '../../../shared/beta/beta_connector_callout';
 
 import { BACK_BUTTON_LABEL } from '../../../shared/constants';
 import { docLinks } from '../../../shared/doc_links';
@@ -38,6 +42,7 @@ export interface Props {
   disabled?: boolean;
   docsUrl?: string;
   error?: string | React.ReactNode;
+  isBeta?: boolean;
   onNameChange?(name: string): void;
   onSubmit(name: string, language: LanguageForOptimization): void;
   type: string;
@@ -50,6 +55,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   onNameChange,
   onSubmit,
   type,
+  isBeta,
 }) => {
   const {
     fullIndexName,
@@ -111,6 +117,45 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
         }}
       >
         <EuiFlexGroup direction="column">
+          {isBeta ? (
+            <EuiFlexItem>
+              <BetaConnectorCallout />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.formTitle"
+                  defaultMessage="Create an Elasticsearch index"
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="m">
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.formDescription"
+                  defaultMessage="This index will hold your data source content, and is optimized with default field
+                mappings for relevant search experiences. Give your index a unique name and
+                optionally set a default {language_analyzer} for the index."
+                  values={{
+                    language_analyzer: (
+                      <EuiLink target="_blank" href={docLinks.languageAnalyzers}>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.formDescription.linkText',
+                          {
+                            defaultMessage: 'language analyzer',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiFlexGroup>
               <EuiFlexItem grow>

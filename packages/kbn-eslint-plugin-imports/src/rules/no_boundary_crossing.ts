@@ -10,7 +10,7 @@ import Path from 'path';
 
 import { TSESTree } from '@typescript-eslint/typescript-estree';
 import * as Bt from '@babel/types';
-import { Rule } from 'eslint';
+import type { Rule } from 'eslint';
 import ESTree from 'estree';
 import { ModuleType } from '@kbn/repo-source-classifier';
 

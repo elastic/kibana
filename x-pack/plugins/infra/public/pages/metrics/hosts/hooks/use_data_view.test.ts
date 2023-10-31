@@ -8,24 +8,20 @@
 import { useDataView } from './use_data_view';
 import { renderHook } from '@testing-library/react-hooks';
 import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
-import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { InfraClientStartDeps } from '../../../../types';
 import { CoreStart } from '@kbn/core/public';
 
-jest.mock('@kbn/i18n');
 jest.mock('@kbn/kibana-react-plugin/public');
 
 let dataViewMock: jest.Mocked<DataViewsServicePublic>;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const notificationMock = notificationServiceMock.createStartContract();
-const prop = { metricAlias: 'test' };
 
 const mockUseKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...coreMock.createStart(),
-      notifications: notificationMock,
       dataViews: dataViewMock,
     } as Partial<CoreStart> & Partial<InfraClientStartDeps>,
   } as unknown as KibanaReactContextValue<Partial<CoreStart> & Partial<InfraClientStartDeps>>);
@@ -43,32 +39,19 @@ const mockDataView = {
 describe('useDataView hook', () => {
   beforeEach(() => {
     dataViewMock = {
-      create: jest.fn(),
-      find: jest.fn(),
+      create: jest.fn().mockImplementation(() => Promise.resolve(mockDataView)),
     } as Partial<DataViewsServicePublic> as jest.Mocked<DataViewsServicePublic>;
 
     mockUseKibana();
   });
 
   it('should create a new ad-hoc data view', async () => {
-    dataViewMock.create.mockReturnValue(Promise.resolve(mockDataView));
-    const { result, waitForNextUpdate } = renderHook(() => useDataView(prop));
+    const { result, waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'test' }));
 
     await waitForNextUpdate();
     expect(result.current.loading).toEqual(false);
-    expect(result.current.hasError).toEqual(false);
+    expect(result.current.error).toBeUndefined();
     expect(result.current.dataView).toEqual(mockDataView);
-  });
-
-  it('should display a toast when it fails to load the data view', async () => {
-    dataViewMock.create.mockReturnValue(Promise.reject());
-    const { result, waitForNextUpdate } = renderHook(() => useDataView(prop));
-
-    await waitForNextUpdate();
-    expect(result.current.loading).toEqual(false);
-    expect(result.current.hasError).toEqual(true);
-    expect(result.current.dataView).toBeUndefined();
-    expect(notificationMock.toasts.addDanger).toBeCalledTimes(1);
   });
 
   it('should create a dataview with unique id for metricAlias metrics', async () => {

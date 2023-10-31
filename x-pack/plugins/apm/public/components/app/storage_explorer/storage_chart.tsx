@@ -15,7 +15,8 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -102,6 +103,7 @@ export function StorageChart() {
           ]}
           showLegend
           legendPosition={Position.Right}
+          locale={i18n.getLocale()}
         />
         <Axis
           id="x-axis"
@@ -113,7 +115,7 @@ export function StorageChart() {
         <Axis
           id="y-axis"
           position={Position.Left}
-          showGridLines
+          gridLine={{ visible: true }}
           tickFormat={asDynamicBytes}
         />
         {storageTimeSeries.map((serie) => (

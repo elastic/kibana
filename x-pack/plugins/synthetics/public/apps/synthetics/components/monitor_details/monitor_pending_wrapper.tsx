@@ -13,6 +13,7 @@ import { EuiLoadingSpinner, EuiLoadingChart } from '@elastic/eui';
 import { PageLoader } from '../common/components/page_loader';
 import { resetMonitorLastRunAction } from '../../state';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
+import { useSyntheticsRefreshContext } from '../../contexts';
 
 export const MonitorPendingWrapper: React.FC = ({ children }) => {
   const dispatch = useDispatch();
@@ -20,6 +21,7 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
   const currentLocation = useLocation();
   const locationRef = useRef(currentLocation);
   const { monitorId } = useParams<{ monitorId: string }>();
+  const { refreshApp } = useSyntheticsRefreshContext();
 
   const { latestPing, loaded: pingsLoaded } = useMonitorLatestPing();
   const [loaded, setLoaded] = useState(false);
@@ -36,9 +38,10 @@ export const MonitorPendingWrapper: React.FC = ({ children }) => {
           setLoaded(false);
           setHasPing(false);
           dispatch(resetMonitorLastRunAction());
+          refreshApp();
         }
       }),
-    [history, monitorId, dispatch]
+    [history, monitorId, dispatch, refreshApp]
   );
 
   useEffect(() => {

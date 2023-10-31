@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
+import type { UserProfileData } from '@kbn/user-profile-components';
 
-import type { GetUserProfileResponse, UserProfile, UserProfileData } from '../../../common';
+import type { GetUserProfileResponse, UserProfile } from '../../../common';
 
 /**
  * Parameters for the get user profile for the current user API.
@@ -70,6 +72,11 @@ export class UserProfileAPIClient {
   public readonly dataUpdates$: Observable<UserProfileData> =
     this.internalDataUpdates$.asObservable();
 
+  private readonly _userProfile$ = new BehaviorSubject<UserProfileData | null>(null);
+
+  /** Observable of the current user profile data */
+  public readonly userProfile$ = this._userProfile$.asObservable();
+
   constructor(private readonly http: HttpStart) {}
 
   /**
@@ -80,9 +87,16 @@ export class UserProfileAPIClient {
    * optional "dataPath" parameter can be used to return personal data for this user.
    */
   public getCurrent<D extends UserProfileData>(params?: UserProfileGetCurrentParams) {
-    return this.http.get<GetUserProfileResponse<D>>('/internal/security/user_profile', {
-      query: { dataPath: params?.dataPath },
-    });
+    return this.http
+      .get<GetUserProfileResponse<D>>('/internal/security/user_profile', {
+        query: { dataPath: params?.dataPath },
+      })
+      .then((response) => {
+        const data = response?.data ?? {};
+        const updated = merge(this._userProfile$.getValue(), data);
+        this._userProfile$.next(updated);
+        return response;
+      });
   }
 
   /**
@@ -126,10 +140,19 @@ export class UserProfileAPIClient {
    * @param data Application data to be written (merged with existing data).
    */
   public update<D extends UserProfileData>(data: D) {
+    // Optimistic update the user profile Observable.
+    const previous = this._userProfile$.getValue();
+    this._userProfile$.next(data);
+
     return this.http
       .post('/internal/security/user_profile/_data', { body: JSON.stringify(data) })
       .then(() => {
         this.internalDataUpdates$.next(data);
+      })
+      .catch((err) => {
+        // Revert the user profile data to the previous state.
+        this._userProfile$.next(previous);
+        return Promise.reject(err);
       });
   }
 }

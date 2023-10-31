@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -35,7 +35,7 @@ describe('AccessAgreementPage', () => {
       />
     );
 
-    expect(wrapper.exists(EuiLoadingContent)).toBe(true);
+    expect(wrapper.exists(EuiSkeletonText)).toBe(true);
     expect(wrapper.exists(ReactMarkdown)).toBe(false);
 
     await act(async () => {
@@ -44,7 +44,7 @@ describe('AccessAgreementPage', () => {
     });
 
     expect(wrapper.find(ReactMarkdown)).toMatchSnapshot();
-    expect(wrapper.exists(EuiLoadingContent)).toBe(false);
+    expect(wrapper.exists(EuiSkeletonText)).toBe(false);
 
     expect(coreStartMock.http.get).toHaveBeenCalledTimes(1);
     expect(coreStartMock.http.get).toHaveBeenCalledWith(

@@ -42,6 +42,11 @@ export class LicenseService {
   public isGoldPlus() {
     return this.hasAtLeast('gold');
   }
+
+  public isPlatinum() {
+    return this.hasAtLeast('platinum');
+  }
+
   public isEnterprise() {
     return this.hasAtLeast('enterprise');
   }

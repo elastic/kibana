@@ -25,7 +25,7 @@ interface StateTransitionLogMeta extends LogMeta {
 
 export const logStateTransition = (
   logger: Logger,
-  logMessagePrefix: string,
+  logPrefix: string,
   prevState: LogAwareState,
   currState: LogAwareState,
   tookMs: number
@@ -34,31 +34,30 @@ export const logStateTransition = (
     currState.logs.slice(prevState.logs.length).forEach(({ message, level }) => {
       switch (level) {
         case 'error':
-          return logger.error(logMessagePrefix + message);
+          return logger.error(logPrefix + message);
         case 'warning':
-          return logger.warn(logMessagePrefix + message);
+          return logger.warn(logPrefix + message);
         case 'info':
-          return logger.info(logMessagePrefix + message);
+          return logger.info(logPrefix + message);
         default:
           throw new Error(`unexpected log level ${level}`);
       }
     });
   }
 
-  logger.info(
-    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`
-  );
-  logger.debug<StateTransitionLogMeta>(
-    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`,
-    {
+  const logMessage = `${logPrefix}${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`;
+  if (logger.isLevelEnabled('debug')) {
+    logger.debug<StateTransitionLogMeta>(logMessage, {
       kibana: {
         migrations: {
           state: currState,
           duration: tookMs,
         },
       },
-    }
-  );
+    });
+  } else {
+    logger.info(logMessage);
+  }
 };
 
 export const logActionResponse = (

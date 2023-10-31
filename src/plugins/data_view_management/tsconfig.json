@@ -33,6 +33,8 @@
     "@kbn/utility-types-jest",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

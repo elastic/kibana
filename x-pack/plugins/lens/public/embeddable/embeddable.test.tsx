@@ -166,6 +166,7 @@ describe('embeddable', () => {
       capabilities: {
         canSaveDashboards: true,
         canSaveVisualizations: true,
+        canOpenVisualizations: true,
         discover: {},
         navLinks: {},
       },
@@ -185,6 +186,7 @@ describe('embeddable', () => {
           },
           indexPatterns: {},
           indexPatternRefs: [],
+          activeVisualizationState: null,
         }),
       ...props,
     };
@@ -361,6 +363,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -380,6 +383,7 @@ describe('embeddable', () => {
             },
             indexPatterns: {},
             indexPatternRefs: [],
+            activeVisualizationState: null,
           }),
       },
       { id: '123' } as LensEmbeddableInput
@@ -413,6 +417,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -432,6 +437,7 @@ describe('embeddable', () => {
             },
             indexPatterns: {},
             indexPatternRefs: [],
+            activeVisualizationState: null,
           }),
       },
       { id: '123', searchSessionId: 'firstSession' } as LensEmbeddableInput
@@ -673,7 +679,7 @@ describe('embeddable', () => {
 
     // loading should become false
     expect(onLoad).toHaveBeenCalledTimes(2);
-    expect(onLoad).toHaveBeenNthCalledWith(2, false, adapters);
+    expect(onLoad).toHaveBeenNthCalledWith(2, false, adapters, embeddable.getOutput$());
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
@@ -692,7 +698,7 @@ describe('embeddable', () => {
 
     // loading should again become false
     expect(onLoad).toHaveBeenCalledTimes(4);
-    expect(onLoad).toHaveBeenNthCalledWith(4, false, adapters);
+    expect(onLoad).toHaveBeenNthCalledWith(4, false, adapters, embeddable.getOutput$());
   });
 
   it('should call onFilter event on filter call ', async () => {
@@ -940,6 +946,7 @@ describe('embeddable', () => {
           capabilities: {
             canSaveDashboards: true,
             canSaveVisualizations: true,
+            canOpenVisualizations: true,
             discover: {},
             navLinks: {},
           },
@@ -965,6 +972,7 @@ describe('embeddable', () => {
               },
               indexPatterns: {},
               indexPatternRefs: [],
+              activeVisualizationState: null,
             }),
           uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
         },
@@ -1039,6 +1047,7 @@ describe('embeddable', () => {
           capabilities: {
             canSaveDashboards: true,
             canSaveVisualizations: true,
+            canOpenVisualizations: true,
             discover: {},
             navLinks: {},
           },
@@ -1058,6 +1067,7 @@ describe('embeddable', () => {
               },
               indexPatterns: {},
               indexPatternRefs: [],
+              activeVisualizationState: null,
             }),
         },
         { id: '123', timeRange, query, filters } as LensEmbeddableInput
@@ -1122,6 +1132,76 @@ describe('embeddable', () => {
     expect(test.expressionRenderer).toHaveBeenCalledTimes(2);
   });
 
+  it('should get full attributes', async () => {
+    const createEmbeddable = async () => {
+      const currentExpressionRenderer = jest.fn((_props) => null);
+      const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
+      const query: Query = { language: 'kquery', query: '' };
+      const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
+      const embeddable = new Embeddable(
+        {
+          timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+          attributeService,
+          data: dataMock,
+          uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
+          expressionRenderer: currentExpressionRenderer,
+          coreStart: {} as CoreStart,
+          basePath,
+          inspector: inspectorPluginMock.createStartContract(),
+          dataViews: {} as DataViewsContract,
+          capabilities: {
+            canSaveDashboards: true,
+            canSaveVisualizations: true,
+            canOpenVisualizations: true,
+            discover: {},
+            navLinks: {},
+          },
+          getTrigger,
+          visualizationMap: defaultVisualizationMap,
+          datasourceMap: defaultDatasourceMap,
+          injectFilterReferences: jest.fn(mockInjectFilterReferences),
+          theme: themeServiceMock.createStartContract(),
+          documentToExpression: () =>
+            Promise.resolve({
+              ast: {
+                type: 'expression',
+                chain: [
+                  { type: 'function', function: 'my', arguments: {} },
+                  { type: 'function', function: 'expression', arguments: {} },
+                ],
+              },
+              indexPatterns: {},
+              indexPatternRefs: [],
+              activeVisualizationState: null,
+            }),
+        },
+        { id: '123', timeRange, query, filters } as LensEmbeddableInput
+      );
+      const reload = jest.spyOn(embeddable, 'reload');
+      const initializeSavedVis = jest.spyOn(embeddable, 'initializeSavedVis');
+
+      await embeddable.initializeSavedVis({
+        id: '123',
+        timeRange,
+        query,
+        filters,
+      } as LensEmbeddableInput);
+
+      embeddable.render(mountpoint);
+
+      return {
+        embeddable,
+        reload,
+        initializeSavedVis,
+        expressionRenderer: currentExpressionRenderer,
+      };
+    };
+
+    const test = await createEmbeddable();
+
+    expect(test.embeddable.getFullAttributes()).toEqual(savedVis);
+  });
+
   it('should pass over the overrides as variables', async () => {
     const embeddable = new Embeddable(
       {
@@ -1135,6 +1215,7 @@ describe('embeddable', () => {
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
+          canOpenVisualizations: true,
           discover: {},
           navLinks: {},
         },
@@ -1155,6 +1236,7 @@ describe('embeddable', () => {
             },
             indexPatterns: {},
             indexPatternRefs: [],
+            activeVisualizationState: null,
           }),
         uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
       },
@@ -1185,5 +1267,26 @@ describe('embeddable', () => {
         },
       })
     );
+  });
+
+  it('should not be editable for no visualize library privileges', async () => {
+    const embeddable = new Embeddable(
+      getEmbeddableProps({
+        capabilities: {
+          canSaveDashboards: false,
+          canSaveVisualizations: true,
+          canOpenVisualizations: false,
+          discover: {},
+          navLinks: {},
+        },
+      }),
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
+    );
+    expect(embeddable.getOutput().editable).toBeUndefined();
   });
 });

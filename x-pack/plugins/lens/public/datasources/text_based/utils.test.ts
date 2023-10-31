@@ -66,6 +66,22 @@ describe('Text based languages utils', () => {
 
       expect(indexPattern).toBe('');
     });
+
+    it('should return the index pattern for es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
+        esql: 'from foo | keep bytes, memory ',
+      });
+
+      expect(indexPattern).toBe('foo');
+    });
+
+    it('should return empty index pattern for non es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
+        lang1: 'from foo | keep bytes, memory ',
+      } as unknown as AggregateQuery);
+
+      expect(indexPattern).toBe('');
+    });
   });
 
   describe('loadIndexPatternRefs', () => {
@@ -144,6 +160,22 @@ describe('Text based languages utils', () => {
   });
 
   describe('getStateFromAggregateQuery', () => {
+    const textBasedQueryColumns = [
+      {
+        id: 'bytes',
+        name: 'bytes',
+        meta: {
+          type: 'number',
+        },
+      },
+      {
+        id: 'dest',
+        name: 'dest',
+        meta: {
+          type: 'string',
+        },
+      },
+    ] as DatatableColumn[];
     it('should return the correct state', async () => {
       const state = {
         layers: {
@@ -157,7 +189,7 @@ describe('Text based languages utils', () => {
         indexPatternRefs: [],
         fieldList: [],
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -191,8 +223,9 @@ describe('Text based languages utils', () => {
           ),
           create: jest.fn().mockReturnValue(
             Promise.resolve({
-              id: '1',
-              title: 'my-fake-index-pattern',
+              id: '4',
+              title: 'my-adhoc-index-pattern',
+              name: 'my-adhoc-index-pattern',
               timeFieldName: 'timeField',
               isPersisted: () => false,
             })
@@ -204,7 +237,7 @@ describe('Text based languages utils', () => {
 
       expect(updatedState).toStrictEqual({
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -252,6 +285,11 @@ describe('Text based languages utils', () => {
             timeField: 'timeField',
             title: 'my-fake-restricted-pattern',
           },
+          {
+            id: '4',
+            timeField: 'timeField',
+            title: 'my-adhoc-index-pattern',
+          },
         ],
         layers: {
           first: {
@@ -280,7 +318,7 @@ describe('Text based languages utils', () => {
             ],
             columns: [],
             errors: [],
-            index: '1',
+            index: '4',
             query: {
               sql: 'SELECT * FROM my-fake-index-pattern',
             },
@@ -303,7 +341,7 @@ describe('Text based languages utils', () => {
         indexPatternRefs: [],
         fieldList: [],
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -356,7 +394,7 @@ describe('Text based languages utils', () => {
 
       expect(updatedState).toStrictEqual({
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {

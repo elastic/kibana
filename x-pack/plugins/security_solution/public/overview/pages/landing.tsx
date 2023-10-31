@@ -6,16 +6,26 @@
  */
 
 import React, { memo } from 'react';
+import { css } from '@emotion/react';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 
 export const LandingPage = memo(() => {
   return (
-    <>
-      <LandingPageComponent />
-      <SpyRoute pageName={SecurityPageName.landing} />
-    </>
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+      `}
+    >
+      <SecuritySolutionPageWrapper noPadding>
+        <LandingPageComponent />
+        <SpyRoute pageName={SecurityPageName.landing} />
+      </SecuritySolutionPageWrapper>
+    </div>
   );
 });
 

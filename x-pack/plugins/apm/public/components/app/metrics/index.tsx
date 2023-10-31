@@ -15,20 +15,38 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { ServerlessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
+import { JsonMetricsDashboard } from './static_dashboard';
+import { hasDashboardFile } from './static_dashboard/helper';
 
 export function Metrics() {
   const { agentName, runtimeName, serverlessType } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgent(serverlessType);
+
+  if (isAWSLambda) {
+    return <ServerlessMetrics />;
+  }
+
+  const hasStaticDashboard = hasDashboardFile({
+    agentName,
+    runtimeName,
+    serverlessType,
+  });
+
+  if (hasStaticDashboard) {
+    return (
+      <JsonMetricsDashboard
+        agentName={agentName}
+        runtimeName={runtimeName}
+        serverlessType={serverlessType}
+      />
+    );
+  }
 
   if (
     !isAWSLambda &&
     (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName))
   ) {
     return <JvmMetricsOverview />;
-  }
-
-  if (isAWSLambda) {
-    return <ServerlessMetrics />;
   }
 
   return <ServiceMetrics />;

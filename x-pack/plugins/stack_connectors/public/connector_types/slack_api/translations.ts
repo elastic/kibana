@@ -8,35 +8,64 @@
 import { i18n } from '@kbn/i18n';
 
 export const MESSAGE_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.slack.error.requiredSlackMessageText',
+  'xpack.stackConnectors.components.slack_api.error.requiredSlackMessageText',
   {
     defaultMessage: 'Message is required.',
   }
 );
 export const CHANNEL_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.slack.error.requiredSlackChannel',
+  'xpack.stackConnectors.components.slack_api.error.requiredSlackChannel',
   {
-    defaultMessage: 'Selected channel is required.',
+    defaultMessage: 'Channel ID is required.',
   }
 );
 export const TOKEN_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.slack.tokenTextFieldLabel',
+  'xpack.stackConnectors.components.slack_api.tokenTextFieldLabel',
   {
     defaultMessage: 'API Token',
   }
 );
-export const WEB_API = i18n.translate('xpack.stackConnectors.components.slack.webApi', {
+export const WEB_API = i18n.translate('xpack.stackConnectors.components.slack_api.webApi', {
   defaultMessage: 'Web API',
 });
 export const SELECT_MESSAGE = i18n.translate(
-  'xpack.stackConnectors.components.slack.selectMessageText',
+  'xpack.stackConnectors.components.slack_api.selectMessageText',
   {
-    defaultMessage: 'Send a message to a Slack channel or user.',
+    defaultMessage: 'Send messages to Slack channels.',
   }
 );
 export const ACTION_TYPE_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.slack.connectorTypeTitle',
+  'xpack.stackConnectors.components.slack_api.connectorTypeTitle',
   {
-    defaultMessage: 'Send to Slack',
+    defaultMessage: 'Slack',
   }
 );
+export const ALLOWED_CHANNELS = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.allowedChannelsLabel',
+  {
+    defaultMessage: 'Channel IDs',
+  }
+);
+export const SUCCESS_FETCH_CHANNELS = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.successFetchChannelsText',
+  {
+    defaultMessage: 'Fetch all channels',
+  }
+);
+
+export const ERROR_VALID_CHANNELS = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.errorValidChannelsText',
+  {
+    defaultMessage:
+      'Cannot valid channels, please check the validity of your token or your channel',
+  }
+);
+
+export const ERROR_INVALID_CHANNELS = (invalidChannels: string[]) =>
+  i18n.translate('xpack.stackConnectors.components.slack_api.errorInvalidChannelsText', {
+    defaultMessage:
+      'Cannot validate channel ID "{channels}", please check the validity of your token and/or the channel ID',
+    values: {
+      channels: invalidChannels.join(', '),
+    },
+  });

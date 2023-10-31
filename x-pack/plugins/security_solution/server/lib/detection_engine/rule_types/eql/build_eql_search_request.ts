@@ -7,10 +7,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
+import { isEmpty } from 'lodash/fp';
 import type {
   RuleFilterArray,
   TimestampOverride,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildTimeRangeFilter } from '../utils/build_events_query';
 import { getQueryFilter } from '../utils/get_query_filter';
 
@@ -89,7 +90,11 @@ export const buildEqlSearchRequest = ({
       runtime_mappings: runtimeMappings,
       timestamp_field: timestampField,
       event_category_field: eventCategoryOverride,
-      tiebreaker_field: tiebreakerField,
+      ...(!isEmpty(tiebreakerField)
+        ? {
+            tiebreaker_field: tiebreakerField,
+          }
+        : {}),
       fields,
     },
   };

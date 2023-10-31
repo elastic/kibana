@@ -7,12 +7,12 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { APMSection } from '../../../components/app/section/apm';
-import { LogsSection } from '../../../components/app/section/logs';
-import { MetricsSection } from '../../../components/app/section/metrics';
-import { UptimeSection } from '../../../components/app/section/uptime';
-import { UXSection } from '../../../components/app/section/ux';
-import { HasDataMap } from '../../../context/has_data_context';
+import { APMSection } from './sections/apm/apm_section';
+import { LogsSection } from './sections/logs/logs_section';
+import { MetricsSection } from './sections/metrics/metrics_section';
+import { UptimeSection } from './sections/uptime/uptime_section';
+import { UXSection } from './sections/ux/ux_section';
+import { HasDataMap } from '../../../context/has_data_context/has_data_context';
 import type { BucketSize } from '../helpers/calculate_bucket_size';
 
 interface Props {

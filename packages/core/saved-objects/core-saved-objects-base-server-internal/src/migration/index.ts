@@ -11,4 +11,5 @@ export type {
   KibanaMigratorStatus,
   MigrationStatus,
   MigrationResult,
+  MigrateDocumentOptions,
 } from './kibana_migrator';

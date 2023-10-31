@@ -129,6 +129,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('execute');
     }
 
+    // v8.9 introduced `upload` capability
+    if (gte(agentVersion, '8.9.0')) {
+      capabilities.push('upload_file');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {
@@ -210,6 +215,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
           },
         },
       },
+      last_checkin: new Date().toISOString(),
     };
     return merge(hostInfo, overrides);
   }

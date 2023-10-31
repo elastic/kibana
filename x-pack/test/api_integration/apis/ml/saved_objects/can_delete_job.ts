@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -32,10 +32,10 @@ export default ({ getService }: FtrProviderContext) => {
       .post(
         `${
           space ? `/s/${space}` : ''
-        }/api/ml/saved_objects/can_delete_ml_space_aware_item/${mlSavedObjectType}`
+        }/internal/ml/saved_objects/can_delete_ml_space_aware_item/${mlSavedObjectType}`
       )
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send({ ids });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 

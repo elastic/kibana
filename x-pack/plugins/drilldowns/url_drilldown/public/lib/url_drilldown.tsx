@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IExternalUrl, IUiSettingsClient } from '@kbn/core/public';
+import { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
 import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
@@ -30,6 +30,7 @@ import {
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { txtUrlDrilldownDisplayName } from './i18n';
 import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
 import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
@@ -50,7 +51,8 @@ interface UrlDrilldownDeps {
   navigateToUrl: (url: string) => Promise<void>;
   getSyntaxHelpDocsLink: () => string;
   getVariablesHelpDocsLink: () => string;
-  uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
+  theme: () => ThemeServiceStart;
 }
 
 export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
@@ -122,7 +124,8 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return (
       <KibanaContextProvider
         services={{
-          uiSettings: this.deps.uiSettings,
+          settings: this.deps.settings,
+          theme: this.deps.theme(),
         }}
       >
         <UrlDrilldownCollectConfig

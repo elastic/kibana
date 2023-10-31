@@ -7,10 +7,7 @@
 
 import React, { FC, memo } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  getSeverityColor,
-  getFormattedSeverityScore,
-} from '../../../../../common/util/anomaly_utils';
+import { getSeverityColor, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
 
 interface SeverityCellProps {
   /**

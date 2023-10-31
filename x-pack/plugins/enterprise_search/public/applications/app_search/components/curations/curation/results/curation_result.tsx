@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+
+import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 
 import { useValues } from 'kea';
 
@@ -18,7 +19,7 @@ import { ResultAction } from '../../../result/types';
 
 interface Props {
   actions: ResultAction[];
-  dragHandleProps?: DraggableProvidedDragHandleProps;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
   result: SearchResult;
   index?: number;
 }

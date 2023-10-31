@@ -8,13 +8,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { MlContext } from '../../contexts/ml';
-import { kibanaContextValueMock } from '../../contexts/ml/__mocks__/kibana_context_value';
 import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
 import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 jest.mock('../../services/toast_notification_service');
 
@@ -132,18 +131,16 @@ jest.mock('../../contexts/kibana/kibana_context', () => {
 describe('TimeSeriesExplorerUrlStateManager', () => {
   test('should render TimeseriesexplorerNoJobsFound when no jobs provided', () => {
     const props = {
-      config: { get: () => 'Browser' },
+      config: { get: () => 'Browser' } as unknown as IUiSettingsClient,
       jobsWithTimeRange: [],
     };
 
     render(
-      <MlContext.Provider value={kibanaContextValueMock}>
-        <I18nProvider>
-          <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
-            <TimeSeriesExplorerUrlStateManager {...props} />
-          </DatePickerContextProvider>
-        </I18nProvider>
-      </MlContext.Provider>
+      <I18nProvider>
+        <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
+          <TimeSeriesExplorerUrlStateManager {...props} />
+        </DatePickerContextProvider>
+      </I18nProvider>
     );
 
     // assert

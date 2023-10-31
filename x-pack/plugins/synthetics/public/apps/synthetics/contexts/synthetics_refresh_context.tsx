@@ -36,6 +36,12 @@ export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
     setLastRefresh(refreshTime);
   }, [setLastRefresh]);
 
+  useEffect(() => {
+    if (!refreshPaused) {
+      refreshApp();
+    }
+  }, [refreshApp, refreshPaused]);
+
   const value = useMemo(() => {
     return {
       lastRefresh,

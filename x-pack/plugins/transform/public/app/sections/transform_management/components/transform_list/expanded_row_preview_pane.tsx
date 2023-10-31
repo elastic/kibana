@@ -8,10 +8,11 @@
 import React, { useMemo, FC } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataGrid } from '@kbn/ml-data-grid';
 
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { useToastNotifications } from '../../../../app_dependencies';
 import { getTransformConfigQuery } from '../../../../common';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import { SearchItems } from '../../../../hooks/use_search_items';
@@ -26,9 +27,6 @@ interface ExpandedRowPreviewPaneProps {
 }
 
 export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
-  const {
-    ml: { DataGrid },
-  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
   const { searchQuery, validationStatus, previewRequest, runtimeMappings } = useMemo(

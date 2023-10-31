@@ -62,7 +62,6 @@ import type { EffectedPolicySelection } from '../../../../components/effected_po
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
-import { filterIndexPatterns } from '../../../../../detection_engine/rule_exceptions/utils/helpers';
 import { EventFiltersApiClient } from '../../service/api_client';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
@@ -419,6 +418,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                 comments: exception?.comments ?? [],
                 os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
                 tags: exception?.tags ?? [],
+                meta: exception.meta,
               }
             : exception;
         const hasValidConditions =
@@ -451,7 +451,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           dataTestSubj: 'alert-exception-builder',
           idAria: 'alert-exception-builder',
           onChange: handleOnBuilderChange,
-          listTypeSpecificIndexPatternFilter: filterIndexPatterns,
           operatorsList: EVENT_FILTERS_OPERATORS,
           osTypes: exception.os_types,
         }),
@@ -532,16 +531,17 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           isLoading={policiesIsLoading}
           isPlatinumPlus={isPlatinumPlus}
           onChange={handleOnPolicyChange}
-          data-test-subj={'effectedPolicies-select'}
+          data-test-subj={getTestId('effectedPolicies')}
         />
       ),
       [
-        policies,
         selectedPolicies,
+        policies,
         isGlobal,
+        policiesIsLoading,
         isPlatinumPlus,
         handleOnPolicyChange,
-        policiesIsLoading,
+        getTestId,
       ]
     );
 

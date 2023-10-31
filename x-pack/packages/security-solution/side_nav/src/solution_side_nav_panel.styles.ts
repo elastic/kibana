@@ -5,37 +5,30 @@
  * 2.0.
  */
 
-import { transparentize, type EuiThemeComputed } from '@elastic/eui';
-import { css, injectGlobal } from '@emotion/css';
+import { transparentize, type EuiThemeComputed, euiFontSize, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 
-const EUI_HEADER_HEIGHT = '93px';
-const PANEL_LEFT_OFFSET = '248px';
-const PANEL_WIDTH = '340px';
+const EUI_HEADER_HEIGHT = '96px';
+const PANEL_LEFT_OFFSET = '249px';
+const PANEL_WIDTH = '270px';
 
-export const panelClass = 'solutionSideNavPanel';
-
+export const panelClassName = 'solutionSideNavPanel';
 export const SolutionSideNavPanelStyles = (
   euiTheme: EuiThemeComputed<{}>,
   { $bottomOffset, $topOffset }: { $bottomOffset?: string; $topOffset?: string } = {}
-) => {
-  // We need to add the banner height to the top space when the header banner is present
-  injectGlobal(`
-    body.kbnBody--hasHeaderBanner .${panelClass} {
-      top: calc(${EUI_HEADER_HEIGHT} + ${euiTheme.size.xl});
-    }
-  `);
+) => css`
+  position: fixed;
+  top: ${$topOffset ?? EUI_HEADER_HEIGHT};
+  left: ${PANEL_LEFT_OFFSET};
+  bottom: 0;
+  width: ${PANEL_WIDTH};
+  height: inherit;
+  z-index: 1000;
+  background-color: ${euiTheme.colors.body};
 
-  return css`
-    position: fixed;
-    top: ${$topOffset ?? EUI_HEADER_HEIGHT};
-    left: ${PANEL_LEFT_OFFSET};
-    bottom: 0;
-    width: ${PANEL_WIDTH};
-    height: inherit;
-
-    // If the bottom bar is visible add padding to the navigation
-    ${$bottomOffset != null &&
-    `
+  // If the bottom bar is visible add padding to the navigation
+  ${$bottomOffset != null &&
+  `
       height: inherit;
       bottom: ${$bottomOffset};
       box-shadow:
@@ -47,27 +40,44 @@ export const SolutionSideNavPanelStyles = (
         inset 0 -6px ${euiTheme.size.xs} -${euiTheme.size.xs} rgb(0 0 0 / 15%);
       `}
 
-    .solutionSideNavPanelLink {
-      .solutionSideNavPanelLinkItem {
-        background-color: transparent; /* originally white, it prevents panel to remove the bottom inset box shadow */
-        &:hover {
-          background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
-        }
-        dt {
-          color: ${euiTheme.colors.primaryText};
-        }
-        dd {
-          color: ${euiTheme.colors.darkestShade};
-        }
+  .solutionSideNavPanelLink {
+    &:focus-within {
+      background-color: transparent;
+      a {
+        text-decoration: auto;
       }
     }
-  `;
-};
+    &:hover {
+      background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+      a {
+        text-decoration: underline;
+      }
+    }
+  }
+`;
 
-export const SolutionSideNavTitleStyles = (
-  euiTheme: EuiThemeComputed<{}>,
-  { $paddingTop = false }: { $paddingTop?: boolean } = {}
-) => css`
+export const SolutionSideNavTitleStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  padding-top: ${euiTheme.size.s};
+`;
+
+export const SolutionSideNavCategoryTitleStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  text-transform: uppercase;
+  color: ${euiTheme.colors.darkShade};
   padding-left: ${euiTheme.size.s};
-  ${$paddingTop && `padding-top: ${euiTheme.size.s};`}
+  padding-bottom: ${euiTheme.size.s};
+  ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xxs')}
+  font-weight: ${euiTheme.font.weight.medium};
+`;
+
+export const SolutionSideNavPanelLinksGroupStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  padding-left: 0;
+  padding-right: 0;
+`;
+
+export const accordionButtonClassName = 'solutionSideNavPanelAccordion__button';
+export const SolutionSideNavCategoryAccordionStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  .${accordionButtonClassName} {
+    font-weight: ${euiTheme.font.weight.bold};
+    ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xs')}
+  }}
 `;

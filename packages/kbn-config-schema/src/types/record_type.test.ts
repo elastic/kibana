@@ -185,3 +185,26 @@ test('error preserves full path', () => {
     `"[grandParentKey.parentKey.ab]: expected value of type [number] but got [string]"`
   );
 });
+
+describe('#extendsDeep', () => {
+  const type = schema.recordOf(schema.string(), schema.object({ foo: schema.string() }));
+
+  test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
+    const allowSchema = type.extendsDeep({ unknowns: 'allow' });
+    const result = allowSchema.validate({ key: { foo: 'test', bar: 'test' } });
+    expect(result).toEqual({ key: { foo: 'test', bar: 'test' } });
+  });
+
+  test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
+    const ignoreSchema = type.extendsDeep({ unknowns: 'ignore' });
+    const result = ignoreSchema.validate({ key: { foo: 'test', bar: 'test' } });
+    expect(result).toEqual({ key: { foo: 'test' } });
+  });
+
+  test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+    const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
+    expect(() =>
+      forbidSchema.validate({ key: { foo: 'test', bar: 'test' } })
+    ).toThrowErrorMatchingInlineSnapshot(`"[key.bar]: definition for this key is missing"`);
+  });
+});

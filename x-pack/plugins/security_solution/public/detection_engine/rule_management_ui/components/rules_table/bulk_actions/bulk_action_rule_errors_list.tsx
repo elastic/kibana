@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import { BulkActionType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 
 import type { DryRunResult, BulkActionForConfirmation } from './types';
 
@@ -53,6 +53,16 @@ const BulkEditRuleErrorItem = ({
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.machineLearningRulesAuthDescription"
             defaultMessage="{rulesCount, plural, =1 {# machine learning rule} other {# machine learning rules}} can't be edited ({message})"
             values={{ rulesCount, message }}
+          />
+        </li>
+      );
+    case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.esqlRulesIndexEditDescription"
+            defaultMessage="{rulesCount, plural, =1 {# custom ES|QL rule} other {# custom ES|QL rules}} (these rules don't have index patterns)"
+            values={{ rulesCount }}
           />
         </li>
       );

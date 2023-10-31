@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CasesCommon } from './common';
@@ -16,6 +16,7 @@ export interface CreateCaseParams {
   tag?: string;
   severity?: CaseSeverity;
   owner?: string;
+  category?: string;
   assignees?: [];
 }
 
@@ -54,11 +55,16 @@ export function CasesCreateViewServiceProvider(
       description = 'desc' + uuidv4(),
       tag = 'tagme',
       severity = CaseSeverity.LOW,
+      category,
       owner,
     }: CreateCaseParams) {
       await this.setTitle(title);
       await this.setDescription(description);
       await this.setTags(tag);
+
+      if (category) {
+        await this.setCategory(category);
+      }
 
       if (severity !== CaseSeverity.LOW) {
         await this.setSeverity(severity);
@@ -83,6 +89,10 @@ export function CasesCreateViewServiceProvider(
 
     async setTags(tag: string) {
       await comboBox.setCustom('caseTags', tag);
+    },
+
+    async setCategory(category: string) {
+      await comboBox.setCustom('categories-list', category);
     },
 
     async setSolution(owner: string) {

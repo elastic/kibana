@@ -10,7 +10,7 @@ import { TrainedModelType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 type ModelType = 'regression' | 'classification';
 
@@ -35,10 +35,10 @@ export default ({ getService }: FtrProviderContext) => {
       .post(
         `${
           space ? `/s/${space}` : ''
-        }/api/ml/saved_objects/can_delete_ml_space_aware_item/${jobType}`
+        }/internal/ml/saved_objects/can_delete_ml_space_aware_item/${jobType}`
       )
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send({ ids });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
     return body;

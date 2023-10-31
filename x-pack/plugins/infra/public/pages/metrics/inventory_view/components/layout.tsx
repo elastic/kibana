@@ -12,8 +12,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { InventoryView } from '../../../../../common/inventory_views';
 import { SnapshotNode } from '../../../../../common/http_api';
-import { SavedView } from '../../../../containers/saved_view/saved_view';
 import { AutoSizer } from '../../../../components/auto_sizer';
 import { NodesOverview } from './nodes_overview';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
@@ -36,7 +36,7 @@ import { LegendControls } from './waffle/legend_controls';
 import { TryItButton } from '../../../../components/try_it_button';
 
 interface Props {
-  currentView: SavedView<any> | null;
+  currentView?: InventoryView | null;
   reload: () => Promise<any>;
   interval: string;
   nodes: SnapshotNode[];
@@ -78,6 +78,7 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
     false
   );
   const hostsLinkClickedRef = useRef<boolean | undefined>(hostsLinkClicked);
+  const AUTO_REFRESH_INTERVAL = 5 * 1000;
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -94,13 +95,16 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
         jumpToTime(Date.now());
       }
     },
-    isAutoReloading ? 5000 : null
+    isAutoReloading ? AUTO_REFRESH_INTERVAL : null
   );
 
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const formatter = useCallback(createInventoryMetricFormatter(options.metric), [options.metric]);
+
+  const formatter = useCallback(
+    (val: string | number) => createInventoryMetricFormatter(options.metric)(val),
+    [options.metric]
+  );
   const { onViewChange } = useWaffleViewState();
 
   useEffect(() => {
@@ -208,6 +212,8 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
                   boundsOverride={boundsOverride}
                   formatter={formatter}
                   bottomMargin={height}
+                  isAutoReloading={isAutoReloading}
+                  refreshInterval={AUTO_REFRESH_INTERVAL}
                 />
               )}
             </AutoSizer>

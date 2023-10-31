@@ -13,6 +13,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AlertDetails } from './details';
 import { mockAlertsService } from '../test_utils/alerts';
 import type { SingleCaseBaseHandlerCommonOptions } from '../types';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 
 describe('AlertDetails', () => {
   let client: CasesClientMock;
@@ -53,7 +54,7 @@ describe('AlertDetails', () => {
       casesClient: client,
       clientArgs: { services: {} } as CasesClientArgs,
     });
-    handler.setupFeature('alerts.hosts');
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -69,7 +70,7 @@ describe('AlertDetails', () => {
     mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
-    handler.setupFeature('alerts.hosts');
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -85,7 +86,7 @@ describe('AlertDetails', () => {
     mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
-    handler.setupFeature('alerts.users');
+    handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -101,7 +102,7 @@ describe('AlertDetails', () => {
     mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
-    handler.setupFeature('alerts.hosts');
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -117,7 +118,7 @@ describe('AlertDetails', () => {
     mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
-    handler.setupFeature('alerts.users');
+    handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -159,7 +160,7 @@ describe('AlertDetails', () => {
   it('returns host details when the host feature is setup', async () => {
     const handler = new AlertDetails(constructorOptions);
 
-    handler.setupFeature('alerts.hosts');
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -174,7 +175,7 @@ describe('AlertDetails', () => {
   it('returns user details when the user feature is setup', async () => {
     const handler = new AlertDetails(constructorOptions);
 
-    handler.setupFeature('alerts.users');
+    handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -189,8 +190,8 @@ describe('AlertDetails', () => {
   it('returns user and host details when the user and host features are setup', async () => {
     const handler = new AlertDetails(constructorOptions);
 
-    handler.setupFeature('alerts.users');
-    handler.setupFeature('alerts.hosts');
+    handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
 
     expect(await handler.compute()).toEqual({
       alerts: {

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type { SavedObjectUnsanitizedDoc } from '../serialization';
 import type { SavedObjectsMigrationLogger } from '../migration';
 
@@ -30,6 +31,10 @@ export interface SavedObjectModelTransformationContext {
    * The model version this migration is registered for
    */
   readonly modelVersion: number;
+  /**
+   * The namespace type of the savedObject type this migration is registered for
+   */
+  readonly namespaceType: SavedObjectsNamespaceType;
 }
 
 /**
@@ -58,24 +63,36 @@ export type SavedObjectModelTransformationFn<
 ) => SavedObjectModelTransformationResult<OutputAttributes>;
 
 /**
- * A bidirectional transformation.
- *
- * Bidirectional transformations define migration functions that can be used to
- * transform a document from the lower version to the higher one (`up`), and
- * the other way around, from the higher version to the lower one (`down`)
+ * Return type for the {@link SavedObjectModelTransformationFn | transformation functions}
  *
  * @public
  */
-export interface SavedObjectModelBidirectionalTransformation<
-  PreviousAttributes = unknown,
-  NewAttributes = unknown
-> {
-  /**
-   * The upward (previous=>next) transformation.
-   */
-  up: SavedObjectModelTransformationFn<PreviousAttributes, NewAttributes>;
-  /**
-   * The downward (next=>previous) transformation.
-   */
-  down: SavedObjectModelTransformationFn<NewAttributes, PreviousAttributes>;
+export interface SavedObjectModelDataBackfillResult<DocAttrs = unknown> {
+  attributes: Partial<DocAttrs>;
 }
+
+/**
+ * A data backfill function associated with a {@link SavedObjectsModelDataBackfillChange | data backfill} change.
+ *
+ * @remark Such transformation functions should only be used to backfill newly introduced fields.
+ *         Even if no check is performed to ensure that, using such transformations to mutate
+ *         existing data of the document can lead to data corruption or inconsistency.
+ * @public
+ */
+export type SavedObjectModelDataBackfillFn<
+  InputAttributes = unknown,
+  OutputAttributes = unknown
+> = (
+  document: SavedObjectModelTransformationDoc<InputAttributes>,
+  context: SavedObjectModelTransformationContext
+) => SavedObjectModelDataBackfillResult<OutputAttributes>;
+
+/**
+ * A data transformation function associated with a {@link SavedObjectsModelUnsafeTransformChange | unsafe transform} change.
+ *
+ * @public
+ */
+export type SavedObjectModelUnsafeTransformFn<
+  InputAttributes = unknown,
+  OutputAttributes = unknown
+> = SavedObjectModelTransformationFn<InputAttributes, OutputAttributes>;

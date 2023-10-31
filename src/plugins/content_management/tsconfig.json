@@ -15,6 +15,7 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-saved-objects-api-server",
     "@kbn/saved-objects-settings",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

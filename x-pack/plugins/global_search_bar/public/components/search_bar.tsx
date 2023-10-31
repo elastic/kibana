@@ -5,78 +5,61 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useRef, useState, useEffect } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import useEvent from 'react-use/lib/useEvent';
-import useMountedState from 'react-use/lib/useMountedState';
-import { Subscription } from 'rxjs';
 import {
-  useEuiTheme,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormLabel,
   EuiHeaderSectionItemButton,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from '@kbn/core/public';
-import type {
-  GlobalSearchPluginStart,
-  GlobalSearchResult,
-  GlobalSearchFindParams,
-} from '@kbn/global-search-plugin/public';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { parseSearchParams } from '../search_syntax';
-import { getSuggestions, SearchSuggestion } from '../suggestions';
+import { css } from '@emotion/react';
+import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import useEvent from 'react-use/lib/useEvent';
+import useMountedState from 'react-use/lib/useMountedState';
+import useObservable from 'react-use/lib/useObservable';
+import { Subscription } from 'rxjs';
+import { blurEvent, isMac, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
+import { parseSearchParams } from '../search_syntax';
+import { i18nStrings } from '../strings';
+import { getSuggestions, SearchSuggestion } from '../suggestions';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
+import { SearchBarProps } from './types';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+const NoMatchesMessage = (props: { basePathUrl: string; darkMode: boolean }) => (
+  <PopoverPlaceholder darkMode={props.darkMode} basePath={props.basePathUrl} />
+);
 
-const blurEvent = new FocusEvent('focusout', {
-  bubbles: true,
-});
+const EmptyMessage = () => (
+  <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
-const sortByScore = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
-  if (a.score < b.score) return 1;
-  if (a.score > b.score) return -1;
-  return 0;
-};
+export const SearchBar: FC<SearchBarProps> = (opts) => {
+  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
 
-const sortByTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
-  const titleA = a.title.toUpperCase(); // ignore upper and lowercase
-  const titleB = b.title.toUpperCase(); // ignore upper and lowercase
-  if (titleA < titleB) return -1;
-  if (titleA > titleB) return 1;
-  return 0;
-};
-
-interface SearchBarProps {
-  globalSearch: GlobalSearchPluginStart;
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  taggingApi?: SavedObjectTaggingPluginStart;
-  basePathUrl: string;
-  darkMode: boolean;
-}
-
-export const SearchBar: FC<SearchBarProps> = ({
-  globalSearch,
-  taggingApi,
-  navigateToUrl,
-  trackUiMetric,
-  basePathUrl,
-  darkMode,
-}) => {
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
+  const chromeStyle = useObservable(chromeStyle$);
+
+  // These hooks are used when on chromeStyle set to 'project'
+  const [isVisible, setIsVisible] = useState(false);
+  const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -146,7 +129,7 @@ export const SearchBar: FC<SearchBarProps> = ({
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
-          trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
+          reportEvent.searchRequest();
         }
 
         const rawParams = parseSearchParams(searchValue);
@@ -170,7 +153,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
             if (searchValue.length > 0) {
-              aggregatedResults = [...results, ...aggregatedResults].sort(sortByScore);
+              aggregatedResults = [...results, ...aggregatedResults].sort(sort.byScore);
               setOptions(aggregatedResults, suggestions, searchParams.tags);
               return;
             }
@@ -178,14 +161,14 @@ export const SearchBar: FC<SearchBarProps> = ({
             // if searchbar is empty, filter to only applications and sort alphabetically
             results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
 
-            aggregatedResults = [...results, ...aggregatedResults].sort(sortByTitle);
+            aggregatedResults = [...results, ...aggregatedResults].sort(sort.byTitle);
 
             setOptions(aggregatedResults, suggestions, searchParams.tags);
           },
-          error: () => {
+          error: (err) => {
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
-            trackUiMetric(METRIC_TYPE.COUNT, 'unhandled_error');
+            reportEvent.error({ message: err, searchValue });
           },
           complete: () => {},
         });
@@ -199,23 +182,35 @@ export const SearchBar: FC<SearchBarProps> = ({
     (event: KeyboardEvent) => {
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        trackUiMetric(METRIC_TYPE.COUNT, 'shortcut_used');
-        if (searchRef) {
+        reportEvent.shortcutUsed();
+        if (chromeStyle === 'project' && !isVisible) {
+          visibilityButtonRef.current?.click();
+        } else if (searchRef) {
           searchRef.focus();
         } else if (buttonRef) {
           (buttonRef.children[0] as HTMLButtonElement).click();
         }
       }
     },
-    [buttonRef, searchRef, trackUiMetric]
+    [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
   );
 
   const onChange = useCallback(
     (selection: EuiSelectableTemplateSitewideOption[]) => {
-      const selected = selection.find(({ checked }) => checked === 'on');
+      let selectedRank: number | null = null;
+      const selected = selection.find(({ checked }, rank) => {
+        const isChecked = checked === 'on';
+        if (isChecked) {
+          selectedRank = rank + 1;
+        }
+        return isChecked;
+      });
+
       if (!selected) {
         return;
       }
+
+      const selectedLabel = selected.label ?? null;
 
       // @ts-ignore - ts error is "union type is too complex to express"
       const { url, type, suggestion } = selected;
@@ -230,20 +225,26 @@ export const SearchBar: FC<SearchBarProps> = ({
       // errors in tracking should not prevent selection behavior
       try {
         if (type === 'application') {
-          const key = selected.keys ?? 'unknown';
-          trackUiMetric(METRIC_TYPE.CLICK, [
-            'user_navigated_to_application',
-            `user_navigated_to_application_${key.toLowerCase().replaceAll(' ', '_')}`, // which application
-          ]);
+          const key = selected.key ?? 'unknown';
+          const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
+          reportEvent.navigateToApplication({
+            application,
+            searchValue,
+            selectedLabel,
+            selectedRank,
+          });
         } else {
-          trackUiMetric(METRIC_TYPE.CLICK, [
-            'user_navigated_to_saved_object',
-            `user_navigated_to_saved_object_${type}`, // which type of saved object
-          ]);
+          reportEvent.navigateToSavedObject({
+            type,
+            searchValue,
+            selectedLabel,
+            selectedRank,
+          });
         }
-      } catch (e) {
+      } catch (err) {
+        reportEvent.error({ message: err, searchValue });
         // eslint-disable-next-line no-console
-        console.log('Error trying to track searchbar metrics', e);
+        console.log('Error trying to track searchbar metrics', err);
       }
 
       navigateToUrl(url);
@@ -254,42 +255,59 @@ export const SearchBar: FC<SearchBarProps> = ({
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [trackUiMetric, navigateToUrl, searchRef]
+    [reportEvent, navigateToUrl, searchRef, searchValue]
   );
 
   const clearField = () => setSearchValue('');
 
-  const noMatchesMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
-  const emptyMessage = (
-    <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
-    defaultMessage: 'Find apps, content, and more.',
-  });
-  const keyboardShortcutTooltip = `${i18n.translate(
-    'xpack.globalSearchBar.searchBar.shortcutTooltip.description',
-    {
-      defaultMessage: 'Keyboard shortcut',
-    }
-  )}: ${
-    isMac
-      ? i18n.translate('xpack.globalSearchBar.searchBar.shortcutTooltip.macCommandDescription', {
-          defaultMessage: 'Command + /',
-        })
-      : i18n.translate(
-          'xpack.globalSearchBar.searchBar.shortcutTooltip.windowsCommandDescription',
-          {
-            defaultMessage: 'Control + /',
-          }
-        )
+  const keyboardShortcutTooltip = `${i18nStrings.keyboardShortcutTooltip.prefix}: ${
+    isMac ? i18nStrings.keyboardShortcutTooltip.onMac : i18nStrings.keyboardShortcutTooltip.onNotMac
   }`;
 
   useEvent('keydown', onKeyDown);
+
+  if (chromeStyle === 'project' && !isVisible) {
+    return (
+      <EuiHeaderSectionItemButton
+        aria-label={i18nStrings.showSearchAriaText}
+        buttonRef={visibilityButtonRef}
+        color="text"
+        data-test-subj="nav-search-reveal"
+        iconType="search"
+        onClick={() => {
+          setIsVisible(true);
+        }}
+      />
+    );
+  }
+
+  const getAppendForChromeStyle = () => {
+    if (chromeStyle === 'project') {
+      return (
+        <EuiButtonIcon
+          aria-label={i18nStrings.closeSearchAriaText}
+          color="text"
+          data-test-subj="nav-search-conceal"
+          iconType="cross"
+          onClick={() => {
+            reportEvent.searchBlur();
+            setIsVisible(false);
+          }}
+        />
+      );
+    }
+
+    if (showAppend) {
+      return (
+        <EuiFormLabel
+          title={keyboardShortcutTooltip}
+          css={{ fontFamily: euiTheme.font.familyCode }}
+        >
+          {isMac ? '⌘/' : '^/'}
+        </EuiFormLabel>
+      );
+    }
+  };
 
   return (
     <EuiSelectableTemplateSitewide
@@ -300,34 +318,35 @@ export const SearchBar: FC<SearchBarProps> = ({
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
+      listProps={{
+        className: 'eui-yScroll',
+        css: css`
+          max-block-size: 75vh;
+        `,
+      }}
       searchProps={{
+        autoFocus: chromeStyle === 'project',
         value: searchValue,
         onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,
-        'aria-label': placeholderText,
-        placeholder: placeholderText,
+        'aria-label': i18nStrings.placeholderText,
+        placeholder: i18nStrings.placeholderText,
         onFocus: () => {
-          trackUiMetric(METRIC_TYPE.COUNT, 'search_focus');
+          reportEvent.searchFocus();
           setInitialLoad(true);
           setShowAppend(false);
         },
         onBlur: () => {
+          reportEvent.searchBlur();
           setShowAppend(!searchValue.length);
         },
         fullWidth: true,
-        append: showAppend ? (
-          <EuiFormLabel
-            title={keyboardShortcutTooltip}
-            css={{ fontFamily: euiTheme.font.familyCode }}
-          >
-            {isMac ? '⌘/' : '^/'}
-          </EuiFormLabel>
-        ) : undefined,
+        append: getAppendForChromeStyle(),
       }}
-      emptyMessage={emptyMessage}
-      noMatchesMessage={noMatchesMessage}
+      emptyMessage={<EmptyMessage />}
+      noMatchesMessage={<NoMatchesMessage {...props} />}
       popoverProps={{
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
@@ -336,12 +355,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         panelStyle: { marginTop: '6px' },
       }}
       popoverButton={
-        <EuiHeaderSectionItemButton
-          aria-label={i18n.translate(
-            'xpack.globalSearchBar.searchBar.mobileSearchButtonAriaLabel',
-            { defaultMessage: 'Site-wide search' }
-          )}
-        >
+        <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
           <EuiIcon type="search" size="m" />
         </EuiHeaderSectionItemButton>
       }

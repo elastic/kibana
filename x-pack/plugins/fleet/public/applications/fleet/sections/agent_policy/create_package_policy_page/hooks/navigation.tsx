@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useMemo, useEffect, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
 
+import { useCallback, useMemo, useEffect, useRef } from 'react';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+
+import { PLUGIN_ID } from '../../../../constants';
 import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
 import type {
   CreatePackagePolicyRouteState,
@@ -67,7 +69,6 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const doOnSaveNavigation = useRef<boolean>(true);
   const { getPath } = useLink();
-  const history = useHistory();
 
   const {
     application: { navigateToApp },
@@ -81,32 +82,46 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
   }, []);
 
   const onSaveNavigate = useCallback(
-    (policy?: PackagePolicy, paramsToApply: OnSaveQueryParamKeys[] = []) => {
+    (policy: PackagePolicy, paramsToApply: OnSaveQueryParamKeys[] = []) => {
       if (!doOnSaveNavigation.current) {
         return;
       }
-
       const packagePolicyPath = getPath('policy_details', { policyId: packagePolicy.policy_id });
-      if (routeState?.onSaveNavigateTo && policy) {
-        const [appId, options] = routeState.onSaveNavigateTo;
-        if (options?.path) {
-          const pathWithQueryString = appendOnSaveQueryParamsToPath({
-            // In cases where we want to navigate back to a new/existing policy, we need to override the initial `path`
-            // value and navigate to the actual agent policy instead
-            path: queryParamsPolicyId ? packagePolicyPath : options.path,
-            policy,
-            mappingOptions: routeState.onSaveQueryParams,
-            paramsToApply,
-          });
-          navigateToApp(appId, { ...options, path: pathWithQueryString });
-        } else {
-          navigateToApp(...routeState.onSaveNavigateTo);
-        }
+
+      const [onSaveNavigateTo, onSaveQueryParams]: [
+        Parameters<ApplicationStart['navigateToApp']>,
+        CreatePackagePolicyRouteState['onSaveQueryParams']
+      ] = routeState?.onSaveNavigateTo
+        ? [routeState.onSaveNavigateTo, routeState?.onSaveQueryParams]
+        : [
+            [
+              PLUGIN_ID,
+              {
+                path: packagePolicyPath,
+              },
+            ],
+            {
+              showAddAgentHelp: true,
+              openEnrollmentFlyout: true,
+            },
+          ];
+
+      const [appId, options] = onSaveNavigateTo;
+      if (options?.path) {
+        const pathWithQueryString = appendOnSaveQueryParamsToPath({
+          // In cases where we want to navigate back to a new/existing policy, we need to override the initial `path`
+          // value and navigate to the actual agent policy instead
+          path: queryParamsPolicyId ? packagePolicyPath : options.path,
+          policy,
+          mappingOptions: onSaveQueryParams,
+          paramsToApply,
+        });
+        navigateToApp(appId, { ...options, path: pathWithQueryString });
       } else {
-        history.push(packagePolicyPath);
+        navigateToApp(...onSaveNavigateTo);
       }
     },
-    [packagePolicy.policy_id, getPath, navigateToApp, history, routeState, queryParamsPolicyId]
+    [packagePolicy.policy_id, getPath, navigateToApp, routeState, queryParamsPolicyId]
   );
 
   return onSaveNavigate;

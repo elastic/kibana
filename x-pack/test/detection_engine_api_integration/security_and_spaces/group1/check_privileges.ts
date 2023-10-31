@@ -8,16 +8,16 @@
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
   deleteAllRules,
   waitForRulePartialFailure,
   getRuleForSignalTesting,
   createRuleWithAuth,
   getThresholdRuleForSignalTesting,
+  deleteAllAlerts,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
@@ -27,6 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('check_privileges', () => {
     before(async () => {
@@ -38,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     beforeEach(async () => {
@@ -75,12 +76,13 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .query({ id })
             .expect(200);
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
+            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
@@ -113,12 +115,13 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .query({ id })
             .expect(200);
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
+            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);

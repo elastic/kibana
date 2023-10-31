@@ -9,11 +9,15 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions } from './type';
 
 export type MapOfOptions<K, V> = TypeOptions<Map<K, V>>;
 
 export class MapOfType<K, V> extends Type<Map<K, V>> {
+  private readonly keyType: Type<K>;
+  private readonly valueType: Type<V>;
+  private readonly mapOptions: MapOfOptions<K, V>;
+
   constructor(keyType: Type<K>, valueType: Type<V>, options: MapOfOptions<K, V> = {}) {
     const defaultValue = options.defaultValue;
     const schema = internals.map().entries(keyType.getSchema(), valueType.getSchema());
@@ -26,6 +30,17 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
       // default value instead.
       defaultValue: defaultValue instanceof Map ? () => defaultValue : defaultValue,
     });
+    this.keyType = keyType;
+    this.valueType = valueType;
+    this.mapOptions = options;
+  }
+
+  public extendsDeep(options: ExtendsDeepOptions) {
+    return new MapOfType(
+      this.keyType.extendsDeep(options),
+      this.valueType.extendsDeep(options),
+      this.mapOptions
+    );
   }
 
   protected handleError(

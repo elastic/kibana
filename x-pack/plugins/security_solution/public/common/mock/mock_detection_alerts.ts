@@ -10,7 +10,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
   ...{
     _id: '1',
-    timestamp: '2018-11-05T19:03:25.937Z',
+    '@timestamp': '2018-11-05T19:03:25.937Z',
     host: {
       name: ['apache'],
       ip: ['192.168.0.1'],

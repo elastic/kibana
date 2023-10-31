@@ -6,9 +6,12 @@
  */
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { installPackage } from '../../packages';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Enterprisesearch', () => {
+    before(() => installPackage(getService('supertest'), 'enterprisesearch'));
+
     loadTestFile(require.resolve('./overview'));
   });
 }

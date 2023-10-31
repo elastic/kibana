@@ -11,7 +11,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { actionsConfigMock } from '../actions_config.mock';
-import { actionsClientMock } from '../actions_client.mock';
+import { actionsClientMock } from '../actions_client/actions_client.mock';
 
 jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),

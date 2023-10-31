@@ -38,7 +38,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
 
     render(
       <MlSharedContext.Provider value={mlShared}>
-        <ExpandedRow item={item} onAlertEdit={onAlertEdit} />
+        <ExpandedRow item={item} onAlertEdit={onAlertEdit} transformsStatsLoading={false} />
       </MlSharedContext.Provider>
     );
 
@@ -60,7 +60,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('transformStatsTab')).toHaveAttribute('aria-selected', 'true');
-      const tabContent = screen.getByTestId('transformDetailsTabContent');
+      const tabContent = screen.getByTestId('transformStatsTabContent');
       expect(within(tabContent).getByText('Stats')).toBeInTheDocument();
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { Comparator, RuleParams } from '../../../../common/alerting/logs/log_threshold';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
 

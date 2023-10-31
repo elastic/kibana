@@ -11,7 +11,7 @@ import chalk from 'chalk';
 import { KibanaRequest } from '@kbn/core/server';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
-import { getInspectResponse } from '@kbn/observability-plugin/server';
+import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { inspectableEsQueriesMap } from '../../../routes/apm_routes/register_apm_server_routes';
 
 function formatObj(obj: Record<string, any>) {

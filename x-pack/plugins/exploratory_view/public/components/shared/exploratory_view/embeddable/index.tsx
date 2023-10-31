@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useAppDataView } from './use_app_data_view';
 import type { ExploratoryViewPublicPluginsStart } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';

@@ -1,5 +1,6 @@
 type: array
 description: An array containing users that are assigned to the case.
+maxItems: 10
 nullable: true
 items:
   type: object

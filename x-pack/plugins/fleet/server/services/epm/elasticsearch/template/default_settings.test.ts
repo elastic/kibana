@@ -69,6 +69,9 @@ describe('buildDefaultSettings', () => {
           "lifecycle": Object {
             "name": "logs",
           },
+          "mapping": Object {
+            "ignore_malformed": true,
+          },
           "query": Object {
             "default_field": Array [
               "field1Keyword",

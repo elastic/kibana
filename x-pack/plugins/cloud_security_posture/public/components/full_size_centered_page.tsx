@@ -15,8 +15,8 @@ export const FullSizeCenteredPage = ({
 }: { children: React.ReactNode } & CommonProps) => (
   <EuiFlexGroup
     css={css`
-      // 140px is roughly the Kibana chrome with a bit of space to spare
-      min-height: calc(100vh - 140px);
+      // 250px is roughly the Kibana chrome with a page title and tabs
+      min-height: calc(100vh - 250px);
     `}
     justifyContent="center"
     alignItems="center"

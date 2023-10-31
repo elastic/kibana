@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getSyntheticsEnablement, selectSyntheticsEnablement } from '../state';
 
 export function useEnablement() {
   const dispatch = useDispatch();
+
+  const { application } = useKibana().services;
 
   const { loading, error, enablement } = useSelector(selectSyntheticsEnablement);
 
@@ -19,6 +22,14 @@ export function useEnablement() {
       dispatch(getSyntheticsEnablement());
     }
   }, [dispatch, enablement, error, loading]);
+
+  useEffect(() => {
+    if (!enablement?.canEnable && !enablement?.isEnabled && !loading && enablement) {
+      application?.navigateToApp('synthetics', {
+        path: '/monitors',
+      });
+    }
+  }, [application, enablement, loading]);
 
   return {
     enablement: {

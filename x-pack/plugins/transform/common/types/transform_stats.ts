@@ -33,7 +33,9 @@ export interface TransformStats {
         percent_complete: number;
       };
     };
-    operations_behind: number;
+    changes_last_detected_at: number;
+    last_search_time?: number;
+    operations_behind?: number;
   };
   health: {
     status: TransformHealth;

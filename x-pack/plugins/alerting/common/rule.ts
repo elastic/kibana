@@ -10,12 +10,16 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import type { Filter, KueryNode } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { IsoWeekday } from './iso_weekdays';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
 export type RuleTypeState = Record<string, unknown>;
 export type RuleTypeParams = Record<string, unknown>;
+
+// rule type defined alert fields to persist in alerts index
+export type RuleAlertData = Record<string, unknown>;
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
@@ -56,6 +60,7 @@ export enum RuleExecutionStatusErrorReasons {
 export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
   MAX_ALERTS = 'maxAlerts',
+  MAX_QUEUED_ACTIONS = 'maxQueuedActions',
 }
 
 export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
@@ -83,7 +88,6 @@ export interface RuleActionFrequency extends SavedObjectAttributes {
   throttle: string | null;
 }
 
-export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export interface AlertsFilterTimeframe extends SavedObjectAttributes {
   days: IsoWeekday[];
   timezone: string;
@@ -112,28 +116,6 @@ export interface RuleAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
-}
-
-export interface AggregateOptions {
-  search?: string;
-  defaultSearchOperator?: 'AND' | 'OR';
-  searchFields?: string[];
-  hasReference?: {
-    type: string;
-    id: string;
-  };
-  filter?: string | KueryNode;
-  page?: number;
-  perPage?: number;
-}
-
-export interface RuleAggregationFormattedResult {
-  ruleExecutionStatus: { [status: string]: number };
-  ruleLastRunOutcome: { [status: string]: number };
-  ruleEnabledStatus: { enabled: number; disabled: number };
-  ruleMutedStatus: { muted: number; unmuted: number };
-  ruleSnoozedStatus: { snoozed: number };
-  ruleTags: string[];
 }
 
 export interface RuleLastRun {
@@ -167,7 +149,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   actions: RuleAction[];
   params: Params;
   mapped_params?: MappedParams;
-  scheduledTaskId?: string;
+  scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: Date;
@@ -209,7 +191,10 @@ export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
 > & { actions: SanitizedRuleAction[] };
 
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
-  Omit<SavedObjectsResolveResponse, 'saved_object'>;
+  Omit<SavedObjectsResolveResponse, 'saved_object'> & {
+    outcome: string;
+    alias_target_id?: string;
+  };
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,

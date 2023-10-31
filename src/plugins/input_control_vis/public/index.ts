@@ -8,7 +8,8 @@
 
 import { PluginInitializerContext } from '@kbn/core/public';
 import { InputControlVisPlugin as Plugin } from './plugin';
+import { InputControlPublicConfig } from '../config';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext<InputControlPublicConfig>) {
   return new Plugin(initializerContext);
 }

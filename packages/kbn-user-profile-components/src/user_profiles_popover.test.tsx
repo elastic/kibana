@@ -84,6 +84,7 @@ describe('UserProfilesPopover', () => {
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
         <EuiContextMenuPanel
           items={Array []}

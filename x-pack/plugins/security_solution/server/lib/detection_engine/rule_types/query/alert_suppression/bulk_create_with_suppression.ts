@@ -18,7 +18,7 @@ import { makeFloatString } from '../../utils/utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../../common/api/detection_engine/model/alerts';
 import type { RuleServices } from '../../types';
 import { createEnrichEventsFunction } from '../../utils/enrichments';
 
@@ -74,7 +74,7 @@ export const bulkCreateWithSuppression = async <
       const enrichedAlerts = await enrichAlerts(alerts, params);
       return enrichedAlerts;
     } catch (error) {
-      ruleExecutionLogger.error(`Enrichments failed ${error}`);
+      ruleExecutionLogger.error(`Alerts enrichment failed: ${error}`);
       throw error;
     } finally {
       enrichmentsTimeFinish = performance.now();
@@ -94,14 +94,10 @@ export const bulkCreateWithSuppression = async <
 
   const end = performance.now();
 
-  ruleExecutionLogger.debug(
-    `individual bulk process time took: ${makeFloatString(end - start)} milliseconds`
-  );
+  ruleExecutionLogger.debug(`Alerts bulk process took ${makeFloatString(end - start)} ms`);
 
   if (!isEmpty(errors)) {
-    ruleExecutionLogger.debug(
-      `[-] bulkResponse had errors with responses of: ${JSON.stringify(errors)}`
-    );
+    ruleExecutionLogger.warn(`Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
     return {
       errors: Object.keys(errors),
       success: false,

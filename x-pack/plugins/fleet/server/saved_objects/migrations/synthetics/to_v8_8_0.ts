@@ -25,9 +25,14 @@ export const ALLOWED_SCHEDULES_IN_MINUTES = [
 export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc
 ) => {
-  if (packagePolicyDoc.attributes.package?.name !== 'synthetics') {
+  if (
+    packagePolicyDoc.attributes.package?.name !== 'synthetics' ||
+    !packagePolicyDoc.attributes.is_managed
+  ) {
     return packagePolicyDoc;
   }
+
+  const agentPolicyId = packagePolicyDoc.attributes.policy_id;
 
   const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
 
@@ -64,6 +69,12 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
       enabledStream.vars['throttling.config'].value = JSON.stringify(formattedThrottling);
       enabledStream.compiled_stream.throttling = formattedThrottling;
     }
+  }
+
+  // set location_id.id to agentPolicyId
+  if (enabledStream.vars) {
+    enabledStream.vars.location_id = { value: agentPolicyId, type: 'text' };
+    enabledStream.compiled_stream.location_id = agentPolicyId;
   }
 
   return updatedPackagePolicyDoc;

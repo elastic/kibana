@@ -7,6 +7,7 @@
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
+import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
@@ -23,7 +24,6 @@ import type {
   IRouter,
   RequestHandler,
   VersionedRouter,
-  IRouterWithVersion,
 } from '@kbn/core-http-server';
 import { validBodyOutput } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
@@ -120,18 +120,21 @@ function validOptions(
 }
 
 /** @internal */
-interface RouterOptions {
+export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
-  /** Whether we are running in a serverless */
-  isServerless?: boolean;
+  /**
+   * Which route resolution algo to use.
+   * @note default to "oldest", but when running in dev default to "none"
+   */
+  versionedRouteResolution?: 'newest' | 'oldest' | 'none';
 }
 
 /**
  * @internal
  */
 export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
-  implements IRouterWithVersion<Context>
+  implements IRouter<Context>
 {
   public routes: Array<Readonly<RouterRoute>> = [];
   public get: IRouter<Context>['get'];
@@ -144,7 +147,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     public readonly routerPath: string,
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
-    private readonly options: RouterOptions = { isDev: false, isServerless: false }
+    private readonly options: RouterOptions
   ) {
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
@@ -181,6 +184,26 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
   public handleLegacyErrors = wrapErrors;
 
+  private logError(
+    msg: string,
+    statusCode: number,
+    {
+      error,
+      request,
+    }: {
+      request: Request;
+      error: Error;
+    }
+  ) {
+    this.log.error(msg, {
+      http: {
+        response: { status_code: statusCode },
+        request: { method: request.route?.method, path: request.route?.path },
+      },
+      error: { message: error.message },
+    });
+  }
+
   private async handle<P, Q, B>({
     routeSchemas,
     request,
@@ -196,32 +219,40 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
-    } catch (e) {
-      return hapiResponseAdapter.toBadRequest(e.message);
+    } catch (error) {
+      this.logError('400 Bad Request', 400, { request, error });
+      return hapiResponseAdapter.toBadRequest(error.message);
     }
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       return hapiResponseAdapter.handle(kibanaResponse);
-    } catch (e) {
-      this.log.error(e);
+    } catch (error) {
+      // capture error
+      apm.captureError(error);
+
       // forward 401 errors from ES client
-      if (isElasticsearchUnauthorizedError(e)) {
+      if (isElasticsearchUnauthorizedError(error)) {
+        this.logError('401 Unauthorized', 401, { request, error });
         return hapiResponseAdapter.handle(
-          kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
+          kibanaResponseFactory.unauthorized(convertEsUnauthorized(error))
         );
       }
+
+      // return a generic 500 to avoid error info / stack trace surfacing
+      this.logError('500 Server Error', 500, { request, error });
       return hapiResponseAdapter.toInternalError();
     }
   }
 
   private versionedRouter: undefined | VersionedRouter<Context> = undefined;
+
   public get versioned(): VersionedRouter<Context> {
     if (this.versionedRouter === undefined) {
       this.versionedRouter = CoreVersionedRouter.from({
         router: this,
         isDev: this.options.isDev,
-        defaultHandlerResolutionStrategy: this.options.isServerless ? 'newest' : 'oldest',
+        defaultHandlerResolutionStrategy: this.options.versionedRouteResolution,
       });
     }
     return this.versionedRouter;

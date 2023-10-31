@@ -15,7 +15,6 @@ import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { BATCH_SIZE } from './constants';
 
 /** @internal */
 export interface ReindexResponse {
@@ -34,6 +33,8 @@ export interface ReindexParams {
    * index for backup purposes, but won't be available in the upgraded index.
    */
   excludeOnUpgradeQuery: QueryDslQueryContainer;
+  /** Number of documents Elasticsearch will read/write in each batch */
+  batchSize: number;
 }
 
 /**
@@ -52,6 +53,7 @@ export const reindex =
     reindexScript,
     requireAlias,
     excludeOnUpgradeQuery,
+    batchSize,
   }: ReindexParams): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> =>
   () => {
     return client
@@ -65,7 +67,7 @@ export const reindex =
           source: {
             index: sourceIndex,
             // Set reindex batch size
-            size: BATCH_SIZE,
+            size: batchSize,
             // Exclude saved object types
             query: excludeOnUpgradeQuery,
           },

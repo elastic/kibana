@@ -9,7 +9,7 @@ import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
@@ -636,7 +636,7 @@ export function replaceColumn({
         previousColumn.customLabel &&
         hypotheticalLayer.columns[columnId] &&
         previousColumn.label !==
-          previousDefinition.getDefaultLabel(previousColumn, indexPattern, tempLayer.columns)
+          previousDefinition.getDefaultLabel(previousColumn, tempLayer.columns, indexPattern)
       ) {
         hypotheticalLayer.columns[columnId].customLabel = true;
         hypotheticalLayer.columns[columnId].label = previousColumn.label;
@@ -1580,7 +1580,8 @@ export function getErrorMessages(
           columnId,
           indexPattern,
           { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
-          operationDefinitionMap
+          operationDefinitionMap,
+          core.uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
         );
       }
     })
@@ -1722,8 +1723,8 @@ export function updateDefaultLabels(
         ...col,
         label: operationDefinitionMap[col.operationType].getDefaultLabel(
           col,
-          indexPattern,
-          copiedColumns
+          copiedColumns,
+          indexPattern
         ),
       };
     }

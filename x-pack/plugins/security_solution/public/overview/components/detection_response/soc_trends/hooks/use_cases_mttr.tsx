@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { statReducer } from './stat_reducer';
 import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -63,7 +64,7 @@ export const useCasesMttr = ({
               from,
               to,
               owner: APP_ID,
-              features: ['mttr'],
+              features: [CaseMetricsFeature.MTTR],
             },
             abortCtrl.signal
           ),
@@ -73,7 +74,7 @@ export const useCasesMttr = ({
               from: fromCompare,
               to: toCompare,
               owner: APP_ID,
-              features: ['mttr'],
+              features: [CaseMetricsFeature.MTTR],
             },
             abortCtrl.signal
           ),

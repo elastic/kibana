@@ -6,19 +6,12 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { AgentPolicyInfo } from '../../../../../common/types';
 import { IHttpSerializedFetchError } from '..';
 import { getAgentPoliciesAction, setAddingNewPrivateLocation } from './actions';
 
-export interface AgentPoliciesList {
-  items: AgentPolicy[];
-  total: number;
-  page: number;
-  perPage: number;
-}
-
 export interface AgentPoliciesState {
-  data: AgentPoliciesList | null;
+  data: AgentPolicyInfo[] | null;
   loading: boolean;
   error: IHttpSerializedFetchError | null;
   isManageFlyoutOpen?: boolean;

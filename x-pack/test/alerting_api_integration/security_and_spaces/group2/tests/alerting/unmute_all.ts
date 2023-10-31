@@ -14,8 +14,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -77,11 +76,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'unmuteAll',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('unmuteAll', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -147,7 +142,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'unmuteAll',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -206,7 +201,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'unmuteAll',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -216,17 +211,6 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'unmuteAll',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
@@ -277,11 +261,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'unmuteAll',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('unmuteAll', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -291,7 +271,7 @@ export default function createUnmuteAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'unmuteAll',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'

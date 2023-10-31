@@ -18,13 +18,15 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsService } from '../common';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
-import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
+import { SavedObjectsClientWrapper } from './saved_objects_client_wrapper';
 
 interface DataViewsServiceFactoryDeps {
   logger: Logger;
   uiSettings: UiSettingsServiceStart;
   fieldFormats: FieldFormatsStart;
   capabilities: CoreStart['capabilities'];
+  scriptedFieldsEnabled: boolean;
+  rollupsEnabled: boolean;
 }
 
 /**
@@ -38,14 +40,18 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
     request?: KibanaRequest,
     byPassCapabilities?: boolean
   ) {
-    const { logger, uiSettings, fieldFormats, capabilities } = deps;
+    const { logger, uiSettings, fieldFormats, capabilities, rollupsEnabled } = deps;
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
     return new DataViewsService({
       uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
-      savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-      apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
+      savedObjectsClient: new SavedObjectsClientWrapper(savedObjectsClient),
+      apiClient: new IndexPatternsApiServer(
+        elasticsearchClient,
+        savedObjectsClient,
+        rollupsEnabled
+      ),
       fieldFormats: formats,
       onError: (error) => {
         logger.error(error);
@@ -65,5 +71,6 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
           : request
           ? (await capabilities.resolveCapabilities(request)).advancedSettings.save === true
           : false,
+      scriptedFieldsEnabled: deps.scriptedFieldsEnabled,
     });
   };

@@ -11,31 +11,35 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
-import type {
-  CasesConfigurationsResponse,
-  CasesConfigureResponse,
-  UserActions,
-  CasePatchRequest,
-  CaseResolveResponse,
-  SingleCaseMetricsResponse,
-  User,
-  CaseUserActionStatsResponse,
-  Case,
-  Cases,
-} from '../../common/api';
 import {
+  AttachmentType,
   CaseRt,
   CasesRt,
-  throwErrors,
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
+  ConfigurationRt,
+  ConfigurationsRt,
   UserActionsRt,
-  CommentType,
+} from '../../common/types/domain';
+import type {
+  CasePatchRequest,
+  CaseResolveResponse,
+  CaseUserActionStatsResponse,
+  SingleCaseMetricsResponse,
+} from '../../common/types/api';
+import {
   CaseResolveResponseRt,
-  SingleCaseMetricsResponseRt,
   CaseUserActionStatsResponseRt,
-} from '../../common/api';
+  SingleCaseMetricsResponseRt,
+} from '../../common/types/api';
+import type {
+  Case,
+  Cases,
+  Configuration,
+  Configurations,
+  User,
+  UserActions,
+} from '../../common/types/domain';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import { throwErrors } from '../../common/api';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 
@@ -67,18 +71,15 @@ export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResp
 export const decodeCasesResponse = (respCase?: Cases) =>
   pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
-export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
+export const decodeCaseConfigurationsResponse = (respCase?: Configurations) => {
   return pipe(
-    CaseConfigurationsResponseRt.decode(respCase),
+    ConfigurationsRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 };
 
-export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =>
-  pipe(
-    CaseConfigureResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+export const decodeCaseConfigureResponse = (respCase?: Configuration) =>
+  pipe(ConfigurationRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseUserActionsResponse = (respUserActions?: UserActions) =>
   pipe(UserActionsRt.decode(respUserActions), fold(throwErrors(createToasterPlainError), identity));
@@ -117,7 +118,7 @@ export const createUpdateSuccessToaster = (
   value: UpdateByKey['updateValue']
 ): ToastInputFields => {
   const caseHasAlerts = caseBeforeUpdate.comments.some(
-    (comment) => comment.type === CommentType.alert
+    (comment) => comment.type === AttachmentType.alert
   );
 
   const toast: ToastInputFields = {

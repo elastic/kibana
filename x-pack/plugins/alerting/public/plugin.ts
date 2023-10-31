@@ -13,8 +13,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/alert_api';
-import { ENABLE_MAINTENANCE_WINDOWS, Rule } from '../common';
-import { MAINTENANCE_WINDOWS_APP_ID } from './config';
+import { ENABLE_MAINTENANCE_WINDOWS, Rule, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -139,7 +138,8 @@ export class AlertingPublicPlugin
 
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
-          return navigationHandler(rule);
+          const navUrl = navigationHandler(rule);
+          if (navUrl) return navUrl;
         }
 
         if (rule.viewInAppRelativeUrl) {

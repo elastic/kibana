@@ -1,24 +1,15 @@
 {
   "snapshot.repository_analyze": {
-    "url_params": {
-      "blob_count": "",
-      "concurrency": "",
-      "read_node_count": "",
-      "early_read_node_count": "",
-      "seed": "",
-      "rare_action_probability": "",
-      "max_blob_size": "",
-      "max_total_data_size": "",
-      "timeout": "",
-      "detailed": "__flag__",
-      "rarely_abort_writes": "__flag__"
-    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_snapshot/{repository}/_analyze"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useEsSearch, useTheme } from '@kbn/observability-plugin/public';
+import { useEsSearch, useTheme } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { useLocations } from './use_locations';
 import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
-  SUMMARY_FILTER,
+  FINAL_SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../contexts';
@@ -39,7 +39,7 @@ export function useStatusByLocation({
         query: {
           bool: {
             filter: [
-              SUMMARY_FILTER,
+              FINAL_SUMMARY_FILTER,
               EXCLUDE_RUN_ONCE_FILTER,
               {
                 term: {

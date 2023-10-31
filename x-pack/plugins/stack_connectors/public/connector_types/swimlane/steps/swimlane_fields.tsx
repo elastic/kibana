@@ -14,9 +14,9 @@ import {
   useFormData,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ComboBoxField, ButtonGroupField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-import { ButtonGroupField } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from '../translations';
 import {
   MappingConfigurationKeys,
@@ -24,6 +24,8 @@ import {
   SwimlaneFieldMappingConfig,
 } from '../types';
 import { isRequiredField, isValidFieldForConnector } from '../helpers';
+
+const { emptyField } = fieldValidators;
 
 const SINGLE_SELECTION = { asPlainText: true };
 const EMPTY_COMBO_BOX_ARRAY: Array<EuiComboBoxOptionOption<string>> | undefined = [];
@@ -176,12 +178,26 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ fields, readOnly }) => {
 
   return (
     <>
-      <ButtonGroupField
-        defaultValue={SwimlaneConnectorType.All}
-        path={'config.connectorType'}
-        label={i18n.SW_CONNECTOR_TYPE_LABEL}
-        legend={i18n.SW_CONNECTOR_TYPE_LABEL}
-        options={connectorTypeButtons}
+      <UseField
+        path="config.connectorType"
+        component={ButtonGroupField}
+        config={{
+          label: i18n.SW_CONNECTOR_TYPE_LABEL,
+          defaultValue: SwimlaneConnectorType.All,
+          validations: [
+            {
+              validator: emptyField(i18n.SW_REQUIRED_CONNECTOR_TYPE),
+            },
+          ],
+        }}
+        componentProps={{
+          euiFieldProps: {
+            legend: i18n.SW_CONNECTOR_TYPE_LABEL,
+            options: connectorTypeButtons,
+            buttonSize: 'm',
+            color: 'primary',
+          },
+        }}
       />
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType.All, 'alertIdConfig') && (
         <MappingField

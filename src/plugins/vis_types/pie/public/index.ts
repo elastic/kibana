@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { VisTypePiePlugin } from './plugin';
+import type { PiePublicConfig } from '../config';
 
 export { pieVisType } from './vis_type';
 export type { Dimensions, Dimension } from './types';
 
-export const plugin = () => new VisTypePiePlugin();
+export const plugin = (initializerContext: PluginInitializerContext<PiePublicConfig>) =>
+  new VisTypePiePlugin(initializerContext);

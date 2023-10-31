@@ -7,39 +7,38 @@
 
 import React, { Component } from 'react';
 
-import { DataView } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiPanel } from '@elastic/eui';
-import { SingleFieldSelect } from '../../../components/single_field_select';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { EuiPanel } from '@elastic/eui';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
-
-import { getGeoPointFields } from '../../../index_pattern_util';
+import { GeoFieldSelect } from '../../../components/geo_field_select';
+import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
+import { getGeoPointFields, getIsTimeseries } from '../../../index_pattern_util';
 import { GeoLineForm } from './geo_line_form';
+import { DEFAULT_LINE_SIMPLIFICATION_SIZE } from './constants';
 
 interface Props {
-  onSourceConfigChange: (
-    sourceConfig: {
-      indexPatternId: string;
-      geoField: string;
-      splitField: string;
-      sortField: string;
-    } | null
-  ) => void;
+  onSourceConfigChange: (sourceConfig: Partial<ESGeoLineSourceDescriptor> | null) => void;
 }
 
 interface State {
   indexPattern: DataView | null;
+  pointFields: DataViewField[];
   geoField: string;
+  groupByTimeseries: boolean;
   splitField: string;
   sortField: string;
+  lineSimplificationSize: number;
 }
 
 export class CreateSourceEditor extends Component<Props, State> {
   state: State = {
     indexPattern: null,
+    pointFields: [],
     geoField: '',
+    groupByTimeseries: false,
     splitField: '',
     sortField: '',
+    lineSimplificationSize: DEFAULT_LINE_SIMPLIFICATION_SIZE,
   };
 
   _onIndexPatternSelect = (indexPattern: DataView) => {
@@ -47,6 +46,8 @@ export class CreateSourceEditor extends Component<Props, State> {
     this.setState(
       {
         indexPattern,
+        pointFields,
+        groupByTimeseries: getIsTimeseries(indexPattern),
         geoField: pointFields.length ? pointFields[0].name : '',
         sortField: indexPattern.timeFieldName ? indexPattern.timeFieldName : '',
       },
@@ -62,6 +63,24 @@ export class CreateSourceEditor extends Component<Props, State> {
     this.setState(
       {
         geoField,
+      },
+      this.previewLayer
+    );
+  };
+
+  _onGroupByTimeseriesChange = (groupByTimeseries: boolean) => {
+    this.setState(
+      {
+        groupByTimeseries,
+      },
+      this.previewLayer
+    );
+  };
+
+  _onLineSimplificationSizeChange = (lineSimplificationSize: number) => {
+    this.setState(
+      {
+        lineSimplificationSize,
       },
       this.previewLayer
     );
@@ -86,11 +105,28 @@ export class CreateSourceEditor extends Component<Props, State> {
   };
 
   previewLayer = () => {
-    const { indexPattern, geoField, splitField, sortField } = this.state;
+    const {
+      indexPattern,
+      geoField,
+      groupByTimeseries,
+      splitField,
+      sortField,
+      lineSimplificationSize,
+    } = this.state;
 
     const sourceConfig =
-      indexPattern && indexPattern.id && geoField && splitField && sortField
-        ? { indexPatternId: indexPattern.id, geoField, splitField, sortField }
+      indexPattern &&
+      indexPattern.id &&
+      geoField &&
+      (groupByTimeseries || (splitField && sortField))
+        ? {
+            indexPatternId: indexPattern.id,
+            geoField,
+            groupByTimeseries,
+            lineSimplificationSize,
+            splitField,
+            sortField,
+          }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
   };
@@ -101,20 +137,12 @@ export class CreateSourceEditor extends Component<Props, State> {
     }
 
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.source.esGeoLine.geofieldLabel', {
-          defaultMessage: 'Geospatial field',
-        })}
-      >
-        <SingleFieldSelect
-          placeholder={i18n.translate('xpack.maps.source.esGeoLine.geofieldPlaceholder', {
-            defaultMessage: 'Select geo field',
-          })}
-          value={this.state.geoField}
-          onChange={this._onGeoFieldSelect}
-          fields={getGeoPointFields(this.state.indexPattern.fields)}
-        />
-      </EuiFormRow>
+      <GeoFieldSelect
+        value={this.state.geoField}
+        onChange={this._onGeoFieldSelect}
+        geoFields={this.state.pointFields}
+        isClearable={false}
+      />
     );
   }
 
@@ -125,9 +153,14 @@ export class CreateSourceEditor extends Component<Props, State> {
 
     return (
       <GeoLineForm
+        isColumnCompressed={false}
         indexPattern={this.state.indexPattern}
+        onGroupByTimeseriesChange={this._onGroupByTimeseriesChange}
+        onLineSimplificationSizeChange={this._onLineSimplificationSizeChange}
         onSortFieldChange={this._onSortFieldSelect}
         onSplitFieldChange={this._onSplitFieldSelect}
+        groupByTimeseries={this.state.groupByTimeseries}
+        lineSimplificationSize={this.state.lineSimplificationSize}
         sortField={this.state.sortField}
         splitField={this.state.splitField}
       />
@@ -138,9 +171,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     return (
       <EuiPanel>
         <GeoIndexPatternSelect
-          value={
-            this.state.indexPattern && this.state.indexPattern.id ? this.state.indexPattern.id : ''
-          }
+          dataView={this.state.indexPattern}
           onChange={this._onIndexPatternSelect}
           isGeoPointsOnly={true}
         />

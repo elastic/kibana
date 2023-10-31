@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsType } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { APM_TELEMETRY_SAVED_OBJECT_ID } from '../../common/apm_saved_object_constants';
 
 export const apmTelemetry: SavedObjectsType = {
@@ -15,5 +16,13 @@ export const apmTelemetry: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {},
+  },
+  modelVersions: {
+    '1': {
+      changes: [],
+      schemas: {
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
   },
 };

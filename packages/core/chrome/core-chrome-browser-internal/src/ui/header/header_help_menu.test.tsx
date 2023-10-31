@@ -10,6 +10,8 @@ import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+
 import { HeaderHelpMenu } from './header_help_menu';
 
 describe('HeaderHelpMenu', () => {
@@ -26,14 +28,23 @@ describe('HeaderHelpMenu', () => {
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
         kibanaDocLink={''}
+        docLinks={docLinksServiceMock.createStartContract()}
+        defaultContentLinks$={of([])}
       />
     );
 
     expect(component.find('EuiButtonEmpty').length).toBe(1); // only the toggle view on/off button
     component.find('EuiButtonEmpty').simulate('click');
 
-    // 4 default links + the toggle button
-    expect(component.find('EuiButtonEmpty').length).toBe(5);
+    const buttons = component.find('EuiButtonEmpty');
+    const buttonTexts = buttons.map((button) => button.text()).filter((text) => text.trim() !== '');
+
+    expect(buttonTexts).toEqual([
+      'Kibana documentation',
+      'Ask Elastic',
+      'Give feedback',
+      'Open an issue in GitHub',
+    ]);
   });
 
   test('it renders the global custom content + the default content', () => {
@@ -63,6 +74,8 @@ describe('HeaderHelpMenu', () => {
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
         kibanaDocLink={''}
+        docLinks={docLinksServiceMock.createStartContract()}
+        defaultContentLinks$={of([])}
       />
     );
 

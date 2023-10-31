@@ -10,8 +10,8 @@ import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Switch, useRouteMatch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -60,8 +60,10 @@ import { AgentsApp } from './sections/agents';
 import { MissingESRequirementsPage } from './sections/agents/agent_requirements_page';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
+import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
+import { ExperimentalFeaturesService } from './services';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -253,12 +255,13 @@ export const FleetAppContext: React.FC<{
     theme$,
     fleetStatus,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const darkModeObservable = useObservable(theme$);
+    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     return (
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
-          <KibanaContextProvider services={{ ...startServices }}>
+          <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
@@ -320,12 +323,13 @@ export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const flyoutContext = useFlyoutContext();
     const fleetStatus = useFleetStatus();
+    const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
 
     return (
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
 
-        <Switch>
+        <Routes>
           <Route path={FLEET_ROUTING_PATHS.agents}>
             <AgentsApp />
           </Route>
@@ -335,6 +339,11 @@ export const AppRoutes = memo(
           <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
             <EnrollmentTokenListPage />
           </Route>
+          {agentTamperProtectionEnabled && (
+            <Route path={FLEET_ROUTING_PATHS.uninstall_tokens}>
+              <UninstallTokenListPage />
+            </Route>
+          )}
           <Route path={FLEET_ROUTING_PATHS.data_streams}>
             <DataStreamApp />
           </Route>
@@ -368,7 +377,7 @@ export const AppRoutes = memo(
               );
             }}
           />
-        </Switch>
+        </Routes>
 
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>

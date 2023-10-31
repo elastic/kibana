@@ -108,6 +108,7 @@ export class MonitoringPlugin
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
           dataViews: pluginsStart.dataViews,
+          infra: pluginsStart.infra,
         };
 
         Legacy.init({
@@ -122,6 +123,7 @@ export class MonitoringPlugin
           usageCollection: deps.usageCollection,
           appMountParameters: deps.appMountParameters,
           dataViews: deps.dataViews,
+          infra: deps.infra,
         });
 
         const config = Object.fromEntries(externalConfig);

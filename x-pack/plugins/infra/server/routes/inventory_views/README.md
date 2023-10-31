@@ -130,26 +130,62 @@ Status code: 404
 
 Creates a new inventory view.
 
+`metric.type`: `"count" | "cpu" | "diskLatency" | "diskSpaceUsage" | "load" | "memory" | "memoryFree" | "memoryTotal" | "normalizedLoad1m" | "tx" | "rx" | "logRate" | "diskIOReadBytes" | "diskIOWriteBytes" | "s3TotalRequests" | "s3NumberOfObjects" | "s3BucketSize" | "s3DownloadBytes" | "s3UploadBytes" | "rdsConnections" | "rdsQueriesExecuted" | "rdsActiveTransactions" | "rdsLatency" | "sqsMessagesVisible" | "sqsMessagesDelayed" | "sqsMessagesSent" | "sqsMessagesEmpty" | "sqsOldestMessage"`
+
+`boundsOverride.max`: `range 0 to 1`
+`boundsOverride.min`: `range 0 to 1`
+
+`sort.by`: `"name" | "value"`
+`sort.direction`: `"asc | "desc"`
+
+`legend.pallete`: `"status" | "temperature" | "cool" | "warm" | "positive" | "negative"`
+
+`view`: `"map" | "table"`
+
 ### Request
 
 - **Method**: POST
 - **Path**: /api/infra/inventory_views
 - **Request body**:
+
   ```json
   {
     "attributes": {
-      "name": "View name",
       "metric": {
-        "type": "cpu"
+          "type": "cpu"
       },
       "sort": {
-        "by": "name",
-        "direction": "desc"
+          "by": "name",
+          "direction": "desc"
       },
-      //...
+      "groupBy": [],
+      "nodeType": "host",
+      "view": "map",
+      "customOptions": [],
+      "customMetrics": [],
+      "boundsOverride": {
+          "max": 1,
+          "min": 0
+      },
+      "autoBounds": true,
+      "accountId": "",
+      "region": "",
+      "autoReload": false,
+      "filterQuery": {
+          "expression": "",
+          "kind": "kuery"
+      },
+      "legend": {
+          "palette": "cool",
+          "steps": 10,
+          "reverseColors": false
+      },
+      "timelineOpen": false,
+      "name": "test-uptime"
     }
   }
-  ```
+  
+```
 
 ### Response
 

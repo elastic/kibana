@@ -30,4 +30,8 @@ describe('asPrettyString', () => {
     expect(asPrettyString(true)).toBe('true');
     expect(asPrettyString(123)).toBe('123');
   });
+
+  test('Converts Symbol into strings', () => {
+    expect(asPrettyString(Symbol('hello'))).toBe('Symbol(hello)');
+  });
 });

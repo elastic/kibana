@@ -5,11 +5,22 @@
  * 2.0.
  */
 
-import { AreaSeries, Axis, Chart, Fit, LineSeries, ScaleType, Settings } from '@elastic/charts';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  Fit,
+  LineSeries,
+  ScaleType,
+  Settings,
+  Tooltip,
+  TooltipType,
+} from '@elastic/charts';
 import React from 'react';
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
 
 interface Data {
@@ -36,18 +47,6 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
 
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
-  const LineAxisComponent =
-    chart === 'line' ? (
-      <Axis
-        id="axis"
-        hide
-        domain={{
-          min: 0,
-          max: 1,
-        }}
-        showGridLines={false}
-      />
-    ) : null;
 
   if (isLoading) {
     return <EuiLoadingChart style={{ minWidth: 60, justifyContent: 'center' }} size="m" mono />;
@@ -59,9 +58,21 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
         baseTheme={baseTheme}
         showLegend={false}
         theme={[theme, EUI_SPARKLINE_THEME_PARTIAL]}
-        tooltip="none"
+        locale={i18n.getLocale()}
       />
-      {LineAxisComponent}
+      <Tooltip type={TooltipType.None} />
+      <Axis
+        id="axis"
+        hide
+        domain={{
+          min: NaN,
+          max: NaN,
+          fit: true,
+        }}
+        gridLine={{
+          visible: false,
+        }}
+      />
       <ChartComponent
         color={color}
         data={data}

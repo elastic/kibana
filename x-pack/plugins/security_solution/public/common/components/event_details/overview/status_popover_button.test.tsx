@@ -45,7 +45,6 @@ const props = {
       fields: {},
     },
   },
-  indexName: '.internal.alerts-security.alerts-default-000001',
   scopeId: 'alerts-page',
   handleOnEventClosed: jest.fn(),
 };

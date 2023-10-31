@@ -7,7 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CaseConnector, ConnectorTypeFields } from '../../common/api';
+import type { CaseConnector, ConnectorTypeFields } from '../../common/types/domain';
 import { getNoneCaseConnector } from '../common/utils';
 import type { ConnectorPersistedFields, ConnectorPersisted } from '../common/types/connectors';
 
@@ -50,13 +50,10 @@ function transformConnectorFieldsToExternalModel(
     type: connector.type,
     fields:
       connector.fields != null && connector.fields.length > 0
-        ? connector.fields.reduce(
-            (fields, { key, value }) => ({
-              ...fields,
-              [key]: value,
-            }),
-            {}
-          )
+        ? connector.fields.reduce((fields, { key, value }) => {
+            fields[key] = value;
+            return fields;
+          }, {} as Record<string, unknown>)
         : null,
   } as ConnectorTypeFields;
 

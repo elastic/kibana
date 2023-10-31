@@ -26,6 +26,12 @@ export const DEPRECATION_TYPE_MAP = {
   ml_settings: i18n.translate('xpack.upgradeAssistant.esDeprecations.mlDeprecationTypeLabel', {
     defaultMessage: 'Machine Learning',
   }),
+  health_indicator: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.healthIndicatorTypeLabel',
+    {
+      defaultMessage: 'Health Indicator',
+    }
+  ),
 };
 
 export const PAGINATION_CONFIG = {

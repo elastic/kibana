@@ -284,6 +284,67 @@
             "returnComment": [
               "The ID of the saved object after it is converted."
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.getMigrationFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "getMigrationFunction",
+            "description": [
+              "\nGets the transform function from a migration object."
+            ],
+            "signature": [
+              "<InputAttributes, MigratedAttributes>(migration: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigration",
+                "text": "SavedObjectMigration"
+              },
+              "<InputAttributes, MigratedAttributes>) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigrationFn",
+                "text": "SavedObjectMigrationFn"
+              },
+              "<InputAttributes, MigratedAttributes>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.getMigrationFunction.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "migration",
+                "description": [
+                  "Migration object or a migration function."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectMigration",
+                    "text": "SavedObjectMigration"
+                  },
+                  "<InputAttributes, MigratedAttributes>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "A migration function."
+            ]
           }
         ],
         "initialIsOpen": false
@@ -381,7 +442,7 @@
             "text": "SavedObjectMigrationMap"
           }
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migrations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -403,7 +464,7 @@
                 "text": "SavedObjectMigrationMap"
               }
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migrations.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -426,7 +487,7 @@
                 "text": "SavedObjectMigrationMap"
               }
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migrations.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -434,6 +495,132 @@
         ],
         "returnComment": [
           "The merged map {@link SavedObjectMigrationMap }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.mergeSavedObjectMigrations",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeSavedObjectMigrations",
+        "description": [
+          "\nComposes two migrations into a single migration.\n```\nmergeSavedObjectMigrations(outer, inner) -> (doc, context) => outer(inner(doc, context), context) }\n```\n\nIf at least one of the migrations is not deferred, the composed migration will not be deferred.\n"
+        ],
+        "signature": [
+          "(outer: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigration",
+            "text": "SavedObjectMigration"
+          },
+          "<unknown, unknown>, inner: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigration",
+            "text": "SavedObjectMigration"
+          },
+          "<unknown, unknown>, rest: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigration",
+            "text": "SavedObjectMigration"
+          },
+          "<unknown, unknown>[]) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigration",
+            "text": "SavedObjectMigration"
+          },
+          "<unknown, unknown>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migrations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.mergeSavedObjectMigrations.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outer",
+            "description": [
+              "Wrapping migration."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigration",
+                "text": "SavedObjectMigration"
+              },
+              "<unknown, unknown>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migrations.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.mergeSavedObjectMigrations.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inner",
+            "description": [
+              "Wrapped migration."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigration",
+                "text": "SavedObjectMigration"
+              },
+              "<unknown, unknown>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migrations.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.mergeSavedObjectMigrations.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "rest",
+            "description": [
+              "Additional wrapped migrations to compose."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigration",
+                "text": "SavedObjectMigration"
+              },
+              "<unknown, unknown>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migrations.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The composed migration can be either a function or an object depending on the input migrations."
         ],
         "initialIsOpen": false
       },

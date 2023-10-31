@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import type { ProcessEvent } from '../../../common';
 import { TTYPlayerControls, TTYPlayerControlsDeps } from '.';
 import { TTYPlayerLineMarkerType } from './tty_player_controls_markers';
 

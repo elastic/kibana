@@ -22,6 +22,7 @@ import type {
   SetDocMigrationStartedState,
   UpdateMappingModelVersionState,
   UpdateDocumentModelVersionsState,
+  UpdateIndexMappingsState,
 } from './state';
 
 describe('actions', () => {
@@ -144,6 +145,69 @@ describe('actions', () => {
         client: context.elasticsearchClient,
         index: state.currentIndex,
         meta: someMeta,
+      });
+    });
+  });
+
+  describe('UPDATE_INDEX_MAPPINGS', () => {
+    describe('when only SO types have been updated', () => {
+      it('calls updateAndPickupMappings with the correct parameters', () => {
+        const state: UpdateIndexMappingsState = {
+          ...createPostDocInitState(),
+          controlState: 'UPDATE_INDEX_MAPPINGS',
+          additiveMappingChanges: {
+            someToken: {},
+          },
+        };
+        const action = actionMap.UPDATE_INDEX_MAPPINGS;
+
+        action(state);
+
+        expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledTimes(1);
+        expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledWith({
+          client: context.elasticsearchClient,
+          index: state.currentIndex,
+          mappings: {
+            properties: {
+              someToken: {},
+            },
+          },
+          batchSize: context.batchSize,
+          query: {
+            bool: {
+              should: [{ term: { type: 'someToken' } }],
+            },
+          },
+        });
+      });
+    });
+
+    describe('when core properties have been updated', () => {
+      it('calls updateAndPickupMappings with the correct parameters', () => {
+        const state: UpdateIndexMappingsState = {
+          ...createPostDocInitState(),
+          controlState: 'UPDATE_INDEX_MAPPINGS',
+          additiveMappingChanges: {
+            managed: {}, // this is a root field
+            someToken: {},
+          },
+        };
+        const action = actionMap.UPDATE_INDEX_MAPPINGS;
+
+        action(state);
+
+        expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledTimes(1);
+        expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledWith({
+          client: context.elasticsearchClient,
+          index: state.currentIndex,
+          mappings: {
+            properties: {
+              managed: {},
+              someToken: {},
+            },
+          },
+          batchSize: context.batchSize,
+        });
       });
     });
   });

@@ -60,6 +60,23 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     return layerDescriptor;
   }
 
+  isLayerLoading(zoom: number) {
+    const isSourceLoading = super.isLayerLoading(zoom);
+    if (isSourceLoading) {
+      return true;
+    }
+
+    // Do not check join loading status when there are no source features. Why?
+    // syncMeta short circuits join loading when there are no source features
+    // because there is no reason to fetch join results when there is nothing to join with
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection || featureCollection?.features?.length === 0) {
+      return false;
+    }
+
+    return this._isLoadingJoins();
+  }
+
   _isTiled(): boolean {
     // Uses untiled maplibre source 'geojson'
     return false;
@@ -266,7 +283,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         return;
       }
 
-      const joinStates = await this._syncJoins(syncContext, style);
+      const joinStates = await this._syncJoins(syncContext, style, sourceResult.featureCollection);
       await performInnerJoins(
         sourceResult,
         joinStates,

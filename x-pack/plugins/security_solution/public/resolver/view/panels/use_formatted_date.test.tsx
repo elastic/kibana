@@ -20,7 +20,7 @@ describe(`useFormattedDate, when the "dateFormat" UI setting is "${uiSetting(
     return <span data-test-subj="useFormattedDateTest">{useFormattedDate(date)}</span>;
   }
   const mockCoreStart = coreMock.createStart();
-  mockCoreStart.uiSettings.get.mockImplementation(uiSetting);
+  mockCoreStart.settings.client.get.mockImplementation(uiSetting);
 
   it.each([
     ['randomString', 'an invalid string', 'Invalid Date'],

@@ -110,13 +110,10 @@ export function readFieldCapsResponse(
           searchable: isSearchable,
           aggregatable: isAggregatable,
           readFromDocValues: false,
-          conflictDescriptions: types.reduce(
-            (acc, esType) => ({
-              ...acc,
-              [esType]: capsByType[esType].indices,
-            }),
-            {}
-          ),
+          conflictDescriptions: types.reduce((acc, esType) => {
+            acc[esType] = capsByType[esType].indices;
+            return acc;
+          }, {} as Record<string, estypes.Indices | undefined>),
           metadata_field: capsByType[types[0]].metadata_field,
         };
         // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
@@ -125,12 +122,16 @@ export function readFieldCapsResponse(
         return agg;
       }
 
-      let timeSeriesMetricType: 'gauge' | 'counter' | undefined;
+      let timeSeriesMetricType: 'gauge' | 'counter' | 'position' | undefined;
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'gauge') {
         timeSeriesMetricType = 'gauge';
       }
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'counter') {
         timeSeriesMetricType = 'counter';
+      }
+
+      if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'position') {
+        timeSeriesMetricType = 'position';
       }
       const esType = types[0];
       const field = {

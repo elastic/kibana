@@ -11,8 +11,8 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -107,7 +107,7 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
     </form>
   ) : (
     <EuiPanel paddingSize="l">
-      <EuiLoadingContent lines={10} />
+      <EuiSkeletonText lines={10} />
     </EuiPanel>
   );
 

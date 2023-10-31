@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CommentRequest } from '../../../common/api';
+import type { AttachmentRequest } from '../../../common/types/api';
 
 export interface Limiter {
   readonly limit: number;
   readonly errorMessage: string;
   countOfItemsWithinCase(caseId: string): Promise<number>;
-  countOfItemsInRequest: (requests: CommentRequest[]) => number;
+  countOfItemsInRequest: (requests: AttachmentRequest[]) => number;
 }

@@ -7,34 +7,23 @@
  */
 
 import * as React from 'react';
-import {
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 export interface PageProps {
   title?: React.ReactNode;
+  sidebar?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
+export const Page: React.FC<PageProps> = ({ title = 'Untitled', sidebar, children }) => {
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{title}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto' }}>
-          {children}
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+    <EuiPageTemplate offset={0} grow={true}>
+      <EuiPageTemplate.Sidebar>{sidebar}</EuiPageTemplate.Sidebar>
+      <EuiPageTemplate.Header>
+        <EuiPageHeader pageTitle={title} />
+      </EuiPageTemplate.Header>
+      <EuiPageTemplate.Section>
+        <EuiPageSection style={{ maxWidth: 800, margin: '0 auto' }}>{children}</EuiPageSection>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

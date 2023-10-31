@@ -44,7 +44,7 @@ function fieldsToOptions(
     });
 }
 
-type Props = Omit<
+export type Props = Omit<
   EuiComboBoxProps<DataViewField>,
   'isDisabled' | 'onChange' | 'options' | 'renderOption' | 'selectedOptions' | 'singleSelection'
 > & {

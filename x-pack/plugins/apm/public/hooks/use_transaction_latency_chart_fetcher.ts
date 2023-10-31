@@ -37,7 +37,6 @@ export function useTransactionLatencyChartsFetcher({
     '/services/{serviceName}',
     '/mobile-services/{serviceName}'
   );
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const preferred = usePreferredDataSourceAndBucketSize({
@@ -45,8 +44,14 @@ export function useTransactionLatencyChartsFetcher({
     numBuckets: 100,
     start,
     end,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
+
+  const shouldUseDurationSummary =
+    latencyAggregationType === 'avg' &&
+    preferred?.source?.hasDurationSummaryField;
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
@@ -73,6 +78,7 @@ export function useTransactionLatencyChartsFetcher({
                 start,
                 end,
                 transactionType,
+                useDurationSummary: !!shouldUseDurationSummary,
                 transactionName: transactionName || undefined,
                 latencyAggregationType,
                 offset:
@@ -89,18 +95,19 @@ export function useTransactionLatencyChartsFetcher({
       }
     },
     [
-      environment,
-      kuery,
+      transactionType,
+      transactionTypeStatus,
       serviceName,
       start,
       end,
-      transactionName,
-      transactionType,
-      transactionTypeStatus,
       latencyAggregationType,
-      offset,
-      comparisonEnabled,
       preferred,
+      environment,
+      kuery,
+      shouldUseDurationSummary,
+      transactionName,
+      comparisonEnabled,
+      offset,
     ]
   );
 

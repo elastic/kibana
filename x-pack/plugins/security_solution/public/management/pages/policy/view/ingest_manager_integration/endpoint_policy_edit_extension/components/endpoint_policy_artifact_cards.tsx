@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import {
   BLOCKLISTS_LABELS,
@@ -178,7 +178,7 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
     const canAccessArtifactContent = useCanAccessSomeArtifacts();
 
     if (loading) {
-      return <EuiLoadingContent lines={4} />;
+      return <EuiSkeletonText lines={4} />;
     }
 
     if (!canAccessArtifactContent) {

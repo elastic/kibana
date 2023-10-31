@@ -141,7 +141,11 @@ export const HoverActionsPopover: React.FC<Props> = ({
           {showHoverContent && (
             <div css={hoverContentWrapperCSS}>
               <EuiScreenReaderOnly>
-                <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field.name)}</p>
+                <p>
+                  {YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(
+                    actionContext.data.map(({ field }) => field.name).join(', ')
+                  )}
+                </p>
               </EuiScreenReaderOnly>
               {visibleActions.map((action) => (
                 <ActionItem
@@ -149,6 +153,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
                   action={action}
                   actionContext={actionContext}
                   showTooltip={showActionTooltips}
+                  onClick={closePopover}
                 />
               ))}
               {extraActions.length > 0 && (

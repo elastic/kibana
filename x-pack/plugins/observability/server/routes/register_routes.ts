@@ -4,23 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
+import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import {
   decodeRequestParams,
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
-import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
-import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-
+import axios from 'axios';
+import * as t from 'io-ts';
+import { ObservabilityConfig } from '..';
+import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
-import { getHTTPResponseCode, ObservabilityError } from '../errors';
 
 interface RegisterRoutes {
+  config: ObservabilityConfig;
   core: CoreSetup;
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
@@ -28,11 +30,14 @@ interface RegisterRoutes {
 }
 
 export interface RegisterRoutesDependencies {
+  pluginsSetup: {
+    core: CoreSetup;
+  };
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
 }
 
-export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {
+export function registerRoutes({ config, repository, core, logger, dependencies }: RegisterRoutes) {
   const routes = Object.values(repository);
 
   const router = core.http.createRouter();
@@ -58,13 +63,14 @@ export function registerRoutes({ repository, core, logger, dependencies }: Regis
             params ?? t.strict({})
           );
 
-          const data = (await handler({
+          const data = await handler({
+            config,
             context,
             request,
             logger,
             params: decodedParams,
             dependencies,
-          })) as any;
+          });
 
           if (data === undefined) {
             return response.noContent();
@@ -76,6 +82,16 @@ export function registerRoutes({ repository, core, logger, dependencies }: Regis
             logger.error(error.message);
             return response.customError({
               statusCode: getHTTPResponseCode(error),
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
+          if (axios.isAxiosError(error)) {
+            logger.error(error);
+            return response.customError({
+              statusCode: error.response?.status || 500,
               body: {
                 message: error.message,
               },

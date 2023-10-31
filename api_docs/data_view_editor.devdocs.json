@@ -1,7 +1,309 @@
 {
   "id": "dataViewEditor",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "dataViewEditor",
+        "id": "def-public.DataViewEditorService",
+        "type": "Class",
+        "tags": [],
+        "label": "DataViewEditorService",
+        "description": [],
+        "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViewEditor",
+                "id": "def-public.DataViewEditorService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    services: { http, dataViews },\n    initialValues: {\n      type: initialType = INDEX_PATTERN_TYPE.DEFAULT,\n      indexPattern: initialIndexPattern = '',\n      name: initialName = '',\n    },\n    requireTimestampField = false,\n  }",
+                "description": [],
+                "signature": [
+                  "DataViewEditorServiceConstructorArgs"
+                ],
+                "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.dataViewNames$",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewNames$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<string[]>"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.rollupIndicesCaps$",
+            "type": "Object",
+            "tags": [],
+            "label": "rollupIndicesCaps$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "RollupIndicesCapsResponse",
+              ">"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.isLoadingSources$",
+            "type": "Object",
+            "tags": [],
+            "label": "isLoadingSources$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.loadingTimestampFields$",
+            "type": "Object",
+            "tags": [],
+            "label": "loadingTimestampFields$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.timestampFieldOptions$",
+            "type": "Object",
+            "tags": [],
+            "label": "timestampFieldOptions$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "TimestampOption",
+              "[]>"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.rollupIndex$",
+            "type": "Object",
+            "tags": [],
+            "label": "rollupIndex$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<string | null | undefined>"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.matchedIndices$",
+            "type": "Object",
+            "tags": [],
+            "label": "matchedIndices$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "MatchedIndicesSet",
+              ">"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.setIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "setIndexPattern",
+            "description": [],
+            "signature": [
+              "(indexPattern: string) => void"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViewEditor",
+                "id": "def-public.DataViewEditorService.setIndexPattern.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.setAllowHidden",
+            "type": "Function",
+            "tags": [],
+            "label": "setAllowHidden",
+            "description": [],
+            "signature": [
+              "(allowHidden: boolean) => void"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViewEditor",
+                "id": "def-public.DataViewEditorService.setAllowHidden.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "allowHidden",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.setType",
+            "type": "Function",
+            "tags": [],
+            "label": "setType",
+            "description": [],
+            "signature": [
+              "(type: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.INDEX_PATTERN_TYPE",
+                "text": "INDEX_PATTERN_TYPE"
+              },
+              ") => void"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViewEditor",
+                "id": "def-public.DataViewEditorService.setType.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "public",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-public.INDEX_PATTERN_TYPE",
+                    "text": "INDEX_PATTERN_TYPE"
+                  }
+                ],
+                "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.indexPatternValidationProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "indexPatternValidationProvider",
+            "description": [],
+            "signature": [
+              "() => Promise<{ rollupIndex: string | null | undefined; matchedIndices: ",
+              "MatchedIndicesSet",
+              "; }>"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [
       {
@@ -298,6 +600,28 @@
           "path": "src/plugins/data_view_editor/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "dataViewEditor",
+          "id": "def-public.PluginStart.dataViewEditorServiceFactory",
+          "type": "Function",
+          "tags": [],
+          "label": "dataViewEditorServiceFactory",
+          "description": [
+            "\nHelper method to generate a new data view editor service."
+          ],
+          "signature": [
+            "() => Promise<typeof ",
+            "src/plugins/data_view_editor/public/data_view_editor_service_lazy",
+            ">"
+          ],
+          "path": "src/plugins/data_view_editor/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": [
+            "DataViewEditorService"
+          ]
         }
       ],
       "lifecycle": "start",

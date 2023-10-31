@@ -67,8 +67,14 @@ export class DiscoverSearchSessionManager {
         this.deps.session.restore(searchSessionIdFromURL);
       }
     }
-
     return searchSessionIdFromURL ?? this.deps.session.start();
+  }
+
+  /**
+   * Get current search session id
+   */
+  getCurrentSearchSessionId() {
+    return this.deps.session.getSessionId();
   }
 
   /**

@@ -25,6 +25,7 @@ interface OptionalMetricOptions {
   type?: string;
   isNotSupportedInInternalCollection?: boolean;
   technicalPreview?: boolean;
+  legendFormat?: string;
 }
 
 interface DefaultMetricOptions {
@@ -40,6 +41,7 @@ export class Metric {
   public label!: string;
   public description!: string;
   public format!: string;
+  public legendFormat?: string;
   public units!: string;
   public timestampField!: string;
   public app?: string;
@@ -101,6 +103,7 @@ export class Metric {
       'description',
       'units',
       'format',
+      'legendFormat',
       'technicalPreview',
     ];
 

@@ -11,6 +11,7 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -28,6 +29,8 @@ export interface UpdateAndPickupMappingsParams {
   client: ElasticsearchClient;
   index: string;
   mappings: IndexMapping;
+  batchSize: number;
+  query?: QueryDslQueryContainer;
 }
 /**
  * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
@@ -37,6 +40,8 @@ export const updateAndPickupMappings = ({
   client,
   index,
   mappings,
+  batchSize,
+  query,
 }: UpdateAndPickupMappingsParams): TaskEither.TaskEither<
   RetryableEsClientError,
   UpdateAndPickupMappingsResponse
@@ -74,7 +79,7 @@ export const updateAndPickupMappings = ({
   return pipe(
     putMappingTask,
     TaskEither.chain((res) => {
-      return pickupUpdatedMappings(client, index);
+      return pickupUpdatedMappings(client, index, batchSize, query);
     })
   );
 };

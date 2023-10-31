@@ -56,14 +56,10 @@ Predicting the buffer required to account for actions depends heavily on the rul
 
 experimental[]
 
-Alerts and actions log activity in a set of "event log" indices.  These indices are configured with an index lifecycle management (ILM) policy, which you can customize.  The default policy rolls over the index when it reaches 50GB, or after 30 days.  Indices over 90 days old are deleted.
+Alerts and actions log activity in a set of "event log" data streams, one per Kibana version, named `.kibana-event-log-{VERSION}`.  These data streams are configured with a lifecycle data retention of 90 days. This can be updated to other values via the standard data stream lifecycle APIs.  Note that the event log data contains the data shown in the alerting pages in {kib}, so reducing the data retention period will result in less data being available to view.
 
-The name of the index policy is `kibana-event-log-policy`.  {kib} creates the index policy on startup, if it doesn't already exist.  The index policy can be customized for your environment, but {kib} never modifies the index policy after creating it.
-
-Because {kib} uses the documents to display historic data, you should set the delete phase longer than you would like the historic data to be shown. For example, if you would like to see one month's worth of historic data, you should set the delete phase to at least one month.
-
-For more information on index lifecycle management, see:
-{ref}/index-lifecycle-management.html[Index Lifecycle Policies].
+For more information on data stream lifecycle management, see:
+{ref}/data-stream-lifecycle.html[Data stream lifecycle].
 
 [float]
 [[alerting-circuit-breakers]]
@@ -75,6 +71,11 @@ There are several scenarios where running alerting rules and actions can start t
 ==== Rules with very short intervals
 
 Running large numbers of rules at very short intervals can quickly clog up Task Manager throughput, leading to higher schedule drift. Use `xpack.alerting.rules.minimumScheduleInterval.value` to set a minimum schedule interval for rules. The default (and recommended) value for this configuration is `1m`. Use `xpack.alerting.rules.minimumScheduleInterval.enforce` to specify whether to strictly enforce this minimum. While the default value for this setting is `false` to maintain backwards compatibility with existing rules, set this to `true` to prevent new and updated rules from running at an interval below the minimum.
+
+Another related setting is `xpack.alerting.rules.maxScheduledPerMinute`, which limits the number of rules that can run per minute.
+For example if it's set to `400`, you can have 400 rules with one minute check intervals or 2,000 rules with 5 minute check intervals.
+You cannot create or edit a rule if its check interval would cause this setting to be exceeded.
+To stay within this limit, delete or disable some rules or update the check intervals so that your rules run less frequently.
 
 [float]
 ==== Rules that run for a long time

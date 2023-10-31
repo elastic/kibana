@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { convertNumberToDashboardVersion } from '../services/dashboard_content_management/lib/dashboard_versioning';
+
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
+
+export const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(1);
 
 export type { DashboardContainer } from './embeddable/dashboard_container';
 export {

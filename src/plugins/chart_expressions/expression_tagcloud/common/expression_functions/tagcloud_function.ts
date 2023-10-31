@@ -20,7 +20,7 @@ const strings = {
   help: i18n.translate('expressionTagcloud.functions.tagcloudHelpText', {
     defaultMessage: 'Tagcloud visualization.',
   }),
-  args: {
+  argHelp: {
     scale: i18n.translate('expressionTagcloud.functions.tagcloud.args.scaleHelpText', {
       defaultMessage: 'Scale to determine font size of a word',
     }),
@@ -47,6 +47,12 @@ const strings = {
     }),
     ariaLabel: i18n.translate('expressionTagcloud.functions.tagcloud.args.ariaLabelHelpText', {
       defaultMessage: 'Specifies the aria label of the tagcloud',
+    }),
+    isPreview: i18n.translate('expressionTagcloud.functions.tagcloud.args.isPreviewHelpText', {
+      defaultMessage: 'Set isPreview to true to avoid showing out of room warnings',
+    }),
+    colorMapping: i18n.translate('expressionTagcloud.layer.colorMapping.help', {
+      defaultMessage: 'JSON key-value pairs of the color mapping model',
     }),
   },
   dimension: {
@@ -81,7 +87,7 @@ export const errors = {
 };
 
 export const tagcloudFunction: ExpressionTagcloudFunction = () => {
-  const { help, args: argHelp, dimension } = strings;
+  const { help, argHelp, dimension } = strings;
 
   return {
     name: EXPRESSION_NAME,
@@ -137,6 +143,16 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         help: argHelp.ariaLabel,
         required: false,
       },
+      isPreview: {
+        types: ['boolean'],
+        help: argHelp.isPreview,
+        default: false,
+        required: false,
+      },
+      colorMapping: {
+        types: ['string'],
+        help: argHelp.colorMapping,
+      },
     },
     fn(input, args, handlers) {
       validateAccessor(args.metric, input.columns);
@@ -157,6 +173,8 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
           args.ariaLabel ??
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
+        isPreview: Boolean(args.isPreview),
+        colorMapping: args.colorMapping,
       };
 
       if (handlers?.inspectorAdapters?.tables) {

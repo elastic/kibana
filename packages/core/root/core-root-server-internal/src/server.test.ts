@@ -79,6 +79,7 @@ test('preboot services on "preboot"', async () => {
   expect(mockLoggingService.preboot).not.toHaveBeenCalled();
   expect(mockPluginsService.preboot).not.toHaveBeenCalled();
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
+  expect(mockStatusService.preboot).not.toHaveBeenCalled();
 
   await server.preboot();
 
@@ -93,6 +94,7 @@ test('preboot services on "preboot"', async () => {
   expect(mockLoggingService.preboot).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.preboot).toHaveBeenCalledTimes(1);
   expect(mockPrebootService.preboot).toHaveBeenCalledTimes(1);
+  expect(mockStatusService.preboot).toHaveBeenCalledTimes(1);
 });
 
 test('sets up services on "setup"', async () => {

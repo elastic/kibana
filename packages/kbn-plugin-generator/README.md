@@ -53,9 +53,9 @@ Generated plugins receive a handful of scripts that can be used during developme
 
 > ***NOTE:*** The following scripts should be run from the generated plugin root folder.
 
-  - `yarn kbn bootstrap`
+  - `yarn bootstrap`
 
-    Install dependencies and crosslink Kibana and all projects/plugins.
+    Install dependencies both on Kibana and in your plugin.
 
     > ***IMPORTANT:*** Use this script instead of `yarn` to install dependencies when switching branches, and re-run it whenever your dependencies change.
 

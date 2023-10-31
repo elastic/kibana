@@ -13,8 +13,17 @@ import { NetworkContainer } from './network/pages';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
-import { HOSTS_PATH, NETWORK_PATH, USERS_PATH } from '../../common/constants';
+import { EXPLORE_PATH, HOSTS_PATH, NETWORK_PATH, USERS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { ExploreLandingPage } from './landing';
+
+const ExploreLanding = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
+      <ExploreLandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
 
 const NetworkRoutes = () => (
   <PluginTemplateWrapper>
@@ -41,6 +50,11 @@ const HostsRoutes = () => (
 );
 
 export const routes: SecuritySubPluginRoutes = [
+  {
+    path: EXPLORE_PATH,
+    exact: true,
+    component: ExploreLanding,
+  },
   {
     path: NETWORK_PATH,
     component: NetworkRoutes,

@@ -39,6 +39,7 @@ export { Redact } from './redact';
 export { RegisteredDomain } from './registered_domain';
 export { Remove } from './remove';
 export { Rename } from './rename';
+export { Reroute } from './reroute';
 export { Script } from './script';
 export { SetProcessor } from './set';
 export { SetSecurityUser } from './set_security_user';

@@ -13,7 +13,7 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import {
   UiSettingsCommon,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   SavedObject,
   DataViewSpec,
   IDataViewsApiClient,
@@ -60,7 +60,7 @@ const savedObject = {
 describe('IndexPatterns', () => {
   let indexPatterns: DataViewsService;
   let indexPatternsNoAccess: DataViewsService;
-  let savedObjectsClient: SavedObjectsClientCommon;
+  let savedObjectsClient: PersistenceAPI;
   let SOClientGetDelay = 0;
   let apiClient: IDataViewsApiClient;
   const uiSettings = {
@@ -73,11 +73,11 @@ describe('IndexPatterns', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    savedObjectsClient = {} as SavedObjectsClientCommon;
+    savedObjectsClient = {} as PersistenceAPI;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
-    savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
+    savedObjectsClient.delete = jest.fn(() => Promise.resolve() as Promise<any>);
     savedObjectsClient.create = jest.fn();
     savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => {
       await new Promise((resolve) => setTimeout(resolve, SOClientGetDelay));
@@ -87,29 +87,27 @@ describe('IndexPatterns', () => {
         attributes: object.attributes,
       };
     });
-    savedObjectsClient.update = jest
-      .fn()
-      .mockImplementation(async (type, id, body, { version }) => {
-        if (object.version !== version) {
-          throw new Object({
-            res: {
-              status: 409,
-            },
-          });
-        }
-        object.attributes.title = body.title;
-        object.version += 'a';
-        return {
-          id: object.id,
-          version: object.version,
-        };
-      });
+    savedObjectsClient.update = jest.fn().mockImplementation(async (id, body, { version }) => {
+      if (object.version !== version) {
+        throw new Object({
+          res: {
+            status: 409,
+          },
+        });
+      }
+      object.attributes.title = body.title;
+      object.version += 'a';
+      return {
+        id: object.id,
+        version: object.version,
+      };
+    });
 
     apiClient = createFieldsFetcher();
 
     indexPatterns = new DataViewsService({
       uiSettings,
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjectsClient as unknown as PersistenceAPI,
       apiClient,
       fieldFormats,
       onNotification: () => {},
@@ -117,11 +115,12 @@ describe('IndexPatterns', () => {
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(true),
       getCanSaveAdvancedSettings: () => Promise.resolve(true),
+      scriptedFieldsEnabled: true,
     });
 
     indexPatternsNoAccess = new DataViewsService({
       uiSettings,
-      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjectsClient as unknown as PersistenceAPI,
       apiClient,
       fieldFormats,
       onNotification: () => {},
@@ -129,6 +128,7 @@ describe('IndexPatterns', () => {
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(false),
       getCanSaveAdvancedSettings: () => Promise.resolve(false),
+      scriptedFieldsEnabled: true,
     });
   });
 
@@ -267,7 +267,6 @@ describe('IndexPatterns', () => {
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      type: 'index-pattern',
       fields: ['title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
@@ -376,10 +375,9 @@ describe('IndexPatterns', () => {
     await indexPatterns.find('kibana*', size);
 
     expect(savedObjectsClient.find).lastCalledWith({
-      type: 'index-pattern',
       fields: ['title'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'name'],
       perPage: size,
     });
   });
@@ -449,17 +447,46 @@ describe('IndexPatterns', () => {
     dataView.setFieldFormat('field', { id: 'formatId' });
     await indexPatterns.updateSavedObject(dataView);
     let lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
-    let [, , attrs] = lastCall;
+    let [, attrs] = lastCall;
     expect(attrs).toHaveProperty('fieldFormatMap');
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{\\"field\\":{\\"id\\":\\"formatId\\"}}"`);
     dataView.deleteFieldFormat('field');
     await indexPatterns.updateSavedObject(dataView);
     lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
-    [, , attrs] = lastCall;
+    [, attrs] = lastCall;
 
     // https://github.com/elastic/kibana/issues/134873: must keep an empty object and not delete it
     expect(attrs).toHaveProperty('fieldFormatMap');
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
+  });
+
+  describe('defaultDataViewExists', () => {
+    beforeEach(() => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+    });
+
+    test('return true if exists', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(true);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('return false if no default data view found', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(false);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
   });
 
   describe('getDefaultDataView', () => {
@@ -472,8 +499,10 @@ describe('IndexPatterns', () => {
       uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
       savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
       savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      jest.spyOn(indexPatterns, 'refreshFields');
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      expect(indexPatterns.refreshFields).not.toBeCalled();
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);
@@ -554,7 +583,7 @@ describe('IndexPatterns', () => {
 
       savedObjectsClient.get = jest
         .fn()
-        .mockImplementation((type: string, id: string) =>
+        .mockImplementation((id: string) =>
           Promise.resolve({ id, version: 'a', attributes: { title: 'title' } })
         );
 
@@ -586,7 +615,7 @@ describe('IndexPatterns', () => {
 
       savedObjectsClient.get = jest
         .fn()
-        .mockImplementation((type: string, id: string) =>
+        .mockImplementation((id: string) =>
           Promise.resolve({ id, version: 'a', attributes: { title: '1' } })
         );
 

@@ -23,7 +23,7 @@ export const findSourceValue = (
   const foundEntry = Object.entries(listItem).find(
     ([key, value]) => types.includes(key) && value != null
   );
-  if (foundEntry != null) {
+  if (foundEntry != null && foundEntry[1] !== null) {
     const [foundType, value] = foundEntry;
     switch (foundType) {
       case 'shape':

@@ -59,12 +59,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     if (error) {
       edges.forEach((edge) => {
         if (edge.fields) {
-          edge.fields['error.skipped'] = edge.fields.error = [
-            i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedErrorText', {
-              defaultMessage:
-                "This query hasn't been called due to parameter used and its value not found in the alert.",
-            }),
-          ];
+          edge.fields['error.skipped'] = edge.fields.error = [error];
         }
       });
     } else if (expired) {

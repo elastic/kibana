@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const browser = getService('browser');
 
-  function getTranslationFr(term: string) {
+  function getTranslationFr(term: string, field?: string, values: number = 3) {
     switch (term) {
       case 'legacyMetric':
         return 'Ancien indicateur';
@@ -53,6 +53,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return 'enregistrements';
       case 'moving_average':
         return 'Moyenne mobile de';
+      case 'average':
+        return field ? `Moyenne de ${field}` : `Moyenne`;
+      case 'max':
+        return field ? `Maximum de ${field}` : 'Maximum';
+      case 'terms':
+        return field ? `${values} principales valeurs de ${field}` : 'Valeurs les plus élevées';
       case 'sum':
         return 'somme';
       default:
@@ -60,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
-  function getTranslationJa(term: string) {
+  function getTranslationJa(term: string, field?: string, values: number = 3) {
     switch (term) {
       case 'legacyMetric':
         return 'レガシーメトリック';
@@ -91,6 +97,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '記録';
       case 'moving_average':
         return 'の移動平均';
+      case 'average':
+        return field ? `${field} の平均` : `平均`;
+      case 'max':
+        return field ? `${field} お最高値` : '最高';
+      case 'terms':
+        return field ? `${field}の上位の${values} 値` : 'トップの値';
       case 'sum':
         return '合計';
       default:
@@ -98,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
-  function getTranslationZh(term: string) {
+  function getTranslationZh(term: string, field?: string, values: number = 3) {
     switch (term) {
       case 'legacyMetric':
         return '旧版指标';
@@ -129,6 +141,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '记录';
       case 'moving_average':
         return '的移动平均值';
+      case 'average':
+        return field ? `${field} 的平均值` : '平均值';
+      case 'max':
+        return field ? `${field} 的最大值` : '最大值';
+      case 'terms':
+        return field ? `${field} 的排名前 ${values} 的值` : `排名最前值`;
       case 'sum':
         return '求和';
       default:
@@ -136,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
-  function getExpectedI18nTranslator(locale: string): (chartType: string) => string {
+  function getExpectedI18nTranslator(locale: string): (term: string, field?: string) => string {
     switch (locale) {
       case 'ja-JP':
         return getTranslationJa;
@@ -145,12 +163,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'fr-FR':
         return getTranslationFr;
       default:
-        return (v: string) => v;
+        return (v: string, field?: string) => v;
     }
   }
 
   describe('lens smokescreen tests', () => {
-    let termTranslator: (chartType: string) => string;
+    let termTranslator: (term: string, field?: string, values?: number) => string;
 
     before(async () => {
       const serverArgs: string[] = config.get('kbnTestServer.serverArgs');
@@ -225,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('xyVisChart');
 
       // Verify that the field was persisted from the transition
-      expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`ip : *`, `geo.src : CN`]);
+      expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`"ip" : *`, `geo.src : CN`]);
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
     });
 
@@ -234,15 +252,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertLegacyMetric(termTranslator('max', 'bytes'), '19,986');
       await PageObjects.lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
-      expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('Maximum of bytes');
+      expect(await PageObjects.lens.getDatatableHeaderText()).to.eql(
+        termTranslator('max', 'bytes')
+      );
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('19,986');
       await PageObjects.lens.switchToVisualization(
         'lnsLegacyMetric',
         termTranslator('legacyMetric')
       );
-      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertLegacyMetric(termTranslator('max', 'bytes'), '19,986');
     });
 
     it('should transition from a multi-layer stacked bar to a multi-layer line chart and correctly remove all layers', async () => {
@@ -305,7 +325,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionColor('#ff0000');
       await PageObjects.lens.openVisualOptions();
 
-      await PageObjects.lens.useCurvedLines();
+      await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues(termTranslator('Linear'));
@@ -437,10 +457,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
-        'Top values of ip'
+        termTranslator('terms', 'ip')
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
-        'Average of bytes'
+        termTranslator('average', 'bytes')
       );
 
       expect(await PageObjects.lens.hasChartSwitchWarning('bar', termTranslator('bar'))).to.eql(
@@ -449,10 +469,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('bar', termTranslator('bar'));
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-        'Top values of ip'
+        termTranslator('terms', 'ip')
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        'Average of bytes'
+        termTranslator('average', 'bytes')
       );
     });
 
@@ -467,10 +487,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '@timestamp'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        'Average of bytes'
+        termTranslator('average', 'bytes')
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-        'Top values of ip'
+        termTranslator('terms', 'ip')
       );
     });
 
@@ -485,9 +505,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('treemap', termTranslator('treemap'));
       expect(
         await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
-      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
+      ).to.eql([termTranslator('terms', 'geo.dest', 7), termTranslator('terms', 'geo.src')]);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
-        'Average of bytes'
+        termTranslator('average', 'bytes')
       );
     });
 
@@ -516,7 +536,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Need to provide a fn for these
       //   expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
-      //   expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql('Average of bytes');
+      expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql(
+        termTranslator('average', 'bytes')
+      );
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });

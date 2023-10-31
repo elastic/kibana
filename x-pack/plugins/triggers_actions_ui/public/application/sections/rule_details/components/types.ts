@@ -15,4 +15,10 @@ export interface AlertListItem {
   sortPriority: number;
   flapping: boolean;
   maintenanceWindowIds?: string[];
+  tracked: boolean;
+}
+
+export interface RefreshToken {
+  resolve: () => void;
+  reject: () => void;
 }

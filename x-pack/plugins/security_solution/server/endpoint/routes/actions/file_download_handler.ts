@@ -6,11 +6,12 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { validateActionId, getFileDownloadStream, validateActionFileId } from '../../services';
+import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
+import { EndpointActionFileDownloadSchema } from '../../../../common/api/endpoint';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { validateActionId } from '../../services';
 import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
-import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
-import { EndpointActionFileDownloadSchema } from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type { EndpointAppContext } from '../../types';
 import type {
@@ -24,18 +25,29 @@ export const registerActionFileDownloadRoutes = (
 ) => {
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
+      // NOTE:
+      // Because this API is used in the browser via `href` (ex. on link to download a file),
+      // we need to enable setting the version number via query params
+      enableQueryVersion: true,
       path: ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
-      validate: EndpointActionFileDownloadSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      getActionFileDownloadRouteHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionFileDownloadSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        getActionFileDownloadRouteHandler(endpointContext)
+      )
+    );
 };
 
 export const getActionFileDownloadRouteHandler = (
@@ -49,14 +61,22 @@ export const getActionFileDownloadRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
   return async (context, req, res) => {
-    const { action_id: actionId, file_id: fileId } = req.params;
+    const fleetFiles = await endpointContext.service.getFleetFromHostFilesClient();
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const { action_id: actionId, file_id: fileId } = req.params;
 
     try {
       await validateActionId(esClient, actionId);
-      await validateActionFileId(esClient, logger, fileId, actionId);
+      const file = await fleetFiles.get(fileId);
 
-      const { stream, fileName } = await getFileDownloadStream(esClient, logger, fileId);
+      if (file.id !== fileId) {
+        throw new CustomHttpRequestError(
+          `Invalid file id [${fileId}] for action [${actionId}]`,
+          400
+        );
+      }
+
+      const { stream, fileName } = await fleetFiles.download(fileId);
 
       return res.ok({
         body: stream,

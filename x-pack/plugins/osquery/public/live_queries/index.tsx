@@ -6,7 +6,7 @@
  */
 
 import { castArray, isEmpty, pickBy } from 'lodash';
-import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCode, EuiSkeletonText, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useContext, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -100,7 +100,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId]);
 
   if (isLoading) {
-    return <EuiLoadingContent lines={10} />;
+    return <EuiSkeletonText lines={10} />;
   }
 
   if (!hasActionResultsPrivileges) {

@@ -10,7 +10,6 @@ import { pick, transform, uniq } from 'lodash';
 
 import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 
-import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
 import type {
   CheckPrivileges,
@@ -24,10 +23,10 @@ import type {
   HasPrivilegesResponseApplication,
 } from './types';
 import { validateEsPrivilegeResponse } from './validate_es_response';
+import { GLOBAL_RESOURCE } from '../../common/constants';
 
 interface CheckPrivilegesActions {
   login: string;
-  version: string;
 }
 
 export function checkPrivilegesFactory(
@@ -35,14 +34,6 @@ export function checkPrivilegesFactory(
   getClusterClient: () => Promise<IClusterClient>,
   applicationName: string
 ) {
-  const hasIncompatibleVersion = (
-    applicationPrivilegesResponse: HasPrivilegesResponseApplication
-  ) => {
-    return Object.values(applicationPrivilegesResponse).some(
-      (resource) => !resource[actions.version] && resource[actions.login]
-    );
-  };
-
   const createApplicationPrivilegesCheck = (
     resources: string[],
     kibanaPrivileges: string | string[],
@@ -56,7 +47,6 @@ export function checkPrivilegesFactory(
       application: applicationName,
       resources,
       privileges: uniq([
-        actions.version,
         ...(requireLoginAction ? [actions.login] : []),
         ...normalizedKibanaPrivileges,
       ]),
@@ -162,12 +152,6 @@ export function checkPrivilegesFactory(
           })),
         };
       }, {});
-
-      if (hasIncompatibleVersion(applicationPrivilegesResponse)) {
-        throw new Error(
-          'Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.'
-        );
-      }
 
       // we need to filter out the non requested privileges from the response
       const resourcePrivileges = transform(applicationPrivilegesResponse, (result, value, key) => {

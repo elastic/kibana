@@ -30,10 +30,10 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
         .catch(withDefaultIfNotFound<InfraDatabaseGetIndicesResponse>({})),
     ]);
 
-    return indexMaps.reduce(
-      (indexNames, indexMap) => [...indexNames, ...Object.keys(indexMap)],
-      [] as string[]
-    );
+    return indexMaps.reduce((indexNames, indexMap) => {
+      indexNames.push(...Object.keys(indexMap));
+      return indexNames;
+    }, [] as string[]);
   }
 
   public async hasAlias(requestContext: InfraPluginRequestHandlerContext, aliasName: string) {

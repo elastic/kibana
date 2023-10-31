@@ -7,12 +7,13 @@
 
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObjectError } from '@kbn/core/types';
 import type { KueryNode } from '@kbn/es-query';
 import type {
-  CommentAttributes,
-  CommentRequestExternalReferenceSOType,
+  AttachmentAttributes,
+  ExternalReferenceSOAttachmentPayload,
   FileAttachmentMetadata,
-} from '../../common/api';
+} from '../../common/types/domain';
 
 /**
  * This structure holds the alert ID and index from an alert comment
@@ -42,10 +43,12 @@ export type SavedObjectFindOptionsKueryNode = FindOptions & {
 };
 
 export type FileAttachmentRequest = Omit<
-  CommentRequestExternalReferenceSOType,
+  ExternalReferenceSOAttachmentPayload,
   'externalReferenceMetadata'
 > & {
   externalReferenceMetadata: FileAttachmentMetadata;
 };
 
-export type AttachmentSavedObject = SavedObject<CommentAttributes>;
+export type AttachmentSavedObject = SavedObject<AttachmentAttributes>;
+
+export type SOWithErrors<T> = Omit<SavedObject<T>, 'attributes'> & { error: SavedObjectError };

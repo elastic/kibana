@@ -18,7 +18,7 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Ecommerce No Map Dashboard', async ({ page, kbnUrl }) => {
+  .step('Go to Ecommerce No Map Dashboard', async ({ page }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Map-Only'));
     await page.waitForSelector(
       'div[data-title="[eCommerce] Orders by Country"][data-render-complete="true"]'

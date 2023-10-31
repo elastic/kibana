@@ -13,7 +13,7 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -26,6 +26,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('delete_rules', () => {
     describe('deleting rules', () => {
@@ -34,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -45,6 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -58,6 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${bodyWithCreatedRule.rule_id}`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
@@ -71,6 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?id=${bodyWithCreatedRule.id}`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
@@ -81,6 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?id=c1e1b359-7ac1-4e96-bc81-c683c092436f`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .expect(404);
 
         expect(body).to.eql({
@@ -93,6 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=fake_id`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .expect(404);
 
         expect(body).to.eql({

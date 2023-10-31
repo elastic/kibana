@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
+import React from 'react';
+import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings';
+import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings_query';
 import { useRuleSnoozeSettings } from './use_rule_snooze_settings';
 
 interface RuleSnoozeBadgeProps {
@@ -31,33 +30,13 @@ export function RuleSnoozeBadge({
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
-  const isLoading = !snoozeSettings;
-  const rule = useMemo(
-    () => ({
-      id: snoozeSettings?.id ?? '',
-      muteAll: snoozeSettings?.muteAll ?? false,
-      activeSnoozes: snoozeSettings?.activeSnoozes ?? [],
-      isSnoozedUntil: snoozeSettings?.isSnoozedUntil
-        ? new Date(snoozeSettings.isSnoozedUntil)
-        : undefined,
-      snoozeSchedule: snoozeSettings?.snoozeSchedule,
-      isEditable: hasCRUDPermissions,
-    }),
-    [snoozeSettings, hasCRUDPermissions]
-  );
-
-  if (error) {
-    return (
-      <EuiToolTip content={error}>
-        <EuiButtonIcon size="s" iconType="bellSlash" disabled />
-      </EuiToolTip>
-    );
-  }
 
   return (
     <RulesListNotifyBadge
-      rule={rule}
-      isLoading={isLoading}
+      ruleId={ruleId}
+      snoozeSettings={snoozeSettings}
+      loading={!snoozeSettings && !error}
+      disabled={!hasCRUDPermissions || error}
       showTooltipInline={showTooltipInline}
       onRuleChanged={invalidateFetchRuleSnoozeSettings}
     />

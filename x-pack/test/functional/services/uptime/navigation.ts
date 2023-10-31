@@ -32,7 +32,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
   return {
     async refreshApp() {
       await browser.refresh();
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await PageObjects.common.sleep(1000);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 

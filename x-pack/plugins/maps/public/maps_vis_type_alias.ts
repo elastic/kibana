@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { VisualizationsSetup, VisualizationStage } from '@kbn/visualizations-plugin/public';
+import type { VisualizationStage } from '@kbn/visualizations-plugin/public';
 import type { MapItem } from '../common/content_management';
 import {
   APP_ID,
@@ -16,10 +16,9 @@ import {
   MAP_PATH,
   MAP_SAVED_OBJECT_TYPE,
 } from '../common/constants';
+import { getMapClient } from './content_management';
 
-export function getMapsVisTypeAlias(visualizations: VisualizationsSetup) {
-  visualizations.hideTypes(['region_map', 'tile_map']);
-
+export function getMapsVisTypeAlias() {
   const appDescription = i18n.translate('xpack.maps.visTypeAlias.description', {
     defaultMessage: 'Create and style maps with multiple layers and indices.',
   });
@@ -36,6 +35,7 @@ export function getMapsVisTypeAlias(visualizations: VisualizationsSetup) {
       visualizations: {
         docTypes: [MAP_SAVED_OBJECT_TYPE],
         searchFields: ['title^3'],
+        client: getMapClient,
         toListItem(mapItem: MapItem) {
           const { id, type, updatedAt, attributes } = mapItem;
           const { title, description } = attributes;

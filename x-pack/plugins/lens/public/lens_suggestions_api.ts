@@ -85,6 +85,9 @@ export const suggestionsApi = ({
     visualizationState: activeVisualization.visualizationState,
     dataViews,
   }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
-
-  return [activeVisualization, ...newSuggestions];
+  const suggestionsList = [activeVisualization, ...newSuggestions];
+  // until we separate the text based suggestions logic from the dataview one,
+  // we want to sort XY first
+  const sortXYFirst = suggestionsList.sort((a, b) => (a.visualizationId === 'lnsXY' ? -1 : 1));
+  return sortXYFirst;
 };

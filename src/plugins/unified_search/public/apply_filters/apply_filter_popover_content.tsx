@@ -18,6 +18,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 import {
   getDisplayValueFromFilter,
@@ -77,6 +78,9 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
               label={this.getLabel(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
+              css={css`
+                word-break: break-word;
+              `}
             />
           </EuiFormRow>
         ))}

@@ -5,116 +5,85 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import type { UseUpdateComment } from './use_update_comment';
-import { useUpdateComment } from './use_update_comment';
 import { basicCase } from './mock';
 import * as api from './api';
-import { TestProviders } from '../common/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
+import { useToasts } from '../common/lib/kibana';
+import { casesQueriesKeys } from './constants';
+import { useUpdateComment } from './use_update_comment';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
-jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
 describe('useUpdateComment', () => {
-  const abortCtrl = new AbortController();
-  const fetchUserActions = jest.fn();
-  const updateCase = jest.fn();
   const sampleUpdate = {
     caseId: basicCase.id,
     commentId: basicCase.comments[0].id,
     commentUpdate: 'updated comment',
-    fetchUserActions,
-    updateCase,
     version: basicCase.comments[0].version,
   };
 
-  const renderHookUseUpdateComment = () =>
-    renderHook<string, UseUpdateComment>(() => useUpdateComment(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-    });
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+
+  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
+    appMockRender = createAppMockRenderer();
   });
 
-  it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoadingIds: [],
-        isError: false,
-        patchComment: result.current.patchComment,
-      });
+  it('patch case and refresh the case page', async () => {
+    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+
+    const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
+      wrapper: appMockRender.AppWrapper,
     });
-  });
 
-  it('calls patchComment with correct arguments - case', async () => {
-    const spyOnPatchComment = jest.spyOn(api, 'patchComment');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-
-      result.current.patchComment(sampleUpdate);
-      await waitForNextUpdate();
-      expect(spyOnPatchComment).toBeCalledWith({
-        caseId: basicCase.id,
-        commentId: basicCase.comments[0].id,
-        commentUpdate: 'updated comment',
-        version: basicCase.comments[0].version,
-        signal: abortCtrl.signal,
-        owner: SECURITY_SOLUTION_OWNER,
-      });
+    act(() => {
+      result.current.mutate(sampleUpdate);
     });
+
+    await waitForNextUpdate();
+
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
   });
 
-  it('patch comment', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-      result.current.patchComment(sampleUpdate);
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoadingIds: [],
-        isError: false,
-        patchComment: result.current.patchComment,
-      });
-      expect(useRefreshCaseViewPage()).toBeCalled();
+  it('calls the api when invoked with the correct parameters', async () => {
+    const patchCommentSpy = jest.spyOn(api, 'patchComment');
+    const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    act(() => {
+      result.current.mutate(sampleUpdate);
+    });
+
+    await waitForNextUpdate();
+
+    expect(patchCommentSpy).toHaveBeenCalledWith({
+      ...sampleUpdate,
+      owner: 'securitySolution',
     });
   });
 
-  it('set isLoading to true when posting case', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-      result.current.patchComment(sampleUpdate);
+  it('shows a toast error when the api return an error', async () => {
+    jest.spyOn(api, 'patchComment').mockRejectedValue(new Error('useUpdateComment: Test error'));
 
-      expect(result.current.isLoadingIds).toEqual([basicCase.comments[0].id]);
-    });
-  });
-
-  it('unhappy path', async () => {
-    const spyOnPatchComment = jest.spyOn(api, 'patchComment');
-    spyOnPatchComment.mockImplementation(() => {
-      throw new Error('Something went wrong');
+    const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
+      wrapper: appMockRender.AppWrapper,
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
-      await waitForNextUpdate();
-      result.current.patchComment(sampleUpdate);
-
-      expect(result.current).toEqual({
-        isLoadingIds: [],
-        isError: true,
-        patchComment: result.current.patchComment,
-      });
+    act(() => {
+      result.current.mutate(sampleUpdate);
     });
+
+    await waitForNextUpdate();
+
+    expect(addError).toHaveBeenCalled();
   });
 });

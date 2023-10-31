@@ -12,6 +12,8 @@ import expect from '@kbn/expect';
 import request from 'superagent';
 import type SuperTest from 'supertest';
 import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { FtrService } from '../ftr_provider_context';
 
 const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
@@ -33,6 +35,7 @@ interface SendOptions {
   options: object;
   strategy: string;
   space?: string;
+  internalOrigin: string;
 }
 
 export class BsearchSecureService extends FtrService {
@@ -43,6 +46,7 @@ export class BsearchSecureService extends FtrService {
     auth,
     referer,
     kibanaVersion,
+    internalOrigin,
     options,
     strategy,
     space,
@@ -56,6 +60,7 @@ export class BsearchSecureService extends FtrService {
         result = await supertestWithoutAuth
           .post(url)
           .auth(auth.username, auth.password)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('referer', referer)
           .set('kbn-version', kibanaVersion)
           .set('kbn-xsrf', 'true')
@@ -64,6 +69,7 @@ export class BsearchSecureService extends FtrService {
         result = await supertestWithoutAuth
           .post(url)
           .auth(auth.username, auth.password)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('referer', referer)
           .set('kbn-xsrf', 'true')
           .send(options);
@@ -71,13 +77,23 @@ export class BsearchSecureService extends FtrService {
         result = await supertestWithoutAuth
           .post(url)
           .auth(auth.username, auth.password)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-version', kibanaVersion)
+          .set('kbn-xsrf', 'true')
+          .send(options);
+      } else if (internalOrigin) {
+        result = await supertestWithoutAuth
+          .post(url)
+          .auth(auth.username, auth.password)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('x-elastic-internal-origin', internalOrigin)
           .set('kbn-xsrf', 'true')
           .send(options);
       } else {
         result = await supertestWithoutAuth
           .post(url)
           .auth(auth.username, auth.password)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'true')
           .send(options);
       }
@@ -96,6 +112,8 @@ export class BsearchSecureService extends FtrService {
         .post(`${spaceUrl}/internal/bsearch`)
         .auth(auth.username, auth.password)
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
         .send({
           batch: [
             {

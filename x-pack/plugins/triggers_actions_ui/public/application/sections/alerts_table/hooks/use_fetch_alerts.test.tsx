@@ -6,11 +6,13 @@
  */
 
 import sinon from 'sinon';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useFetchAlerts, FetchAlertsArgs, FetchAlertResp } from './use_fetch_alerts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useState } from 'react';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -88,6 +90,7 @@ const expectedResponse: FetchAlertResp = {
 
 describe('useFetchAlerts', () => {
   let clock: sinon.SinonFakeTimers;
+  const onPageChangeMock = jest.fn();
   const args: FetchAlertsArgs = {
     featureIds: ['siem'],
     fields: [
@@ -101,6 +104,7 @@ describe('useFetchAlerts', () => {
       pageIndex: 0,
       pageSize: 10,
     },
+    onPageChange: onPageChangeMock,
     sort: [],
     skip: false,
   };
@@ -282,9 +286,8 @@ describe('useFetchAlerts', () => {
     ]);
   });
 
-  it('returns the correct response if the request is undefined', () => {
-    // @ts-expect-error
-    const obs$ = of<IKibanaSearchResponse>(undefined);
+  it('handles search error', () => {
+    const obs$ = throwError('simulated search error');
     dataSearchMock.mockReturnValue(obs$);
     const { result } = renderHook(() => useFetchAlerts(args));
 
@@ -304,7 +307,7 @@ describe('useFetchAlerts', () => {
     expect(showErrorMock).toHaveBeenCalled();
   });
 
-  it('returns the correct response if the request is running', () => {
+  it('returns the correct response if the search response is running', () => {
     const obs$ = of<IKibanaSearchResponse>({ ...searchResponse, isRunning: true });
     dataSearchMock.mockReturnValue(obs$);
     const { result } = renderHook(() => useFetchAlerts(args));
@@ -321,47 +324,6 @@ describe('useFetchAlerts', () => {
         updatedAt: 0,
       },
     ]);
-  });
-
-  it('returns the correct response if the request is partial', () => {
-    const obs$ = of<IKibanaSearchResponse>({ ...searchResponse, isPartial: true });
-    dataSearchMock.mockReturnValue(obs$);
-    const { result } = renderHook(() => useFetchAlerts(args));
-
-    expect(result.current).toEqual([
-      false,
-      {
-        ...expectedResponse,
-        alerts: [],
-        getInspectQuery: expect.anything(),
-        refetch: expect.anything(),
-        isInitializing: true,
-        totalAlerts: -1,
-        updatedAt: 0,
-      },
-    ]);
-    expect(showErrorMock).toHaveBeenCalled();
-  });
-
-  it('returns the correct response if there is no rawResponse', () => {
-    // @ts-expect-error
-    const obs$ = of<IKibanaSearchResponse>({ id: '1', isRunning: true, isPartial: false });
-    dataSearchMock.mockReturnValue(obs$);
-    const { result } = renderHook(() => useFetchAlerts(args));
-
-    expect(result.current).toEqual([
-      false,
-      {
-        ...expectedResponse,
-        alerts: [],
-        getInspectQuery: expect.anything(),
-        refetch: expect.anything(),
-        isInitializing: true,
-        totalAlerts: -1,
-        updatedAt: 0,
-      },
-    ]);
-    expect(showErrorMock).toHaveBeenCalled();
   });
 
   it('returns the correct total alerts if the total alerts in the response is an object', () => {
@@ -473,5 +435,76 @@ describe('useFetchAlerts', () => {
         updatedAt: 0,
       },
     ]);
+  });
+
+  it('reset pagination when query is used', async () => {
+    const useWrapperHook = ({ query }: { query: Pick<QueryDslQueryContainer, 'bool' | 'ids'> }) => {
+      const [pagination, setPagination] = useState({ pageIndex: 5, pageSize: 10 });
+      const handlePagination = (newPagination: { pageIndex: number; pageSize: number }) => {
+        onPageChangeMock(newPagination);
+        setPagination(newPagination);
+      };
+      const result = useFetchAlerts({
+        ...args,
+        pagination,
+        onPageChange: handlePagination,
+        query,
+      });
+      return result;
+    };
+
+    const { rerender } = renderHook(
+      ({ initialValue }) =>
+        useWrapperHook({
+          query: initialValue,
+        }),
+      {
+        initialProps: { initialValue: {} },
+      }
+    );
+
+    expect(dataSearchMock).lastCalledWith(
+      {
+        featureIds: args.featureIds,
+        fields: [...args.fields],
+        pagination: {
+          pageIndex: 5,
+          pageSize: 10,
+        },
+        query: {},
+        sort: args.sort,
+      },
+      { abortSignal: expect.anything(), strategy: 'privateRuleRegistryAlertsSearchStrategy' }
+    );
+
+    rerender({
+      initialValue: {
+        ids: {
+          values: ['alert-id-1'],
+        },
+      },
+    });
+
+    expect(dataSearchMock).lastCalledWith(
+      {
+        featureIds: args.featureIds,
+        fields: [...args.fields],
+        pagination: {
+          pageIndex: 0,
+          pageSize: 10,
+        },
+        query: {
+          ids: {
+            values: ['alert-id-1'],
+          },
+        },
+        sort: args.sort,
+      },
+      { abortSignal: expect.anything(), strategy: 'privateRuleRegistryAlertsSearchStrategy' }
+    );
+    expect(onPageChangeMock).lastCalledWith({
+      pageIndex: 0,
+      pageSize: 10,
+    });
   });
 });

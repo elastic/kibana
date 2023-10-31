@@ -6,7 +6,7 @@
  */
 
 import { isCrossClusterSearch } from './is_cross_cluster_search';
-import { ApmIndicesConfig } from '@kbn/observability-plugin/common/typings';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 describe('isCrossClusterSearch', () => {
@@ -17,7 +17,7 @@ describe('isCrossClusterSearch', () => {
         span: 'traces-apm*',
         metric: 'metrics-apm*',
         error: 'logs-apm*',
-      } as ApmIndicesConfig,
+      } as APMIndices,
     } as unknown as APMEventClient;
 
     expect(isCrossClusterSearch(mockApmEventClient)).toBe(false);
@@ -30,7 +30,7 @@ describe('isCrossClusterSearch', () => {
         span: 'traces-apm*,test-apm*',
         metric: 'metrics-apm*,test-apm*',
         error: 'logs-apm*,test-apm*',
-      } as ApmIndicesConfig,
+      } as APMIndices,
     } as unknown as APMEventClient;
 
     expect(isCrossClusterSearch(mockApmEventClient)).toBe(false);
@@ -44,7 +44,7 @@ describe('isCrossClusterSearch', () => {
         metric: '',
         error: '',
         onboarding: 'apm-*,remote_cluster:apm-*',
-      } as ApmIndicesConfig,
+      } as APMIndices,
     } as unknown as APMEventClient;
 
     expect(isCrossClusterSearch(mockApmEventClient)).toBe(false);
@@ -57,7 +57,7 @@ describe('isCrossClusterSearch', () => {
         span: '',
         metric: '',
         error: '',
-      } as ApmIndicesConfig,
+      } as APMIndices,
     } as unknown as APMEventClient;
 
     expect(isCrossClusterSearch(mockApmEventClient)).toBe(true);
@@ -70,7 +70,7 @@ describe('isCrossClusterSearch', () => {
         span: 'traces-apm*,remote_cluster:traces-apm*',
         metric: '',
         error: '',
-      } as ApmIndicesConfig,
+      } as APMIndices,
     } as unknown as APMEventClient;
 
     expect(isCrossClusterSearch(mockApmEventClient)).toBe(true);
@@ -83,7 +83,7 @@ describe('isCrossClusterSearch', () => {
         span: '',
         metric: 'metrics-apm*,remote_cluster:metrics-apm*',
         error: '',
-      } as ApmIndicesConfig,
+      } as APMIndices,
     } as unknown as APMEventClient;
 
     expect(isCrossClusterSearch(mockApmEventClient)).toBe(true);
@@ -96,7 +96,7 @@ describe('isCrossClusterSearch', () => {
         span: '',
         metric: '',
         error: 'logs-apm*,remote_cluster:logs-apm*',
-      } as ApmIndicesConfig,
+      } as APMIndices,
     } as unknown as APMEventClient;
 
     expect(isCrossClusterSearch(mockApmEventClient)).toBe(true);

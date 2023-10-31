@@ -11,8 +11,8 @@ import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
   EnvironmentField,
@@ -29,10 +29,10 @@ import {
 
 interface AlertParams {
   anomalySeverityType?:
-    | ANOMALY_SEVERITY.CRITICAL
-    | ANOMALY_SEVERITY.MAJOR
-    | ANOMALY_SEVERITY.MINOR
-    | ANOMALY_SEVERITY.WARNING;
+    | ML_ANOMALY_SEVERITY.CRITICAL
+    | ML_ANOMALY_SEVERITY.MAJOR
+    | ML_ANOMALY_SEVERITY.MINOR
+    | ML_ANOMALY_SEVERITY.WARNING;
   environment?: string;
   serviceName?: string;
   transactionType?: string;
@@ -63,7 +63,7 @@ export function TransactionDurationAnomalyRuleType(props: Props) {
     {
       windowSize: 30,
       windowUnit: TIME_UNITS.MINUTE,
-      anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
+      anomalySeverityType: ML_ANOMALY_SEVERITY.CRITICAL,
       environment: ENVIRONMENT_ALL.value,
     }
   );

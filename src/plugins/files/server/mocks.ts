@@ -9,7 +9,8 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import * as stream from 'stream';
-import { File } from '../common';
+import { clone } from 'lodash';
+import { File, FileJSON } from '../common';
 import { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.';
 
 export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> => ({
@@ -33,7 +34,9 @@ export const createFileServiceFactoryMock = (): DeeplyMockedKeys<FileServiceFact
   asScoped: jest.fn((_: KibanaRequest) => createFileServiceMock()),
 });
 
-export const createFileMock = (): DeeplyMockedKeys<File> => {
+export const createFileMock = <Meta = unknown>(
+  fileDataOverride: Partial<FileJSON<Meta>> = {}
+): DeeplyMockedKeys<File> => {
   const fileMock: DeeplyMockedKeys<File> = {
     id: '123',
     data: {
@@ -48,6 +51,8 @@ export const createFileMock = (): DeeplyMockedKeys<File> => {
       alt: undefined,
       fileKind: 'none',
       status: 'READY',
+
+      ...fileDataOverride,
     },
     update: jest.fn(),
     uploadContent: jest.fn(),
@@ -56,7 +61,9 @@ export const createFileMock = (): DeeplyMockedKeys<File> => {
     share: jest.fn(),
     listShares: jest.fn(),
     unshare: jest.fn(),
-    toJSON: jest.fn(),
+    toJSON: jest.fn(() => {
+      return clone(fileMock.data);
+    }),
   };
 
   fileMock.update.mockResolvedValue(fileMock);
@@ -65,8 +72,10 @@ export const createFileMock = (): DeeplyMockedKeys<File> => {
   return fileMock;
 };
 
-export const createFileClientMock = (): DeeplyMockedKeys<FileClient> => {
-  const fileMock = createFileMock();
+export const createFileClientMock = <Meta = unknown>(
+  fileDataOverride: Partial<FileJSON<Meta>> = {}
+): DeeplyMockedKeys<FileClient> => {
+  const fileMock = createFileMock(fileDataOverride);
 
   return {
     fileKind: 'none',

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
   ) {
     const { body, status } = await supertest
       .get(
-        `${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors${
+        `${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors${
           jobOrGroup ? `/${jobOrGroup}` : ''
         }/_stats`
       )
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;

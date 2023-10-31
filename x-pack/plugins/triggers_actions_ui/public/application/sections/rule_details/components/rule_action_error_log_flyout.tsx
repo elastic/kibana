@@ -23,10 +23,11 @@ import {
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { RuleErrorLogWithApi } from './rule_error_log';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
+import { RefreshToken } from './types';
 
 export interface RuleActionErrorLogFlyoutProps {
   runLog: IExecutionLog;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   onClose: () => void;
   activeSpaceId?: string;
 }

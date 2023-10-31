@@ -291,6 +291,13 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
+  async getFieldFilterTabCount() {
+    return await this.retry.try(async () => {
+      const text = await this.testSubjects.getVisibleText('tab-sourceFilters');
+      return text.split(' ')[2].replace(/\((.*)\)/, '$1');
+    });
+  }
+
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
     return await Promise.all(
@@ -343,6 +350,19 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
+  async setSchemaFieldTypeFilter(type: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('schemaFieldTypeFilterDropdown');
+      await this.find.byCssSelector(
+        '.euiPopover-isOpen[data-test-subj="schemaFieldTypeFilterDropdown-popover"]'
+      );
+    });
+    await this.testSubjects.existOrFail(`schemaFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.click(`schemaFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.existOrFail(`schemaFieldTypeFilterDropdown-option-${type}-checked`);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
@@ -745,6 +765,23 @@ export class SettingsPageObject extends FtrService {
     if (doSaveField) {
       await this.clickSaveField();
     }
+  }
+
+  async editFieldFilter(name: string, newName: string) {
+    await this.testSubjects.click(`edit_filter-${name}`);
+    await this.testSubjects.setValue(`filter_input_${name}`, newName);
+    await this.testSubjects.click(`save_filter-${name}`);
+
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be changed', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await Promise.all(
+        tableCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
+      return fieldNames.includes(newName);
+    });
   }
 
   async addFieldFilter(name: string) {

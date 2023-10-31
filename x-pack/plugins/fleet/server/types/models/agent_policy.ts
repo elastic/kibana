@@ -35,6 +35,7 @@ export const AgentPolicyBaseSchema = {
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
     )
   ),
+  keep_monitoring_alive: schema.maybe(schema.boolean({ defaultValue: false })),
   data_output_id: schema.maybe(schema.nullable(schema.string())),
   monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
   download_source_id: schema.maybe(schema.nullable(schema.string())),
@@ -44,6 +45,18 @@ export const AgentPolicyBaseSchema = {
       schema.object({
         name: schema.string(),
         enabled: schema.boolean(),
+      })
+    )
+  ),
+  is_protected: schema.maybe(schema.boolean()),
+  overrides: schema.maybe(
+    schema.nullable(
+      schema.recordOf(schema.string(), schema.any(), {
+        validate: (val) => {
+          if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
+            return 'inputs overrides is not allowed';
+          }
+        },
       })
     )
   ),

@@ -6,7 +6,7 @@
  */
 import React, { ReactElement } from 'react';
 import moment from 'moment';
-import { EuiDescriptionList, EuiLoadingContent, EuiToolTip } from '@elastic/eui';
+import { EuiDescriptionList, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
@@ -18,7 +18,7 @@ export const MonitorDetailsLastRun: React.FC = () => {
     : '--';
 
   if (!latestPing && pingsLoading) {
-    description = <EuiLoadingContent lines={1} />;
+    description = <EuiSkeletonText lines={1} />;
   }
 
   return (

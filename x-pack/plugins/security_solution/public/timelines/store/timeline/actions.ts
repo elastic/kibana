@@ -22,7 +22,6 @@ import type {
   TimelineNonEcsData,
 } from '../../../../common/search_strategy/timeline';
 import type {
-  RowRendererId,
   TimelineTabs,
   TimelinePersistInput,
   SerializedFilterQuery,
@@ -30,6 +29,7 @@ import type {
   ColumnHeaderOptions,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
+import type { RowRendererId } from '../../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
@@ -271,3 +271,13 @@ export const clearEventsDeleted = actionCreator<{
 export const updateTotalCount = actionCreator<{ id: string; totalCount: number }>(
   'UPDATE_TOTAL_COUNT'
 );
+
+export const updateSavedSearchId = actionCreator<{
+  id: string;
+  savedSearchId: string;
+}>('UPDATE_DISCOVER_SAVED_SEARCH_ID');
+
+export const setIsDiscoverSavedSearchLoaded = actionCreator<{
+  id: string;
+  isDiscoverSavedSearchLoaded: boolean;
+}>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');

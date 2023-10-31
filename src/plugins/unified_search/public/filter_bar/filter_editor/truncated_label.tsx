@@ -15,7 +15,7 @@ import { throttle } from 'lodash';
 interface TruncatedLabelProps {
   label: string;
   search: string;
-  comboBoxRef: RefObject<HTMLInputElement>;
+  comboBoxWrapperRef: RefObject<HTMLDivElement | null>;
   defaultFont: string;
   defaultComboboxWidth: number;
   comboboxPaddings: number;
@@ -56,7 +56,7 @@ const truncateLabel = (
 
 export const TruncatedLabel = React.memo(function TruncatedLabel({
   label,
-  comboBoxRef,
+  comboBoxWrapperRef,
   search,
   defaultFont,
   defaultComboboxWidth,
@@ -69,15 +69,14 @@ export const TruncatedLabel = React.memo(function TruncatedLabel({
     width: defaultComboboxWidth - comboboxPaddings,
     font: defaultFont,
   });
-
   const computeStyles = (_e: UIEvent | undefined, shouldRecomputeAll = false) => {
-    if (comboBoxRef.current) {
+    if (comboBoxWrapperRef.current) {
       const current = {
         ...labelProps,
-        width: comboBoxRef.current?.clientWidth - comboboxPaddings,
+        width: comboBoxWrapperRef.current.clientWidth - comboboxPaddings,
       };
       if (shouldRecomputeAll) {
-        current.font = window.getComputedStyle(comboBoxRef.current).font;
+        current.font = window.getComputedStyle(comboBoxWrapperRef.current).font;
       }
       setLabelProps(current);
     }
@@ -88,7 +87,7 @@ export const TruncatedLabel = React.memo(function TruncatedLabel({
   }, 50);
 
   useEffectOnce(() => {
-    if (comboBoxRef.current) {
+    if (comboBoxWrapperRef.current) {
       handleResize(undefined, true);
     }
 

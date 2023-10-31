@@ -10,7 +10,8 @@ import type { GetLensAttributes } from '../../types';
 const layerId = uuidv4();
 
 export const getEventsHistogramLensAttributes: GetLensAttributes = (
-  stackByField = 'event.action'
+  stackByField = 'event.action',
+  extraOptions = {}
 ) => {
   return {
     title: 'Events',
@@ -21,7 +22,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
         title: 'Empty XY chart',
         legend: {
           isVisible: true,
-          position: 'left',
+          position: 'right',
           legendSize: 'xlarge',
         },
         valueLabels: 'hide',
@@ -49,12 +50,13 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: true,
         },
+        valuesInLegend: true,
       },
       query: {
         query: '',
         language: 'kuery',
       },
-      filters: [],
+      filters: extraOptions.filters ?? [],
       datasourceStates: {
         formBased: {
           layers: {

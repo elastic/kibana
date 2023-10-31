@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCallOut,
   EuiCode,
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -14,6 +15,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { METRICS_INDEX_PATTERN } from '../../../../common/constants';
@@ -23,12 +25,30 @@ interface IndicesConfigurationPanelProps {
   isLoading: boolean;
   readOnly: boolean;
   metricAliasFieldProps: InputFieldProps;
+  metricIndicesExist?: boolean;
+  remoteClustersExist?: boolean;
 }
+
+const METRIC_INDICES_WARNING_TITLE = i18n.translate(
+  'xpack.infra.sourceConfiguration.metricIndicesDoNotExistTitle',
+  {
+    defaultMessage: 'No matching index found',
+  }
+);
+
+const REMOTE_CLUSTER_ERROR_TITLE = i18n.translate(
+  'xpack.infra.sourceConfiguration.remoteClusterConnectionDoNotExistTitle',
+  {
+    defaultMessage: 'Couldn’t connect to the remote cluster',
+  }
+);
 
 export const IndicesConfigurationPanel = ({
   isLoading,
   readOnly,
   metricAliasFieldProps,
+  metricIndicesExist,
+  remoteClustersExist,
 }: IndicesConfigurationPanelProps) => (
   <EuiForm>
     <EuiTitle size="s">
@@ -85,6 +105,41 @@ export const IndicesConfigurationPanel = ({
           {...metricAliasFieldProps}
         />
       </EuiFormRow>
+      {remoteClustersExist && !metricIndicesExist && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            title={METRIC_INDICES_WARNING_TITLE}
+            color="warning"
+            iconType="warning"
+            data-test-subj="infraIndicesPanelSettingsWarningCallout"
+          >
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.metricIndicesDoNotExist"
+              defaultMessage="We couldn’t find any metrics data because the pattern entered doesn’t match any index."
+            />
+          </EuiCallOut>
+        </>
+      )}
+      {!remoteClustersExist && !metricIndicesExist && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            data-test-subj="infraIndicesPanelSettingsDangerCallout"
+            size="s"
+            title={REMOTE_CLUSTER_ERROR_TITLE}
+            color="danger"
+            iconType="error"
+          >
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.remoteClusterConnectionDoNotExist"
+              defaultMessage="Check that the remote cluster is available or that the remote connection settings are
+              correct."
+            />
+          </EuiCallOut>
+        </>
+      )}
     </EuiDescribedFormGroup>
   </EuiForm>
 );

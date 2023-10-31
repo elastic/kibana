@@ -10,7 +10,7 @@ import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useUiTracker } from '../../../hooks/use_track_metric';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import { useExpViewTimeRange } from './hooks/use_time_range';

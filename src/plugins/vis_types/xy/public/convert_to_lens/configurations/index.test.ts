@@ -28,6 +28,7 @@ describe('getConfiguration', () => {
       seriesIdsMap: { 1: '1' },
       collapseFn: 'max',
       isReferenceLineLayer: false,
+      ignoreGlobalFilters: false,
     },
     {
       indexPatternId: '',
@@ -41,6 +42,7 @@ describe('getConfiguration', () => {
       seriesIdsMap: { 4: '2' },
       collapseFn: undefined,
       isReferenceLineLayer: false,
+      ignoreGlobalFilters: false,
     },
     {
       indexPatternId: '',
@@ -51,6 +53,7 @@ describe('getConfiguration', () => {
       seriesIdsMap: {},
       collapseFn: undefined,
       isReferenceLineLayer: true,
+      ignoreGlobalFilters: false,
     },
   ];
   const series = [

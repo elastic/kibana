@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   MonitorOverviewResult,
@@ -16,14 +15,6 @@ import {
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 import { MonitorOverviewPageState } from './models';
-import { SyntheticsMonitor } from '../../../../../common/runtime_types';
-import { API_URLS } from '../../../../../common/constants';
-
-export const fetchSyntheticsMonitor = async (
-  monitorId: string
-): Promise<SavedObject<SyntheticsMonitor>> => {
-  return apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`);
-};
 
 function toMonitorOverviewQueryArgs(
   pageState: MonitorOverviewPageState

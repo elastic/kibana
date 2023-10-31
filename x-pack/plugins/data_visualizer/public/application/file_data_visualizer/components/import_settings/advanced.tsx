@@ -200,7 +200,6 @@ const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => 
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
-          syntaxChecking={false}
           onChange={onChange}
         />
       </EuiFormRow>
@@ -225,7 +224,6 @@ const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
-          syntaxChecking={false}
           onChange={onChange}
         />
       </EuiFormRow>
@@ -250,7 +248,6 @@ const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) =>
           readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
-          syntaxChecking={false}
           onChange={onChange}
         />
       </EuiFormRow>

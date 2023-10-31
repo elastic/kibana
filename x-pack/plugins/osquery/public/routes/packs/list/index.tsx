@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
@@ -66,7 +66,7 @@ const PacksPageComponent = () => {
 
   const Content = useMemo(() => {
     if (isLoadingAssetsStatus || isLoadingPacks) {
-      return <EuiLoadingContent lines={10} />;
+      return <EuiSkeletonText lines={10} />;
     }
 
     if (showEmptyState) {

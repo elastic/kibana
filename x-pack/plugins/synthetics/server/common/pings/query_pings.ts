@@ -10,7 +10,8 @@ import {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFnParams } from '../../legacy_uptime/lib/adapters/framework';
+import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
+import { UptimeEsClient } from '../../lib';
 import {
   GetPingsParams,
   HttpResponseBody,
@@ -20,43 +21,6 @@ import {
 
 const DEFAULT_PAGE_SIZE = 25;
 
-/**
- * This branch of filtering is used for monitors of type `browser`. This monitor
- * type represents an unbounded set of steps, with each `check_group` representing
- * a distinct journey. The document containing the `summary` field is indexed last, and
- * contains the data necessary for querying a journey.
- *
- * Because of this, when querying for "pings", it is important that we treat `browser` summary
- * checks as the "ping" we want. Without this filtering, we will receive >= N pings for a journey
- * of N steps, because an individual step may also contain multiple documents.
- */
-const REMOVE_NON_SUMMARY_BROWSER_CHECKS = {
-  must_not: [
-    {
-      bool: {
-        filter: [
-          {
-            term: {
-              'monitor.type': 'browser',
-            },
-          },
-          {
-            bool: {
-              must_not: [
-                {
-                  exists: {
-                    field: 'summary',
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
-
 function isStringArray(value: unknown): value is string[] {
   if (!Array.isArray(value)) return false;
   // are all array items strings
@@ -65,21 +29,15 @@ function isStringArray(value: unknown): value is string[] {
 }
 
 type QueryFields = Array<QueryDslFieldAndFormat | Field>;
-type GetParamsWithFields<F> = UMElasticsearchQueryFnParams<
-  GetPingsParams & { fields: QueryFields; fieldsExtractorFn: (doc: any) => F }
->;
-type GetParamsWithoutFields = UMElasticsearchQueryFnParams<GetPingsParams>;
+type GetParamsWithFields<F> = GetPingsParams & {
+  fields: QueryFields;
+  fieldsExtractorFn: (doc: any) => F;
+};
 
-export function queryPings(
-  params: UMElasticsearchQueryFnParams<GetPingsParams>
-): Promise<PingsResponse>;
-
-export function queryPings<F>(
-  params: UMElasticsearchQueryFnParams<GetParamsWithFields<F>>
-): Promise<{ total: number; pings: F[] }>;
+type GetParamsWithoutFields = GetPingsParams;
 
 export async function queryPings<F>(
-  params: GetParamsWithFields<F> | GetParamsWithoutFields
+  params: (GetParamsWithFields<F> | GetParamsWithoutFields) & { uptimeEsClient: UptimeEsClient }
 ): Promise<PingsResponse | { total: number; pings: F[] }> {
   const {
     uptimeEsClient,
@@ -102,11 +60,11 @@ export async function queryPings<F>(
     query: {
       bool: {
         filter: [
+          SUMMARY_FILTER,
           { range: { '@timestamp': { gte: from, lte: to } } },
           ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
           ...(status ? [{ term: { 'monitor.status': status } }] : []),
         ] as QueryDslQueryContainer[],
-        ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
       },
     },
     sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],

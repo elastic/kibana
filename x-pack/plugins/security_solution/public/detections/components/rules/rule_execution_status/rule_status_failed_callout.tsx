@@ -7,9 +7,11 @@
 
 import React from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import * as i18n from './translations';
 
@@ -30,20 +32,36 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   }
 
   return (
-    <EuiCallOut
-      title={
-        <>
-          {title} <FormattedDate value={date} fieldName="execution_summary.last_execution.date" />
-        </>
-      }
-      color={color}
-      iconType="warning"
-      data-test-subj="ruleStatusFailedCallOut"
+    <div
+      css={`
+        pre {
+          margin-block-end: 0;
+          margin-right: 24px; // Otherwise the copy button overlaps the scrollbar
+          padding-inline-end: 0;
+        }
+      `}
     >
-      {message.split('\n').map((line) => (
-        <p>{line}</p>
-      ))}
-    </EuiCallOut>
+      <EuiCallOut
+        title={
+          <>
+            {title} <FormattedDate value={date} fieldName="execution_summary.last_execution.date" />
+          </>
+        }
+        color={color}
+        iconType="warning"
+        data-test-subj="ruleStatusFailedCallOut"
+      >
+        <EuiCodeBlock
+          className="eui-fullWidth"
+          paddingSize="none"
+          isCopyable
+          overflowHeight={96}
+          transparentBackground
+        >
+          {message}
+        </EuiCodeBlock>
+      </EuiCallOut>
+    </div>
   );
 };
 
@@ -58,13 +76,13 @@ interface HelperProps {
 
 const getPropsByStatus = (status: RuleExecutionStatus | null | undefined): HelperProps => {
   switch (status) {
-    case RuleExecutionStatus.failed:
+    case RuleExecutionStatusEnum.failed:
       return {
         shouldBeDisplayed: true,
         color: 'danger',
         title: i18n.ERROR_CALLOUT_TITLE,
       };
-    case RuleExecutionStatus['partial failure']:
+    case RuleExecutionStatusEnum['partial failure']:
       return {
         shouldBeDisplayed: true,
         color: 'warning',

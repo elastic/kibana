@@ -1,0 +1,107 @@
+# @kbn-doc-linker partial
+
+properties:
+  criteria:
+    type: array
+    items:
+      type: object
+      properties:
+        metric:
+          type: string
+          enum:
+            - "count"
+            - "cpu"
+            - "diskLatency"
+            - "load"
+            - "memory"
+            - "memoryTotal"
+            - "tx"
+            - "rx"
+            - "logRate"
+            - "diskIOReadBytes"
+            - "diskIOWriteBytes"
+            - "s3TotalRequests"
+            - "s3NumberOfObjects"
+            - "s3BucketSize"
+            - "s3DownloadBytes"
+            - "s3UploadBytes"
+            - "rdsConnections"
+            - "rdsQueriesExecuted"
+            - "rdsActiveTransactions"
+            - "rdsLatency"
+            - "sqsMessagesVisible"
+            - "sqsMessagesDelayed"
+            - "sqsMessagesSent"
+            - "sqsMessagesEmpty"
+            - "sqsOldestMessage"
+            - "custom"
+        timeSize:
+          type: number
+        timeUnit:
+          type: string
+          enum: 
+            - "s"
+            - "m"
+            - "h"
+            - "d"
+        sourceId:
+          type: string
+        threshold:
+          type: array
+          items:
+            type: number
+        comparator:
+          type: string
+          enum:
+            - "<"
+            - "<="
+            - ">"
+            - ">="
+            - "between"
+            - "outside"
+        customMetric:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: ["custom"]
+            field:
+              type: string
+            aggregation:
+              type: string
+              enum: ["avg", "max", "min", "rate"]
+            id:
+              type: string
+            label:
+              type: string 
+        warningThreshold:
+          type: array
+          items:
+            type: number
+        warningComparator:
+          type: string
+          enum:
+            - "<"
+            - "<="
+            - ">"
+            - ">="
+            - "between"
+            - "outside"
+  filterQuery:
+    type: string
+  filterQueryText:
+    type: string
+  nodeType:
+    type: string
+    enum: 
+      - "host"
+      - "pod"
+      - "container"
+      - "awsEC2"
+      - "awsS3"
+      - "awsSQS"
+      - "awsRDS"
+  sourceId:
+    type: string
+  alertOnNoData:
+    type: boolean

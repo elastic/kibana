@@ -20,10 +20,9 @@ import {
 } from '../../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
 import { hostDetailsPagePath } from '../types';
-import { type } from './utils';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
-import { HostsTableType } from '../../store/model';
+import { HostsType, HostsTableType } from '../../store/model';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
@@ -123,7 +122,7 @@ describe('body', () => {
               hostDetailsPagePath={hostDetailsPagePath}
               indexNames={[]}
               indexPattern={mockIndexPattern}
-              type={type}
+              type={HostsType.details}
               hostDetailsFilter={mockHostDetailsPageFilters}
               filterQuery={filterQuery}
               from={'2020-07-07T08:20:18.966Z'}

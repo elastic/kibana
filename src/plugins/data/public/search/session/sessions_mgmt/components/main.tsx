@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
-import React from 'react';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';

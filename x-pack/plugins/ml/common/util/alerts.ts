@@ -21,7 +21,7 @@ const narrowBucketLength = 60;
  */
 export function resolveLookbackInterval(jobs: Job[], datafeeds: Datafeed[]): string {
   const bucketSpanInSeconds = Math.ceil(
-    resolveMaxTimeInterval(jobs.map((v) => v.analysis_config.bucket_span)) ?? 0
+    resolveMaxTimeInterval(jobs.map((v) => v.analysis_config.bucket_span!)) ?? 0
   );
   const queryDelayInSeconds = Math.ceil(
     resolveMaxTimeInterval(datafeeds.map((v) => v.query_delay).filter(isDefined)) ?? 0
@@ -45,7 +45,7 @@ export function getLookbackInterval(jobs: CombinedJobWithStats[]): string {
 }
 
 export function getTopNBuckets(job: Job): number {
-  const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+  const bucketSpan = parseInterval(job.analysis_config.bucket_span!);
 
   if (bucketSpan === null) {
     throw new Error('Unable to resolve a bucket span length');

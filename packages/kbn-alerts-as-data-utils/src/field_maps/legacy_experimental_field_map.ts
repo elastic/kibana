@@ -7,9 +7,13 @@
  */
 
 import {
+  ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+  ALERT_GROUP_FIELD,
+  ALERT_GROUP_VALUE,
 } from '@kbn/rule-data-utils';
 
 export const legacyExperimentalFieldMap = {
@@ -19,11 +23,27 @@ export const legacyExperimentalFieldMap = {
     required: false,
   },
   [ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100, required: false },
+  [ALERT_CONTEXT]: { type: 'object', array: false, required: false },
   [ALERT_EVALUATION_VALUES]: {
     type: 'scaled_float',
     scaling_factor: 100,
     required: false,
     array: true,
+  },
+  [ALERT_GROUP]: {
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  [ALERT_GROUP_FIELD]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_GROUP_VALUE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
 } as const;
 

@@ -5,37 +5,52 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
+import moment from 'moment';
+import { FilterStateStore, type TimeRange } from '@kbn/es-query';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useMemo } from 'react';
+import { useFilerQueryUpdates } from '../../hooks/use_filters_query';
 import { fnOperationTypeMapping } from './constants';
 import { useDataSource } from '../../hooks/use_data_source';
-import {
-  ChangePointAnnotation,
-  FieldConfig,
-  useChangePointDetectionContext,
-} from './change_point_detection_context';
+import { ChangePointAnnotation, FieldConfig } from './change_point_detection_context';
 
 /**
  * Provides common props for the Lens Embeddable component
+ * based on the change point definition and currently applied filters and query.
  */
 export const useCommonChartProps = ({
   annotation,
   fieldConfig,
   previewMode = false,
+  bucketInterval,
 }: {
   fieldConfig: FieldConfig;
   annotation: ChangePointAnnotation;
   previewMode?: boolean;
+  bucketInterval: string;
 }): Partial<TypedLensByValueInput> => {
-  const timeRange = useTimeRangeUpdates();
   const { dataView } = useDataSource();
-  const { bucketInterval, resultQuery, resultFilters } = useChangePointDetectionContext();
+
+  const { filters: resultFilters, query: resultQuery, timeRange } = useFilerQueryUpdates();
+
+  /**
+   * In order to correctly render annotations for change points at the edges,
+   * we need to adjust time bound based on the change point timestamp.
+   */
+  const chartTimeRange = useMemo<TimeRange>(() => {
+    const absoluteTimeRange = getAbsoluteTimeRange(timeRange);
+
+    return {
+      from: moment.min(moment(absoluteTimeRange.from), moment(annotation.timestamp)).toISOString(),
+      to: moment.max(moment(absoluteTimeRange.to), moment(annotation.timestamp)).toISOString(),
+    };
+  }, [timeRange, annotation.timestamp]);
 
   const filters = useMemo(() => {
     return [
       ...resultFilters,
+      // Adds a filter for change point partition value
       ...(annotation.group
         ? [
             {
@@ -149,7 +164,9 @@ export const useCommonChartProps = ({
                   outside: false,
                 },
               ],
-              ignoreGlobalFilters: true,
+              // TODO check if we need to set filter from
+              // the filterManager
+              ignoreGlobalFilters: false,
             },
           ],
         },
@@ -168,7 +185,7 @@ export const useCommonChartProps = ({
                     isBucketed: true,
                     scale: 'interval',
                     params: {
-                      interval: bucketInterval.expression,
+                      interval: bucketInterval,
                       includeEmptyRows: true,
                       dropPartials: false,
                     },
@@ -207,14 +224,14 @@ export const useCommonChartProps = ({
     dataView.timeFieldName,
     resultQuery,
     filters,
-    bucketInterval.expression,
+    bucketInterval,
     fieldConfig.fn,
     fieldConfig.metricField,
     gridAndLabelsVisibility,
   ]);
 
   return {
-    timeRange,
+    timeRange: chartTimeRange,
     filters,
     query: resultQuery,
     attributes,

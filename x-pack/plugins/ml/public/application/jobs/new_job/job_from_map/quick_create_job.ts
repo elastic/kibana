@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import type { MlApiServices } from '../../../services/ml_api_service';
 import { getDataViews } from '../../../util/dependency_cache';
@@ -40,12 +40,12 @@ interface VisDescriptor {
 
 export class QuickGeoJobCreator extends QuickJobCreatorBase {
   constructor(
-    public readonly kibanaConfig: IUiSettingsClient,
-    public readonly timeFilter: TimefilterContract,
-    public readonly share: SharePluginStart,
-    public readonly mlApiServices: MlApiServices
+    kibanaConfig: IUiSettingsClient,
+    timeFilter: TimefilterContract,
+    dashboardService: DashboardStart,
+    mlApiServices: MlApiServices
   ) {
-    super(kibanaConfig, timeFilter, share, mlApiServices);
+    super(kibanaConfig, timeFilter, dashboardService, mlApiServices);
   }
 
   public async createAndSaveGeoJob({

@@ -72,6 +72,7 @@ export type ColumnHeaderOptions = Pick<
   | 'schema'
 > & {
   aggregatable?: boolean;
+  searchable?: boolean;
   dataTableCellActions?: DataTableCellAction[];
   category?: string;
   columnHeaderType: ColumnHeaderType;

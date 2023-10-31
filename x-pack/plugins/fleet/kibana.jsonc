@@ -22,7 +22,9 @@
       "savedObjectsTagging",
       "taskManager",
       "guidedOnboarding",
-      "files"
+      "files",
+      "uiActions",
+      "dashboard"
     ],
     "optionalPlugins": [
       "features",
@@ -37,9 +39,8 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "cloudChat",
       "esUiShared",
-      "infra",
+      "logsShared",
       "kibanaUtils",
       "usageCollection",
       "unifiedSearch"

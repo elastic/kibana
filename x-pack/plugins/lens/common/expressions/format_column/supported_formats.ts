@@ -5,31 +5,43 @@
  * 2.0.
  */
 
+import {
+  DEFAULT_DURATION_INPUT_FORMAT,
+  DEFAULT_DURATION_OUTPUT_FORMAT,
+} from '@kbn/field-formats-plugin/common';
+import type { FormatColumnArgs } from '.';
+
 export const supportedFormats: Record<
   string,
-  { decimalsToPattern: (decimals?: number) => string; formatId: string }
+  {
+    formatId: string;
+    decimalsToPattern: (decimals?: number, compact?: boolean) => string;
+    translateToFormatParams?: (
+      params: Omit<FormatColumnArgs, 'format' | 'columnId' | 'parentFormat'>
+    ) => Record<string, unknown>;
+  }
 > = {
   number: {
     formatId: 'number',
-    decimalsToPattern: (decimals = 2) => {
+    decimalsToPattern: (decimals = 2, compact?: boolean) => {
       if (decimals === 0) {
-        return `0,0`;
+        return `0,0${compact ? 'a' : ''}`;
       }
-      return `0,0.${'0'.repeat(decimals)}`;
+      return `0,0.${'0'.repeat(decimals)}${compact ? 'a' : ''}`;
     },
   },
   percent: {
     formatId: 'percent',
-    decimalsToPattern: (decimals = 2) => {
+    decimalsToPattern: (decimals = 2, compact?: boolean) => {
       if (decimals === 0) {
-        return `0,0%`;
+        return `0,0${compact ? 'a' : ''}%`;
       }
-      return `0,0.${'0'.repeat(decimals)}%`;
+      return `0,0.${'0'.repeat(decimals)}${compact ? 'a' : ''}%`;
     },
   },
   bytes: {
     formatId: 'bytes',
-    decimalsToPattern: (decimals = 2) => {
+    decimalsToPattern: (decimals = 2, compact?: boolean) => {
       if (decimals === 0) {
         return `0,0b`;
       }
@@ -37,12 +49,30 @@ export const supportedFormats: Record<
     },
   },
   bits: {
-    formatId: 'number',
-    decimalsToPattern: (decimals = 2) => {
+    formatId: 'bytes',
+    decimalsToPattern: (decimals = 2, compact?: boolean) => {
       if (decimals === 0) {
         return `0,0bitd`;
       }
       return `0,0.${'0'.repeat(decimals)}bitd`;
     },
+  },
+  duration: {
+    formatId: 'duration',
+    decimalsToPattern: () => '',
+    translateToFormatParams: (params) => {
+      return {
+        inputFormat: params.fromUnit || DEFAULT_DURATION_INPUT_FORMAT.kind,
+        outputFormat: params.toUnit || DEFAULT_DURATION_OUTPUT_FORMAT.method,
+        outputPrecision: params.decimals,
+        useShortSuffix: Boolean(params.compact),
+        showSuffix: true,
+        includeSpaceWithSuffix: true,
+      };
+    },
+  },
+  custom: {
+    formatId: 'custom',
+    decimalsToPattern: () => '',
   },
 };

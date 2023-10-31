@@ -51,16 +51,18 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
     hasNoDslParams: true,
     getSerializedFormat,
     createFilter: (agg, inputState) => {
+      const indexPattern = agg.getIndexPattern();
+      if (
+        agg.params.customMetric.type.name === 'top_hits' ||
+        agg.params.customMetric.type.name === 'top_metrics'
+      ) {
+        return agg.params.customMetric.createFilter(inputState);
+      }
       if (!agg.params.customBucket.params.filter) return;
       const esQueryConfigs = getEsQueryConfig({ get: getConfig });
       return buildQueryFilter(
-        buildEsQuery(
-          agg.getIndexPattern(),
-          [agg.params.customBucket.params.filter],
-          [],
-          esQueryConfigs
-        ),
-        agg.getIndexPattern().id!,
+        buildEsQuery(indexPattern, [agg.params.customBucket.params.filter], [], esQueryConfigs),
+        indexPattern.id!,
         agg.params.customBucket.params.filter.query
       );
     },
@@ -68,6 +70,14 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
       const customMetric = agg.getParam('customMetric');
       const customBucket = agg.getParam('customBucket');
       return bucket && bucket[customBucket.id] && customMetric.getValue(bucket[customBucket.id]);
+    },
+    getValueType(agg) {
+      const customMetric = agg.getParam('customMetric');
+      return (
+        customMetric.type.getValueType?.(customMetric) ||
+        customMetric.params.field?.type ||
+        'number'
+      );
     },
     getValueBucketPath(agg) {
       const customBucket = agg.getParam('customBucket');

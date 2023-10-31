@@ -15,14 +15,12 @@ import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects
 export const buildTypesMappings = (
   types: SavedObjectsType[]
 ): SavedObjectsTypeMappingDefinitions => {
-  return types.reduce((acc, { name: type, mappings }) => {
+  return types.reduce<SavedObjectsTypeMappingDefinitions>((acc, { name: type, mappings }) => {
     const duplicate = acc.hasOwnProperty(type);
     if (duplicate) {
       throw new Error(`Type ${type} is already defined.`);
     }
-    return {
-      ...acc,
-      [type]: mappings,
-    };
+    acc[type] = mappings;
+    return acc;
   }, {});
 };

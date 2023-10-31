@@ -7,6 +7,7 @@
 
 import { DARK_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
+import { HttpHandler } from '@kbn/core-http-browser';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -30,12 +31,14 @@ const formatNumber = (value: number | undefined) =>
 const pattern = 'auditbeat-*';
 const patternRollup = auditbeatWithAllResults;
 
-let mockFetchMappings = jest.fn(
+const mockFetchMappings = jest.fn(
   ({
     abortController,
+    httpFetch,
     patternOrIndexName,
   }: {
     abortController: AbortController;
+    httpFetch: HttpHandler;
     patternOrIndexName: string;
   }) =>
     new Promise((resolve) => {
@@ -46,24 +49,29 @@ let mockFetchMappings = jest.fn(
 jest.mock('../../use_mappings/helpers', () => ({
   fetchMappings: ({
     abortController,
+    httpFetch,
     patternOrIndexName,
   }: {
     abortController: AbortController;
+    httpFetch: HttpHandler;
     patternOrIndexName: string;
   }) =>
     mockFetchMappings({
       abortController,
+      httpFetch,
       patternOrIndexName,
     }),
 }));
 
-let mockFetchUnallowedValues = jest.fn(
+const mockFetchUnallowedValues = jest.fn(
   ({
     abortController,
+    httpFetch,
     indexName,
     requestItems,
   }: {
     abortController: AbortController;
+    httpFetch: HttpHandler;
     indexName: string;
     requestItems: UnallowedValueRequestItem[];
   }) => new Promise((resolve) => resolve(mockUnallowedValuesResponse))
@@ -76,15 +84,18 @@ jest.mock('../../use_unallowed_values/helpers', () => {
     ...original,
     fetchUnallowedValues: ({
       abortController,
+      httpFetch,
       indexName,
       requestItems,
     }: {
       abortController: AbortController;
+      httpFetch: HttpHandler;
       indexName: string;
       requestItems: UnallowedValueRequestItem[];
     }) =>
       mockFetchUnallowedValues({
         abortController,
+        httpFetch,
         indexName,
         requestItems,
       }),
@@ -98,12 +109,14 @@ const defaultProps: Props = {
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick: jest.fn(),
+  indexId: '1xxx',
   ilmPhase: 'hot',
   indexName: 'auditbeat-custom-index-1',
+  isAssistantEnabled: true,
   openCreateCaseFlyout: jest.fn(),
   pattern,
   patternRollup,
-  theme: DARK_THEME,
+  baseTheme: DARK_THEME,
   updatePatternRollup: jest.fn(),
 };
 
@@ -131,7 +144,7 @@ describe('IndexProperties', () => {
     });
 
     test('it displays the expected empty prompt content', async () => {
-      mockFetchMappings = jest.fn(
+      mockFetchMappings.mockImplementation(
         ({
           // eslint-disable-next-line @typescript-eslint/no-shadow
           abortController,
@@ -169,7 +182,7 @@ describe('IndexProperties', () => {
     });
 
     test('it displays the expected empty prompt content', async () => {
-      mockFetchUnallowedValues = jest.fn(
+      mockFetchUnallowedValues.mockImplementation(
         ({
           // eslint-disable-next-line @typescript-eslint/no-shadow
           abortController,
@@ -204,7 +217,7 @@ describe('IndexProperties', () => {
     });
 
     test('it displays the expected loading prompt content', async () => {
-      mockFetchMappings = jest.fn(
+      mockFetchMappings.mockImplementation(
         ({
           abortController,
           patternOrIndexName,
@@ -234,7 +247,7 @@ describe('IndexProperties', () => {
     });
 
     test('it displays the expected loading prompt content', async () => {
-      mockFetchUnallowedValues = jest.fn(
+      mockFetchUnallowedValues.mockImplementation(
         ({
           abortController,
           indexName,

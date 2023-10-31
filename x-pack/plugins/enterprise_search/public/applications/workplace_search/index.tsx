@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Switch, useRouteMatch } from 'react-router-dom';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -73,43 +73,24 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   return <WorkplaceSearchConfigured {...props} />;
 };
 
-export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
-  const { hasInitialized } = useValues(AppLogic);
-  const { initializeAppData, setContext } = useActions(AppLogic);
-  const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);
-
-  /**
-   * Personal dashboard urls begin with /p/
-   * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
-   */
-  const isOrganization = !useRouteMatch(PERSONAL_PATH);
-
-  setContext(isOrganization);
-
-  useEffect(() => {
-    setChromeIsVisible(isOrganization);
-  }, [isOrganization]);
-
-  useEffect(() => {
-    if (!hasInitialized) {
-      initializeAppData(props);
-      renderHeaderActions(WorkplaceSearchHeaderActions);
-    }
-  }, [hasInitialized]);
-
-  return (
-    <Switch>
+export const WorkplaceSearchConfiguredRoutes: React.FC<{
+  isAdmin: boolean;
+  kibanaUIsEnabled: boolean;
+}> = ({ isAdmin, kibanaUIsEnabled }) => {
+  const isblockingRoutes = isAdmin && !kibanaUIsEnabled;
+  return !isblockingRoutes ? (
+    <Routes>
+      <Route exact path="/">
+        <Overview />
+      </Route>
       <Route path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
       <Route path={SOURCE_ADDED_PATH}>
         <SourceAdded />
       </Route>
-      <Route exact path="/">
-        <Overview />
-      </Route>
       <Route path={PERSONAL_PATH}>
-        <Switch>
+        <Routes>
           <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
           <Route path={PRIVATE_SOURCES_PATH}>
             <SourcesRouter />
@@ -126,7 +107,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           <Route>
             <NotFound isOrganization={false} />
           </Route>
-        </Switch>
+        </Routes>
       </Route>
       <Route path={SOURCES_PATH}>
         <SourcesRouter />
@@ -149,17 +130,56 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
+  ) : (
+    <Routes>
+      <Route exact path="/">
+        <Overview />
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
+    </Routes>
   );
+};
+export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
+  const {
+    hasInitialized,
+    organization: { kibanaUIsEnabled },
+    account: { isAdmin },
+  } = useValues(AppLogic);
+  const { initializeAppData, setContext } = useActions(AppLogic);
+  const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);
+
+  /**
+   * Personal dashboard urls begin with /p/
+   * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
+   */
+  const isOrganization = !useRouteMatch(PERSONAL_PATH);
+
+  setContext(isOrganization);
+
+  useEffect(() => {
+    setChromeIsVisible(isOrganization);
+  }, [isOrganization]);
+
+  useEffect(() => {
+    if (!hasInitialized) {
+      initializeAppData(props);
+      renderHeaderActions(WorkplaceSearchHeaderActions);
+    }
+  }, [hasInitialized]);
+
+  return <WorkplaceSearchConfiguredRoutes isAdmin={isAdmin} kibanaUIsEnabled={kibanaUIsEnabled} />;
 };
 
 export const WorkplaceSearchUnconfigured: React.FC = () => (
-  <Switch>
+  <Routes>
     <Route exact path={SETUP_GUIDE_PATH}>
       <SetupGuide />
     </Route>
     <Route>
       <Redirect to={SETUP_GUIDE_PATH} />
     </Route>
-  </Switch>
+  </Routes>
 );

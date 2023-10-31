@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import { ProvidedType } from '@kbn/test';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { ProvidedType } from '@kbn/test';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export const COMMON_REQUEST_HEADERS = {
+const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'Kibana',
 };
 
 export type MlCommonAPI = ProvidedType<typeof MachineLearningCommonAPIProvider>;
 
 export function MachineLearningCommonAPIProvider({}: FtrProviderContext) {
   return {
-    async getCommonRequestHeader() {
-      return COMMON_REQUEST_HEADERS;
-    },
+    getCommonRequestHeader,
   };
+}
+
+export function getCommonRequestHeader(apiVersion?: string) {
+  if (apiVersion === undefined) {
+    return COMMON_REQUEST_HEADERS;
+  }
+
+  return Object.assign(COMMON_REQUEST_HEADERS, { [ELASTIC_HTTP_VERSION_HEADER]: apiVersion });
 }

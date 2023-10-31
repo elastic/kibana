@@ -7,11 +7,6 @@
  */
 
 /**
- * Batch size for updateByQuery and reindex operations.
- * Uses the default value of 1000 for Elasticsearch reindex operation.
- */
-export const BATCH_SIZE = 1_000;
-/**
  * When a request takes a long time to complete and hits the timeout or the
  * client aborts that request due to the requestTimeout, our only course of
  * action is to retry that request. This places our request at the end of the

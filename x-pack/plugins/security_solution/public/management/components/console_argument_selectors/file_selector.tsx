@@ -122,6 +122,7 @@ export const ArgumentFileSelector = memo<
             onChange={handleFileSelection}
             fullWidth
             display="large"
+            data-test-subj="console-arg-file-picker"
           />
         )}
       </EuiPopover>

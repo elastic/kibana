@@ -6,19 +6,46 @@
  */
 
 import { useMemo } from 'react';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
+import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 
-export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndices?: string[]) => {
+export const useRuleIndices = (
+  machineLearningJobId?: string[],
+  defaultRuleIndices?: string[],
+  esqlQuery?: string
+) => {
   const memoMlJobIds = useMemo(() => machineLearningJobId ?? [], [machineLearningJobId]);
-  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
+  const { loading: mlSecurityJobLoading, jobs } = useSecurityJobs();
+  const memoSelectedMlJobs = useMemo(
+    () => jobs.filter(({ id }) => memoMlJobIds.includes(id)),
+    [jobs, memoMlJobIds]
+  );
+
+  // Filter jobs that are installed. For those jobs we can get the index pattern from `job.results_index_name` field
+  const memoInstalledMlJobs = useMemo(
+    () => memoSelectedMlJobs.filter(({ isInstalled }) => isInstalled).map((j) => j.id),
+    [memoSelectedMlJobs]
+  );
+  const { loading: mlInstalledJobLoading, jobs: installedJobs } =
+    useGetInstalledJob(memoInstalledMlJobs);
+  const memoMlIndices = useMemo(() => {
+    const installedJobsIndices = installedJobs.map((j) => `.ml-anomalies-${j.results_index_name}`);
+    return [...new Set(installedJobsIndices)];
+  }, [installedJobs]);
 
   const memoRuleIndices = useMemo(() => {
-    if (jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    if (memoMlIndices.length > 0) {
+      return memoMlIndices;
+    } else if (esqlQuery) {
+      return getIndexListFromEsqlQuery(esqlQuery);
     } else {
       return defaultRuleIndices ?? [];
     }
-  }, [jobs, defaultRuleIndices]);
+  }, [defaultRuleIndices, esqlQuery, memoMlIndices]);
 
-  return { mlJobLoading, ruleIndices: memoRuleIndices };
+  return {
+    mlJobLoading: mlSecurityJobLoading || mlInstalledJobLoading,
+    ruleIndices: memoRuleIndices,
+  };
 };

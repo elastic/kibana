@@ -7,18 +7,30 @@
 
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
+import { HttpFetchQuery } from '@kbn/core/public';
 
+import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import * as i18n from '../translations';
+import { INTERNAL_API_VERSION } from '../helpers';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';
 
-interface UseStats {
+export interface UseStats {
   stats: Record<string, IndicesStatsIndicesStats> | null;
   error: string | null;
   loading: boolean;
 }
 
-export const useStats = (pattern: string): UseStats => {
+export const useStats = ({
+  endDate,
+  pattern,
+  startDate,
+}: {
+  endDate?: string | null;
+  pattern: string;
+  startDate?: string | null;
+}): UseStats => {
+  const { httpFetch, isILMAvailable } = useDataQualityContext();
   const [stats, setStats] = useState<Record<string, IndicesStatsIndicesStats> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -29,24 +41,32 @@ export const useStats = (pattern: string): UseStats => {
     async function fetchData() {
       try {
         const encodedIndexName = encodeURIComponent(`${pattern}`);
-
-        const response = await fetch(`${STATS_ENDPOINT}/${encodedIndexName}`, {
-          method: 'GET',
-          signal: abortController.signal,
-        });
-
-        if (response.ok) {
-          const json = await response.json();
-
-          if (!abortController.signal.aborted) {
-            setStats(json);
+        const query: HttpFetchQuery = { isILMAvailable };
+        if (!isILMAvailable) {
+          if (startDate) {
+            query.startDate = startDate;
           }
-        } else {
-          throw new Error(response.statusText);
+          if (endDate) {
+            query.endDate = endDate;
+          }
+        }
+
+        const response = await httpFetch<Record<string, IndicesStatsIndicesStats>>(
+          `${STATS_ENDPOINT}/${encodedIndexName}`,
+          {
+            version: INTERNAL_API_VERSION,
+            method: 'GET',
+            signal: abortController.signal,
+            query,
+          }
+        );
+
+        if (!abortController.signal.aborted) {
+          setStats(response);
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(i18n.ERROR_LOADING_STATS(e));
+          setError(i18n.ERROR_LOADING_STATS(e.message));
         }
       } finally {
         if (!abortController.signal.aborted) {
@@ -60,7 +80,7 @@ export const useStats = (pattern: string): UseStats => {
     return () => {
       abortController.abort();
     };
-  }, [pattern, setError]);
+  }, [endDate, httpFetch, isILMAvailable, pattern, setError, startDate]);
 
   return { stats, error, loading };
 };

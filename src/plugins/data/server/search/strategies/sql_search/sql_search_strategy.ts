@@ -11,6 +11,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -69,7 +70,7 @@ export const sqlSearchStrategyProvider = (
         ));
       }
 
-      if (!body.is_partial && !body.is_running && body.cursor && !keepCursor) {
+      if (!body.is_running && body.cursor && !keepCursor) {
         try {
           await client.sql.clearCursor({ cursor: body.cursor });
         } catch (error) {
@@ -94,7 +95,7 @@ export const sqlSearchStrategyProvider = (
     }).pipe(
       tap((response) => (id = response.id)),
       catchError((e) => {
-        throw getKbnServerError(e);
+        throw getKbnSearchError(e);
       })
     );
   }
@@ -105,7 +106,7 @@ export const sqlSearchStrategyProvider = (
      * @param options
      * @param deps `SearchStrategyDependencies`
      * @returns `Observable<IEsSearchResponse<any>>`
-     * @throws `KbnServerError`
+     * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`sql search: search request=${JSON.stringify(request)}`);

@@ -1018,6 +1018,8 @@ Aliases: `q`, `query`
 Default: `"-_index:.kibana"`
 
 |`index`
+
+Alias: `dataView`
 |`string`
 |An index or data view. For example, `"logstash-*"`.
 
@@ -1087,6 +1089,8 @@ Default: `1000`
 |A comma-separated list of fields. For better performance, use fewer fields.
 
 |`index`
+
+Alias: `dataView`
 |`string`
 |An index or data view. For example, `"logstash-*"`.
 
@@ -1128,7 +1132,7 @@ kibana
 ----
 This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the "kibana_sample_data_flights" index.
 
-*Accepts:* `filter`
+*Accepts:* `kibana_context`, `null`
 
 [cols="3*^<"]
 |===
@@ -1151,6 +1155,12 @@ Default: `1000`
 Alias: `param`
 |`string`, `number`, `boolean`
 |A parameter to be passed to the SQL query.
+
+|`timeField`
+
+Alias: `timeField`
+|`string`
+|The time field to use in the time range filter, which is set in the context.
 
 |`timezone`
 
@@ -1177,19 +1187,6 @@ exactly "state" value="running"
 exactly "age" value=50 filterGroup="group2"
 exactly column="project" value="beats"
 ----
-
-*Code example*
-[source,text]
-----
-kibana
-| selectFilter
-| exactly column=project value=elasticsearch
-| demodata
-| pointseries x=project y="mean(age)"
-| plot defaultStyle={seriesStyle bars=1}
-| render
-----
-The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `"elasticsearch"` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.
 
 *Accepts:* `filter`
 
@@ -1270,7 +1267,7 @@ Aliases: `exp`, `expression`, `fn`, `function`
 [[filters_fn]]
 === `filters`
 
-Aggregates element filters from the workpad for use elsewhere, usually a data source.
+Aggregates element filters from the workpad for use elsewhere, usually a data source. <<filters_fn>> is deprecated and will be removed in a future release. Use `kibana | selectFilter` instead.
 
 *Expression syntax*
 [source,js]
@@ -1935,7 +1932,7 @@ Alias: `expression`
 [[mathColumn_fn]]
 === `mathColumn`
 
-Adds a column by evaluating TinyMath on each row. This function is optimized for math, so it performs better than the mapColumn with a math
+Adds a column by evaluating `TinyMath` on each row. This function is optimized for math and performs better than using a math expression in <<mapColumn_fn>>.
 
 *Accepts:* `datatable`
 
@@ -1954,6 +1951,10 @@ Aliases: `column`, `name`
 Alias: `expression`
 |`string`
 |An evaluated `TinyMath` expression. See https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html.
+
+|`castColumns` †
+|`string`
+|The column ids that are cast to numbers before the formula is applied.
 
 |`copyMetaFrom`
 |`string`, `null`

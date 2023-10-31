@@ -6,26 +6,14 @@
  */
 
 import { useEffect } from 'react';
-import { navTabs } from '../../app/home/home_navigations';
-import { useIsGroupedNavigationEnabled } from '../components/navigation/helpers';
-import type { NavTab } from '../components/navigation/types';
-import { getLinkInfo } from '../links';
-import { useRouteSpy } from '../utils/route/use_route_spy';
+import { useNavLinks } from '../links/nav_links';
+import { useFindAppLinksByPath } from '../links/use_find_app_links_by_path';
 
 export const useUpdateBrowserTitle = () => {
-  const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
-  const [{ pageName }] = useRouteSpy();
-  const linkInfo = getLinkInfo(pageName);
+  const navLinks = useNavLinks();
+  const linkInfo = useFindAppLinksByPath(navLinks);
 
   useEffect(() => {
-    if (!isGroupedNavEnabled) {
-      document.title = `${getTitle(pageName, navTabs)} - Kibana`;
-    } else {
-      document.title = `${linkInfo?.title ?? ''} - Kibana`;
-    }
-  }, [pageName, isGroupedNavEnabled, linkInfo]);
-};
-
-export const getTitle = (pageName: string, tabs: Record<string, NavTab>): string => {
-  return tabs[pageName] != null ? tabs[pageName].name : '';
+    document.title = `${linkInfo?.title ?? ''} - Kibana`;
+  }, [linkInfo]);
 };

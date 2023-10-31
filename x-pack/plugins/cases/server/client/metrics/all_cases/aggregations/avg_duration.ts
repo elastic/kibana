@@ -6,7 +6,7 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../../common/constants';
-import type { CasesMetricsResponse } from '../../../../../common/api';
+import type { CasesMetricsResponse } from '../../../../../common/types/api';
 import type { AggregationBuilder, AggregationResponse } from '../../types';
 
 export class AverageDuration implements AggregationBuilder<CasesMetricsResponse> {

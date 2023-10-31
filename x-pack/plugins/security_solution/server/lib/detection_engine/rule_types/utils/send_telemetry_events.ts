@@ -72,6 +72,6 @@ export function sendAlertTelemetryEvents(
   try {
     eventsTelemetry.queueTelemetryEvents(selectedEvents);
   } catch (exc) {
-    ruleExecutionLogger.error(`[-] queing telemetry events failed ${exc}`);
+    ruleExecutionLogger.error(`Queuing telemetry events failed: ${exc}`);
   }
 }

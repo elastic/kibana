@@ -34,15 +34,11 @@ import {
   getMobileDetailedStatisticsByFieldPeriods,
   MobileDetailedStatisticsResponse,
 } from './get_mobile_detailed_statistics_by_field';
+import { MobilePropertyType } from '../../../common/mobile_types';
 import {
   getMobileMostUsedCharts,
   MobileMostUsedChartResponse,
-} from './get_mobile_most_used_charts/get_device_os_app_charts';
-import {
-  getMobileMostUsedNCTCharts,
-  MobileMostUsedNCTChartResponse,
-} from './get_mobile_most_used_charts/get_nct_chart';
-import { MobilePropertyType } from '../../../common/mobile_types';
+} from './get_mobile_most_used_charts';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -104,8 +100,7 @@ const mobileChartsRoute = createApmServerRoute({
   ): Promise<{
     mostUsedCharts: Array<{
       key: MobilePropertyType;
-      options: MobileMostUsedChartResponse[number]['options'] &
-        MobileMostUsedNCTChartResponse['options'];
+      options: MobileMostUsedChartResponse[number]['options'];
     }>;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -113,27 +108,17 @@ const mobileChartsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { kuery, environment, start, end, transactionType } = params.query;
 
-    const [deviceOsAndAppVersionChart, nctChart] = await Promise.all([
-      getMobileMostUsedCharts({
-        kuery,
-        environment,
-        transactionType,
-        start,
-        end,
-        serviceName,
-        apmEventClient,
-      }),
-      getMobileMostUsedNCTCharts({
-        kuery,
-        environment,
-        start,
-        end,
-        serviceName,
-        apmEventClient,
-      }),
-    ]);
+    const mostUsedCharts = await getMobileMostUsedCharts({
+      kuery,
+      environment,
+      transactionType,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+    });
 
-    return { mostUsedCharts: [...deviceOsAndAppVersionChart, nctChart] };
+    return { mostUsedCharts };
   },
 });
 

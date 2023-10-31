@@ -7,10 +7,10 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
-import type { UnifiedHistogramServices } from '../../types';
+import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
   getBreakdownField,
   getChartHidden,
@@ -40,6 +40,14 @@ export interface UnifiedHistogramState {
    * The current Lens request adapter
    */
   lensRequestAdapter: RequestAdapter | undefined;
+  /**
+   * The current Lens adapters
+   */
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  /**
+   * Lens embeddable output observable
+   */
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   /**
    * The current time interval of the chart
    */
@@ -108,6 +116,13 @@ export interface UnifiedHistogramStateService {
    * Sets the current Lens request adapter
    */
   setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
+  /**
+   * Sets the current Lens adapters
+   */
+  setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
+  setLensEmbeddableOutput$: (
+    lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+  ) => void;
   /**
    * Sets the current total hits status and result
    */
@@ -181,13 +196,21 @@ export const createStateService = (
     setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
       updateState({ currentSuggestion: suggestion });
     },
-
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
     },
 
     setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => {
       updateState({ lensRequestAdapter });
+    },
+
+    setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
+      updateState({ lensAdapters });
+    },
+    setLensEmbeddableOutput$: (
+      lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+    ) => {
+      updateState({ lensEmbeddableOutput$ });
     },
 
     setTotalHits: (totalHits: {

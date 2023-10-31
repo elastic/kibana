@@ -18,6 +18,9 @@ export const MOCK_YAML_CONFIGURATION = `file:
     - name: nginxOnly
       containerImageName:
         - nginx
+      operation:
+        - createExecutable
+        - modifyExecutable
     - name: excludeCustomNginxBuild
       containerImageTag:
         - staging

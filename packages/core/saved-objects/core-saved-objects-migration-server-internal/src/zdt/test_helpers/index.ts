@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { createContextMock, type MockedMigratorContext } from './context';
+export {
+  createContextMock,
+  createMigrationConfigMock,
+  type MockedMigratorContext,
+} from './context';
 export {
   createPostInitState,
   createPostDocInitState,

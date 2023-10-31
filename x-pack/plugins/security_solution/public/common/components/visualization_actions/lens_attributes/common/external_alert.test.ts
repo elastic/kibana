@@ -43,4 +43,19 @@ describe('getExternalAlertLensAttributes', () => {
 
     expect(result?.current).toMatchSnapshot();
   });
+
+  it('should render values in legend', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state?.visualization).toEqual(
+      expect.objectContaining({ valuesInLegend: true })
+    );
+  });
 });

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
 import type { DashboardSaveOptions } from '../../../types';
@@ -39,14 +39,12 @@ interface Props {
 }
 
 interface State {
-  description: string;
   tags: string[];
   timeRestore: boolean;
 }
 
 export class DashboardSaveModal extends React.Component<Props, State> {
   state: State = {
-    description: this.props.description,
     timeRestore: this.props.timeRestore,
     tags: this.props.tags ?? [],
   };
@@ -57,29 +55,25 @@ export class DashboardSaveModal extends React.Component<Props, State> {
 
   saveDashboard = ({
     newTitle,
+    newDescription,
     newCopyOnSave,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: {
     newTitle: string;
+    newDescription: string;
     newCopyOnSave: boolean;
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
     this.props.onSave({
       newTitle,
-      newDescription: this.state.description,
+      newDescription,
       newCopyOnSave,
       newTimeRestore: this.state.timeRestore,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
       newTags: this.state.tags,
-    });
-  };
-
-  onDescriptionChange = (event: any) => {
-    this.setState({
-      description: event.target.value,
     });
   };
 
@@ -102,26 +96,12 @@ export class DashboardSaveModal extends React.Component<Props, State> {
             tags,
           });
         }}
+        markOptional
       />
     ) : undefined;
 
     return (
       <Fragment>
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="dashboard.topNav.saveModal.descriptionFormRowLabel"
-              defaultMessage="Description"
-            />
-          }
-        >
-          <EuiTextArea
-            data-test-subj="dashboardDescription"
-            value={this.state.description}
-            onChange={this.onDescriptionChange}
-          />
-        </EuiFormRow>
-
         {tagSelector}
 
         <EuiFormRow
@@ -154,13 +134,14 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         onSave={this.saveDashboard}
         onClose={this.props.onClose}
         title={this.props.title}
+        description={this.props.description}
+        showDescription
         showCopyOnSave={this.props.showCopyOnSave}
         initialCopyOnSave={this.props.showCopyOnSave}
         objectType={i18n.translate('dashboard.topNav.saveModal.objectType', {
           defaultMessage: 'dashboard',
         })}
         options={this.renderDashboardSaveOptions()}
-        showDescription={false}
       />
     );
   }

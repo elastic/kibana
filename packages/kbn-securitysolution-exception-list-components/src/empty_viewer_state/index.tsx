@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import type { FC } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiImage,
   EuiEmptyPrompt,
   EuiButton,
@@ -116,13 +116,16 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
     listType,
   ]);
 
-  if (viewerStatus === ViewerStatus.LOADING || viewerStatus === ViewerStatus.SEARCHING)
-    return <EuiLoadingContent lines={4} data-test-subj="loadingViewerState" />;
-
   return (
-    <EuiPanel css={panelCss} color={viewerStatus === 'empty_search' ? 'subdued' : 'transparent'}>
-      <EuiEmptyPrompt {...euiEmptyPromptProps} />
-    </EuiPanel>
+    <EuiSkeletonText
+      lines={4}
+      data-test-subj="loadingViewerState"
+      isLoading={viewerStatus === ViewerStatus.LOADING || viewerStatus === ViewerStatus.SEARCHING}
+    >
+      <EuiPanel css={panelCss} color={viewerStatus === 'empty_search' ? 'subdued' : 'transparent'}>
+        <EuiEmptyPrompt {...euiEmptyPromptProps} />
+      </EuiPanel>
+    </EuiSkeletonText>
   );
 };
 

@@ -6,20 +6,20 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { Actions, ActionTypes } from '../../../../common/api';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class SeverityUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'severity'>): UserActionEvent {
-    const action = Actions.update;
+    const action = UserActionActions.update;
 
     const parameters = this.buildCommonUserAction({
       ...args,
       action,
       valueKey: 'severity',
       value: args.payload.severity,
-      type: ActionTypes.severity,
+      type: UserActionTypes.severity,
     });
 
     const getMessage = (id?: string) =>

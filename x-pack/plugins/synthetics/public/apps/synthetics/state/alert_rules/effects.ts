@@ -7,9 +7,27 @@
 
 import { takeLeading } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
-import { enableDefaultAlertingAction, updateDefaultAlertingAction } from './actions';
+import {
+  enableDefaultAlertingAction,
+  enableDefaultAlertingSilentlyAction,
+  getDefaultAlertingAction,
+  updateDefaultAlertingAction,
+} from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { enableDefaultAlertingAPI, updateDefaultAlertingAPI } from './api';
+import { enableDefaultAlertingAPI, getDefaultAlertingAPI, updateDefaultAlertingAPI } from './api';
+
+export function* getDefaultAlertingEffect() {
+  yield takeLeading(
+    getDefaultAlertingAction.get,
+    fetchEffectFactory(
+      getDefaultAlertingAPI,
+      enableDefaultAlertingAction.success,
+      enableDefaultAlertingAction.fail,
+      undefined,
+      failureMessage
+    )
+  );
+}
 
 export function* enableDefaultAlertingEffect() {
   yield takeLeading(
@@ -19,6 +37,19 @@ export function* enableDefaultAlertingEffect() {
       enableDefaultAlertingAction.success,
       enableDefaultAlertingAction.fail,
       successMessage,
+      failureMessage
+    )
+  );
+}
+
+export function* enableDefaultAlertingSilentlyEffect() {
+  yield takeLeading(
+    enableDefaultAlertingSilentlyAction.get,
+    fetchEffectFactory(
+      enableDefaultAlertingAPI,
+      enableDefaultAlertingAction.success,
+      enableDefaultAlertingAction.fail,
+      undefined,
       failureMessage
     )
   );
@@ -39,7 +70,7 @@ export function* updateDefaultAlertingEffect() {
 
 const successMessage = i18n.translate('xpack.synthetics.settings.enableAlerting', {
   defaultMessage:
-    'Monitor status rule type successfully updated. Next rule alerts will take the changes into account.',
+    'Monitor status rule successfully updated. Changes will take effect on the next rule execution.',
 });
 
 const failureMessage = i18n.translate('xpack.synthetics.settings.enabledAlert.fail', {

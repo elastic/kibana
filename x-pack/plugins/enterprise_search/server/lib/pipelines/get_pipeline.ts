@@ -12,14 +12,9 @@ export const getPipeline = async (
   pipelineName: string,
   client: IScopedClusterClient
 ): Promise<IngestGetPipelineResponse> => {
-  try {
-    const pipelinesResponse = await client.asCurrentUser.ingest.getPipeline({
-      id: pipelineName,
-    });
+  const pipelinesResponse = await client.asCurrentUser.ingest.getPipeline({
+    id: pipelineName,
+  });
 
-    return pipelinesResponse;
-  } catch (error) {
-    // If we can't find anything, we return an empty object
-    return {};
-  }
+  return pipelinesResponse;
 };

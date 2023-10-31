@@ -106,6 +106,7 @@ export function useHTTPRequest<Response>(
       onResolve: (resp) => {
         try {
           setResponse(decode(resp)); // Catch decoding errors
+          setError(null);
         } catch (e) {
           onError(e);
         }

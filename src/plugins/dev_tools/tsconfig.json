@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["public/**/*"],
+  "include": ["public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/url-forwarding-plugin",
@@ -13,6 +13,9 @@
     "@kbn/ui-theme",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/deeplinks-devtools",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",

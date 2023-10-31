@@ -7,13 +7,13 @@
  */
 
 import React from 'react';
-import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
+import { EuiSkeletonText, EuiDelayRender } from '@elastic/eui';
 import type { MarkdownSimpleProps } from './markdown_simple';
 import type { MarkdownProps } from './markdown';
 
 const Fallback = () => (
   <EuiDelayRender>
-    <EuiLoadingContent lines={3} />
+    <EuiSkeletonText lines={3} />
   </EuiDelayRender>
 );
 

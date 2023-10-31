@@ -121,6 +121,7 @@ describe('When using get-file action from response actions console', () => {
       expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
         body: '{"endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
         path: GET_FILE_ROUTE,
+        version: '2023-10-31',
       });
     });
   });

@@ -6,24 +6,33 @@
  */
 import { merge } from 'lodash';
 
-import type { SingleCaseMetricsRequest, SingleCaseMetricsResponse } from '../../../common/api';
-import { SingleCaseMetricsResponseRt } from '../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../common/types/api';
+import { SingleCaseMetricsResponseRt, SingleCaseMetricsRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
+import type { GetCaseMetricsParams } from './types';
 import { buildHandlers } from './utils';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 export const getCaseMetrics = async (
-  params: SingleCaseMetricsRequest,
+  { caseId, features }: GetCaseMetricsParams,
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Promise<SingleCaseMetricsResponse> => {
   const { logger } = clientArgs;
 
   try {
-    await checkAuthorization(params, clientArgs);
-    const handlers = buildHandlers(params, casesClient, clientArgs);
+    const queryParams = decodeWithExcessOrThrow(SingleCaseMetricsRequestRt)({ features });
+
+    await checkAuthorization(caseId, clientArgs);
+    const handlers = buildHandlers(
+      { caseId, features: queryParams.features },
+      casesClient,
+      clientArgs
+    );
 
     const computedMetrics = await Promise.all(
       Array.from(handlers).map(async (handler) => {
@@ -35,27 +44,24 @@ export const getCaseMetrics = async (
       return merge(acc, metric);
     }, {}) as SingleCaseMetricsResponse;
 
-    return SingleCaseMetricsResponseRt.encode(mergedResults);
+    return decodeOrThrow(SingleCaseMetricsResponseRt)(mergedResults);
   } catch (error) {
     throw createCaseError({
       logger,
-      message: `Failed to retrieve metrics within client for case id: ${params.caseId}: ${error}`,
+      message: `Failed to retrieve metrics within client for case id: ${caseId}: ${error}`,
       error,
     });
   }
 };
 
-const checkAuthorization = async (
-  params: SingleCaseMetricsRequest,
-  clientArgs: CasesClientArgs
-) => {
+const checkAuthorization = async (caseId: string, clientArgs: CasesClientArgs) => {
   const {
     services: { caseService },
     authorization,
   } = clientArgs;
 
   const caseInfo = await caseService.getCase({
-    id: params.caseId,
+    id: caseId,
   });
 
   await authorization.ensureAuthorized({

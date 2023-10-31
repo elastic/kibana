@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { createContainerWithEntries } from './create_container_with_entries';
 import { createContainerWithEndpointEntries } from './create_container_with_endpoint_entries';

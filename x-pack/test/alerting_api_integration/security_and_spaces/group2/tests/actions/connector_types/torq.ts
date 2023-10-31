@@ -88,6 +88,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'A Torq action',
         connector_type_id: '.torq',

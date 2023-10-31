@@ -6,11 +6,12 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
   FlowTarget,
-  HostsFields,
   NetworkDnsFields,
   NetworkTopTablesFields,
   NetworkTlsFields,
@@ -31,12 +32,8 @@ import {
   VIEW_SELECTION,
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
-import {
-  TimelineType,
-  TimelineStatus,
-  TimelineTabs,
-  TimelineId,
-} from '../../../common/types/timeline';
+import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
@@ -47,6 +44,12 @@ import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../store/sourcerer';
+import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
+import { getMockDiscoverInTimelineState } from './mock_discover_state';
+
+const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
+  mockIndexFields.map((field) => [field.name, field])
+);
 
 export const mockSourcererState: SourcererState = {
   ...initialSourcererState,
@@ -56,7 +59,7 @@ export const mockSourcererState: SourcererState = {
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
     indexFields: mockIndexFields,
-    fields: mockIndexFields,
+    fields: mockFieldMap,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
     runtimeMappings: mockRuntimeMappings,
@@ -371,6 +374,8 @@ export const mockGlobalState: State = {
         filters: [],
         isSaving: false,
         itemsPerPageOptions: [10, 25, 50, 100],
+        savedSearchId: null,
+        isDiscoverSavedSearchLoaded: false,
       },
     },
     insertTimeline: null,
@@ -418,6 +423,12 @@ export const mockGlobalState: State = {
     },
   },
   groups: initialGroupingState,
+  analyzer: {
+    [TableId.test]: EMPTY_RESOLVER,
+    [TimelineId.test]: EMPTY_RESOLVER,
+    [TimelineId.active]: EMPTY_RESOLVER,
+    flyout: EMPTY_RESOLVER,
+  },
   sourcerer: {
     ...mockSourcererState,
     defaultDataView: {
@@ -470,4 +481,5 @@ export const mockGlobalState: State = {
    * they are cast to mutable versions here.
    */
   management: mockManagementState as ManagementState,
+  discover: getMockDiscoverInTimelineState(),
 };

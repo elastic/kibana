@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useState, useMemo } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useMemo, useState } from 'react';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { isRatioRule } from '../../../../../../common/alerting/logs/log_threshold';
-import { PersistedLogViewReference } from '../../../../../../common/log_views';
-import { ExecutionTimeRange } from '../../../../../types';
-import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
+  GetLogAlertsChartPreviewDataAlertParamsSubset,
+  getLogAlertsChartPreviewDataRequestPayloadRT,
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
   getLogAlertsChartPreviewDataSuccessResponsePayloadRT,
-  getLogAlertsChartPreviewDataRequestPayloadRT,
   LOG_ALERTS_CHART_PREVIEW_DATA_PATH,
 } from '../../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
-import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../../common/http_api/log_alerts';
+import { ExecutionTimeRange } from '../../../../../types';
+import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 
 interface Options {
   logViewReference: PersistedLogViewReference;
@@ -68,7 +68,7 @@ export const useChartPreviewData = ({
           let seriesQueryB = ratio[1].data.series[0].points;
           let seriesId = 'ratio';
           // When groupBy and a filter is applied, return the ratio only for the filtered grouped-by
-          if (ruleParams.groupBy.length && filterSeriesByGroupName) {
+          if (ruleParams.groupBy?.length && filterSeriesByGroupName) {
             seriesId = filterSeriesByGroupName;
             seriesQueryA =
               ratio[0].data.series.find((series) => series.id === filterSeriesByGroupName)
@@ -147,6 +147,7 @@ export const callGetChartPreviewDataAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogAlertsChartPreviewDataSuccessResponsePayloadRT)(response);

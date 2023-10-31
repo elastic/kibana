@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNestedField } from '@kbn/data-views-plugin/common';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
 import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
@@ -29,8 +29,9 @@ export function convertDataViewIntoLensIndexPattern(
   dataView: DataView,
   restrictionRemapper: (name: string) => string = onRestrictionMapping
 ): IndexPattern {
+  const metaKeys = new Set(dataView.metaFields);
   const newFields = dataView.fields
-    .filter((field) => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
+    .filter(isFieldLensCompatible)
     .map((field): IndexPatternField => {
       // Convert the getters on the index pattern service into plain JSON
       const base = {
@@ -40,13 +41,14 @@ export function convertDataViewIntoLensIndexPattern(
         aggregatable: field.aggregatable,
         filterable: field.filterable,
         searchable: field.searchable,
-        meta: dataView.metaFields.includes(field.name),
+        meta: metaKeys.has(field.name),
         esTypes: field.esTypes,
         scripted: field.scripted,
         isMapped: field.isMapped,
         customLabel: field.customLabel,
         runtimeField: field.runtimeField,
         runtime: Boolean(field.runtimeField),
+        timeSeriesDimension: field.timeSeriesDimension,
         timeSeriesMetric: field.timeSeriesMetric,
         timeSeriesRollup: field.isRolledUpField,
         partiallyApplicableFunctions: field.isRolledUpField

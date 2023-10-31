@@ -19,25 +19,6 @@
 
 import { omit } from 'lodash';
 import * as rt from 'io-ts';
-import moment from 'moment';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { chain } from 'fp-ts/lib/Either';
-
-export const TimestampFromString = new rt.Type<number, string>(
-  'TimestampFromString',
-  (input): input is number => typeof input === 'number',
-  (input, context) =>
-    pipe(
-      rt.string.validate(input, context),
-      chain((stringInput) => {
-        const momentValue = moment(stringInput);
-        return momentValue.isValid()
-          ? rt.success(momentValue.valueOf())
-          : rt.failure(stringInput, context);
-      })
-    ),
-  (output) => new Date(output).toISOString()
-);
 
 /**
  * Source configuration config file properties.
@@ -246,21 +227,3 @@ export const SourceResponseRuntimeType = rt.type({
 });
 
 export type SourceResponse = rt.TypeOf<typeof SourceResponseRuntimeType>;
-
-/**
- * Saved object type with metadata
- */
-
-export const SourceConfigurationSavedObjectRuntimeType = rt.intersection([
-  rt.type({
-    id: rt.string,
-    attributes: SavedSourceConfigurationRuntimeType,
-  }),
-  rt.partial({
-    version: rt.string,
-    updated_at: TimestampFromString,
-  }),
-]);
-
-export interface SourceConfigurationSavedObject
-  extends rt.TypeOf<typeof SourceConfigurationSavedObjectRuntimeType> {}

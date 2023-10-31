@@ -7,6 +7,7 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import {
   DashboardReduxState,
@@ -56,6 +57,10 @@ export const dashboardContainerReducers = {
     }
   },
 
+  setLastSavedId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.lastSavedId = action.payload;
+  },
+
   setStateFromSettingsFlyout: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardStateFromSettingsFlyout>
@@ -85,6 +90,11 @@ export const dashboardContainerReducers = {
     state: DashboardReduxState,
     action: PayloadAction<DashboardContainerInput['viewMode']>
   ) => {
+    // Managed Dashboards cannot be put into edit mode.
+    if (state.componentState.managed) {
+      state.explicitInput.viewMode = ViewMode.VIEW;
+      return;
+    }
     state.explicitInput.viewMode = action.payload;
   },
 
@@ -97,6 +107,13 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardContainerInput['title']>
   ) => {
     state.explicitInput.title = action.payload;
+  },
+
+  setManaged: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardPublicState['managed']>
+  ) => {
+    state.componentState.managed = action.payload;
   },
 
   // ------------------------------------------------------------------------------
@@ -114,12 +131,24 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardPublicState['lastSavedInput']>
   ) => {
     state.componentState.lastSavedInput = action.payload;
+
+    // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
+    // been serialized into the SO.
+    state.componentState.hasRunClientsideMigrations = false;
   },
 
+  /**
+   * Resets the dashboard to the last saved input, excluding:
+   * 1) The time range, unless `timeRestore` is `true` - if we include the time range on reset even when
+   *    `timeRestore` is `false`, this causes unecessary data fetches for the control group.
+   * 2) The view mode, since resetting should never impact this - sometimes the Dashboard saved objects
+   *    have this saved in and we don't want resetting to cause unexpected view mode changes.
+   */
   resetToLastSavedInput: (state: DashboardReduxState) => {
     state.explicitInput = {
       ...state.componentState.lastSavedInput,
-      viewMode: state.explicitInput.viewMode, // keep current view mode when resetting
+      ...(!state.explicitInput.timeRestore && { timeRange: state.explicitInput.timeRange }),
+      viewMode: state.explicitInput.viewMode,
     };
   },
 
@@ -209,5 +238,15 @@ export const dashboardContainerReducers = {
 
   setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
     state.componentState.highlightPanelId = action.payload;
+  },
+  setFocusedPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.focusedPanelId = action.payload;
+  },
+
+  setAnimatePanelTransforms: (
+    state: DashboardReduxState,
+    action: PayloadAction<boolean | undefined>
+  ) => {
+    state.componentState.animatePanelTransforms = action.payload;
   },
 };

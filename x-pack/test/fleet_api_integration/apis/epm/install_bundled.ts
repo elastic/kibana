@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { BUNDLED_PACKAGE_DIR } from '../../config';
+import { BUNDLED_PACKAGE_DIR } from '../../config.base';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';

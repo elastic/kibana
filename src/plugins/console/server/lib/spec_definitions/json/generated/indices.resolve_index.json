@@ -1,12 +1,16 @@
 {
   "indices.resolve_index": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ]
     },
     "methods": [
@@ -15,6 +19,10 @@
     "patterns": [
       "_resolve/index/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-resolve-index-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-resolve-index-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

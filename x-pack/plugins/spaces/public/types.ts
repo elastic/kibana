@@ -7,8 +7,8 @@
 
 import type { Observable } from 'rxjs';
 
-import type { GetAllSpacesPurpose, GetSpaceResult, Space } from '../common';
 import type { SpacesApiUi } from './ui_api';
+import type { GetAllSpacesPurpose, GetSpaceResult, Space } from '../common';
 
 /**
  * The structure for all of the space data that must be loaded for share-to-space components to function.
@@ -48,6 +48,13 @@ export interface SpacesApi {
    * Retrieve the currently active space.
    */
   getActiveSpace(): Promise<Space>;
+
+  /**
+   * Determines whether Kibana supports multiple spaces or only the default space.
+   *
+   * When `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden.
+   */
+  hasOnlyDefaultSpace: boolean;
 
   /**
    * UI components and services to add spaces capabilities to an application.

@@ -14,8 +14,6 @@ describe('injectActionParams', () => {
     };
     const result = injectActionParams({
       actionParams,
-      ruleId: '1',
-      spaceId: 'the-space',
       actionTypeId: '.server-log',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -25,17 +23,24 @@ describe('injectActionParams', () => {
     `);
   });
 
-  test('injects viewInKibanaPath and viewInKibanaText when actionTypeId is .email', () => {
+  test('injects viewInKibanaPath and viewInKibanaText when actionTypeId is .email and there is no basePathname', () => {
     const actionParams = {
       body: {
         message: 'State: "{{state.value}}", Context: "{{context.value}}"',
       },
     };
+    const ruleUrl = {
+      absoluteUrl:
+        'http://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/1',
+      kibanaBaseUrl: 'http://localhost:5601',
+      basePathname: '',
+      spaceIdSegment: '',
+      relativePath: '/app/management/insightsAndAlerting/triggersActions/rule/1',
+    };
     const result = injectActionParams({
       actionParams,
-      ruleId: '1',
-      spaceId: 'default',
       actionTypeId: '.email',
+      ruleUrl,
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -50,32 +55,40 @@ describe('injectActionParams', () => {
     `);
   });
 
-  test('injects viewInKibanaPath and viewInKibanaText when actionTypeId is .email and spaceId is undefined', () => {
+  test('injects viewInKibanaPath and viewInKibanaText when actionTypeId is .email with basePathname and spaceId', () => {
     const actionParams = {
       body: {
         message: 'State: "{{state.value}}", Context: "{{context.value}}"',
       },
     };
+    const ruleUrl = {
+      absoluteUrl:
+        'http://localhost:5601/kibana/s/mary/app/management/insightsAndAlerting/triggersActions/rule/1',
+      kibanaBaseUrl: 'http://localhost:5601/kibana',
+      basePathname: '/kibana',
+      spaceIdSegment: '/s/mary',
+      relativePath: '/app/management/insightsAndAlerting/triggersActions/rule/1',
+    };
     const result = injectActionParams({
       actionParams,
-      ruleId: '1',
-      spaceId: undefined,
       actionTypeId: '.email',
+      ruleUrl,
     });
+    // path in the snapshot should not include /kibana since it is part of kibanaBaseUrl already
     expect(result).toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "message": "State: \\"{{state.value}}\\", Context: \\"{{context.value}}\\"",
         },
         "kibanaFooterLink": Object {
-          "path": "/app/management/insightsAndAlerting/triggersActions/rule/1",
+          "path": "/s/mary/app/management/insightsAndAlerting/triggersActions/rule/1",
           "text": "View rule in Kibana",
         },
       }
     `);
   });
 
-  test('injects viewInKibanaPath with space ID and viewInKibanaText when actionTypeId is .email', () => {
+  test('injects viewInKibanaPath as empty string when the ruleUrl is undefined', () => {
     const actionParams = {
       body: {
         message: 'State: "{{state.value}}", Context: "{{context.value}}"',
@@ -83,8 +96,6 @@ describe('injectActionParams', () => {
     };
     const result = injectActionParams({
       actionParams,
-      ruleId: '1',
-      spaceId: 'not-the-default',
       actionTypeId: '.email',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -93,7 +104,7 @@ describe('injectActionParams', () => {
           "message": "State: \\"{{state.value}}\\", Context: \\"{{context.value}}\\"",
         },
         "kibanaFooterLink": Object {
-          "path": "/s/not-the-default/app/management/insightsAndAlerting/triggersActions/rule/1",
+          "path": "",
           "text": "View rule in Kibana",
         },
       }

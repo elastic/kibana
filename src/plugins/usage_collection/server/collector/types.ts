@@ -21,7 +21,7 @@ export type {
 /**
  * Helper to find out whether to keep recursively looking or if we are on an end value
  */
-export type RecursiveMakeSchemaFrom<U> = U extends object
+export type RecursiveMakeSchemaFrom<U, RequireMeta> = U extends object
   ? Record<string, unknown> extends U
     ?
         | {
@@ -31,19 +31,21 @@ export type RecursiveMakeSchemaFrom<U> = U extends object
               description: string; // Intentionally enforcing the descriptions here
             } & SchemaMetaOptional<U>;
           }
-        | MakeSchemaFrom<U> // But still allow being explicit in the definition if they want to.
-    : MakeSchemaFrom<U>
+        | MakeSchemaFrom<U, RequireMeta> // But still allow being explicit in the definition if they want to.
+    : MakeSchemaFrom<U, RequireMeta>
+  : RequireMeta extends true
+  ? { type: PossibleSchemaTypes<U>; _meta: { description: string } }
   : { type: PossibleSchemaTypes<U>; _meta?: { description: string } };
 
 /**
  * The `schema` property in {@link CollectorOptions} must match the output of
  * the `fetch` method. This type helps ensure that is correct
  */
-export type MakeSchemaFrom<Base> = {
+export type MakeSchemaFrom<Base, RequireMeta = false> = {
   // Using Required to enforce all optional keys in the object
   [Key in keyof Required<Base>]: Required<Base>[Key] extends Array<infer U>
-    ? { type: 'array'; items: RecursiveMakeSchemaFrom<U> }
-    : RecursiveMakeSchemaFrom<Required<Base>[Key]>;
+    ? { type: 'array'; items: RecursiveMakeSchemaFrom<U, RequireMeta> }
+    : RecursiveMakeSchemaFrom<Required<Base>[Key], RequireMeta>;
 };
 
 /**

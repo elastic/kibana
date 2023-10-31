@@ -15,11 +15,11 @@ import { Status } from '../../../../../../common/types/api';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
-import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
 import {
   LicensingCallout,
   LICENSING_FEATURE,
-} from '../../shared/licensing_callout/licensing_callout';
+} from '../../../../shared/licensing_callout/licensing_callout';
+import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
 import { MethodCrawlerLogic } from './method_crawler_logic';

@@ -7,9 +7,10 @@
 
 import { useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { MonitorOverviewItem } from '../../../../common/runtime_types';
 import { selectServiceLocationsState, getServiceLocations } from '../state';
 
-export function useLocationName({ locationId }: { locationId: string }) {
+export function useLocationName(monitor: MonitorOverviewItem) {
   const dispatch = useDispatch();
   const { locationsLoaded, locations } = useSelector(selectServiceLocationsState);
   useEffect(() => {
@@ -17,12 +18,14 @@ export function useLocationName({ locationId }: { locationId: string }) {
       dispatch(getServiceLocations());
     }
   });
+  const locationId = monitor?.location.id;
 
   return useMemo(() => {
-    if (!locationsLoaded) {
-      return undefined;
+    if (!locationsLoaded || monitor.location.label) {
+      return monitor.location.label ?? monitor.location.id;
     } else {
-      return locations.find((location) => location.id === locationId);
+      const location = locations.find((loc) => loc.id === locationId);
+      return location?.label ?? (monitor.location.label || monitor.location.id);
     }
-  }, [locationsLoaded, locations, locationId]);
+  }, [locationsLoaded, locations, locationId, monitor]);
 }

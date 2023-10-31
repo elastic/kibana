@@ -28,9 +28,12 @@ export {
   HTTPAuthorizationHeader,
 } from './http_authentication';
 export type {
-  CreateAPIKeyResult,
-  InvalidateAPIKeyResult,
   CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
+  InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
   ValidateAPIKeyParams,
   GrantAPIKeyResult,

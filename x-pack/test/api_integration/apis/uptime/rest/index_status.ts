@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { expectFixtureEql } from './helper/expect_fixture_eql';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('indexStatus query', () => {
@@ -16,7 +16,10 @@ export default function ({ getService }: FtrProviderContext) {
     it(`will fetch the index's count`, async () => {
       const apiResponse = await supertest.get(API_URLS.INDEX_STATUS);
       const data = apiResponse.body;
-      expectFixtureEql(data, 'doc_count');
+      expect(data).to.eql({
+        indexExists: true,
+        indices: 'heartbeat-*',
+      });
     });
   });
 }

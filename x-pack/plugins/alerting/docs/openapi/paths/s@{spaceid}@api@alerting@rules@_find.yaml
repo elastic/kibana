@@ -113,6 +113,8 @@ get:
           examples:
             findRulesResponse:
               $ref: '../components/examples/find_rules_response.yaml'
+            findConditionalActionRulesResponse:
+              $ref: '../components/examples/find_rules_response_conditional_action.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:

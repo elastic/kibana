@@ -30,4 +30,5 @@ export const threatSearchParamsMock: GetThreatListOptions = {
   searchAfter: undefined,
   runtimeMappings: undefined,
   exceptionFilter: undefined,
+  indexFields: [],
 };

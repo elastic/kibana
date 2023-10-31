@@ -7,7 +7,7 @@
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useMemo } from 'react';
-import type { CaseAssignees } from '../../../common/api';
+import type { CaseAssignees } from '../../../common/types/domain';
 import { sortProfiles } from '../../components/user_profiles/sort';
 import type { Assignee, AssigneeWithProfile } from '../../components/user_profiles/types';
 

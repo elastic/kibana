@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KnownTypeToString } from '../types';
+import { TypeString } from '../types';
 import { ArgumentType } from './arguments';
 
 export class ExpressionFunctionParameter<T = unknown> {
@@ -46,6 +46,6 @@ export class ExpressionFunctionParameter<T = unknown> {
   }
 
   accepts(type: string) {
-    return !this.types?.length || this.types.includes(type as KnownTypeToString<T>);
+    return !this.types?.length || this.types.includes(type as TypeString<T>);
   }
 }

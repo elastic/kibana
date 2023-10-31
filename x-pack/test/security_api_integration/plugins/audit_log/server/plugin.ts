@@ -12,7 +12,13 @@ export class AuditTrailTestPlugin implements Plugin {
     const router = core.http.createRouter();
     router.get({ path: '/audit_log', validate: false }, async (context, request, response) => {
       const soClient = (await context.core).savedObjects.client;
-      await soClient.create('dashboard', {});
+      await soClient.create('dashboard', {
+        title: '',
+        optionsJSON: '',
+        description: '',
+        panelsJSON: '{}',
+        kibanaSavedObjectMeta: {},
+      });
       await soClient.find({ type: 'dashboard' });
       return response.noContent();
     });

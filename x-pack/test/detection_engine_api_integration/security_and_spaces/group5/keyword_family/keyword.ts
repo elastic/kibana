@@ -11,14 +11,14 @@ import {
   EqlRuleCreateProps,
   QueryRuleCreateProps,
   ThresholdRuleCreateProps,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
   getSignalsById,
@@ -32,6 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('Rule detects against a keyword of event.dataset', () => {
     before(async () => {
@@ -47,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

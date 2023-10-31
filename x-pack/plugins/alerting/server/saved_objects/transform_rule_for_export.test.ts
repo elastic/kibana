@@ -7,7 +7,7 @@
 
 import { transformRulesForExport } from './transform_rule_for_export';
 jest.mock('../lib/rule_execution_status', () => ({
-  getRuleExecutionStatusPending: () => ({
+  getRuleExecutionStatusPendingAttributes: () => ({
     status: 'pending',
     lastExecutionDate: '2020-08-20T19:23:38Z',
     error: null,

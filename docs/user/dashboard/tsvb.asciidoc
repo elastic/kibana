@@ -43,7 +43,7 @@ IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecate
 
 . Select *Use only {kib} {data-sources}*.
 
-. From the *Data view* drodpown, select the {data-source}, then select the *Time field* and *Interval*.
+. From the *Data view* dropdown, select the {data-source}, then select the *Time field* and *Interval*.
 
 . Select a *Drop last bucket* option. 
 +

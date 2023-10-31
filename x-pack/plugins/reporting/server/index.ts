@@ -21,6 +21,4 @@ export const plugin = (initContext: PluginInitializerContext<ReportingConfigType
   new ReportingPlugin(initContext);
 
 // @internal
-export type { ReportingConfig } from './config/config';
-// @internal
 export { ReportingCore } from './core';

@@ -25,7 +25,6 @@ describe('Severity level chart', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('renders severity table correctly', () => {

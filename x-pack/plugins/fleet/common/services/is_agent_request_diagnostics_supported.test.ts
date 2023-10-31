@@ -9,10 +9,10 @@ import type { Agent } from '../types/models/agent';
 
 import { isAgentRequestDiagnosticsSupported } from '.';
 
-const getAgent = ({ version }: { version: string }): Agent => {
+const getAgent = ({ version, active = true }: { active?: boolean; version: string }): Agent => {
   const agent: Agent = {
     id: 'agent1',
-    active: true,
+    active,
     type: 'PERMANENT',
     enrolled_at: '2023-02-08T20:24:08.347Z',
     user_provided_metadata: {},
@@ -38,5 +38,11 @@ describe('Fleet - isAgentRequestDiagnosticsSupported', () => {
 
   it('returns true if agent version > 8.7', () => {
     expect(isAgentRequestDiagnosticsSupported(getAgent({ version: '8.8.0' }))).toBe(true);
+  });
+
+  it('returns false if agent version > 8.7 and agent is inactive', () => {
+    expect(isAgentRequestDiagnosticsSupported(getAgent({ active: false, version: '8.8.0' }))).toBe(
+      false
+    );
   });
 });

@@ -22,18 +22,18 @@ import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import type { Observable, Subscription } from 'rxjs';
 
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
+import { SpaceCards } from './components';
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
-import { SpaceCards } from './components';
 
 interface Props {
   spacesManager: SpacesManager;

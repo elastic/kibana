@@ -44,6 +44,7 @@ jest.mock('../../lib/kibana', () => {
   const originalKibanaLib = jest.requireActual('../../lib/kibana');
 
   return {
+    ...originalKibanaLib,
     useKibana: () => ({
       services: {
         application: {
@@ -71,7 +72,6 @@ jest.mock('../../lib/kibana', () => {
     useNavigateTo: jest.fn().mockReturnValue({
       navigateTo: jest.fn(),
     }),
-    useGetUserCasesPermissions: originalKibanaLib.useGetUserCasesPermissions,
   };
 });
 

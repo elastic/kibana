@@ -84,6 +84,36 @@ describe('set signal status', () => {
         status_code: 500,
       });
     });
+
+    test('calls "esClient.updateByQuery" with queryId when query is defined', async () => {
+      await server.inject(
+        getSetSignalStatusByQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            query: expect.objectContaining({
+              bool: { filter: typicalSetStatusSignalByQueryPayload().query },
+            }),
+          }),
+        })
+      );
+    });
+
+    test('calls "esClient.updateByQuery" with signalIds when ids are defined', async () => {
+      await server.inject(
+        getSetSignalStatusByIdsRequest(),
+        requestContextMock.convertContext(context)
+      );
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            query: { bool: { filter: { terms: { _id: ['somefakeid1', 'somefakeid2'] } } } },
+          }),
+        })
+      );
+    });
   });
 
   describe('request validation', () => {

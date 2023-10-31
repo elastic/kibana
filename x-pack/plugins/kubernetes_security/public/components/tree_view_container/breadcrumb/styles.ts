@@ -27,9 +27,8 @@ export const useStyles = () => {
       maxWidth: '248px',
       fontSize: size.m,
       fontWeight: font.weight.regular,
-      '.euiButtonEmpty__content': {
-        paddingLeft: size.xs,
-        paddingRight: size.xs,
+      '.euiButtonEmpty': {
+        paddingInline: size.xs,
       },
     };
 

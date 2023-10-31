@@ -67,7 +67,9 @@ export function ServiceOverviewThroughputChart({
     end,
     numBuckets: 100,
     kuery,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
 
   const { transactionType, serviceName, transactionTypeStatus } =

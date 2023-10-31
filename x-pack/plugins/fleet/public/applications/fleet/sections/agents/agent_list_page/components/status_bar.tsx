@@ -6,7 +6,7 @@
  */
 
 import styled from 'styled-components';
-import { EuiColorPaletteDisplay } from '@elastic/eui';
+import { EuiColorPaletteDisplay, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { AGENT_STATUSES, getColorForAgentStatus } from '../../services/agent_status';
@@ -35,13 +35,19 @@ export const AgentStatusBar: React.FC<{
       return acc;
     }, [] as Array<{ stop: number; color: string }>);
   }, [agentStatus]);
+
+  const hasNoAgent = palette[palette.length - 1].stop === 0;
+
+  if (hasNoAgent) {
+    return <EuiSpacer size="s" />;
+  }
+
   return (
-    <>
-      <StyledEuiColorPaletteDisplay
-        className="ingest-agent-status-bar"
-        size="s"
-        palette={palette}
-      />
-    </>
+    <StyledEuiColorPaletteDisplay
+      data-test-subj="agentStatusBar"
+      className="ingest-agent-status-bar"
+      size="s"
+      palette={palette}
+    />
   );
 };

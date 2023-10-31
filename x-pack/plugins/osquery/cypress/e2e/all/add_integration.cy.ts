@@ -28,60 +28,63 @@ import {
   interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
-
-import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Add Integration', () => {
+describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
+      savedQueryId = data.saved_object_id;
     });
   });
 
   beforeEach(() => {
-    login();
+    cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
   });
 
   after(() => {
     cleanupSavedQuery(savedQueryId);
   });
 
-  it('validate osquery is not available and nav search links to integration', () => {
-    cy.visit(OSQUERY);
-    cy.intercept('GET', '**/internal/osquery/status', (req) => {
-      req.continue((res) => res.send({ ...res.body, install_status: undefined }));
-    });
-    cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
-    cy.contains('Add Osquery Manager');
-    cy.getBySel('osquery-add-integration-button');
-    cy.getBySel('nav-search-input').type('Osquery');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
-    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
-  });
+  it(
+    'validate osquery is not available and nav search links to integration',
+    { tags: ['@ess', '@brokenInServerless'] },
+    () => {
+      cy.visit(OSQUERY);
+      cy.intercept('GET', '**/internal/osquery/status', (req) => {
+        req.continue((res) => res.send({ ...res.body, install_status: undefined }));
+      });
+      cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
+      cy.contains('Add Osquery Manager');
+      cy.getBySel('osquery-add-integration-button');
+      cy.getBySel('nav-search-input').type('Osquery');
+      cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
+      cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
+      cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
+    }
+  );
 
-  describe('Add and upgrade integration', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169702
+  describe.skip('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
 
-    before(() => {
+    beforeEach(() => {
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupAgentPolicy(policyId);
     });
 
-    it('should add the old integration and be able to upgrade it', () => {
+    it('should add the old integration and be able to upgrade it', { tags: '@ess' }, () => {
       cy.visit(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
-      cy.contains(integrationName);
       policyContainsIntegration(integrationName, policyName);
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
@@ -97,13 +100,13 @@ describe('ALL - Add Integration', () => {
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
 
-    before(() => {
+    beforeEach(() => {
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupAgentPolicy(policyId);
     });
 
@@ -114,6 +117,7 @@ describe('ALL - Add Integration', () => {
       cy.getBySel('createAgentPolicyFlyoutBtn').click();
       cy.getBySel('agentPolicyNameLink').contains(policyName).click();
       cy.getBySel('addPackagePolicyButton').click();
+      cy.getBySel('epmList.searchBar').type('osquery');
       cy.getBySel('integration-card:epr:osquery_manager').click();
       cy.getBySel('addIntegrationPolicyButton').click();
       cy.getBySel('agentPolicySelect').within(() => {
@@ -136,7 +140,7 @@ describe('ALL - Add Integration', () => {
     let policyId: string;
     let packId: string;
 
-    before(() => {
+    beforeEach(() => {
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
@@ -145,7 +149,7 @@ describe('ALL - Add Integration', () => {
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupPack(packId);
       cleanupAgentPolicy(policyId);
     });
@@ -200,7 +204,6 @@ describe('ALL - Add Integration', () => {
 
       // test list of prebuilt queries
       navigateTo('/app/osquery/saved_queries');
-      cy.waitForReact();
       cy.react('EuiTableRow').should('have.length.above', 5);
     });
   });

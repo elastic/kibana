@@ -12,7 +12,7 @@ export function computeSummaryStatus(slo: SLO, sliValue: number, errorBudget: Er
     return 'NO_DATA';
   }
 
-  if (slo.objective.target <= sliValue) {
+  if (sliValue >= slo.objective.target) {
     return 'HEALTHY';
   } else {
     return errorBudget.remaining > 0 ? 'DEGRADING' : 'VIOLATED';

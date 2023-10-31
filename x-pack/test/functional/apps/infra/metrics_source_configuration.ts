@@ -50,11 +50,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await metricIndicesInput.type('does-not-exist-*');
 
         await infraSourceConfigurationForm.saveConfiguration();
+
+        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.infraHome.getInfraMissingMetricsIndicesCallout();
       });
 
       it('renders the no indices screen when no indices match the pattern', async () => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
+      });
+
+      it('can change the metric indices to a remote cluster when connection does not exist', async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
+
+        const nameInput = await infraSourceConfigurationForm.getNameInput();
+        await nameInput.clearValueWithKeyboard({ charByChar: true });
+        await nameInput.type('Modified Source');
+
+        const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
+        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
+        await metricIndicesInput.type('remote_cluster:metricbeat-*');
+
+        await infraSourceConfigurationForm.saveConfiguration();
+
+        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.infraHome.getInfraMissingRemoteClusterIndicesCallout();
+      });
+
+      it('renders the no remote cluster screen when no remote cluster connection is available', async () => {
+        await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraHome.getNoRemoteClusterPrompt();
       });
 
       it('can change the metric indices back to a pattern that matches something', async () => {

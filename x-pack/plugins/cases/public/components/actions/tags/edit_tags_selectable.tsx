@@ -20,13 +20,13 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
-import type { CaseUI } from '../../../../common';
+import type { CasesUI } from '../../../../common';
 import * as i18n from './translations';
 import { useItemsState } from '../use_items_state';
 import type { ItemSelectableOption, ItemsSelectionState } from '../types';
 
 interface Props {
-  selectedCases: CaseUI[];
+  selectedCases: CasesUI;
   tags: string[];
   isLoading: boolean;
   onChangeTags: (args: ItemsSelectionState) => void;

@@ -1,19 +1,13 @@
 {
   "type": "plugin",
   "id": "@kbn/session-view-plugin",
-  "owner": "@elastic/sec-cloudnative-integrations",
+  "owner": "@elastic/kibana-cloud-security-posture",
   "plugin": {
     "id": "sessionView",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "data",
-      "timelines",
-      "ruleRegistry"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "esUiShared"
-    ]
+    "requiredPlugins": ["data", "timelines", "ruleRegistry"],
+    "optionalPlugins": ["usageCollection"],
+    "requiredBundles": ["kibanaReact", "esUiShared"]
   }
 }

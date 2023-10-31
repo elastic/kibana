@@ -8,7 +8,18 @@
 
 import React from 'react';
 
-export interface FlyoutPanel {
+export interface PanelPath {
+  /**
+   * Top level tab that to be displayed
+   */
+  tab: string;
+  /**
+   * Optional secondary level to be displayed under top level tab
+   */
+  subTab?: string;
+}
+
+export interface FlyoutPanelProps {
   /**
    * Unique key to identify the panel
    */
@@ -18,9 +29,9 @@ export interface FlyoutPanel {
    */
   params?: Record<string, unknown>;
   /**
-   * Tracks the path for what to show in a panel. We may have multiple tabs or details..., so easiest to just use a stack
+   * Tracks the path for what to show in a panel, such as activated tab and subtab
    */
-  path?: string[];
+  path?: PanelPath;
   /**
    * Tracks visual state such as whether the panel is collapsed
    */
@@ -35,5 +46,5 @@ export interface Panel {
   /**
    * Component to be rendered
    */
-  component: (props: FlyoutPanel) => React.ReactElement;
+  component: (props: FlyoutPanelProps) => React.ReactElement;
 }

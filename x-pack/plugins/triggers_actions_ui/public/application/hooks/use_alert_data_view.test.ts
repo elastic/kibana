@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { AsyncState } from 'react-use/lib/useAsync';
-import { useAlertDataView } from './use_alert_data_view';
+import { useAlertDataView, UserAlertDataView } from './use_alert_data_view';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 
@@ -23,7 +21,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 describe('useAlertDataView', () => {
-  const mockedDataView = 'dataView';
   const observabilityAlertFeatureIds: ValidFeatureId[] = [
     AlertConsumers.APM,
     AlertConsumers.INFRASTRUCTURE,
@@ -40,7 +37,6 @@ describe('useAlertDataView', () => {
         '.alerts-observability.apm.alerts-*',
       ],
     });
-    mockUseKibanaReturnValue.data.dataViews.create = jest.fn().mockReturnValue(mockedDataView);
   });
 
   afterEach(() => {
@@ -51,9 +47,10 @@ describe('useAlertDataView', () => {
     await act(async () => {
       const mockedAsyncDataView = {
         loading: true,
+        error: undefined,
       };
 
-      const { result, waitForNextUpdate } = renderHook<ValidFeatureId[], AsyncState<DataView>>(() =>
+      const { result, waitForNextUpdate } = renderHook<ValidFeatureId[], UserAlertDataView>(() =>
         useAlertDataView(observabilityAlertFeatureIds)
       );
 
@@ -65,19 +62,26 @@ describe('useAlertDataView', () => {
 
   it('returns dataView for the provided featureIds', async () => {
     await act(async () => {
-      const mockedAsyncDataView = {
-        loading: false,
-        value: mockedDataView,
-      };
-
-      const { result, waitForNextUpdate } = renderHook<ValidFeatureId[], AsyncState<DataView>>(() =>
+      const { result, waitForNextUpdate } = renderHook<ValidFeatureId[], UserAlertDataView>(() =>
         useAlertDataView(observabilityAlertFeatureIds)
       );
 
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      expect(result.current).toEqual(mockedAsyncDataView);
+      expect(result.current).toMatchInlineSnapshot(`
+        Object {
+          "error": undefined,
+          "loading": false,
+          "value": Array [
+            Object {
+              "fieldFormatMap": Object {},
+              "fields": Array [],
+              "title": ".alerts-observability.uptime.alerts-*,.alerts-observability.metrics.alerts-*,.alerts-observability.logs.alerts-*,.alerts-observability.apm.alerts-*",
+            },
+          ],
+        }
+      `);
     });
   });
 
@@ -88,19 +92,20 @@ describe('useAlertDataView', () => {
     });
 
     await act(async () => {
-      const mockedAsyncDataView = {
-        loading: false,
-        error,
-      };
-
-      const { result, waitForNextUpdate } = renderHook<ValidFeatureId[], AsyncState<DataView>>(() =>
+      const { result, waitForNextUpdate } = renderHook<ValidFeatureId[], UserAlertDataView>(() =>
         useAlertDataView(observabilityAlertFeatureIds)
       );
 
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      expect(result.current).toEqual(mockedAsyncDataView);
+      expect(result.current).toMatchInlineSnapshot(`
+        Object {
+          "error": [Error: http error],
+          "loading": false,
+          "value": undefined,
+        }
+      `);
     });
   });
 });

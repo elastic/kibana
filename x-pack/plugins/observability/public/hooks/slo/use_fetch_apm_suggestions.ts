@@ -48,7 +48,7 @@ export function useFetchApmSuggestions({
             start: moment().subtract(2, 'days').toISOString(),
             end: moment().toISOString(),
             fieldValue: search,
-            ...(!!serviceName && { serviceName }),
+            ...(!!serviceName && fieldName !== 'service.name' && { serviceName }),
           },
           signal,
         });
@@ -59,6 +59,7 @@ export function useFetchApmSuggestions({
       }
     },
     refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 
   return {

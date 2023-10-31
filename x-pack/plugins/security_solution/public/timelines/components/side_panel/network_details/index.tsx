@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import {
   EuiFlexGroup,
   EuiFlyoutHeader,
@@ -65,6 +63,7 @@ interface NetworkDetailsProps {
   isDraggable?: boolean;
 }
 
+// eslint-disable-next-line react/display-name
 export const NetworkDetailsPanel = React.memo(
   ({
     contextID,

@@ -13,6 +13,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
   useForm,
@@ -22,8 +23,8 @@ import {
   getUseField,
   Field,
 } from '../../../../../../shared_imports';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditType } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';
@@ -104,7 +105,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     onConfirm({
       type: editAction,
       value: {
-        actions: actions.map(({ actionTypeId, ...action }) => action),
+        actions: actions.map(transformAlertToNormalizedRuleAction),
       },
     });
   }, [form, onConfirm]);

@@ -6,12 +6,18 @@
  */
 
 import { useMemo } from 'react';
-import { ApmDataSource } from '../../common/data_source';
+import { ApmDataSourceWithSummary } from '../../common/data_source';
 import { ApmDocumentType } from '../../common/document_type';
 import { getBucketSize } from '../../common/utils/get_bucket_size';
 import { getPreferredBucketSizeAndDataSource } from '../../common/utils/get_preferred_bucket_size_and_data_source';
 import { useTimeRangeMetadata } from '../context/time_range_metadata/use_time_range_metadata_context';
 
+/**
+ * Hook to get the source and interval based on Time Range Metadata API
+ *
+ * @param {number} numBuckets - The number of buckets. Should be 20 for SparkPlots or 100 for Other charts.
+
+ */
 export function usePreferredDataSourceAndBucketSize<
   TDocumentType extends
     | ApmDocumentType.ServiceTransactionMetric
@@ -30,7 +36,7 @@ export function usePreferredDataSourceAndBucketSize<
   type: TDocumentType;
 }): {
   bucketSizeInSeconds: number;
-  source: ApmDataSource<
+  source: ApmDataSourceWithSummary<
     TDocumentType extends ApmDocumentType.ServiceTransactionMetric
       ?
           | ApmDocumentType.ServiceTransactionMetric
@@ -74,15 +80,13 @@ export function usePreferredDataSourceAndBucketSize<
           start: new Date(start).getTime(),
           end: new Date(end).getTime(),
         }).bucketSize,
-        sources: sources.filter(
-          (s) => s.hasDocs && suitableTypes.includes(s.documentType)
-        ),
+        sources: sources.filter((s) => suitableTypes.includes(s.documentType)),
       }
     );
 
     return {
       bucketSizeInSeconds,
-      source: source as ApmDataSource<any>,
+      source: source as ApmDataSourceWithSummary<any>,
     };
   }, [type, start, end, sources, numBuckets]);
 }

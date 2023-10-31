@@ -10,6 +10,7 @@ import { DATE_NOW, LIST_ID, META, TIE_BREAKER, USER, VALUE } from '../../../comm
 import { IndexEsListItemSchema } from './index_es_list_item_schema';
 
 export const getIndexESListItemMock = (ip = VALUE): IndexEsListItemSchema => ({
+  '@timestamp': DATE_NOW,
   created_at: DATE_NOW,
   created_by: USER,
   deserializer: undefined,

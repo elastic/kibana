@@ -18,5 +18,3 @@ export const DEFAULT_TIMERANGE = {
 };
 
 export const DEFAULT_REFRESH_TIME_RANGE = DEFAULT_TIMERANGE;
-
-export const DEFAULT_REFRESH_INTERVAL = { pause: true, value: 5000 };

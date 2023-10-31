@@ -27,7 +27,13 @@ import {
   apmEnableContinuousRollups,
   enableCriticalPath,
   enableInfrastructureHostsView,
-  profilingElasticsearchPlugin,
+  syntheticsThrottlingEnabled,
+  enableLegacyUptimeApp,
+  apmEnableProfilingIntegration,
+  profilingUseLegacyFlamegraphAPI,
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPerCoreWatt,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -38,13 +44,6 @@ const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
   { defaultMessage: 'technical preview' }
 );
-
-function feedbackLink({ href }: { href: string }) {
-  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
-    'xpack.observability.uiSettings.giveFeedBackLabel',
-    { defaultMessage: 'Give feedback' }
-  )}</a>`;
-}
 
 type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
 
@@ -82,7 +81,8 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
-      defaultMessage: 'Enable the comparison feature in APM app',
+      defaultMessage:
+        'Determines whether the comparison feature is enabled or disabled by default in the APM app.',
     }),
     schema: schema.boolean(),
   },
@@ -161,10 +161,9 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
         values: {
           technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-          feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-apm-page-performance' }),
         },
       }
     ),
@@ -192,14 +191,16 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {feedbackLink}.',
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {link}',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-trace-explorer' }),
+        link: traceExplorerDocsLink({
+          href: 'https://www.elastic.co/guide/en/kibana/master/traces.html#trace-explorer',
+        }),
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
@@ -223,13 +224,11 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
       defaultMessage: 'Infrastructure Hosts view',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the Hosts view in the Infrastructure app. {feedbackLink}.',
+      defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
       values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-host-observability' }),
+        betaLabel: `<em>[${betaLabel}]</em>`,
       },
     }),
     schema: schema.boolean(),
@@ -241,10 +240,9 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
+        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-aws-lambda' }),
       },
     }),
     schema: schema.boolean(),
@@ -259,16 +257,15 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Agent explorer',
     }),
     description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+      defaultMessage: '{betaLabel} Enables Agent explorer view.',
       values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        betaLabel: `<em>[${betaLabel}]</em>`,
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
-    showInLabs: true,
   },
   [apmAWSLambdaPriceFactor]: {
     category: [observabilityFeatureId],
@@ -338,21 +335,133 @@ export const uiSettings: Record<string, UiSettings> = {
     type: 'boolean',
     showInLabs: true,
   },
-  [profilingElasticsearchPlugin]: {
+  [syntheticsThrottlingEnabled]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.profilingElasticsearchPlugin', {
-      defaultMessage: 'Use Elasticsearch profiler plugin',
+    name: i18n.translate('xpack.observability.syntheticsThrottlingEnabledExperimentName', {
+      defaultMessage: 'Enable Synthetics throttling (Experimental)',
     }),
-    description: i18n.translate('xpack.observability.profilingElasticsearchPluginDescription', {
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.syntheticsThrottlingEnabledExperimentDescription',
+      {
+        defaultMessage:
+          'Enable the throttling setting in Synthetics monitor configurations. Note that throttling may still not be available for your monitors even if the setting is active. Intended for internal use only. {link}',
+        values: {
+          link: throttlingDocsLink({
+            href: 'https://github.com/elastic/synthetics/blob/main/docs/throttling.md',
+          }),
+        },
+      }
+    ),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [enableLegacyUptimeApp]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableLegacyUptimeApp', {
+      defaultMessage: 'Always show legacy Uptime app',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableLegacyUptimeAppDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Whether to load stacktraces using Elasticsearch profiler plugin.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
+        "By default, the legacy Uptime app is hidden from the interface when it doesn't have any data for more than a week. Enable this option to always show it.",
     }),
     schema: schema.boolean(),
-    value: true,
     requiresPageReload: true,
-    type: 'boolean',
+  },
+  [apmEnableProfilingIntegration]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableProfilingIntegration', {
+      defaultMessage: 'Enable Universal Profiling integration in APM',
+    }),
+    value: true,
+    schema: schema.boolean(),
+    requiresPageReload: false,
+  },
+  [profilingUseLegacyFlamegraphAPI]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingUseLegacyFlamegraphAPI', {
+      defaultMessage: 'Use legacy Flamegraph API in Universal Profiling',
+    }),
+    value: false,
+    schema: schema.boolean(),
+  },
+  [profilingPerCoreWatt]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingPerCoreWattUiSettingName', {
+      defaultMessage: 'Per Core Watts',
+    }),
+    value: 7,
+    description: i18n.translate('xpack.observability.profilingPerCoreWattUiSettingDescription', {
+      defaultMessage: `The average amortized per-core power consumption (based on 100% CPU utilization).`,
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [profilingDatacenterPUE]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingName', {
+      defaultMessage: 'Data Center PUE',
+    }),
+    value: 1.7,
+    description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
+      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the {uptimeLink} survey  
+      </br></br>
+      You can also use the PUE that corresponds with your cloud provider: 
+      <ul style="list-style-type: none;margin-left: 4px;">
+        <li><strong>AWS:</strong> 1.135</li>
+        <li><strong>GCP:</strong> 1.1</li>
+        <li><strong>Azure:</strong> 1.185</li>
+      </ul>
+      `,
+      values: {
+        uptimeLink:
+          '<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate(
+            'xpack.observability.profilingDatacenterPUEUiSettingDescription.uptimeLink',
+            { defaultMessage: 'Uptime Institute' }
+          ) +
+          '</a>',
+      },
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [profilingCo2PerKWH]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingName', {
+      defaultMessage: 'Regional Carbon Intensity (ton/kWh)',
+    }),
+    value: 0.000379069,
+    description: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingDescription', {
+      defaultMessage: `Carbon intensity measures how clean your data center electricity is.  
+      Specifically, it measures the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region.
+      Use the cloud carbon footprint {datasheetLink} to update this value according to your region. Defaults to US East (N. Virginia).`,
+      values: {
+        datasheetLink:
+          '<a href="https://ela.st/grid-datasheet" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate(
+            'xpack.observability.profilingCo2PerKWHUiSettingDescription.datasheetLink',
+            { defaultMessage: 'datasheet' }
+          ) +
+          '</a>',
+      },
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
   },
 };
+
+function throttlingDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
+    'xpack.observability.uiSettings.throttlingDocsLinkText',
+    { defaultMessage: 'read notice here.' }
+  )}</a>`;
+}
+
+function traceExplorerDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank">${i18n.translate(
+    'xpack.observability.uiSettings.traceExplorerDocsLinkText',
+    { defaultMessage: 'Learn more.' }
+  )}</a>`;
+}

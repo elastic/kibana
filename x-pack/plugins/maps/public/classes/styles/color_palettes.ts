@@ -7,26 +7,17 @@
 
 import tinycolor from 'tinycolor2';
 import {
-  // @ts-ignore
   colorPalette as colorPaletteGenerator,
-  // @ts-ignore
   euiPaletteForStatus,
-  // @ts-ignore
   euiPaletteForTemperature,
-  // @ts-ignore
   euiPaletteCool,
-  // @ts-ignore
   euiPaletteWarm,
-  // @ts-ignore
   euiPaletteNegative,
-  // @ts-ignore
   euiPalettePositive,
-  // @ts-ignore
   euiPaletteGray,
-  // @ts-ignore
   euiPaletteColorBlind,
-} from '@elastic/eui/lib/services';
-import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+  EuiColorPalettePickerPaletteProps,
+} from '@elastic/eui';
 import { PercentilesFieldMeta } from '../../../common/descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
@@ -198,7 +189,8 @@ export function getOrdinalMbColorRampStops(
   return palette.reduce(
     (accu: Array<number | string>, stopColor: string, idx: number, srcArr: string[]) => {
       const stopNumber = min + (delta * idx) / srcArr.length;
-      return [...accu, stopNumber, stopColor];
+      accu.push(stopNumber, stopColor);
+      return accu;
     },
     []
   );
@@ -228,7 +220,8 @@ export function getPercentilesMbColorRampStops(
     palette.reverse();
   }
   return palette.reduce((accu: Array<number | string>, stopColor: string, idx: number) => {
-    return [...accu, percentiles[idx].value, stopColor];
+    accu.push(percentiles[idx].value, stopColor);
+    return accu;
   }, []);
 }
 

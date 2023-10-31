@@ -18,6 +18,8 @@
     "@kbn/repo-info",
     "@kbn/import-resolver",
     "@kbn/usage-collection-plugin",
+    "@kbn/config-schema",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",

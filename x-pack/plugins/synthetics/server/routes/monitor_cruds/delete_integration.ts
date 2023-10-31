@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({

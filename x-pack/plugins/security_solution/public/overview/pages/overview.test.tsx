@@ -26,9 +26,9 @@ import { initialUserPrivilegesState } from '../../common/components/user_privile
 import type { EndpointPrivileges } from '../../../common/endpoint/types';
 import { useRiskScore } from '../../explore/containers/risk_score';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { LandingPageComponent } from '../../common/components/landing_page';
 
 const mockNavigateToApp = jest.fn();
+jest.mock('../../common/components/landing_page');
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -308,7 +308,7 @@ describe('Overview', () => {
           </TestProviders>
         );
 
-        expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
+        expect(wrapper.find(`[data-test-subj="siem-landing-page"]`).exists()).toBe(true);
       });
     });
   });

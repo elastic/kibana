@@ -76,6 +76,7 @@ export class IndexedFieldsTable extends Component<
         fields.map((field) => {
           return {
             ...field.spec,
+            id: field.name,
             type: field.esTypes?.join(', ') || '',
             kbnType: field.type,
             displayName: field.displayName,
@@ -114,6 +115,7 @@ export class IndexedFieldsTable extends Component<
           },
         },
         name,
+        id: name,
         type: 'composite',
         kbnType: '',
         displayName: name,

@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import type { DiffableRule } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
-import type { FullRuleDiff } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
-import type { ThreeWayDiff } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import { MissingVersion } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type {
+  DiffableRule,
+  FullRuleDiff,
+  ThreeWayDiff,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { MissingVersion } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import { invariant } from '../../../../../../common/utils/invariant';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 import { calculateRuleFieldsDiff } from './calculation/calculate_rule_fields_diff';
 import { convertRuleToDiffable } from './normalization/convert_rule_to_diffable';
 
-export interface CalculateRuleDiffArgs {
-  currentVersion: RuleResponse;
-  baseVersion?: PrebuiltRuleAsset;
-  targetVersion: PrebuiltRuleAsset;
+export interface RuleVersions {
+  current?: RuleResponse;
+  base?: PrebuiltRuleAsset;
+  target?: PrebuiltRuleAsset;
 }
 
 export interface CalculateRuleDiffResult {
   ruleDiff: FullRuleDiff;
   ruleVersions: {
-    input: {
-      current: RuleResponse;
-      base?: PrebuiltRuleAsset;
-      target: PrebuiltRuleAsset;
-    };
+    input: RuleVersions;
     output: {
       current: DiffableRule;
       base?: DiffableRule;
@@ -39,11 +38,11 @@ export interface CalculateRuleDiffResult {
 
 /**
  * Calculates a rule diff for a given set of 3 versions of the rule:
- *   - currenly installed version
+ *   - currently installed version
  *   - base version that is the corresponding stock rule content
  *   - target version which is the stock rule content the user wants to update the rule to
  */
-export const calculateRuleDiff = (args: CalculateRuleDiffArgs): CalculateRuleDiffResult => {
+export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult => {
   /*
     1. Convert current, base and target versions to `DiffableRule`.
     2. Calculate a `RuleFieldsDiff`. For every top-level field of `DiffableRule`:
@@ -59,11 +58,16 @@ export const calculateRuleDiff = (args: CalculateRuleDiffArgs): CalculateRuleDif
     3. Create and return a result based on the `RuleFieldsDiff`.
   */
 
-  const { baseVersion, currentVersion, targetVersion } = args;
+  const { base, current, target } = args;
 
-  const diffableBaseVersion = baseVersion ? convertRuleToDiffable(baseVersion) : undefined;
-  const diffableCurrentVersion = convertRuleToDiffable(currentVersion);
-  const diffableTargetVersion = convertRuleToDiffable(targetVersion);
+  invariant(current != null, 'current version is required');
+  const diffableCurrentVersion = convertRuleToDiffable(current);
+
+  invariant(target != null, 'target version is required');
+  const diffableTargetVersion = convertRuleToDiffable(target);
+
+  // Base version is optional
+  const diffableBaseVersion = base ? convertRuleToDiffable(base) : undefined;
 
   const fieldsDiff = calculateRuleFieldsDiff({
     base_version: diffableBaseVersion || MissingVersion,
@@ -82,9 +86,9 @@ export const calculateRuleDiff = (args: CalculateRuleDiffArgs): CalculateRuleDif
     },
     ruleVersions: {
       input: {
-        current: currentVersion,
-        base: baseVersion,
-        target: targetVersion,
+        current,
+        base,
+        target,
       },
       output: {
         current: diffableCurrentVersion,

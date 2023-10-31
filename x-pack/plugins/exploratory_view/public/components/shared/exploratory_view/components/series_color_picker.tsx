@@ -15,7 +15,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '../../../../hooks/use_theme';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesUrl } from '../types';
 

@@ -64,6 +64,8 @@ export class AttributeService<
   RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
   MetaInfo extends unknown = unknown
 > {
+  private embeddableFactory;
+
   constructor(
     private type: string,
     private toasts: NotificationsStart['toasts'],
@@ -75,6 +77,7 @@ export class AttributeService<
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(this.type);
       }
+      this.embeddableFactory = factory;
     }
   }
 
@@ -137,14 +140,12 @@ export class AttributeService<
       return input as ValType;
     }
     const { attributes } = await this.unwrapAttributes(input);
-    const libraryTitle = attributes.title;
     const { savedObjectId, ...originalInputToPropagate } = input;
 
     return {
       ...originalInputToPropagate,
       // by value visualizations should not have default titles and/or descriptions
       ...{ attributes: omit(attributes, ['title', 'description']) },
-      title: libraryTitle,
     } as unknown as ValType;
   };
 
@@ -188,7 +189,9 @@ export class AttributeService<
               (input as ValType)[ATTRIBUTE_SERVICE_KEY].title
             )}
             showCopyOnSave={false}
-            objectType={this.type}
+            objectType={
+              this.embeddableFactory ? this.embeddableFactory.getDisplayName() : this.type
+            }
             showDescription={false}
           />
         );

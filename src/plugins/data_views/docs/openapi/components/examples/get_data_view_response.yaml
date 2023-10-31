@@ -1,0 +1,1156 @@
+summary: The get data view API returns a JSON object that contains information about the data view.
+value:
+  {
+    "data_view": {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "version": "WzUsMV0=",
+      "title": "kibana_sample_data_ecommerce",
+      "timeFieldName": "order_date",
+      "sourceFilters": [],
+      "fields": {
+        "_id": {
+          "count": 0,
+          "name": "_id",
+          "type": "string",
+          "esTypes": [
+            "_id"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "_index": {
+          "count": 0,
+          "name": "_index",
+          "type": "string",
+          "esTypes": [
+            "_index"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "_score": {
+          "count": 0,
+          "name": "_score",
+          "type": "number",
+          "scripted": false,
+          "searchable": false,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "_source": {
+          "count": 0,
+          "name": "_source",
+          "type": "_source",
+          "esTypes": [
+            "_source"
+          ],
+          "scripted": false,
+          "searchable": false,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "_source"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "category": {
+          "count": 0,
+          "name": "category",
+          "type": "string",
+          "esTypes": [
+            "text"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "category.keyword": {
+          "count": 0,
+          "name": "category.keyword",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "subType": {
+            "multi": {
+              "parent": "category"
+            }
+          },
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "currency": {
+          "count": 0,
+          "name": "currency",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_birth_date": {
+          "count": 0,
+          "name": "customer_birth_date",
+          "type": "date",
+          "esTypes": [
+            "date"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "date"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_first_name": {
+          "count": 0,
+          "name": "customer_first_name",
+          "type": "string",
+          "esTypes": [
+            "text"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_first_name.keyword": {
+          "count": 0,
+          "name": "customer_first_name.keyword",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "subType": {
+            "multi": {
+              "parent": "customer_first_name"
+            }
+          },
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_full_name": {
+          "count": 0,
+          "name": "customer_full_name",
+          "type": "string",
+          "esTypes": [
+            "text"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_full_name.keyword": {
+          "count": 0,
+          "name": "customer_full_name.keyword",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "subType": {
+            "multi": {
+              "parent": "customer_full_name"
+            }
+          },
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_gender": {
+          "count": 0,
+          "name": "customer_gender",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_id": {
+          "count": 0,
+          "name": "customer_id",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_last_name": {
+          "count": 0,
+          "name": "customer_last_name",
+          "type": "string",
+          "esTypes": [
+            "text"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_last_name.keyword": {
+          "count": 0,
+          "name": "customer_last_name.keyword",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "subType": {
+            "multi": {
+              "parent": "customer_last_name"
+            }
+          },
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "customer_phone": {
+          "count": 0,
+          "name": "customer_phone",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "day_of_week": {
+          "count": 0,
+          "name": "day_of_week",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "day_of_week_i": {
+          "count": 0,
+          "name": "day_of_week_i",
+          "type": "number",
+          "esTypes": [
+            "integer"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "email": {
+          "count": 0,
+          "name": "email",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "event.dataset": {
+          "count": 0,
+          "name": "event.dataset",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "geoip.city_name": {
+          "count": 0,
+          "name": "geoip.city_name",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "geoip.continent_name": {
+          "count": 0,
+          "name": "geoip.continent_name",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "geoip.country_iso_code": {
+          "count": 0,
+          "name": "geoip.country_iso_code",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "geoip.location": {
+          "count": 0,
+          "name": "geoip.location",
+          "type": "geo_point",
+          "esTypes": [
+            "geo_point"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "geo_point",
+            "params": {
+              "transform": "wkt"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "geoip.region_name": {
+          "count": 0,
+          "name": "geoip.region_name",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "manufacturer": {
+          "count": 0,
+          "name": "manufacturer",
+          "type": "string",
+          "esTypes": [
+            "text"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "manufacturer.keyword": {
+          "count": 0,
+          "name": "manufacturer.keyword",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "subType": {
+            "multi": {
+              "parent": "manufacturer"
+            }
+          },
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "order_date": {
+          "count": 0,
+          "name": "order_date",
+          "type": "date",
+          "esTypes": [
+            "date"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "date"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "order_id": {
+          "count": 0,
+          "name": "order_id",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products._id": {
+          "count": 0,
+          "name": "products._id",
+          "type": "string",
+          "esTypes": [
+            "text"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products._id.keyword": {
+          "count": 0,
+          "name": "products._id.keyword",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "subType": {
+            "multi": {
+              "parent": "products._id"
+            }
+          },
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.base_price": {
+          "count": 0,
+          "name": "products.base_price",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.00"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.base_unit_price": {
+          "count": 0,
+          "name": "products.base_unit_price",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.00"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.category": {
+          "count": 0,
+          "name": "products.category",
+          "type": "string",
+          "esTypes": [
+            "text"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.category.keyword": {
+          "count": 0,
+          "name": "products.category.keyword",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "subType": {
+            "multi": {
+              "parent": "products.category"
+            }
+          },
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.created_on": {
+          "count": 0,
+          "name": "products.created_on",
+          "type": "date",
+          "esTypes": [
+            "date"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "date"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.discount_amount": {
+          "count": 0,
+          "name": "products.discount_amount",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.discount_percentage": {
+          "count": 0,
+          "name": "products.discount_percentage",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.manufacturer": {
+          "count": 1,
+          "name": "products.manufacturer",
+          "type": "string",
+          "esTypes": [
+            "text"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.manufacturer.keyword": {
+          "count": 0,
+          "name": "products.manufacturer.keyword",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "subType": {
+            "multi": {
+              "parent": "products.manufacturer"
+            }
+          },
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.min_price": {
+          "count": 0,
+          "name": "products.min_price",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.00"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.price": {
+          "count": 1,
+          "name": "products.price",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.00"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.product_id": {
+          "count": 0,
+          "name": "products.product_id",
+          "type": "number",
+          "esTypes": [
+            "long"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.product_name": {
+          "count": 1,
+          "name": "products.product_name",
+          "type": "string",
+          "esTypes": [
+            "text"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.product_name.keyword": {
+          "count": 0,
+          "name": "products.product_name.keyword",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "subType": {
+            "multi": {
+              "parent": "products.product_name"
+            }
+          },
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.quantity": {
+          "count": 0,
+          "name": "products.quantity",
+          "type": "number",
+          "esTypes": [
+            "integer"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.sku": {
+          "count": 0,
+          "name": "products.sku",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.tax_amount": {
+          "count": 0,
+          "name": "products.tax_amount",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.taxful_price": {
+          "count": 0,
+          "name": "products.taxful_price",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.00"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.taxless_price": {
+          "count": 0,
+          "name": "products.taxless_price",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.00"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "products.unit_discount_amount": {
+          "count": 0,
+          "name": "products.unit_discount_amount",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "sku": {
+          "count": 0,
+          "name": "sku",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "taxful_total_price": {
+          "count": 0,
+          "name": "taxful_total_price",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.[00]"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "taxless_total_price": {
+          "count": 0,
+          "name": "taxless_total_price",
+          "type": "number",
+          "esTypes": [
+            "half_float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.00"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "total_quantity": {
+          "count": 1,
+          "name": "total_quantity",
+          "type": "number",
+          "esTypes": [
+            "integer"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "total_unique_products": {
+          "count": 0,
+          "name": "total_unique_products",
+          "type": "number",
+          "esTypes": [
+            "integer"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "type": {
+          "count": 0,
+          "name": "type",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "user": {
+          "count": 0,
+          "name": "user",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        }
+      },
+      "typeMeta": {},
+      "fieldFormats": {
+        "taxful_total_price": {
+          "id": "number",
+          "params": {
+            "pattern": "$0,0.[00]"
+          }
+        },
+        "products.price": {
+          "id": "number",
+          "params": {
+            "pattern": "$0,0.00"
+          }
+        },
+        "taxless_total_price": {
+          "id": "number",
+          "params": {
+            "pattern": "$0,0.00"
+          }
+        },
+        "products.taxless_price": {
+          "id": "number",
+          "params": {
+            "pattern": "$0,0.00"
+          }
+        },
+        "products.taxful_price": {
+          "id": "number",
+          "params": {
+            "pattern": "$0,0.00"
+          }
+        },
+        "products.min_price": {
+          "id": "number",
+          "params": {
+            "pattern": "$0,0.00"
+          }
+        },
+        "products.base_unit_price": {
+          "id": "number",
+          "params": {
+            "pattern": "$0,0.00"
+          }
+        },
+        "products.base_price": {
+          "id": "number",
+          "params": {
+            "pattern": "$0,0.00"
+          }
+        }
+      },
+      "runtimeFieldMap": {},
+      "fieldAttrs": {
+        "products.manufacturer": {
+          "count": 1
+        },
+        "products.price": {
+          "count": 1
+        },
+        "products.product_name": {
+          "count": 1
+        },
+        "total_quantity": {
+          "count": 1
+        }
+      },
+      "allowNoIndex": false,
+      "name": "Kibana Sample Data eCommerce",
+      "namespaces": [
+        "default"
+      ]
+    }
+  }

@@ -20,6 +20,7 @@ import type {
   UnifiedSearchSetupDependencies,
   UnifiedSearchPluginSetup,
   UnifiedSearchPublicPluginStart,
+  UnifiedSearchPublicPluginStartUi,
 } from './types';
 import { createFilterAction } from './actions/apply_filter_action';
 import { createUpdateFilterReferencesAction } from './actions/update_filter_references_action';
@@ -73,16 +74,28 @@ export class UnifiedSearchPublicPlugin
     setIndexPatterns(dataViews);
     const autocompleteStart = this.autocomplete.start();
 
-    const SearchBar = createSearchBar({
-      core,
-      data,
-      storage: this.storage,
-      usageCollection: this.usageCollection,
-      isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
-      unifiedSearch: {
-        autocomplete: autocompleteStart,
-      },
-    });
+    /*
+     *
+     *  unifiedsearch uses global data service to create stateful search bar.
+     *  This function helps in creating a search bar with different instances of data service
+     *  so that it can be easy to use multiple stateful searchbars in the single applications
+     *
+     * */
+    const getCustomSearchBar: UnifiedSearchPublicPluginStartUi['getCustomSearchBar'] = (
+      customDataService
+    ) =>
+      createSearchBar({
+        core,
+        data: customDataService ?? data,
+        storage: this.storage,
+        usageCollection: this.usageCollection,
+        isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
+        unifiedSearch: {
+          autocomplete: autocompleteStart,
+        },
+      });
+
+    const SearchBar = getCustomSearchBar();
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER);
 
@@ -92,6 +105,7 @@ export class UnifiedSearchPublicPlugin
       ui: {
         IndexPatternSelect: createIndexPatternSelect(dataViews),
         SearchBar,
+        getCustomSearchBar,
         AggregateQuerySearchBar: SearchBar,
         FiltersBuilderLazy,
       },

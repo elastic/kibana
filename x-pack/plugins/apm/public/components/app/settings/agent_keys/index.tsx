@@ -68,13 +68,6 @@ export function AgentKeys() {
 
   return (
     <Fragment>
-      <EuiText color="subdued">
-        {i18n.translate('xpack.apm.settings.agentKeys.descriptionText', {
-          defaultMessage:
-            'View and delete APM agent keys. An APM agent key sends requests on behalf of a user.',
-        })}
-      </EuiText>
-      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle>
@@ -103,6 +96,14 @@ export function AgentKeys() {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.agentKeys.descriptionText', {
+          defaultMessage:
+            'View and delete APM agent keys. An APM agent key sends requests on behalf of a user.',
+        })}
+      </EuiText>
       <EuiSpacer size="m" />
       {createdAgentKey && (
         <AgentKeyCallOut

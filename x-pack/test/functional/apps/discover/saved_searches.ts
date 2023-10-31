@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
+  const testSubjects = getService('testSubjects');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -46,15 +47,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Customize time range', () => {
       it('should be possible to customize time range for saved searches on dashboards', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await dashboardAddPanel.clickOpenAddPanel();
         await dashboardAddPanel.addSavedSearch('Ecommerce Data');
         expect(await dataGrid.getDocCount()).to.be(500);
 
         await panelActions.customizePanel();
-        await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-        await dashboardCustomizePanel.clickToggleQuickMenuButton();
+        await dashboardCustomizePanel.enableCustomTimeRange();
+        await dashboardCustomizePanel.openDatePickerQuickMenu();
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
         await dashboardCustomizePanel.clickSaveButton();
 
@@ -77,6 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.clickNewSearchButton();
 
+      expect(await testSubjects.getVisibleText('discover-dataView-switch-link')).to.be('ecommerce');
+
       expect(await filterBar.hasFilter('category', `Men's Shoes`)).to.be(false);
       expect(await queryBar.getQueryString()).to.eql('');
 
@@ -89,6 +92,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await filterBar.hasFilter('category', `Men's Shoes`)).to.be(false);
       expect(await queryBar.getQueryString()).to.eql('');
+
+      await PageObjects.discover.clickNewSearchButton();
+      expect(await testSubjects.getVisibleText('discover-dataView-switch-link')).to.be('ecommerce');
     });
   });
 }

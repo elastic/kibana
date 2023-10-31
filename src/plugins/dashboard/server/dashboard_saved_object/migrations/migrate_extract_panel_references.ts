@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes, SavedObjectMigrationFn } from '@kbn/core/server';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
 
-import { DashboardAttributes, extractReferences, injectReferences } from '../../../common';
+import { extractReferences, injectReferences } from '../../../common';
+import { DashboardAttributes } from '../../../common/content_management';
 import { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
 
 /**
@@ -36,7 +37,7 @@ export function createExtractPanelReferencesMigration(
 
     const injectedAttributes = injectReferences(
       {
-        attributes: doc.attributes as unknown as SavedObjectAttributes,
+        attributes: doc.attributes,
         references,
       },
       { embeddablePersistableStateService: deps.embeddable }

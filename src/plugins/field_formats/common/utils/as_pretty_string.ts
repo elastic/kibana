@@ -22,6 +22,6 @@ export function asPrettyString(
         ? JSON.stringify(val)
         : JSON.stringify(val, null, '  ');
     default:
-      return '' + val;
+      return String(val);
   }
 }

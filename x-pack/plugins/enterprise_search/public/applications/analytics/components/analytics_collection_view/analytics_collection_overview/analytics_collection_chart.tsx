@@ -18,8 +18,8 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 
 import { XYChartElementEvent } from '@elastic/charts/dist/specs/settings';
@@ -145,6 +145,7 @@ export const AnalyticsCollectionChart: React.FC<
           }
         }}
         onElementOut={() => setHoverChart(null)}
+        locale={i18n.getLocale()}
       />
 
       {charts.map(({ data: chartData, id, name, chartColor }) => (

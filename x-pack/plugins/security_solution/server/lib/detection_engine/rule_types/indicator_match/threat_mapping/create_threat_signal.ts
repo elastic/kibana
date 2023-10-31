@@ -47,6 +47,8 @@ export const createThreatSignal = async ({
   threatQuery,
   reassignThreatPitId,
   allowedFieldsForTermsQuery,
+  inputIndexFields,
+  threatIndexFields,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -72,6 +74,7 @@ export const createThreatSignal = async ({
       services,
       index: inputIndex,
       exceptionFilter,
+      fields: inputIndexFields,
     });
 
     ruleExecutionLogger.debug(
@@ -92,6 +95,7 @@ export const createThreatSignal = async ({
       exceptionFilter,
       threatMapping,
       runtimeMappings,
+      threatIndexFields,
     });
 
     const result = await searchAfterAndBulkCreate({

@@ -9,8 +9,8 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import '../jest_matchers';
-import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getFooType, getLegacyType } from '../fixtures/zdt_base.fixtures';
 
@@ -18,18 +18,6 @@ const logFilePath = Path.join(__dirname, 'create_index.test.log');
 
 describe('ZDT with v2 compat - running on a fresh cluster', () => {
   let esServer: TestElasticsearchUtils['es'];
-
-  const startElasticsearch = async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-        },
-      },
-    });
-    return await startES();
-  };
 
   beforeAll(async () => {
     await fs.unlink(logFilePath).catch(() => {});
@@ -46,7 +34,7 @@ describe('ZDT with v2 compat - running on a fresh cluster', () => {
     const legacyType = getLegacyType();
 
     const { runMigrations, client } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams(),
+      ...getBaseMigratorParams({ kibanaVersion: '8.8.0' }),
       logFilePath,
       types: [fooType, legacyType],
     });

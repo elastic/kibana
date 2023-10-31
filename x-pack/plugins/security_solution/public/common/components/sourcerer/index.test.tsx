@@ -25,7 +25,8 @@ import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/supe
 import { waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
-import { TimelineId, TimelineType } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
@@ -97,10 +98,6 @@ describe('Sourcerer component', () => {
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     (useSignalHelpers as jest.Mock).mockReturnValue({ signalIndexNeedsInit: false });
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
   });
 
   it('renders data view title', () => {
@@ -895,8 +892,8 @@ describe('Sourcerer integration tests', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
+
   it('Selects a different index pattern', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
@@ -940,8 +937,8 @@ describe('No data', () => {
     });
     store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
+
   test('Hide sourcerer - default ', () => {
     const wrapper = mount(
       <TestProviders store={store}>

@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { GetInspectQuery } from '../../../types';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
 import { InspectButton } from './toolbar/components/inspect';
+import { ALERTS_TABLE_TITLE } from './translations';
 
 const heights = {
   tall: 490,
@@ -40,7 +41,7 @@ export const EmptyState: React.FC<{
       <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
         {showInpectButton && (
           <EuiFlexItem grow={false}>
-            <InspectButton getInspectQuery={getInspectQuery} />
+            <InspectButton getInspectQuery={getInspectQuery} inspectTitle={ALERTS_TABLE_TITLE} />
           </EuiFlexItem>
         )}
         {controls?.right && <EuiFlexItem grow={false}>{controls.right}</EuiFlexItem>}

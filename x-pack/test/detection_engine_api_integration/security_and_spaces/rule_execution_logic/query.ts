@@ -20,15 +20,18 @@ import {
   ALERT_LAST_DETECTED,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
   QueryRuleCreateProps,
-  AlertSuppressionMissingFieldsStrategy,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+  BulkActionType,
+  AlertSuppressionMissingFieldsStrategyEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
@@ -36,7 +39,11 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import {
@@ -44,13 +51,16 @@ import {
   createExceptionListItem,
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getOpenSignals,
   getPreviewAlerts,
   getRuleForSignalTesting,
   getSimpleRule,
   previewRule,
   setSignalStatus,
+  getRuleSOById,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataGeneratorFactory } from '../../utils/data_generator';
@@ -92,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllRules(supertest, log);
     });
 
@@ -237,51 +247,13 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]?._source?.user?.risk).to.eql(undefined);
     });
 
-    describe('with host risk index', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
-      });
-
-      it('should host have risk score field and do not have user risk score', async () => {
-        const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
-          query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
-        };
-        const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-        const firstAlert = previewAlerts.find(
-          (alert) => alert?._source?.host?.name === 'suricata-zeek-sensor-toronto'
-        );
-        const secondAlert = previewAlerts.find(
-          (alert) => alert?._source?.host?.name === 'suricata-sensor-london'
-        );
-        const thirdAlert = previewAlerts.find(
-          (alert) => alert?._source?.host?.name === 'IE11WIN8_1'
-        );
-
-        expect(firstAlert?._source?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(firstAlert?._source?.host?.risk?.calculated_score_norm).to.eql(96);
-        expect(firstAlert?._source?.user?.risk).to.eql(undefined);
-        expect(secondAlert?._source?.host?.risk?.calculated_level).to.eql('Low');
-        expect(secondAlert?._source?.host?.risk?.calculated_score_norm).to.eql(20);
-        expect(thirdAlert?._source?.host?.risk).to.eql(undefined);
-      });
-    });
-
     describe('with host and user risk indices', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/user_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/user_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should have host and user risk score fields', async () => {
@@ -835,7 +807,7 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             es,
             createdRule,
-            RuleExecutionStatus.succeeded,
+            RuleExecutionStatusEnum.succeeded,
             undefined,
             afterTimestamp
           );
@@ -911,7 +883,7 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             es,
             createdRule,
-            RuleExecutionStatus.succeeded,
+            RuleExecutionStatusEnum.succeeded,
             undefined,
             afterTimestamp
           );
@@ -1506,7 +1478,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1577,7 +1549,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1632,7 +1604,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1686,7 +1658,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1784,7 +1756,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name', 'agent.version'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1863,7 +1835,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name', 'agent.version'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1911,7 +1883,7 @@ export default ({ getService }: FtrProviderContext) => {
             const firstDoc = { id, '@timestamp': timestamp, agent: { name: 'agent-1' } };
             const secondDoc = { id, '@timestamp': laterTimestamp, agent: { name: 'agent-1' } };
             const thirdDoc = { id, '@timestamp': laterTimestamp, agent: { name: 'agent-2' } };
-            const missingFieldDoc1 = { id, '@timestamp': laterTimestamp };
+            const missingFieldDoc1 = { id, '@timestamp': timestamp };
             const missingFieldDoc2 = { id, '@timestamp': laterTimestamp };
 
             await indexListOfDocuments([
@@ -1934,7 +1906,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 300,
                   unit: 'm',
                 },
-                missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.Suppress,
+                missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
               },
               from: 'now-1h',
               interval: '1h',
@@ -2001,7 +1973,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 300,
                   unit: 'm',
                 },
-                missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+                missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
               },
               from: 'now-1h',
               interval: '1h',
@@ -2156,6 +2128,197 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
         expect(previewAlerts.length).equal(1);
+      });
+    });
+
+    // https://github.com/elastic/kibana/issues/149920
+    describe('field name wildcard queries', async () => {
+      const { indexEnhancedDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      it('should return correct documents with wildcard field query', async () => {
+        const id = uuidv4();
+        const firstDoc = { id, agent: { name: 'test-1' } };
+        const secondDoc = { id, agent: { name: 'test-2' } };
+
+        await indexEnhancedDocuments({ documents: [firstDoc, firstDoc, secondDoc], id });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['ecs_compliant']),
+          query: `id:${id} AND agent.n*: test-1`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+          sort: ['agent.name'],
+        });
+        expect(previewAlerts.length).to.eql(2);
+
+        // both alerts should have agent.name "test-1" as per rule query
+        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-1');
+        expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-1');
+      });
+
+      it('should return correct documents with negation wildcard field query', async () => {
+        const id = uuidv4();
+        const firstDoc = { id, agent: { name: 'test-1' } };
+        const secondDoc = { id, agent: { name: 'test-2' } };
+
+        await indexEnhancedDocuments({ documents: [firstDoc, firstDoc, secondDoc], id });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['ecs_compliant']),
+          query: `id:${id} AND NOT agent.na*: "test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name'],
+        });
+        expect(previewAlerts.length).to.eql(1);
+
+        //  alert should not have agent.name "test-1" as per rule query
+        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-2');
+      });
+
+      it('should return correct documents with wildcard field query across multiple different fields', async () => {
+        const id = uuidv4();
+        const firstDoc = { id, agent: { name: 'test-1' } };
+        const secondDoc = { id, agent: { name: 'test-2' } };
+        const thirdDoc = { id, agent: { name: 'test-3', version: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [firstDoc, secondDoc, thirdDoc], id });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['ecs_compliant']),
+          query: `id:${id} AND agent*: "test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+          sort: ['agent.name'],
+        });
+        expect(previewAlerts.length).to.eql(2);
+
+        // alert should have agent.name "test-1" as per rule query
+        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-1');
+        // alert should have agent.name "test-a"  and agent.version "test-1" as per rule query
+        expect(previewAlerts[1]._source?.agent).to.have.property('version', 'test-1');
+        expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-3');
+      });
+
+      it('should return correct documents with wildcard field query across multiple different fields for lucene language', async () => {
+        const id = uuidv4();
+        const firstDoc = { id, agent: { name: 'test-1' } };
+        const secondDoc = { id, agent: { name: 'test-2' } };
+        const thirdDoc = { id, agent: { name: 'test-3', version: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [firstDoc, secondDoc, thirdDoc], id });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['ecs_compliant']),
+          query: `id:${id} AND agent.\\*: test-1`,
+          from: 'now-1h',
+          interval: '1h',
+          language: 'lucene',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+          sort: ['agent.name'],
+        });
+        expect(previewAlerts.length).to.eql(2);
+
+        // alert should have agent.name "test-1" as per rule query
+        expect(previewAlerts[0]._source?.agent).to.have.property('name', 'test-1');
+        // alert should have agent.name "test-a"  and agent.version "test-1" as per rule query
+        expect(previewAlerts[1]._source?.agent).to.have.property('version', 'test-1');
+        expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-3');
+      });
+    });
+
+    describe('legacy investigation_fields', () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('should generate alerts when rule includes legacy investigation_fields', async () => {
+        // enable rule
+        await supertest
+          .post(DETECTION_ENGINE_RULES_BULK_ACTION)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ query: '', action: BulkActionType.enable })
+          .expect(200);
+
+        // Confirming that enabling did not migrate rule, so rule
+        // run/alerts generated here were from rule with legacy investigation field
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+
+        // fetch rule for format needed to pass into
+        const { body: ruleBody } = await supertest
+          .get(
+            `${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleWithLegacyInvestigationField.params.ruleId}`
+          )
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .expect(200);
+
+        const alertsAfterEnable = await getOpenSignals(supertest, log, es, ruleBody, 'succeeded');
+        expect(alertsAfterEnable.hits.hits.length > 0).eql(true);
       });
     });
   });

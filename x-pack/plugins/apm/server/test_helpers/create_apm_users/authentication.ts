@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { PrivilegeType } from '../../../common/privilege_type';
+import {
+  PrivilegeType,
+  ClusterPrivilegeType,
+} from '../../../common/privilege_type';
 
 export enum ApmUsername {
   noAccessUser = 'no_access_user',
@@ -67,7 +70,7 @@ export const customRoles = {
   },
   [ApmCustomRolename.apmManageOwnAgentKeys]: {
     elasticsearch: {
-      cluster: ['manage_own_api_key'],
+      cluster: [ClusterPrivilegeType.MANAGE_OWN_API_KEY],
     },
   },
   [ApmCustomRolename.apmManageOwnAndCreateAgentKeys]: {
@@ -135,5 +138,3 @@ export const users: Record<
     customRoleNames: [ApmCustomRolename.apmManageServiceAccount],
   },
 };
-
-export const APM_TEST_PASSWORD = 'changeme';

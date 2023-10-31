@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { NewTermsRuleParams } from '../../rule_schema';
-import { newTermsRuleParams } from '../../rule_schema';
+import { NewTermsRuleParams } from '../../rule_schema';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { getFilter } from '../utils/get_filter';
@@ -53,13 +52,7 @@ export const createNewTermsAlertType = (
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, newTermsRuleParams);
-          if (errors != null) {
-            throw new Error(errors);
-          }
-          if (validated == null) {
-            throw new Error('Validation of rule params failed');
-          }
+          const validated = NewTermsRuleParams.parse(object);
           validateHistoryWindowStart({
             historyWindowStart: validated.historyWindowStart,
             from: validated.from,
@@ -91,6 +84,7 @@ export const createNewTermsAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
+    category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
@@ -109,6 +103,7 @@ export const createNewTermsAlertType = (
           unprocessedExceptions,
           alertTimestampOverride,
           publicBaseUrl,
+          inputIndexFields,
         },
         services,
         params,
@@ -132,6 +127,7 @@ export const createNewTermsAlertType = (
         type: params.type,
         query: params.query,
         exceptionFilter,
+        fields: inputIndexFields,
       });
 
       const parsedHistoryWindowSize = parseDateString({

@@ -55,6 +55,7 @@ export const getStatsWithXpack: StatsGetter<TelemetryAggregatedStats> = async fu
       // From the monitoring-sourced telemetry, we need to filter out the clusters that are opted-out.
       const onlyOptedInMonitoringClusters = (monitoringTelemetry || []).filter(isClusterOptedIn);
 
-      return [...acc, stats, ...onlyOptedInMonitoringClusters];
+      acc.push(stats, ...onlyOptedInMonitoringClusters);
+      return acc;
     }, [] as TelemetryAggregatedStats[]);
 };

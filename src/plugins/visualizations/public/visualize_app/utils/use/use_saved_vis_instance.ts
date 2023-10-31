@@ -12,7 +12,12 @@ import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
-import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
+import {
+  getEditBreadcrumbs,
+  getCreateBreadcrumbs,
+  getCreateServerlessBreadcrumbs,
+  getEditServerlessBreadcrumbs,
+} from '../breadcrumbs';
 import { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
@@ -46,6 +51,7 @@ export const useSavedVisInstance = (
       stateTransferService,
       visEditorsRegistry,
       application: { navigateToApp },
+      serverless,
     } = services;
     const getSavedVisInstance = async () => {
       try {
@@ -83,6 +89,16 @@ export const useSavedVisInstance = (
           savedVisInstance = await getVisualizationInstance(services, visualizationIdFromUrl);
         }
 
+        if (savedVisInstance.vis.type.disableEdit) {
+          throw new Error(
+            i18n.translate('visualizations.editVisualization.readOnlyErrorMessage', {
+              defaultMessage:
+                '{visTypeTitle} visualizations are read only and can not be opened in editor',
+              values: { visTypeTitle: savedVisInstance.vis.type.title },
+            })
+          );
+        }
+
         if (embeddableInput && embeddableInput.timeRange) {
           savedVisInstance.panelTimeRange = embeddableInput.timeRange;
         }
@@ -94,18 +110,35 @@ export const useSavedVisInstance = (
         const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
 
         if (savedVis.id) {
-          chrome.setBreadcrumbs(
-            getEditBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
-          );
+          if (serverless?.setBreadcrumbs) {
+            serverless.setBreadcrumbs(
+              getEditServerlessBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
+            );
+          } else {
+            chrome.setBreadcrumbs(
+              getEditBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
+            );
+          }
+
           chrome.docTitle.change(savedVis.title);
         } else {
-          chrome.setBreadcrumbs(
-            getCreateBreadcrumbs({
-              byValue: Boolean(originatingApp),
-              originatingAppName,
-              redirectToOrigin,
-            })
-          );
+          if (serverless?.setBreadcrumbs) {
+            serverless.setBreadcrumbs(
+              getCreateServerlessBreadcrumbs({
+                byValue: Boolean(originatingApp),
+                originatingAppName,
+                redirectToOrigin,
+              })
+            );
+          } else {
+            chrome.setBreadcrumbs(
+              getCreateBreadcrumbs({
+                byValue: Boolean(originatingApp),
+                originatingAppName,
+                redirectToOrigin,
+              })
+            );
+          }
         }
 
         let visEditorController;

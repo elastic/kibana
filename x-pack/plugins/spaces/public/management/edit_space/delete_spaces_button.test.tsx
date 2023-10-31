@@ -10,9 +10,9 @@ import React from 'react';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { DeleteSpacesButton } from './delete_spaces_button';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { DeleteSpacesButton } from './delete_spaces_button';
 
 const space = {
   id: 'my-space',

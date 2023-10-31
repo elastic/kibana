@@ -15,6 +15,7 @@ import {
 } from './helpers';
 import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
 import { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../types';
+import { INTERNAL_API_VERSION } from '../helpers';
 
 describe('helpers', () => {
   let originalFetch: typeof global['fetch'];
@@ -389,15 +390,12 @@ describe('helpers', () => {
     ];
 
     test('it includes the expected content in the `fetch` request', async () => {
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockUnallowedValuesResponse),
-      });
-      global.fetch = mockFetch;
+      const mockFetch = jest.fn().mockResolvedValue(mockUnallowedValuesResponse);
       const abortController = new AbortController();
 
       await fetchUnallowedValues({
         abortController,
+        httpFetch: mockFetch,
         indexName: 'auditbeat-custom-index-1',
         requestItems,
       });
@@ -406,22 +404,20 @@ describe('helpers', () => {
         '/internal/ecs_data_quality_dashboard/unallowed_field_values',
         {
           body: JSON.stringify(requestItems),
-          headers: { 'Content-Type': 'application/json', 'kbn-xsrf': 'xsrf' },
+          headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: abortController.signal,
+          version: INTERNAL_API_VERSION,
         }
       );
     });
 
     test('it returns the expected unallowed values', async () => {
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockUnallowedValuesResponse),
-      });
-      global.fetch = mockFetch;
+      const mockFetch = jest.fn().mockResolvedValue(mockUnallowedValuesResponse);
 
       const result = await fetchUnallowedValues({
         abortController: new AbortController(),
+        httpFetch: mockFetch,
         indexName: 'auditbeat-custom-index-1',
         requestItems,
       });
@@ -483,15 +479,14 @@ describe('helpers', () => {
 
     test('it throws the expected error when fetch fails', async () => {
       const error = 'simulated error';
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: false,
-        statusText: error,
+      const mockFetch = jest.fn().mockImplementation(() => {
+        throw new Error(error);
       });
-      global.fetch = mockFetch;
 
       await expect(
         fetchUnallowedValues({
           abortController: new AbortController(),
+          httpFetch: mockFetch,
           indexName: 'auditbeat-custom-index-1',
           requestItems,
         })

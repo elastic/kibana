@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserActionTypes } from '../../../common/api';
+import type { UserActionType } from '../../../common/types/domain';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';
@@ -21,6 +21,8 @@ import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_fr
 import type { BuilderDeps } from './types';
 import { AssigneesUserActionBuilder } from './builders/assignees';
 import { NoopUserActionBuilder } from './builders/noop';
+import { CategoryUserActionBuilder } from './builders/category';
+import { CustomFieldsUserActionBuilder } from './builders/custom_fields';
 
 const builderMap = {
   assignees: AssigneesUserActionBuilder,
@@ -32,9 +34,11 @@ const builderMap = {
   pushed: PushedUserActionBuilder,
   tags: TagsUserActionBuilder,
   status: StatusUserActionBuilder,
+  category: CategoryUserActionBuilder,
   severity: SeverityUserActionBuilder,
   settings: SettingsUserActionBuilder,
   delete_case: NoopUserActionBuilder,
+  customFields: CustomFieldsUserActionBuilder,
 };
 
 export class BuilderFactory {
@@ -44,7 +48,7 @@ export class BuilderFactory {
     this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
   }
 
-  getBuilder<T extends UserActionTypes>(type: T): UserActionBuilder | undefined {
+  getBuilder<T extends UserActionType>(type: T): UserActionBuilder | undefined {
     return new builderMap[type]({
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
     });

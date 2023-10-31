@@ -7,31 +7,46 @@
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { isEmpty } from 'lodash';
+import { getQueryFilter } from '../../../../utils/build_query';
 import type { AgentsRequestOptions } from '../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildAgentsQuery = ({
-  filterQuery,
-  pagination: { cursorStart, querySize },
+  kuery,
+  pagination: { cursorStart },
   sort,
-  aggregations,
 }: AgentsRequestOptions): ISearchRequestParams => {
-  const filter = [
-    { term: { active: { value: 'true' } } },
-    ...createQueryFilterClauses(filterQuery),
-  ];
+  const activeQuery = `active: true`;
+  let filter = activeQuery;
+  if (!isEmpty(kuery)) {
+    filter = activeQuery + ` AND ${kuery}`;
+  }
 
-  const dslQuery = {
+  const filterQuery = getQueryFilter({ filter });
+
+  return {
     allow_no_indices: true,
     index: AGENTS_INDEX,
     ignore_unavailable: true,
     body: {
       query: {
         bool: {
-          filter,
+          filter: filterQuery,
         },
       },
-      aggs: aggregations,
+      aggs: {
+        platforms: {
+          terms: {
+            field: 'local_metadata.os.platform',
+          },
+        },
+        policies: {
+          terms: {
+            field: 'policy_id',
+            size: 2000,
+          },
+        },
+      },
       track_total_hits: true,
       sort: [
         {
@@ -40,10 +55,8 @@ export const buildAgentsQuery = ({
           },
         },
       ],
-      size: querySize,
+      size: 0,
       from: cursorStart,
     },
   };
-
-  return dslQuery;
 };

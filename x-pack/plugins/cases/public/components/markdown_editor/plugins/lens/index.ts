@@ -7,7 +7,7 @@
 
 import { plugin } from './plugin';
 import { LensParser } from './parser';
-import { LensMarkDownRenderer } from './processor';
 import { VISUALIZATION } from './translations';
+import { LensRenderer } from '../../../visualizations/lens_renderer';
 
-export { plugin, LensParser as parser, LensMarkDownRenderer as renderer, VISUALIZATION };
+export { plugin, LensParser as parser, LensRenderer as renderer, VISUALIZATION };

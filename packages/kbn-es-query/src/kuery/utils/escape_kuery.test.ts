@@ -6,7 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { escapeKuery } from './escape_kuery';
+import { escapeKuery, escapeQuotes } from './escape_kuery';
+
+describe('escapeQuotes', () => {
+  test('should escape quotes', () => {
+    const value = 'I said, "Hello."';
+    const expected = 'I said, \\"Hello.\\"';
+
+    expect(escapeQuotes(value)).toBe(expected);
+  });
+
+  test('should escape backslashes and quotes', () => {
+    const value = 'Backslashes \\" in the middle and ends with quotes \\"';
+    const expected = 'Backslashes \\\\\\" in the middle and ends with quotes \\\\\\"';
+
+    expect(escapeQuotes(value)).toBe(expected);
+  });
+});
 
 describe('escapeKuery', () => {
   test('should escape special characters', () => {

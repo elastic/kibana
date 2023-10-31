@@ -231,7 +231,7 @@
           "\nType guard to check if error is of type Boom."
         ],
         "signature": [
-          "(error: unknown) => boolean"
+          "(error: any) => boolean"
         ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
@@ -240,12 +240,12 @@
           {
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.isBoomError.$1",
-            "type": "Unknown",
+            "type": "Any",
             "tags": [],
             "label": "error",
             "description": [],
             "signature": [
-              "unknown"
+              "any"
             ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
@@ -268,7 +268,7 @@
           "\nType guard to check if error is a string."
         ],
         "signature": [
-          "(error: unknown) => boolean"
+          "(error: any) => boolean"
         ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
@@ -277,12 +277,12 @@
           {
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.isErrorString.$1",
-            "type": "Unknown",
+            "type": "Any",
             "tags": [],
             "label": "error",
             "description": [],
             "signature": [
-              "unknown"
+              "any"
             ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
@@ -305,7 +305,7 @@
           "\nType guard to check if error is of type EsErrorBody"
         ],
         "signature": [
-          "(error: unknown) => boolean"
+          "(error: any) => boolean"
         ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
@@ -314,12 +314,12 @@
           {
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.isEsErrorBody.$1",
-            "type": "Unknown",
+            "type": "Any",
             "tags": [],
             "label": "error",
             "description": [],
             "signature": [
-              "unknown"
+              "any"
             ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
@@ -342,7 +342,7 @@
           "\nType guard to check if error is of type MLResponseError."
         ],
         "signature": [
-          "(error: unknown) => boolean"
+          "(error: any) => boolean"
         ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
@@ -351,12 +351,12 @@
           {
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.isMLResponseError.$1",
-            "type": "Unknown",
+            "type": "Any",
             "tags": [],
             "label": "error",
             "description": [],
             "signature": [
-              "unknown"
+              "any"
             ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
@@ -702,6 +702,8 @@
         ],
         "signature": [
           "string | ",
+          "ErrorResponseBase",
+          " | ",
           {
             "pluginId": "@kbn/ml-error-utils",
             "scope": "common",
@@ -709,8 +711,6 @@
             "section": "def-common.MLHttpFetchError",
             "text": "MLHttpFetchError"
           },
-          " | ",
-          "ErrorResponseBase",
           " | ",
           "Boom",
           "<any> | undefined"

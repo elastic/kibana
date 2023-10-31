@@ -104,6 +104,66 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.ELASTIC_HTTP_VERSION_HEADER",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_HTTP_VERSION_HEADER",
+        "description": [],
+        "signature": [
+          "\"elastic-api-version\""
+        ],
+        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.ELASTIC_HTTP_VERSION_QUERY_PARAM",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_HTTP_VERSION_QUERY_PARAM",
+        "description": [],
+        "signature": [
+          "\"apiVersion\""
+        ],
+        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM",
+        "description": [],
+        "signature": [
+          "\"elasticInternalOrigin\""
+        ],
+        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "type": "string",
+        "tags": [],
+        "label": "X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
+        "description": [],
+        "signature": [
+          "\"x-elastic-internal-origin\""
+        ],
+        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

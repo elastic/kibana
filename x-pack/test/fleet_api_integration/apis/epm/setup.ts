@@ -18,10 +18,20 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
 
+  const uninstallPackage = async (name: string, version: string) => {
+    await supertest
+      .delete(`/api/fleet/epm/packages/${name}/${version}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: 'true' });
+  };
+
   describe('setup api', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-
+    after(async () => {
+      await uninstallPackage('deprecated', '0.1.0');
+      await uninstallPackage('multiple_versions', '0.3.0');
+    });
     // FLAKY: https://github.com/elastic/kibana/issues/118479
     describe.skip('setup performs upgrades', async () => {
       const oldEndpointVersion = '0.13.0';
@@ -48,7 +58,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/epm/packages/endpoint/${latestEndpointVersion}`)
           .expect(200));
         expect(body.item).to.have.property('savedObject');
-        expect((body.item as InstalledRegistry).savedObject.attributes.install_version).to.eql(
+        expect((body.item as InstalledRegistry).savedObject?.attributes.install_version).to.eql(
           latestEndpointVersion
         );
       });

@@ -26,6 +26,7 @@ import {
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
+  FieldFilterPredicate,
 } from '../types';
 import {
   cachedChildEmbeddableOrder,
@@ -98,11 +99,14 @@ export class ControlGroupContainer extends Container<
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
 
+  public fieldFilterPredicate: FieldFilterPredicate | undefined;
+
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
     initialInput: ControlGroupInput,
     parent?: Container,
-    settings?: ControlGroupSettings
+    settings?: ControlGroupSettings,
+    fieldFilterPredicate?: FieldFilterPredicate
   ) {
     super(
       initialInput,
@@ -141,6 +145,8 @@ export class ControlGroupContainer extends Container<
       this.setupSubscriptions();
       this.initialized$.next(true);
     });
+
+    this.fieldFilterPredicate = fieldFilterPredicate;
   }
 
   private setupSubscriptions = () => {
@@ -184,6 +190,19 @@ export class ControlGroupContainer extends Container<
     );
   };
 
+  public updateInputAndReinitialize = (newInput: Partial<ControlGroupInput>) => {
+    this.subscriptions.unsubscribe();
+    this.subscriptions = new Subscription();
+    this.initialized$.next(false);
+    this.updateInput(newInput);
+    this.untilAllChildrenReady().then(() => {
+      this.recalculateDataViews();
+      this.recalculateFilters();
+      this.setupSubscriptions();
+      this.initialized$.next(true);
+    });
+  };
+
   public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
     this.lastUsedDataViewId = lastUsedDataViewId;
   };
@@ -203,22 +222,22 @@ export class ControlGroupContainer extends Container<
 
   public async addDataControlFromField(controlProps: AddDataControlProps) {
     const panelState = await getDataControlPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
+    return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
   }
 
   public addOptionsListControl(controlProps: AddOptionsListControlProps) {
     const panelState = getOptionsListPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
+    return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
   }
 
   public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
     const panelState = getRangeSliderPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
+    return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
   }
 
   public addTimeSliderControl() {
     const panelState = getTimeSliderPanelState(this.getInput());
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
+    return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
   }
 
   public openAddDataControlFlyout = openAddDataControlFlyout;
@@ -264,15 +283,19 @@ export class ControlGroupContainer extends Container<
 
   protected createNewPanelState<TEmbeddableInput extends ControlInput = ControlInput>(
     factory: EmbeddableFactory<ControlInput, ControlOutput, ControlEmbeddable>,
-    partial: Partial<TEmbeddableInput> = {}
-  ): ControlPanelState<TEmbeddableInput> {
-    const panelState = super.createNewPanelState(factory, partial);
+    partial: Partial<TEmbeddableInput> = {},
+    otherPanels: ControlGroupInput['panels']
+  ) {
+    const { newPanel } = super.createNewPanelState(factory, partial);
     return {
-      order: getNextPanelOrder(this.getInput().panels),
-      width: this.getInput().defaultControlWidth,
-      grow: this.getInput().defaultControlGrow,
-      ...panelState,
-    } as ControlPanelState<TEmbeddableInput>;
+      newPanel: {
+        order: getNextPanelOrder(this.getInput().panels),
+        width: this.getInput().defaultControlWidth,
+        grow: this.getInput().defaultControlGrow,
+        ...newPanel,
+      } as ControlPanelState<TEmbeddableInput>,
+      otherPanels,
+    };
   }
 
   protected onRemoveEmbeddable(idToRemove: string) {

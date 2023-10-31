@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -15,17 +14,18 @@ import { disableAutoApply } from '../../state_management/lens_slice';
 import { selectTriggerApplyChanges } from '../../state_management';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 describe('Data Panel Wrapper', () => {
   describe('Datasource data panel properties', () => {
     let datasourceDataPanelProps: DatasourceDataPanelProps;
     let lensStore: Awaited<ReturnType<typeof mountWithProvider>>['lensStore'];
     beforeEach(async () => {
-      const renderDataPanel = jest.fn();
+      const DataPanelComponent = jest.fn().mockImplementation(() => <div />);
 
       const datasourceMap = {
         activeDatasource: {
-          renderDataPanel,
+          DataPanelComponent,
           getUsedDataViews: jest.fn(),
           getLayers: jest.fn(() => []),
         } as unknown as Datasource,
@@ -37,9 +37,13 @@ describe('Data Panel Wrapper', () => {
           visualizationMap={{} as VisualizationMap}
           showNoDataPopover={() => {}}
           core={{} as DatasourceDataPanelProps['core']}
-          dropOntoWorkspace={(field: DragDropIdentifier) => {}}
-          hasSuggestionForField={(field: DragDropIdentifier) => true}
-          plugins={{ uiActions: {} as UiActionsStart, dataViews: {} as DataViewsPublicPluginStart }}
+          dropOntoWorkspace={() => {}}
+          hasSuggestionForField={() => true}
+          plugins={{
+            uiActions: {} as UiActionsStart,
+            dataViews: {} as DataViewsPublicPluginStart,
+            eventAnnotationService: {} as EventAnnotationServiceType,
+          }}
           indexPatternService={createIndexPatternServiceMock()}
           frame={createMockFramePublicAPI()}
         />,
@@ -61,7 +65,7 @@ describe('Data Panel Wrapper', () => {
 
       lensStore = mountResult.lensStore;
 
-      datasourceDataPanelProps = renderDataPanel.mock.calls[0][1] as DatasourceDataPanelProps;
+      datasourceDataPanelProps = DataPanelComponent.mock.calls[0][0] as DatasourceDataPanelProps;
     });
 
     describe('setState', () => {

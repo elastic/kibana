@@ -6,21 +6,23 @@
  */
 
 import { useMemo } from 'react';
+
+import type { NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
+import type {
+  AnalyticsMapReturnType,
+  DataFrameAnalyticsConfig,
+  DataFrameAnalyticsStats,
+  DeleteDataFrameAnalyticsWithIndexStatus,
+  UpdateDataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
-import { basePath } from '.';
-import type { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
-import type { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
 import type { DeepPartial } from '../../../../common/types/common';
-import type { NewJobCapsResponse } from '../../../../common/types/fields';
-import type { UpdateDataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import type { JobMessage } from '../../../../common/types/audit_message';
-import type {
-  DeleteDataFrameAnalyticsWithIndexStatus,
-  AnalyticsMapReturnType,
-} from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -58,22 +60,25 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   getDataFrameAnalytics(analyticsId?: string, excludeGenerated?: boolean, size?: number) {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
     return httpService.http<GetDataFrameAnalyticsResponse>({
-      path: `${basePath()}/data_frame/analytics${analyticsIdString}`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics${analyticsIdString}`,
       method: 'GET',
       ...(excludeGenerated ? { query: { excludeGenerated, size } } : {}),
+      version: '1',
     });
   },
   getDataFrameAnalyticsStats(analyticsId?: string) {
     if (analyticsId !== undefined) {
       return httpService.http<GetDataFrameAnalyticsStatsResponse>({
-        path: `${basePath()}/data_frame/analytics/${analyticsId}/_stats`,
+        path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}/_stats`,
         method: 'GET',
+        version: '1',
       });
     }
 
     return httpService.http<GetDataFrameAnalyticsStatsResponse>({
-      path: `${basePath()}/data_frame/analytics/_stats`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/_stats`,
       method: 'GET',
+      version: '1',
     });
   },
   createDataFrameAnalytics(
@@ -82,17 +87,19 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   ) {
     const body = JSON.stringify(analyticsConfig);
     return httpService.http<any>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
       body,
+      version: '1',
     });
   },
   updateDataFrameAnalytics(analyticsId: string, updateConfig: UpdateDataFrameAnalyticsConfig) {
     const body = JSON.stringify(updateConfig);
     return httpService.http<any>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}/_update`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}/_update`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
   getDataFrameAnalyticsMap(
@@ -102,39 +109,44 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   ): Promise<AnalyticsMapReturnType> {
     const idString = id !== undefined ? `/${id}` : '';
     return httpService.http({
-      path: `${basePath()}/data_frame/analytics/map${idString}`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/map${idString}`,
       method: 'GET',
       query: { treatAsRoot, type },
+      version: '1',
     });
   },
   jobsExist(analyticsIds: string[], allSpaces: boolean = false) {
     const body = JSON.stringify({ analyticsIds, allSpaces });
     return httpService.http<JobsExistsResponse>({
-      path: `${basePath()}/data_frame/analytics/jobs_exist`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/jobs_exist`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
   evaluateDataFrameAnalytics(evaluateConfig: any) {
     const body = JSON.stringify(evaluateConfig);
     return httpService.http<any>({
-      path: `${basePath()}/data_frame/_evaluate`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/_evaluate`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
   explainDataFrameAnalytics(jobConfig: DeepPartial<DataFrameAnalyticsConfig>) {
     const body = JSON.stringify(jobConfig);
     return httpService.http<any>({
-      path: `${basePath()}/data_frame/analytics/_explain`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/_explain`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
   deleteDataFrameAnalytics(analyticsId: string) {
     return httpService.http<any>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
       method: 'DELETE',
+      version: '1',
     });
   },
   deleteDataFrameAnalyticsAndDestIndex(
@@ -143,44 +155,50 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
     deleteDestIndexPattern: boolean
   ) {
     return httpService.http<DeleteDataFrameAnalyticsWithIndexResponse>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
       query: { deleteDestIndex, deleteDestIndexPattern },
       method: 'DELETE',
+      version: '1',
     });
   },
   startDataFrameAnalytics(analyticsId: string) {
     return httpService.http<any>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}/_start`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}/_start`,
       method: 'POST',
+      version: '1',
     });
   },
   stopDataFrameAnalytics(analyticsId: string, force: boolean = false) {
     return httpService.http<any>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}/_stop`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}/_stop`,
       method: 'POST',
       query: { force },
+      version: '1',
     });
   },
   getAnalyticsAuditMessages(analyticsId: string) {
     return httpService.http<JobMessage[]>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
+      version: '1',
     });
   },
   validateDataFrameAnalytics(analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>) {
     const body = JSON.stringify(analyticsConfig);
     return httpService.http<ValidateAnalyticsJobResponse>({
-      path: `${basePath()}/data_frame/analytics/validate`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/validate`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
   newJobCapsAnalytics(indexPatternTitle: string, isRollup: boolean = false) {
     const query = isRollup === true ? { rollup: true } : {};
     return httpService.http<NewJobCapsResponse>({
-      path: `${basePath()}/data_frame/analytics/new_job_caps/${indexPatternTitle}`,
+      path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/new_job_caps/${indexPatternTitle}`,
       method: 'GET',
       query,
+      version: '1',
     });
   },
 });

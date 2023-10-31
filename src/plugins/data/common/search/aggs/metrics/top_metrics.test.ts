@@ -11,6 +11,7 @@ import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
 import { KBN_FIELD_TYPES } from '../../..';
+import { CombinedFilter } from '@kbn/es-query';
 
 describe('Top metrics metric', () => {
   let aggConfig: IMetricAggConfig;
@@ -190,6 +191,16 @@ describe('Top metrics metric', () => {
 
       init({ fieldName: 'bytes' });
       expect(getTopMetricsMetricAgg().getValue(aggConfig, bucket)).toEqual([1024, 512, 256]);
+    });
+    it('returns phrase filter', () => {
+      expect(getTopMetricsMetricAgg().createFilter!(aggConfig, '10').query.match_phrase).toEqual({
+        bytes: 10,
+      });
+    });
+    it('returns combined OR filter for array values', () => {
+      const params = getTopMetricsMetricAgg().createFilter!(aggConfig, ['10', '20']).meta
+        .params as CombinedFilter['meta']['params'];
+      expect(params.map((p) => p.query!.match_phrase)).toEqual([{ bytes: 10 }, { bytes: 20 }]);
     });
   });
 });

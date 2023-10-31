@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -34,9 +34,9 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/api/ml/saved_objects/update_jobs_spaces`)
+      .post(`/internal/ml/saved_objects/update_jobs_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
+      await ml.testResources.cleanMLSavedObjects([idSpace1, idSpace2]);
     });
 
     after(async () => {

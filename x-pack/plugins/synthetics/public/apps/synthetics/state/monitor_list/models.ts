@@ -7,16 +7,14 @@
 
 import { ErrorToastOptions } from '@kbn/core-notifications-browser';
 
+import { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
 import {
   EncryptedSyntheticsMonitor,
-  EncryptedSyntheticsSavedMonitor,
   FetchMonitorManagementListQueryArgs,
   SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
-
-export type MonitorListSortField = `${keyof EncryptedSyntheticsSavedMonitor}.keyword` | 'enabled';
 
 export interface MonitorFilterState {
   query?: string;
@@ -25,6 +23,7 @@ export interface MonitorFilterState {
   projects?: string[];
   schedules?: string[];
   locations?: string[];
+  monitorQueryIds?: string[]; // Monitor Query IDs
 }
 
 export interface MonitorListPageState extends MonitorFilterState {

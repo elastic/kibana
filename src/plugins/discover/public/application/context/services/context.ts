@@ -8,13 +8,15 @@
 import type { Filter } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { reverseSortDir, SortDirection } from '../utils/sorting';
 import { convertIsoToMillis, extractNanos } from '../utils/date_conversion';
 import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
 import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
-import { getEsQuerySort } from '../utils/get_es_query_sort';
-import { DataTableRecord } from '../../../types';
+import { getEsQuerySort } from '../../../../common/utils/sorting/get_es_query_sort';
+import type { DiscoverServices } from '../../../build_services';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',
@@ -36,7 +38,9 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  * @param {SortDirection} sortDir - direction of sorting
  * @param {number} size - number of records to retrieve
  * @param {Filter[]} filters - to apply in the elastic query
+ * @param {DataPublicPluginStart} data
  * @param {boolean} useNewFieldsApi
+ * @param {DiscoverServices} services
  * @returns {Promise<object[]>}
  */
 export async function fetchSurroundingDocs(
@@ -48,10 +52,17 @@ export async function fetchSurroundingDocs(
   size: number,
   filters: Filter[],
   data: DataPublicPluginStart,
-  useNewFieldsApi?: boolean
-): Promise<DataTableRecord[]> {
+  useNewFieldsApi: boolean | undefined,
+  services: DiscoverServices
+): Promise<{
+  rows: DataTableRecord[];
+  interceptedWarnings: SearchResponseWarning[] | undefined;
+}> {
   if (typeof anchor !== 'object' || anchor === null || !size) {
-    return [];
+    return {
+      rows: [],
+      interceptedWarnings: undefined,
+    };
   }
   const timeField = dataView.timeFieldName!;
   const searchSource = data.search.searchSource.createEmpty();
@@ -64,27 +75,26 @@ export async function fetchSurroundingDocs(
     nanos !== '' ? convertIsoToMillis(anchorRaw.fields?.[timeField][0]) : anchorRaw.sort?.[0];
 
   const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis as number, type, sortDir);
-  let documents: DataTableRecord[] = [];
+  let rows: DataTableRecord[] = [];
+  let interceptedWarnings: SearchResponseWarning[] = [];
 
   for (const interval of intervals) {
-    const remainingSize = size - documents.length;
+    const remainingSize = size - rows.length;
 
     if (remainingSize <= 0) {
       break;
     }
 
-    const searchAfter = getEsQuerySearchAfter(
-      type,
-      documents,
-      timeField,
-      anchor,
-      nanos,
-      useNewFieldsApi
-    );
+    const searchAfter = getEsQuerySearchAfter(type, rows, anchor);
 
-    const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply, nanos);
+    const sort = getEsQuerySort({
+      timeFieldName: timeField,
+      tieBreakerFieldName: tieBreakerField,
+      sortDir: sortDirToApply,
+      isTimeNanosBased: dataView.isTimeNanosBased(),
+    });
 
-    const hits = await fetchHitsInInterval(
+    const result = await fetchHitsInInterval(
       searchSource,
       timeField,
       sort,
@@ -93,16 +103,28 @@ export async function fetchSurroundingDocs(
       searchAfter,
       remainingSize,
       nanos,
-      anchor.raw._id
+      anchor.raw._id,
+      type,
+      services
     );
 
-    documents =
+    rows =
       type === SurrDocType.SUCCESSORS
-        ? [...documents, ...hits]
-        : [...hits.slice().reverse(), ...documents];
+        ? [...rows, ...result.rows]
+        : [...result.rows.slice().reverse(), ...rows];
+
+    if (result.interceptedWarnings) {
+      interceptedWarnings =
+        type === SurrDocType.SUCCESSORS
+          ? [...interceptedWarnings, ...result.interceptedWarnings]
+          : [...result.interceptedWarnings.slice().reverse(), ...interceptedWarnings];
+    }
   }
 
-  return documents;
+  return {
+    rows,
+    interceptedWarnings,
+  };
 }
 
 export function updateSearchSource(

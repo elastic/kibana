@@ -25,6 +25,17 @@ jest.mock('../components/app/rum_dashboard/rum_home', () => ({
   RumHome: () => <p>Home Mock</p>,
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: () => ({
+      from: new Date(),
+      to: new Date(),
+    }),
+  };
+});
+
 const mockPlugin = {
   data: {
     query: {
@@ -48,7 +59,7 @@ const mockCorePlugins = {
   embeddable: mockEmbeddable,
   inspector: {},
   maps: {},
-  observability: {
+  observabilityShared: {
     navigation: {
       registerSections: () => jest.fn(),
       PageTemplate: ({ children }: { children: React.ReactNode }) => (

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { isValidIPv4OrCIDR } from '../../../../../../common/endpoint/utils/is_valid_ip';
 import type {
   EffectedPolicySelection,
@@ -42,6 +43,8 @@ import {
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
 
+export const testIdPrefix = 'hostIsolationExceptions-form';
+
 interface ExceptionIpEntry {
   field: 'destination.ip';
   operator: 'included';
@@ -64,6 +67,8 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
     const [hasNameError, setHasNameError] = useState(!exception.name);
     const [hasIpError, setHasIpError] = useState(!ipEntry.value);
+
+    const getTestId = useTestIdGenerator(testIdPrefix);
 
     const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
       isGlobal: isGlobalPolicyEffected(exception.tags),
@@ -304,7 +309,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
             selected={selectedPolicies.selected}
             options={policies}
             onChange={handlePolicySelectChange}
-            data-test-subj={'effectedPolicies-select'}
+            data-test-subj={getTestId('effectedPolicies')}
             disabled={disabled}
           />
         </EuiFormRow>

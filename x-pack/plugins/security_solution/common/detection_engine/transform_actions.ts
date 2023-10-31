@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
-import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
-import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
-import type { RuleAlertAction } from './types';
+import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
+import type { NormalizedAlertAction } from '@kbn/alerting-plugin/server/rules_client';
+import type { NormalizedRuleAction } from '../api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type {
+  ResponseAction,
+  RuleResponseAction,
+} from '../api/detection_engine/model/rule_response_actions';
+import { RESPONSE_ACTION_TYPES } from '../api/detection_engine/model/rule_response_actions';
+import type { RuleAction } from '../api/detection_engine/model';
 
 export const transformRuleToAlertAction = ({
   group,
@@ -18,12 +23,14 @@ export const transformRuleToAlertAction = ({
   uuid,
   frequency,
   alerts_filter: alertsFilter,
-}: RuleAlertAction): RuleAction => ({
+}: RuleAction): AlertingRuleAction => ({
   group,
   id,
-  params,
+  params: params as AlertingRuleAction['params'],
   actionTypeId,
-  ...(alertsFilter && { alertsFilter }),
+  ...(alertsFilter && {
+    alertsFilter: alertsFilter as AlertingRuleAction['alertsFilter'],
+  }),
   ...(uuid && { uuid }),
   ...(frequency && { frequency }),
 });
@@ -36,13 +43,41 @@ export const transformAlertToRuleAction = ({
   uuid,
   frequency,
   alertsFilter,
-}: RuleAction): RuleAlertAction => ({
+}: AlertingRuleAction): RuleAction => ({
   group,
   id,
   params,
   action_type_id: actionTypeId,
   ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(uuid && { uuid }),
+  ...(frequency && { frequency }),
+});
+
+export const transformNormalizedRuleToAlertAction = ({
+  group,
+  id,
+  params,
+  frequency,
+  alerts_filter: alertsFilter,
+}: NormalizedRuleAction): NormalizedAlertAction => ({
+  group,
+  id,
+  params: params as AlertingRuleAction['params'],
+  ...(alertsFilter && { alertsFilter }),
+  ...(frequency && { frequency }),
+});
+
+export const transformAlertToNormalizedRuleAction = ({
+  group,
+  id,
+  params,
+  frequency,
+  alertsFilter,
+}: AlertingRuleAction): NormalizedRuleAction => ({
+  group,
+  id,
+  params,
+  ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(frequency && { frequency }),
 });
 

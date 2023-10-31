@@ -8,11 +8,19 @@
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { isLensEqual } from './lens_document_equality';
 import { Document } from '../persistence/saved_object_store';
-import { Datasource, DatasourceMap } from '../types';
+import {
+  AnnotationGroups,
+  Datasource,
+  DatasourceMap,
+  Visualization,
+  VisualizationMap,
+} from '../types';
+
+const visualizationType = 'lnsSomeVis';
 
 const defaultDoc: Document = {
   title: 'some-title',
-  visualizationType: 'lnsXY',
+  visualizationType,
   state: {
     query: {
       query: '',
@@ -53,23 +61,67 @@ describe('lens document equality', () => {
   );
 
   let mockDatasourceMap: DatasourceMap;
+  let mockVisualizationMap: VisualizationMap;
+  let mockAnnotationGroups: AnnotationGroups;
 
   beforeEach(() => {
     mockDatasourceMap = {
-      indexpattern: { isEqual: jest.fn(() => true) },
-    } as unknown as DatasourceMap;
+      indexpattern: { isEqual: jest.fn(() => true) } as Partial<Datasource> as Datasource,
+    };
+
+    mockVisualizationMap = {
+      [visualizationType]: {
+        isEqual: jest.fn(() => true),
+      } as Partial<Visualization> as Visualization,
+    };
+
+    mockAnnotationGroups = {};
   });
 
   it('returns true when documents are equal', () => {
     expect(
-      isLensEqual(defaultDoc, defaultDoc, mockInjectFilterReferences, mockDatasourceMap)
+      isLensEqual(
+        defaultDoc,
+        defaultDoc,
+        mockInjectFilterReferences,
+        mockDatasourceMap,
+        mockVisualizationMap,
+        mockAnnotationGroups
+      )
     ).toBeTruthy();
   });
 
   it('handles undefined documents', () => {
-    expect(isLensEqual(undefined, undefined, mockInjectFilterReferences, {})).toBeTruthy();
-    expect(isLensEqual(undefined, {} as Document, mockInjectFilterReferences, {})).toBeFalsy();
-    expect(isLensEqual({} as Document, undefined, mockInjectFilterReferences, {})).toBeFalsy();
+    expect(
+      isLensEqual(
+        undefined,
+        undefined,
+        mockInjectFilterReferences,
+        {},
+        mockVisualizationMap,
+        mockAnnotationGroups
+      )
+    ).toBeTruthy();
+    expect(
+      isLensEqual(
+        undefined,
+        {} as Document,
+        mockInjectFilterReferences,
+        {},
+        mockVisualizationMap,
+        mockAnnotationGroups
+      )
+    ).toBeFalsy();
+    expect(
+      isLensEqual(
+        {} as Document,
+        undefined,
+        mockInjectFilterReferences,
+        {},
+        mockVisualizationMap,
+        mockAnnotationGroups
+      )
+    ).toBeFalsy();
   });
 
   it('should compare visualization type', () => {
@@ -78,7 +130,9 @@ describe('lens document equality', () => {
         defaultDoc,
         { ...defaultDoc, visualizationType: 'other-type' },
         mockInjectFilterReferences,
-        mockDatasourceMap
+        mockDatasourceMap,
+        mockVisualizationMap,
+        mockAnnotationGroups
       )
     ).toBeFalsy();
   });
@@ -98,26 +152,9 @@ describe('lens document equality', () => {
           },
         },
         mockInjectFilterReferences,
-        mockDatasourceMap
-      )
-    ).toBeFalsy();
-  });
-
-  it('should compare the visualization state', () => {
-    expect(
-      isLensEqual(
-        defaultDoc,
-        {
-          ...defaultDoc,
-          state: {
-            ...defaultDoc.state,
-            visualization: {
-              some: 'other-props',
-            },
-          },
-        },
-        mockInjectFilterReferences,
-        mockDatasourceMap
+        mockDatasourceMap,
+        mockVisualizationMap,
+        mockAnnotationGroups
       )
     ).toBeFalsy();
   });
@@ -139,7 +176,9 @@ describe('lens document equality', () => {
             },
           },
           mockInjectFilterReferences,
-          { ...mockDatasourceMap, foodatasource: { isEqual: () => true } as unknown as Datasource }
+          { ...mockDatasourceMap, foodatasource: { isEqual: () => true } as unknown as Datasource },
+          mockVisualizationMap,
+          mockAnnotationGroups
         )
       ).toBeFalsy();
 
@@ -167,7 +206,9 @@ describe('lens document equality', () => {
             },
           },
           mockInjectFilterReferences,
-          { ...mockDatasourceMap, foodatasource: { isEqual: () => true } as unknown as Datasource }
+          { ...mockDatasourceMap, foodatasource: { isEqual: () => true } as unknown as Datasource },
+          mockVisualizationMap,
+          mockAnnotationGroups
         )
       ).toBeTruthy();
     });
@@ -176,7 +217,67 @@ describe('lens document equality', () => {
       // datasource's isEqual returns false
       (mockDatasourceMap.indexpattern.isEqual as jest.Mock).mockReturnValue(false);
       expect(
-        isLensEqual(defaultDoc, defaultDoc, mockInjectFilterReferences, mockDatasourceMap)
+        isLensEqual(
+          defaultDoc,
+          defaultDoc,
+          mockInjectFilterReferences,
+          mockDatasourceMap,
+          mockVisualizationMap,
+          mockAnnotationGroups
+        )
+      ).toBeFalsy();
+    });
+  });
+
+  describe('comparing the visualizations', () => {
+    it('delegates to visualization class if visualization.isEqual available', () => {
+      expect(
+        isLensEqual(
+          defaultDoc,
+          defaultDoc,
+          mockInjectFilterReferences,
+          mockDatasourceMap,
+          mockVisualizationMap,
+          mockAnnotationGroups
+        )
+      ).toBeTruthy();
+
+      expect(mockVisualizationMap[visualizationType].isEqual).toHaveBeenCalled();
+
+      (mockVisualizationMap[visualizationType].isEqual as jest.Mock).mockReturnValue(false);
+
+      expect(
+        isLensEqual(
+          defaultDoc,
+          defaultDoc,
+          mockInjectFilterReferences,
+          mockDatasourceMap,
+          mockVisualizationMap,
+          mockAnnotationGroups
+        )
+      ).toBeFalsy();
+    });
+
+    it('direct comparison if no isEqual implementation', () => {
+      delete mockVisualizationMap[visualizationType].isEqual;
+
+      expect(
+        isLensEqual(
+          defaultDoc,
+          {
+            ...defaultDoc,
+            state: {
+              ...defaultDoc.state,
+              visualization: {
+                some: 'other-props',
+              },
+            },
+          },
+          mockInjectFilterReferences,
+          mockDatasourceMap,
+          mockVisualizationMap,
+          mockAnnotationGroups
+        )
       ).toBeFalsy();
     });
   });
@@ -197,7 +298,9 @@ describe('lens document equality', () => {
         defaultDoc,
         { ...defaultDoc, state: { ...defaultDoc.state, filters: filtersWithPinned } },
         mockInjectFilterReferences,
-        mockDatasourceMap
+        mockDatasourceMap,
+        mockVisualizationMap,
+        mockAnnotationGroups
       )
     ).toBeTruthy();
   });
@@ -221,7 +324,9 @@ describe('lens document equality', () => {
           },
         },
         mockInjectFilterReferences,
-        mockDatasourceMap
+        mockDatasourceMap,
+        mockVisualizationMap,
+        mockAnnotationGroups
       )
     ).toBeTruthy();
   });
@@ -241,7 +346,9 @@ describe('lens document equality', () => {
           },
         },
         mockInjectFilterReferences,
-        mockDatasourceMap
+        mockDatasourceMap,
+        mockVisualizationMap,
+        mockAnnotationGroups
       )
     ).toBeTruthy();
   });

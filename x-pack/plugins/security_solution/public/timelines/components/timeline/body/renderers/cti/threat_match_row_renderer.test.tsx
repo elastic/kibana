@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { get } from 'lodash';

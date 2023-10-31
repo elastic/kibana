@@ -7,9 +7,9 @@
 
 import type { Headers, ISavedObjectsRepository } from '@kbn/core/server';
 
-import type { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
 import { SPACES_USAGE_STATS_ID, SPACES_USAGE_STATS_TYPE } from './constants';
 import type { UsageStats } from './types';
+import type { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
 
 interface BaseIncrementOptions {
   headers?: Headers;
@@ -119,7 +119,9 @@ export class UsageStatsClient {
 }
 
 function getIsKibanaRequest(headers?: Headers) {
-  // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
+  // The presence of these request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  return headers && headers['kbn-version'] && headers.referer;
+  return (
+    headers && headers['kbn-version'] && headers.referer && headers['x-elastic-internal-origin']
+  );
 }

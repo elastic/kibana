@@ -24,7 +24,6 @@ import type {
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
-import { isDataView } from '../../../common/types/data_view';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
@@ -101,35 +100,6 @@ export function isDefaultQuery(query: TransformConfigQuery): boolean {
     (isFilterBasedSimpleQuery(query) &&
       (query.bool.filter[0].query_string.query === '*' || isMatchAllQuery(query.bool.filter[0])))
   );
-}
-
-export function getCombinedRuntimeMappings(
-  dataView: DataView | undefined,
-  runtimeMappings?: StepDefineExposedState['runtimeMappings']
-): StepDefineExposedState['runtimeMappings'] | undefined {
-  let combinedRuntimeMappings = {};
-
-  // And runtime field mappings defined by index pattern
-  if (isDataView(dataView)) {
-    const computedFields = dataView.getComputedFields();
-    if (computedFields?.runtimeFields !== undefined) {
-      const ipRuntimeMappings = computedFields.runtimeFields;
-      if (isPopulatedObject(ipRuntimeMappings)) {
-        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
-      }
-    }
-  }
-
-  // Use runtime field mappings defined inline from API
-  // and override fields with same name from index pattern
-  if (isPopulatedObject(runtimeMappings)) {
-    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
-  }
-
-  if (isPopulatedObject<keyof StepDefineExposedState['runtimeMappings']>(combinedRuntimeMappings)) {
-    return combinedRuntimeMappings;
-  }
-  return undefined;
 }
 
 export const getMissingBucketConfig = (

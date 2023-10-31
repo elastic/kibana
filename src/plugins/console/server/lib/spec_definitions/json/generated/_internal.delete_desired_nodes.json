@@ -6,6 +6,10 @@
     "patterns": [
       "_internal/desired_nodes"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-desired-nodes.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-desired-nodes.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
   }
 }

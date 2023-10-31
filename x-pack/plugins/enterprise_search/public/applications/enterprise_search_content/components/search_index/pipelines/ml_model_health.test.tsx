@@ -52,7 +52,7 @@ describe('TrainedModelHealth', () => {
       <TrainedModelHealth modelState={modelState} modelStateReason={modelStateReason} />
     );
     const health = wrapper.find(EuiHealth);
-    expect(health.prop('children')).toEqual('Not deployed');
+    expect(health.prop('children')).toEqual('Not started');
     expect(health.prop('color')).toEqual('danger');
   });
   it('renders model stopping', () => {

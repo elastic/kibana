@@ -15,18 +15,16 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   return {
-    getSavedViewsButton() {
-      return testSubjects.find('savedViews-openPopover');
-    },
+    async clickSavedViewsButton() {
+      const button = await testSubjects.find('savedViews-openPopover');
 
-    clickSavedViewsButton() {
-      return testSubjects.click('savedViews-openPopover');
-    },
+      await retry.waitFor('Wait for button to be enabled', async () => {
+        const isDisabled = Boolean(await button.getAttribute('disabled'));
+        return !isDisabled;
+      });
 
-    getSavedViewsPopover() {
-      return testSubjects.find('savedViews-popover');
+      return button.click();
     },
-
     pressEsc() {
       return browser.pressKeys([Key.ESCAPE]);
     },
@@ -36,62 +34,38 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
       return this.pressEsc();
     },
 
-    getLoadViewButton() {
-      return testSubjects.find('savedViews-loadView');
-    },
-
-    getManageViewsButton() {
-      return testSubjects.find('savedViews-manageViews');
-    },
-
     clickManageViewsButton() {
       return testSubjects.click('savedViews-manageViews');
     },
 
-    getManageViewsFlyout() {
-      return testSubjects.find('loadViewsFlyout');
-    },
-
     async getManageViewsEntries() {
-      await this.clickSavedViewsButton();
       await this.clickManageViewsButton();
       return testSubjects.findAll('infraRenderNameButton');
-    },
-
-    getUpdateViewButton() {
-      return testSubjects.find('savedViews-updateView');
     },
 
     clickUpdateViewButton() {
       return testSubjects.click('savedViews-updateView');
     },
 
-    getSaveNewViewButton() {
-      return testSubjects.find('savedViews-saveNewView');
-    },
-
     clickSaveNewViewButton() {
       return testSubjects.click('savedViews-saveNewView');
-    },
-
-    getCreateSavedViewModal() {
-      return testSubjects.find('savedViews-upsertModal');
     },
 
     async createNewSavedView(name: string) {
       await testSubjects.setValue('savedViewName', name);
       await testSubjects.click('createSavedViewButton');
-      await testSubjects.missingOrFail('savedViews-upsertModal');
+      await testSubjects.missingOrFail('createSavedViewButton', { timeout: 20000 });
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.missingOrFail('savedViews-upsertModal');
+      });
     },
 
     async createView(name: string) {
-      await this.clickSavedViewsButton();
       await this.clickSaveNewViewButton();
       await this.createNewSavedView(name);
     },
 
     async updateView(name: string) {
-      await this.clickSavedViewsButton();
       await this.clickUpdateViewButton();
       await this.createNewSavedView(name);
     },
@@ -101,15 +75,6 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
         const subject = await testSubjects.find('savedViews-openPopover');
         expect(await subject.getVisibleText()).to.be(name);
       });
-    },
-
-    async ensureViewIsLoadable(name: string) {
-      const subject = await testSubjects.find('savedViews-loadList');
-      await subject.findByCssSelector(`li[title="${name}"]`);
-    },
-
-    closeSavedViewsLoadModal() {
-      return testSubjects.click('cancelSavedViewModal');
     },
   };
 }

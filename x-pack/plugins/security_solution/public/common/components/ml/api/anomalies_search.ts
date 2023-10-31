@@ -28,9 +28,10 @@ export const anomaliesSearch = async (
   signal: AbortSignal
 ): Promise<AnomaliesSearchResponse> => {
   return KibanaServices.get().http.fetch<AnomaliesSearchResponse>(
-    '/api/ml/results/anomaly_search',
+    '/internal/ml/results/anomaly_search',
     {
       method: 'POST',
+      version: '1',
       body: JSON.stringify(body),
       asSystemRequest: true,
       signal,

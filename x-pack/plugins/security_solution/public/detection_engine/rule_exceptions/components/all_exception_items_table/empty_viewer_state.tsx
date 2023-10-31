@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiImage,
   EuiEmptyPrompt,
   EuiButton,
@@ -96,7 +96,7 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
         );
       default:
         return (
-          <EuiLoadingContent lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
+          <EuiSkeletonText lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
         );
     }
   }, [

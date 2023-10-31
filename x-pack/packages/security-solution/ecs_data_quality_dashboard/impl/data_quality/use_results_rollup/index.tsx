@@ -6,24 +6,32 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-
-interface Props {
-  ilmPhases: string[];
-  patterns: string[];
-}
+import { EcsVersion } from '@kbn/ecs';
 
 import {
   getTotalDocsCount,
   getTotalIncompatible,
   getTotalIndices,
   getTotalIndicesChecked,
+  getTotalSameFamily,
   getTotalSizeInBytes,
   onPatternRollupUpdated,
   updateResultOnCheckCompleted,
 } from './helpers';
 
-import type { OnCheckCompleted, PartitionedFieldMetadata, PatternRollup } from '../types';
+import type { OnCheckCompleted, PatternRollup } from '../types';
+import { getDocsCount, getIndexId, getSizeInBytes } from '../helpers';
+import { getIlmPhase, getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
+import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
+import {
+  getIncompatibleMappingsFields,
+  getIncompatibleValuesFields,
+} from '../data_quality_panel/tabs/incompatible_tab/helpers';
 
+interface Props {
+  ilmPhases: string[];
+  patterns: string[];
+}
 interface UseResultsRollup {
   onCheckCompleted: OnCheckCompleted;
   patternIndexNames: Record<string, string[]>;
@@ -32,6 +40,7 @@ interface UseResultsRollup {
   totalIncompatible: number | undefined;
   totalIndices: number | undefined;
   totalIndicesChecked: number | undefined;
+  totalSameFamily: number | undefined;
   totalSizeInBytes: number | undefined;
   updatePatternIndexNames: ({
     indexNames,
@@ -46,7 +55,7 @@ interface UseResultsRollup {
 export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRollup => {
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
-
+  const { telemetryEvents, isILMAvailable } = useDataQualityContext();
   const updatePatternRollup = useCallback((patternRollup: PatternRollup) => {
     setPatternRollups((current) =>
       onPatternRollupUpdated({ patternRollup, patternRollups: current })
@@ -60,6 +69,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
     () => getTotalIndicesChecked(patternRollups),
     [patternRollups]
   );
+  const totalSameFamily = useMemo(() => getTotalSameFamily(patternRollups), [patternRollups]);
   const totalSizeInBytes = useMemo(() => getTotalSizeInBytes(patternRollups), [patternRollups]);
 
   const updatePatternIndexNames = useCallback(
@@ -74,33 +84,84 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
 
   const onCheckCompleted: OnCheckCompleted = useCallback(
     ({
+      batchId,
+      checkAllStartTime,
       error,
       formatBytes,
       formatNumber,
       indexName,
       partitionedFieldMetadata,
       pattern,
-    }: {
-      error: string | null;
-      formatBytes: (value: number | undefined) => string;
-      formatNumber: (value: number | undefined) => string;
-      indexName: string;
-      partitionedFieldMetadata: PartitionedFieldMetadata | null;
-      pattern: string;
+      requestTime,
+      isLastCheck,
     }) => {
-      setPatternRollups((current) =>
-        updateResultOnCheckCompleted({
+      const indexId = getIndexId({ indexName, stats: patternRollups[pattern].stats });
+      const ilmExplain = patternRollups[pattern].ilmExplain;
+
+      setPatternRollups((current) => {
+        const updated = updateResultOnCheckCompleted({
           error,
           formatBytes,
           formatNumber,
           indexName,
+          isILMAvailable,
           partitionedFieldMetadata,
           pattern,
           patternRollups: current,
-        })
-      );
+        });
+
+        if (
+          indexId != null &&
+          updated[pattern].stats &&
+          updated[pattern].results &&
+          requestTime != null &&
+          requestTime > 0 &&
+          partitionedFieldMetadata &&
+          ilmExplain
+        ) {
+          telemetryEvents.reportDataQualityIndexChecked?.({
+            batchId,
+            ecsVersion: EcsVersion,
+            errorCount: error ? 1 : 0,
+            ilmPhase: getIlmPhase(ilmExplain[indexName], isILMAvailable),
+            indexId,
+            indexName,
+            isCheckAll: true,
+            numberOfDocuments: getDocsCount({ indexName, stats: updated[pattern].stats }),
+            numberOfIncompatibleFields: getIndexIncompatible({
+              indexName,
+              results: updated[pattern].results,
+            }),
+            numberOfIndices: 1,
+            numberOfIndicesChecked: 1,
+            sizeInBytes: getSizeInBytes({ stats: updated[pattern].stats, indexName }),
+            timeConsumedMs: requestTime,
+            unallowedMappingFields: getIncompatibleMappingsFields(
+              partitionedFieldMetadata.incompatible
+            ),
+            unallowedValueFields: getIncompatibleValuesFields(
+              partitionedFieldMetadata.incompatible
+            ),
+          });
+        }
+
+        if (isLastCheck) {
+          telemetryEvents.reportDataQualityCheckAllCompleted?.({
+            batchId,
+            ecsVersion: EcsVersion,
+            isCheckAll: true,
+            numberOfDocuments: getTotalDocsCount(updated),
+            numberOfIncompatibleFields: getTotalIncompatible(updated),
+            numberOfIndices: getTotalIndices(updated),
+            numberOfIndicesChecked: getTotalIndicesChecked(updated),
+            sizeInBytes: getTotalSizeInBytes(updated),
+            timeConsumedMs: Date.now() - checkAllStartTime,
+          });
+        }
+        return updated;
+      });
     },
-    []
+    [isILMAvailable, patternRollups, telemetryEvents]
   );
 
   useEffect(() => {
@@ -117,6 +178,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
     totalIncompatible,
     totalIndices,
     totalIndicesChecked,
+    totalSameFamily,
     totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,

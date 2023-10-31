@@ -20,7 +20,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DurationDistributionChartWithScrubber } from '../../../shared/charts/duration_distribution_chart_with_scrubber';
-import { HeightRetainer } from '../../../shared/height_retainer';
+import { ResettingHeightRetainer } from '../../../shared/height_retainer/resetting_height_container';
 import { fromQuery, push, toQuery } from '../../../shared/links/url_helpers';
 import { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
@@ -99,7 +99,7 @@ export function TransactionDistribution({
   );
 
   return (
-    <HeightRetainer>
+    <ResettingHeightRetainer reset={!traceId}>
       <div data-test-subj="apmTransactionDistributionTabContent">
         <DurationDistributionChartWithScrubber
           onChartSelection={onChartSelection}
@@ -138,6 +138,6 @@ export function TransactionDistribution({
           onShowCriticalPathChange={onShowCriticalPathChange}
         />
       </div>
-    </HeightRetainer>
+    </ResettingHeightRetainer>
   );
 }

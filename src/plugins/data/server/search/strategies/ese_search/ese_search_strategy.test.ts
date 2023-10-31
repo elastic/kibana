@@ -8,6 +8,7 @@
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import * as xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
@@ -64,6 +65,7 @@ describe('ES search strategy', () => {
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
+    rollupsEnabled: true,
   } as unknown as SearchStrategyDependencies;
   const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
@@ -233,6 +235,31 @@ describe('ES search strategy', () => {
         expect(method).toBe('POST');
         expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
       });
+
+      it("doesn't call the rollup API if the index is a rollup type BUT rollups are disabled", async () => {
+        mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
+        mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = { index: 'foo-程', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+
+        await esSearch
+          .search(
+            {
+              indexType: 'rollup',
+              params,
+            },
+            {},
+            { ...mockDeps, rollupsEnabled: false }
+          )
+          .toPromise();
+
+        expect(mockApiCaller).toBeCalledTimes(0);
+      });
     });
 
     describe('with sessionId', () => {
@@ -360,14 +387,14 @@ describe('ES search strategy', () => {
         mockLogger
       );
 
-      let err: KbnServerError | undefined;
+      let err: KbnSearchError | undefined;
       try {
         await esSearch.search({ params }, {}, mockDeps).toPromise();
       } catch (e) {
         err = e;
       }
       expect(mockSubmitCaller).toBeCalled();
-      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
       expect(err?.errBody).toBe(indexNotFoundException);
@@ -385,14 +412,14 @@ describe('ES search strategy', () => {
         mockLogger
       );
 
-      let err: KbnServerError | undefined;
+      let err: KbnSearchError | undefined;
       try {
         await esSearch.search({ params }, {}, mockDeps).toPromise();
       } catch (e) {
         err = e;
       }
       expect(mockSubmitCaller).toBeCalled();
-      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
       expect(err?.errBody).toBe(undefined);

@@ -22,14 +22,10 @@ interface CollectionsPutResponse {
 const createAnalyticsCollection = async (
   client: IScopedClusterClient,
   name: string
-): Promise<CollectionsPutResponse> => {
-  const response = await client.asCurrentUser.transport.request<CollectionsPutResponse>({
-    method: 'PUT',
-    path: `/_application/analytics/${name}`,
-  });
-
-  return response;
-};
+): Promise<CollectionsPutResponse> =>
+  (await client.asCurrentUser.searchApplication.putBehavioralAnalytics({
+    name,
+  })) as CollectionsPutResponse;
 
 const createDataView = async (
   dataViewsService: DataViewsService,

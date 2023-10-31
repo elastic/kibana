@@ -9,7 +9,6 @@ import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../comm
 import { getAlertsForNotification } from '.';
 import { Alert } from '../alert';
 import { alertsWithAnyUUID } from '../test_utils';
-import { RuleNotifyWhen } from '../types';
 
 describe('getAlertsForNotification', () => {
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
@@ -20,7 +19,7 @@ describe('getAlertsForNotification', () => {
 
     const { newAlerts, activeAlerts } = getAlertsForNotification(
       DEFAULT_FLAPPING_SETTINGS,
-      RuleNotifyWhen.CHANGE,
+      true,
       'default',
       {
         '1': alert1,
@@ -38,6 +37,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": "uuid-1",
           },
@@ -51,6 +51,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": "uuid-1",
           },
@@ -60,6 +61,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": "uuid-2",
           },
@@ -82,7 +84,7 @@ describe('getAlertsForNotification', () => {
       currentRecoveredAlerts,
     } = getAlertsForNotification(
       DEFAULT_FLAPPING_SETTINGS,
-      RuleNotifyWhen.CHANGE,
+      true,
       'default',
       {},
       {},
@@ -105,6 +107,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 1,
             "uuid": Any<String>,
           },
@@ -123,18 +126,19 @@ describe('getAlertsForNotification', () => {
       ]
     `);
     expect(alertsWithAnyUUID(currentActiveAlerts)).toMatchInlineSnapshot(`
-          Object {
-            "3": Object {
-              "meta": Object {
-                "flapping": true,
-                "flappingHistory": Array [],
-                "pendingRecoveredCount": 1,
-                "uuid": Any<String>,
-              },
-              "state": Object {},
-            },
-          }
-      `);
+      Object {
+        "3": Object {
+          "meta": Object {
+            "flapping": true,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "pendingRecoveredCount": 1,
+            "uuid": Any<String>,
+          },
+          "state": Object {},
+        },
+      }
+    `);
     expect(Object.values(currentActiveAlerts).map((a) => a.getScheduledActionOptions()))
       .toMatchInlineSnapshot(`
           Array [
@@ -151,6 +155,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -160,6 +165,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "uuid": Any<String>,
           },
           "state": Object {},
@@ -172,6 +178,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -181,6 +188,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "uuid": Any<String>,
           },
           "state": Object {},
@@ -203,7 +211,7 @@ describe('getAlertsForNotification', () => {
     const { newAlerts, activeAlerts, recoveredAlerts, currentRecoveredAlerts } =
       getAlertsForNotification(
         DISABLE_FLAPPING_SETTINGS,
-        RuleNotifyWhen.CHANGE,
+        true,
         'default',
         {},
         {},
@@ -231,6 +239,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -244,6 +253,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -257,6 +267,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -274,6 +285,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -287,6 +299,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -300,6 +313,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -322,7 +336,7 @@ describe('getAlertsForNotification', () => {
       currentRecoveredAlerts,
     } = getAlertsForNotification(
       DEFAULT_FLAPPING_SETTINGS,
-      RuleNotifyWhen.ACTIVE,
+      false,
       'default',
       {},
       {},
@@ -345,6 +359,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 1,
             "uuid": Any<String>,
           },
@@ -372,6 +387,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -381,6 +397,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "uuid": Any<String>,
           },
           "state": Object {},
@@ -393,6 +410,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -402,6 +420,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "uuid": Any<String>,
           },
           "state": Object {},

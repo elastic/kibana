@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, Suspense, useMemo } from 'react';
-import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
+import type { Ecs } from '@kbn/cases-plugin/common';
 import ServicesWrapper from './services_wrapper';
 import type { ServicesWrapperProps } from './services_wrapper';
 import type { OsqueryActionProps } from './osquery_action';
@@ -16,7 +16,7 @@ const OsqueryAction = lazy(() => import('./osquery_action'));
 export const getLazyOsqueryAction =
   (services: ServicesWrapperProps['services']) =>
   // eslint-disable-next-line react/display-name
-  (props: OsqueryActionProps & { ecsData?: EcsSecurityExtension }) => {
+  (props: OsqueryActionProps & { ecsData?: Ecs }) => {
     const { ecsData, ...restProps } = props;
     const renderAction = useMemo(() => {
       if (ecsData && ecsData?._id) {

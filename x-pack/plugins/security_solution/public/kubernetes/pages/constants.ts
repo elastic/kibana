@@ -13,7 +13,6 @@ import {
   COLUMN_EXECUTABLE,
   COLUMN_ENTRY_USER,
   COLUMN_INTERACTIVE,
-  COLUMN_ENTRY_TYPE,
   COLUMN_NODE,
   COLUMN_CONTAINER,
   COLUMN_POD,
@@ -28,23 +27,13 @@ export const kubernetesSessionsHeaders: ColumnHeaderOptions[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'process.entry_leader.user.name',
-    display: COLUMN_ENTRY_USER,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
     id: 'process.entry_leader.executable',
     display: COLUMN_EXECUTABLE,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'cloud.instance.name',
-    display: COLUMN_NODE,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'process.entry_leader.entry_meta.type',
-    display: COLUMN_ENTRY_TYPE,
+    id: 'process.entry_leader.user.id',
+    display: COLUMN_ENTRY_USER,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -53,12 +42,17 @@ export const kubernetesSessionsHeaders: ColumnHeaderOptions[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'container.name',
-    display: COLUMN_CONTAINER,
+    id: 'cloud.instance.name',
+    display: COLUMN_NODE,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'orchestrator.resource.name',
     display: COLUMN_POD,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'container.name',
+    display: COLUMN_CONTAINER,
   },
 ];

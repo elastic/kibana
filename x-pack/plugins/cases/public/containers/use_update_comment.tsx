@@ -5,51 +5,14 @@
  * 2.0.
  */
 
-import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { useToasts } from '../common/lib/kibana';
+import { useMutation } from '@tanstack/react-query';
+import { useCasesToast } from '../common/use_cases_toast';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
+import type { ServerError } from '../types';
 import { patchComment } from './api';
+import { casesMutationsKeys } from './constants';
 import * as i18n from './translations';
-
-interface CommentUpdateState {
-  isLoadingIds: string[];
-  isError: boolean;
-}
-interface CommentUpdate {
-  commentId: string;
-}
-
-type Action =
-  | { type: 'FETCH_INIT'; payload: string }
-  | { type: 'FETCH_SUCCESS'; payload: CommentUpdate }
-  | { type: 'FETCH_FAILURE'; payload: string };
-
-const dataFetchReducer = (state: CommentUpdateState, action: Action): CommentUpdateState => {
-  switch (action.type) {
-    case 'FETCH_INIT':
-      return {
-        ...state,
-        isLoadingIds: [...state.isLoadingIds, action.payload],
-        isError: false,
-      };
-
-    case 'FETCH_SUCCESS':
-      return {
-        ...state,
-        isLoadingIds: state.isLoadingIds.filter((id) => action.payload.commentId !== id),
-        isError: false,
-      };
-    case 'FETCH_FAILURE':
-      return {
-        ...state,
-        isLoadingIds: state.isLoadingIds.filter((id) => action.payload !== id),
-        isError: true,
-      };
-    default:
-      return state;
-  }
-};
 
 interface UpdateComment {
   caseId: string;
@@ -58,66 +21,32 @@ interface UpdateComment {
   version: string;
 }
 
-export interface UseUpdateComment extends CommentUpdateState {
-  patchComment: ({ caseId, commentId, commentUpdate }: UpdateComment) => void;
-}
-
-export const useUpdateComment = (): UseUpdateComment => {
-  const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoadingIds: [],
-    isError: false,
-  });
-  const toasts = useToasts();
-  const isCancelledRef = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
+export const useUpdateComment = () => {
+  const { showErrorToast } = useCasesToast();
+  const refreshCaseViewPage = useRefreshCaseViewPage();
   // this hook guarantees that there will be at least one value in the owner array, we'll
   // just use the first entry just in case there are more than one entry
   const owner = useCasesContext().owner[0];
-  const refreshCaseViewPage = useRefreshCaseViewPage();
 
-  const dispatchUpdateComment = useCallback(
-    async ({ caseId, commentId, commentUpdate, version }: UpdateComment) => {
-      try {
-        isCancelledRef.current = false;
-        abortCtrlRef.current.abort();
-        abortCtrlRef.current = new AbortController();
-        dispatch({ type: 'FETCH_INIT', payload: commentId });
-
-        await patchComment({
-          caseId,
-          commentId,
-          commentUpdate,
-          version,
-          signal: abortCtrlRef.current.signal,
-          owner,
-        });
-
-        if (!isCancelledRef.current) {
-          refreshCaseViewPage();
-          dispatch({ type: 'FETCH_SUCCESS', payload: { commentId } });
-        }
-      } catch (error) {
-        if (!isCancelledRef.current) {
-          if (error.name !== 'AbortError') {
-            toasts.addError(
-              error.body && error.body.message ? new Error(error.body.message) : error,
-              { title: i18n.ERROR_TITLE }
-            );
-          }
-          dispatch({ type: 'FETCH_FAILURE', payload: commentId });
-        }
-      }
-    },
-    [owner, refreshCaseViewPage, toasts]
+  return useMutation(
+    ({ caseId, commentId, commentUpdate, version }: UpdateComment) =>
+      patchComment({
+        caseId,
+        commentId,
+        commentUpdate,
+        version,
+        owner,
+      }),
+    {
+      mutationKey: casesMutationsKeys.updateComment,
+      onSuccess: () => {
+        refreshCaseViewPage();
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
+      },
+    }
   );
-
-  useEffect(
-    () => () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
-    },
-    []
-  );
-
-  return { ...state, patchComment: dispatchUpdateComment };
 };
+
+export type UseUpdateComment = ReturnType<typeof useUpdateComment>;

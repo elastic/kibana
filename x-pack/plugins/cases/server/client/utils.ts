@@ -8,9 +8,6 @@
 import { badRequest } from '@hapi/boom';
 import { get, isPlainObject, differenceWith, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { validate as uuidValidate } from 'uuid';
 
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
@@ -20,28 +17,28 @@ import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import type {
-  CaseStatuses,
-  CommentRequest,
   CaseSeverity,
-  CommentRequestExternalReferenceType,
-  CasesFindRequest,
-} from '../../common/api';
+  CaseStatuses,
+  ExternalReferenceAttachmentPayload,
+} from '../../common/types/domain';
+import {
+  ActionsAttachmentPayloadRt,
+  AlertAttachmentPayloadRt,
+  ExternalReferenceNoSOAttachmentPayloadRt,
+  ExternalReferenceSOAttachmentPayloadRt,
+  ExternalReferenceStorageType,
+  PersistableStateAttachmentPayloadRt,
+  UserCommentAttachmentPayloadRt,
+} from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
 
+import { decodeWithExcessOrThrow } from '../../common/api';
 import {
+  CASE_SAVED_OBJECT,
+  NO_ASSIGNEES_FILTERING_KEYWORD,
   OWNER_FIELD,
-  AlertCommentRequestRt,
-  ActionsCommentRequestRt,
-  ContextTypeUserRt,
-  excess,
-  throwErrors,
-  ExternalReferenceStorageType,
-  ExternalReferenceSORt,
-  ExternalReferenceNoSORt,
-  PersistableStateAttachmentRt,
-} from '../../common/api';
-import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+} from '../../common/constants';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -56,17 +53,20 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 
+// TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
-  comment: CommentRequest,
+  comment: AttachmentRequest,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (isCommentRequestTypeUser(comment)) {
-    pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
+    decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
-    pipe(excess(ActionsCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
+    decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeAlert(comment)) {
-    pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
+    decodeWithExcessOrThrow(AlertAttachmentPayloadRt)(comment);
+
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
     /**
@@ -112,10 +112,7 @@ export const decodeCommentRequest = (
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
-    pipe(
-      excess(PersistableStateAttachmentRt).decode(comment),
-      fold(throwErrors(badRequest), identity)
-    );
+    decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
   } else {
     /**
      * This assertion ensures that TS will show an error
@@ -127,16 +124,13 @@ export const decodeCommentRequest = (
 };
 
 const decodeExternalReferenceAttachment = (
-  attachment: CommentRequestExternalReferenceType,
+  attachment: ExternalReferenceAttachmentPayload,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
-    pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
+    decodeWithExcessOrThrow(ExternalReferenceSOAttachmentPayloadRt)(attachment);
   } else {
-    pipe(
-      excess(ExternalReferenceNoSORt).decode(attachment),
-      fold(throwErrors(badRequest), identity)
-    );
+    decodeWithExcessOrThrow(ExternalReferenceNoSOAttachmentPayloadRt)(attachment);
   }
 
   const metadata = attachment.externalReferenceMetadata;
@@ -150,54 +144,45 @@ const decodeExternalReferenceAttachment = (
 /**
  * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
  */
-export const getAlertIds = (comment: CommentRequest): string[] => {
+export const getAlertIds = (comment: AttachmentRequest): string[] => {
   if (isCommentRequestTypeAlert(comment)) {
     return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
   }
   return [];
 };
 
-export const addStatusFilter = ({
-  status,
-  appendFilter,
-  type = CASE_SAVED_OBJECT,
-}: {
-  status: CaseStatuses;
-  appendFilter?: KueryNode;
-  type?: string;
-}): KueryNode => {
-  const filters: KueryNode[] = [];
-  filters.push(
-    nodeBuilder.is(`${type}.attributes.status`, `${STATUS_EXTERNAL_TO_ESMODEL[status]}`)
+const addStatusFilter = (status: CaseStatuses): KueryNode => {
+  return nodeBuilder.is(
+    `${CASE_SAVED_OBJECT}.attributes.status`,
+    `${STATUS_EXTERNAL_TO_ESMODEL[status]}`
   );
-
-  if (appendFilter) {
-    filters.push(appendFilter);
-  }
-
-  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
-export const addSeverityFilter = ({
-  severity,
-  appendFilter,
-  type = CASE_SAVED_OBJECT,
-}: {
-  severity: CaseSeverity;
-  appendFilter?: KueryNode;
-  type?: string;
-}): KueryNode => {
-  const filters: KueryNode[] = [];
-
-  filters.push(
-    nodeBuilder.is(`${type}.attributes.severity`, `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`)
+const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
+  return nodeBuilder.is(
+    `${CASE_SAVED_OBJECT}.attributes.severity`,
+    `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`
   );
+};
 
-  if (appendFilter) {
-    filters.push(appendFilter);
+const buildCategoryFilter = (
+  categories: CasesFindQueryParams['category']
+): KueryNode | undefined => {
+  if (categories === undefined) {
+    return;
   }
 
-  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+  const categoriesAsArray = Array.isArray(categories) ? categories : [categories];
+
+  if (categoriesAsArray.length === 0) {
+    return;
+  }
+
+  const categoryFilters = categoriesAsArray.map((category) =>
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.category`, `${category}`)
+  );
+
+  return nodeBuilder.or(categoryFilters);
 };
 
 export const NodeBuilderOperators = {
@@ -212,10 +197,6 @@ interface FilterField {
   field: string;
   operator: NodeBuilderOperatorsType;
   type?: string;
-}
-
-interface NestedFilterField extends FilterField {
-  nestedField: string;
 }
 
 export const buildFilter = ({
@@ -235,48 +216,7 @@ export const buildFilter = ({
   }
 
   return nodeBuilder[operator](
-    filtersAsArray.map((filter) =>
-      nodeBuilder.is(`${escapeKuery(type)}.attributes.${escapeKuery(field)}`, escapeKuery(filter))
-    )
-  );
-};
-
-/**
- * Creates a KueryNode filter for the Saved Object find API's filter field. This handles constructing a filter for
- * a nested field.
- *
- * @param filters is a string or array of strings that defines the values to search for
- * @param field is the location to search for
- * @param nestedField is the field in the saved object that has a type of 'nested'
- * @param operator whether to 'or'/'and' the created filters together
- * @type the type of saved object being searched
- * @returns a constructed KueryNode representing the filter or undefined if one could not be built
- */
-export const buildNestedFilter = ({
-  filters,
-  field,
-  nestedField,
-  operator,
-  type = CASE_SAVED_OBJECT,
-}: NestedFilterField): KueryNode | undefined => {
-  if (filters === undefined) {
-    return;
-  }
-
-  const filtersAsArray = Array.isArray(filters) ? filters : [filters];
-
-  if (filtersAsArray.length === 0) {
-    return;
-  }
-
-  return nodeBuilder[operator](
-    filtersAsArray.map((filter) =>
-      fromKueryExpression(
-        `${escapeKuery(type)}.attributes.${escapeKuery(nestedField)}:{ ${escapeKuery(
-          field
-        )}: ${escapeKuery(filter)} }`
-      )
-    )
+    filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
   );
 };
 
@@ -382,7 +322,7 @@ export const buildAssigneesFilter = ({
   );
 
   const assigneesFilter = assigneesWithoutNone.map((filter) =>
-    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, filter)
   );
 
   if (!hasNoneAssignee) {
@@ -401,22 +341,23 @@ export const constructQueryOptions = ({
   reporters,
   status,
   severity,
-  sortByField,
+  sortField,
   owner,
   authorizationFilter,
   from,
   to,
   assignees,
+  category,
 }: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
-  const sortField = convertSortField(sortByField);
+  const sortByField = convertSortField(sortField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
-
-  const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
-  const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
+  const statusFilter = status != null ? addStatusFilter(status) : undefined;
+  const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
+  const categoryFilter = buildCategoryFilter(category);
 
   const filters = combineFilters([
     statusFilter,
@@ -426,11 +367,12 @@ export const constructQueryOptions = ({
     rangeFilter,
     ownerFilter,
     assigneesFilter,
+    categoryFilter,
   ]);
 
   return {
     filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
-    sortField,
+    sortField: sortByField,
   };
 };
 
@@ -489,6 +431,7 @@ export const arraysDifference = <T>(
 interface CaseWithIDVersion {
   id: string;
   version: string;
+
   [key: string]: unknown;
 }
 
@@ -496,37 +439,34 @@ export const getCaseToUpdate = (
   currentCase: unknown,
   queryCase: CaseWithIDVersion
 ): CaseWithIDVersion =>
-  Object.entries(queryCase).reduce(
+  Object.entries(queryCase).reduce<CaseWithIDVersion>(
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);
       if (Array.isArray(currentValue) && Array.isArray(value)) {
         if (arraysDifference(value, currentValue)) {
-          return {
-            ...acc,
-            [key]: value,
-          };
+          acc[key] = value;
         }
-        return acc;
       } else if (isPlainObject(currentValue) && isPlainObject(value)) {
         if (!deepEqual(currentValue, value)) {
-          return {
-            ...acc,
-            [key]: value,
-          };
+          acc[key] = value;
         }
-
-        return acc;
-      } else if (currentValue != null && value !== currentValue) {
-        return {
-          ...acc,
-          [key]: value,
-        };
+      } else if (currentValue !== undefined && value !== currentValue) {
+        acc[key] = value;
       }
       return acc;
     },
     { id: queryCase.id, version: queryCase.version }
   );
 
+/**
+ * TODO: Backend is not connected with the
+ * frontend in x-pack/plugins/cases/common/ui/types.ts.
+ * It is easy to forget to update a sort field.
+ * We should fix it and make it common.
+ * Also the sortField in x-pack/plugins/cases/common/api/cases/case.ts
+ * is set to string. We should narrow it to the
+ * acceptable values
+ */
 enum SortFieldCase {
   closedAt = 'closed_at',
   createdAt = 'created_at',
@@ -534,25 +474,27 @@ enum SortFieldCase {
   title = 'title.keyword',
   severity = 'severity',
   updatedAt = 'updated_at',
+  category = 'category',
 }
 
-export const convertSortField = (sortField: string | undefined): SortFieldCase => {
+export const convertSortField = (
+  sortField: CasesFindRequestSortFields | undefined
+): SortFieldCase => {
   switch (sortField) {
     case 'status':
       return SortFieldCase.status;
     case 'createdAt':
-    case 'created_at':
       return SortFieldCase.createdAt;
     case 'closedAt':
-    case 'closed_at':
       return SortFieldCase.closedAt;
     case 'title':
       return SortFieldCase.title;
     case 'severity':
       return SortFieldCase.severity;
     case 'updatedAt':
-    case 'updated_at':
       return SortFieldCase.updatedAt;
+    case 'category':
+      return SortFieldCase.category;
     default:
       return SortFieldCase.createdAt;
   }
@@ -562,7 +504,7 @@ export const constructSearch = (
   search: string | undefined,
   spaceId: string,
   savedObjectsSerializer: ISavedObjectsSerializer
-): Pick<CasesFindRequest, 'search' | 'rootSearchFields'> | undefined => {
+): { search: string; rootSearchFields?: string[] } | undefined => {
   if (!search) {
     return undefined;
   }

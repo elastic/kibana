@@ -58,7 +58,7 @@ export const GuidePanelFlyoutBody = ({
 
     return (
       <>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <EuiText size="m">
           <EuiLink external target="_blank" href={guideConfig.docs.url}>
             {guideConfig.docs.text}
@@ -109,7 +109,7 @@ export const GuidePanelFlyoutBody = ({
     return (
       <>
         <EuiImage
-          size="fullWidth"
+          size="l"
           src={isDarkTheme ? wellDoneAnimatedDarkGif : wellDoneAnimatedGif}
           alt={i18n.translate('guidedOnboarding.dropdownPanel.wellDoneAnimatedGif', {
             defaultMessage: `Guide completed animated gif`,
@@ -131,17 +131,9 @@ export const GuidePanelFlyoutBody = ({
 
         {docsLink()}
 
-        <GuideProgress
-          guideConfig={guideConfig}
-          styles={styles}
-          pluginState={pluginState}
-          isLoading={isLoading}
-          handleStepButtonClick={handleStepButtonClick}
-          isGuideReadyToComplete={isGuideReadyToComplete}
-          stepsCompleted={stepsCompleted}
-        />
+        <EuiSpacer />
 
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButton
               isLoading={isLoading}
@@ -156,6 +148,8 @@ export const GuidePanelFlyoutBody = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer />
       </>
     );
   }

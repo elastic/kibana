@@ -21,7 +21,6 @@ import type {
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
-  SavedObjectsStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -33,6 +32,7 @@ import type { DashboardFeatureFlagConfig } from '@kbn/dashboard-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
@@ -46,6 +46,9 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   DatasourceMap,
   EditorFrameInstance,
@@ -58,7 +61,7 @@ import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
-import type { Document } from '../persistence/saved_object_store';
+import type { Document, SavedObjectIndexStore } from '../persistence/saved_object_store';
 import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
 
 export interface RedirectToOriginProps {
@@ -80,6 +83,7 @@ export interface LensAppProps {
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
   datasourceMap: DatasourceMap;
+  savedObjectStore: SavedObjectIndexStore;
   visualizationMap: VisualizationMap;
   initialContext?: VisualizeEditorContext | VisualizeFieldContext;
   contextOriginatingApp?: string;
@@ -147,8 +151,10 @@ export interface LensAppServices {
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
+  eventAnnotationService: EventAnnotationServiceType;
   inspector: LensInspector;
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
   notifications: NotificationsStart;
@@ -156,7 +162,7 @@ export interface LensAppServices {
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
-  savedObjectsClient: SavedObjectsStart['client'];
+  contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
   presentationUtil: PresentationUtilPluginStart;
@@ -170,6 +176,8 @@ export interface LensAppServices {
   dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   locator?: LensAppLocator;
+  savedObjectStore: SavedObjectIndexStore;
+  serverless?: ServerlessPluginStart;
 }
 
 interface TopNavAction {

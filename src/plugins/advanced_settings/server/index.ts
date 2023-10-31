@@ -9,5 +9,7 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 import { AdvancedSettingsServerPlugin } from './plugin';
 
+export { config } from './config';
+
 export const plugin = (initContext: PluginInitializerContext) =>
   new AdvancedSettingsServerPlugin(initContext);

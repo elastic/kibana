@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from './migrations';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { TaskInstanceWithDeprecatedFields } from '../task';
 
 const migrationContext = migrationMocks.createContext();
@@ -19,7 +20,7 @@ describe('successful migrations', () => {
   });
   describe('7.4.0', () => {
     test('extend task instance with updated_at', () => {
-      const migration740 = getMigrations()['7.4.0'];
+      const migration740 = SavedObjectsUtils.getMigrationFunction(getMigrations()['7.4.0']);
       const taskInstance = getMockData({});
       expect(migration740(taskInstance, migrationContext).attributes.updated_at).not.toBeNull();
     });
@@ -27,7 +28,7 @@ describe('successful migrations', () => {
 
   describe('7.6.0', () => {
     test('rename property Internal to Schedule', () => {
-      const migration760 = getMigrations()['7.6.0'];
+      const migration760 = SavedObjectsUtils.getMigrationFunction(getMigrations()['7.6.0']);
       const taskInstance = getMockData({});
       expect(migration760(taskInstance, migrationContext)).toEqual({
         ...taskInstance,
@@ -41,7 +42,7 @@ describe('successful migrations', () => {
 
   describe('8.0.0', () => {
     test('transforms actionsTasksLegacyIdToSavedObjectIds', () => {
-      const migration800 = getMigrations()['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.0.0']);
       const taskInstance = getMockData({
         taskType: 'actions:123456',
         params: JSON.stringify({ spaceId: 'user1', actionTaskParamsId: '123456' }),
@@ -57,7 +58,7 @@ describe('successful migrations', () => {
     });
 
     test('it is only applicable for saved objects that live in a custom space', () => {
-      const migration800 = getMigrations()['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.0.0']);
       const taskInstance = getMockData({
         taskType: 'actions:123456',
         params: JSON.stringify({ spaceId: 'default', actionTaskParamsId: '123456' }),
@@ -67,7 +68,7 @@ describe('successful migrations', () => {
     });
 
     test('it is only applicable for saved objects that live in a custom space even if spaces are disabled', () => {
-      const migration800 = getMigrations()['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.0.0']);
       const taskInstance = getMockData({
         taskType: 'actions:123456',
         params: JSON.stringify({ actionTaskParamsId: '123456' }),
@@ -77,7 +78,7 @@ describe('successful migrations', () => {
     });
 
     test('transforms alertingTaskLegacyIdToSavedObjectIds', () => {
-      const migration800 = getMigrations()['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.0.0']);
       const taskInstance = getMockData({
         taskType: 'alerting:123456',
         params: JSON.stringify({ spaceId: 'user1', alertId: '123456' }),
@@ -93,7 +94,7 @@ describe('successful migrations', () => {
     });
 
     test('skip transformation for defult space scenario', () => {
-      const migration800 = getMigrations()['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.0.0']);
       const taskInstance = getMockData({
         taskType: 'alerting:123456',
         params: JSON.stringify({ spaceId: 'default', alertId: '123456' }),
@@ -111,7 +112,7 @@ describe('successful migrations', () => {
 
   describe('8.2.0', () => {
     test('resets attempts and status of a "failed" alerting tasks without schedule interval', () => {
-      const migration820 = getMigrations()['8.2.0'];
+      const migration820 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.2.0']);
       const taskInstance = getMockData({
         taskType: 'alerting:123',
         status: 'failed',
@@ -129,7 +130,7 @@ describe('successful migrations', () => {
     });
 
     test('resets attempts and status of a "running" alerting tasks without schedule interval', () => {
-      const migration820 = getMigrations()['8.2.0'];
+      const migration820 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.2.0']);
       const taskInstance = getMockData({
         taskType: 'alerting:123',
         status: 'running',
@@ -147,7 +148,7 @@ describe('successful migrations', () => {
     });
 
     test('does not update the tasks that are not "failed"', () => {
-      const migration820 = getMigrations()['8.2.0'];
+      const migration820 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.2.0']);
       const taskInstance = getMockData({
         taskType: 'alerting:123',
         status: 'idle',
@@ -159,7 +160,7 @@ describe('successful migrations', () => {
     });
 
     test('does not update the tasks that are not "failed" and has a schedule', () => {
-      const migration820 = getMigrations()['8.2.0'];
+      const migration820 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.2.0']);
       const taskInstance = getMockData({
         taskType: 'alerting:123',
         status: 'idle',
@@ -171,7 +172,7 @@ describe('successful migrations', () => {
     });
 
     test('resets "unrecognized" status to "idle" when task type is not in REMOVED_TYPES list', () => {
-      const migration820 = getMigrations()['8.2.0'];
+      const migration820 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.2.0']);
       const taskInstance = getMockData({
         taskType: 'someValidTask',
         status: 'unrecognized',
@@ -187,7 +188,7 @@ describe('successful migrations', () => {
     });
 
     test('does not modify "unrecognized" status when task type is in REMOVED_TYPES list', () => {
-      const migration820 = getMigrations()['8.2.0'];
+      const migration820 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.2.0']);
       const taskInstance = getMockData({
         taskType: 'sampleTaskRemovedType',
         status: 'unrecognized',
@@ -197,7 +198,7 @@ describe('successful migrations', () => {
     });
 
     test('does not modify document when status is "running"', () => {
-      const migration820 = getMigrations()['8.2.0'];
+      const migration820 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.2.0']);
       const taskInstance = getMockData({
         taskType: 'someTask',
         status: 'running',
@@ -207,7 +208,7 @@ describe('successful migrations', () => {
     });
 
     test('does not modify document when status is "idle"', () => {
-      const migration820 = getMigrations()['8.2.0'];
+      const migration820 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.2.0']);
       const taskInstance = getMockData({
         taskType: 'someTask',
         status: 'idle',
@@ -217,7 +218,7 @@ describe('successful migrations', () => {
     });
 
     test('does not modify document when status is "failed"', () => {
-      const migration820 = getMigrations()['8.2.0'];
+      const migration820 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.2.0']);
       const taskInstance = getMockData({
         taskType: 'someTask',
         status: 'failed',
@@ -229,7 +230,7 @@ describe('successful migrations', () => {
 
   describe('8.5.0', () => {
     test('adds enabled: true to tasks that are running, claiming, or idle', () => {
-      const migration850 = getMigrations()['8.5.0'];
+      const migration850 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.5.0']);
       const activeTasks = [
         getMockData({
           status: 'running',
@@ -253,7 +254,7 @@ describe('successful migrations', () => {
     });
 
     test('does not modify tasks that are failed or unrecognized', () => {
-      const migration850 = getMigrations()['8.5.0'];
+      const migration850 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.5.0']);
       const inactiveTasks = [
         getMockData({
           status: 'failed',
@@ -272,7 +273,7 @@ describe('successful migrations', () => {
 describe('handles errors during migrations', () => {
   describe('8.0.0 throws if migration fails', () => {
     test('should throw the exception if task instance params format is wrong', () => {
-      const migration800 = getMigrations()['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(getMigrations()['8.0.0']);
       const taskInstance = getMockData({
         taskType: 'alerting:123456',
         params: `{ spaceId: 'user1', customId: '123456' }`,

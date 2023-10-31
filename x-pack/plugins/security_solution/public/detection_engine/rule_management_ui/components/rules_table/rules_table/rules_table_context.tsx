@@ -15,7 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
+import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -25,7 +25,7 @@ import type {
   FilterOptions,
   PaginationOptions,
   Rule,
-  RuleSnoozeSettings,
+  RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
@@ -43,7 +43,7 @@ interface RulesSnoozeSettings {
   /**
    * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
    */
-  data: Record<string, RuleSnoozeSettings>;
+  data: RulesSnoozeSettingsMap;
   /**
    * Sets to true during the first data loading
    */
@@ -206,7 +206,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     showElasticRules:
       savedFilter?.source === RuleSource.Prebuilt ?? DEFAULT_FILTER_OPTIONS.showElasticRules,
     enabled: savedFilter?.enabled,
+    ruleExecutionStatus:
+      savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
   });
+
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
     field: savedSorting?.field ?? DEFAULT_SORTING_OPTIONS.field,
     order: savedSorting?.order ?? DEFAULT_SORTING_OPTIONS.order,
@@ -248,6 +251,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
       tags: DEFAULT_FILTER_OPTIONS.tags,
       enabled: undefined,
+      ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
     });
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
@@ -291,6 +295,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       pagination,
     },
     {
+      // We don't need refreshes on windows focus and reconnects if auto-refresh if off
+      refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
+      refetchOnReconnect: isRefreshOn && !isActionInProgress,
       refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
       keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     }
@@ -298,12 +305,12 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules snooze settings
   const {
-    data: rulesSnoozeSettings,
+    data: rulesSnoozeSettingsMap,
     isLoading: isSnoozeSettingsLoading,
     isFetching: isSnoozeSettingsFetching,
     isError: isSnoozeSettingsFetchError,
     refetch: refetchSnoozeSettings,
-  } = useFetchRulesSnoozeSettings(
+  } = useFetchRulesSnoozeSettingsQuery(
     rules.map((x) => x.id),
     { enabled: rules.length > 0 }
   );
@@ -347,18 +354,11 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   );
 
   const providerValue = useMemo(() => {
-    const rulesSnoozeSettingsMap =
-      rulesSnoozeSettings?.reduce((map, snoozeSettings) => {
-        map[snoozeSettings.id] = snoozeSettings;
-
-        return map;
-      }, {} as Record<string, RuleSnoozeSettings>) ?? {};
-
     return {
       state: {
         rules,
         rulesSnoozeSettings: {
-          data: rulesSnoozeSettingsMap,
+          data: rulesSnoozeSettingsMap ?? {},
           isLoading: isSnoozeSettingsLoading,
           isFetching: isSnoozeSettingsFetching,
           isError: isSnoozeSettingsFetchError,
@@ -392,7 +392,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     };
   }, [
     rules,
-    rulesSnoozeSettings,
+    rulesSnoozeSettingsMap,
     isSnoozeSettingsLoading,
     isSnoozeSettingsFetching,
     isSnoozeSettingsFetchError,

@@ -12,7 +12,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiSuperUpdateButton,
@@ -25,7 +24,7 @@ import { isEqual } from 'lodash';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
-import { PreviewLogsComponent } from './preview_logs';
+import { PreviewLogs } from './preview_logs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -232,36 +231,32 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           <EuiSpacer />
         </>
       )}
-      <EuiFormRow
-        label={i18n.QUERY_PREVIEW_LABEL}
-        error={undefined}
-        isInvalid={false}
-        data-test-subj="rule-preview"
-        describedByIds={['rule-preview']}
-      >
-        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          <EuiSuperDatePicker
-            start={startDate}
-            end={endDate}
-            isDisabled={isDisabled}
-            onTimeChange={onTimeChange}
-            showUpdateButton={false}
-            commonlyUsedRanges={timeRanges}
-            onRefresh={onTimeframeRefresh}
-            data-test-subj="preview-time-frame"
+      <EuiText size="xs" data-test-subj="rule-preview">
+        <h4>{i18n.QUERY_PREVIEW_LABEL}</h4>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+        <EuiSuperDatePicker
+          start={startDate}
+          end={endDate}
+          isDisabled={isDisabled}
+          onTimeChange={onTimeChange}
+          showUpdateButton={false}
+          commonlyUsedRanges={timeRanges}
+          onRefresh={onTimeframeRefresh}
+          data-test-subj="preview-time-frame"
+        />
+        <EuiFlexItem grow={false}>
+          <EuiSuperUpdateButton
+            isDisabled={isDateRangeInvalid || isDisabled}
+            iconType={isDirty ? 'kqlFunction' : 'refresh'}
+            onClick={onTimeframeRefresh}
+            color={isDirty ? 'success' : 'primary'}
+            fill={true}
+            data-test-subj="previewSubmitButton"
           />
-          <EuiFlexItem grow={false}>
-            <EuiSuperUpdateButton
-              isDisabled={isDateRangeInvalid || isDisabled}
-              iconType={isDirty ? 'kqlFunction' : 'refresh'}
-              onClick={onTimeframeRefresh}
-              color={isDirty ? 'success' : 'primary'}
-              fill={true}
-              data-test-subj="previewSubmitButton"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="l" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
       {!isPreviewRequestInProgress && previewId && spaceId && (
@@ -274,7 +269,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           timeframeOptions={previewData.timeframeOptions}
         />
       )}
-      <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
+      <PreviewLogs logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
     </>
   );
 };

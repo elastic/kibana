@@ -33,7 +33,7 @@ export function addTypeToTermJoin({ attributes }: { attributes: MapAttributes })
     if (!vectorLayer.joins) {
       return;
     }
-    vectorLayer.joins.forEach((join: JoinDescriptor) => {
+    vectorLayer.joins.forEach((join: Partial<JoinDescriptor>) => {
       if (!join.right) {
         return;
       }

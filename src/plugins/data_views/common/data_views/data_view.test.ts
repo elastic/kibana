@@ -8,7 +8,7 @@
 
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { RuntimeField, RuntimePrimitiveTypes, FieldSpec } from '../types';
+import { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
@@ -41,7 +41,7 @@ const runtimeField = {
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter());
 
 // helper function to create index patterns
-function create(id: string, spec?: object) {
+function create(id: string, spec?: DataViewSpec) {
   const {
     type,
     version,
@@ -315,11 +315,9 @@ describe('IndexPattern', () => {
         id: 'bytes',
       });
       expect(field.customLabel).toEqual('custom name');
-      expect(indexPattern.toSpec().fieldAttrs).toEqual({
-        '@tags': {
-          customLabel: 'custom name',
-          count: 5,
-        },
+      expect(indexPattern.toSpec().fieldAttrs!['@tags']).toEqual({
+        customLabel: 'custom name',
+        count: 5,
       });
 
       indexPattern.removeRuntimeField('@tags');
@@ -368,6 +366,20 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
     });
 
+    test('add and remove a custom label from a runtime field', () => {
+      const newField = 'new_field_test';
+      indexPattern.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        customLabel: 'test1',
+      });
+      expect(indexPattern.getFieldByName(newField)?.customLabel).toEqual('test1');
+      indexPattern.setFieldCustomLabel(newField, 'test2');
+      expect(indexPattern.getFieldByName(newField)?.customLabel).toEqual('test2');
+      indexPattern.setFieldCustomLabel(newField, undefined);
+      expect(indexPattern.getFieldByName(newField)?.customLabel).toBeUndefined();
+      indexPattern.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', () => {
       const fieldCount = indexPattern.fields.length;
       indexPattern.addRuntimeField('new_field', runtimeCompositeWithAttrs);
@@ -379,15 +391,13 @@ describe('IndexPattern', () => {
       expect(indexPattern.getRuntimeField('new_field')).toMatchSnapshot();
       expect(indexPattern.toSpec()!.fields!['new_field.a']).toBeDefined();
       expect(indexPattern.toSpec()!.fields!['new_field.b']).toBeDefined();
-      expect(indexPattern.toSpec()!.fieldAttrs).toEqual({
-        'new_field.a': {
-          count: 3,
-          customLabel: 'custom name a',
-        },
-        'new_field.b': {
-          count: 4,
-          customLabel: 'custom name b',
-        },
+      expect(indexPattern.toSpec().fieldAttrs!['new_field.a']).toEqual({
+        count: 3,
+        customLabel: 'custom name a',
+      });
+      expect(indexPattern.toSpec().fieldAttrs!['new_field.b']).toEqual({
+        count: 4,
+        customLabel: 'custom name b',
       });
 
       indexPattern.removeRuntimeField('new_field');
@@ -471,11 +481,118 @@ describe('IndexPattern', () => {
     });
 
     test('creating from spec does not contain references to spec', () => {
-      const sourceFilters = ['test'];
+      const sourceFilters = [{ value: 'test' }];
       const spec = { sourceFilters };
       const dataView1 = create('test1', spec);
       const dataView2 = create('test2', spec);
       expect(dataView1.sourceFilters).not.toBe(dataView2.sourceFilters);
+    });
+  });
+
+  describe('toMinimalSpec', () => {
+    test('can exclude fields', () => {
+      expect(indexPattern.toMinimalSpec()).toMatchSnapshot();
+    });
+
+    test('can omit counts', () => {
+      const fieldsMap = {
+        test1: {
+          name: 'test1',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test2: {
+          name: 'test2',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test3: {
+          name: 'test3',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+      };
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: undefined,
+        }).toMinimalSpec().fieldAttrs
+      ).toBeUndefined();
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: {
+            test1: {
+              count: 11,
+            },
+            test2: {
+              count: 12,
+            },
+          },
+        }).toMinimalSpec().fieldAttrs
+      ).toBeUndefined();
+
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: {
+            test1: {
+              count: 11,
+              customLabel: 'test11',
+            },
+            test2: {
+              count: 12,
+            },
+          },
+        }).toMinimalSpec().fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+        }
+      `);
+
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: {
+            test1: {
+              count: 11,
+              customLabel: 'test11',
+            },
+            test2: {
+              customLabel: 'test12',
+            },
+            test3: {
+              count: 30,
+            },
+          },
+        }).toMinimalSpec().fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+          "test2": Object {
+            "customLabel": "test12",
+          },
+        }
+      `);
     });
   });
 });

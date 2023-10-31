@@ -32,6 +32,7 @@ describe('Overview Grid', () => {
         isStatusAlertEnabled: true,
         type: 'browser',
         tags: [],
+        schedule: '60',
       });
       data.push({
         id: `${i}`,
@@ -45,6 +46,7 @@ describe('Overview Grid', () => {
         isStatusAlertEnabled: true,
         type: 'browser',
         tags: [],
+        schedule: '60',
       });
     }
     return data;

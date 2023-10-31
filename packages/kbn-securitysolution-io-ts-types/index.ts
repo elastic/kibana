@@ -25,6 +25,7 @@ export * from './src/non_empty_array';
 export * from './src/non_empty_or_nullable_string_array';
 export * from './src/non_empty_string_array';
 export * from './src/non_empty_string';
+export * from './src/number_between_zero_and_one_inclusive';
 export * from './src/only_false_allowed';
 export * from './src/operator';
 export * from './src/positive_integer_greater_than_zero';

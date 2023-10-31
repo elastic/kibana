@@ -93,7 +93,7 @@ describe('AddFile', () => {
 
   useCreateAttachmentsMock.mockReturnValue({
     isLoading: false,
-    createAttachments: createAttachmentsMock,
+    mutateAsync: createAttachmentsMock,
   });
 
   beforeEach(() => {
@@ -148,7 +148,7 @@ describe('AddFile', () => {
       expect(createAttachmentsMock).toBeCalledWith({
         caseId: 'foobar',
         caseOwner: mockedTestProvidersOwner[0],
-        data: [
+        attachments: [
           {
             externalReferenceAttachmentTypeId: '.files',
             externalReferenceId: mockedExternalReferenceId,
@@ -166,8 +166,6 @@ describe('AddFile', () => {
             type: 'externalReference',
           },
         ],
-        throwOnError: true,
-        updateCase: expect.any(Function),
       })
     );
 
@@ -233,7 +231,6 @@ describe('AddFile', () => {
     expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
       caseId: basicCaseId,
       fileIds: [mockedExternalReferenceId],
-      signal: expect.any(AbortSignal),
     });
 
     createAttachmentsMock.mockRestore();

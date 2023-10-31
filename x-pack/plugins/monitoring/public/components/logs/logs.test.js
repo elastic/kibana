@@ -14,6 +14,13 @@ jest.mock('../../legacy_shims', () => ({
     shims: {
       getBasePath: () => '',
       capabilities: { logs: { show: true } },
+      infra: {
+        locators: {
+          logsLocator: {
+            getRedirectUrl: () => '',
+          },
+        },
+      },
     },
   },
 }));

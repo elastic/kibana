@@ -35,20 +35,32 @@ export interface RouteState {
 export type ServerRouteHandlerResources = Record<string, any>;
 export type ServerRouteCreateOptions = Record<string, any>;
 
+type ValidateEndpoint<TEndpoint extends string> = string extends TEndpoint
+  ? true
+  : TEndpoint extends `${string} ${string} ${string}`
+  ? true
+  : TEndpoint extends `${string} ${infer TPathname}`
+  ? TPathname extends `/internal/${string}`
+    ? true
+    : false
+  : false;
+
 export type ServerRoute<
   TEndpoint extends string,
   TRouteParamsRT extends RouteParamsRT | undefined,
   TRouteHandlerResources extends ServerRouteHandlerResources,
   TReturnType,
   TRouteCreateOptions extends ServerRouteCreateOptions
-> = {
-  endpoint: TEndpoint;
-  params?: TRouteParamsRT;
-  handler: ({}: TRouteHandlerResources &
-    (TRouteParamsRT extends RouteParamsRT
-      ? DecodedRequestParamsOfType<TRouteParamsRT>
-      : {})) => Promise<TReturnType>;
-} & TRouteCreateOptions;
+> = ValidateEndpoint<TEndpoint> extends true
+  ? {
+      endpoint: TEndpoint;
+      params?: TRouteParamsRT;
+      handler: ({}: TRouteHandlerResources &
+        (TRouteParamsRT extends RouteParamsRT
+          ? DecodedRequestParamsOfType<TRouteParamsRT>
+          : {})) => Promise<TReturnType>;
+    } & TRouteCreateOptions
+  : never;
 
 export type ServerRouteRepository = Record<
   string,

@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+import type { DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 

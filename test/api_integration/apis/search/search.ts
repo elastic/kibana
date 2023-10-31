@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
@@ -28,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 when correctly formatted searches are provided', async () => {
         const resp = await supertest
           .post(`/internal/search/es`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
               body: {
@@ -43,11 +45,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body.isPartial).to.be(false);
         expect(resp.body.isRunning).to.be(false);
         expect(resp.body).to.have.property('rawResponse');
+        expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
       it('should return 200 if terminated early', async () => {
         const resp = await supertest
           .post(`/internal/search/es`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
               terminateAfter: 1,
@@ -66,11 +70,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.body.isPartial).to.be(false);
         expect(resp.body.isRunning).to.be(false);
         expect(resp.body.rawResponse.terminated_early).to.be(true);
+        expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
       it('should return 404 when if no strategy is provided', async () => {
         const resp = await supertest
           .post(`/internal/search`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             body: {
               query: {
@@ -86,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 404 when if unknown strategy is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/banana`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             body: {
               query: {
@@ -97,11 +104,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         verifyErrorResponse(resp.body, 404);
         expect(resp.body.message).to.contain('banana not found');
+        expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
       it('should return 400 with illegal ES argument', async () => {
         const resp = await supertest
           .post(`/internal/search/es`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
               timeout: 1, // This should be a time range string!
@@ -122,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 400 with a bad body', async () => {
         const resp = await supertest
           .post(`/internal/search/es`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
               body: {
@@ -136,7 +146,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 400 for a painless error', async () => {
-        const resp = await supertest.post(`/internal/search/es`).send(painlessErrReq).expect(400);
+        const resp = await supertest
+          .post(`/internal/search/es`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send(painlessErrReq)
+          .expect(400);
 
         verifyErrorResponse(resp.body, 400, 'search_phase_execution_exception', true);
       });
@@ -144,14 +158,23 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('delete', () => {
       it('should return 404 when no search id provided', async () => {
-        const resp = await supertest.delete(`/internal/search/es`).send().expect(404);
+        const resp = await supertest
+          .delete(`/internal/search/es`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send()
+          .expect(404);
         verifyErrorResponse(resp.body, 404);
       });
 
       it('should return 400 when trying a delete on a non supporting strategy', async () => {
-        const resp = await supertest.delete(`/internal/search/es/123`).send().expect(400);
+        const resp = await supertest
+          .delete(`/internal/search/es/123`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send()
+          .expect(400);
         verifyErrorResponse(resp.body, 400);
         expect(resp.body.message).to.contain("Search strategy es doesn't support cancellations");
+        expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
     });
   });

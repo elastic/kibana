@@ -15,6 +15,7 @@ import {
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
 import { request } from './common';
 import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/constants';
+
 const ES_URL = Cypress.env('ELASTICSEARCH_URL');
 
 /**
@@ -47,7 +48,7 @@ export const waitForEndpointAlerts = (
           return (streamedAlerts.hits.total as estypes.SearchTotalHits).value > 0;
         });
       },
-      { timeout }
+      { timeout, interval: 2000 }
     )
     .then(() => {
       // Stop/start Endpoint rule so that it can pickup and create Detection alerts
@@ -70,6 +71,9 @@ export const fetchEndpointSecurityDetectionRule = (): Cypress.Chainable<Rule> =>
     qs: {
       rule_id: ELASTIC_SECURITY_RULE_ID,
     },
+    headers: {
+      'elastic-api-version': '2023-10-31',
+    },
   }).then(({ body }) => {
     return body;
   });
@@ -86,6 +90,9 @@ export const stopStartEndpointDetectionsRule = (): Cypress.Chainable<Rule> => {
           action: 'disable',
           ids: [endpointRule.id],
         },
+        headers: {
+          'elastic-api-version': '2023-10-31',
+        },
       }).then(() => {
         return endpointRule;
       });
@@ -100,6 +107,9 @@ export const stopStartEndpointDetectionsRule = (): Cypress.Chainable<Rule> => {
         body: {
           action: 'enable',
           ids: [endpointRule.id],
+        },
+        headers: {
+          'elastic-api-version': '2023-10-31',
         },
       }).then(() => endpointRule);
     })
@@ -133,7 +143,7 @@ export const waitForDetectionAlerts = (
         return Boolean((alertsResponse.hits.total as estypes.SearchTotalHits)?.value ?? 0);
       });
     },
-    { timeout }
+    { timeout, interval: 2000 }
   );
 };
 
@@ -167,4 +177,11 @@ export const getEndpointDetectionAlertsQueryForAgentId = (endpointAgentId: strin
       ],
     },
   };
+};
+
+export const changeAlertsFilter = (text: string) => {
+  cy.getByTestSubj('filters-global-container').within(() => {
+    cy.getByTestSubj('queryInput').type(text);
+    cy.getByTestSubj('querySubmitButton').click();
+  });
 };
