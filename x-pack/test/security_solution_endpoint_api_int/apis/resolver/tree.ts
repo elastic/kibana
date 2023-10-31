@@ -16,6 +16,7 @@ import {
   Tree,
   RelatedEventCategory,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { Options, GeneratedTrees } from '../../services/resolver';
 import { schemaWithAncestry, schemaWithName, schemaWithoutAncestry, verifyTree } from './common';
@@ -45,7 +46,9 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  describe('Resolver tree', () => {
+  describe('Resolver tree', function () {
+    targetTags(this, ['@ess']);
+
     before(async () => {
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree

@@ -8,13 +8,16 @@
 import expect from '@kbn/expect';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { ResolverEntityIndex } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('Resolver tests for the entity route', () => {
+  describe('Resolver tests for the entity route', function () {
+    targetTags(this, ['@ess']);
+
     describe('winlogbeat tests', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');

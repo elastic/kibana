@@ -24,6 +24,7 @@ import {
   EXECUTE_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { targetTags } from '../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { ROLE } from '../services/roles_users';
 
@@ -39,7 +40,9 @@ export default function ({ getService }: FtrProviderContext) {
     body: Record<string, unknown> | undefined;
   }
 
-  describe('When attempting to call an endpoint api', () => {
+  describe('When attempting to call an endpoint api', function () {
+    targetTags(this, ['@ess']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let actionId = '';
     let agentId = '';

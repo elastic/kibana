@@ -17,6 +17,7 @@ import {
   toNdJsonString,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
@@ -28,7 +29,9 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', () => {
+  describe('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', function () {
+    targetTags(this, ['@ess']);
+
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let hostIsolationExceptionData: ArtifactTestData;
 

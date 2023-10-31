@@ -14,6 +14,7 @@ import {
   getImportExceptionsListSchemaMock,
   toNdJsonString,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
@@ -25,7 +26,9 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin): Event Filters', () => {
+  describe('Endpoint artifacts (via lists plugin): Event Filters', function () {
+    targetTags(this, ['@ess']);
+
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {

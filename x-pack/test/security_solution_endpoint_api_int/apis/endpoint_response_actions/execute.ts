@@ -8,6 +8,7 @@ import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/
 import expect from '@kbn/expect';
 import { EXECUTE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ROLE } from '../../services/roles_users';
 
@@ -15,7 +16,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('Endpoint `execute` response action', () => {
+  describe('Endpoint `execute` response action', function () {
+    targetTags(this, ['@ess']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let agentId = '';
 
