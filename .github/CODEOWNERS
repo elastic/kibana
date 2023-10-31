@@ -38,8 +38,8 @@ packages/analytics/shippers/gainsight @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/plugins/apm_data_access @elastic/apm-ui
 x-pack/plugins/apm @elastic/apm-ui
-packages/kbn-apm-synthtrace @elastic/apm-ui
-packages/kbn-apm-synthtrace-client @elastic/apm-ui
+packages/kbn-apm-synthtrace @elastic/apm-ui @elastic/obs-ux-logs-team
+packages/kbn-apm-synthtrace-client @elastic/apm-ui @elastic/obs-ux-logs-team
 packages/kbn-apm-utils @elastic/apm-ui
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
