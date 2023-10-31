@@ -19,8 +19,8 @@ const stories: Meta = {
   title: 'infra/Asset Details View/Components/Anomalies',
   decorators: [
     decorateWithGlobalStorybookThemeProviders,
-    DecorateWithKibanaContext,
     DecorateWithAssetDetailsStateContext,
+    DecorateWithKibanaContext,
   ],
   component: Anomalies,
 };
