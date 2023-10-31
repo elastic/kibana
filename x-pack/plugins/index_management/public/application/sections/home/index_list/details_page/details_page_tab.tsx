@@ -5,31 +5,23 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core-application-browser';
 import React, { FunctionComponent } from 'react';
-import { DetailsPageOverview } from './details_page_overview';
-import { IndexDetailsTab, IndexDetailsTabIds } from '../../../../../../common/constants';
 import { Index } from '../../../../../../common';
+import { IndexDetailsTab, IndexDetailsTabId } from '../../../../../../common/constants';
+import { useAppContext } from '../../../../app_context';
+import { DetailsPageOverview } from './details_page_overview';
 
 interface Props {
   tabs: IndexDetailsTab[];
-  indexDetailsSection: IndexDetailsTabIds;
-  index?: Index | null;
+  tab: IndexDetailsTabId;
   indexName: string;
-  getUrlForApp: ApplicationStart['getUrlForApp'];
+  index: Index;
 }
-export const DetailsPageTab: FunctionComponent<Props> = ({
-  tabs,
-  indexDetailsSection,
-  index,
-  indexName,
-  getUrlForApp,
-}) => {
-  // if there is no index data, the tab content won't be rendered, so it's safe to return null here
-  if (!index) {
-    return null;
-  }
-  const selectedTab = tabs.find((tab) => tab.id === indexDetailsSection);
+export const DetailsPageTab: FunctionComponent<Props> = ({ tabs, tab, indexName, index }) => {
+  const selectedTab = tabs.find((tabConfig) => tabConfig.id === tab);
+  const {
+    core: { getUrlForApp },
+  } = useAppContext();
   return selectedTab ? (
     selectedTab.renderTabContent({ indexName, index, getUrlForApp })
   ) : (

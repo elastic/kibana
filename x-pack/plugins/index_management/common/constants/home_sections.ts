@@ -24,11 +24,11 @@ export enum IndexDetailsSection {
   Stats = 'stats',
 }
 
-export type IndexDetailsTabIds = IndexDetailsSection | string;
+export type IndexDetailsTabId = IndexDetailsSection | string;
 
 export interface IndexDetailsTab {
   // a unique key to identify the tab
-  id: IndexDetailsTabIds;
+  id: IndexDetailsTabId;
   // a text that is displayed on the tab label, usually a Formatted message component
   name: ReactNode;
   // a function that renders the content of the tab
@@ -39,5 +39,5 @@ export interface IndexDetailsTab {
   }) => ReturnType<FunctionComponent>;
   // a number to specify the order of the tabs
   order: number;
-  renderTab?: (args: { indexName: string; index?: Index | null }) => boolean;
+  shouldRenderTab?: (args: { indexName: string; index?: Index | null }) => boolean;
 }

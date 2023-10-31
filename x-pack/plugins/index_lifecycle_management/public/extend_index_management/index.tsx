@@ -236,7 +236,7 @@ export const addAllExtensions = (
     ),
     order: 50,
     renderTabContent: IndexLifecycleSummary,
-    renderTab: ({ index }) => {
+    shouldRenderTab: ({ index }) => {
       return !!index && !!index.ilm && index.ilm.managed;
     },
   });
