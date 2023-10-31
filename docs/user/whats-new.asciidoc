@@ -240,7 +240,7 @@ You can now view your {es} endpoint, link:https://www.elastic.co/guide/en/cloud/
 [role="screenshot"]
 image::images/endpoints.png[An example of where to find the endpoints in the UI, width=40%]
 
-//[discrete]
-//==== AWS CloudFormation template updates
+[discrete]
+==== AWS CloudFormation template updates
 
-//When subscribing to Elastic using the link:https://aws.amazon.com/marketplace/pp/prodview-voru33wi6xs7k[AWS Marketplace], users have the option to quickly get set up with an AWS CloudFormation Template. This step allows you to create an Elastic deployment in the AWS region of your choice. We’ve updated the AWS CloudFormation Template with bug fixes and stability improvements to better help you get started.
+When subscribing to Elastic using the link:https://aws.amazon.com/marketplace/pp/prodview-voru33wi6xs7k[AWS Marketplace], users have the option to quickly get set up with an AWS CloudFormation Template. This step allows you to create an Elastic deployment in the AWS region of your choice. We’ve updated the AWS CloudFormation Template with bug fixes and stability improvements to better help you get started.
