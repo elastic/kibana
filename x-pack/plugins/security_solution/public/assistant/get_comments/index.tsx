@@ -27,26 +27,21 @@ const transformMessageWithReplacements = ({
   content,
   showAnonymizedValues,
   replacements,
-  times = 0,
 }: {
   message: Message;
   content: string;
   showAnonymizedValues: boolean;
   replacements?: Record<string, string>;
-  times?: number;
 }): ContentMessage => {
-  console.log(`called transformMessageWithReplacements ${times}`, replacements);
-  if (showAnonymizedValues || !replacements) {
-    console.log('return without transform', { showAnonymizedValues, replacements: !replacements });
-    return { ...message, content };
-  }
-
   return {
     ...message,
-    content: getMessageContentWithReplacements({
-      messageContent: content,
-      replacements,
-    }),
+    content:
+      showAnonymizedValues || !replacements
+        ? content
+        : getMessageContentWithReplacements({
+            messageContent: content,
+            replacements,
+          }),
   };
 };
 
@@ -89,7 +84,7 @@ export const getComments = ({
                 content=""
                 regenerateMessage={regenerateMessageOfConversation}
                 isLastComment
-                transformMessage={() => ({ content: '' })}
+                transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
                 isFetching
               />
               <span ref={lastCommentRef} />
@@ -139,16 +134,8 @@ export const getComments = ({
           times,
         });
 
-      console.log('about to return', {
-        conditionForStreaming: !(message.content && message.content.length),
-        messageContent: message.content,
-      });
       // message still needs to stream, no actions returned and replacements handled by streamer
       if (!(message.content && message.content.length)) {
-        console.log(
-          'returns this StreamComment and typeof transformMessage is ',
-          typeof transformMessage
-        );
         return {
           ...messageProps,
           children: (
@@ -165,11 +152,10 @@ export const getComments = ({
           ),
         };
       }
+
+      // transform message here so we can send correct message to CommentActions
       const transformedMessage = transformMessage(message.content ?? '');
-      console.log('transformMessage', {
-        message: message.content,
-        transformedMessage: transformedMessage.content,
-      });
+
       return {
         ...messageProps,
         actions: <CommentActions message={transformedMessage} />,
