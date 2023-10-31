@@ -6,13 +6,14 @@
  */
 
 import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/edit_space/enabled_features';
+import type { ResponseActionTypes } from '../../../common/api/detection_engine/model/rule_response_actions';
 import {
   RESPONSE_ACTION_TYPES,
   SUPPORTED_RESPONSE_ACTION_TYPES,
 } from '../../../common/api/detection_engine/model/rule_response_actions';
 
 export interface ResponseActionType {
-  id: RESPONSE_ACTION_TYPES;
+  id: ResponseActionTypes;
   name: string;
   iconClass: string;
   disabled?: boolean;
