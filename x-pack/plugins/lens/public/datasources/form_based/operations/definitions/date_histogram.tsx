@@ -102,7 +102,7 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern) => getSafeName(column.sourceField, indexPattern),
+  getDefaultLabel: (column, columns, indexPattern) => getSafeName(column.sourceField, indexPattern),
   buildColumn({ field }, columnParams) {
     return {
       label: field.displayName,

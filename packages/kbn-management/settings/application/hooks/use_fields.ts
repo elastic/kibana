@@ -6,17 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { Query } from '@elastic/eui';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import { FieldDefinition } from '@kbn/management-settings-types';
 import { useServices } from '../services';
 import { useSettings } from './use_settings';
 
 /**
  * React hook which retrieves settings and returns an observed collection of
  * {@link FieldDefinition} objects derived from those settings.
+ * @param query The {@link Query} to execute for filtering the fields.
+ * @returns An array of {@link FieldDefinition} objects.
  */
-export const useFields = (): Array<FieldDefinition<SettingType>> => {
+export const useFields = (query?: Query): FieldDefinition[] => {
   const { isCustomSetting: isCustom, isOverriddenSetting: isOverridden } = useServices();
   const settings = useSettings();
-  return getFieldDefinitions(settings, { isCustom, isOverridden });
+  const fields = getFieldDefinitions(settings, { isCustom, isOverridden });
+  if (query) {
+    return Query.execute(query, fields);
+  }
+  return fields;
 };

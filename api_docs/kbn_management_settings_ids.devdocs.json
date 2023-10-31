@@ -879,21 +879,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.LABS_DASHBOARD_CONTROLS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "LABS_DASHBOARD_CONTROLS_ID",
-        "description": [],
-        "signature": [
-          "\"labs:dashboard:dashboardControls\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.LABS_DASHBOARD_DEFER_BELOW_FOLD_ID",
         "type": "string",
         "tags": [],
@@ -1149,6 +1134,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableContinuousRollups\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID",
         "type": "string",
         "tags": [],
@@ -1156,6 +1156,36 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableCriticalPath\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableProfilingIntegration\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceMetrics\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

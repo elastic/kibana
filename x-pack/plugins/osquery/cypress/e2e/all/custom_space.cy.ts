@@ -17,7 +17,7 @@ import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_
 import { ServerlessRoleName } from '../../support/roles';
 
 const testSpaces = [
-  { name: 'default', tags: ['@ess', '@serverless'] },
+  { name: 'default', tags: ['@ess', '@serverless', '@brokenInServerless'] },
   { name: 'custom-spaces', tags: ['@ess'] },
 ];
 describe('ALL - Custom space', () => {
@@ -71,7 +71,7 @@ describe('ALL - Custom space', () => {
         }
       });
 
-      it('Discover should be opened in new tab in results table', { tags: ['@ess'] }, () => {
+      it('Discover should be opened in new tab in results table', { tags: testSpace.tags }, () => {
         cy.contains('New live query').click();
         selectAllAgents();
         inputQuery('select * from uptime;');
@@ -90,7 +90,7 @@ describe('ALL - Custom space', () => {
             // @ts-expect-error-next-line href string - check types
             cy.visit($href);
             cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-              cy.contains('action_data.queryselect * from uptime');
+              cy.contains('action_data{ "query": "select * from uptime;"');
             });
           });
       });

@@ -190,6 +190,26 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.network_events_exclude_local',
+    first_supported_version: '8.10.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.network_events_exclude_local',
+      {
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.network_events_exclude_local',
+    first_supported_version: '8.10.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.network_events_exclude_local',
+      {
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -389,6 +409,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.harden.self_protect',
       {
         defaultMessage: 'Enables self-protection on macOS. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.network_events_exclude_local',
+    first_supported_version: '8.10.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.network_events_exclude_local',
+      {
+        defaultMessage: 'Exclude local connections from network events. Default: false.',
       }
     ),
   },

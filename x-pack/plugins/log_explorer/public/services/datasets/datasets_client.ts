@@ -7,6 +7,7 @@
 
 import { HttpStart } from '@kbn/core/public';
 
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATASETS_URL,
@@ -43,9 +44,11 @@ export class DatasetsClient implements IDatasetsClient {
 
     const query = findIntegrationsRequestQueryRT.encode(search);
 
-    const response = await this.http.get(INTEGRATIONS_URL, { query }).catch((error) => {
-      throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
-    });
+    const response = await this.http
+      .get(INTEGRATIONS_URL, { query, version: API_VERSIONS.public.v1 })
+      .catch((error) => {
+        throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
+      });
 
     const data = decodeOrThrow(
       findIntegrationsResponseRT,
@@ -61,9 +64,11 @@ export class DatasetsClient implements IDatasetsClient {
 
     const query = findDatasetsRequestQueryRT.encode(search);
 
-    const response = await this.http.get(DATASETS_URL, { query }).catch((error) => {
-      throw new FindDatasetsError(`Failed to fetch data streams": ${error}`);
-    });
+    const response = await this.http
+      .get(DATASETS_URL, { query, version: API_VERSIONS.public.v1 })
+      .catch((error) => {
+        throw new FindDatasetsError(`Failed to fetch data streams": ${error}`);
+      });
 
     const data = decodeOrThrow(
       findDatasetsResponseRT,

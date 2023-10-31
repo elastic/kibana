@@ -51,6 +51,7 @@ export const packetbeatNoResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 512194751,
+          total_data_set_size_in_bytes: 512194751,
           reserved_in_bytes: 0,
         },
       },
@@ -68,6 +69,7 @@ export const packetbeatNoResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 584326147,
+          total_data_set_size_in_bytes: 584326147,
           reserved_in_bytes: 0,
         },
       },

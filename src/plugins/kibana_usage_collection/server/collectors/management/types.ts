@@ -137,7 +137,6 @@ export interface UsageStats {
   'labs:dashboard:enable_ui': boolean;
   'labs:dashboard:linksPanel': boolean;
   'labs:dashboard:deferBelowFold': boolean;
-  'labs:dashboard:dashboardControls': boolean;
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;

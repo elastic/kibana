@@ -24,6 +24,7 @@ export const callAgentExecutor = async ({
   logger,
   request,
   elserId,
+  kbResource,
 }: AgentExecutorParams): AgentExecutorResponse => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
 
@@ -39,8 +40,23 @@ export const callAgentExecutor = async ({
   });
 
   // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger, elserId);
-  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
+  const esStore = new ElasticsearchStore(
+    esClient,
+    KNOWLEDGE_BASE_INDEX_PATTERN,
+    logger,
+    elserId,
+    kbResource
+  );
+
+  const modelExists = await esStore.isModelInstalled();
+  if (!modelExists) {
+    throw new Error(
+      'Please ensure ELSER is configured to use the Knowledge Base, otherwise disable the Knowledge Base in Advanced Settings to continue.'
+    );
+  }
+
+  // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
+  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
   const tools: Tool[] = [
     new ChainTool({

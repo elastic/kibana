@@ -1,6 +1,12 @@
-[role="xpack"]
 [[geo-alerting]]
-== Tracking containment
+== Create a tracking containment rule
+:frontmatter-description: Generate alerts when a geographic entity is contained or no longer contained within a boundary.
+:frontmatter-tags-products: [kibana,alerting]
+:frontmatter-tags-content-type: [how-to]
+:frontmatter-tags-user-goals: [analyze]
+++++
+<titleabbrev>Tracking containment</titleabbrev>
+++++
 
 The tracking containment rule alerts when an entity is contained or no longer contained within a boundary. 
 

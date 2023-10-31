@@ -1,5 +1,9 @@
 [[pre-configured-connectors]]
 == Preconfigured connectors
+:frontmatter-description: Define connectors in the {kib} configuration file.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 If you are running {kib} on-prem, you can preconfigure a connector to have all
 the information it needs prior to startup by adding it to the `kibana.yml` file.
@@ -20,6 +24,7 @@ predefined, including the connector name and ID.
 
 Add `xpack.actions.preconfigured` settings to your `kibana.yml` file. The
 settings vary depending on which type of connector you're adding.
+Refer to <<preconfigured-connector-settings>>.
 
 This example shows a valid configuration for a Slack connector and a Webhook
 connector:
@@ -107,6 +112,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 [[preconfigured-connector-examples]]
 === Examples
 
+* <<preconfigured-bedrock-configuration>>
 * <<preconfigured-d3security-configuration>>
 * <<preconfigured-email-configuration>>
 * <<preconfigured-gen-ai-configuration>>
@@ -127,6 +133,30 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
+
+[float]
+[[preconfigured-bedrock-configuration]]
+==== {bedrock} connectors
+
+The following example creates an <<bedrock-action-type,{bedrock} connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-bedrock:
+    name: preconfigured-bedrock-connector-type
+    actionTypeId: .bedrock
+    config:
+      apiUrl: https://bedrock.us-east-1.amazonaws.com <1>
+      defaultModel: anthropic.claude-v2 <2>
+    secrets:
+      accessKey: key-value <3>
+      secret: secret-value <4>
+--
+<1> The {bedrock} request URL.
+<2> The default model to use for requests. Current support is for the Anthropic Claude models, defaulting to Claude 2.
+<3> The AWS access key for authentication.
+<4> The AWS secret for authentication.
 
 [float]
 [[preconfigured-d3security-configuration]]
@@ -302,7 +332,7 @@ xpack.actions.preconfigured:
     secrets:
       apiKey: superlongapikey <4>
 --
-<1> The OpenAI request URL
+<1> The OpenAI request URL.
 <2> The OpenAI API provider, either `OpenAI` or `Azure OpenAI`.
 <3> The default model to use for requests. This setting is optional and applicable only when `apiProvider` is `OpenAI`.
 <4> The OpenAI or Azure OpenAI API key for authentication.

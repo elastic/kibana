@@ -2749,6 +2749,22 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.actionReadOnlyExtraComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "actionReadOnlyExtraComponent",
+            "description": [],
+            "signature": [
+              "React.LazyExoticComponent<React.ComponentType<",
+              "ActionReadOnlyElementProps",
+              ">> | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.ActionTypeModel.defaultActionParams",
             "type": "Object",
             "tags": [],
@@ -5489,7 +5505,13 @@
             "description": [],
             "signature": [
               "(crumbs: ",
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]) => void"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -5504,7 +5526,13 @@
                 "label": "crumbs",
                 "description": [],
                 "signature": [
-                  "EuiBreadcrumbProps",
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeBreadcrumb",
+                    "text": "ChromeBreadcrumb"
+                  },
                   "[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -5623,13 +5651,23 @@
             "label": "alertsTableConfigurationRegistry",
             "description": [],
             "signature": [
-              "{ get: (id: string) => ",
+              "{ update: (id: string, objectType: ",
+              "AlertsTableConfigurationRegistryWithActions",
+              ") => ",
               "AlertsTableConfigurationRegistry",
-              "; list: () => ",
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              "; get: (id: string) => ",
               "AlertsTableConfigurationRegistry",
-              "[]; register: (objectType: ",
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              "; list: () => (",
               "AlertsTableConfigurationRegistry",
-              ") => void; has: (id: string) => boolean; }"
+              " | ",
+              "AlertsTableConfigurationRegistryWithActions",
+              ")[]; register: (objectType: ",
+              "AlertsTableConfigurationRegistry",
+              ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6030,13 +6068,23 @@
         "label": "AlertsTableConfigurationRegistryContract",
         "description": [],
         "signature": [
-          "{ get: (id: string) => ",
+          "{ update: (id: string, objectType: ",
+          "AlertsTableConfigurationRegistryWithActions",
+          ") => ",
           "AlertsTableConfigurationRegistry",
-          "; list: () => ",
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          "; get: (id: string) => ",
           "AlertsTableConfigurationRegistry",
-          "[]; register: (objectType: ",
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          "; list: () => (",
           "AlertsTableConfigurationRegistry",
-          ") => void; has: (id: string) => boolean; }"
+          " | ",
+          "AlertsTableConfigurationRegistryWithActions",
+          ")[]; register: (objectType: ",
+          "AlertsTableConfigurationRegistry",
+          ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6065,9 +6113,9 @@
           },
           ">; isLoading: boolean; }; columns: ",
           "EuiDataGridColumn",
-          "[]; deletedEventIds: string[]; disabledCellActions: string[]; flyoutSize?: \"m\" | \"s\" | \"l\" | undefined; pageSize: number; pageSizeOptions: number[]; id?: string | undefined; leadingControlColumns: ",
+          "[]; deletedEventIds: string[]; disabledCellActions: string[]; pageSize: number; pageSizeOptions: number[]; id?: string | undefined; leadingControlColumns: ",
           "EuiDataGridControlColumn",
-          "[]; showExpandToDetails: boolean; showAlertStatusWithFlapping?: boolean | undefined; trailingControlColumns: ",
+          "[]; showAlertStatusWithFlapping?: boolean | undefined; trailingControlColumns: ",
           "EuiDataGridControlColumn",
           "[]; useFetchAlertsData: () => ",
           "FetchAlertData",
@@ -6081,7 +6129,15 @@
           "EuiDataGridToolBarVisibilityOptions",
           " | undefined; shouldHighlightRow?: ((alert: ",
           "EcsFieldsResponse",
-          ") => boolean) | undefined; } & Partial<Pick<",
+          ") => boolean) | undefined; featureIds?: ",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.AlertConsumers",
+            "text": "AlertConsumers"
+          },
+          "[] | undefined; } & Partial<Pick<",
           "EuiDataGridProps",
           ", \"gridStyle\" | \"rowHeightsOptions\">>"
         ],
@@ -7359,10 +7415,7 @@
           "label": "alertsTableConfigurationRegistry",
           "description": [],
           "signature": [
-            "TypeRegistry",
-            "<",
-            "AlertsTableConfigurationRegistry",
-            ">"
+            "AlertTableConfigRegistry"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -7437,10 +7490,7 @@
           "label": "alertsTableConfigurationRegistry",
           "description": [],
           "signature": [
-            "TypeRegistry",
-            "<",
-            "AlertsTableConfigurationRegistry",
-            ">"
+            "AlertTableConfigRegistry"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,

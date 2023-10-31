@@ -60,7 +60,7 @@ jest.mock('../../../../common/components/visualization_actions/lens_embeddable')
 jest.mock('../../../../common/components/page/use_refetch_by_session');
 jest.mock('../common/hooks', () => ({
   useInspectButton: jest.fn(),
-  useStackByFields: jest.fn(),
+  useStackByFields: jest.fn().mockReturnValue(() => []),
 }));
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const getMockUseIsExperimentalFeatureEnabled =

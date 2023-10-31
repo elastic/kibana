@@ -9,8 +9,6 @@
 export * from './expressions';
 
 export type {
-  SearchResponseWarning,
-  SearchResponseIncompleteWarning,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,

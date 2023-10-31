@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -32,7 +33,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
@@ -44,13 +45,14 @@ import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { LogstashInstructions } from '../logstash_instructions';
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 
+import { SecretFormRow } from './output_form_secret_form_row';
+
 import { OutputFormKafkaSection } from './output_form_kafka';
 
 import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 import { useOutputForm } from './use_output_form';
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 import { AdvancedOptionsSection } from './advanced_options_section';
-
 export interface EditOutputFlyoutProps {
   output?: Output;
   onClose: () => void;
@@ -67,6 +69,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
   const { euiTheme } = useEuiTheme();
+  const { outputSecretsStorage: isOutputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
+  const [useSecretsStorage, setUseSecretsStorage] = React.useState(isOutputSecretsStorageEnabled);
+
+  const onUsePlainText = () => {
+    setUseSecretsStorage(false);
+  };
 
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
@@ -161,28 +169,51 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             )}
           />
         </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
-              defaultMessage="Client SSL certificate key"
-            />
-          }
-          {...inputs.sslKeyInput.formRowProps}
-        >
-          <EuiTextArea
+        {(output && output?.ssl?.key) || !useSecretsStorage ? (
+          <EuiFormRow
             fullWidth
-            rows={5}
-            {...inputs.sslKeyInput.props}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
-              {
-                defaultMessage: 'Specify certificate key',
-              }
-            )}
-          />
-        </EuiFormRow>
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
+                defaultMessage="Client SSL certificate key"
+              />
+            }
+            {...inputs.sslKeyInput.formRowProps}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeyInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </EuiFormRow>
+        ) : (
+          <SecretFormRow
+            fullWidth
+            title={i18n.translate('xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle', {
+              defaultMessage: 'Client SSL certificate key',
+            })}
+            {...inputs.sslKeySecretInput.formRowProps}
+            onUsePlainText={onUsePlainText}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeySecretInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </SecretFormRow>
+        )}
       </>
     );
   };
@@ -231,7 +262,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const renderKafkaSection = () => {
     if (isKafkaOutputEnabled) {
-      return <OutputFormKafkaSection inputs={inputs} />;
+      return (
+        <OutputFormKafkaSection
+          inputs={inputs}
+          useSecretsStorage={useSecretsStorage}
+          onUsePlainText={onUsePlainText}
+        />
+      );
     }
     return null;
   };

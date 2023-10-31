@@ -24,6 +24,29 @@
 {
   "attributes": {
     "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "Data view without fields",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "timestamp",
+    "title": "kibana_sample_data_logs",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-07T17:23:20.906Z",
+  "id": "data-view-without-fields",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-09-11T15:50:59.227Z",
+  "version": "WzIyNywxXQ=="
+}
+
+{
+  "attributes": {
+    "fieldAttrs": "{}",
     "fieldFormatMap": "{\"hour_of_day\":{}}",
     "fields": "[]",
     "name": "To Delete!",
@@ -42,6 +65,44 @@
   "typeMigrationVersion": "8.0.0",
   "updated_at": "2023-09-11T15:50:59.227Z",
   "version": "WzIyNywxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "extraFields": [
+          "@message.raw"
+        ],
+        "icon": "triangle",
+        "id": "3d28ce7e-fc5e-409b-aea3-4d9e15010843",
+        "key": {
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "timeField": "@timestamp",
+        "type": "query"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "Group with additional fields"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-10-06T17:15:58.790Z",
+  "id": "12371e00-5174-11ee-a5c4-7dce2e3293a7",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-10-06T17:17:05.384Z",
+  "version": "WzE4MywxXQ=="
 }
 
 {

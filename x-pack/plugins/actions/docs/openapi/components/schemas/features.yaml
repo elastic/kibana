@@ -1,8 +1,9 @@
 type: string
 description: >
-  The feature that uses the connector. Valid values are `alerting`, `cases`, `uptime`, and `siem`.
+  The feature that uses the connector.
 enum:
   - alerting 
   - cases
-  - uptime
+  - generativeAI
   - siem
+  - uptime

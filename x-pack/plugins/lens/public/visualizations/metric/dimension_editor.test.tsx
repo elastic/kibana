@@ -24,7 +24,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { LayoutDirection } from '@elastic/charts';
 import { act } from 'react-dom/test-utils';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
-import { createMockFramePublicAPI } from '../../mocks';
+import { createMockFramePublicAPI, generateActiveData } from '../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
 import { DebouncedInput } from '@kbn/visualization-ui-components';
@@ -46,6 +46,18 @@ const SELECTORS = {
   MAX_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_maximum"]',
   BREAKDOWN_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_breakdown"]',
 };
+
+const nonNumericMetricFrame = createMockFramePublicAPI({
+  activeData: generateActiveData([
+    {
+      id: 'first',
+      rows: Array(3).fill({
+        'metric-col-id': 'nonNumericData',
+        'max-col-id': 1000,
+      }),
+    },
+  ]),
+});
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
@@ -102,7 +114,14 @@ describe('dimension editor', () => {
       } as unknown as DatasourcePublicAPI,
       removeLayer: jest.fn(),
       addLayer: jest.fn(),
-      frame: createMockFramePublicAPI(),
+      frame: createMockFramePublicAPI({
+        activeData: generateActiveData([
+          {
+            id: 'first',
+            rows: Array(3).fill({ 'metric-col-id': 100, 'secondary-metric-col-id': 1 }),
+          },
+        ]),
+      }),
       setState: jest.fn(),
       panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
       paletteService: chartPluginMock.createPaletteRegistry(),
@@ -112,26 +131,8 @@ describe('dimension editor', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('primary metric dimension', () => {
-    const accessor = 'primary-metric-col-id';
+    const accessor = 'metric-col-id';
     const metricAccessorState = { ...fullState, metricAccessor: accessor };
-
-    beforeEach(() => {
-      props.frame.activeData = {
-        first: {
-          type: 'datatable',
-          columns: [
-            {
-              id: accessor,
-              name: 'foo',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
-          rows: [],
-        },
-      };
-    });
 
     class Harness {
       public _wrapper;
@@ -144,6 +145,10 @@ describe('dimension editor', () => {
 
       private get rootComponent() {
         return this._wrapper.find(DimensionEditor);
+      }
+
+      public get colorModeSwitch() {
+        return this._wrapper.find('EuiButtonGroup[data-test-subj="lnsMetric_color_mode_buttons"]');
       }
 
       public get colorPicker() {
@@ -163,11 +168,16 @@ describe('dimension editor', () => {
 
     const mockSetState = jest.fn();
 
-    const getHarnessWithState = (state: MetricVisualizationState, datasource = props.datasource) =>
+    const getHarnessWithState = (
+      state: MetricVisualizationState,
+      datasource = props.datasource,
+      propsOverrides: Partial<VisualizationDimensionEditorProps<MetricVisualizationState>> = {}
+    ) =>
       new Harness(
         mountWithIntl(
           <DimensionEditor
             {...props}
+            {...propsOverrides}
             datasource={datasource}
             state={state}
             setState={mockSetState}
@@ -191,6 +201,15 @@ describe('dimension editor', () => {
       expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
     });
 
+    it('Color mode switch is not shown when the primary metric is non-numeric', () => {
+      expect(getHarnessWithState(fullState, undefined).colorModeSwitch.exists()).toBeTruthy();
+      expect(
+        getHarnessWithState(fullState, undefined, {
+          frame: nonNumericMetricFrame,
+        }).colorModeSwitch.exists()
+      ).toBeFalsy();
+    });
+
     describe('static color controls', () => {
       it('is hidden when dynamic coloring is enabled', () => {
         const harnessWithPalette = getHarnessWithState({ ...metricAccessorState, palette });
@@ -201,6 +220,13 @@ describe('dimension editor', () => {
           palette: undefined,
         });
         expect(harnessNoPalette.colorPicker.exists()).toBeTruthy();
+      });
+      it('is visible when metric is non-numeric even if palette is set', () => {
+        expect(
+          getHarnessWithState(fullState, undefined, {
+            frame: nonNumericMetricFrame,
+          }).colorPicker.exists()
+        ).toBeTruthy();
       });
 
       it('fills with default value', () => {
@@ -239,24 +265,6 @@ describe('dimension editor', () => {
 
   describe('secondary metric dimension', () => {
     const accessor = 'secondary-metric-col-id';
-
-    beforeEach(() => {
-      props.frame.activeData = {
-        first: {
-          type: 'datatable',
-          columns: [
-            {
-              id: accessor,
-              name: 'foo',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
-          rows: [],
-        },
-      };
-    });
 
     it('renders when the accessor matches', () => {
       const component = shallow(
@@ -331,7 +339,7 @@ describe('dimension editor', () => {
         const setState = jest.fn();
         const localState = {
           ...fullState,
-          secondaryPrefix: 'foo',
+          secondaryPrefix: 'secondary-metric-col-id2',
           secondaryMetricAccessor: accessor,
         };
         const component = mount(
@@ -341,7 +349,7 @@ describe('dimension editor', () => {
         const buttonGroup = component.find(EuiButtonGroup);
 
         // make sure that if the user was to select the "custom" option, they would get the default value
-        expect(buttonGroup.props().options[1].value).toBe('foo');
+        expect(buttonGroup.props().options[1].value).toBe('secondary-metric-col-id');
 
         const newVal = 'bar';
 
@@ -461,7 +469,7 @@ describe('dimension editor', () => {
   });
 
   describe('additional section', () => {
-    const accessor = 'primary-metric-col-id';
+    const accessor = 'metric-col-id';
     const metricAccessorState = { ...fullState, metricAccessor: accessor };
 
     class Harness {
@@ -471,6 +479,10 @@ describe('dimension editor', () => {
         wrapper: ReactWrapper<HTMLAttributes, unknown, React.Component<{}, {}, unknown>>
       ) {
         this._wrapper = wrapper;
+      }
+
+      public get wrapper() {
+        return this._wrapper;
       }
 
       private get rootComponent() {
@@ -520,11 +532,16 @@ describe('dimension editor', () => {
 
     const mockSetState = jest.fn();
 
-    const getHarnessWithState = (state: MetricVisualizationState, datasource = props.datasource) =>
+    const getHarnessWithState = (
+      state: MetricVisualizationState,
+      datasource = props.datasource,
+      propsOverrides: Partial<VisualizationDimensionEditorProps<MetricVisualizationState>> = {}
+    ) =>
       new Harness(
         mountWithIntl(
           <DimensionEditorAdditionalSection
             {...props}
+            {...propsOverrides}
             datasource={datasource}
             state={state}
             setState={mockSetState}
@@ -621,6 +638,13 @@ describe('dimension editor', () => {
                 hasReducedTimeRange: id === stateWOTrend.secondaryMetricAccessor,
               } as OperationDescriptor),
           } as DatasourcePublicAPI).isDisabled('trendline')
+        ).toBeTruthy();
+      });
+      it('should not show a trendline button group when primary metric dimension is non-numeric', () => {
+        expect(
+          getHarnessWithState(fullState, undefined, {
+            frame: nonNumericMetricFrame,
+          }).wrapper.isEmptyRender()
         ).toBeTruthy();
       });
 

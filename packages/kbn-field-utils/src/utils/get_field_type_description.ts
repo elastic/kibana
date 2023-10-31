@@ -118,6 +118,10 @@ export function getFieldTypeDescription(type?: string) {
       return i18n.translate('fieldUtils.fieldNameDescription.shapeField', {
         defaultMessage: 'Arbitrary cartesian geometries.',
       });
+    case KNOWN_FIELD_TYPES.SPARSE_VECTOR:
+      return i18n.translate('fieldUtils.fieldNameDescription.sparseVectorField', {
+        defaultMessage: 'Records sparse vectors of float values.',
+      });
     case KNOWN_FIELD_TYPES.STRING:
       return i18n.translate('fieldUtils.fieldNameDescription.stringField', {
         defaultMessage: 'Full text such as the body of an email or a product description.',

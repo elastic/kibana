@@ -26,10 +26,7 @@ function getGlobPattern() {
 export default function apmApiIntegrationTests({ getService, loadTestFile }: FtrProviderContext) {
   const registry = getService('registry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167973
-  // FLAKY: https://github.com/elastic/kibana/issues/167974
-  // Failing: See https://github.com/elastic/kibana/issues/167975
-  describe.skip('APM API tests', function () {
+  describe('APM API tests', function () {
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
 

@@ -14,6 +14,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('empty pages', function () {
+    // Error: expected testSubject(kbnOverviewElasticsearchGettingStarted) to exist
+    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
       await svlSearchNavigation.navigateToLandingPage();
@@ -28,7 +30,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('~breadcrumb-deepLinkId-discover');
       await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
       await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting started' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Get started' });
     });
 
     it('should show search specific empty page in visualize', async () => {
@@ -36,7 +38,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('~breadcrumb-deepLinkId-visualize');
       await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
       await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting started' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Get started' });
     });
 
     it('should show search specific empty page in dashboards', async () => {
@@ -44,7 +46,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('~breadcrumb-deepLinkId-dashboards');
       await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
       await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting started' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Get started' });
     });
   });
 }

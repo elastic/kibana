@@ -25,7 +25,7 @@ export async function waitForDocumentInIndex({
 }): Promise<SearchResponse> {
   return await pRetry(
     async () => {
-      const response = await esClient.search({ index: indexName });
+      const response = await esClient.search({ index: indexName, sort: 'date:desc' });
       if (response.hits.hits.length < num) {
         throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
       }

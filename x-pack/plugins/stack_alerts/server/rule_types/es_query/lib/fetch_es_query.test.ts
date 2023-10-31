@@ -10,7 +10,6 @@ import { Comparator } from '../../../../common/comparator_types';
 import { fetchEsQuery } from './fetch_es_query';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { getSearchParams } from './get_search_params';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/common', () => {
   const actual = jest.requireActual('@kbn/triggers-actions-ui-plugin/common');
@@ -56,7 +55,8 @@ describe('fetchEsQuery', () => {
   };
   it('should add time filter if timestamp if defined and excludeHitsFromPreviousRun is true', async () => {
     const params = defaultParams;
-    const { dateStart, dateEnd } = getSearchParams(params);
+    const date = new Date().toISOString();
+
     await fetchEsQuery({
       ruleId: 'abc',
       name: 'test-rule',
@@ -65,6 +65,8 @@ describe('fetchEsQuery', () => {
       services,
       spacePrefix: '',
       publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -116,8 +118,8 @@ describe('fetchEsQuery', () => {
                         range: {
                           '@timestamp': {
                             format: 'strict_date_optional_time',
-                            gte: dateStart,
-                            lte: dateEnd,
+                            gte: date,
+                            lte: date,
                           },
                         },
                       },
@@ -147,7 +149,8 @@ describe('fetchEsQuery', () => {
 
   it('should not add time filter if timestamp is undefined', async () => {
     const params = defaultParams;
-    const { dateStart, dateEnd } = getSearchParams(params);
+    const date = new Date().toISOString();
+
     await fetchEsQuery({
       ruleId: 'abc',
       name: 'test-rule',
@@ -156,6 +159,8 @@ describe('fetchEsQuery', () => {
       services,
       spacePrefix: '',
       publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -181,8 +186,8 @@ describe('fetchEsQuery', () => {
                         range: {
                           '@timestamp': {
                             format: 'strict_date_optional_time',
-                            gte: dateStart,
-                            lte: dateEnd,
+                            gte: date,
+                            lte: date,
                           },
                         },
                       },
@@ -212,7 +217,8 @@ describe('fetchEsQuery', () => {
 
   it('should not add time filter if excludeHitsFromPreviousRun is false', async () => {
     const params = { ...defaultParams, excludeHitsFromPreviousRun: false };
-    const { dateStart, dateEnd } = getSearchParams(params);
+    const date = new Date().toISOString();
+
     await fetchEsQuery({
       ruleId: 'abc',
       name: 'test-rule',
@@ -221,6 +227,8 @@ describe('fetchEsQuery', () => {
       services,
       spacePrefix: '',
       publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -246,8 +254,8 @@ describe('fetchEsQuery', () => {
                         range: {
                           '@timestamp': {
                             format: 'strict_date_optional_time',
-                            gte: dateStart,
-                            lte: dateEnd,
+                            gte: date,
+                            lte: date,
                           },
                         },
                       },
@@ -277,7 +285,8 @@ describe('fetchEsQuery', () => {
 
   it('should set size: 0 and top hits size to size parameter if grouping alerts', async () => {
     const params = { ...defaultParams, groupBy: 'top', termField: 'host.name', termSize: 10 };
-    const { dateStart, dateEnd } = getSearchParams(params);
+    const date = new Date().toISOString();
+
     await fetchEsQuery({
       ruleId: 'abc',
       name: 'test-rule',
@@ -286,6 +295,8 @@ describe('fetchEsQuery', () => {
       services,
       spacePrefix: '',
       publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -338,8 +349,8 @@ describe('fetchEsQuery', () => {
                         range: {
                           '@timestamp': {
                             format: 'strict_date_optional_time',
-                            gte: dateStart,
-                            lte: dateEnd,
+                            gte: date,
+                            lte: date,
                           },
                         },
                       },
