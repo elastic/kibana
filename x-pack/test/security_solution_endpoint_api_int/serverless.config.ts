@@ -7,6 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
+import { svlServices } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const serverlessTestsConfig = await readConfigFile(
@@ -18,5 +19,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junitReportName: 'X-Pack Endpoint API Integration Tests against Serverless',
     target: 'serverless',
     kbnServerArgs: ['--serverless=security'],
+    services: svlServices,
   });
 }

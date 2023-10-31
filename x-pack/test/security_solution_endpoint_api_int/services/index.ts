@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaSupertestWithCertProvider } from '../../security_solution_endpoint/services/supertest_with_cert';
 import { services as xPackAPIServices } from '../../api_integration/services';
 import { ResolverGeneratorProvider } from './resolver';
 import { RolesUsersProvider } from './roles_users';
@@ -19,4 +20,10 @@ export const services = {
   endpointPolicyTestResources: EndpointPolicyTestResourcesProvider,
   endpointArtifactTestResources: EndpointArtifactsTestResources,
   rolesUsersProvider: RolesUsersProvider,
+};
+
+export const svlServices = {
+  ...services,
+
+  supertest: KibanaSupertestWithCertProvider,
 };

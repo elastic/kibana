@@ -7,6 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
+import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
@@ -15,5 +16,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     baseConfig: xPackAPITestsConfig,
     junitReportName: 'X-Pack Endpoint API Integration Tests against ESS',
     target: 'ess',
+    services,
   });
 }

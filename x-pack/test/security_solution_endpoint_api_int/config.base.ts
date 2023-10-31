@@ -6,7 +6,6 @@
  */
 
 import { Config } from '@kbn/test';
-import { services } from './services';
 import { getRegistryUrlAsArray, createEndpointDockerConfig } from './registry';
 import { SUITE_TAGS } from '../security_solution_endpoint/config.base';
 
@@ -15,11 +14,13 @@ export const generateConfig = async ({
   junitReportName,
   kbnServerArgs = [],
   target,
+  services,
 }: {
   baseConfig: Config;
   junitReportName: string;
   kbnServerArgs?: string[];
   target: keyof typeof SUITE_TAGS;
+  services: any;
 }): Promise<Config> => {
   return {
     ...baseConfig.getAll(),
