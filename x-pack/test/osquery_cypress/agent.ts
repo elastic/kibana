@@ -16,6 +16,7 @@ export class AgentManager extends Manager {
   private log: ToolingLog;
   private policyEnrollmentKey: string;
   private fleetServerPort: string;
+  private agentContainerId?: string;
 
   constructor(policyEnrollmentKey: string, fleetServerPort: string, log: ToolingLog) {
     super();
