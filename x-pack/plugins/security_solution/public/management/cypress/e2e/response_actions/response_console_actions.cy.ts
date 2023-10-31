@@ -20,6 +20,7 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
+  isolateHostFromEndpointList,
 } from '../../tasks/isolate';
 
 import { login } from '../../tasks/login';
@@ -67,6 +68,19 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       }
     });
 
+    it('should release host from response console', () => {
+      const command = 'release';
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      isolateHostFromEndpointList();
+      checkEndpointListForOnlyIsolatedHosts();
+      openResponseConsoleFromEndpointList();
+      performCommandInputChecks(command);
+      submitCommand();
+      waitForCommandToBeExecuted(command);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      checkEndpointListForOnlyUnIsolatedHosts();
+    });
+
     it('should isolate host from response console', () => {
       const command = 'isolate';
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
@@ -77,18 +91,6 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       waitForCommandToBeExecuted(command);
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyIsolatedHosts();
-    });
-
-    it('should release host from response console', () => {
-      const command = 'release';
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      checkEndpointListForOnlyIsolatedHosts();
-      openResponseConsoleFromEndpointList();
-      performCommandInputChecks(command);
-      submitCommand();
-      waitForCommandToBeExecuted(command);
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      checkEndpointListForOnlyUnIsolatedHosts();
     });
   });
 
