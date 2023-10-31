@@ -10,9 +10,9 @@ import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
 import { createLensFilterLegendAction } from './helpers';
 
-export const ACTION_ID_TIMELINE_TOP_N_FILTER_OUT = 'timeline_topN_filterOut';
+export const TIMELINE_HISTOGRAM_LEGEND_ACTION_FILTER_OUT = 'timelineHistogramLegendActionFilterOut';
 
-export const createFilterOutTopNTimelineLegendAction = ({
+export const createFilterOutHistogramTimelineLegendAction = ({
   store,
   order,
   services,
@@ -22,7 +22,7 @@ export const createFilterOutTopNTimelineLegendAction = ({
   services: StartServices;
 }) =>
   createLensFilterLegendAction({
-    id: ACTION_ID_TIMELINE_TOP_N_FILTER_OUT,
+    id: TIMELINE_HISTOGRAM_LEGEND_ACTION_FILTER_OUT,
     order,
     store,
     services,

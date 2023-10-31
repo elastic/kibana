@@ -13,12 +13,12 @@ import type { StartServices } from '../types';
 import {
   createFilterInCellActionFactory,
   createFilterInDiscoverCellActionFactory,
-  createFilterInTopNTimelineLegendAction,
-  createFilterInTopNTopNLegendAction,
+  createFilterInHistogramTimelineLegendAction,
+  createFilterInHistogramTopNLegendAction,
   createFilterOutCellActionFactory,
   createFilterOutDiscoverCellActionFactory,
-  createFilterOutTopNLegendAction,
-  createFilterOutTopNTimelineLegendAction,
+  createFilterOutHistogramLegendAction,
+  createFilterOutHistogramTimelineLegendAction,
 } from './filter';
 import {
   createAddToTimelineLensAction,
@@ -63,28 +63,28 @@ const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartS
   const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
 
-  const filterInTimelineLegendActions = createFilterInTopNTimelineLegendAction({
+  const filterInTimelineLegendActions = createFilterInHistogramTimelineLegendAction({
     store,
     order: 0,
     services,
   });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInTimelineLegendActions);
 
-  const filterOutTimelineLegendActions = createFilterOutTopNTimelineLegendAction({
+  const filterOutTimelineLegendActions = createFilterOutHistogramTimelineLegendAction({
     store,
     order: 1,
     services,
   });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutTimelineLegendActions);
 
-  const filterInLegendActions = createFilterInTopNTopNLegendAction({
+  const filterInLegendActions = createFilterInHistogramTopNLegendAction({
     store,
     order: 2,
     services,
   });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInLegendActions);
 
-  const filterOutLegendActions = createFilterOutTopNLegendAction({
+  const filterOutLegendActions = createFilterOutHistogramLegendAction({
     store,
     order: 3,
     services,

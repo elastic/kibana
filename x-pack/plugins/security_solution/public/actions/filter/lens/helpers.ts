@@ -23,8 +23,8 @@ import { TimelineId } from '../../../../common/types';
 import { SecurityCellActionType } from '../../constants';
 import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
-import { ACTION_ID_TOP_N_FILTER_IN } from './filter_in';
-import { ACTION_ID_TOP_N_FILTER_OUT } from './filter_out';
+import { HISTOGRAM_LEGEND_ACTION_FILTER_IN } from './filter_in';
+import { HISTOGRAM_LEGEND_ACTION_FILTER_OUT } from './filter_out';
 
 function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   return (
@@ -93,13 +93,15 @@ export const createLensFilterLegendAction = ({
 
       if (!negate) {
         addFilterIn({
-          filterManager: id === ACTION_ID_TOP_N_FILTER_IN ? filterManager : timeline.filterManager,
+          filterManager:
+            id === HISTOGRAM_LEGEND_ACTION_FILTER_IN ? filterManager : timeline.filterManager,
           fieldName: field,
           value,
         });
       } else {
         addFilterOut({
-          filterManager: id === ACTION_ID_TOP_N_FILTER_OUT ? filterManager : timeline.filterManager,
+          filterManager:
+            id === HISTOGRAM_LEGEND_ACTION_FILTER_OUT ? filterManager : timeline.filterManager,
           fieldName: field,
           value,
         });
