@@ -60,7 +60,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await testSubjects.existOrFail(`indicesTab`);
 
       // navigate back to serverless search overview
-      await svlCommonNavigation.breadcrumbs.clickHome();
+      await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'serverlessElasticsearch',
       });
