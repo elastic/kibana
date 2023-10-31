@@ -12,6 +12,7 @@ steps:
     commands:
       - "buildkite-agent annotate --append --context banner --style info \"<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>\""
       - "buildkite-agent annotate --append --context banner --style info \"<br/>:guide_dog: Please follow the steps in the build.\""
+      - "buildkite-agent annotate --append --context banner --style info \"<br/>:github: First, we're gathering info about recent commits...\""
 
   - label: "Select target commit to deploy"
     command: ts-node .buildkite/scripts/serverless/create_deploy_tag/generate_commit_selector.ts 50
