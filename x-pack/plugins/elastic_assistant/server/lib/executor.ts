@@ -11,7 +11,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { PassThrough, Readable } from 'stream';
 import { RequestBody } from './langchain/types';
 
-interface Props {
+export interface Props {
   actions: ActionsPluginStart;
   connectorId: string;
   request: KibanaRequest<unknown, unknown, RequestBody>;
@@ -50,7 +50,11 @@ export const executeAction = async ({
       status: 'ok',
     };
   }
-  const readable = get('data', actionResult);
+  const readable = get('data', actionResult) as Readable;
 
-  return (readable as Readable).pipe(new PassThrough());
+  if (typeof readable?.read !== 'function') {
+    throw new Error('Unexpected action result');
+  }
+
+  return readable.pipe(new PassThrough());
 };

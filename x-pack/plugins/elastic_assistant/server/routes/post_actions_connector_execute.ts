@@ -41,10 +41,10 @@ export const postActionsConnectorExecuteRoute = (
 
         // get the actions plugin start contract from the request context:
         const actions = (await context.elasticAssistant).actions;
+
         // if not langchain, call execute action directly and return the response:
         if (!request.body.assistantLangChain) {
           logger.debug('Executing via actions framework directly, assistantLangChain: false');
-
           const result = await executeAction({ actions, request, connectorId });
           return response.ok({
             body: result,
