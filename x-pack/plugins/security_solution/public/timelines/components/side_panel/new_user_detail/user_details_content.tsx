@@ -22,6 +22,7 @@ import {
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { max } from 'lodash';
+import { FlyoutLoading } from '../../../../flyout/shared/components/flyout_loading';
 import * as i18n from './translations';
 
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
@@ -166,6 +167,10 @@ export const UserDetailsContent = ({
   });
   const observedUser = useObservedUser(userName);
   const managedUser = useManagedUser(userName);
+
+  if (riskScoreState.loading || observedUser.isLoading || managedUser.isLoading) {
+    return <FlyoutLoading />;
+  }
 
   return (
     <AnomalyTableProvider

@@ -32,16 +32,16 @@ import { useExpandDetailsFlyout } from '../hooks/use_expand_details_flyout';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;
-  scopeId: string;
 }
 
 interface TableItem {
   category: string;
   count: number;
 }
+const LENS_VISUALIZATION_SIZE = 110;
 
-export const RiskSummary = ({ riskScoreData, scopeId }: RiskSummaryProps) => {
-  const { data: userRisk, isAuthorized: isRiskScoreAuthorized } = riskScoreData;
+export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
+  const { data: userRisk } = riskScoreData;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
   const lensAttributes = useMemo(() => {
@@ -57,14 +57,24 @@ export const RiskSummary = ({ riskScoreData, scopeId }: RiskSummaryProps) => {
     () => [
       {
         field: 'category',
-        name: 'Category', // TODO
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.categoryColumnLabel"
+            defaultMessage="Category"
+          />
+        ),
         truncateText: false,
         mobileOptions: { show: true },
         sortable: true,
       },
       {
         field: 'count',
-        name: 'Inputs', // TODO
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.inputsColumnLabel"
+            defaultMessage="Inputs"
+          />
+        ),
         truncateText: false,
         mobileOptions: { show: true },
         sortable: true,
@@ -75,8 +85,7 @@ export const RiskSummary = ({ riskScoreData, scopeId }: RiskSummaryProps) => {
   );
 
   const { isExpanded, onToggle } = useExpandDetailsFlyout({
-    riskEntity: RiskScoreEntity.user,
-    scopeId,
+    riskInputs: userRiskData?.user.risk.inputs ?? [],
   });
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
@@ -88,7 +97,7 @@ export const RiskSummary = ({ riskScoreData, scopeId }: RiskSummaryProps) => {
     },
   ];
 
-  if (!isRiskScoreAuthorized || !userRiskData) {
+  if (!userRiskData) {
     return null;
   }
 
@@ -97,7 +106,12 @@ export const RiskSummary = ({ riskScoreData, scopeId }: RiskSummaryProps) => {
       <EuiFlexGroup direction="row" alignItems="baseline" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h3>{'Risk summary'}</h3>
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.title"
+                defaultMessage="Risk summary"
+              />
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
 
@@ -127,23 +141,25 @@ export const RiskSummary = ({ riskScoreData, scopeId }: RiskSummaryProps) => {
       <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFlexGroup gutterSize="m" direction="row">
           <EuiFlexItem grow={false}>
-            <VisualizationEmbeddable
-              applyGlobalQueriesAndFilters={false}
-              lensAttributes={lensAttributes}
-              id={`RiskSummary-risk_score_metric`}
-              timerange={{ from: 'now-30d', to: 'now' }}
-              width={110}
-              height={110}
-            />
+            <div
+              // Improve Visualization loading state by predefining the size
+              css={`
+                width: ${LENS_VISUALIZATION_SIZE}px;
+                height: ${LENS_VISUALIZATION_SIZE}px;
+              `}
+            >
+              <VisualizationEmbeddable
+                applyGlobalQueriesAndFilters={false}
+                lensAttributes={lensAttributes}
+                id={`RiskSummary-risk_score_metric`}
+                timerange={{ from: 'now-30d', to: 'now' }}
+                width={LENS_VISUALIZATION_SIZE}
+                height={LENS_VISUALIZATION_SIZE}
+              />
+            </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBasicTable
-              columns={columns}
-              items={items}
-              loading={!userRiskData}
-              compressed
-              // noItemsMessage={<EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />}
-            />
+            <EuiBasicTable columns={columns} items={items} loading={!userRiskData} compressed />
           </EuiFlexItem>
         </EuiFlexGroup>
 

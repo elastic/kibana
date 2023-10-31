@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
 import {
   useEuiBackgroundColor,
   EuiSpacer,
@@ -13,19 +13,20 @@ import {
   EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import type { RiskInputs, SimpleRiskInput } from '../../../common/risk_engine';
-import { RiskScoreEntity } from '../../../common/risk_engine';
-import { useRiskScore } from '../../explore/containers/risk_score';
+import { get } from 'lodash/fp';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import type { RiskInputs } from '../../../common/risk_engine';
 import { ActionColumn } from './action_column';
 import { PreferenceFormattedDate } from '../../common/components/formatted_date';
+import { RiskInputsUtilityBar } from './utility_bar';
+import { useAlertsByIds } from '../../common/containers/alerts/use_alerts_by_ids';
 
 export interface RiskInputsPanelProps extends Record<string, unknown> {
-  riskEntity: RiskScoreEntity;
-  scopeId: string;
+  riskInputs: RiskInputs;
 }
 
 export interface RiskInputsExpandableFlyoutProps extends FlyoutPanelProps {
@@ -35,20 +36,23 @@ export interface RiskInputsExpandableFlyoutProps extends FlyoutPanelProps {
 
 export const RiskInputsPanelKey: RiskInputsExpandableFlyoutProps['key'] = 'all-risk-inputs';
 
-export const RiskInputsPanel = ({ riskEntity, scopeId }: RiskInputsPanelProps) => {
-  const riskScoreState = useRiskScore({ riskEntity: RiskScoreEntity.user });
+export interface AlertRawData {
+  fields: Record<string, string[]>;
+  _index: string;
+  _id: string;
+}
 
-  const { data: userRisk, loading } = riskScoreState;
-  const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-  const inputs = userRiskData?.user.risk.inputs ?? [];
-
-  const [selectedItems, setSelectedItems] = useState<RiskInputs>([]);
+export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
+  const [selectedItems, setSelectedItems] = useState<AlertRawData[]>([]);
+  const alertIds = useMemo(() => riskInputs.map(({ id }) => id), [riskInputs]);
+  const { loading, data: alertsData } = useAlertsByIds({ alertIds });
 
   const euiTableSelectionProps = useMemo(
     () => ({
-      onSelectionChange: (selected: RiskInputs) => {
+      onSelectionChange: (selected: AlertRawData[]) => {
         setSelectedItems(selected);
       },
+      // TODO
       selectableMessage: (selectable: boolean) => '',
       initialSelected: [],
       selectable: () => true,
@@ -56,7 +60,7 @@ export const RiskInputsPanel = ({ riskEntity, scopeId }: RiskInputsPanelProps) =
     []
   );
 
-  const columns: Array<EuiBasicTableColumn<SimpleRiskInput>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<AlertRawData>> = useMemo(
     () => [
       {
         name: (
@@ -66,12 +70,12 @@ export const RiskInputsPanel = ({ riskEntity, scopeId }: RiskInputsPanelProps) =
           />
         ),
         width: '80px',
-        render: (input: SimpleRiskInput) => {
-          return <ActionColumn riskInput={input} scopeId={scopeId} />;
+        render: (alert: AlertRawData) => {
+          return <ActionColumn alert={alert} />;
         },
       },
       {
-        field: 'timestamp',
+        field: 'fields.@timestamp',
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.riskInputs.dateColumn"
@@ -85,7 +89,7 @@ export const RiskInputsPanel = ({ riskEntity, scopeId }: RiskInputsPanelProps) =
         render: (timestamp: string) => <PreferenceFormattedDate value={new Date(timestamp)} />,
       },
       {
-        field: 'description',
+        field: 'fields',
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.riskInputs.riskInputColumn"
@@ -95,9 +99,28 @@ export const RiskInputsPanel = ({ riskEntity, scopeId }: RiskInputsPanelProps) =
         truncateText: true,
         mobileOptions: { show: true },
         sortable: true,
+        render: (fields: AlertRawData['fields']) => get(ALERT_RULE_NAME, fields),
       },
     ],
-    [scopeId]
+    []
+  );
+
+  const [currentPage, setCurrentPage] = useState<{
+    index: number;
+    size: number;
+  }>({ index: 0, size: 10 });
+
+  const onTableChange = useCallback(({ page }) => {
+    setCurrentPage(page);
+  }, []);
+
+  const pagination: Pagination = useMemo(
+    () => ({
+      totalItemCount: riskInputs.length,
+      pageIndex: currentPage.index,
+      pageSize: currentPage.size,
+    }),
+    [currentPage.index, currentPage.size, riskInputs.length]
   );
 
   return (
@@ -115,17 +138,20 @@ export const RiskInputsPanel = ({ riskEntity, scopeId }: RiskInputsPanelProps) =
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer />
+        <EuiSpacer size="s" />
+        <RiskInputsUtilityBar pagination={pagination} selectedAlerts={selectedItems} />
+        <EuiSpacer size="xs" />
         <EuiInMemoryTable
           compressed={true}
           loading={loading}
-          items={inputs}
+          items={alertsData ?? []}
           columns={columns}
           pagination
           sorting
           selection={euiTableSelectionProps}
+          onTableChange={onTableChange}
           isSelectable
-          itemId="id"
+          itemId="_id"
         />
         <></>
       </EuiFlyoutBody>

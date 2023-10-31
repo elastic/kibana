@@ -222,7 +222,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return null;
   }
 
-  console.log({ attributes, visualizationData });
   if (
     !attributes ||
     (visualizationData?.responses != null && visualizationData?.responses?.length === 0)

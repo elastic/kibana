@@ -31,6 +31,8 @@ export enum TableId {
   kubernetesPageSessions = 'kubernetes-page-sessions',
   alertsOnCasePage = 'alerts-case-page',
   alertsRiskInputs = 'alerts-risk-inputs',
+  // New version of `alertsRiskInputs` designed to support multiple kinds of risk inputs
+  riskInputs = 'risk-inputs',
 }
 
 export enum TableEntityType {
