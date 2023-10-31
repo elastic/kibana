@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { OperationType } from '@kbn/lens-plugin/public';
+import { FillStyle, OperationType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
@@ -16,9 +16,12 @@ import {
   XYChart,
   XYDataLayer,
   XYLayerOptions,
+  XYReferenceLinesLayer,
 } from '@kbn/lens-embeddable-utils';
+
 import {
   Aggregators,
+  Comparator,
   CustomMetricAggTypes,
 } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -42,11 +45,75 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
   const [attributes, setAttributes] = useState<LensAttributes>();
   const [aggMap, setAggMap] = useState<AggMap>();
   const [formula, setFormula] = useState<string>('');
-
+  const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
 
+  useEffect(() => {
+    if (!threshold) return;
+    const refLayers = [];
+
+    if (
+      comparator === Comparator.OUTSIDE_RANGE ||
+      (comparator === Comparator.BETWEEN && threshold.length === 2)
+    ) {
+      const refLineStart = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: (threshold[0] || 0).toString(),
+            color: '#FF0000',
+            fill: comparator === Comparator.OUTSIDE_RANGE ? 'below' : 'above',
+            format: {
+              id: 'number',
+              params: {
+                decimals: 1,
+              },
+            },
+          },
+        ],
+      });
+      const refLineEnd = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: (threshold[1] || 0).toString(),
+            color: '#FF0000',
+            fill: comparator === Comparator.OUTSIDE_RANGE ? 'above' : 'below',
+            format: {
+              id: 'number',
+              params: {
+                decimals: 1,
+              },
+            },
+          },
+        ],
+      });
+
+      refLayers.push(refLineStart, refLineEnd);
+    } else {
+      let fill: FillStyle = 'above';
+      if (comparator === Comparator.LT || comparator === Comparator.LT_OR_EQ) {
+        fill = 'below';
+      }
+      const refLine = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: (threshold[0] || 0).toString(),
+            color: '#FF0000',
+            fill,
+            format: {
+              id: 'number',
+              params: {
+                decimals: 1,
+              },
+            },
+          },
+        ],
+      });
+      refLayers.push(refLine);
+    }
+    setThresholdReferenceLine(refLayers);
+  }, [threshold, comparator]);
   // Build the aggregation map from the metrics
   useEffect(() => {
     if (!metrics || metrics.length === 0) {
@@ -85,6 +152,7 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
       setFormula(parser.parse());
     } catch (e) {
       console.error('PainlessTinyMathParser', e);
+      setAttributes(undefined);
       // Fail silently as Lens chart will show the error
       return;
     }
@@ -116,6 +184,7 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
         query: filterQuery || '',
       },
     };
+
     const xYDataLayerOptions: XYLayerOptions = {
       buckets: { type: 'date_histogram' },
       seriesType: 'bar',
@@ -144,9 +213,13 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
       options: xYDataLayerOptions,
     });
 
+    const layers: Array<XYDataLayer | XYReferenceLinesLayer> = [xyDataLayer];
+    if (thresholdReferenceLine) {
+      layers.push(...thresholdReferenceLine);
+    }
     const attributesLens = new LensAttributesBuilder({
       visualization: new XYChart({
-        layers: [xyDataLayer],
+        layers,
         formulaAPI: formulaAsync.value.formula,
         dataView,
       }),
@@ -163,6 +236,7 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
     groupBy,
     metrics,
     threshold,
+    thresholdReferenceLine,
   ]);
   if (!dataView || !attributes) {
     return (
