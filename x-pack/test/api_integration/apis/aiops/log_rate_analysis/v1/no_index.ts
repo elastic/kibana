@@ -8,9 +8,11 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-import { logRateAnalysisTestData } from './test_data';
+import { logRateAnalysisTestData } from '../../test_data';
+
+const API_VERSION = '1';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -22,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
           const resp = await supertest
             .post(`/internal/aiops/log_rate_analysis`)
             .set('kbn-xsrf', 'kibana')
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
             .send({
               ...testData.requestBody,
               index: 'does_not_exist',
