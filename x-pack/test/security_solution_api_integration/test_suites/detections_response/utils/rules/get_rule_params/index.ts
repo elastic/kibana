@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './get_slack_action';
-export * from './get_web_hook_action';
-export * from './create_new_action';
-export * from './legacy_actions';
+
+export * from './get_custom_query_rule_params';
+export * from './get_saved_query_rule_params';
+export * from './get_ml_rule_params';
+export * from './get_threshold_rule_params';
