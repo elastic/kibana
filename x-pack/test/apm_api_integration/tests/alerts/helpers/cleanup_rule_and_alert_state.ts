@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 import type { SuperTest, Test } from 'supertest';
 import {
   clearKibanaApmEventLog,
@@ -14,12 +15,14 @@ import {
   deleteActionConnectorIndex,
 } from './alerting_api_helper';
 
-export async function cleanupAllState({
+export async function cleanupRuleAndAlertState({
   es,
   supertest,
+  logger,
 }: {
   es: Client;
   supertest: SuperTest<Test>;
+  logger: ToolingLog;
 }) {
   try {
     await Promise.all([
@@ -29,7 +32,6 @@ export async function cleanupAllState({
       await clearKibanaApmEventLog(es),
     ]);
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(`An error occured while cleaning up the state: ${e}`);
+    logger.error(`An error occured while cleaning up the state: ${e}`);
   }
 }
