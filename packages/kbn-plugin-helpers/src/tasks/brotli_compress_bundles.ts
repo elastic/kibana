@@ -13,6 +13,7 @@ import { promisify } from 'util';
 import vfs from 'vinyl-fs';
 import gulpBrotli from 'gulp-brotli';
 import zlib from 'zlib';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TaskContext } from '../task_context';
 
@@ -22,7 +23,7 @@ const asyncPipeline = promisify(pipeline);
 export async function brotliCompressBundles({ buildDir, log }: TaskContext) {
   const compressDir = Path.resolve(buildDir, 'target/public');
 
-  log.info(`compressing js and css bundles found at ${compressDir} to brotli`);
+  log.info(`compressing js and css bundles found at ${Path.relative(REPO_ROOT, compressDir)} to brotli`);
 
   await asyncPipeline(
     vfs.src(['**/*.{js,css}'], { cwd: compressDir }),
