@@ -30,7 +30,7 @@ export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
 
   const { globalFullScreen } = useGlobalFullScreen();
-  const { indexPattern } = useSourcererDataView();
+  const { indexPattern, sourcererDataView } = useSourcererDataView();
   const { from, to } = useGlobalTime();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -81,7 +81,7 @@ export const KubernetesContainer = React.memo(() => {
       {kubernetesSecurity.getKubernetesPage({
         filter: (
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
-            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
           </FiltersGlobal>
         ),
         indexPattern,
