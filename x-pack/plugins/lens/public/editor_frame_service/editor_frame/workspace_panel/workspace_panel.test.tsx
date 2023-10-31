@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { UserMessage, Visualization } from '../../../types';
+import { UserMessage } from '../../../types';
 import { fireEvent, screen } from '@testing-library/react';
 import {
   createMockVisualization,
@@ -185,19 +185,71 @@ describe('workspace_panel', () => {
     expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
   });
 
-  describe('enzyme tests', () => {
-    afterEach(() => {
-      instance.unmount();
-    });
-    it('should give user control when auto-apply disabled', async () => {
-      const framePublicAPI = createMockFramePublicAPI();
-      framePublicAPI.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-      mockDatasource.toExpression.mockReturnValue('datasource');
-      mockDatasource.getLayers.mockReturnValue(['first']);
+  it('should give user control when auto-apply disabled', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
 
-      const mounted = await mountWithProvider(
+    const { rerender, store } = renderWithReduxStore(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />,
+      {},
+      {
+        preloadedState: {
+          autoApplyDisabled: true,
+        },
+      }
+    );
+
+    expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
+
+    mockDatasource.toExpression.mockReturnValue('new-datasource');
+    rerender(
+      <WorkspacePanel
+        {...defaultProps}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers, 'new-vis'),
+          },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
+
+    expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(applyChanges());
+    });
+
+    expect(screen.getByText('new-datasource | new-vis')).toBeInTheDocument();
+
+    mockDatasource.toExpression.mockReturnValue('other-new-datasource');
+
+    act(() => {
+      rerender(
         <WorkspacePanel
           {...defaultProps}
           datasourceMap={{
@@ -205,149 +257,85 @@ describe('workspace_panel', () => {
           }}
           framePublicAPI={framePublicAPI}
           visualizationMap={{
-            testVis: {
-              ...mockVisualization,
-              toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
-                toExpr(datasourceExpressionsByLayers),
-            },
-          }}
-          ExpressionRenderer={expressionRendererMock}
-        />,
-        {
-          preloadedState: {
-            autoApplyDisabled: true,
-          },
-        }
-      );
-
-      instance = mounted.instance;
-      instance.update();
-
-      const getExpression = () => instance.find(expressionRendererMock).prop('expression');
-
-      // allows initial render
-      expect(getExpression()).toMatchInlineSnapshot(`
-        "datasource
-        | testVis"
-      `);
-
-      mockDatasource.toExpression.mockReturnValue('new-datasource');
-      act(() => {
-        instance.setProps({
-          visualizationMap: {
-            testVis: {
-              ...mockVisualization,
-              toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
-                toExpr(datasourceExpressionsByLayers, 'new-vis'),
-            } as Visualization,
-          },
-        });
-      });
-      instance.update();
-
-      expect(getExpression()).toMatchInlineSnapshot(`
-        "datasource
-        | testVis"
-      `);
-
-      act(() => {
-        mounted.lensStore.dispatch(applyChanges());
-      });
-      instance.update();
-
-      // should update
-      expect(getExpression()).toMatchInlineSnapshot(`
-        "new-datasource
-        | new-vis"
-      `);
-
-      mockDatasource.toExpression.mockReturnValue('other-new-datasource');
-      act(() => {
-        instance.setProps({
-          visualizationMap: {
             testVis: {
               ...mockVisualization,
               toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
                 toExpr(datasourceExpressionsByLayers, 'other-new-vis'),
-            } as Visualization,
-          },
-        });
-        mounted.lensStore.dispatch(enableAutoApply());
-      });
-      instance.update();
-
-      // reenabling auto-apply triggers an update as well
-      expect(getExpression()).toMatchInlineSnapshot(`
-        "other-new-datasource
-        | other-new-vis"
-      `);
-    });
-
-    it('should base saveability on working changes when auto-apply disabled', async () => {
-      const framePublicAPI = createMockFramePublicAPI();
-      framePublicAPI.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-      mockDatasource.toExpression.mockReturnValue('datasource');
-      mockDatasource.getLayers.mockReturnValue(['first']);
-
-      let userMessages: UserMessage[] = [];
-
-      const mounted = await mountWithProvider(
-        <WorkspacePanel
-          {...defaultProps}
-          getUserMessages={() => userMessages}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          framePublicAPI={framePublicAPI}
-          visualizationMap={{
-            testVis: {
-              ...mockVisualization,
-              toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
-                toExpr(datasourceExpressionsByLayers),
             },
           }}
           ExpressionRenderer={expressionRendererMock}
         />
       );
+      store.dispatch(enableAutoApply());
+    });
 
-      instance = mounted.instance;
-      const isSaveable = () => mounted.lensStore.getState().lens.isSaveable;
+    expect(screen.getByText('other-new-datasource | other-new-vis')).toBeInTheDocument();
+  });
 
-      instance.update();
+  it('should base saveability on working changes when auto-apply disabled', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
 
-      // allows initial render
-      expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-        "datasource
-        | testVis"
-      `);
-      expect(isSaveable()).toBe(true);
+    let userMessages: UserMessage[] = [];
 
-      // note that populating the user messages and then dispatching a state update is true to
-      // how Lens interacts with the workspace panel from its perspective. all the panel does is call
-      // that getUserMessages function any time it gets re-rendered (aka state update)
-      userMessages = [
-        {
-          severity: 'error',
-          fixableInEditor: true,
-          displayLocations: [{ id: 'visualization' }],
-          shortMessage: 'hey there',
-          longMessage: "i'm another error",
-        },
-      ] as UserMessage[];
+    const { store } = renderWithReduxStore(
+      <WorkspacePanel
+        {...defaultProps}
+        getUserMessages={() => userMessages}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+      />
+    );
 
-      act(() => {
-        mounted.lensStore.dispatch(
-          updateVisualizationState({
-            visualizationId: 'testVis',
-            newState: {},
-          })
-        );
-      });
-      instance.update();
+    const isSaveable = () => store.getState().lens.isSaveable;
 
-      expect(isSaveable()).toBe(false);
+    // allows initial render
+    expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
+
+    expect(isSaveable()).toBe(true);
+
+    // note that populating the user messages and then dispatching a state update is true to
+    // how Lens interacts with the workspace panel from its perspective. all the panel does is call
+    // that getUserMessages function any time it gets re-rendered (aka state update)
+    userMessages = [
+      {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
+        shortMessage: 'hey there',
+        longMessage: "i'm another error",
+      },
+    ] as UserMessage[];
+
+    act(() => {
+      store.dispatch(
+        updateVisualizationState({
+          visualizationId: 'testVis',
+          newState: {},
+        })
+      );
+    });
+
+    expect(isSaveable()).toBe(false);
+  });
+
+  describe('enzyme tests', () => {
+    afterEach(() => {
+      instance.unmount();
     });
 
     it('should show proper workspace prompts when auto-apply disabled', async () => {

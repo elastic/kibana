@@ -50,7 +50,6 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
     DimensionEditorComponent: jest.fn(() => <div />),
-    ToolbarComponent: jest.fn(({ state }) => <div>{state.id}</div>),
   };
 }
 

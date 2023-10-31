@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { Provider } from 'react-redux';
@@ -76,7 +76,7 @@ export const defaultState = {
 };
 
 export const renderWithReduxStore = (
-  ui: JSX.Element,
+  ui: ReactElement,
   options?: RenderOptions,
   {
     preloadedState,
