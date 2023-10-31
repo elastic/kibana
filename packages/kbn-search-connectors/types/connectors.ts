@@ -111,20 +111,26 @@ export interface IngestPipelineParams {
   run_ml_inference: boolean;
 }
 
-export enum FilteringPolicy {
-  EXCLUDE = 'exclude',
-  INCLUDE = 'include',
-}
+export type FilteringPolicy = 'exclude' | 'include';
 
-export enum FilteringRuleRule {
-  CONTAINS = 'contains',
-  ENDS_WITH = 'ends_with',
-  EQUALS = 'equals',
-  GT = '>',
-  LT = '<',
-  REGEX = 'regex',
-  STARTS_WITH = 'starts_with',
-}
+export type FilteringRuleRule =
+  | 'contains'
+  | 'ends_with'
+  | 'equals'
+  | '>'
+  | '<'
+  | 'regex'
+  | 'starts_with';
+
+export const FilteringRuleRuleValues: FilteringRuleRule[] = [
+  'contains',
+  'ends_with',
+  'equals',
+  '>',
+  '<',
+  'regex',
+  'starts_with',
+];
 
 export interface FilteringRule {
   created_at: string;

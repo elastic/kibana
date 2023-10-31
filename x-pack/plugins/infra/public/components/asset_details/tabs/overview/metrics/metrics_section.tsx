@@ -15,7 +15,7 @@ import {
   MetricsSectionTitle,
   KubernetesMetricsSectionTitle,
 } from '../../../components/section_titles';
-import { useMetadataStateProviderContext } from '../../../hooks/use_metadata_state';
+import { useMetadataStateContext } from '../../../hooks/use_metadata_state';
 import { MetricsGrid } from './metrics_grid';
 
 interface Props {
@@ -85,7 +85,7 @@ const Section = ({
   children: React.ReactNode;
 }) => {
   const Title = title;
-  const { metadata } = useMetadataStateProviderContext();
+  const { metadata } = useMetadataStateContext();
 
   const shouldRender = useMemo(
     () =>

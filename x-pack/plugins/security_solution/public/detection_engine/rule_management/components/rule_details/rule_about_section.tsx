@@ -25,7 +25,7 @@ import type {
   Threats,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
@@ -367,24 +367,30 @@ const prepareAboutSectionListItems = (
   return aboutSectionListItems;
 };
 
-export interface RuleAboutSectionProps {
+export interface RuleAboutSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
   hideName?: boolean;
   hideDescription?: boolean;
 }
 
-export const RuleAboutSection = ({ rule, hideName, hideDescription }: RuleAboutSectionProps) => {
+export const RuleAboutSection = ({
+  rule,
+  hideName,
+  hideDescription,
+  ...descriptionListProps
+}: RuleAboutSectionProps) => {
   const aboutSectionListItems = prepareAboutSectionListItems(rule, hideName, hideDescription);
 
   return (
     <div>
       <EuiSpacer size="m" />
       <EuiDescriptionList
-        type="column"
+        type={descriptionListProps.type ?? 'column'}
+        rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={aboutSectionListItems}
         columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-        rowGutterSize="m"
         data-test-subj="listItemColumnStepRuleDescription"
+        {...descriptionListProps}
       />
     </div>
   );

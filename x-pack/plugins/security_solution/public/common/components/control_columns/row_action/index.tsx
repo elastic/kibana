@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { timelineActions } from '../../../../timelines/store/timeline';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 import { RightPanelKey } from '../../../../flyout/document_details/right';
 import type {
@@ -20,9 +21,9 @@ import type {
   ExpandedDetailType,
 } from '../../../../../common/types';
 import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
-
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -97,6 +98,7 @@ const RowActionComponent = ({
       },
     };
 
+    // TODO remove when https://github.com/elastic/security-team/issues/7760 is merged
     // excluding rule preview page as some sections in new flyout are not applicable when user is creating a new rule
     if (isSecurityFlyoutEnabled && tableId !== TableId.rulePreview) {
       openFlyout({
@@ -109,7 +111,20 @@ const RowActionComponent = ({
           },
         },
       });
-    } else {
+    }
+    // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
+    // support of old flyout in cases page
+    else if (tableId === TableId.alertsOnCasePage) {
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          ...updatedExpandedDetail,
+          id: TimelineId.casePage,
+        })
+      );
+    }
+    // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
+    // support of old flyout
+    else {
       dispatch(
         dataTableActions.toggleDetailPanel({
           ...updatedExpandedDetail,
