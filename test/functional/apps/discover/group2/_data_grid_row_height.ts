@@ -44,12 +44,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rows.length).to.be.above(0);
 
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
     });
 
     it('should allow to change row height and reset it', async () => {
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
 
       await dataGrid.changeRowHeightValue('Single');
 
@@ -61,18 +61,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.resetRowHeightValue();
 
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
 
-      await dataGrid.changeRowHeightValue('Custom');
+      await dataGrid.changeRowHeightValue('Auto fit');
 
       await dataGrid.resetRowHeightValue();
 
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
     });
 
     it('should persist the selection after reloading the page', async () => {
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
 
       await dataGrid.changeRowHeightValue('Single');
 
