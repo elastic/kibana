@@ -19,6 +19,7 @@ export const defaultNavigation: DevToolsNodeDefinition = {
   }),
   id: 'rootNav:devtools',
   icon: 'editorCodeBlock',
+  renderAs: 'accordion',
   children: [
     {
       link: 'dev_tools:console',

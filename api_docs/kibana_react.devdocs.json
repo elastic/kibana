@@ -5510,6 +5510,14 @@
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
+          " | undefined; plugins?: ",
+          {
+            "pluginId": "@kbn/core-plugins-contracts-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+            "section": "def-common.PluginsServiceStart",
+            "text": "PluginsServiceStart"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",
