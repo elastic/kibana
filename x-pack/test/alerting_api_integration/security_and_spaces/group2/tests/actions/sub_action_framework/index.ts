@@ -344,10 +344,6 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           [SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS]: [PRIVILEGE_ID.responseActionsHistoryLogRead],
         };
 
-        // 'actions_log_management_all',
-        // 'host_isolation_all',
-        // 'process_operations_all',
-
         let connectorId: string;
 
         const getExpectedAuthzError = () => ({
@@ -356,6 +352,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           retry: false,
           connector_id: 'b8c2b050-772b-11ee-a142-41aacf030956',
         });
+
         const createUser = async ({
           username,
           password = 'changeme',
@@ -400,7 +397,8 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             username,
             password,
             deleteUser: async () => {
-              // FIXME:PT implement
+              await securityService.user.delete(role.name);
+              await securityService.role.delete(role.name);
             },
           };
         };
