@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['aiops']);
 
     // The aiops API should return forbidden when called without a trial/platinum license.
-    loadTestFile(require.resolve('./permissions'));
+    loadTestFile(require.resolve('./v1/permissions'));
+    loadTestFile(require.resolve('./v2/permissions'));
   });
 }

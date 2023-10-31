@@ -11,16 +11,18 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import expect from '@kbn/expect';
 
-import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/log_rate_analysis/v2/schema';
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+const API_VERSION = '2';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
 
-  const requestBody: AiopsApiLogRateAnalysis['body'] = {
+  const requestBody: AiopsLogRateAnalysisSchema = {
     baselineMax: 1561719083292,
     baselineMin: 1560954147006,
     deviationMax: 1562254538692,
@@ -37,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
       await supertest
         .post(`/internal/aiops/log_rate_analysis`)
         .set('kbn-xsrf', 'kibana')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
         .send(requestBody)
         .expect(403);
     });
@@ -48,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
         headers: {
           'Content-Type': 'application/json',
           'kbn-xsrf': 'stream',
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: API_VERSION,
         },
         body: JSON.stringify(requestBody),
       });
