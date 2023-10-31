@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-export { Navigation } from './navigation';
-export type { Props as RecentlyAccessedProps } from './recently_accessed';
-export type {
-  PanelContent,
-  PanelComponentProps,
-  ContentProvider as PanelContentProvider,
-} from './panel';
+import { useEffect } from 'react';
+
+const mockUseEffect = useEffect;
+
+// Replace useDebounce() with a normal useEffect()
+jest.mock('react-use/lib/useDebounce', () => {
+  return (cb: () => void, ms: number, deps: any[]) => {
+    mockUseEffect(() => {
+      cb();
+    }, deps);
+  };
+});
+
+export {};
