@@ -24,7 +24,7 @@ import { renderParameterTemplates } from './render_template_variables';
 
 export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secrets> => {
   return {
-    Service: OpsgenieConnector,
+    getService: (params) => new OpsgenieConnector(params),
     minimumLicenseRequired: 'platinum',
     name: i18n.OPSGENIE_NAME,
     id: OpsgenieConnectorTypeId,

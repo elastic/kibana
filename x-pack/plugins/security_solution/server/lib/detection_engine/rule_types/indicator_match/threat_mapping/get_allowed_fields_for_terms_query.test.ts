@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IndicesGetFieldMappingResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
@@ -14,52 +14,40 @@ import {
   getAllowedFieldsForTermQuery,
 } from './get_allowed_fields_for_terms_query';
 
-const indexMapping = {
-  'source-index': {
-    mappings: {
-      'host.name': {
-        full_name: 'host.name',
-        mapping: {
-          name: {
-            type: 'keyword',
-          },
-        },
-      },
-      'url.full': {
-        full_name: 'url.full',
-        mapping: {
-          full: {
-            type: 'keyword',
-          },
-        },
-      },
-      'source.range': {
-        full_name: 'source.range',
-        mapping: {
-          range: {
-            type: 'ip_range',
-          },
-        },
+const fieldsCapsResponse: FieldCapsResponse = {
+  indices: ['source-index', 'other-source-index'],
+  fields: {
+    'url.full': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
       },
     },
-  },
-  'other-source-index': {
-    mappings: {
-      'host.name': {
-        full_name: 'host.name',
-        mapping: {
-          name: {
-            type: 'keyword',
-          },
-        },
+    'host.name': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
       },
-      'host.ip': {
-        full_name: 'host.ip',
-        mapping: {
-          name: {
-            type: 'ip',
-          },
-        },
+    },
+    'host.ip': {
+      ip: {
+        type: 'ip',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'source.range': {
+      ip_range: {
+        type: 'ip_range',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+        indices: ['source-index'],
       },
     },
   },
@@ -68,9 +56,12 @@ const indexMapping = {
 describe('get_allowed_fields_for_terms_query copy', () => {
   describe('getAllowedFieldForTermQueryFromMapping', () => {
     it('should return map of fields allowed for term query', () => {
-      const result = getAllowedFieldForTermQueryFromMapping(
-        indexMapping as IndicesGetFieldMappingResponse
-      );
+      const result = getAllowedFieldForTermQueryFromMapping(fieldsCapsResponse, [
+        'host.ip',
+        'url.full',
+        'host.name',
+        'source.range',
+      ]);
       expect(result).toEqual({
         'host.ip': true,
         'url.full': true,
@@ -78,21 +69,25 @@ describe('get_allowed_fields_for_terms_query copy', () => {
       });
     });
     it('should disable fields if in one index type not supported', () => {
-      const result = getAllowedFieldForTermQueryFromMapping({
-        'new-source-index': {
-          mappings: {
+      const result = getAllowedFieldForTermQueryFromMapping(
+        {
+          ...fieldsCapsResponse,
+          fields: {
+            ...fieldsCapsResponse.fields,
             'host.name': {
-              full_name: 'host.name',
-              mapping: {
-                name: {
-                  type: 'text',
-                },
+              ...fieldsCapsResponse.fields['host.name'],
+              text: {
+                type: 'text',
+                metadata_field: false,
+                searchable: true,
+                aggregatable: true,
+                indices: ['new-source-index'],
               },
             },
           },
         },
-        ...indexMapping,
-      } as IndicesGetFieldMappingResponse);
+        ['host.ip', 'url.full', 'host.name', 'source.range']
+      );
       expect(result).toEqual({
         'host.ip': true,
         'url.full': true,
@@ -106,16 +101,16 @@ describe('get_allowed_fields_for_terms_query copy', () => {
 
     beforeEach(() => {
       alertServices = alertsMock.createRuleExecutorServices();
-      alertServices.scopedClusterClient.asCurrentUser.indices.getFieldMapping.mockResolvedValue(
-        indexMapping as IndicesGetFieldMappingResponse
+      alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
+        fieldsCapsResponse
       );
       ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
     });
 
     it('should return map of fields allowed for term query for source and threat indices', async () => {
       const threatMatchedFields = {
-        source: ['host.name', 'url.full'],
-        threat: ['host.name', 'url.full'],
+        source: ['host.name', 'url.full', 'host.ip'],
+        threat: ['host.name', 'url.full', 'host.ip'],
       };
       const threatIndex = ['threat-index'];
       const inputIndex = ['source-index'];

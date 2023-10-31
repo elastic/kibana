@@ -71,7 +71,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         )}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
         `--xpack.fleet.enableExperimental=${JSON.stringify([
-          'secretsStorage',
+          'outputSecretsStorage',
           'agentTamperProtectionEnabled',
         ])}`,
         `--logging.loggers=${JSON.stringify([

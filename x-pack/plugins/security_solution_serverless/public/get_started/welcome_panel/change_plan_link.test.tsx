@@ -16,6 +16,9 @@ jest.mock('../../common/services', () => ({
     services: {
       cloud: {
         projectsUrl: 'https://cloud.elastic.co/projects',
+        serverless: {
+          projectId: 'test-project-id',
+        },
       },
     },
   }),
@@ -35,6 +38,9 @@ describe('ChangePlanLink', () => {
     const link = getByText('Change plan');
     expect(badge).toBeInTheDocument();
     expect(link).toBeInTheDocument();
+    expect(link.getAttribute('href')).toEqual(
+      'https://cloud.elastic.co/projects/security/test-project-id'
+    );
   });
 
   it('does not render badge when productTier is defined', () => {

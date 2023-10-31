@@ -56,7 +56,7 @@ describe('SLOs Welcome Page', () => {
 
   describe('when the incorrect license is found', () => {
     it('renders the welcome message with subscription buttons', async () => {
-      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useGlobalDiagnosisMock.mockReturnValue({
         data: {
@@ -82,7 +82,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and no results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, emptySloList });
+        useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       });
 
       it('disables the create slo button when no write capabilities', async () => {
@@ -146,7 +146,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
         useGlobalDiagnosisMock.mockReturnValue({
           data: {
             userPrivileges: {

@@ -92,9 +92,8 @@ export class ActionsClientLlm extends LLM {
         `${LLM_TYPE}: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
       );
     }
-
     // TODO: handle errors from the connector
-    const content = get('data', actionResult);
+    const content = get('data.message', actionResult);
 
     if (typeof content !== 'string') {
       throw new Error(

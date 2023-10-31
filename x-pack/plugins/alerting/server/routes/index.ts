@@ -62,6 +62,8 @@ import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggest
 import { registerFieldsRoute } from './suggestions/fields_rules';
 import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
+import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
+import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -133,4 +135,6 @@ export function defineRoutes(opts: RouteOptions) {
   bulkGetMaintenanceWindowRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);
   bulkUntrackAlertRoute(router, licenseState);
+  getQueryDelaySettingsRoute(router, licenseState);
+  updateQueryDelaySettingsRoute(router, licenseState);
 }

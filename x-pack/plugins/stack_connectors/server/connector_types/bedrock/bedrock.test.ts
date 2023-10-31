@@ -109,7 +109,7 @@ describe('BedrockConnector', () => {
             stop_sequences: ['\n\nHuman:'],
           }),
         });
-        expect(response).toEqual(mockResponseString);
+        expect(response.message).toEqual(mockResponseString);
       });
 
       it('Properly formats messages from user, assistant, and system', async () => {
@@ -148,7 +148,7 @@ describe('BedrockConnector', () => {
             stop_sequences: ['\n\nHuman:'],
           }),
         });
-        expect(response).toEqual(mockResponseString);
+        expect(response.message).toEqual(mockResponseString);
       });
 
       it('errors during API calls are properly handled', async () => {

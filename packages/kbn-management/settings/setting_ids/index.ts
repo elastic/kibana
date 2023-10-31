@@ -52,7 +52,6 @@ export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
 // Presentation labs settings
 export const LABS_CANVAS_BY_VALUE_EMBEDDABLE_ID = 'labs:canvas:byValueEmbeddable';
 export const LABS_CANVAS_ENABLE_UI_ID = 'labs:canvas:enable_ui';
-export const LABS_DASHBOARD_CONTROLS_ID = 'labs:dashboard:dashboardControls';
 export const LABS_DASHBOARD_DEFER_BELOW_FOLD_ID = 'labs:dashboard:deferBelowFold';
 export const LABS_DASHBOARDS_ENABLE_UI_ID = 'labs:dashboard:enable_ui';
 
@@ -157,8 +156,8 @@ export const SECURITY_SOLUTION_DEFAULT_INDEX_ID = 'securitySolution:defaultIndex
 export const SECURITY_SOLUTION_DEFAULT_THREAT_INDEX_ID = 'securitySolution:defaultThreatIndex';
 export const SECURITY_SOLUTION_DEFAULT_ANOMALY_SCORE_ID = 'securitySolution:defaultAnomalyScore';
 export const SECURITY_SOLUTION_ENABLE_GROUPED_NAV_ID = 'securitySolution:enableGroupedNav';
-export const SECURITY_SOLUTION_ENABLE_NEWS_FEED_ID = 'securitySolution:enableNewsFeed';
 export const SECURITY_SOLUTION_RULES_TABLE_REFRESH_ID = 'securitySolution:rulesTableRefresh';
+export const SECURITY_SOLUTION_ENABLE_NEWS_FEED_ID = 'securitySolution:enableNewsFeed';
 export const SECURITY_SOLUTION_NEWS_FEED_URL_ID = 'securitySolution:newsFeedUrl';
 export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipReputationLinks';
 export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableCcsWarning';

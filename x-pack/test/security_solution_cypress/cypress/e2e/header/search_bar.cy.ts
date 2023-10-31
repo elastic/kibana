@@ -6,7 +6,7 @@
  */
 
 import { login } from '../../tasks/login';
-import { visit } from '../../tasks/navigation';
+import { visitWithTimeRange } from '../../tasks/navigation';
 import {
   openAddFilterPopover,
   fillAddFilterForm,
@@ -23,12 +23,18 @@ import { getHostIpFilter } from '../../objects/filter';
 import { hostsUrl } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165637
-describe('SearchBar', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
+    cy.task('esArchiverResetKibana');
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
+
     login();
-    visit(hostsUrl('allHosts'));
+    visitWithTimeRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
+  });
+
+  afterEach(() => {
+    cy.task('esArchiverUnload', 'auditbeat');
   });
 
   it('adds correctly a filter to the global search bar', () => {

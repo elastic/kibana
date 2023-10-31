@@ -112,6 +112,9 @@ export const DataDriftOverviewTable = ({
 
         return (
           <EuiButtonIcon
+            data-test-subj={`dataDriftToggleDetails-${
+              itemIdToExpandedRowMapValues[item.featureName] ? 'expanded' : 'collapsed'
+            }`}
             onClick={() => toggleDetails(item)}
             aria-label={itemIdToExpandedRowMapValues[item.featureName] ? COLLAPSE_ROW : EXPAND_ROW}
             iconType={itemIdToExpandedRowMapValues[item.featureName] ? 'arrowDown' : 'arrowRight'}
@@ -149,7 +152,10 @@ export const DataDriftOverviewTable = ({
       'data-test-subj': 'mlDataDriftOverviewTableDriftDetected',
       sortable: true,
       textOnly: true,
-      render: (driftDetected: boolean) => {
+      render: (driftDetected: boolean, item) => {
+        // @ts-expect-error currently ES two_sided does return string NaN, will be fixed
+        // NaN happens when the distributions are non overlapping. This means there is a drift.
+        if (item.similarityTestPValue === 'NaN') return dataComparisonYesLabel;
         return <span>{driftDetected ? dataComparisonYesLabel : dataComparisonNoLabel}</span>;
       },
     },

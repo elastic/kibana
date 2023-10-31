@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { stringifyZodError } from '@kbn/securitysolution-es-utils';
-import { expectParseError, expectParseSuccess } from '../../../../test/zod_helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import type { ExportRulesRequestQueryInput } from './export_rules_route.gen';
 import { ExportRulesRequestBody, ExportRulesRequestQuery } from './export_rules_route.gen';
 

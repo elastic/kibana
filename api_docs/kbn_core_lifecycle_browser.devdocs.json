@@ -319,6 +319,28 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [
+              "{@link PluginsServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-common.PluginsServiceSetup",
+                "text": "PluginsServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreSetup.getStartServices",
             "type": "Function",
             "tags": [],
@@ -787,6 +809,28 @@
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [
+              "{@link PluginsServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-common.PluginsServiceStart",
+                "text": "PluginsServiceStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",

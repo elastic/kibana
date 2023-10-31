@@ -9,7 +9,7 @@ Retrieve the health status of the alerting framework.
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification].
 ====
 
 [[get-alerting-framework-health-api-request]]

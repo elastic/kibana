@@ -48,6 +48,11 @@ export enum AppFeatureSecurityKey {
    * Enables managing endpoint exceptions on rules and alerts
    */
   endpointExceptions = 'endpointExceptions',
+
+  /**
+   * enables all rule actions
+   */
+  externalRuleActions = 'external_rule_actions',
 }
 
 export enum AppFeatureCasesKey {

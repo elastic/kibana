@@ -50,13 +50,13 @@ let exceptionListResponse: Cypress.Response<ExceptionListSchema>;
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165690
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/165838
+describe.skip(
   'Manage lists from "Shared Exception Lists" page',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     describe('Create/Export/Delete List', () => {
       before(() => {
-        cy.task('esArchiverResetKibana');
         createRule(getNewRule({ name: 'Another rule' }));
 
         // Create exception list associated with a rule

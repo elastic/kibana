@@ -9,8 +9,9 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import type { OutputSOAttributes } from '../types';
+import type { Logger } from '@kbn/logging';
 
+import type { OutputSOAttributes } from '../types';
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 
 import { outputService, outputIdToUuid } from './output';
@@ -27,6 +28,17 @@ const mockedAppContextService = appContextService as jest.Mocked<typeof appConte
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
+
+mockedAppContextService.getLogger.mockImplementation(() => {
+  return {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger;
+});
+
+mockedAppContextService.getExperimentalFeatures.mockReturnValue({});
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 

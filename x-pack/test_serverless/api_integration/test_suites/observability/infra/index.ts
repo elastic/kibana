@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Infra UI', function () {
+    // all these tests are failing on MKI:
+    // Error: expected 200 "OK", got 404 "Not Found"
+    this.tags(['failsOnMKI']);
+
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./snapshot'));
     loadTestFile(require.resolve('./processes'));

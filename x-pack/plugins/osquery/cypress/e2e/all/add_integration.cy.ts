@@ -29,6 +29,7 @@ import {
   policyContainsIntegration,
 } from '../../tasks/integrations';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
@@ -40,7 +41,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('elastic');
+    cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
   });
 
   after(() => {
@@ -65,7 +66,8 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  describe('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169702
+  describe.skip('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;

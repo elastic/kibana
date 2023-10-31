@@ -51,7 +51,27 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiErrorBoundary>
+                  "children": <KibanaErrorBoundaryProvider>
+                    <KibanaErrorBoundary>
+                      <EuiFlyout
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiFlyout>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaErrorBoundaryProvider>
+                  <KibanaErrorBoundary>
                     <EuiFlyout
                       onClose={[Function]}
                     >
@@ -60,24 +80,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiFlyout>
-                  </EuiErrorBoundary>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <EuiErrorBoundary>
-                  <EuiFlyout
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiFlyout>
-                </EuiErrorBoundary>,
+                  </KibanaErrorBoundary>
+                </KibanaErrorBoundaryProvider>,
               },
             ],
           },
@@ -110,7 +114,27 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiErrorBoundary>
+                  "children": <KibanaErrorBoundaryProvider>
+                    <KibanaErrorBoundary>
+                      <EuiFlyout
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiFlyout>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaErrorBoundaryProvider>
+                  <KibanaErrorBoundary>
                     <EuiFlyout
                       onClose={[Function]}
                     >
@@ -119,24 +143,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiFlyout>
-                  </EuiErrorBoundary>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <EuiErrorBoundary>
-                  <EuiFlyout
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiFlyout>
-                </EuiErrorBoundary>,
+                  </KibanaErrorBoundary>
+                </KibanaErrorBoundaryProvider>,
               },
             ],
           },

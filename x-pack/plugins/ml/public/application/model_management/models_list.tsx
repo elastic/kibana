@@ -35,6 +35,7 @@ import {
   BUILT_IN_MODEL_TAG,
   BUILT_IN_MODEL_TYPE,
   DEPLOYMENT_STATE,
+  DeploymentState,
   ELASTIC_MODEL_DEFINITIONS,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
@@ -68,6 +69,7 @@ import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
+import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { useEnabledFeatures } from '../contexts/ml';
 
@@ -162,6 +164,7 @@ export const ModelsList: FC<Props> = ({
     {}
   );
   const [modelToTest, setModelToTest] = useState<ModelItem | null>(null);
+  const [dfaModelToTest, setDfaModelToTest] = useState<ModelItem | null>(null);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -349,7 +352,7 @@ export const ModelsList: FC<Props> = ({
         );
         if (elasticModels.length > 0) {
           for (const model of elasticModels) {
-            if (model.state === MODEL_STATE.STARTED) {
+            if (Object.values(DEPLOYMENT_STATE).includes(model.state as DeploymentState)) {
               // no need to check for the download status if the model has been deployed
               continue;
             }
@@ -409,6 +412,7 @@ export const ModelsList: FC<Props> = ({
     isLoading,
     fetchModels: fetchModelsData,
     onTestAction: setModelToTest,
+    onDfaTestAction: setDfaModelToTest,
     onModelsDeleteRequest: setModelsToDelete,
     onModelDeployRequest: setModelToDeploy,
     onLoading: setIsLoading,
@@ -761,6 +765,9 @@ export const ModelsList: FC<Props> = ({
       )}
       {modelToTest === null ? null : (
         <TestTrainedModelFlyout model={modelToTest} onClose={setModelToTest.bind(null, null)} />
+      )}
+      {dfaModelToTest === null ? null : (
+        <TestDfaModelsFlyout model={dfaModelToTest} onClose={setDfaModelToTest.bind(null, null)} />
       )}
       {modelToDeploy !== undefined ? (
         <AddInferencePipelineFlyout
