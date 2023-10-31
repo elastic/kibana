@@ -552,7 +552,7 @@ x-pack/plugins/observability_onboarding @elastic/apm-ui @elastic/obs-ux-logs-tea
 x-pack/plugins/observability @elastic/actionable-observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
-test/common/plugins/otel_metrics @elastic/infra-monitoring-ui TODO
+test/common/plugins/otel_metrics @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
@@ -569,7 +569,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 src/plugins/presentation_util @elastic/kibana-presentation
-x-pack/plugins/profiling_data_access @elastic/profiling-ui TODO
+x-pack/plugins/profiling_data_access @elastic/profiling-ui @elastic/obs-ux-management-team
 x-pack/plugins/profiling @elastic/profiling-ui @elastic/obs-ux-infra_services-team
 packages/kbn-profiling-utils @elastic/profiling-ui @elastic/obs-ux-infra_services-team
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
@@ -658,7 +658,7 @@ packages/kbn-securitysolution-rules @elastic/security-detection-engine
 packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 packages/kbn-securitysolution-utils @elastic/security-detection-engine
 packages/kbn-server-http-tools @elastic/kibana-core
-packages/kbn-server-route-repository @elastic/apm-ui TODO
+packages/kbn-server-route-repository @elastic/apm-ui @elastic/obs-knowledge-team @elastic/obs-ux-management-team
 x-pack/plugins/serverless @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/platform-deployment-management
 x-pack/plugins/serverless_observability @elastic/appex-sharedux @elastic/apm-ui @elastic/obs-ux-management-team
@@ -772,7 +772,7 @@ x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
-packages/kbn-typed-react-router-config @elastic/apm-ui TODO
+packages/kbn-typed-react-router-config @elastic/apm-ui @elastic/obs-knowledge-team @elastic/obs-ux-management-team
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 src/plugins/ui_actions_enhanced @elastic/appex-sharedux
