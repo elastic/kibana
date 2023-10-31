@@ -17,8 +17,7 @@ import {
 } from '@elastic/eui';
 import { useLegendAction } from '@elastic/charts';
 import type { CellValueAction } from '../types';
-
-const shouldShowLegendActionDefault = () => true;
+import { shouldShowLegendActionDefault } from '../../common/helpers/visualization';
 
 export type LegendCellValueActions = Array<
   Omit<CellValueAction, 'execute'> & { execute: () => void }
