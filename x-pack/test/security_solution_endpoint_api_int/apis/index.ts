@@ -26,35 +26,42 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
-    const roles = Object.values(ROLE);
     before(async () => {
       try {
         await ingestManager.setup();
       } catch (err) {
         log.warning(`Error setting up ingestManager: ${err}`);
       }
-
-      // create role/user
-      for (const role of roles) {
-        await rolesUsersProvider.createRole({ predefinedRole: role });
-        await rolesUsersProvider.createUser({ name: role, roles: [role] });
-      }
-    });
-    after(async () => {
-      // delete role/user
-      await rolesUsersProvider.deleteUsers(roles);
-      await rolesUsersProvider.deleteRoles(roles);
     });
 
-    loadTestFile(require.resolve('./resolver'));
-    loadTestFile(require.resolve('./metadata'));
-    loadTestFile(require.resolve('./policy'));
-    loadTestFile(require.resolve('./package'));
-    loadTestFile(require.resolve('./endpoint_authz'));
-    loadTestFile(require.resolve('./endpoint_response_actions/execute'));
-    loadTestFile(require.resolve('./endpoint_artifacts/trusted_apps'));
-    loadTestFile(require.resolve('./endpoint_artifacts/event_filters'));
-    loadTestFile(require.resolve('./endpoint_artifacts/host_isolation_exceptions'));
-    loadTestFile(require.resolve('./endpoint_artifacts/blocklists'));
+    describe('tests using roles', () => {
+      const roles = Object.values(ROLE);
+      before(async () => {
+        // create role/user
+        for (const role of roles) {
+          await rolesUsersProvider.createRole({ predefinedRole: role });
+          await rolesUsersProvider.createUser({ name: role, roles: [role] });
+        }
+      });
+      after(async () => {
+        // delete role/user
+        await rolesUsersProvider.deleteUsers(roles);
+        await rolesUsersProvider.deleteRoles(roles);
+      });
+
+      loadTestFile(require.resolve('./metadata'));
+      loadTestFile(require.resolve('./policy'));
+      loadTestFile(require.resolve('./package'));
+      loadTestFile(require.resolve('./endpoint_authz'));
+      loadTestFile(require.resolve('./endpoint_response_actions/execute'));
+      loadTestFile(require.resolve('./endpoint_artifacts/trusted_apps'));
+      loadTestFile(require.resolve('./endpoint_artifacts/event_filters'));
+      loadTestFile(require.resolve('./endpoint_artifacts/host_isolation_exceptions'));
+      loadTestFile(require.resolve('./endpoint_artifacts/blocklists'));
+    });
+
+    describe('tests not using roles', () => {
+      loadTestFile(require.resolve('./resolver'));
+    });
   });
 }
