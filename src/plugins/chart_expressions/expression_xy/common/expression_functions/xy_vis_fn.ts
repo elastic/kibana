@@ -139,7 +139,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
       overrides: handlers.variables?.overrides as XYRender['value']['overrides'],
-      shouldShowLegendAction: handlers?.shouldShowLegendAction,
+      shouldShowLegendAction: handlers?.shouldShowLegendAction ?? (() => true),
     },
   };
 };
