@@ -28,13 +28,13 @@ describe('streamReducer', () => {
       ccsWarning: true,
       loaded: 50,
       loadingState: 'Loaded 50%',
-      significantTerms: [],
-      significantTermsGroups: [],
+      significantItems: [],
+      significantItemsGroups: [],
       errors: [],
     });
   });
 
-  it('adds significant term, then resets all state again', () => {
+  it('adds significant item, then resets all state again', () => {
     const state1 = streamReducer(
       initialState,
       addSignificantItemsAction([
