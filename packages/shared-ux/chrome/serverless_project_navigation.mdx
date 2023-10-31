@@ -560,13 +560,11 @@ Project name breadcrumb is always displayed as the first breadcrumb. It displays
 Project navigation breadcrumbs are automatically generated based on the project's navigation tree set for the [side navigation](#left-side-navigation) and the currently active navigation path.
 
 > **Note**
-> If you have static pages that are accessible from an app, that should display the breadcrumbs, but shouldn't be visible in the sidenav, you can add them to the navigation tree with `sideNavStatus: 'hidden'`.
+> If you have static pages that are accessible from an app and should display breadcrumbs but shouldn't be visible in the sidenav, you can add such pages to the navigation tree with `sideNavStatus: 'hidden'`.
 
 #### Deeper context breadcrumbs
 
-Most of the applications are already setting the complete breadcrumb path for the stateful Kibana navigation using the `chrome.setBreadcrumbs` api.
-It is possible to re-use the existing breadcrumbs for deeper context breadcrumbs in the serverless project navigation. For this, apps need to add a `deepLinkId` to the breadcrumb object.
-This `deepLinkId` will be used to match and merge the project navigation breadcrumbs with the deeper context breadcrumbs set in `chrome.setBreadcrumbs`.
+Most of the applications are already setting the complete breadcrumb path for stateful Kibana navigation using the chrome.setBreadcrumbs API. It is possible to reuse the existing breadcrumbs for deeper context breadcrumbs in the serverless project navigation. For this, apps need to add a deepLinkId to the breadcrumb object. This deepLinkId will be used to match and merge the project navigation breadcrumbs with the deeper context breadcrumbs set in chrome.setBreadcrumbs."
 
 For example, consider the navigation tree:
 
