@@ -198,7 +198,11 @@ export function DifferentialTopNFunctionsView() {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <AsyncComponent {...comparisonState} size="xl" alignTop>
+          <AsyncComponent
+            {...(comparisonState.status === AsyncStatus.Loading ? comparisonState : state)}
+            size="xl"
+            alignTop
+          >
             <DifferentialTopNFunctionsGrid
               base={state.data}
               comparison={comparisonState.data}

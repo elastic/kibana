@@ -11,6 +11,7 @@ import {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
+  EuiDataGridSetCellProps,
   EuiDataGridSorting,
   EuiPopover,
   EuiPopoverTitle,
@@ -27,7 +28,7 @@ import {
   TopNFunctions,
   TopNFunctionSortField,
 } from '@kbn/profiling-utils';
-import { orderBy } from 'lodash';
+import { isEmpty, orderBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
@@ -36,15 +37,10 @@ import { FunctionRow } from '../topn_functions/function_row';
 import { getFunctionsRows, IFunctionRow } from '../topn_functions/utils';
 import './diff_topn_functions.scss';
 
-interface Target {
-  columnId: string;
-  frame: string;
-  className?: 'blinking';
-}
-
 interface CompareFrame {
   frame?: IFunctionRow;
   isComparison: boolean;
+  className?: 'blinking';
 }
 
 const removeComparisonFromId = (id: string) => id.replace('comparison_', '');
@@ -73,7 +69,13 @@ export type OnChangeSortParams =
     };
 
 function getFrameIdentification(frame: StackFrameMetadata) {
-  return [frame.SourceFilename, frame.FunctionName].join('|');
+  return [
+    frame.SourceFilename,
+    frame.FunctionName,
+    frame.ExeFileName,
+    frame.FileID,
+    frame.AddressOrLine,
+  ].join('|');
 }
 
 interface Props {
@@ -109,7 +111,6 @@ export function DifferentialTopNFunctionsGrid({
 }: Props) {
   const timerIdRef = useRef<NodeJS.Timeout | undefined>();
   const calculateImpactEstimates = useCalculateImpactEstimate();
-  const [target, setTarget] = useState<Target | undefined>();
   const [selectedCompareFrame, setSelectedCompareFrame] = useState<CompareFrame | undefined>();
   const theme = useEuiTheme();
 
@@ -180,11 +181,21 @@ export function DifferentialTopNFunctionsGrid({
     totalSeconds,
   ]);
 
-  const compareFrame: EuiDataGridColumnCellAction = useCallback(
+  const compareFrameAction: EuiDataGridColumnCellAction = useCallback(
     ({ rowIndex, columnId, Component }) => {
       const isComparison = isComparisonColumn(columnId);
-      const data = isComparison ? comparisonRows[rowIndex] : baseRows[rowIndex];
-      const currentFrameId = getFrameIdentification(data.frame);
+      const currentRow = isComparison ? comparisonRows[rowIndex] : baseRows[rowIndex];
+      if (currentRow === undefined) {
+        return null;
+      }
+      const currentFrameId = getFrameIdentification(currentRow.frame);
+      const compareRow = isComparison
+        ? baseRows.find((item) => getFrameIdentification(item.frame) === currentFrameId)
+        : comparisonRows.find((item) => getFrameIdentification(item.frame) === currentFrameId);
+
+      if (compareRow === undefined) {
+        return null;
+      }
       const selectedFrameId = selectedCompareFrame?.frame
         ? getFrameIdentification(selectedCompareFrame.frame.frame)
         : undefined;
@@ -200,26 +211,16 @@ export function DifferentialTopNFunctionsGrid({
                   clearTimeout(timerIdRef.current);
                 }
 
-                const _target: Target = {
-                  columnId: isComparison
-                    ? removeComparisonFromId(columnId)
-                    : `comparison_${columnId}`,
-                  frame: currentFrameId,
-                  className: 'blinking',
-                };
-                setTarget(_target);
-                const id = setTimeout(() => setTarget({ ..._target, className: undefined }), 2000);
-
+                setSelectedCompareFrame({ isComparison, frame: compareRow, className: 'blinking' });
+                // After 2s update state removing the classname
+                const id = setTimeout(
+                  () =>
+                    setSelectedCompareFrame((state) =>
+                      state ? { ...state, className: undefined } : undefined
+                    ),
+                  2000
+                );
                 timerIdRef.current = id;
-
-                setSelectedCompareFrame({
-                  isComparison,
-                  frame: isComparison
-                    ? baseRows.find((item) => getFrameIdentification(item.frame) === currentFrameId)
-                    : comparisonRows.find(
-                        (item) => getFrameIdentification(item.frame) === currentFrameId
-                      ),
-                });
               }}
               iconType="inspect"
             >
@@ -310,7 +311,7 @@ export function DifferentialTopNFunctionsGrid({
         displayAsText: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
           defaultMessage: 'Function',
         }),
-        cellActions: [compareFrame],
+        cellActions: [compareFrameAction],
       },
       {
         id: TopNFunctionSortField.Samples,
@@ -373,7 +374,7 @@ export function DifferentialTopNFunctionsGrid({
         displayAsText: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
           defaultMessage: 'Function',
         }),
-        cellActions: [compareFrame],
+        cellActions: [compareFrameAction],
       },
       {
         id: TopNComparisonFunctionSortField.ComparisonSamples,
@@ -430,7 +431,7 @@ export function DifferentialTopNFunctionsGrid({
         isSortable: false,
       },
     ],
-    [compareFrame]
+    [compareFrameAction]
   );
 
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
@@ -440,28 +441,47 @@ export function DifferentialTopNFunctionsGrid({
     const data = isComparison ? sortedComparisonRows[rowIndex] : sortedBaseRows[rowIndex];
 
     useEffect(() => {
-      if (target?.columnId === columnId && getFrameIdentification(data.frame) === target.frame) {
-        setCellProps({
-          className: target.className,
+      let cellProps: EuiDataGridSetCellProps = {};
+      if (
+        data &&
+        selectedCompareFrame?.frame &&
+        getFrameIdentification(data.frame) ===
+          getFrameIdentification(selectedCompareFrame.frame.frame) &&
+        // We do this to highlight the opposite column from the one selected
+        isComparison !== selectedCompareFrame.isComparison
+      ) {
+        cellProps = {
+          className: selectedCompareFrame.className,
           style: {
             backgroundColor:
-              target.className === 'blinking' ? theme.euiTheme.colors.highlight : 'transparent',
+              selectedCompareFrame.className === 'blinking'
+                ? theme.euiTheme.colors.highlight
+                : 'transparent',
           },
-        });
+        };
       }
-    }, [columnId, data.frame, setCellProps]);
 
-    useEffect(() => {
+      // Add thick border to divide the baseline and comparison columns
       if (isComparison && columnId === TopNComparisonFunctionSortField.ComparisonRank) {
-        setCellProps({
-          style: {
-            borderLeft: theme.euiTheme.border.thick,
-          },
-        });
+        cellProps = {
+          ...cellProps,
+          style: { ...cellProps.style, borderLeft: theme.euiTheme.border.thick },
+        };
       } else if (columnId === TopNFunctionSortField.TotalCPU) {
-        setCellProps({ style: { borderRight: theme.euiTheme.border.thin } });
+        cellProps = {
+          ...cellProps,
+          style: { ...cellProps.style, borderRight: theme.euiTheme.border.thin },
+        };
       }
-    }, [columnId, isComparison, setCellProps]);
+
+      if (!isEmpty(cellProps)) {
+        setCellProps(cellProps);
+      }
+    }, [columnId, data, isComparison, setCellProps]);
+
+    if (data === undefined) {
+      return null;
+    }
 
     return (
       <FunctionRow
@@ -473,6 +493,8 @@ export function DifferentialTopNFunctionsGrid({
       />
     );
   }
+
+  const rowCount = Math.max(sortedBaseRows.length, sortedComparisonRows.length);
 
   return (
     <div>
@@ -489,7 +511,7 @@ export function DifferentialTopNFunctionsGrid({
         )}
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={sortedBaseRows.length > 100 ? 100 : sortedBaseRows.length}
+        rowCount={rowCount > 100 ? 100 : rowCount}
         renderCellValue={RenderCellValue}
         sorting={{
           columns: [
