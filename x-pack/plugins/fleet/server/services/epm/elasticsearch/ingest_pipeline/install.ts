@@ -172,8 +172,7 @@ export async function installAllPipelines({
     const content = getAsset(path).toString('utf-8');
     pipelinesInfos.push({
       nameForInstallation,
-      customIngestPipelineNameForInstallation:
-        dataStream && isMainPipeline ? getCustomPipelineNameForDatastream(dataStream) : undefined,
+      shouldInstallCustomPipelines: dataStream && isMainPipeline,
       dataStream,
       content,
       extension,
@@ -200,7 +199,7 @@ export async function installAllPipelines({
 
     pipelinesToInstall.push({
       nameForInstallation,
-      customIngestPipelineNameForInstallation: getCustomPipelineNameForDatastream(dataStream),
+      shouldInstallCustomPipelines: true,
       dataStream,
       contentForInstallation: 'processors: []',
       extension: 'yml',
@@ -208,7 +207,10 @@ export async function installAllPipelines({
   }
 
   const installationPromises = pipelinesToInstall.map(async (pipeline) => {
-    return installPipeline({ esClient, pipeline, installablePackage, logger });
+    return installPipeline({ esClient, pipeline, installablePackage, logger }).catch((err) => {
+      console.log('TESTSTST', JSON.stringify(pipeline, null, 2));
+      return Promise.reject(err);
+    });
   });
 
   return Promise.all(installationPromises);

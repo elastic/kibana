@@ -153,19 +153,16 @@ processors:
       `,
       extension: 'yml',
       nameForInstallation: 'logs-test-1.0.0',
-      customIngestPipelineNameForInstallation: 'logs-test@custom',
+      shouldInstallCustomPipelines: true,
     });
 
     expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(`
-      "---
+      "
       processors:
         - set:
             field: test
             value: toto
-        - pipeline:
-            name: logs-test@custom
-            ignore_missing_pipeline: true
-      "
+            "
     `);
   });
 
@@ -183,11 +180,15 @@ processors:
       }`,
       extension: 'json',
       nameForInstallation: 'logs-test-1.0.0',
-      customIngestPipelineNameForInstallation: 'logs-test@custom',
+      dataStream: {
+        type: 'logs',
+        dataset: 'test',
+      } as any,
+      shouldInstallCustomPipelines: true,
     });
 
     expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
-      `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}}]}"`
+      `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}]}"`
     );
   });
 
@@ -202,12 +203,13 @@ processors:
       `,
         extension: 'yml',
         nameForInstallation: 'logs-test-1.0.0',
-        customIngestPipelineNameForInstallation: 'logs-test@custom',
+        shouldInstallCustomPipelines: true,
         dataStream: {
-          dataset: 'test',
+          type: 'logs',
+          dataset: 'test.access',
           routing_rules: [
             {
-              source_dataset: 'test',
+              source_dataset: 'test.access',
               rules: [
                 {
                   target_dataset: 'test.reroute',
@@ -221,21 +223,26 @@ processors:
       });
 
       expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(`
-              "---
-              processors:
-                - set:
-                    field: test
-                    value: toto
-                - pipeline:
-                    name: logs-test@custom
-                    ignore_missing_pipeline: true
-                - reroute:
-                    tag: test
-                    dataset: test.reroute
-                    namespace: default
-                    if: true == true
-              "
-          `);
+        "---
+        processors:
+          - set:
+              field: test
+              value: toto
+          - name: global@custom
+            ignore_missing_pipeline: true
+          - name: logs@custom
+            ignore_missing_pipeline: true
+          - name: logs-test@custom
+            ignore_missing_pipeline: true
+          - name: logs-test.access@custom
+            ignore_missing_pipeline: true
+          - reroute:
+              tag: test.access
+              dataset: test.reroute
+              namespace: default
+              if: true == true
+        "
+      `);
     });
 
     it('add reroute processor after custom pipeline processor for json pipeline', () => {
@@ -252,12 +259,13 @@ processors:
       }`,
         extension: 'json',
         nameForInstallation: 'logs-test-1.0.0',
-        customIngestPipelineNameForInstallation: 'logs-test@custom',
+        shouldInstallCustomPipelines: true,
         dataStream: {
-          dataset: 'test',
+          type: 'logs',
+          dataset: 'test.access',
           routing_rules: [
             {
-              source_dataset: 'test',
+              source_dataset: 'test.access',
               rules: [
                 {
                   target_dataset: 'test.reroute',
@@ -271,7 +279,7 @@ processors:
       });
 
       expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
-        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"reroute\\":{\\"tag\\":\\"test\\",\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
+        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs-test.access@custom\\",\\"ignore_missing_pipeline\\":true},{\\"reroute\\":{\\"tag\\":\\"test.access\\",\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
       );
     });
   });
