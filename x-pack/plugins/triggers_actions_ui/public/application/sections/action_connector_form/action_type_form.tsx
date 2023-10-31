@@ -280,9 +280,15 @@ export const ActionTypeForm = ({
       const defaultParams = await getDefaultParams();
       if (defaultParams) {
         for (const [key, paramValue] of Object.entries(defaultParams)) {
+          const defaultAADParams: typeof defaultParams = {};
           if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
             setActionParamsProperty(key, paramValue, index);
+            // Add default param to AAD defaults only if it does not contain any template code
+            if (typeof paramValue !== 'string' || !paramValue.match(/{{.*?}}/g)) {
+              defaultAADParams[key] = paramValue;
+            }
           }
+          setStoredActionParamsForAadToggle(defaultAADParams);
         }
       }
     })();
@@ -293,9 +299,14 @@ export const ActionTypeForm = ({
     (async () => {
       const defaultParams = await getDefaultParams();
       if (defaultParams && actionGroup) {
+        const defaultAADParams: typeof defaultParams = {};
         for (const [key, paramValue] of Object.entries(defaultParams)) {
           setActionParamsProperty(key, paramValue, index);
+          if (!paramValue.match(/{{.*?}}/g)) {
+            defaultAADParams[key] = paramValue;
+          }
         }
+        setStoredActionParamsForAadToggle(defaultAADParams);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -529,6 +540,7 @@ export const ActionTypeForm = ({
                     label="Use template fields from alerts index"
                     checked={useAadTemplateFields}
                     onChange={handleUseAadTemplateFields}
+                    data-test-subj="mustacheAutocompleteSwitch"
                   />
                 </EuiFlexItem>
               )}
