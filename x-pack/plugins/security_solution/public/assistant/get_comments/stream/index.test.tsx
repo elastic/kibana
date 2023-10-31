@@ -21,6 +21,8 @@ const testProps = {
   regenerateMessage: jest.fn(),
 };
 
+const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
+
 describe('StreamComment', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,19 +47,19 @@ describe('StreamComment', () => {
   });
 
   it('renders cursor and stopGeneratingButton when reader is loading', () => {
-    render(<StreamComment {...testProps} reader={jest.fn()} isFetching={true} />);
+    render(<StreamComment {...testProps} reader={mockReader} isFetching={true} />);
     expect(screen.getByTestId('stopGeneratingButton')).toBeInTheDocument();
     expect(screen.getByTestId('cursor')).toBeInTheDocument();
   });
 
   it('renders controls correctly when not loading', () => {
-    render(<StreamComment {...testProps} reader={jest.fn()} />);
+    render(<StreamComment {...testProps} reader={mockReader} />);
 
     expect(screen.getByTestId('regenerateResponseButton')).toBeInTheDocument();
   });
 
   it('calls setComplete when StopGeneratingButton is clicked', () => {
-    render(<StreamComment {...testProps} reader={jest.fn()} isFetching={true} />);
+    render(<StreamComment {...testProps} reader={mockReader} isFetching={true} />);
 
     fireEvent.click(screen.getByTestId('stopGeneratingButton'));
 
