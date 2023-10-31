@@ -125,13 +125,12 @@ export const getComments = ({
         ...(message.isError ? errorStyles : {}),
       };
 
-      const transformMessage = (content: string, times?: number) =>
+      const transformMessage = (content: string) =>
         transformMessageWithReplacements({
           message,
           content,
           showAnonymizedValues,
           replacements,
-          times,
         });
 
       // message still needs to stream, no actions returned and replacements handled by streamer
