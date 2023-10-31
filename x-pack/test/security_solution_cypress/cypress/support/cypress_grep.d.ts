@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import * as hunterNoActionsUser from './detections_user.json';
-import * as hunterNoActionsRole from './detections_role.json';
-export { hunterNoActionsUser, hunterNoActionsRole };
+declare module '@cypress/grep' {
+  function registerCypressGrep(): void;
+
+  export = registerCypressGrep;
+}
