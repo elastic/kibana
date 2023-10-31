@@ -261,7 +261,6 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
         style={{ height: 180 }}
         timeRange={{ from: `now-${timeSize}${timeUnit}`, to: 'now' }}
         attributes={attributes}
-        withDefaultActions={true}
       />
     </div>
   );
