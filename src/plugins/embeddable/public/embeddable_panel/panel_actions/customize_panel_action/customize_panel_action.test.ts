@@ -40,28 +40,58 @@ function createHelloWorldContainer(input = { id: '123', panels: {} }) {
   return new HelloWorldContainer(input, { getEmbeddableFactory } as any);
 }
 
-beforeAll(async () => {
-  container = createHelloWorldContainer();
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    id: 'robert',
-    firstName: 'Robert',
-    lastName: 'Baratheon',
+describe('customizePanelAction', () => {
+  beforeAll(async () => {
+    container = createHelloWorldContainer();
+    const contactCardEmbeddable = await container.addNewEmbeddable<
+      ContactCardEmbeddableInput,
+      ContactCardEmbeddableOutput,
+      ContactCardEmbeddable
+    >(CONTACT_CARD_EMBEDDABLE, {
+      id: 'robert',
+      firstName: 'Robert',
+      lastName: 'Baratheon',
+    });
+    if (isErrorEmbeddable(contactCardEmbeddable)) {
+      throw new Error('Error creating new hello world embeddable');
+    } else {
+      embeddable = contactCardEmbeddable;
+    }
   });
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
-    throw new Error('Error creating new hello world embeddable');
-  } else {
-    embeddable = contactCardEmbeddable;
-  }
+
+  test('execute should open flyout', async () => {
+    const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelActionMock);
+    const spy = jest.spyOn(overlays, 'openFlyout');
+    await customizePanelAction.execute({ embeddable });
+
+    expect(spy).toHaveBeenCalled();
+  });
 });
 
-test('execute should open flyout', async () => {
-  const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelActionMock);
-  const spy = jest.spyOn(overlays, 'openFlyout');
-  await customizePanelAction.execute({ embeddable });
+describe('customizePanelAction and withDefaultActions is false', () => {
+  beforeAll(async () => {
+    container = createHelloWorldContainer();
+    const contactCardEmbeddable = await container.addNewEmbeddable<
+      ContactCardEmbeddableInput,
+      ContactCardEmbeddableOutput,
+      ContactCardEmbeddable
+    >(CONTACT_CARD_EMBEDDABLE, {
+      id: 'robert',
+      firstName: 'Robert',
+      lastName: 'Baratheon',
+      withDefaultActions: false,
+    });
+    if (isErrorEmbeddable(contactCardEmbeddable)) {
+      throw new Error('Error creating new hello world embeddable');
+    } else {
+      embeddable = contactCardEmbeddable;
+    }
+  });
 
-  expect(spy).toHaveBeenCalled();
+  test('should not be compatible', async () => {
+    const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelActionMock);
+    const result = await customizePanelAction.isCompatible({ embeddable });
+
+    expect(result).toBeFalsy();
+  });
 });

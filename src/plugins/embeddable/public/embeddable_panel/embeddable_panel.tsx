@@ -72,6 +72,7 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
 
     const actions: PanelUniversalActions = {
       customizePanel: new CustomizePanelAction(
+        core.application,
         core.overlays,
         core.theme,
         editPanel,

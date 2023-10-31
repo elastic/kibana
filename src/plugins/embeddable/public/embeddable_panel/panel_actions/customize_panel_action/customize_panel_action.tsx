@@ -99,8 +99,10 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
 
   public async isCompatible({ embeddable }: CustomizePanelActionContext) {
     // It should be possible to customize just the time range in View mode
+    const input = embeddable.getInput();
     return (
-      embeddable.getInput().viewMode === ViewMode.EDIT || this.isTimeRangeCompatible({ embeddable })
+      (input.viewMode === ViewMode.EDIT || this.isTimeRangeCompatible({ embeddable })) &&
+      input?.withDefaultActions !== false
     );
   }
 

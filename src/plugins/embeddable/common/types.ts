@@ -71,6 +71,7 @@ export type EmbeddableInput = {
   syncTooltips?: boolean;
 
   executionContext?: KibanaExecutionContext;
+  withDefaultActions?: boolean;
 };
 
 export interface PanelState<
