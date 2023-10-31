@@ -96,7 +96,6 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       })
       .clickOutside();
 
-    // cy.contains('Please fix issues listed below').should('not.exist');
     cy.getBySel('ruleEditSubmitButton').click();
     cy.contains(`${ruleName} was saved`).should('exist');
     closeToastIfVisible();
@@ -136,7 +135,6 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
 
     cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
 
-    // cy.contains('Please fix issues listed below').should('not.exist');
     cy.getBySel('ruleEditSubmitButton').click();
     cy.wait('@saveRuleSingleQuery').should(({ request }) => {
       const oneQuery = [
