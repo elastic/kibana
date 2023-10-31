@@ -11,7 +11,6 @@ import {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
-  EuiDataGridSetCellProps,
   EuiDataGridSorting,
   EuiPopover,
   EuiPopoverTitle,
@@ -28,20 +27,14 @@ import {
   TopNFunctions,
   TopNFunctionSortField,
 } from '@kbn/profiling-utils';
-import { isEmpty, orderBy } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { orderBy } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from '../topn_functions/function_row';
 import { getFunctionsRows, IFunctionRow } from '../topn_functions/utils';
 import './diff_topn_functions.scss';
-
-interface CompareFrame {
-  frame?: IFunctionRow;
-  isComparison: boolean;
-  className?: 'blinking';
-}
 
 const removeComparisonFromId = (id: string) => id.replace('comparison_', '');
 const isComparisonColumn = (id: string) => id.startsWith('comparison_');
@@ -109,18 +102,11 @@ export function DifferentialTopNFunctionsGrid({
   comparisonSortDirection,
   comparisonSortField,
 }: Props) {
-  const timerIdRef = useRef<NodeJS.Timeout | undefined>();
   const calculateImpactEstimates = useCalculateImpactEstimate();
-  const [selectedCompareFrame, setSelectedCompareFrame] = useState<CompareFrame | undefined>();
+  const [selectedFrameId, setSelectedFrameId] = useState<
+    { currentFrameId?: string; isComparison: boolean } | undefined
+  >();
   const theme = useEuiTheme();
-
-  useEffect(() => {
-    return () => {
-      if (timerIdRef.current) {
-        clearTimeout(timerIdRef.current);
-      }
-    };
-  }, []);
 
   const totalCount = useMemo(() => {
     if (!base || !base.TotalCount) {
@@ -189,38 +175,22 @@ export function DifferentialTopNFunctionsGrid({
         return null;
       }
       const currentFrameId = getFrameIdentification(currentRow.frame);
+
+      const isOpen = selectedFrameId
+        ? selectedFrameId.currentFrameId === currentFrameId &&
+          selectedFrameId.isComparison === isComparison
+        : false;
+
       const compareRow = isComparison
         ? baseRows.find((item) => getFrameIdentification(item.frame) === currentFrameId)
         : comparisonRows.find((item) => getFrameIdentification(item.frame) === currentFrameId);
-
-      if (compareRow === undefined) {
-        return null;
-      }
-      const selectedFrameId = selectedCompareFrame?.frame
-        ? getFrameIdentification(selectedCompareFrame.frame.frame)
-        : undefined;
-      const isOpen =
-        currentFrameId === selectedFrameId && selectedCompareFrame?.isComparison === isComparison;
 
       return (
         <EuiPopover
           button={
             <Component
               onClick={() => {
-                if (timerIdRef.current) {
-                  clearTimeout(timerIdRef.current);
-                }
-
-                setSelectedCompareFrame({ isComparison, frame: compareRow, className: 'blinking' });
-                // After 2s update state removing the classname
-                const id = setTimeout(
-                  () =>
-                    setSelectedCompareFrame((state) =>
-                      state ? { ...state, className: undefined } : undefined
-                    ),
-                  2000
-                );
-                timerIdRef.current = id;
+                setSelectedFrameId({ currentFrameId, isComparison });
               }}
               iconType="inspect"
             >
@@ -231,7 +201,7 @@ export function DifferentialTopNFunctionsGrid({
           }
           isOpen={isOpen}
           closePopover={() => {
-            setSelectedCompareFrame(undefined);
+            setSelectedFrameId(undefined);
           }}
           anchorPosition="upRight"
           css={css`
@@ -241,7 +211,7 @@ export function DifferentialTopNFunctionsGrid({
             }
           `}
         >
-          {selectedCompareFrame?.frame ? (
+          {compareRow ? (
             <div style={{ maxWidth: 400 }}>
               <EuiPopoverTitle paddingSize="s">
                 {isComparison
@@ -253,10 +223,10 @@ export function DifferentialTopNFunctionsGrid({
                     })}
               </EuiPopoverTitle>
               <EuiTitle size="xs">
-                <EuiText>{getCalleeFunction(selectedCompareFrame.frame.frame)}</EuiText>
+                <EuiText>{getCalleeFunction(compareRow.frame)}</EuiText>
               </EuiTitle>
               <EuiBasicTable
-                items={[selectedCompareFrame.frame]}
+                items={[compareRow]}
                 columns={[
                   { field: 'rank', name: 'Rank' },
                   {
@@ -277,11 +247,17 @@ export function DifferentialTopNFunctionsGrid({
                 ]}
               />
             </div>
-          ) : null}
+          ) : (
+            <EuiText color="subdued" size="s">
+              {i18n.translate('xpack.profiling.diffTopNFunctions.noCorrespondingValueFound', {
+                defaultMessage: 'No corresponding value found',
+              })}
+            </EuiText>
+          )}
         </EuiPopover>
       );
     },
-    [baseRows, comparisonRows, selectedCompareFrame]
+    [baseRows, comparisonRows, selectedFrameId]
   );
 
   const sortedBaseRows = useMemo(() => {
@@ -441,56 +417,32 @@ export function DifferentialTopNFunctionsGrid({
     const data = isComparison ? sortedComparisonRows[rowIndex] : sortedBaseRows[rowIndex];
 
     useEffect(() => {
-      let cellProps: EuiDataGridSetCellProps = {};
-      if (
-        data &&
-        selectedCompareFrame?.frame &&
-        getFrameIdentification(data.frame) ===
-          getFrameIdentification(selectedCompareFrame.frame.frame) &&
-        // We do this to highlight the opposite column from the one selected
-        isComparison !== selectedCompareFrame.isComparison
-      ) {
-        cellProps = {
-          className: selectedCompareFrame.className,
-          style: {
-            backgroundColor:
-              selectedCompareFrame.className === 'blinking'
-                ? theme.euiTheme.colors.highlight
-                : 'transparent',
-          },
-        };
-      }
-
       // Add thick border to divide the baseline and comparison columns
       if (isComparison && columnId === TopNComparisonFunctionSortField.ComparisonRank) {
-        cellProps = {
-          ...cellProps,
-          style: { ...cellProps.style, borderLeft: theme.euiTheme.border.thick },
-        };
+        setCellProps({
+          style: { borderLeft: theme.euiTheme.border.thick },
+        });
       } else if (columnId === TopNFunctionSortField.TotalCPU) {
-        cellProps = {
-          ...cellProps,
-          style: { ...cellProps.style, borderRight: theme.euiTheme.border.thin },
-        };
+        setCellProps({
+          style: { borderRight: theme.euiTheme.border.thin },
+        });
       }
-
-      if (!isEmpty(cellProps)) {
-        setCellProps(cellProps);
-      }
-    }, [columnId, data, isComparison, setCellProps]);
+    }, [columnId, isComparison, setCellProps]);
 
     if (data === undefined) {
       return null;
     }
 
     return (
-      <FunctionRow
-        functionRow={data}
-        columnId={removeComparisonFromId(columnId)}
-        setCellProps={setCellProps}
-        totalCount={totalCount}
-        onFrameClick={onFrameClick}
-      />
+      <div data-test-subj={columnId}>
+        <FunctionRow
+          functionRow={data}
+          columnId={removeComparisonFromId(columnId)}
+          setCellProps={setCellProps}
+          totalCount={totalCount}
+          onFrameClick={onFrameClick}
+        />
+      </div>
     );
   }
 
