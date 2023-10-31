@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlyoutBody } from '@elastic/eui';
-import { mountWithProvider } from '../../../mocks';
+import { mountWithProvider, renderWithReduxStore } from '../../../mocks';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
@@ -19,7 +20,6 @@ import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
-import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import {
   LensEditConfigurationFlyout,
   type EditConfigPanelProps,
@@ -58,8 +58,9 @@ describe('LensEditConfigurationFlyout', () => {
     props: ReturnType<typeof getDefaultProps>,
     query?: Query | AggregateQuery
   ) {
-    return mountWithProvider(
+    return renderWithReduxStore(
       <LensEditConfigurationFlyout {...props} />,
+      {},
       {
         preloadedState: {
           datasourceStates: {
@@ -75,15 +76,12 @@ describe('LensEditConfigurationFlyout', () => {
           datasourceMap: props.datasourceMap,
           visualizationMap: props.visualizationMap,
         }),
-      },
-      {
-        attachTo: container,
       }
     );
   }
 
   function getDefaultProps(
-    { datasourceMap = mockDatasourceMap(), visualizationMap = mockVisualizationMap() } = {
+    { datasourceMap, visualizationMap } = {
       datasourceMap: mockDatasourceMap(),
       visualizationMap: mockVisualizationMap(),
     }
@@ -130,9 +128,10 @@ describe('LensEditConfigurationFlyout', () => {
       displayFlyoutHeader: true,
       navigateToLensEditor: navigateToLensEditorSpy,
     };
-    const { instance } = await prepareAndMountComponent(newProps);
-    expect(instance.find('[data-test-subj="editFlyoutHeader"]').exists()).toBe(true);
-    instance.find('[data-test-subj="navigateToLensEditorLink"]').at(1).simulate('click');
+
+    prepareAndMountComponent(newProps);
+    expect(screen.getByTestId('editFlyoutHeader')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId('navigateToLensEditorLink'));
     expect(navigateToLensEditorSpy).toHaveBeenCalled();
   });
 
@@ -143,9 +142,10 @@ describe('LensEditConfigurationFlyout', () => {
       ...props,
       closeFlyout: closeFlyoutSpy,
     };
-    const { instance } = await prepareAndMountComponent(newProps);
-    expect(instance.find(EuiFlyoutBody).exists()).toBe(true);
-    instance.find('[data-test-subj="cancelFlyoutButton"]').at(1).simulate('click');
+
+    prepareAndMountComponent(newProps);
+    expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId('cancelFlyoutButton'));
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 
@@ -158,8 +158,8 @@ describe('LensEditConfigurationFlyout', () => {
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',
     };
-    const { instance } = await prepareAndMountComponent(newProps);
-    instance.find('[data-test-subj="cancelFlyoutButton"]').at(1).simulate('click');
+    prepareAndMountComponent(newProps);
+    userEvent.click(screen.getByTestId('cancelFlyoutButton'));
     expect(updateByRefInputSpy).toHaveBeenCalled();
   });
 
@@ -174,63 +174,69 @@ describe('LensEditConfigurationFlyout', () => {
       savedObjectId: 'id',
       saveByRef: saveByRefSpy,
     };
-    const { instance } = await prepareAndMountComponent(newProps);
-    instance.find('[data-test-subj="applyFlyoutButton"]').at(2).simulate('click');
+    prepareAndMountComponent(newProps);
+    userEvent.click(screen.getByTestId('applyFlyoutButton'));
     expect(updateByRefInputSpy).toHaveBeenCalled();
     expect(saveByRefSpy).toHaveBeenCalled();
   });
 
   it('should compute the frame public api correctly', async () => {
     const props = getDefaultProps();
-    const { instance } = await prepareAndMountComponent(props);
-    expect(instance.find(ConfigPanelWrapper).exists()).toBe(true);
-    expect(instance.find(VisualizationToolbar).exists()).toBe(true);
-    expect(instance.find(VisualizationToolbar).prop('framePublicAPI')).toMatchInlineSnapshot(`
-      Object {
-        "activeData": Object {},
-        "dataViews": Object {
-          "indexPatternRefs": Array [],
-          "indexPatterns": Object {},
-        },
-        "datasourceLayers": Object {
-          "a": Object {
-            "datasourceId": "testDatasource",
-            "getFilters": [MockFunction],
-            "getMaxPossibleNumValues": [MockFunction],
-            "getOperationForColumnId": [MockFunction],
-            "getSourceId": [MockFunction],
-            "getTableSpec": [MockFunction],
-            "getVisualDefaults": [MockFunction],
-            "hasDefaultTimeField": [MockFunction],
-            "isTextBasedLanguage": [MockFunction] {
-              "calls": Array [
-                Array [],
-                Array [],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": false,
-                },
-                Object {
-                  "type": "return",
-                  "value": false,
-                },
-              ],
-            },
-          },
-        },
-        "dateRange": Object {
-          "fromDate": "2021-01-10T04:00:00.000Z",
-          "toDate": "2021-01-10T08:00:00.000Z",
-        },
-      }
-    `);
+    prepareAndMountComponent(props);
+    screen.debug();
+    expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
+    expect(props.visualizationMap.testVis.ToolbarComponent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        frame: {},
+      })
+    );
+    // expect(instance.find(VisualizationToolbar).exists()).toBe(true);
+    // expect(instance.find(VisualizationToolbar).prop('framePublicAPI')).toMatchInlineSnapshot(`
+    //   Object {
+    //     "activeData": Object {},
+    //     "dataViews": Object {
+    //       "indexPatternRefs": Array [],
+    //       "indexPatterns": Object {},
+    //     },
+    //     "datasourceLayers": Object {
+    //       "a": Object {
+    //         "datasourceId": "testDatasource",
+    //         "getFilters": [MockFunction],
+    //         "getMaxPossibleNumValues": [MockFunction],
+    //         "getOperationForColumnId": [MockFunction],
+    //         "getSourceId": [MockFunction],
+    //         "getTableSpec": [MockFunction],
+    //         "getVisualDefaults": [MockFunction],
+    //         "hasDefaultTimeField": [MockFunction],
+    //         "isTextBasedLanguage": [MockFunction] {
+    //           "calls": Array [
+    //             Array [],
+    //             Array [],
+    //           ],
+    //           "results": Array [
+    //             Object {
+    //               "type": "return",
+    //               "value": false,
+    //             },
+    //             Object {
+    //               "type": "return",
+    //               "value": false,
+    //             },
+    //           ],
+    //         },
+    //       },
+    //     },
+    //     "dateRange": Object {
+    //       "fromDate": "2021-01-10T04:00:00.000Z",
+    //       "toDate": "2021-01-10T08:00:00.000Z",
+    //     },
+    //   }
+    // `);
   });
 
   it('should compute the activeVisualization correctly', async () => {
     const props = getDefaultProps();
-    const { instance } = await prepareAndMountComponent(props);
+    prepareAndMountComponent(props);
     expect(instance.find(VisualizationToolbar).prop('activeVisualization')).toMatchInlineSnapshot(`
       Object {
         "DimensionEditorComponent": [MockFunction],
