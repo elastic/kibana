@@ -25,6 +25,10 @@ export {
   PageLoading,
   PageError,
   SectionLoading,
+  useAuthorizationContext,
+  NotAuthorizedSection,
+  WithPrivileges,
+  AuthorizationProvider,
 } from '@kbn/es-ui-shared-plugin/public';
 
 export type {
