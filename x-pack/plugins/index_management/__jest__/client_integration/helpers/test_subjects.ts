@@ -102,5 +102,6 @@ export type TestSubjects =
   | 'filter-option-h'
   | 'infiniteRetentionPeriod.input'
   | 'saveButton'
+  | 'enrichPoliciesInsuficientPrivileges'
   | 'dataRetentionDetail'
   | 'createIndexSaveButton';
