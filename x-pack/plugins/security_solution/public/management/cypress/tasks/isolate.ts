@@ -42,15 +42,26 @@ export const isolateHostWithComment = (comment: string, hostname: string): void 
 };
 
 export const isolateHostFromEndpointList = (index: number = 0): void => {
-  // open action menu and click isolate
+  // open the action menu and click isolate action
   cy.getByTestSubj('endpointTableRowActions').eq(index).click();
   cy.getByTestSubj('isolateLink').click();
-  // isolation form confirm
+  // isolation form, click confirm button
   cy.getByTestSubj('hostIsolateConfirmButton').click();
   // return to endpoint details
   cy.getByTestSubj('hostIsolateSuccessCompleteButton').click();
   // close details flyout
   cy.getByTestSubj('euiFlyoutCloseButton').click();
+
+  // ensure the host is isolated
+  cy.wait(12000);
+
+  cy.getByTestSubj('endpointListTable').within(() => {
+    cy.get('tbody tr')
+      .eq(index)
+      .within(() => {
+        cy.get('td').eq(1).should('contain.text', 'Isolated');
+      });
+  });
 };
 
 export const releaseHostWithComment = (comment: string, hostname: string): void => {
