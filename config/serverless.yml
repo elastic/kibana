@@ -56,7 +56,6 @@ xpack.canvas.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
-xpack.screenshotting.enabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
 xpack.security.showInsecureClusterWarning: false
@@ -141,3 +140,8 @@ xpack.task_manager.allow_reading_invalid_state: false
 
 ## TaskManager requeue invalid tasks, supports ZDT
 xpack.task_manager.requeue_invalid_tasks.enabled: true
+
+# Reporting feature
+xpack.screenshotting.enabled: false
+xpack.reporting.roles.enabled: false
+xpack.reporting.statefulSettings.enabled: false
