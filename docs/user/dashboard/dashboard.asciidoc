@@ -338,7 +338,7 @@ Copy panels from one dashboard to another dashboard.
 
 preview::[]
 
-Links panels intro
+Links panels can now be added to dashboards to easily navigate between other dashboards and external websites. When creating links panels, you can include the time range and any current filters used on the dashboard, keeping the same range and filters when navigating to another dashboard. 
 
 [float]
 [[add-links-panel]]
@@ -351,9 +351,9 @@ To add a links panel to your dashboards:
 . In the **Create links panel** flyout choose between the panel displaying vertically or horizontally on your dashboard. 
 . Click **Add link**.
 . Specify the following:
-* **Go to** - Dashboard to link to another dashboard, or URL to link to an external URL. 
+* **Go to** - Dashboard to link to another dashboard, or URL to link to an external website. 
 * **Choose destination** - Use the dropdown to select another dashboard or enter an external URL.
-* **Text** - Enter text for the link. <--- this is weird phrasing.
+* **Text** - Enter text for the link, which displays in the panel. 
 * **Options** - When linking to another dashboard use the sliders to use the filters and queries from the original dashboard, use the date range from the original dashboard, or open the dashboard in a new tab. When linking to an external URL use the sliders to open the URL in a new tab, or encode the URL. 
 . Click **Add link**.
 . Click **Save**.
@@ -367,16 +367,29 @@ By default links panels are saved to the library. To add a links panel to anothe
 
 . On the **Dashboards** page, click the dashboard **Title** you want to open. 
 . Click **Add from library**.
-. Select the links panel from the **Add from library** flyout.  
+. Select the links panel from the **Add from library** flyout.
+. Click **Save**.  
 
 [float]
 [[edit-links-panel]]
 === Edit links panels
 
+To edit links panels:
+
+. Click image:images/lens_layerActions_8.5.0.png[], then **Edit Links**. 
+. Click image:images/dashboard_controlsEditControl_8.3.0.png[] on the link.
+. Click **Update link**.
+. Click **Saved**.
 
 [float]
 [[delete-links-panels]]
 === Delete links panels
+
+To delete links panels:
+
+. Click image:images/lens_layerActions_8.5.0.png[], then **More**.
+. Click **Delete from dashboard**.
+. Click **Save**.
 
 [float]
 [[add-dashboard-settings]]
