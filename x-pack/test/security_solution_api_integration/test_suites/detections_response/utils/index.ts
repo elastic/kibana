@@ -16,3 +16,5 @@ export * from './count_down_test';
 export * from './count_down_es';
 export * from './update_username';
 export * from './refresh_index';
+export * from './create_detection_engine_indices';
+export * from './generate_event';

@@ -36,6 +36,10 @@
     "actions:runner:serverless": "npm run run-tests actions serverless serverlessEnv",
     "actions:qa:serverless": "npm run run-tests actions serverless qaEnv",
     "actions:server:ess": "npm run initialize-server actions ess",
-    "actions:runner:ess": "npm run run-tests actions ess essEnv"
+    "actions:runner:ess": "npm run run-tests actions ess essEnv",
+    "privileges:server:serverless": "npm run initialize-server privileges serverless",
+    "privileges:runner:serverless": "npm run run-tests privileges serverless serverlessEnv",
+    "privileges:server:ess": "npm run initialize-server privileges ess",
+    "privileges:runner:ess": "npm run run-tests privileges ess essEnv"
   }
 }
