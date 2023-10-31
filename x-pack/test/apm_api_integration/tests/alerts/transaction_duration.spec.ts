@@ -15,15 +15,11 @@ import {
   createApmRule,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-  deleteAlertsByRuleId,
-  deleteRuleById,
-  clearKibanaApmEventLog,
   ApmAlertFields,
   createIndexConnector,
   getIndexAction,
-  deleteActionConnector,
 } from './helpers/alerting_api_helper';
-import { cleanupAllState } from './helpers/cleanup_state';
+import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
@@ -49,8 +45,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
     before(async () => {
-      cleanupAllState({ es, supertest });
-
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -77,12 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      try {
-        await synthtraceEsClient.clean();
-        await clearKibanaApmEventLog(es);
-      } catch (e) {
-        logger.info('Could not clear apm event log', e);
-      }
+      await synthtraceEsClient.clean();
     });
 
     describe('create rule for opbeans-java without kql filter', () => {
@@ -111,13 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        try {
-          await deleteActionConnector({ supertest, es, actionId });
-          await deleteRuleById({ supertest, ruleId });
-          await deleteAlertsByRuleId({ es, ruleId });
-        } catch (e) {
-          logger.info('Could not delete rule or action connector', e);
-        }
+        await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
       it('checks if rule is active', async () => {
@@ -229,12 +212,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        try {
-          await deleteAlertsByRuleId({ es, ruleId });
-          await deleteRuleById({ supertest, ruleId });
-        } catch (e) {
-          logger.info('Could not delete rule or action connector', e);
-        }
+        await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
       it('checks if rule is active', async () => {
