@@ -23,7 +23,7 @@ import path from 'path';
 import os from 'os';
 import { renderSummaryTable } from './print_run';
 import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
-import { isSkipped, parseTestFileConfig } from './utils';
+import { parseTestFileConfig, retrieveIntegrations } from './utils';
 
 interface ProductType {
   product_line: string;
@@ -52,35 +52,6 @@ interface Credentials {
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 let log: ToolingLog;
-
-/**
- * Retrieve test files using a glob pattern.
- * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
- */
-const retrieveIntegrations = (integrationsPaths: string[]) => {
-  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
-
-  if (process.env.RUN_ALL_TESTS === 'true') {
-    return nonSkippedSpecs;
-  } else {
-    // The number of instances of this job were created
-    const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
-      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
-      : 1;
-    // An index which uniquely identifies this instance of the job
-    const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-      : 0;
-
-    const nonSkippedSpecsForChunk: string[] = [];
-
-    for (let i = chunkIndex; i < nonSkippedSpecs.length; i += chunksTotal) {
-      nonSkippedSpecsForChunk.push(nonSkippedSpecs[i]);
-    }
-
-    return nonSkippedSpecsForChunk;
-  }
-};
 
 const encode = (str: string): string => Buffer.from(str, 'binary').toString('base64');
 
