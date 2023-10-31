@@ -176,21 +176,25 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             defaultMessage: `The index lifecycle policy that manages the data in the data stream. `,
           }),
           content: isDataStreamFullyManagedByDSL(dataStream) ? (
-            <>
-              <EuiToolTip
-                position="top"
-                content={i18n.translate(
-                  'xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTipWarning',
-                  {
-                    defaultMessage: `This data stream is not currently being managed by the ILM policy.`,
-                  }
+            <EuiToolTip
+              position="top"
+              content={i18n.translate(
+                'xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTipWarning',
+                {
+                  defaultMessage: `This data stream is not currently being managed by the ILM policy.`,
+                }
+              )}
+            >
+              <>
+                {ilmPolicyLink ? (
+                  <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
+                    <EuiTextColor color="subdued">{ilmPolicyName}</EuiTextColor>
+                  </EuiLink>
+                ) : (
+                  ilmPolicyName
                 )}
-              >
-                <>
-                  <EuiTextColor color="subdued">{ilmPolicyName}</EuiTextColor>
-                </>
-              </EuiToolTip>
-            </>
+              </>
+            </EuiToolTip>
           ) : (
             <>
               {ilmPolicyLink ? (
