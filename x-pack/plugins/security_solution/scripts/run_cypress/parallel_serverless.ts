@@ -22,13 +22,8 @@ import axios from 'axios';
 import path from 'path';
 import os from 'os';
 import { renderSummaryTable } from './print_run';
-import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
+import type { SecuritySolutionDescribeBlockFtrConfig, ProductType } from './utils';
 import { isSkipped, parseTestFileConfig } from './utils';
-
-interface ProductType {
-  product_line: string;
-  product_tier: string;
-}
 
 interface CreateEnvironmentRequestBody {
   name: string;
@@ -132,7 +127,7 @@ async function createEnvironment(
 
   const productTypes: ProductType[] = [];
   ftrConfig?.productTypes?.forEach((t) => {
-    productTypes.push(t as ProductType);
+    productTypes.push(t);
   });
   if (productTypes.length > 0) body.product_types = productTypes;
 
