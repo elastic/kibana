@@ -39,7 +39,7 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
   },
   {
     label: i18n.translate('xpack.observability.related.events.sortBy.pValue', {
-      defaultMessage: 'p-value',
+      defaultMessage: 'Significance',
     }),
     type: 'p_value',
   },
