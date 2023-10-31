@@ -257,7 +257,7 @@ export class Plugin implements InfraClientPluginClass {
           defaultMessage: 'Inventory',
         }),
         path: '/inventory',
-        navLinkStatus: AppNavLinkStatus.visible,
+        navLinkStatus: this.isServerlessEnv ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
       },
       ...(hostsEnabled
         ? [
@@ -267,7 +267,9 @@ export class Plugin implements InfraClientPluginClass {
                 defaultMessage: 'Hosts',
               }),
               path: '/hosts',
-              navLinkStatus: AppNavLinkStatus.visible,
+              navLinkStatus: this.isServerlessEnv
+                ? AppNavLinkStatus.visible
+                : AppNavLinkStatus.hidden,
             },
           ]
         : []),
