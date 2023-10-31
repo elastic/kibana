@@ -7,6 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS } from '@kbn/fleet-plugin/server/constants';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
@@ -20,7 +21,6 @@ import { latestIndexConfigs } from './latest_indices';
 import { IndexConfig, IndexTemplateParams } from './types';
 
 import { CloudSecurityPostureConfig } from '../config';
-import { STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS } from '../../../fleet/server/constants';
 
 interface IndexTemplateSettings {
   index: {
@@ -28,7 +28,7 @@ interface IndexTemplateSettings {
     codec?: string;
     mapping?: {
       ignore_malformed: boolean;
-    }
+    };
   };
   lifecycle?: { name: string };
 }
@@ -233,8 +233,8 @@ const updateIndexTemplate = async (
       default_pipeline: latestFindingsPipelineIngestConfig.id,
       codec: 'best_compression',
       mapping: {
-        ignore_malformed: true
-      }
+        ignore_malformed: true,
+      },
     },
     lifecycle: { name: '' },
   };
@@ -251,7 +251,7 @@ const updateIndexTemplate = async (
         aliases: template?.aliases,
       },
       _meta,
-      composed_of: composedOf.filter(ct => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
+      composed_of: composedOf.filter((ct) => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
     });
 
     logger.info(`Updated index template successfully [Name: ${indexTemplateName}]`);
