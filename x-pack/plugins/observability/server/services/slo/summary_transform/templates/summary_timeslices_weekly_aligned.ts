@@ -143,6 +143,11 @@ export const SUMMARY_TIMESLICES_WEEKLY_ALIGNED: TransformPutTransformRequest = {
             'if (params.sliValue == -1) { return 0 } else if (params.sliValue >= params.objective) { return 4 } else if (params.errorBudgetRemaining > 0) { return 2 } else { return 1 }',
         },
       },
+      lastUpdatedAt: {
+        max: {
+          field: '@timestamp',
+        },
+      },
     },
   },
   description:

@@ -130,6 +130,11 @@ export const SUMMARY_OCCURRENCES_30D_ROLLING: TransformPutTransformRequest = {
           },
         },
       },
+      lastUpdatedAt: {
+        max: {
+          field: '@timestamp',
+        },
+      },
     },
   },
   description:

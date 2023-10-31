@@ -130,6 +130,11 @@ export const SUMMARY_TIMESLICES_7D_ROLLING: TransformPutTransformRequest = {
           },
         },
       },
+      lastUpdatedAt: {
+        max: {
+          field: '@timestamp',
+        },
+      },
     },
   },
   description:

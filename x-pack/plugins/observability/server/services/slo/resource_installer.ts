@@ -123,7 +123,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         this.logger.info(
           `SLO summary erich policy [${policy.name}] already exists, deleting policy.`
         );
-        await this.esClient.enrich.deletePolicy({ name: policy.name });
+        return;
+        // await this.esClient.enrich.deletePolicy({ name: policy.name });
       }
       this.logger.info(`Installing SLO summary erich policy [${policy.name}]`);
       return this.esClient.enrich
