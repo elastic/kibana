@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { buildkite, exec, SELECTED_COMMIT_META_KEY } from './shared';
-import { BuildkiteInputStep } from '#pipeline-utils';
+import { buildkite, buildStateToEmoji, exec, SELECTED_COMMIT_META_KEY } from './shared';
+import { BuildkiteInputStep, getGithubClient } from '#pipeline-utils';
 
 interface CommitData {
   commits: Array<{
@@ -46,10 +46,43 @@ async function collectAvailableCommits(commitCount: string): Promise<CommitData>
   };
 }
 
+async function enrichWithStatuses(
+  commits: Array<{ message: string; hash: string }>
+): Promise<Array<{ message: string; hash: string }>> {
+  console.log('--- Enriching with build statuses');
+
+  const ghClient = getGithubClient();
+
+  const commitsWithStatuses = await Promise.all(
+    commits.map(async (commit) => {
+      const statusesResponse = await ghClient.request(
+        `GET /repos/{owner}/{repo}/commits/{ref}/status`,
+        {
+          owner: 'elastic',
+          repo: 'kibana',
+          ref: commit.hash,
+        }
+      );
+
+      const combinedState = statusesResponse.data.state;
+      const emoji = buildStateToEmoji(combinedState);
+
+      return {
+        message: `${emoji} ${commit.message}`,
+        hash: commit.hash,
+      };
+    })
+  );
+
+  return commitsWithStatuses;
+}
+
 async function generateCommitSelectionInput(commitData: CommitData) {
   console.log('--- Generating select step');
 
   const commits = commitData.commits;
+
+  const commitsWithStatuses = await enrichWithStatuses(commits);
 
   const inputStep: BuildkiteInputStep = {
     input: 'Select commit to deploy',
@@ -59,8 +92,10 @@ async function generateCommitSelectionInput(commitData: CommitData) {
       {
         select: 'Select commit to deploy',
         key: SELECTED_COMMIT_META_KEY,
-        // TODO: Enrich this with build stats?
-        options: commits.map((commit) => ({ label: commit.message, value: commit.hash })),
+        options: commitsWithStatuses.map((commit) => ({
+          label: commit.message,
+          value: commit.hash,
+        })),
       },
     ],
   };

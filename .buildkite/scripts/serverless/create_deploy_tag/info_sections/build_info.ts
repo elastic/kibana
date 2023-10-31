@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { exec, octokit } from '../shared';
+import { buildStateToEmoji, exec, octokit } from '../shared';
 import { BuildkiteClient } from '#pipeline-utils';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';
@@ -42,12 +42,7 @@ export async function getOnMergePRBuild(commitHash: string): Promise<BuildkiteBu
   const buildkiteURL = buildkiteStatus.target_url;
   const buildkiteBuildNumber = Number(buildkiteURL.match(/builds\/([0-9]+)/)?.[1]);
   const state = buildkiteStatus.state as 'failure' | 'pending' | 'success';
-  const stateEmoji =
-    {
-      failure: ':x:',
-      pending: ':hourglass:',
-      success: ':white_check_mark:',
-    }[state] || ':question:';
+  const stateEmoji = buildStateToEmoji(state);
 
   return {
     success: state === 'success',
@@ -61,24 +56,35 @@ export async function getOnMergePRBuild(commitHash: string): Promise<BuildkiteBu
 export async function getQAFTestBuilds(date: string): Promise<BuildkiteBuildExtract[]> {
   const buildkite = new BuildkiteClient({ exec });
   const pipelineSlug = QA_FTR_TEST_SLUG;
+
+  // We'd get up to the last 3 builds, but the most recent first
   const builds = await buildkite.getBuildsAfterDate(pipelineSlug, date, 3);
-  return builds.map((build) => ({
-    success: build.state === 'passed',
-    stateEmoji: build.state === 'passed' ? ':white_check_mark:' : ':x:',
-    url: build.web_url,
-    slug: pipelineSlug,
-    buildNumber: build.number,
-  }));
+
+  return builds
+    .map((build) => ({
+      success: build.state === 'passed',
+      stateEmoji: build.state === 'passed' ? ':white_check_mark:' : ':x:',
+      url: build.web_url,
+      slug: pipelineSlug,
+      buildNumber: build.number,
+    }))
+    .reverse();
 }
 
 export function toBuildkiteBuildInfoHtml(
   heading: string,
-  buildkiteBuildInfo: BuildkiteBuildExtract | null
+  builds: Record<string, BuildkiteBuildExtract | null>
 ): string {
-  if (buildkiteBuildInfo === null) {
-    return `<div>[:question:] Cannot find related buildkite build</div>`;
-  } else {
-    const { url, stateEmoji, buildNumber } = buildkiteBuildInfo;
-    return `<div>${heading}: <a href="${url}">[${stateEmoji}] ${buildkiteBuildInfo.slug}#${buildNumber}</a></div>`;
+  let html = `<div><h4>${heading}</h4>`;
+  for (const [name, build] of Object.entries(builds)) {
+    if (!build) {
+      html += `<div>[:question:] ${name}: No build found</div>`;
+    } else {
+      const { url, stateEmoji, buildNumber, slug } = build;
+      html += `<div>[${stateEmoji}] ${name}: <a href="${url}">${slug}#${buildNumber}</a></div>`;
+    }
   }
+  html += '</div>';
+
+  return html;
 }
