@@ -228,7 +228,7 @@ function SpanFlyoutBody({
       content: (
         <Fragment>
           <EuiSpacer size="m" />
-          <SpanMetadata spanId={span.span.id} />
+          <SpanMetadata span={span} />
         </Fragment>
       ),
     },

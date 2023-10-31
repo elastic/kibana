@@ -46,6 +46,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: jest.fn(),
+    category: 'test',
     producer: 'alerts',
     alerts: {
       context: 'test',
@@ -68,6 +69,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: jest.fn(),
+    category: 'test',
     producer: 'alerts',
     alerts: {
       context: 'spaceAware',
@@ -91,6 +93,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: jest.fn(),
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: schema.any(),

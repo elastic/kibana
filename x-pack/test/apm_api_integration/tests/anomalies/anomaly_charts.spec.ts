@@ -20,6 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const ml = getService('ml');
   const es = getService('es');
+  const logger = getService('log');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
 
@@ -180,6 +181,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             es,
             ml,
             environments: ['production', 'development'],
+            logger,
           });
         });
 

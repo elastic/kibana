@@ -138,6 +138,19 @@ describe('FindSLO', () => {
       `);
     });
   });
+
+  describe('validation', () => {
+    it("throws an error when 'perPage > 5000'", async () => {
+      const slo = createSLO();
+      mockSummarySearchClient.search.mockResolvedValueOnce(summarySearchResult(slo));
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await expect(findSLO.execute({ perPage: '5000' })).resolves.not.toThrow();
+      await expect(findSLO.execute({ perPage: '5001' })).rejects.toThrowError(
+        'perPage limit to 5000'
+      );
+    });
+  });
 });
 
 function summarySearchResult(slo: SLO): Paginated<SLOSummary> {

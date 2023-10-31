@@ -21,6 +21,7 @@ type TimestampField = TimestampFieldFromEs;
 
 interface PrivilegesFromEs {
   delete_index: boolean;
+  manage_data_stream_lifecycle: boolean;
 }
 
 type Privileges = PrivilegesFromEs;
@@ -33,6 +34,7 @@ export interface EnhancedDataStreamFromEs extends IndicesDataStream {
   maximum_timestamp?: IndicesDataStreamsStatsDataStreamsStatsItem['maximum_timestamp'];
   privileges: {
     delete_index: boolean;
+    manage_data_stream_lifecycle: boolean;
   };
 }
 
@@ -57,7 +59,9 @@ export interface DataStream {
   _meta?: Metadata;
   privileges: Privileges;
   hidden: boolean;
-  lifecycle?: IndicesDataLifecycleWithRollover;
+  lifecycle?: IndicesDataLifecycleWithRollover & {
+    enabled?: boolean;
+  };
 }
 
 export interface DataStreamIndex {

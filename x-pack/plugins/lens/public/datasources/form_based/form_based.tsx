@@ -497,8 +497,8 @@ export function getFormBasedDatasource({
               ? column.label
               : operationDefinitionMap[column.operationType].getDefaultLabel(
                   column,
-                  indexPatternsMap[layer.indexPatternId],
-                  layer.columns
+                  layer.columns,
+                  indexPatternsMap[layer.indexPatternId]
                 )
           );
         });
@@ -857,6 +857,14 @@ export function getFormBasedDatasource({
     },
     getUsedDataViews: (state) => {
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
+    },
+    injectReferencesToLayers: (state, references) => {
+      const layers =
+        references && state ? injectReferences(state, references).layers : state?.layers;
+      return {
+        ...state,
+        layers,
+      };
     },
 
     getDatasourceInfo: async (state, references, dataViewsService) => {

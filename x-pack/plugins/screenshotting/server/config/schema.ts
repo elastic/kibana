@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 import moment from 'moment';
 
 const RulesSchema = schema.object({
@@ -23,6 +23,10 @@ const RulesSchema = schema.object({
 });
 
 export const ConfigSchema = schema.object({
+  enabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+    traditional: schema.boolean({ defaultValue: true }),
+  }),
   networkPolicy: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     rules: schema.arrayOf(RulesSchema, {

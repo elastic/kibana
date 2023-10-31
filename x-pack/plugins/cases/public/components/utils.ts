@@ -6,6 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import type {
   FieldConfig,
   ValidationConfig,
@@ -224,4 +225,12 @@ export const parseCaseUsers = ({
   }
 
   return { userProfiles, reporterAsArray };
+};
+
+export const convertCustomFieldValue = (value: string | boolean) => {
+  if (typeof value === 'string' && isEmpty(value)) {
+    return null;
+  }
+
+  return value;
 };

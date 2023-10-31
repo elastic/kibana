@@ -40,7 +40,7 @@ import { toastNotificationServiceProvider } from '../../../services/toast_notifi
 import { JobImportService } from './jobs_import_service';
 import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
-import { usePermissionCheck } from '../../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../../contexts/ml';
 
 interface Props {
   isDisabled: boolean;
@@ -82,7 +82,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     () => toastNotificationServiceProvider(toasts),
     [toasts]
   );
-  const [isADEnabled, isDFAEnabled] = usePermissionCheck(['isADEnabled', 'isDFAEnabled']);
+  const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
 
   const [validateIds] = useValidateIds(
     jobType,

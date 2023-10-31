@@ -90,6 +90,7 @@ describe('MaintenanceWindowClient - update', () => {
       data: {
         ...updatedAttributes,
         rRule: updatedAttributes.rRule as UpdateMaintenanceWindowParams['data']['rRule'],
+        categoryIds: ['observability', 'securitySolution'],
       },
     });
 
@@ -110,6 +111,7 @@ describe('MaintenanceWindowClient - update', () => {
         createdBy: 'test-user',
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
+        categoryIds: ['observability', 'securitySolution'],
       },
       {
         id: 'test-id',
@@ -117,7 +119,7 @@ describe('MaintenanceWindowClient - update', () => {
         version: '123',
       }
     );
-    // Only these 3 properties are worth asserting since the rest come from mocks
+    // Only these properties are worth asserting since the rest come from mocks
     expect(result).toEqual(
       expect.objectContaining({
         id: 'test-id',
@@ -234,5 +236,29 @@ describe('MaintenanceWindowClient - update', () => {
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
       'Failed to update maintenance window by id: test-id, Error: Error: Cannot edit archived maintenance windows'
     );
+  });
+
+  it('should throw if updating a maintenance window with invalid category ids', async () => {
+    await expect(async () => {
+      await updateMaintenanceWindow(mockContext, {
+        id: 'test-id',
+        data: {
+          categoryIds: ['invalid_id'] as unknown as MaintenanceWindow['categoryIds'],
+          rRule: {
+            tzid: 'CET',
+            dtstart: '2023-03-26T00:00:00.000Z',
+            freq: Frequency.WEEKLY,
+            count: 2,
+          },
+        },
+      });
+    }).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Error validating update maintenance window data - [data.categoryIds]: types that failed validation:
+      - [data.categoryIds.0.0]: types that failed validation:
+       - [data.categoryIds.0.0]: expected value to equal [observability]
+       - [data.categoryIds.0.1]: expected value to equal [securitySolution]
+       - [data.categoryIds.0.2]: expected value to equal [management]
+      - [data.categoryIds.1]: expected value to equal [null]"
+    `);
   });
 });

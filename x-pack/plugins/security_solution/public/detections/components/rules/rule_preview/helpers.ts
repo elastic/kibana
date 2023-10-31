@@ -113,6 +113,39 @@ const isNewTermsPreviewDisabled = (newTermsFields: string[]): boolean => {
   return newTermsFields.length === 0 || newTermsFields.length > MAX_NUMBER_OF_NEW_TERMS_FIELDS;
 };
 
+const isEsqlPreviewDisabled = ({
+  isQueryBarValid,
+  queryBar,
+}: {
+  queryBar: FieldValueQueryBar;
+  isQueryBarValid: boolean;
+}): boolean => {
+  return !isQueryBarValid || isEmpty(queryBar.query.query);
+};
+
+const isThreatMatchPreviewDisabled = ({
+  isThreatQueryBarValid,
+  threatIndex,
+  threatMapping,
+}: {
+  threatIndex: string[];
+  threatMapping: ThreatMapping;
+  isThreatQueryBarValid: boolean;
+}): boolean => {
+  if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) {
+    return true;
+  } else if (
+    !threatMapping.length ||
+    !threatMapping[0].entries?.length ||
+    !threatMapping[0].entries[0].field ||
+    !threatMapping[0].entries[0].value
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 export const getIsRulePreviewDisabled = ({
   ruleType,
   isQueryBarValid,
@@ -138,6 +171,9 @@ export const getIsRulePreviewDisabled = ({
   queryBar: FieldValueQueryBar;
   newTermsFields: string[];
 }) => {
+  if (ruleType === 'esql') {
+    return isEsqlPreviewDisabled({ isQueryBarValid, queryBar });
+  }
   if (
     !isQueryBarValid ||
     (dataSourceType === DataSourceType.DataView && !dataViewId) ||
@@ -146,14 +182,11 @@ export const getIsRulePreviewDisabled = ({
     return true;
   }
   if (ruleType === 'threat_match') {
-    if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
-    if (
-      !threatMapping.length ||
-      !threatMapping[0].entries?.length ||
-      !threatMapping[0].entries[0].field ||
-      !threatMapping[0].entries[0].value
-    )
-      return true;
+    return isThreatMatchPreviewDisabled({
+      threatIndex,
+      threatMapping,
+      isThreatQueryBarValid,
+    });
   }
   if (ruleType === 'machine_learning') {
     return machineLearningJobId.length === 0;

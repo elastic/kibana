@@ -15,9 +15,9 @@ const name = 'Some color field';
 const id = 'some:color:field';
 
 describe('ColorPickerInput', () => {
-  const onChange = jest.fn();
+  const onInputChange = jest.fn();
   const defaultProps: ColorPickerInputProps = {
-    onChange,
+    onInputChange,
     field: {
       name,
       type: 'color',
@@ -32,7 +32,7 @@ describe('ColorPickerInput', () => {
   };
 
   beforeEach(() => {
-    onChange.mockClear();
+    onInputChange.mockClear();
   });
 
   it('renders without errors', () => {
@@ -42,20 +42,23 @@ describe('ColorPickerInput', () => {
     expect(input).toHaveValue('#000000');
   });
 
-  it('calls the onChange prop when the value changes', () => {
+  it('calls the onInputChange prop when the value changes', () => {
     const { getByRole } = render(wrap(<ColorPickerInput {...defaultProps} />));
     const input = getByRole('textbox');
     const newValue = '#ffffff';
     fireEvent.change(input, { target: { value: newValue } });
-    expect(defaultProps.onChange).toHaveBeenCalledWith({ type: 'color', unsavedValue: newValue });
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+      type: 'color',
+      unsavedValue: newValue,
+    });
   });
 
-  it('calls the onChange prop with an error when the value is malformed', () => {
+  it('calls the onInputChange prop with an error when the value is malformed', () => {
     const { getByRole } = render(wrap(<ColorPickerInput {...defaultProps} />));
     const input = getByRole('textbox');
     const newValue = '#1234';
     fireEvent.change(input, { target: { value: newValue } });
-    expect(defaultProps.onChange).toHaveBeenCalledWith({
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
       type: 'color',
       unsavedValue: newValue,
       isInvalid: true,

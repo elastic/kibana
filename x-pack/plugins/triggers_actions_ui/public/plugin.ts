@@ -68,7 +68,6 @@ import type {
   GlobalRuleEventLogListProps,
   RulesListProps,
   RulesListNotifyBadgePropsWithApi,
-  AlertsTableConfigurationRegistry,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
   ConnectorServices,
@@ -90,17 +89,18 @@ import { RuleSnoozeModalProps } from './application/sections/rules_list/componen
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
+import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
-  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
-  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   getActionForm: (
     props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>
   ) => ReactElement<ActionAccordionFormProps>;
@@ -178,7 +178,7 @@ export class Plugin
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
-  private alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  private alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   private config: TriggersActionsUiConfigType;
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
@@ -186,7 +186,7 @@ export class Plugin
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
-    this.alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
+    this.alertsTableConfigurationRegistry = new AlertTableConfigRegistry();
     this.config = ctx.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }

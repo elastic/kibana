@@ -19,7 +19,7 @@ describe('getSearchStatus', () => {
     };
   });
 
-  test('returns an error status if search is partial and not running', async () => {
+  test('returns a complete status if search is partial and not running', async () => {
     mockClient.asyncSearch.status.mockResolvedValue({
       body: {
         is_partial: true,
@@ -28,7 +28,7 @@ describe('getSearchStatus', () => {
       },
     });
     const res = await getSearchStatus(mockClient, '123');
-    expect(res.status).toBe(SearchStatus.ERROR);
+    expect(res.status).toBe(SearchStatus.COMPLETE);
   });
 
   test('returns an error status if completion_status is an error', async () => {

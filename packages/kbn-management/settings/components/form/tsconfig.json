@@ -30,5 +30,7 @@
     "@kbn/core-theme-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/management-settings-components-field-input",
+    "@kbn/management-settings-components-field-category",
+    "@kbn/management-settings-utilities",
   ]
 }

@@ -38,19 +38,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    it('existing dashboard opens in last used view mode', async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+      expect(await PageObjects.dashboard.getIsInViewMode()).to.equal(true);
+
+      await PageObjects.dashboard.switchToEditMode();
+
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+      expect(await PageObjects.dashboard.getIsInViewMode()).to.equal(false);
+
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.loadSavedDashboard('few panels');
+      expect(await PageObjects.dashboard.getIsInViewMode()).to.equal(false);
+
+      await PageObjects.dashboard.clickCancelOutOfEditMode();
+    });
+
     it('create new dashboard opens in edit mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       const isInViewMode = await PageObjects.dashboard.getIsInViewMode();
       expect(isInViewMode).to.be(false);
-    });
-
-    it('existing dashboard opens in view mode', async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
-
-      expect(inViewMode).to.equal(true);
     });
 
     describe('save', function () {

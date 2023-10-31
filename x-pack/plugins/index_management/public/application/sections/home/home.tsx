@@ -13,7 +13,6 @@ import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { Section } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
-import { useAppContext } from '../../app_context';
 import { ComponentTemplateList } from '../../components/component_templates';
 import { IndexList } from './index_list';
 import { EnrichPoliciesList } from './enrich_policies_list';
@@ -39,9 +38,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const {
-    config: { enableIndexDetailsPage },
-  } = useAppContext();
   const tabs = [
     {
       id: Section.Indices,
@@ -147,15 +143,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
       </Routes>
     </>
   );
-  if (enableIndexDetailsPage) {
-    return (
-      <>
-        <Routes>
-          <Route path={`/${Section.Indices}/index_details`} component={IndexDetailsPage} />
-          <Route render={() => indexManagementTabs} />
-        </Routes>
-      </>
-    );
-  }
-  return indexManagementTabs;
+  return (
+    <Routes>
+      <Route path={`/${Section.Indices}/index_details`} component={IndexDetailsPage} />
+      <Route render={() => indexManagementTabs} />
+    </Routes>
+  );
 };

@@ -29,7 +29,7 @@ export const ArrayInput = ({
   field,
   unsavedChange,
   isSavingEnabled,
-  onChange: onChangeProp,
+  onInputChange,
 }: ArrayInputProps) => {
   const [inputValue] = getFieldInputValue(field, unsavedChange) || [];
   const [value, setValue] = useState(inputValue?.join(', '));
@@ -39,7 +39,7 @@ export const ArrayInput = ({
     setValue(newValue);
   };
 
-  const onUpdate = useUpdate({ onChange: onChangeProp, field });
+  const onUpdate = useUpdate({ onInputChange, field });
 
   useEffect(() => {
     setValue(inputValue?.join(', '));

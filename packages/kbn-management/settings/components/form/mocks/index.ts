@@ -7,5 +7,4 @@
  */
 
 export { TestWrapper, createFormServicesMock, wrap } from './context';
-export { getSettingsMock } from './settings';
 export { uiSettingsClientMock } from './settings_client';

@@ -37,6 +37,7 @@
     "@kbn/alerting-plugin",
     "@kbn/securitysolution-ecs",
     "@kbn/ui-theme",
+    "@kbn/cases-components",
   ],
   "exclude": [
     "target/**/*",

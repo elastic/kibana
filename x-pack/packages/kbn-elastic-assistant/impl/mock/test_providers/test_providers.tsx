@@ -44,6 +44,12 @@ export const TestProvidersComponent: React.FC<Props> = ({
   providerContext,
 }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
+  actionTypeRegistry.get = jest.fn().mockReturnValue({
+    id: '12345',
+    actionTypeId: '.gen-ai',
+    actionTypeTitle: 'OpenAI',
+    iconClass: 'logoGenAI',
+  });
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const queryClient = new QueryClient({
@@ -66,10 +72,10 @@ export const TestProvidersComponent: React.FC<Props> = ({
           <AssistantProvider
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={assistantAvailability}
-            assistantLangChain={false}
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
             baseAllow={[]}
             baseAllowReplacement={[]}
+            basePath={'https://localhost:5601/kbn'}
             defaultAllow={[]}
             defaultAllowReplacement={[]}
             docLinks={{

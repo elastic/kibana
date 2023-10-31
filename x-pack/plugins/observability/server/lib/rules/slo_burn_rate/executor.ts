@@ -63,6 +63,7 @@ export const getRuleExecutor = ({
     params,
     startedAt,
     spaceId,
+    getTimeRange,
   }): ReturnType<
     ExecutorType<
       BurnRateRuleParams,
@@ -88,7 +89,10 @@ export const getRuleExecutor = ({
       return { state: {} };
     }
 
-    const results = await evaluate(esClient.asCurrentUser, slo, params, startedAt);
+    // We only need the end timestamp to base all of queries on. The length of the time range
+    // doesn't matter for our use case since we allow the user to customize the window sizes,
+    const { dateEnd } = getTimeRange('1m');
+    const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
     if (results.length > 0) {
       for (const result of results) {
@@ -120,6 +124,17 @@ export const getRuleExecutor = ({
           );
 
           const alertId = instanceId;
+          const alert = alertWithLifecycle({
+            id: alertId,
+            fields: {
+              [ALERT_REASON]: reason,
+              [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
+              [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
+              [SLO_ID_FIELD]: slo.id,
+              [SLO_REVISION_FIELD]: slo.revision,
+              [SLO_INSTANCE_ID_FIELD]: instanceId,
+            },
+          });
           const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
@@ -142,19 +157,6 @@ export const getRuleExecutor = ({
             sloName: slo.name,
             sloInstanceId: instanceId,
           };
-
-          const alert = alertWithLifecycle({
-            id: alertId,
-
-            fields: {
-              [ALERT_REASON]: reason,
-              [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
-              [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
-              [SLO_ID_FIELD]: slo.id,
-              [SLO_REVISION_FIELD]: slo.revision,
-              [SLO_INSTANCE_ID_FIELD]: instanceId,
-            },
-          });
 
           alert.scheduleActions(windowDef.actionGroup, context);
           alert.replaceState({ alertState: AlertStates.ALERT });

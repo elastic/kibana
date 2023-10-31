@@ -34,6 +34,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggregationType, Comparator } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
+import { i18n } from '@kbn/i18n';
 import {
   getThresholdRuleVisualizationData,
   GetThresholdRuleVisualizationDataParams,
@@ -270,6 +271,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
               showLegend={!!termField}
               showLegendExtra
               legendPosition={Position.Bottom}
+              locale={i18n.getLocale()}
             />
             <Axis
               id="bottom"

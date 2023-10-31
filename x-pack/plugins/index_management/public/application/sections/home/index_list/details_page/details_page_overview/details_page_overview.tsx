@@ -7,6 +7,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
   EuiPanel,
@@ -16,6 +17,7 @@ import {
   EuiTitle,
   EuiText,
   EuiTextColor,
+  EuiLink,
 } from '@elastic/eui';
 import {
   CodeBox,
@@ -26,6 +28,7 @@ import {
 } from '@kbn/search-api-panels';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
+import { documentationService } from '../../../../../services';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../../services/breadcrumbs';
 import { languageDefinitions, curlDefinition } from './languages';
 import { ExtensionsSummary } from './extensions_summary';
@@ -165,7 +168,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
           <EuiTitle size="s">
             <h2>
               {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.addMoreDataTitle', {
-                defaultMessage: 'Add more data to this index',
+                defaultMessage: 'Add data to this index',
               })}
             </h2>
           </EuiTitle>
@@ -175,10 +178,20 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
           <EuiTextColor color="subdued">
             <EuiText size="s">
               <p>
-                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.addMoreDataDescription', {
-                  defaultMessage:
-                    'Keep adding more documents to your already created index using the API',
-                })}
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.overviewTab.addMoreDataDescription"
+                  defaultMessage="Use the bulk API to add data to your index. {docsLink}"
+                  values={{
+                    docsLink: (
+                      <EuiLink href={documentationService.getBulkApi()} target="_blank" external>
+                        <FormattedMessage
+                          id="xpack.idxMgmt.indexDetails.overviewTab.addDocsLink"
+                          defaultMessage="Learn more."
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
               </p>
             </EuiText>
           </EuiTextColor>

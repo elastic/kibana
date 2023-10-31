@@ -30,12 +30,14 @@ const testBedConfig: AsyncTestBedConfig = {
 
 export interface IndicesTestBed extends TestBed<TestSubjects> {
   actions: {
+    clickIndexNameAt: (index: number) => Promise<void>;
+    findIndexDetailsPageTitle: () => string;
     selectIndexDetailsTab: (
       tab: 'settings' | 'mappings' | 'stats' | 'edit_settings'
     ) => Promise<void>;
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
-    clickDataStreamAt: (index: number) => void;
+    clickDataStreamAt: (index: number) => Promise<void>;
     dataStreamLinkExistsAt: (index: number) => boolean;
     clickManageContextMenuButton: () => void;
     clickContextMenuOption: (optionDataTestSubject: string) => void;
@@ -90,6 +92,11 @@ export const setup = async (
     return Boolean(props['aria-checked']);
   };
 
+  const findIndexDetailsPageTitle = () => {
+    const { find } = testBed;
+    return find('indexDetailsHeader').text();
+  };
+
   const selectIndexDetailsTab = async (
     tab: 'settings' | 'mappings' | 'stats' | 'edit_settings'
   ) => {
@@ -98,6 +105,18 @@ export const setup = async (
     await act(async () => {
       find('detailPanelTab').at(indexDetailsTabs.indexOf(tab)).simulate('click');
     });
+    component.update();
+  };
+
+  const clickIndexNameAt = async (index: number) => {
+    const { component, table } = testBed;
+    const { rows } = table.getMetaData('indexTable');
+    const indexNameLink = findTestSubject(rows[index].reactWrapper, 'indexTableIndexNameLink');
+
+    await act(async () => {
+      indexNameLink.simulate('click');
+    });
+
     component.update();
   };
 
@@ -170,6 +189,8 @@ export const setup = async (
   return {
     ...testBed,
     actions: {
+      clickIndexNameAt,
+      findIndexDetailsPageTitle,
       selectIndexDetailsTab,
       getIncludeHiddenIndicesToggleStatus,
       clickIncludeHiddenIndicesToggle,

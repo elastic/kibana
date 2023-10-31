@@ -42,7 +42,13 @@ export const MetricDetailPage = () => {
     loading: metadataLoading,
     cloudId,
     metadata,
-  } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, parsedTimeRange);
+  } = useMetadata({
+    assetId: nodeId,
+    assetType: nodeType,
+    requiredMetrics: inventoryModel.requiredMetrics,
+    sourceId,
+    timeRange: parsedTimeRange,
+  });
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 

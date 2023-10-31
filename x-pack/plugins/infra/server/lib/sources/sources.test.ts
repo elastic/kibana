@@ -125,8 +125,15 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
   inventory: {
     compositeSize: 2000,
   },
-  logs: {
-    app_target: 'logs-ui',
+  featureFlags: {
+    customThresholdAlertsEnabled: false,
+    logsUIEnabled: true,
+    metricsExplorerEnabled: true,
+    osqueryEnabled: true,
+    inventoryThresholdAlertRuleEnabled: true,
+    metricThresholdAlertRuleEnabled: true,
+    logThresholdAlertRuleEnabled: true,
+    alertsAndRulesDropdownEnabled: true,
   },
   sources,
   enabled: true,

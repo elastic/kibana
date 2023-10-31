@@ -3120,7 +3120,9 @@
             "label": "esServerlessOptions",
             "description": [],
             "signature": [
-              "{ image?: string | undefined; tag?: string | undefined; } | undefined"
+              "Pick<",
+              "ServerlessOptions",
+              ", \"host\" | \"tag\" | \"image\" | \"resources\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,

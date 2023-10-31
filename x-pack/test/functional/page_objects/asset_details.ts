@@ -180,5 +180,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     async clickOsqueryTab() {
       return testSubjects.click('infraAssetDetailsOsqueryTab');
     },
+
+    // APM Tab link
+    async clickApmTabLink() {
+      return testSubjects.click('infraAssetDetailsApmServicesLinkTab');
+    },
   };
 }

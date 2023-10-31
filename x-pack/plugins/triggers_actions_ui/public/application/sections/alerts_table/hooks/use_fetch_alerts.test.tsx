@@ -287,9 +287,7 @@ describe('useFetchAlerts', () => {
   });
 
   it('handles search error', () => {
-    const obs$ = throwError(
-      'simulated search response error, which could be 1) undefined response, 2) response without rawResponse, or 3) partial response'
-    );
+    const obs$ = throwError('simulated search error');
     dataSearchMock.mockReturnValue(obs$);
     const { result } = renderHook(() => useFetchAlerts(args));
 

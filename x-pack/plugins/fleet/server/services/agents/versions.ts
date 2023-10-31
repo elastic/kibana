@@ -60,8 +60,7 @@ export const getAvailableVersions = async ({
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
     versionsToDisplay = uniq(versions) as string[];
 
-    const appendCurrentVersion =
-      includeCurrentVersion ?? !config?.internal?.onlyAllowAgentUpgradeToKnownVersions;
+    const appendCurrentVersion = includeCurrentVersion;
 
     if (appendCurrentVersion) {
       // Add current version if not already present
@@ -76,9 +75,8 @@ export const getAvailableVersions = async ({
 
     return availableVersions;
   } catch (e) {
-    if (e.code === 'ENOENT' && !config?.internal?.onlyAllowAgentUpgradeToKnownVersions) {
-      // If the file does not exist, return the current version
-      return [kibanaVersion];
+    if (e.code === 'ENOENT') {
+      return config?.internal?.onlyAllowAgentUpgradeToKnownVersions ? [] : [kibanaVersion];
     }
     throw e;
   }

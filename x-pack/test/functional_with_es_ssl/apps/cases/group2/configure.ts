@@ -13,6 +13,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const toasts = getService('toasts');
+  const header = getPageObject('header');
+  const find = getService('find');
 
   describe('Configure', function () {
     before(async () => {
@@ -24,6 +26,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Closure options', function () {
+      this.beforeEach(async () => {
+        await header.waitUntilLoadingHasFinished();
+      });
+
       it('defaults the closure option correctly', async () => {
         await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-user');
       });
@@ -31,8 +37,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('change closure option successfully', async () => {
         await cases.common.selectRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
         const toast = await toasts.getToastElement(1);
-        expect(await toast.getVisibleText()).to.be('Saved external connection settings');
+        expect(await toast.getVisibleText()).to.be('Settings successfully updated');
         await toasts.dismissAllToasts();
+        await cases.common.assertRadioGroupValue('closure-options-radio-group', 'close-by-pushing');
       });
     });
 
@@ -46,6 +53,55 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.clickAndValidate('dropdown-connector-add-connector', 'euiFlyoutCloseButton');
         await testSubjects.click('euiFlyoutCloseButton');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+      });
+    });
+
+    describe('Custom fields', function () {
+      it('adds a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        await common.clickAndValidate('add-custom-field', 'custom-field-flyout');
+
+        await testSubjects.setValue('custom-field-label-input', 'Summary');
+
+        await testSubjects.setCheckbox('text-custom-field-options-wrapper', 'check');
+
+        await testSubjects.click('custom-field-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary\nText');
+      });
+
+      it('edits a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const textField = await find.byCssSelector('[data-test-subj*="-custom-field-edit"]');
+
+        await textField.click();
+
+        const input = await testSubjects.find('custom-field-label-input');
+
+        await input.type('!!!');
+
+        await testSubjects.click('custom-field-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('custom-fields-list');
+
+        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary!!!\nText');
+      });
+
+      it('deletes a custom field', async () => {
+        await testSubjects.existOrFail('custom-fields-form-group');
+        const deleteButton = await find.byCssSelector('[data-test-subj*="-custom-field-delete"]');
+
+        await deleteButton.click();
+
+        await testSubjects.existOrFail('confirm-delete-custom-field-modal');
+
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await testSubjects.missingOrFail('custom-fields-list');
       });
     });
   });

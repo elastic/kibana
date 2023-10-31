@@ -9,7 +9,7 @@ import { capitalize } from 'lodash';
 
 export const contextToSchemaName = (context: string) => {
   return `${context
-    .split('.')
+    .split(/[.\-]/)
     .map((part: string) => capitalize(part))
     .join('')}Alert`;
 };

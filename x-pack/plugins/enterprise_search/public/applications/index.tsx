@@ -66,7 +66,7 @@ export const renderApp = (
   const { history } = params;
   const { application, chrome, http, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security, share } = plugins;
+  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -107,6 +107,7 @@ export const renderApp = (
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
+    ml,
     uiSettings,
   });
   const unmountLicensingLogic = mountLicensingLogic({

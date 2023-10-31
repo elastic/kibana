@@ -13,6 +13,7 @@ import { ServicesProvider, CloudChatServices } from '../public/services';
 const services: CloudChatServices = {
   chat: {
     chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
+    chatVariant: 'bubble',
     user: {
       id: 'user-id',
       email: 'test-user@elastic.co',

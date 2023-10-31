@@ -17,13 +17,13 @@ import {
   isErrorEmbeddable,
   EmbeddablePanel,
 } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableContainerContext } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableAppContext } from '@kbn/embeddable-plugin/public';
 import { StartDeps } from '../../plugin';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { RendererFactory, EmbeddableInput } from '../../../types';
-import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
+import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -41,18 +41,19 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
       return null;
     }
 
-    const embeddableContainerContext: EmbeddableContainerContext = {
+    const canvasAppContext: EmbeddableAppContext = {
       getCurrentPath: () => {
         const urlToApp = core.application.getUrlForApp(currentAppId);
         const inAppPath = window.location.pathname.replace(urlToApp, '');
 
         return inAppPath + window.location.search + window.location.hash;
       },
+      currentAppId: CANVAS_APP,
     };
 
-    return (
-      <EmbeddablePanel embeddable={embeddable} containerContext={embeddableContainerContext} />
-    );
+    embeddable.getAppContext = () => canvasAppContext;
+
+    return <EmbeddablePanel embeddable={embeddable} />;
   };
 
   return (embeddableObject: IEmbeddable) => {

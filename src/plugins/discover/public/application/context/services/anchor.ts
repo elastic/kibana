@@ -12,10 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import {
-  getSearchResponseInterceptedWarnings,
-  type SearchResponseInterceptedWarning,
-} from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DiscoverServices } from '../../../build_services';
 
 export async function fetchAnchor(
@@ -27,7 +24,7 @@ export async function fetchAnchor(
   services: DiscoverServices
 ): Promise<{
   anchorRow: DataTableRecord;
-  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+  interceptedWarnings: SearchResponseWarning[];
 }> {
   updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
 
@@ -50,12 +47,16 @@ export async function fetchAnchor(
       })
     );
   }
+
+  const interceptedWarnings: SearchResponseWarning[] = [];
+  services.data.search.showWarnings(adapter, (warning) => {
+    interceptedWarnings.push(warning);
+    return true; // suppress the default behaviour
+  });
+
   return {
     anchorRow: buildDataTableRecord(doc, dataView, true),
-    interceptedWarnings: getSearchResponseInterceptedWarnings({
-      services,
-      adapter,
-    }),
+    interceptedWarnings,
   };
 }
 

@@ -10,7 +10,12 @@ import { mount, shallow } from 'enzyme';
 
 import { SelectRuleType } from '.';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
-jest.mock('../../../../common/lib/kibana');
+import { useIsEsqlRuleTypeEnabled } from '../../../../detection_engine/rule_creation/hooks';
+
+jest.mock('../../../../detection_engine/rule_creation/hooks', () => ({
+  useIsEsqlRuleTypeEnabled: jest.fn().mockReturnValue(true),
+}));
+const useIsEsqlRuleTypeEnabledMock = useIsEsqlRuleTypeEnabled as jest.Mock;
 
 describe('SelectRuleType', () => {
   it('renders correctly', () => {
@@ -51,6 +56,7 @@ describe('SelectRuleType', () => {
       expect(wrapper.find('[data-test-subj="thresholdRuleType"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="eqlRuleType"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="threatMatchRuleType"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeTruthy();
     });
 
     it('renders only the card selected when in update mode of "eql"', () => {
@@ -71,6 +77,7 @@ describe('SelectRuleType', () => {
       expect(wrapper.find('[data-test-subj="thresholdRuleType"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="eqlRuleType"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="threatMatchRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeFalsy();
     });
 
     it('renders only the card selected when in update mode of "machine_learning', () => {
@@ -91,6 +98,7 @@ describe('SelectRuleType', () => {
       expect(wrapper.find('[data-test-subj="thresholdRuleType"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="eqlRuleType"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="threatMatchRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeFalsy();
     });
 
     it('renders only the card selected when in update mode of "query', () => {
@@ -111,6 +119,7 @@ describe('SelectRuleType', () => {
       expect(wrapper.find('[data-test-subj="thresholdRuleType"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="eqlRuleType"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="threatMatchRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeFalsy();
     });
 
     it('renders only the card selected when in update mode of "threshold"', () => {
@@ -131,6 +140,7 @@ describe('SelectRuleType', () => {
       expect(wrapper.find('[data-test-subj="thresholdRuleType"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="eqlRuleType"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="threatMatchRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeFalsy();
     });
 
     it('renders only the card selected when in update mode of "threat_match', () => {
@@ -151,6 +161,47 @@ describe('SelectRuleType', () => {
       expect(wrapper.find('[data-test-subj="thresholdRuleType"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="eqlRuleType"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="threatMatchRuleType"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeFalsy();
+    });
+
+    it('renders only the card selected when in update mode of "esql"', () => {
+      const field = useFormFieldMock<unknown>({ value: 'esql' });
+      const wrapper = mount(
+        <TestProviders>
+          <SelectRuleType
+            describedByIds={[]}
+            field={field}
+            isUpdateView={true}
+            hasValidLicense={true}
+            isMlAdmin={true}
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="customRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="machineLearningRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="thresholdRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="eqlRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="threatMatchRuleType"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeTruthy();
+    });
+
+    it('should not render "esql" rule type if esql rule is not enabled', () => {
+      useIsEsqlRuleTypeEnabledMock.mockReturnValueOnce(false);
+      const Component = () => {
+        const field = useFormFieldMock();
+
+        return (
+          <SelectRuleType
+            field={field}
+            describedByIds={[]}
+            isUpdateView={false}
+            hasValidLicense={true}
+            isMlAdmin={true}
+          />
+        );
+      };
+      const wrapper = shallow(<Component />);
+      expect(wrapper.find('[data-test-subj="esqlRuleType"]').exists()).toBeFalsy();
     });
   });
 

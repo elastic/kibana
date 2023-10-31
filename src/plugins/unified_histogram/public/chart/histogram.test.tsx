@@ -8,6 +8,7 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Histogram } from './histogram';
 import React from 'react';
+import { of } from 'rxjs';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
@@ -166,24 +167,25 @@ describe('Histogram', () => {
     jest
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
-    onLoad(true, undefined);
+    const embeddableOutput$ = jest.fn().mockReturnValue(of('output$'));
+    onLoad(true, undefined, embeddableOutput$);
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.loading,
       undefined
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters: {} });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters: {}, embeddableOutput$ });
     expect(buildBucketInterval.buildBucketInterval).not.toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: undefined })
     );
     act(() => {
-      onLoad(false, adapters);
+      onLoad(false, adapters, embeddableOutput$);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,
       100
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters, embeddableOutput$ });
     expect(buildBucketInterval.buildBucketInterval).toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: mockBucketInterval })

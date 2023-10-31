@@ -36,17 +36,15 @@ export function ChatWelcomePanel({ knowledgeBase }: { knowledgeBase: UseKnowledg
           </h2>
         </EuiTitle>
         <EuiText color="subdued" textAlign="center">
-          <p>
-            {knowledgeBase.status.value?.ready
-              ? i18n.translate('xpack.observabilityAiAssistant.chatWelcomePanel.body.kbReady', {
-                  defaultMessage:
-                    'Keep in mind that Elastic AI Assistant is a technical preview feature. Please provide feedback at any time.',
-                })
-              : i18n.translate('xpack.observabilityAiAssistant.chatWelcomePanel.body.kbNotReady', {
-                  defaultMessage:
-                    'We recommend you enable the knowledge base for a better experience. It will provide the assistant with the ability to learn from your interaction with it. Keep in mind that Elastic AI Assistant is a technical preview feature. Please provide feedback at any time.',
-                })}
-          </p>
+          {knowledgeBase.status.value?.ready
+            ? i18n.translate('xpack.observabilityAiAssistant.chatWelcomePanel.body.kbReady', {
+                defaultMessage:
+                  'Keep in mind that Elastic AI Assistant is a technical preview feature. Please provide feedback at any time.',
+              })
+            : i18n.translate('xpack.observabilityAiAssistant.chatWelcomePanel.body.kbNotReady', {
+                defaultMessage:
+                  'We recommend you enable the knowledge base for a better experience. It will provide the assistant with the ability to learn from your interaction with it. Keep in mind that Elastic AI Assistant is a technical preview feature. Please provide feedback at any time.',
+              })}
         </EuiText>
 
         {!knowledgeBase.status.value?.ready ? (

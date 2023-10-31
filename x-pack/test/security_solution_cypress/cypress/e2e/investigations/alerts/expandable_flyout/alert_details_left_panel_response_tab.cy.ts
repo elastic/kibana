@@ -17,19 +17,23 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe('Alert details expandable flyout left panel investigation', () => {
-  beforeEach(() => {
-    cleanKibana();
-    login();
-    createRule(getNewRule());
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
-    expandFirstAlertExpandableFlyout();
-    expandDocumentDetailsExpandableFlyoutLeftSection();
-    openResponseTab();
-  });
+describe(
+  'Alert details expandable flyout left panel investigation',
+  { tags: ['@ess', '@serverless'] },
+  () => {
+    beforeEach(() => {
+      cleanKibana();
+      login();
+      createRule(getNewRule());
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
+      expandFirstAlertExpandableFlyout();
+      expandDocumentDetailsExpandableFlyoutLeftSection();
+      openResponseTab();
+    });
 
-  it('should display empty response message', () => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_EMPTY).should('be.visible');
-  });
-});
+    it('should display empty response message', () => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_EMPTY).should('be.visible');
+    });
+  }
+);

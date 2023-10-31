@@ -107,7 +107,7 @@ const registerCellActions = (
     investigateInNewTimeline: createInvestigateInNewTimelineCellActionFactory({ store, services }),
     showTopN: createShowTopNCellActionFactory({ services }),
     copyToClipboard: createCopyToClipboardCellActionFactory({ services }),
-    toggleColumn: createToggleColumnCellActionFactory({ store }),
+    toggleColumn: createToggleColumnCellActionFactory({ store, services }),
   };
 
   const registerCellActionsTrigger = (

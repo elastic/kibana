@@ -12,14 +12,9 @@ import { Page } from 'playwright';
 import callsites from 'callsites';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';
-import {
-  FtrProviderContext,
-  KibanaServer,
-  Es,
-  RetryService,
-} from '@kbn/ftr-common-functional-services';
+import { FtrProviderContext } from '../services/ftr_context_provider';
+import { Es, KibanaServer, Retry, Auth } from '../services';
 
-import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
@@ -37,7 +32,7 @@ export interface BaseStepCtx {
   kbnUrl: KibanaUrl;
   kibanaServer: KibanaServer;
   es: Es;
-  retry: RetryService;
+  retry: Retry;
   auth: Auth;
 }
 
@@ -141,7 +136,7 @@ export class Journey<CtxExt extends object> {
       getService('kibanaServer'),
       getService('es'),
       getService('retry'),
-      new Auth(getService('config'), getService('log'), getService('kibanaServer')),
+      getService('auth'),
       this.config
     ).initMochaSuite(this.#steps);
   }

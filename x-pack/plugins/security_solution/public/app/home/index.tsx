@@ -8,7 +8,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import type { AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
@@ -33,10 +32,9 @@ import { AssistantOverlay } from '../../assistant/overlay';
 
 interface HomePageProps {
   children: React.ReactNode;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionMenu }) => {
+const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { pathname } = useLocation();
   useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
@@ -58,7 +56,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionM
       <ConsoleManager>
         <TourContextProvider>
           <>
-            <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
+            <GlobalHeader />
             <DragDropContextWrapper browserFields={browserFields}>
               {children}
             </DragDropContextWrapper>

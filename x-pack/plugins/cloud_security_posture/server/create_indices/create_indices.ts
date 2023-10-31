@@ -65,7 +65,7 @@ export const initializeCspIndices = async (
   }
 };
 
-const createBenchmarkScoreIndex = async (
+export const createBenchmarkScoreIndex = async (
   esClient: ElasticsearchClient,
   cloudSecurityPostureConfig: CloudSecurityPostureConfig,
   logger: Logger

@@ -23,6 +23,10 @@ export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
 
+export const EQL_QUERY_DETAILS = 'EQL query';
+
+export const ESQL_QUERY_DETAILS = 'ES|QL query';
+
 export const SAVED_QUERY_NAME_DETAILS = 'Saved query name';
 
 export const SAVED_QUERY_DETAILS = /^Saved query$/;
@@ -141,8 +145,6 @@ export const THREAT_TACTIC = '[data-test-subj="threatTacticLink"]';
 export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
-
-export const BACK_TO_RULES_TABLE = '[data-test-subj="breadcrumb"][title="Detection rules (SIEM)"]';
 
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';

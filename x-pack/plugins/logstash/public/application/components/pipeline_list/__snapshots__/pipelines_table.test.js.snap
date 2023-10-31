@@ -106,6 +106,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
       </EuiButton>,
     }
   }
+  searchFormat="eql"
   selection={
     Object {
       "onSelectionChange": [MockFunction],

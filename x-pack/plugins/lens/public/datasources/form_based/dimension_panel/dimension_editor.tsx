@@ -67,6 +67,7 @@ import {
   CalloutWarning,
   DimensionEditorGroupsOptions,
   isLayerChangingDueToDecimalsPercentile,
+  isLayerChangingDueToOtherBucketChange,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
@@ -133,6 +134,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [hasRankingToastFired, setRankingToastAsFired] = useState(false);
 
+  const [hasOtherBucketToastFired, setHasOtherBucketToastFired] = useState(false);
+
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
 
@@ -143,6 +146,25 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const updateLayer = useCallback(
     (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
+  );
+
+  const fireOrResetOtherBucketToast = useCallback(
+    (newLayer: FormBasedLayer) => {
+      if (isLayerChangingDueToOtherBucketChange(state.layers[layerId], newLayer)) {
+        props.notifications.toasts.add({
+          title: i18n.translate('xpack.lens.uiInfo.otherBucketChangeTitle', {
+            defaultMessage: '“Group remaining values as Other” disabled',
+          }),
+          text: i18n.translate('xpack.lens.uiInfo.otherBucketDisabled', {
+            defaultMessage:
+              'Values >= 1000 may slow performance. Re-enable the setting in “Advanced” options.',
+          }),
+        });
+      }
+      // resets the flag
+      setHasOtherBucketToastFired(!hasOtherBucketToastFired);
+    },
+    [layerId, props.notifications.toasts, state.layers, hasOtherBucketToastFired]
   );
 
   const fireOrResetRandomSamplingToast = useCallback(
@@ -189,8 +211,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (newLayer: FormBasedLayer) => {
       fireOrResetRandomSamplingToast(newLayer);
       fireOrResetRankingToast(newLayer);
+      fireOrResetOtherBucketToast(newLayer);
     },
-    [fireOrResetRandomSamplingToast, fireOrResetRankingToast]
+    [fireOrResetRandomSamplingToast, fireOrResetRankingToast, fireOrResetOtherBucketToast]
   );
 
   const setStateWrapper = useCallback(
@@ -1064,8 +1087,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         selectedColumn &&
           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
             selectedColumn,
-            props.indexPatterns[state.layers[layerId].indexPatternId],
-            state.layers[layerId].columns
+            state.layers[layerId].columns,
+            props.indexPatterns[state.layers[layerId].indexPatternId]
           )
       ),
     [layerId, selectedColumn, props.indexPatterns, state.layers]
@@ -1240,8 +1263,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         customLabel:
                           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
                             selectedColumn,
-                            props.indexPatterns[state.layers[layerId].indexPatternId],
-                            state.layers[layerId].columns
+                            state.layers[layerId].columns,
+                            props.indexPatterns[state.layers[layerId].indexPatternId]
                           ) !== value,
                       },
                     },

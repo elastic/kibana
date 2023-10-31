@@ -168,7 +168,7 @@ export class SecurityPageObject extends FtrService {
     );
   }
 
-  private async isLoginFormVisible() {
+  public async isLoginFormVisible() {
     return await this.testSubjects.exists('loginForm');
   }
 
@@ -323,7 +323,14 @@ export class SecurityPageObject extends FtrService {
         if (alert?.accept) {
           await alert.accept();
         }
-        return !(await this.browser.getCurrentUrl()).includes('/logout');
+
+        if (this.config.get('serverless')) {
+          // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+          this.log.debug('Wait 5 sec for Cloud login page to be displayed');
+          return await this.find.existsByDisplayedByCssSelector('.login-form-password', 5000);
+        } else {
+          return !(await this.browser.getCurrentUrl()).includes('/logout');
+        }
       });
     }
   }
@@ -654,10 +661,6 @@ export class SecurityPageObject extends FtrService {
   }
 
   async selectRole(role: string) {
-    const dropdown = await this.testSubjects.find('rolesDropdown');
-    const input = await dropdown.findByCssSelector('input');
-    await input.type(role);
-    await this.find.clickByCssSelector(`[role=option][title="${role}"]`);
-    await this.testSubjects.click('comboBoxToggleListButton');
+    await this.comboBox.set('rolesDropdown', role);
   }
 }

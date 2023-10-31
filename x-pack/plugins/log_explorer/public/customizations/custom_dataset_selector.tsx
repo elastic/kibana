@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
+import { useDatasetSelection } from '../hooks/use_dataset_selection';
+import { DataViewsProvider, useDataViewsContext } from '../hooks/use_data_views';
+import { useEsql } from '../hooks/use_esql';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
-import { useDatasetSelection } from '../hooks/use_dataset_selection';
 
 interface CustomDatasetSelectorProps {
   logExplorerProfileStateService: LogExplorerProfileStateService;
@@ -38,23 +42,46 @@ export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateSer
   const {
     datasets,
     error: datasetsError,
-    isLoading: isLoadingStreams,
+    isLoading: isLoadingUncategorized,
     loadDatasets,
     reloadDatasets,
     searchDatasets,
     sortDatasets,
   } = useDatasetsContext();
 
+  const {
+    dataViews,
+    error: dataViewsError,
+    isLoading: isLoadingDataViews,
+    loadDataViews,
+    reloadDataViews,
+    selectDataView,
+    searchDataViews,
+    sortDataViews,
+  } = useDataViewsContext();
+
+  const { isEsqlEnabled, discoverEsqlUrlProps } = useEsql({ datasetSelection });
+
   return (
     <DatasetSelector
       datasets={datasets}
       datasetSelection={datasetSelection}
       datasetsError={datasetsError}
+      dataViews={dataViews}
+      dataViewsError={dataViewsError}
+      discoverEsqlUrlProps={discoverEsqlUrlProps}
       integrations={integrations}
       integrationsError={integrationsError}
+      isEsqlEnabled={isEsqlEnabled}
+      isLoadingDataViews={isLoadingDataViews}
       isLoadingIntegrations={isLoadingIntegrations}
-      isLoadingStreams={isLoadingStreams}
+      isLoadingUncategorized={isLoadingUncategorized}
       isSearchingIntegrations={isSearchingIntegrations}
+      onDataViewSelection={selectDataView}
+      onDataViewsReload={reloadDataViews}
+      onDataViewsSearch={searchDataViews}
+      onDataViewsSort={sortDataViews}
+      onDataViewsTabClick={loadDataViews}
       onIntegrationsLoadMore={loadMore}
       onIntegrationsReload={reloadIntegrations}
       onIntegrationsSearch={searchIntegrations}
@@ -62,10 +89,10 @@ export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateSer
       onIntegrationsStreamsSearch={searchIntegrationsStreams}
       onIntegrationsStreamsSort={sortIntegrationsStreams}
       onSelectionChange={handleDatasetSelectionChange}
-      onStreamsEntryClick={loadDatasets}
-      onUnmanagedStreamsReload={reloadDatasets}
-      onUnmanagedStreamsSearch={searchDatasets}
-      onUnmanagedStreamsSort={sortDatasets}
+      onUncategorizedReload={reloadDatasets}
+      onUncategorizedSearch={searchDatasets}
+      onUncategorizedSort={sortDatasets}
+      onUncategorizedTabClick={loadDatasets}
     />
   );
 });
@@ -75,17 +102,23 @@ export default CustomDatasetSelector;
 
 export type CustomDatasetSelectorBuilderProps = CustomDatasetSelectorProps & {
   datasetsClient: IDatasetsClient;
+  dataViews: DataViewsPublicPluginStart;
+  discover: DiscoverStart;
 };
 
 function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorProps>) {
   return function ComponentWithProviders({
-    logExplorerProfileStateService,
     datasetsClient,
+    dataViews,
+    discover,
+    logExplorerProfileStateService,
   }: CustomDatasetSelectorBuilderProps) {
     return (
       <IntegrationsProvider datasetsClient={datasetsClient}>
         <DatasetsProvider datasetsClient={datasetsClient}>
-          <Component logExplorerProfileStateService={logExplorerProfileStateService} />
+          <DataViewsProvider dataViewsService={dataViews} discoverService={discover}>
+            <Component logExplorerProfileStateService={logExplorerProfileStateService} />
+          </DataViewsProvider>
         </DatasetsProvider>
       </IntegrationsProvider>
     );

@@ -30,6 +30,7 @@ import {
 } from '../../../../../hooks';
 import { GoogleCloudShellGuide } from '../../../../../components';
 import { ManualInstructions } from '../../../../../../../components/enrollment_instructions';
+import { getGcpIntegrationDetailsFromPackagePolicy } from '../../../../../../../services';
 
 export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
   onConfirm: () => void;
@@ -46,6 +47,8 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
   );
   const { fleetServerHosts, fleetProxy } = useFleetServerHostsForPolicy(agentPolicy);
   const agentVersion = useAgentVersion();
+  const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
+    getGcpIntegrationDetailsFromPackagePolicy(packagePolicy);
 
   const { cloudShellUrl, error, isError, isLoading } = useCreateCloudShellUrl({
     enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
@@ -61,6 +64,9 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
     fleetServerHosts,
     fleetProxy,
     agentVersion,
+    gcpProjectId,
+    gcpOrganizationId,
+    gcpAccountType,
   });
 
   return (
@@ -75,7 +81,10 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
       </EuiModalHeader>
 
       <EuiModalBody>
-        <GoogleCloudShellGuide commandText={installManagedCommands.googleCloudShell} />
+        <GoogleCloudShellGuide
+          commandText={installManagedCommands.googleCloudShell}
+          hasProjectId={!!gcpProjectId}
+        />
         {error && isError && (
           <>
             <EuiSpacer size="m" />

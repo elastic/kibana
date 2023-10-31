@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PipelineEditor component includes required error message for falsy pipeline id 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-"
   restrictWidth={true}
   style={
@@ -289,11 +289,11 @@ Default value: 1024"
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component invalidates form for invalid pipeline id input 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-$invalid-pipeline-name"
   restrictWidth={true}
   style={
@@ -580,11 +580,11 @@ Default value: 1024"
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component invalidates form for pipeline id with spaces 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipeline id with spaces"
   restrictWidth={true}
   style={
@@ -871,11 +871,11 @@ Default value: 1024"
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
   style={
@@ -1148,11 +1148,11 @@ Default value: 1024"
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
   style={
@@ -1435,11 +1435,11 @@ Default value: 1024"
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
   style={
@@ -1712,5 +1712,5 @@ Default value: 1024"
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;

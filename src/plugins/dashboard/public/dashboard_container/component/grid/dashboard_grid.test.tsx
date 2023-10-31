@@ -46,16 +46,18 @@ jest.mock('./dashboard_grid_item', () => {
 
 const createAndMountDashboardGrid = () => {
   const dashboardContainer = buildMockDashboard({
-    panels: {
-      '1': {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-        type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '1' },
-      },
-      '2': {
-        gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
-        type: CONTACT_CARD_EMBEDDABLE,
-        explicitInput: { id: '2' },
+    overrides: {
+      panels: {
+        '1': {
+          gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+          type: CONTACT_CARD_EMBEDDABLE,
+          explicitInput: { id: '1' },
+        },
+        '2': {
+          gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
+          type: CONTACT_CARD_EMBEDDABLE,
+          explicitInput: { id: '2' },
+        },
       },
     },
   });

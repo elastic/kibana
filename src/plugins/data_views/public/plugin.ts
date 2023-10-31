@@ -88,6 +88,7 @@ export class DataViewsPublicPlugin
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
       apiClient: new DataViewsApiClient(http),
       fieldFormats,
+      http,
       onNotification: (toastInputFields, key) => {
         onNotifDebounced(key)(toastInputFields);
       },

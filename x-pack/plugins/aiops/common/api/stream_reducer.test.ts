@@ -39,6 +39,8 @@ describe('streamReducer', () => {
       initialState,
       addSignificantTermsAction([
         {
+          key: 'the-field-name:the-field-value',
+          type: 'keyword',
           fieldName: 'the-field-name',
           fieldValue: 'the-field-value',
           doc_count: 10,

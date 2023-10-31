@@ -11,6 +11,8 @@ import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
+import { basename } from 'path';
+import { SERVERLESS_RESOURCES_PATHS } from '../paths';
 import { Cluster } from '../cluster';
 import {
   ES_SERVERLESS_REPO_ELASTICSEARCH,
@@ -33,10 +35,18 @@ export const serverless: Command = {
       --basePath          Path to the directory where the ES cluster will store data
       --clean             Remove existing file system object store before running
       --kill              Kill running ES serverless nodes if detected on startup
+      --host              Publish ES docker container on additional host IP
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       --ssl               Enable HTTP SSL on the ES cluster
       --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
+      --resources         Overrides resources under ES 'config/' directory, which are by default
+                          mounted from 'packages/kbn-es/src/serverless_resources/users'. Value should
+                          be a valid file path (relative or absolute). This option can be used multiple
+                          times if needing to override multiple files. The following files can be overwritten:
+                          ${SERVERLESS_RESOURCES_PATHS.map((filePath) => basename(filePath)).join(
+                            ' | '
+                          )}
 
       -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
@@ -63,7 +73,7 @@ export const serverless: Command = {
         files: 'F',
       },
 
-      string: ['tag', 'image', 'basePath'],
+      string: ['tag', 'image', 'basePath', 'resources', 'host'],
       boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
 
       default: defaults,

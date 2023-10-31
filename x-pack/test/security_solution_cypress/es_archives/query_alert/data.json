@@ -119,6 +119,9 @@
         "path": "C:/fake_malware.exe",
         "size": 3456
       },
+      "user": {
+        "name": "user1"
+      },
       "host": {
         "architecture": "wtnozeqvub",
         "hostname": "Host-fwarau82er",

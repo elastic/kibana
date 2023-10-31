@@ -7,6 +7,10 @@ Connectors provide a central place to store connection information for services 
 [cols="2"]
 |===
 
+a| <<bedrock-action-type,{bedrock}>>
+
+| Send a request to {bedrock}.
+
 a| <<d3security-action-type,D3 Security>>
 
 | Send a request to D3 Security.
@@ -14,10 +18,6 @@ a| <<d3security-action-type,D3 Security>>
 a| <<email-action-type,Email>>
 
 | Send email from your server.
-
-a| <<gen-ai-action-type,Generative AI>>
-
-| Send a request to OpenAI.
 
 a| <<resilient-action-type,{ibm-r}>>
 
@@ -34,6 +34,10 @@ a| <<jira-action-type,Jira>>
 a| <<teams-action-type,Microsoft Teams>>
 
 | Send a message to a Microsoft Teams channel.
+
+a| <<openai-action-type,OpenAI>>
+
+| Send a request to OpenAI.
 
 a| <<opsgenie-action-type,{opsgenie}>>
 

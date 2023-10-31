@@ -190,7 +190,7 @@
                 "section": "def-common.MountPoint",
                 "text": "MountPoint"
               },
-              "<HTMLElement>) => void"
+              "<HTMLElement> | undefined) => void"
             ],
             "path": "packages/react/kibana_mount/mount_point_portal.tsx",
             "deprecated": false,
@@ -211,12 +211,12 @@
                     "section": "def-common.MountPoint",
                     "text": "MountPoint"
                   },
-                  "<HTMLElement>"
+                  "<HTMLElement> | undefined"
                 ],
                 "path": "packages/react/kibana_mount/mount_point_portal.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []

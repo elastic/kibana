@@ -36,6 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
     const defaultBody = { data_view_id: '.alerts-security.alerts-default' };
     const { body: result } = await supertest
       .post(RISK_SCORE_PREVIEW_URL)
+      .set('elastic-api-version', '1')
       .set('kbn-xsrf', 'true')
       .send({ ...defaultBody, ...body })
       .expect(200);

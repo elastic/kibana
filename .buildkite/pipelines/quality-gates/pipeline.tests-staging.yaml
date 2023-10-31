@@ -3,22 +3,22 @@
 # A failure in this pipeline build will prevent further progression to the subsequent stage.
 
 steps:
-  - label: ":pipeline::kibana::seedling: Trigger SLO check"
-    trigger: "serverless-quality-gates" # https://buildkite.com/elastic/serverless-quality-gates
-    build:
-      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
-      env:
-        TARGET_ENV: staging
-        CHECK_SLO: true
-        CHECK_SLO_TAG: kibana
-    soft_fail: true
-
-  - label: ":pipeline::rocket::seedling: Trigger control-plane e2e tests"
+  - label: ":rocket: control-plane e2e tests"
     trigger: "ess-k8s-staging-e2e-tests" # https://buildkite.com/elastic/ess-k8s-staging-e2e-tests
     build:
       env:
         REGION_ID: aws-us-east-1
         NAME_PREFIX: ci_test_kibana-promotion_
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
+
+  - label: ":kibana: Kibana Serverless Tests for ${ENVIRONMENT}"
+    trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
+    soft_fail: true # Remove this before release or when tests stabilize
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+        EC_ENV: staging
+        EC_REGION: aws-us-east-1
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
 
   - wait: ~

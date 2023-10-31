@@ -33,7 +33,7 @@ import {
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
-    tags: ['@serverless', '@brokenInServerless'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [
@@ -63,7 +63,7 @@ describe(
     });
 
     // roles `t1_analyst` and `t2_analyst` are very similar with exception of one page
-    (['t1_analyst', `t2_analyst`] as ROLE[]).forEach((roleName) => {
+    [ROLE.t1_analyst, ROLE.t2_analyst].forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
 
@@ -350,7 +350,7 @@ describe(
       });
     });
 
-    (['platform_engineer', 'endpoint_policy_manager'] as ROLE[]).forEach((roleName) => {
+    [ROLE.platform_engineer, ROLE.endpoint_policy_manager].forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [
           pageById.trustedApps,

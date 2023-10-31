@@ -131,7 +131,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService } = kibana.services;
+  const { dataViews, expressions, indexManagementApiService, application } = kibana.services;
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   const [editorHeight, setEditorHeight] = useState(
@@ -148,6 +148,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     useState<LanguageDocumentationSections>();
 
   const policiesRef = useRef<SerializedEnrichPolicy[]>([]);
+
+  // Registers a command to redirect users to the index management page
+  // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
+  monaco.editor.registerCommand('esql.policies.create', (...args) => {
+    application?.navigateToApp('management', {
+      path: 'data/index_management/enrich_policies/create',
+      openInNewTab: true,
+    });
+  });
+
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
     isCompactFocused,
@@ -570,7 +580,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 {documentationSections && (
                   <EuiFlexItem grow={false}>
                     <LanguageDocumentationPopover
-                      language={getLanguageDisplayName(String(language)).toUpperCase()}
+                      language={getLanguageDisplayName(String(language))}
                       sections={documentationSections}
                       buttonProps={{
                         color: 'text',
@@ -721,6 +731,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         onErrorClick={onErrorClick}
                         refreshErrors={onTextLangQuerySubmit}
                         detectTimestamp={detectTimestamp}
+                        hideRunQueryText={hideRunQueryText}
                       />
                     )}
                   </div>

@@ -22,7 +22,6 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { CloudChatProviderPluginStart } from '@kbn/cloud-chat-provider-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import { ConfigSchema } from '../config';
@@ -43,7 +42,6 @@ export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
-  cloudChatProvider?: CloudChatProviderPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -82,10 +80,8 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [
-          coreStart,
-          { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding, cloudChatProvider },
-        ] = await core.getStartServices();
+        const [coreStart, { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding }] =
+          await core.getStartServices();
         setServices({
           share,
           trackUiMetric,
@@ -110,7 +106,6 @@ export class HomePublicPlugin
           welcomeService: this.welcomeService,
           guidedOnboardingService: guidedOnboarding.guidedOnboardingApi,
           cloud,
-          cloudChat: cloudChatProvider,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

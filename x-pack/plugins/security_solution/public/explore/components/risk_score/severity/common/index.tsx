@@ -41,7 +41,8 @@ const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: bo
 const TooltipContainer = styled.div`
   padding: ${({ theme }) => theme.eui.euiSizeS};
 `;
-export const RiskScore: React.FC<{
+
+export const RiskScoreLevel: React.FC<{
   severity: RiskSeverity;
   hideBackgroundColor?: boolean;
   toolTipContent?: JSX.Element;

@@ -11,6 +11,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { EMBEDDABLE_FUNCTIONS } from '@kbn/observability-shared-plugin/public';
 import type { TopNFunctions } from '@kbn/profiling-utils';
+import { GetProfilingEmbeddableDependencies } from '../profiling_embeddable_provider';
 
 interface EmbeddableFunctionsInput {
   data?: TopNFunctions;
@@ -26,13 +27,16 @@ export class EmbeddableFunctionsFactory
 {
   readonly type = EMBEDDABLE_FUNCTIONS;
 
+  constructor(private getProfilingEmbeddableDependencies: GetProfilingEmbeddableDependencies) {}
+
   async isEditable() {
     return false;
   }
 
   async create(input: EmbeddableFunctionsEmbeddableInput, parent?: IContainer) {
     const { EmbeddableFunctions } = await import('./embeddable_functions');
-    return new EmbeddableFunctions(input, {}, parent);
+    const deps = await this.getProfilingEmbeddableDependencies();
+    return new EmbeddableFunctions(deps, input, parent);
   }
 
   getDisplayName() {

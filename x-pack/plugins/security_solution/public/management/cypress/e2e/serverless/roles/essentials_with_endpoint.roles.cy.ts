@@ -26,7 +26,7 @@ import {
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
   {
-    tags: ['@serverless', '@brokenInServerless'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [
@@ -55,7 +55,7 @@ describe(
     });
 
     // roles `t1_analyst` and `t2_analyst` are the same as far as endpoint access
-    (['t1_analyst', `t2_analyst`] as ROLE[]).forEach((roleName) => {
+    [ROLE.t1_analyst, ROLE.t2_analyst].forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
 
@@ -237,9 +237,11 @@ describe(
     });
 
     // Endpoint Operations Manager, Endpoint Policy Manager and Platform Engineer currently have the same level of access
-    (
-      ['platform_engineer', `endpoint_operations_analyst`, 'endpoint_policy_manager'] as ROLE[]
-    ).forEach((roleName) => {
+    [
+      ROLE.platform_engineer,
+      ROLE.endpoint_operations_analyst,
+      ROLE.endpoint_policy_manager,
+    ].forEach((roleName) => {
       describe(`for role: ${roleName}`, () => {
         const artifactPagesFullAccess = [
           pageById.trustedApps,

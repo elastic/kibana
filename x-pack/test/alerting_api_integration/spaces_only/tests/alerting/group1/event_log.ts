@@ -24,6 +24,7 @@ const InstanceActions = new Set<string | undefined>([
   'new-instance',
   'active-instance',
   'recovered-instance',
+  'untracked-instance',
 ]);
 
 // eslint-disable-next-line import/no-default-export

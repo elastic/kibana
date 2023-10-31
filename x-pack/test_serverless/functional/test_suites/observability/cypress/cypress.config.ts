@@ -29,7 +29,6 @@ export default defineCypressConfig({
   viewportHeight: 1800,
   viewportWidth: 1440,
   video: false,
-  videoUploadOnPasses: false,
   screenshotOnRunFailure: false,
   retries: {
     runMode: 1,

@@ -6,8 +6,12 @@
  */
 
 import { merge } from 'lodash';
+import { setupToolingLogLevel } from './support/setup_tooling_log_level';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
+import { agentActions } from './support/agent_actions';
+import { usageTracker } from '../../../common/endpoint/data_loaders/usage_tracker';
 
 export const getCypressBaseConfig = (
   overrides: Cypress.ConfigOptions = {}
@@ -48,6 +52,10 @@ export const getCypressBaseConfig = (
         ELASTICSEARCH_USERNAME: 'system_indices_superuser',
         ELASTICSEARCH_PASSWORD: 'changeme',
 
+        // Default log level for instance of `ToolingLog` created via `crateToolingLog()`. Set this
+        // to `debug` or `verbose` when wanting to debug tooling used by tests (ex. data indexer functions).
+        TOOLING_LOG_LEVEL: 'info',
+
         // grep related configs
         grepFilterSpecs: true,
         grepOmitFiltered: true,
@@ -59,23 +67,29 @@ export const getCypressBaseConfig = (
         supportFile: 'public/management/cypress/support/e2e.ts',
         specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
         experimentalRunAllSpecs: true,
+        experimentalMemoryManagement: true,
+        experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
-          dataLoaders(on, config);
+          // IMPORTANT: setting the log level should happen before any tooling is called
+          setupToolingLogLevel(config);
 
-          // skip dataLoadersForRealEndpoints() if running in serverless
-          // https://github.com/elastic/security-team/issues/7467
-          // Once we are able to run Fleet server in serverless mode (see: https://github.com/elastic/kibana/pull/166183)
-          // this `if()` statement needs to be removed and `dataLoadersForRealEndpoints()` should
-          // just be called without having any checks around it.
-          if (!config.env.IS_SERVERLESS) {
-            // Data loaders specific to "real" Endpoint testing
-            dataLoadersForRealEndpoints(on, config);
-          }
+          dataLoaders(on, config);
+          // Data loaders specific to "real" Endpoint testing
+          dataLoadersForRealEndpoints(on, config);
+
+          agentActions(on);
 
           responseActionTasks(on, config);
 
           // eslint-disable-next-line @typescript-eslint/no-var-requires
           require('@cypress/grep/src/plugin')(config);
+
+          on('after:spec', () => {
+            createToolingLogger().info(
+              'Tooling Usage Tracking summary:\n',
+              usageTracker.toSummaryTable()
+            );
+          });
 
           return config;
         },

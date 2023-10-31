@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleExecutionResult } from './execution_result';
+import type { RuleExecutionResult } from './execution_result.gen';
 
 const getSomeResults = (): RuleExecutionResult[] => [
   {

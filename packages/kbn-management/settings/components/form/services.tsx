@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
-  FieldRowProvider,
-  FieldRowKibanaProvider,
-} from '@kbn/management-settings-components-field-row';
 import React, { FC, useContext } from 'react';
-import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
+import {
+  FieldCategoryKibanaProvider,
+  FieldCategoryProvider,
+} from '@kbn/management-settings-components-field-category';
 import type { FormServices, FormKibanaDependencies, Services } from './types';
 import { reloadPageToast } from './reload_page_toast';
 
@@ -33,7 +32,7 @@ export const FormProvider = ({ children, ...services }: FormProviderProps) => {
 
   return (
     <FormContext.Provider value={{ saveChanges, showError, showReloadPagePrompt }}>
-      <FieldRowProvider {...rest}>{children}</FieldRowProvider>
+      <FieldCategoryProvider {...rest}>{children}</FieldCategoryProvider>
     </FormContext.Provider>
   );
 };
@@ -42,22 +41,24 @@ export const FormProvider = ({ children, ...services }: FormProviderProps) => {
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}.
  */
 export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...deps }) => {
-  const { settings, toasts, docLinks, theme, i18nStart } = deps;
+  const { settings, notifications, docLinks, theme, i18n } = deps;
+
+  const services: Services = {
+    saveChanges: (changes) => {
+      const arr = Object.entries(changes).map(([key, value]) =>
+        settings.client.set(key, value.unsavedValue)
+      );
+      return Promise.all(arr);
+    },
+    showError: (message: string) => notifications.toasts.addDanger(message),
+    showReloadPagePrompt: () => notifications.toasts.add(reloadPageToast(theme, i18n)),
+  };
 
   return (
-    <FormContext.Provider
-      value={{
-        saveChanges: (changes: Record<string, UnsavedFieldChange<SettingType>>) => {
-          const arr = Object.entries(changes).map(([key, value]) =>
-            settings.client.set(key, value.unsavedValue)
-          );
-          return Promise.all(arr);
-        },
-        showError: (message: string) => toasts.addDanger(message),
-        showReloadPagePrompt: () => toasts.add(reloadPageToast(theme, i18nStart)),
-      }}
-    >
-      <FieldRowKibanaProvider {...{ docLinks, toasts }}>{children}</FieldRowKibanaProvider>
+    <FormContext.Provider value={services}>
+      <FieldCategoryKibanaProvider {...{ docLinks, notifications }}>
+        {children}
+      </FieldCategoryKibanaProvider>
     </FormContext.Provider>
   );
 };

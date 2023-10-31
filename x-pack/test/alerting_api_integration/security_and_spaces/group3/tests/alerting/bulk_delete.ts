@@ -17,33 +17,32 @@ import {
 
 const getDefaultRules = (response: any) => ({
   id: response.body.rules[0].id,
-  apiKey: response.body.rules[0].apiKey,
-  apiKeyCreatedByUser: false,
-  notifyWhen: 'onThrottleInterval',
+  api_key_created_by_user: false,
+  notify_when: 'onThrottleInterval',
   enabled: true,
   name: 'abc',
   tags: ['foo'],
   consumer: 'alertsFixture',
   throttle: '1m',
-  alertTypeId: 'test.noop',
-  apiKeyOwner: response.body.rules[0].apiKeyOwner,
-  createdBy: 'elastic',
-  updatedBy: response.body.rules[0].updatedBy,
-  muteAll: false,
-  mutedInstanceIds: [],
+  rule_type_id: 'test.noop',
+  api_key_owner: response.body.rules[0].api_key_owner,
+  created_by: 'elastic',
+  updated_by: response.body.rules[0].updated_by,
+  mute_all: false,
+  muted_alert_ids: [],
   schedule: { interval: '1m' },
   actions: [],
   params: {},
   running: false,
-  snoozeSchedule: [],
-  updatedAt: response.body.rules[0].updatedAt,
-  createdAt: response.body.rules[0].createdAt,
-  scheduledTaskId: response.body.rules[0].scheduledTaskId,
-  executionStatus: response.body.rules[0].executionStatus,
+  snooze_schedule: [],
+  updated_at: response.body.rules[0].updated_at,
+  created_at: response.body.rules[0].created_at,
+  scheduled_task_id: response.body.rules[0].scheduled_task_id,
+  execution_status: response.body.rules[0].execution_status,
   monitoring: response.body.rules[0].monitoring,
   revision: 0,
-  ...(response.body.rules[0].nextRun ? { nextRun: response.body.rules[0].nextRun } : {}),
-  ...(response.body.rules[0].lastRun ? { lastRun: response.body.rules[0].lastRun } : {}),
+  ...(response.body.rules[0].next_run ? { next_run: response.body.rules[0].next_run } : {}),
+  ...(response.body.rules[0].last_run ? { last_run: response.body.rules[0].last_run } : {}),
 });
 
 const getThreeRules = (response: any) => {
@@ -51,33 +50,32 @@ const getThreeRules = (response: any) => {
   for (let i = 0; i < 3; i++) {
     rules.push({
       id: response.body.rules[i].id,
-      apiKey: response.body.rules[i].apiKey,
-      apiKeyCreatedByUser: false,
-      notifyWhen: 'onThrottleInterval',
+      api_key_created_by_user: false,
+      notify_when: 'onThrottleInterval',
       enabled: true,
       name: 'abc',
       tags: ['multiple-rules-delete'],
       consumer: 'alertsFixture',
       throttle: '1m',
-      alertTypeId: 'test.noop',
-      apiKeyOwner: response.body.rules[i].apiKeyOwner,
-      createdBy: 'elastic',
-      updatedBy: response.body.rules[i].updatedBy,
-      muteAll: false,
-      mutedInstanceIds: [],
+      rule_type_id: 'test.noop',
+      api_key_owner: response.body.rules[i].api_key_owner,
+      created_by: 'elastic',
+      updated_by: response.body.rules[i].updated_by,
+      mute_all: false,
+      muted_alert_ids: [],
       schedule: { interval: '1m' },
       actions: [],
       params: {},
       running: false,
-      snoozeSchedule: [],
-      updatedAt: response.body.rules[i].updatedAt,
-      createdAt: response.body.rules[i].createdAt,
-      scheduledTaskId: response.body.rules[i].scheduledTaskId,
-      executionStatus: response.body.rules[i].executionStatus,
+      snooze_schedule: [],
+      updated_at: response.body.rules[i].updated_at,
+      created_at: response.body.rules[i].created_at,
+      scheduled_task_id: response.body.rules[i].scheduled_task_id,
+      execution_status: response.body.rules[i].execution_status,
       monitoring: response.body.rules[i].monitoring,
       revision: 0,
-      ...(response.body.rules[i].nextRun ? { nextRun: response.body.rules[i].nextRun } : {}),
-      ...(response.body.rules[i].lastRun ? { lastRun: response.body.rules[i].lastRun } : {}),
+      ...(response.body.rules[i].next_run ? { next_run: response.body.rules[i].next_run } : {}),
+      ...(response.body.rules[i].last_run ? { last_run: response.body.rules[i].last_run } : {}),
     });
   }
   return rules;
@@ -230,7 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
                 rules: [
                   {
                     ...getDefaultRules(response),
-                    alertTypeId: 'test.restricted-noop',
+                    rule_type_id: 'test.restricted-noop',
                     consumer: 'alertsRestrictedFixture',
                   },
                 ],
@@ -298,7 +296,7 @@ export default ({ getService }: FtrProviderContext) => {
               break;
             case 'superuser at space1':
               expect(response.body).to.eql({
-                rules: [{ ...getDefaultRules(response), alertTypeId: 'test.restricted-noop' }],
+                rules: [{ ...getDefaultRules(response), rule_type_id: 'test.restricted-noop' }],
                 errors: [],
                 total: 1,
                 taskIdsFailedToBeDeleted: [],
@@ -604,7 +602,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
-          "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
+          "Error validating bulk delete data - Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
         );
         objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
         await getScheduledTask(createdRule1.scheduled_task_id);
@@ -641,7 +639,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.body).to.eql({
           error: 'Bad Request',
-          message: "Either 'ids' or 'filter' property in method's arguments should be provided",
+          message:
+            "Error validating bulk delete data - Either 'ids' or 'filter' property in method's arguments should be provided",
           statusCode: 400,
         });
       });
@@ -669,7 +668,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.body).to.eql({
           error: 'Bad Request',
-          message: "Either 'ids' or 'filter' property in method's arguments should be provided",
+          message:
+            "Error validating bulk delete data - Either 'ids' or 'filter' property in method's arguments should be provided",
           statusCode: 400,
         });
       });

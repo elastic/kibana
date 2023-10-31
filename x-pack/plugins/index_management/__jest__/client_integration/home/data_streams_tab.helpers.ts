@@ -34,6 +34,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     selectDataStream: (name: string, selected: boolean) => void;
     clickConfirmDelete: () => void;
     clickDeleteDataStreamButton: () => void;
+    clickEditDataRetentionButton: () => void;
     clickDetailPanelIndexTemplateLink: () => void;
   };
   findDeleteActionAt: (index: number) => ReactWrapper;
@@ -176,8 +177,13 @@ export const setup = async (
   };
 
   const clickDeleteDataStreamButton = () => {
-    const { find } = testBed;
-    find('deleteDataStreamButton').simulate('click');
+    testBed.find('manageDataStreamButton').simulate('click');
+    testBed.find('deleteDataStreamButton').simulate('click');
+  };
+
+  const clickEditDataRetentionButton = () => {
+    testBed.find('manageDataStreamButton').simulate('click');
+    testBed.find('editDataRetentionButton').simulate('click');
   };
 
   const clickDetailPanelIndexTemplateLink = async () => {
@@ -236,6 +242,7 @@ export const setup = async (
       selectDataStream,
       clickConfirmDelete,
       clickDeleteDataStreamButton,
+      clickEditDataRetentionButton,
       clickDetailPanelIndexTemplateLink,
     },
     findDeleteActionAt,
@@ -267,9 +274,11 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   maxTimeStamp: 420,
   privileges: {
     delete_index: true,
+    manage_data_stream_lifecycle: true,
   },
   hidden: false,
   lifecycle: {
+    enabled: true,
     data_retention: '7d',
   },
   ...dataStream,
