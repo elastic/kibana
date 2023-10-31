@@ -51,7 +51,7 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
+    schema: schema.arrayOf(schema.string(), { maxSize: 50 }),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {

@@ -38,9 +38,19 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   getRegistered() {
-    const copiedDefaults: Record<string, Omit<UiSettingsParams, 'schema'>> = {};
+    const copiedDefaults: Record<
+      string,
+      Omit<UiSettingsParams, 'schema'> & {
+        schemaStructure: { type: unknown; rules: { [key: string]: any } };
+      }
+    > = {};
     for (const [key, value] of Object.entries(this.defaults)) {
-      copiedDefaults[key] = omit(value, 'schema');
+      const registeredValue = omit(value, 'schema');
+      const schemaStructure = {
+        type: value.schema.getSchema().describe().type,
+        rules: value.schema.getSchema().describe().rules,
+      };
+      copiedDefaults[key] = { ...registeredValue, schemaStructure };
     }
     return copiedDefaults;
   }

@@ -13,6 +13,7 @@ import {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 import { ToastsStart } from '@kbn/core-notifications-browser';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 /**
  * Contextual services used by a {@link FieldInput} component.
@@ -23,6 +24,7 @@ export interface FieldInputServices {
    * @param value The message to display.
    */
   showDanger: (value: string) => void;
+  validateChange: (key: string, value: any) => string | null;
 }
 
 /**
@@ -33,6 +35,9 @@ export interface FieldInputKibanaDependencies {
   /** The portion of the {@link ToastsStart} contract used by this component. */
   notifications: {
     toasts: Pick<ToastsStart, 'addDanger'>;
+  };
+  settings: {
+    client: IUiSettingsClient;
   };
 }
 

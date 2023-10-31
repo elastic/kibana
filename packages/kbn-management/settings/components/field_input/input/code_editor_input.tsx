@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { SettingType } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
+import { useServices } from '../services';
 import { CodeEditor, CodeEditorProps } from '../code_editor';
 import type { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
@@ -45,6 +46,7 @@ export const CodeEditorInput = ({
   defaultValue,
   onInputChange,
 }: CodeEditorInputProps) => {
+  const { validateChange } = useServices();
   const onUpdate = useUpdate({ onInputChange, field });
 
   const onChange: CodeEditorProps['onChange'] = (inputValue) => {
@@ -57,7 +59,14 @@ export const CodeEditorInput = ({
         newUnsavedValue = inputValue || (isJsonArray ? '[]' : '{}');
 
         try {
-          JSON.parse(newUnsavedValue);
+          const parsedUnsavedValue = JSON.parse(newUnsavedValue);
+          const validationError = validateChange(field.id, parsedUnsavedValue);
+          if (validationError) {
+            errorParams = {
+              error: validationError,
+              isInvalid: true,
+            };
+          }
         } catch (e) {
           errorParams = {
             error: i18n.translate('management.settings.field.codeEditorSyntaxErrorMessage', {

@@ -11,6 +11,7 @@ import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
+import { useServices } from '../services';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
@@ -28,9 +29,12 @@ export const TextInput = ({
   isSavingEnabled,
   onInputChange,
 }: TextInputProps) => {
+  const { validateChange } = useServices();
+
   const onChange: EuiFieldTextProps['onChange'] = (event) => {
     const inputValue = event.target.value;
-    onUpdate({ type: field.type, unsavedValue: inputValue });
+    const error = validateChange(field.id, inputValue);
+    onUpdate({ type: field.type, unsavedValue: inputValue, isInvalid: error !== null, error });
   };
 
   const onUpdate = useUpdate({ onInputChange, field });

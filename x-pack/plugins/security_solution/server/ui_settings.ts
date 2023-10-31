@@ -115,7 +115,7 @@ export const initUiSettings = (
       }),
       category: [APP_ID],
       requiresPageReload: true,
-      schema: schema.arrayOf(schema.string()),
+      schema: schema.arrayOf(schema.string(), { maxSize: 50 }),
     },
     [DEFAULT_THREAT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
@@ -132,7 +132,7 @@ export const initUiSettings = (
       ),
       category: [APP_ID],
       requiresPageReload: true,
-      schema: schema.arrayOf(schema.string()),
+      schema: schema.arrayOf(schema.string(), { maxSize: 10 }),
     },
     [DEFAULT_ANOMALY_SCORE]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAnomalyScoreLabel', {
@@ -149,7 +149,7 @@ export const initUiSettings = (
       ),
       category: [APP_ID],
       requiresPageReload: true,
-      schema: schema.number(),
+      schema: schema.number({ max: 100, min: 0 }),
     },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {

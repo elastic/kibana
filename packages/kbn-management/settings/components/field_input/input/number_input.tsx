@@ -13,6 +13,7 @@ import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilitie
 
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
+import { useServices } from '../services';
 
 /**
  * Props for a {@link NumberInput} component.
@@ -28,12 +29,15 @@ export const NumberInput = ({
   isSavingEnabled,
   onInputChange,
 }: NumberInputProps) => {
-  const onChange: EuiFieldNumberProps['onChange'] = (event) => {
-    const inputValue = Number(event.target.value);
-    onUpdate({ type: field.type, unsavedValue: inputValue });
-  };
+  const { validateChange } = useServices();
 
   const onUpdate = useUpdate({ onInputChange, field });
+
+  const onChange: EuiFieldNumberProps['onChange'] = (event) => {
+    const inputValue = Number(event.target.value);
+    const error = validateChange(field.id, inputValue);
+    onUpdate({ type: field.type, unsavedValue: inputValue, isInvalid: error !== null, error });
+  };
 
   const { id, name, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;

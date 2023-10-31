@@ -12,6 +12,7 @@ import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
 import { getFieldInputValue } from '@kbn/management-settings-utilities';
 import { useUpdate } from '@kbn/management-settings-utilities';
 
+import { useServices } from '../services';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
@@ -33,6 +34,7 @@ export const ArrayInput = ({
 }: ArrayInputProps) => {
   const [inputValue] = getFieldInputValue(field, unsavedChange) || [];
   const [value, setValue] = useState(inputValue?.join(', '));
+  const { validateChange } = useServices();
 
   const onChange: EuiFieldTextProps['onChange'] = (event) => {
     const newValue = event.target.value;
@@ -52,7 +54,8 @@ export const ArrayInput = ({
       .replace(REGEX, ',')
       .split(',')
       .filter((v) => v !== '');
-    onUpdate({ type: field.type, unsavedValue: blurValue });
+    const error = validateChange(field.id, blurValue);
+    onUpdate({ type: field.type, unsavedValue: blurValue, isInvalid: error !== null, error });
     setValue(blurValue.join(', '));
   };
 

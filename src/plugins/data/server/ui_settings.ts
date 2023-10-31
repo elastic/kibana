@@ -468,7 +468,8 @@ export function getUiSettings(
           from: schema.string(),
           to: schema.string(),
           display: schema.string(),
-        })
+        }),
+        { maxSize: 10 }
       ),
     },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
