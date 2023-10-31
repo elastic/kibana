@@ -55,8 +55,10 @@ export function ChartGrid({ limit, charts, showFrames }: ChartGridProps) {
       <EuiSpacer />
       <EuiTitle size="s">
         <h1>
-          {i18n.translate('xpack.profiling.chartGrid.h1.topLabel', { defaultMessage: 'Top' })}
-          {charts.length}
+          {i18n.translate('xpack.profiling.chartGrid.h1.topLabel', {
+            defaultMessage: 'Top {size}',
+            values: { size: charts.length },
+          })}
         </h1>
       </EuiTitle>
       <EuiSpacer />
