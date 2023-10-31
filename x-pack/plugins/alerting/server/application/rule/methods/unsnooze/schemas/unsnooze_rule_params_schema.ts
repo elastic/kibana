@@ -9,5 +9,5 @@ import { schema } from '@kbn/config-schema';
 
 export const unsnoozeRuleParamsSchema = schema.object({
   id: schema.string(),
-  scheduleIds: schema.maybe(schema.string()),
+  scheduleIds: schema.maybe(schema.arrayOf(schema.string())),
 });
