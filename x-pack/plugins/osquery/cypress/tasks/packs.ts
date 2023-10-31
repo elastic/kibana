@@ -21,6 +21,7 @@ export const preparePack = (packName: string) => {
 };
 
 export const deactivatePack = (packName: string) => {
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
   cy.get(`[aria-label="${packName}"]`).click();
   closeModalIfVisible();
 
@@ -30,6 +31,7 @@ export const deactivatePack = (packName: string) => {
 };
 
 export const activatePack = (packName: string) => {
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
   cy.get(`[aria-label="${packName}"]`).click();
   closeModalIfVisible();
 
