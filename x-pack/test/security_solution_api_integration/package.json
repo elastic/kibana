@@ -27,10 +27,10 @@
     "exception_operators_ips_text_array:qa:serverless": "npm run run-tests exceptions/operators_data_types/ips_text_array serverless qaEnv",
     "exception_operators_ips_text_array:server:ess": "npm run initialize-server exceptions/operators_data_types/ips_text_array ess",
     "exception_operators_ips_text_array:runner:ess": "npm run run-tests exceptions/operators_data_types/ips_text_array ess essEnv",
-    "rule_creation_preview:server:serverless": "npm run initialize-server rule_creation_preview serverless",
-    "rule_creation_preview:runner:serverless": "npm run run-tests rule_creation_preview serverless serverlessEnv",
-    "rule_creation_preview:qa:serverless": "npm run run-tests rule_creation_preview serverless qaEnv",
-    "rule_creation_preview:server:ess": "npm run initialize-server rule_creation_preview ess",
-    "rule_creation_preview:runner:ess": "npm run run-tests rule_creation_preview ess essEnv"
+    "rule_creation:server:serverless": "npm run initialize-server rule_creation serverless",
+    "rule_creation:runner:serverless": "npm run run-tests rule_creation serverless serverlessEnv",
+    "rule_creation:qa:serverless": "npm run run-tests rule_creation serverless qaEnv",
+    "rule_creation:server:ess": "npm run initialize-server rule_creation ess",
+    "rule_creation:runner:ess": "npm run run-tests rule_creation ess essEnv"
   }
 }
