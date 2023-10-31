@@ -13,15 +13,10 @@ import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  createApmRule,
-  runRuleSoon,
-  deleteApmAlerts,
-  deleteRuleById,
-  ApmAlertFields,
-} from '../alerts/helpers/alerting_api_helper';
+import { createApmRule, runRuleSoon, ApmAlertFields } from '../alerts/helpers/alerting_api_helper';
 import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
 import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
+import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
 
 type TransactionsGroupsMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -36,6 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const dayInMs = 24 * 60 * 60 * 1000;
   const start = Date.now() - dayInMs;
   const end = Date.now() + dayInMs;
+  const logger = getService('log');
 
   async function getTransactionGroups(overrides?: {
     path?: {
@@ -170,8 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         after(async () => {
-          await deleteRuleById({ supertest, ruleId });
-          await deleteApmAlerts(es);
+          await cleanupRuleAndAlertState({ es, supertest, logger });
         });
 
         it('checks if rule is active', async () => {
@@ -244,8 +239,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         after(async () => {
-          await deleteRuleById({ supertest, ruleId });
-          await deleteApmAlerts(es);
+          await cleanupRuleAndAlertState({ es, supertest, logger });
         });
 
         it('checks if rule is active', async () => {
@@ -319,8 +313,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         after(async () => {
-          await deleteRuleById({ supertest, ruleId });
-          await deleteApmAlerts(es);
+          await cleanupRuleAndAlertState({ es, supertest, logger });
         });
 
         it('checks if rule is active', async () => {
