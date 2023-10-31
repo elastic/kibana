@@ -6,7 +6,7 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation } from '@kbn/elastic-assistant';
+import type { Conversation, Message } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiLoadingSpinner, tint } from '@elastic/eui';
 import React from 'react';
 
@@ -14,9 +14,41 @@ import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import { getMessageContentWithReplacements } from '../helpers';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
+
+export interface ContentMessage extends Message {
+  content: string;
+}
+const transformMessageWithReplacements = ({
+  message,
+  content,
+  showAnonymizedValues,
+  replacements,
+  times = 0,
+}: {
+  message: Message;
+  content: string;
+  showAnonymizedValues: boolean;
+  replacements?: Record<string, string>;
+  times?: number;
+}): ContentMessage => {
+  console.log(`called transformMessageWithReplacements ${times}`, replacements);
+  if (showAnonymizedValues || !replacements) {
+    console.log('return without transform', { showAnonymizedValues, replacements: !replacements });
+    return { ...message, content };
+  }
+
+  return {
+    ...message,
+    content: getMessageContentWithReplacements({
+      messageContent: content,
+      replacements,
+    }),
+  };
+};
 
 export const getComments = ({
   amendMessage,
@@ -57,6 +89,7 @@ export const getComments = ({
                 content=""
                 regenerateMessage={regenerateMessageOfConversation}
                 isLastComment
+                transformMessage={() => ({ content: '' })}
                 isFetching
               />
               <span ref={lastCommentRef} />
@@ -97,8 +130,25 @@ export const getComments = ({
         ...(message.isError ? errorStyles : {}),
       };
 
-      // message still needs to stream, no response manipulation
+      const transformMessage = (content: string, times?: number) =>
+        transformMessageWithReplacements({
+          message,
+          content,
+          showAnonymizedValues,
+          replacements,
+          times,
+        });
+
+      console.log('about to return', {
+        conditionForStreaming: !(message.content && message.content.length),
+        messageContent: message.content,
+      });
+      // message still needs to stream, no actions returned and replacements handled by streamer
       if (!(message.content && message.content.length)) {
+        console.log(
+          'returns this StreamComment and typeof transformMessage is ',
+          typeof transformMessage
+        );
         return {
           ...messageProps,
           children: (
@@ -107,6 +157,7 @@ export const getComments = ({
                 amendMessage={amendMessageOfConversation}
                 reader={message.reader}
                 regenerateMessage={regenerateMessageOfConversation}
+                transformMessage={transformMessage}
                 isLastComment={isLastComment}
               />
               {isLastComment ? <span ref={lastCommentRef} /> : null}
@@ -114,19 +165,11 @@ export const getComments = ({
           ),
         };
       }
-
-      const messageContentWithReplacements =
-        replacements != null
-          ? Object.keys(replacements).reduce(
-              (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
-              message.content
-            )
-          : message.content;
-      const transformedMessage = {
-        ...message,
-        content: messageContentWithReplacements,
-      };
-
+      const transformedMessage = transformMessage(message.content ?? '');
+      console.log('transformMessage', {
+        message: message.content,
+        transformedMessage: transformedMessage.content,
+      });
       return {
         ...messageProps,
         actions: <CommentActions message={transformedMessage} />,
@@ -134,10 +177,12 @@ export const getComments = ({
           <>
             <StreamComment
               amendMessage={amendMessageOfConversation}
-              content={showAnonymizedValues ? message.content : transformedMessage.content}
-              reader={message.reader}
+              content={transformedMessage.content}
+              // reader is used to determine if streaming controls are shown
+              reader={transformedMessage.reader}
               regenerateMessage={regenerateMessageOfConversation}
               isLastComment={isLastComment}
+              transformMessage={transformMessage}
             />
             {isLastComment ? <span ref={lastCommentRef} /> : null}
           </>

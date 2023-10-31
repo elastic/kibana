@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
 import { RegenerateResponseButton } from './buttons/regenerate_response_button';
@@ -19,6 +20,7 @@ interface Props {
   isLastComment: boolean;
   isFetching?: boolean;
   regenerateMessage: () => void;
+  transformMessage: (message: string) => ContentMessage;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 
@@ -28,6 +30,7 @@ export const StreamComment = ({
   isLastComment,
   reader,
   regenerateMessage,
+  transformMessage,
   isFetching = false,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
@@ -35,7 +38,12 @@ export const StreamComment = ({
     content,
     reader,
   });
-  const message = useMemo(() => content ?? pendingMessage, [content, pendingMessage]);
+
+  const message = useMemo(
+    // only transform streaming message, transform happens upstream for content message
+    () => content ?? transformMessage(pendingMessage).content,
+    [content, transformMessage, pendingMessage]
+  );
   const isAnythingLoading = useMemo(
     () => isFetching || isLoading || isStreaming,
     [isFetching, isLoading, isStreaming]
@@ -62,7 +70,6 @@ export const StreamComment = ({
     );
   }, [isAnythingLoading, isLastComment, reader, regenerateMessage, setComplete]);
 
-  console.log('error???', error);
   return (
     <MessagePanel
       body={<MessageText content={message} loading={isAnythingLoading} />}
