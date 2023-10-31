@@ -22,8 +22,10 @@ import {
   EuiFlyoutHeader,
   EuiIconTip,
   EuiLink,
+  EuiTextColor,
   EuiTitle,
   EuiIcon,
+  EuiToolTip,
   EuiPopover,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
@@ -171,23 +173,34 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             defaultMessage: 'Index lifecycle policy',
           }),
           toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
-            defaultMessage: `The index lifecycle policy that manages the data in the data stream.`,
+            defaultMessage: `The index lifecycle policy that manages the data in the data stream. `,
           }),
-          content: (
-            <ConditionalWrap
-              condition={isDataStreamFullyManagedByDSL(dataStream)}
-              wrap={(children) => <s>{children}</s>}
-            >
-              <>
-                {ilmPolicyLink ? (
-                  <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
-                    {ilmPolicyName}
-                  </EuiLink>
-                ) : (
-                  ilmPolicyName
+          content: isDataStreamFullyManagedByDSL(dataStream) ? (
+            <>
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTipWarning',
+                  {
+                    defaultMessage: `This data stream is not currently being managed by the ILM policy.`,
+                  }
                 )}
-              </>
-            </ConditionalWrap>
+              >
+                <>
+                  <EuiTextColor color="subdued">{ilmPolicyName}</EuiTextColor>
+                </>
+              </EuiToolTip>
+            </>
+          ) : (
+            <>
+              {ilmPolicyLink ? (
+                <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
+                  {ilmPolicyName}
+                </EuiLink>
+              ) : (
+                ilmPolicyName
+              )}
+            </>
           ),
           dataTestSubj: 'ilmPolicyDetail',
         });
@@ -301,7 +314,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         content: (
           <ConditionalWrap
             condition={isDataStreamFullyManagedByILM(dataStream)}
-            wrap={(children) => <s>{children}</s>}
+            wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
           >
             <>{getLifecycleValue(lifecycle)}</>
           </ConditionalWrap>
