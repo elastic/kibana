@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import { MemoryRouter } from 'react-router-dom';
 import { AssetDetails } from './asset_details';
@@ -15,17 +15,21 @@ import { type TabIds, type AssetDetailsProps } from './types';
 import { DecorateWithKibanaContext } from './__stories__/decorator';
 import { assetDetailsProps } from './__stories__/context/fixtures';
 
-interface AssetDetailsStoryArgs {
-  props: AssetDetailsProps;
+interface AssetDetailsStoryArgs extends AssetDetailsProps {
   tabId: TabIds;
-  links: AssetDetailsProps['links'];
 }
 
 const stories: Meta<AssetDetailsStoryArgs> = {
-  title: 'infra/Asset Details View/Page',
+  title: 'infra/Asset Details View',
   decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
   component: AssetDetails,
   argTypes: {
+    tabId: {
+      options: assetDetailsProps.tabs.filter(({ id }) => id !== 'linkToApm').map(({ id }) => id),
+      control: {
+        type: 'radio',
+      },
+    },
     links: {
       options: assetDetailsProps.links,
       control: {
@@ -33,16 +37,13 @@ const stories: Meta<AssetDetailsStoryArgs> = {
       },
     },
   },
-  args: {
-    props: { ...assetDetailsProps },
-    tabId: 'overview',
-  },
+  args: { ...assetDetailsProps },
 };
 
 const PageTabTemplate: Story<AssetDetailsStoryArgs> = (args) => {
   return (
     <MemoryRouter initialEntries={[`/infra/metrics/hosts?assetDetails=(tabId:${args.tabId})`]}>
-      <AssetDetails {...args.props} />
+      <AssetDetails {...args} />
     </MemoryRouter>
   );
 };
@@ -50,24 +51,27 @@ const PageTabTemplate: Story<AssetDetailsStoryArgs> = (args) => {
 const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
   const [isOpen, setIsOpen] = useState(false);
   const closeFlyout = () => setIsOpen(false);
+  const options = assetDetailsProps.tabs.filter(({ id }) => id !== 'linkToApm').map(({ id }) => id);
+  const [tabId, setTabId] = useState(args.tabId ?? 'overview');
+
   return (
     <div>
       <EuiCallOut
         color="warning"
-        title={`To see different tab content before open the Controls and change the tabId or add the tabId to the url`}
-      >
-        <p>
-          for example:{' '}
-          <EuiLink
-            data-test-subj="infraFlyoutTemplateLink"
-            href={`${window.location.origin}?path=/story/infra-asset-details-view-page--flyout&args=tabId:metadata`}
-          >{`${window.location.origin}?path=/story/infra-asset-details-view-page--flyout&args=tabId:metadata`}</EuiLink>
-        </p>
-        <p>
-          Supported tab ids: &quot;overview&quot;, &quot;metadata&quot;, &quot;processes&quot;,
-          &quot;anomalies&quot;, &quot;logs&quot;.
-        </p>
-      </EuiCallOut>
+        title={`To see different tab content please close the flyout if opened, select one of the options from the drop-down and open the flyout again:`}
+      />
+      <EuiSpacer />
+      <EuiSelect
+        data-test-subj="infraFlyoutTemplateSelect"
+        value={tabId}
+        onChange={(e) => {
+          setTabId(e.target.value as TabIds);
+        }}
+        options={options.map((id) => ({
+          text: id,
+          value: id,
+        }))}
+      />
       <EuiSpacer />
       <EuiButton
         data-test-subj="infraFlyoutTemplateOpenFlyoutButton"
@@ -78,9 +82,9 @@ const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
       <div hidden={!isOpen}>
         {isOpen && (
           <MemoryRouter
-            initialEntries={[`/infra/metrics/hosts?assetDetails=(tabId:${args.tabId})`]}
+            initialEntries={[`/infra/metrics/hosts?assetDetails=(tabId:${tabId ?? args.tabId})`]}
           >
-            <AssetDetails {...args.props} renderMode={{ mode: 'flyout', closeFlyout }} />
+            <AssetDetails {...args} renderMode={{ mode: 'flyout', closeFlyout }} />
           </MemoryRouter>
         )}
       </div>
@@ -104,6 +108,5 @@ export const AnomaliesTab = PageTabTemplate.bind({});
 AnomaliesTab.args = { tabId: 'anomalies' };
 
 export const Flyout = FlyoutTemplate.bind({});
-Flyout.args = { tabId: 'overview' };
 
 export default stories;
