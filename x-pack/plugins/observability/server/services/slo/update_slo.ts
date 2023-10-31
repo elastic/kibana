@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
-import { isEqual } from 'lodash';
+import { isEqual, pick } from 'lodash';
 import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
@@ -37,15 +37,20 @@ export class UpdateSLO {
       return this.toResponse(originalSlo);
     }
 
+    const fields = ['indicator', 'groupBy', 'timeWindow', 'budgetingMethod'];
+    const requireRevisionBump = !isEqual(pick(originalSlo, fields), pick(updatedSlo, fields));
+
     updatedSlo = Object.assign(updatedSlo, {
       updatedAt: new Date(),
-      revision: originalSlo.revision + 1,
+      revision: requireRevisionBump ? originalSlo.revision + 1 : originalSlo.revision,
     });
 
     validateSLO(updatedSlo);
-
-    const updatedSloTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
     await this.repository.save(updatedSlo);
+
+    if (!requireRevisionBump) {
+      return this.toResponse(updatedSlo);
+    }
 
     try {
       await this.transformManager.install(updatedSlo);
@@ -54,6 +59,7 @@ export class UpdateSLO {
       throw err;
     }
 
+    const updatedSloTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
     try {
       await this.transformManager.preview(updatedSloTransformId);
       await this.transformManager.start(updatedSloTransformId);
