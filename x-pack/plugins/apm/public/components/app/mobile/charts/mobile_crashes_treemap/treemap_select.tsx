@@ -81,8 +81,8 @@ export function TreemapSelect({
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h2>
-            {i18n.translate('xpack.apm.transactionOverview.treemap.title', {
-              defaultMessage: 'Most used {currentTreemap}',
+            {i18n.translate('xpack.apm.errorOverview.treemap.title', {
+              defaultMessage: 'Most affected {currentTreemap}',
               values: { currentTreemap: currentTreemap.value },
             })}
           </h2>
@@ -90,7 +90,7 @@ export function TreemapSelect({
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.apm.errorOverview.treemap.subtitle', {
             defaultMessage:
-              'Treemap showing the total and most used {currentTreemap}',
+              'Treemap showing the total and most affected {currentTreemap}',
             values: { currentTreemap: currentTreemap.value },
           })}
         </EuiText>

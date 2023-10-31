@@ -30,10 +30,10 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
       }
     ),
     description: i18n.translate(
-      'xpack.apm.transactionOverview.treemap.dropdown.devices.subtitle',
+      'xpack.apm.errorOverview.treemap.dropdown.devices.subtitle',
       {
         defaultMessage:
-          'This treemap view allows for easy and faster visual way the most used devices',
+          'This treemap view allows for easy and faster visual way the most affected devices',
       }
     ),
   },
@@ -46,10 +46,10 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
       }
     ),
     description: i18n.translate(
-      'xpack.apm.transactionOverview.treemap.dropdown.versions.subtitle',
+      'xpack.apm.errorOverview.treemap.dropdown.versions.subtitle',
       {
         defaultMessage:
-          'This treemap view allows for easy and faster visual way the most used versions.',
+          'This treemap view allows for easy and faster visual way the most affected versions.',
       }
     ),
   },
