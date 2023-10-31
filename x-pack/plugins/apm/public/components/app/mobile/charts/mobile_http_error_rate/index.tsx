@@ -83,7 +83,7 @@ export function HttpErrorRateChart({
       data: data.currentPeriod.timeseries,
       type: 'linemark',
       color: currentPeriodColor,
-      title: i18n.translate('xpack.apm.transactions.httpRequestsTitle', {
+      title: i18n.translate('xpack.apm.errors.httpErrorRateTitle', {
         defaultMessage: 'HTTP error rate',
       }),
     },

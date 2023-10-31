@@ -196,7 +196,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
+      label: i18n.translate('xpack.apm.serviceDetails.mobileErrorsTabLabel', {
         defaultMessage: 'Errors & Crashes',
       }),
     },

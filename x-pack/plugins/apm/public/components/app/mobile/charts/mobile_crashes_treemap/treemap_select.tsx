@@ -26,7 +26,7 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
     label: i18n.translate(
       'xpack.apm.transactionOverview.treemap.dropdown.devices',
       {
-        defaultMessage: 'Devices treemap',
+        defaultMessage: 'Devices',
       }
     ),
     description: i18n.translate(
@@ -42,7 +42,7 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
     label: i18n.translate(
       'xpack.apm.transactionOverview.treemap.versions.devices',
       {
-        defaultMessage: 'Versions treemap',
+        defaultMessage: 'Versions',
       }
     ),
     description: i18n.translate(
@@ -88,7 +88,7 @@ export function TreemapSelect({
           </h2>
         </EuiTitle>
         <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.apm.transactionOverview.treemap.subtitle', {
+          {i18n.translate('xpack.apm.errorOverview.treemap.subtitle', {
             defaultMessage:
               'Treemap showing the total and most used {currentTreemap}',
             values: { currentTreemap: currentTreemap.value },

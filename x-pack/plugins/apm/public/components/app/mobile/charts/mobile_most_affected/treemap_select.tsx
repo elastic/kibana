@@ -96,7 +96,7 @@ export function TreemapSelect({
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h2>
-            {i18n.translate('xpack.apm.transactionOverview.treemap.title', {
+            {i18n.translate('xpack.apm.errorsOverview.treemap.title', {
               defaultMessage: 'Most affected {currentTreemap}',
               values: { currentTreemap: currentTreemap.value },
             })}
