@@ -164,6 +164,13 @@ export class TestSubjects extends FtrService {
     await this.findService.clickByCssSelector(testSubjSelector(selector), timeout, topOffset);
   }
 
+  public async pressEnter(selector: string, timeout: number = this.FIND_TIME): Promise<void> {
+    this.log.debug(`TestSubjects.pressEnter(${selector})`);
+    const element = await this.find(selector, timeout);
+    await element.focus();
+    await element.pressKeys(this.ctx.getService('browser').keys.ENTER);
+  }
+
   public async doubleClick(selector: string, timeout: number = this.FIND_TIME): Promise<void> {
     this.log.debug(`TestSubjects.doubleClick(${selector})`);
     const element = await this.find(selector, timeout);
