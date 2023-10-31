@@ -29,7 +29,6 @@ export {
   NotAuthorizedSection,
   WithPrivileges,
   AuthorizationProvider,
-  SectionError,
 } from '@kbn/es-ui-shared-plugin/public';
 
 export type {
