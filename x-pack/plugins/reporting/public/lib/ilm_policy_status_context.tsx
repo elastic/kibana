@@ -22,15 +22,8 @@ interface ContextValue {
 
 const IlmPolicyStatusContext = createContext<undefined | ContextValue>(undefined);
 
-export const IlmPolicyStatusContextProvider: FunctionComponent<{ statefulSettings: boolean }> = ({
-  statefulSettings,
-  children,
-}) => {
-  const {
-    isLoading,
-    data,
-    resendRequest: recheckStatus,
-  } = useCheckIlmPolicyStatus(statefulSettings);
+export const IlmPolicyStatusContextProvider: FunctionComponent<{}> = ({ children }) => {
+  const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus();
 
   return (
     <IlmPolicyStatusContext.Provider value={{ isLoading, status: data?.status, recheckStatus }}>

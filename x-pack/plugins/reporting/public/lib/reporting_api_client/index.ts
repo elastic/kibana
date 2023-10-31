@@ -6,6 +6,6 @@
  */
 
 export { InternalApiClientProvider, useInternalApiClient } from './context';
-export { useCheckIlmPolicyStatus } from './hooks';
+export { useCheckIlmPolicyStatus, DoNotUseIlmPolicyStatus } from './hooks';
 export { ReportingAPIClient } from './reporting_api_client';
 export type { DiagnoseResponse } from './reporting_api_client';

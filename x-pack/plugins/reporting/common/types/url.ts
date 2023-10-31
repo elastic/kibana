@@ -34,6 +34,10 @@ export interface IlmPolicyStatusResponse {
   status: IlmPolicyMigrationStatus;
 }
 
+export interface NoPolicyStatusResponse {
+  status?: undefined;
+}
+
 type Url = string;
 type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
 
