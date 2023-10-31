@@ -22,7 +22,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       ...options,
       pipeline: logsPipeline(),
     });
-    this.dataStreams = ['logs-*'];
+    this.dataStreams = ['logs-*-*'];
   }
 }
 
