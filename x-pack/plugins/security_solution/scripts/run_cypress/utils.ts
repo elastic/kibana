@@ -11,7 +11,6 @@ import * as parser from '@babel/parser';
 import generate from '@babel/generator';
 import type { ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types';
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { productType as ProductTypeSchema } from '@kbn/security-solution-serverless/common/config';
 import { getExperimentalAllowedValues } from '../../common/experimental_features';
 
 export const isSkipped = (filePath: string): boolean => {
@@ -101,10 +100,22 @@ const TestFileFtrConfigSchema = schema.object(
         })
       )
     ),
-    productTypes: schema.maybe(schema.arrayOf(ProductTypeSchema)),
+    productTypes: schema.maybe(
+      // TODO:PT write validate function to ensure that only the correct combinations are used
+      schema.arrayOf(
+        schema.object({
+          product_line: schema.oneOf([
+            schema.literal('security'),
+            schema.literal('endpoint'),
+            schema.literal('cloud'),
+          ]),
+
+          product_tier: schema.oneOf([schema.literal('essentials'), schema.literal('complete')]),
+        })
+      )
+    ),
   },
   { defaultValue: {}, unknowns: 'forbid' }
 );
 
 export type SecuritySolutionDescribeBlockFtrConfig = TypeOf<typeof TestFileFtrConfigSchema>;
-export type ProductType = TypeOf<typeof ProductTypeSchema>;
