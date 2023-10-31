@@ -13,7 +13,7 @@ import {
   getLegacyActionSOById,
   getLegacyActionNotificationSOById,
   getRuleSOById,
-} from '../../../../../detection_engine_api_integration/utils';
+} from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**

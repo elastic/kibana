@@ -6,3 +6,4 @@
  */
 export * from './get_legacy_action_so';
 export * from './get_legacy_actions_so_by_id';
+export * from './get_legacy_action_notifications_so_by_id';
