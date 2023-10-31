@@ -68,6 +68,9 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
       max-width: 320px;
     `,
   },
+  firstBar: css`
+    z-index: 2000;
+  `,
 });
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
@@ -109,6 +112,7 @@ export interface Props {
   navControlsLeft$: Observable<ChromeNavControl[]>;
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
+  isSideNavCollapsed$: Observable<boolean>;
   prependBasePath: (url: string) => string;
   toggleSideNav: (isCollapsed: boolean) => void;
 }
@@ -181,7 +185,7 @@ export const ProjectHeader = ({
   const projectName = useObservable(observables.projectName$);
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
-  const { logo: logoCss } = headerCss;
+  const { logo: logoCss, firstBar: firstBarCss } = headerCss;
 
   return (
     <>
@@ -195,10 +199,15 @@ export const ProjectHeader = ({
       <HeaderTopBanner headerBanner$={observables.headerBanner$} />
       <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
-          <EuiHeader position="fixed" className="header__firstBar">
+          <EuiHeader position="fixed" className="header__firstBar" css={firstBarCss}>
             <EuiHeaderSection grow={false}>
               <Router history={application.history}>
-                <ProjectNavigation toggleSideNav={toggleSideNav}>{children}</ProjectNavigation>
+                <ProjectNavigation
+                  toggleSideNav={toggleSideNav}
+                  isCollapsed$={observables.isSideNavCollapsed$}
+                >
+                  {children}
+                </ProjectNavigation>
               </Router>
 
               <EuiHeaderSectionItem>

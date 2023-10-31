@@ -176,4 +176,11 @@ export interface ChromeStart {
    * Get an observable of the current collapsed state of the side nav.
    */
   getIsSideNavCollapsed$(): Observable<boolean>;
+
+  /**
+   * Sets the collapsed state of the sideNav.
+   * Since this is a programmatic change not caused by an explicit user interaction, it will not store the value in the local storage.
+   * @param isCollapsed The collapsed state to apply to the sideNav.
+   */
+  setIsSideNavCollapsed(isCollapsed: boolean): void;
 }

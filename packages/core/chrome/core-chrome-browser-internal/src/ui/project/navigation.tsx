@@ -6,31 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-
-const LOCAL_STORAGE_IS_COLLAPSED_KEY = 'PROJECT_NAVIGATION_COLLAPSED' as const;
+import useObservable, { type Observable } from 'react-use/lib/useObservable';
 
 export const ProjectNavigation: React.FC<{
+  isCollapsed$: Observable<boolean>;
   toggleSideNav: (isVisible: boolean) => void;
-}> = ({ children, toggleSideNav }) => {
-  const isMounted = useRef(false);
-  const [isCollapsed, setIsCollapsed] = useLocalStorage(LOCAL_STORAGE_IS_COLLAPSED_KEY, false);
+}> = ({ children, toggleSideNav, isCollapsed$ }) => {
+  const isCollapsed = useObservable(isCollapsed$);
+
   const onCollapseToggle = (nextIsCollapsed: boolean) => {
-    setIsCollapsed(nextIsCollapsed);
     toggleSideNav(nextIsCollapsed);
   };
 
-  useEffect(() => {
-    if (!isMounted.current && isCollapsed !== undefined) {
-      toggleSideNav(isCollapsed);
-    }
-    isMounted.current = true;
-  }, [isCollapsed, toggleSideNav]);
-
   return (
     <EuiCollapsibleNavBeta
+      key={isCollapsed ? 'collapsed' : 'expanded'} // force re-render when isCollapsed changes
       data-test-subj="projectLayoutSideNav"
       initialIsCollapsed={isCollapsed}
       onCollapseToggle={onCollapseToggle}

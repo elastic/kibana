@@ -49,6 +49,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
+const IS_SIDE_NAV_COLLAPSED_KEY = 'PROJECT_NAVIGATION_COLLAPSED' as const;
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
@@ -80,7 +81,6 @@ export class ChromeService {
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation = new ProjectNavigationService();
   private mutationObserver: MutationObserver | undefined;
-  private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -191,6 +191,9 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
+    const isSideNavCollapsed$ = new BehaviorSubject(
+      localStorage.getItem(IS_SIDE_NAV_COLLAPSED_KEY) === 'true'
+    );
     const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
 
     const getKbnVersionClass = () => {
@@ -245,6 +248,11 @@ export class ChromeService {
     const setIsNavDrawerLocked = (isLocked: boolean) => {
       isNavDrawerLocked$.next(isLocked);
       localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
+    };
+
+    const toggleSideNav = (isCollapsed: boolean) => {
+      isSideNavCollapsed$.next(isCollapsed);
+      localStorage.setItem(IS_SIDE_NAV_COLLAPSED_KEY, `${isCollapsed}`);
     };
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
@@ -392,9 +400,8 @@ export class ChromeService {
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
-                toggleSideNav={(isCollapsed) => {
-                  this.isSideNavCollapsed$.next(isCollapsed);
-                }}
+                isSideNavCollapsed$={isSideNavCollapsed$.asObservable()}
+                toggleSideNav={toggleSideNav}
               >
                 <SideNavComponent activeNodes={activeNodes} />
               </ProjectHeader>
@@ -517,7 +524,8 @@ export class ChromeService {
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
-      getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+      getIsSideNavCollapsed$: () => isSideNavCollapsed$.asObservable(),
+      setIsSideNavCollapsed: (isCollapsed) => isSideNavCollapsed$.next(isCollapsed),
       project: {
         setHome: setProjectHome,
         setProjectsUrl,
