@@ -163,7 +163,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   >();
 
   const {
-    indexPattern,
+    sourcererDataView,
     runtimeMappings,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
@@ -457,7 +457,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              indexPattern={indexPattern}
+              sourcererDataView={sourcererDataView}
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper

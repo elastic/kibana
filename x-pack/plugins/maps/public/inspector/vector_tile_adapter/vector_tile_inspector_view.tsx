@@ -23,7 +23,7 @@ export const VectorTileInspectorView = {
     defaultMessage: 'View the vector tile search requests used to collect the data',
   }),
   shouldShow(adapters: Adapters) {
-    return Boolean(adapters.vectorTiles);
+    return Boolean(adapters.vectorTiles?.hasLayers());
   },
   component: (props: { adapters: Adapters }) => {
     return <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />;
