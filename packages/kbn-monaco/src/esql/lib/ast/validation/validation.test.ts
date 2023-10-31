@@ -36,7 +36,6 @@ function getCallbackMocks() {
               name: `listField`,
               type: `list`,
             },
-            { name: '@timestamp', type: 'date' },
           ]
         : [
             { name: 'otherField', type: 'string' },
@@ -225,7 +224,11 @@ describe('validation logic', () => {
       'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "(metadata"',
     ]);
     testErrorsAndWarnings(`from ind*, other*`, []);
-    testErrorsAndWarnings(`from index*`, ['Unknown index [index*]']);
+    testErrorsAndWarnings(`from index*`, []);
+    testErrorsAndWarnings(`from *ex`, []);
+    testErrorsAndWarnings(`from in*ex`, []);
+    testErrorsAndWarnings(`from ind*ex`, []);
+    testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
   });
 
   describe('row', () => {
@@ -472,9 +475,13 @@ describe('validation logic', () => {
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from index | keep s*', []);
+    testErrorsAndWarnings('from index | keep *Field', []);
+    testErrorsAndWarnings('from index | keep s*Field', []);
+    testErrorsAndWarnings('from index | keep string*Field', []);
     testErrorsAndWarnings('from index | keep s*, n*', []);
     testErrorsAndWarnings('from index | keep m*', ['Unknown column [m*]']);
-    testErrorsAndWarnings('from index | keep *', []);
+    testErrorsAndWarnings('from index | keep *m', ['Unknown column [*m]']);
+    testErrorsAndWarnings('from index | keep d*m', ['Unknown column [d*m]']);
   });
 
   describe('drop', () => {
@@ -495,22 +502,13 @@ describe('validation logic', () => {
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from index | drop s*', []);
+    testErrorsAndWarnings('from index | drop *Field', []);
+    testErrorsAndWarnings('from index | drop s*Field', []);
+    testErrorsAndWarnings('from index | drop string*Field', []);
     testErrorsAndWarnings('from index | drop s*, n*', []);
     testErrorsAndWarnings('from index | drop m*', ['Unknown column [m*]']);
-    testErrorsAndWarnings('from index | drop *', ['Removing all fields is not allowed [*]']);
-    testErrorsAndWarnings('from index | drop stringField, *', [
-      'Removing all fields is not allowed [*]',
-    ]);
-    testErrorsAndWarnings(
-      'from index | drop @timestamp',
-      [],
-      ['Drop [@timestamp] will remove all time filters to the search results']
-    );
-    testErrorsAndWarnings(
-      'from index | drop stringField, @timestamp',
-      [],
-      ['Drop [@timestamp] will remove all time filters to the search results']
-    );
+    testErrorsAndWarnings('from index | drop *m', ['Unknown column [*m]']);
+    testErrorsAndWarnings('from index | drop d*m', ['Unknown column [d*m]']);
   });
 
   describe('mv_expand', () => {

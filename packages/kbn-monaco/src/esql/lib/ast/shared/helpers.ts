@@ -364,20 +364,45 @@ export function getDurationItemsWithQuantifier(quantifier: number = 1) {
 }
 
 function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
-  if (hasWildcard(fuzzyName)) {
-    const prefix = fuzzyName.substring(0, fuzzyName.length - 1);
+  const wildCardPosition = getWildcardPosition(fuzzyName);
+  if (wildCardPosition !== 'none') {
+    const matcher = getMatcher(fuzzyName, wildCardPosition);
     for (const resourceName of resources) {
-      if (resourceName.startsWith(prefix)) {
-        // just to be sure that there's not an exact match here
-        // i.e. name-* should not match name-
-        return resourceName.length > prefix.length;
+      if (matcher(resourceName)) {
+        return true;
       }
     }
   }
 }
 
+function getMatcher(name: string, position: 'start' | 'end' | 'middle') {
+  if (position === 'start') {
+    const prefix = name.substring(1);
+    return (resource: string) => resource.endsWith(prefix);
+  }
+  if (position === 'end') {
+    const prefix = name.substring(0, name.length - 1);
+    return (resource: string) => resource.startsWith(prefix);
+  }
+  const [prefix, postFix] = name.split('*');
+  return (resource: string) => resource.startsWith(prefix) && resource.endsWith(postFix);
+}
+
+function getWildcardPosition(name: string) {
+  if (!hasWildcard(name)) {
+    return 'none';
+  }
+  if (name.startsWith('*')) {
+    return 'start';
+  }
+  if (name.endsWith('*')) {
+    return 'end';
+  }
+  return 'middle';
+}
+
 export function hasWildcard(name: string) {
-  return name[name.length - 1] === '*';
+  return name.includes('*');
 }
 
 export function columnExists(
