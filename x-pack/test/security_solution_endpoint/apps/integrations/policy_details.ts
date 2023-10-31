@@ -77,14 +77,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      it('should not hide the side navigation', async function () {
+      describe('side navigation', function () {
         targetTags(this, ['@skipInServerless']);
 
-        await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
-        // ensure center of button is visible and not hidden by sticky bottom bar
-        await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
-        // test cleanup: go back to policy details page
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+        it('should not hide the side navigation', async function () {
+          await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
+          // ensure center of button is visible and not hidden by sticky bottom bar
+          await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
+          // test cleanup: go back to policy details page
+          await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+        });
       });
 
       it('Should show/hide advanced section when button is clicked', async () => {

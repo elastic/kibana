@@ -12,6 +12,6 @@ export type TargetTags =
   | '@skipInServerless'
   | '@brokenInServerless';
 
-export const targetTags = (thisSuite: Mocha.Suite | Mocha.Context, tags: TargetTags[]) => {
+export const targetTags = (thisSuite: Mocha.Suite, tags: TargetTags[]) => {
   thisSuite.tags(tags);
 };
