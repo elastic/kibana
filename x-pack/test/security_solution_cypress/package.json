@@ -24,7 +24,7 @@
     "cypress:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/!(investigations|explore)/**/*.cy.ts'",
     "cypress:run:cloud:serverless": "yarn cypress:cloud:serverless run --config-file ./cypress/cypress_ci_serverless.config.ts --env CLOUD_SERVERLESS=true",
     "cypress:run:qa:serverless": "yarn cypress:cloud:serverless run --config-file ./cypress/cypress_ci_serverless_qa.config.ts --env CLOUD_SERVERLESS=true",
-    "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/alerts/ransomware_detection.cy.ts''",
+    "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/alerts/ransomware_detection.cy.ts'",
     "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",
     "cypress:changed-specs-only:serverless": "yarn cypress:serverless --changed-specs-only --env burn=5",
     "cypress:burn:serverless": "yarn cypress:serverless --env burn=5"
