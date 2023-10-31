@@ -98,7 +98,7 @@ export function TreemapSelect({
           <h2>
             {i18n.translate('xpack.apm.transactionOverview.treemap.title', {
               defaultMessage: 'Most affected {currentTreemap}',
-              values: { currentTreemap: currentTreemap.inputDisplay },
+              values: { currentTreemap: currentTreemap.value },
             })}
           </h2>
         </EuiTitle>
