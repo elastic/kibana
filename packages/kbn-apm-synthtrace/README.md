@@ -21,6 +21,7 @@ This library can currently be used in two ways:
 - `Instance`: a single instance of a monitored service. E.g., the workload for a monitored service might be spread across multiple containers. An `Instance` object contains fields like `service.node.name` and `container.id`.
 - `Timerange`: an object that will return an array of timestamps based on an interval and a rate. These timestamps can be used to generate events/metricsets.
 - `Transaction`, `Span`, `APMError` and `Metricset`: events/metricsets that occur on an instance. For more background, see the [explanation of the APM data model](https://www.elastic.co/guide/en/apm/get-started/7.15/apm-data-model.html)
+- `Log`: An instance of Log generating Service which supports additional helpers to customise fields like `messages`, `logLevel`
 
 #### Example
 
@@ -109,6 +110,18 @@ node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost
 
 The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
 
+Logs can be generated similarily with the below commands
+
+```
+# Live Data
+
+node scripts/synthtrace simple_logs.ts --clean --type=log --live
+
+# Static Data
+
+node scripts/synthtrace simple_logs.ts --clean --type=log
+```
+
 The following options are supported:
 
 ### Connection options
@@ -143,11 +156,12 @@ Note:
 
 ### Setup options
 
-| Option       | Type      | Default | Description                             |
-| ------------ | --------- | :------ | --------------------------------------- |
-| `--clean`    | [boolean] | `false` | Clean APM data before indexing new data |
-| `--workers`  | [number]  |         | Amount of Node.js worker threads        |
-| `--logLevel` | [enum]    | `info`  | Log level                               |
+| Option       | Type      | Default | Description                                                             |
+|--------------|-----------|:--------|-------------------------------------------------------------------------|
+| `--clean`    | [boolean] | `false` | Clean APM data before indexing new data                                 |
+| `--workers`  | [number]  |         | Amount of Node.js worker threads                                        |
+| `--logLevel` | [enum]    | `info`  | Log level                                                               |
+| `--type`     | [string]  | `apm`   | Type of data to be generated, `log` must be passed when generating logs |
 
 ## Testing
 
