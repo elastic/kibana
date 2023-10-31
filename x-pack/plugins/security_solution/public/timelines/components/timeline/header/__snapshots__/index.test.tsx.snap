@@ -1,50 +1,607 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header rendering renders correctly against snapshot 1`] = `
-<Fragment>
-  <DataProviders
-    timelineId="foo"
-  />
-  <Connect(StatefulSearchOrFilterComponent)
-    filterManager={
-      FilterManager {
-        "extract": [Function],
-        "fetch$": Subject {
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "filters": Array [],
-        "getAllMigrations": [Function],
-        "inject": [Function],
-        "telemetry": [Function],
-        "uiSettings": Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        },
-        "updated$": Subject {
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-      }
-    }
-    timelineId="foo"
-  />
-</Fragment>
+<I18nProvider>
+  <Component>
+    <MockSubscriptionTrackingProvider>
+      <UpsellingProviderMock>
+        <Provider
+          store={
+            Object {
+              "@@observable": [Function],
+              "dispatch": [Function],
+              "getState": [Function],
+              "replaceReducer": [Function],
+              "subscribe": [Function],
+            }
+          }
+        >
+          <ThemeProvider
+            theme={[Function]}
+          >
+            <QueryClientProvider
+              client={
+                QueryClient {
+                  "defaultOptions": Object {
+                    "queries": Object {
+                      "retry": false,
+                    },
+                  },
+                  "logger": CustomConsole {
+                    "Console": [Function],
+                    "_counters": Object {},
+                    "_formatBuffer": [Function],
+                    "_groupDepth": 0,
+                    "_stderr": Socket {
+                      "_closeAfterHandlingError": false,
+                      "_destroy": [Function],
+                      "_events": Object {
+                        "end": [Function],
+                      },
+                      "_eventsCount": 1,
+                      "_hadError": false,
+                      "_host": null,
+                      "_isStdio": true,
+                      "_maxListeners": undefined,
+                      "_parent": null,
+                      "_pendingData": null,
+                      "_pendingEncoding": "",
+                      "_readableState": ReadableState {
+                        "autoDestroy": true,
+                        "awaitDrainWriters": null,
+                        "buffer": BufferList {
+                          "head": null,
+                          "length": 0,
+                          "tail": null,
+                        },
+                        "closeEmitted": false,
+                        "closed": false,
+                        "constructed": true,
+                        "dataEmitted": false,
+                        "decoder": null,
+                        "defaultEncoding": "utf8",
+                        "destroyed": false,
+                        "emitClose": false,
+                        "emittedReadable": false,
+                        "encoding": null,
+                        "endEmitted": true,
+                        "ended": true,
+                        "errorEmitted": false,
+                        "errored": null,
+                        "flowing": null,
+                        "highWaterMark": 16384,
+                        "length": 0,
+                        "multiAwaitDrain": false,
+                        "needReadable": false,
+                        "objectMode": false,
+                        "pipes": Array [],
+                        "readable": false,
+                        "readableListening": false,
+                        "reading": false,
+                        "readingMore": false,
+                        "resumeScheduled": false,
+                        "sync": true,
+                        Symbol(kPaused): null,
+                      },
+                      "_server": null,
+                      "_sockname": null,
+                      "_type": "pipe",
+                      "_writableState": WritableState {
+                        "afterWriteTickInfo": null,
+                        "allBuffers": true,
+                        "allNoop": true,
+                        "autoDestroy": true,
+                        "bufferProcessing": false,
+                        "buffered": Array [],
+                        "bufferedIndex": 0,
+                        "closeEmitted": false,
+                        "closed": false,
+                        "constructed": true,
+                        "corked": 0,
+                        "decodeStrings": false,
+                        "defaultEncoding": "utf8",
+                        "destroyed": false,
+                        "emitClose": false,
+                        "ended": false,
+                        "ending": false,
+                        "errorEmitted": false,
+                        "errored": null,
+                        "finalCalled": false,
+                        "finished": false,
+                        "highWaterMark": 16384,
+                        "length": 0,
+                        "needDrain": false,
+                        "objectMode": false,
+                        "onwrite": [Function],
+                        "pendingcb": 0,
+                        "prefinished": false,
+                        "sync": true,
+                        "writecb": null,
+                        "writelen": 0,
+                        "writing": false,
+                        Symbol(kOnFinished): Array [],
+                      },
+                      "allowHalfOpen": false,
+                      "connecting": false,
+                      "destroySoon": [Function],
+                      "fd": 1,
+                      "server": null,
+                      Symbol(async_id_symbol): 9,
+                      Symbol(kHandle): Pipe {
+                        Symbol(owner_symbol): [Circular],
+                      },
+                      Symbol(lastWriteQueueSize): 0,
+                      Symbol(timeout): null,
+                      Symbol(kBuffer): null,
+                      Symbol(kBufferCb): null,
+                      Symbol(kBufferGen): null,
+                      Symbol(kCapture): false,
+                      Symbol(kSetNoDelay): false,
+                      Symbol(kSetKeepAlive): false,
+                      Symbol(kSetKeepAliveInitialDelay): 0,
+                      Symbol(kBytesRead): 0,
+                      Symbol(kBytesWritten): 0,
+                    },
+                    "_stdout": Socket {
+                      "_closeAfterHandlingError": false,
+                      "_destroy": [Function],
+                      "_events": Object {
+                        "end": [Function],
+                      },
+                      "_eventsCount": 1,
+                      "_hadError": false,
+                      "_host": null,
+                      "_isStdio": true,
+                      "_maxListeners": undefined,
+                      "_parent": null,
+                      "_pendingData": null,
+                      "_pendingEncoding": "",
+                      "_readableState": ReadableState {
+                        "autoDestroy": true,
+                        "awaitDrainWriters": null,
+                        "buffer": BufferList {
+                          "head": null,
+                          "length": 0,
+                          "tail": null,
+                        },
+                        "closeEmitted": false,
+                        "closed": false,
+                        "constructed": true,
+                        "dataEmitted": false,
+                        "decoder": null,
+                        "defaultEncoding": "utf8",
+                        "destroyed": false,
+                        "emitClose": false,
+                        "emittedReadable": false,
+                        "encoding": null,
+                        "endEmitted": true,
+                        "ended": true,
+                        "errorEmitted": false,
+                        "errored": null,
+                        "flowing": null,
+                        "highWaterMark": 16384,
+                        "length": 0,
+                        "multiAwaitDrain": false,
+                        "needReadable": false,
+                        "objectMode": false,
+                        "pipes": Array [],
+                        "readable": false,
+                        "readableListening": false,
+                        "reading": false,
+                        "readingMore": false,
+                        "resumeScheduled": false,
+                        "sync": true,
+                        Symbol(kPaused): null,
+                      },
+                      "_server": null,
+                      "_sockname": null,
+                      "_type": "pipe",
+                      "_writableState": WritableState {
+                        "afterWriteTickInfo": null,
+                        "allBuffers": true,
+                        "allNoop": true,
+                        "autoDestroy": true,
+                        "bufferProcessing": false,
+                        "buffered": Array [],
+                        "bufferedIndex": 0,
+                        "closeEmitted": false,
+                        "closed": false,
+                        "constructed": true,
+                        "corked": 0,
+                        "decodeStrings": false,
+                        "defaultEncoding": "utf8",
+                        "destroyed": false,
+                        "emitClose": false,
+                        "ended": false,
+                        "ending": false,
+                        "errorEmitted": false,
+                        "errored": null,
+                        "finalCalled": false,
+                        "finished": false,
+                        "highWaterMark": 16384,
+                        "length": 0,
+                        "needDrain": false,
+                        "objectMode": false,
+                        "onwrite": [Function],
+                        "pendingcb": 0,
+                        "prefinished": false,
+                        "sync": true,
+                        "writecb": null,
+                        "writelen": 0,
+                        "writing": false,
+                        Symbol(kOnFinished): Array [],
+                      },
+                      "allowHalfOpen": false,
+                      "connecting": false,
+                      "destroySoon": [Function],
+                      "fd": 1,
+                      "server": null,
+                      Symbol(async_id_symbol): 9,
+                      Symbol(kHandle): Pipe {
+                        Symbol(owner_symbol): [Circular],
+                      },
+                      Symbol(lastWriteQueueSize): 0,
+                      Symbol(timeout): null,
+                      Symbol(kBuffer): null,
+                      Symbol(kBufferCb): null,
+                      Symbol(kBufferGen): null,
+                      Symbol(kCapture): false,
+                      Symbol(kSetNoDelay): false,
+                      Symbol(kSetKeepAlive): false,
+                      Symbol(kSetKeepAliveInitialDelay): 0,
+                      Symbol(kBytesRead): 0,
+                      Symbol(kBytesWritten): 0,
+                    },
+                    "_timers": Object {},
+                    "assert": [Function],
+                    "clear": [Function],
+                    "count": [Function],
+                    "countReset": [Function],
+                    "debug": [Function],
+                    "dir": [Function],
+                    "dirxml": [Function],
+                    "error": [Function],
+                    "group": [Function],
+                    "groupCollapsed": [Function],
+                    "groupEnd": [Function],
+                    "info": [Function],
+                    "log": [Function],
+                    "table": [Function],
+                    "time": [Function],
+                    "timeEnd": [Function],
+                    "timeLog": [Function],
+                    "trace": [Function],
+                    "warn": [Function],
+                  },
+                  "mountCount": 0,
+                  "mutationCache": MutationCache {
+                    "config": Object {},
+                    "listeners": Set {},
+                    "mutationId": 0,
+                    "mutations": Array [],
+                    "subscribe": [Function],
+                  },
+                  "mutationDefaults": Array [],
+                  "queryCache": QueryCache {
+                    "config": Object {},
+                    "listeners": Set {},
+                    "queries": Array [],
+                    "queriesMap": Object {},
+                    "subscribe": [Function],
+                  },
+                  "queryDefaults": Array [],
+                }
+              }
+            >
+              <MockDiscoverInTimelineContext>
+                <Memo(MockAssistantProviderComponent)>
+                  <ForwardRef>
+                    <ConsoleManager>
+                      <CellActionsProvider
+                        getTriggerCompatibleActions={[Function]}
+                      >
+                        <DragDropContext
+                          onDragEnd={[MockFunction]}
+                        >
+                          <Memo(TimelineHeaderComponent)
+                            browserFields={Object {}}
+                            dataProviders={
+                              Array [
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 1",
+                                  "kqlQuery": "",
+                                  "name": "Provider 1",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 1",
+                                  },
+                                },
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 2",
+                                  "kqlQuery": "",
+                                  "name": "Provider 2",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 2",
+                                  },
+                                },
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 3",
+                                  "kqlQuery": "",
+                                  "name": "Provider 3",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 3",
+                                  },
+                                },
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 4",
+                                  "kqlQuery": "",
+                                  "name": "Provider 4",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 4",
+                                  },
+                                },
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 5",
+                                  "kqlQuery": "",
+                                  "name": "Provider 5",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 5",
+                                  },
+                                },
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 6",
+                                  "kqlQuery": "",
+                                  "name": "Provider 6",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 6",
+                                  },
+                                },
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 7",
+                                  "kqlQuery": "",
+                                  "name": "Provider 7",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 7",
+                                  },
+                                },
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 8",
+                                  "kqlQuery": "",
+                                  "name": "Provider 8",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 8",
+                                  },
+                                },
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 9",
+                                  "kqlQuery": "",
+                                  "name": "Provider 9",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 9",
+                                  },
+                                },
+                                Object {
+                                  "and": Array [],
+                                  "enabled": true,
+                                  "excluded": false,
+                                  "id": "id-Provider 10",
+                                  "kqlQuery": "",
+                                  "name": "Provider 10",
+                                  "queryMatch": Object {
+                                    "field": "name",
+                                    "operator": ":",
+                                    "value": "Provider 10",
+                                  },
+                                },
+                              ]
+                            }
+                            filterManager={
+                              FilterManager {
+                                "extract": [Function],
+                                "fetch$": Subject {
+                                  "closed": false,
+                                  "currentObservers": null,
+                                  "hasError": false,
+                                  "isStopped": false,
+                                  "observers": Array [],
+                                  "thrownError": null,
+                                },
+                                "filters": Array [],
+                                "getAllMigrations": [Function],
+                                "inject": [Function],
+                                "telemetry": [Function],
+                                "uiSettings": Object {
+                                  "get": [MockFunction],
+                                  "get$": [MockFunction],
+                                  "getAll": [MockFunction],
+                                  "getUpdate$": [MockFunction],
+                                  "getUpdateErrors$": [MockFunction],
+                                  "isCustom": [MockFunction],
+                                  "isDeclared": [MockFunction],
+                                  "isDefault": [MockFunction],
+                                  "isOverridden": [MockFunction],
+                                  "remove": [MockFunction],
+                                  "set": [MockFunction],
+                                },
+                                "updated$": Subject {
+                                  "closed": false,
+                                  "currentObservers": null,
+                                  "hasError": false,
+                                  "isStopped": false,
+                                  "observers": Array [],
+                                  "thrownError": null,
+                                },
+                              }
+                            }
+                            indexPattern={
+                              Object {
+                                "fields": Array [
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "@timestamp",
+                                    "searchable": true,
+                                    "type": "date",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "@version",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.ephemeral_id",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.hostname",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.id",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.test1",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.test2",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.test3",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.test4",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.test5",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.test6",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.test7",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "agent.test8",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": true,
+                                    "name": "host.name",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": false,
+                                    "name": "nestedField.firstAttributes",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                  Object {
+                                    "aggregatable": false,
+                                    "name": "nestedField.secondAttributes",
+                                    "searchable": true,
+                                    "type": "string",
+                                  },
+                                ],
+                                "title": "filebeat-*,auditbeat-*,packetbeat-*",
+                              }
+                            }
+                            onDataProviderEdited={[MockFunction]}
+                            onDataProviderRemoved={[MockFunction]}
+                            onToggleDataProviderEnabled={[MockFunction]}
+                            onToggleDataProviderExcluded={[MockFunction]}
+                            onToggleDataProviderType={[MockFunction]}
+                            show={true}
+                            showCallOutUnauthorizedMsg={false}
+                            status="active"
+                            timelineId="timeline-test"
+                            timelineType="default"
+                          />
+                        </DragDropContext>
+                      </CellActionsProvider>
+                    </ConsoleManager>
+                  </ForwardRef>
+                </Memo(MockAssistantProviderComponent)>
+              </MockDiscoverInTimelineContext>
+            </QueryClientProvider>
+          </ThemeProvider>
+        </Provider>
+      </UpsellingProviderMock>
+    </MockSubscriptionTrackingProvider>
+  </Component>
+</I18nProvider>
 `;

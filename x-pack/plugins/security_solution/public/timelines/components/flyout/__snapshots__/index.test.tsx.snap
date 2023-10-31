@@ -9,7 +9,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
       data-test-subj="flyout-pane"
     />
   </div>
-  .c2 {
+  .c3 {
   display: block;
 }
 
@@ -17,7 +17,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   padding: 0;
 }
 
-.c3 {
+.c2 {
   overflow: hidden;
   display: inline-block;
   text-overflow: ellipsis;
@@ -85,13 +85,23 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
                 >
                   <div
+                    class="euiFlexItem c2 emotion-euiFlexItem-growZero"
+                  >
+                    Untitled timeline
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div />
+                  </div>
+                  <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                     >
                       <div
-                        class="euiHealth c2 emotion-euiHealth-s"
+                        class="euiHealth c3 emotion-euiHealth-s"
                       >
                         <div
                           class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
@@ -110,16 +120,6 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                         </div>
                       </div>
                     </span>
-                  </div>
-                  <div
-                    class="euiFlexItem c3 emotion-euiFlexItem-growZero"
-                  >
-                    Untitled timeline
-                  </div>
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    <div />
                   </div>
                 </div>
               </span>

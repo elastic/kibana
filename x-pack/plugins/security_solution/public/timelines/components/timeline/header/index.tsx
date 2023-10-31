@@ -57,6 +57,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   timelineId,
 }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
   const getIsDataProviderVisible = useMemo(
     () => timelineSelectors.dataProviderVisibilitySelector(),
     []
@@ -66,8 +67,8 @@ const TimelineHeaderComponent: React.FC<Props> = ({
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
   );
 
-  const isDataProviderVisible = useDeepEqualSelector((state) =>
-    getIsDataProviderVisible(state, timelineId)
+  const isDataProviderVisible = useDeepEqualSelector(
+    (state) => getIsDataProviderVisible(state, timelineId) ?? timelineDefaults.isDataProviderVisible
   );
 
   const shouldShowQueryBuilder = isDataProviderVisible || timelineType === TimelineType.template;
