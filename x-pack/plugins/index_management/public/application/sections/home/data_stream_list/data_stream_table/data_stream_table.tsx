@@ -140,7 +140,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       <EuiToolTip
         content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
           defaultMessage:
-            'Data will be kept at least this long before it is automatically deleted. Only applies to data streams managed by a data stream lifecycle. This value might not apply to all data if the data stream also has an index lifecycle policy.',
+            `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.`,
         })}
       >
         <span>

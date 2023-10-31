@@ -296,7 +296,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Data retention',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
-          defaultMessage: 'The amount of time to retain the data in the data stream.',
+          defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.`,
         }),
         content: (
           <ConditionalWrap
@@ -320,7 +320,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             <EuiCallOut
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.fullyManagedByILMTitle',
-                { defaultMessage: 'This data stream is fully managed by ILM' }
+                { defaultMessage: 'This data stream and its associated indices are managed by ILM' }
               )}
               iconType="pin"
               data-test-subj="dsIsFullyManagedByILM"
@@ -328,7 +328,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               <p>
                 <FormattedMessage
                   id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.fullyManagedByILMDescription"
-                  defaultMessage="Editing the data retention for this data stream is only possible through its {link}."
+                  defaultMessage="To edit data retention for this data stream, you must edit its associated {link}."
                   values={{
                     link: (
                       <EuiLink href={ilmPolicyLink}>

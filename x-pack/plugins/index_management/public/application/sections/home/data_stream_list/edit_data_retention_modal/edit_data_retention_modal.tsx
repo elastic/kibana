@@ -181,9 +181,6 @@ const MixedIndicesCallout = ({
   dataStreamName,
   history,
 }: MixedIndicesCalloutProps) => {
-  const MAX_VISIBLE_INDICES = 3;
-  const visibleIndices = dslWithIlmIndices.ilmIndices.slice(0, MAX_VISIBLE_INDICES);
-
   return (
     <EuiCallOut
       title={i18n.translate(
@@ -197,11 +194,9 @@ const MixedIndicesCallout = ({
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.someManagedByILMBody"
-          defaultMessage="The following indices are managed by ILM: {managedByILM} {hasManyIndices, plural, one {and {remainingIndices} more} other { } } ({viewAllIndicesLink}). Updating data retention will not affect these indices, instead you will have to update the {ilmPolicyLink} policy."
+          defaultMessage="{ilmIndicesCount, plural, one { One index is } other { Several indices are } } managed by an ILM policy ({viewAllIndicesLink}). Updating data retention for this data stream won't affect these indices. Instead you will have to update the {ilmPolicyLink} policy."
           values={{
-            managedByILM: <strong>{visibleIndices.map((index) => index.name).join(', ')}</strong>,
-            remainingIndices: dslWithIlmIndices.ilmIndices.length - MAX_VISIBLE_INDICES,
-            hasManyIndices: dslWithIlmIndices.ilmIndices.length > MAX_VISIBLE_INDICES ? 1 : 0,
+            ilmIndicesCount: dslWithIlmIndices.ilmIndices.length,
             ilmPolicyLink: (
               <EuiLink data-test-subj="viewIlmPolicyLink" href={ilmPolicyLink}>
                 {ilmPolicyName}
