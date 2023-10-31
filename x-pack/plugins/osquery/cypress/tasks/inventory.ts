@@ -6,12 +6,18 @@
  */
 
 export const triggerLoadData = () => {
-  // @ts-expect-error update types for multiple true
-  const nodeContainers = cy.getBySel('nodeContainer', { multiple: true });
   cy.getBySel('infraWaffleTimeControlsAutoRefreshButton').should('exist');
   cy.wait(1000);
   cy.getBySel('infraWaffleTimeControlsAutoRefreshButton').click();
-  nodeContainers.not(':contains("dev-fleet-server")').first().should('exist');
+  // @ts-expect-error update types for multiple true
+  cy.getBySel('nodeContainer', { multiple: true })
+    .not(':contains("dev-fleet-server")')
+    .first()
+    .should('exist');
   cy.getBySel('infraWaffleTimeControlsStopRefreshingButton').click();
-  nodeContainers.not(':contains("dev-fleet-server")').first().click();
+  // @ts-expect-error update types for multiple true
+  cy.getBySel('nodeContainer', { multiple: true })
+    .not(':contains("dev-fleet-server")')
+    .first()
+    .click();
 };

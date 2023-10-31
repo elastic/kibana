@@ -6,7 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-import { filterCypressVideos } from './support/filter_videos';
+import { getFailedSpecVideos } from './support/filter_videos';
 import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 
 // eslint-disable-next-line import/no-default-export
@@ -43,7 +43,7 @@ export default defineCypressConfig({
     numTestsKeptInMemory: 3,
     setupNodeEvents: (on, config) => {
       setupUserDataLoader(on, config, { additionalRoleName: 'viewer' });
-      on('after:spec', filterCypressVideos);
+      on('after:spec', getFailedSpecVideos);
 
       return config;
     },

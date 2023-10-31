@@ -7,7 +7,7 @@
 import fs from 'fs';
 
 // makes sure we save videos just for failed specs
-export const filterCypressVideos = (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {
+export const getFailedSpecVideos = (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {
   if (results && results.video) {
     // Do we have failures for any retry attempts?
     const failures = results.tests.some((test) =>

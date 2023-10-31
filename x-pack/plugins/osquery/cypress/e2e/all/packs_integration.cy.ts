@@ -64,8 +64,8 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.get('span').contains('Add pack').click();
         cy.get('input[name="name"]').type(`${REMOVING_PACK}{downArrow}{enter}`);
         cy.getBySel('policyIdsComboBox').type(`${AGENT_POLICY_NAME}{downArrow}{enter}`);
-        cy.get('button').contains('Save pack').click();
-
+        // cy.get('button').contains('Save pack').click();
+        cy.getBySel('savePackButton').click();
         closeToastIfVisible();
         cy.getBySel('tablePaginationPopoverButton').click();
         cy.getBySel('tablePagination-50-rows').click();
@@ -123,7 +123,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(PREBUILD_PACK_NAME).click();
         cy.contains('Edit').click();
         cy.getBySel('policyIdsComboBox').type(`${DEFAULT_POLICY} {downArrow}{enter}`);
-        cy.contains('Update pack').click();
+        cy.getBySel('updatePackButton').click();
         cy.getBySel('confirmModalConfirmButton').click();
         cy.contains(`Successfully updated "${PREBUILD_PACK_NAME}" pack`);
       });
@@ -204,9 +204,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('policyIdsComboBox').should('exist');
         cy.getBySel('osqueryPackTypeGlobal').click();
         cy.getBySel('policyIdsComboBox').should('not.exist');
-
-        cy.get('button').contains('Save pack').click();
-
+        cy.getBySel('savePackButton').click();
         cy.getBySel('tablePaginationPopoverButton').click();
         cy.getBySel('tablePagination-50-rows').click();
         cy.contains(globalPack);
@@ -275,7 +273,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
           cy.getBySel('shards-field-policy').type(`${OSQUERY_POLICY}{downArrow}{enter}`);
           cy.get('#shardsPercentage1').type('{backspace}{backspace}{backspace}');
         });
-        cy.get('button').contains('Save pack').click();
+        cy.getBySel('savePackButton').click();
 
         cy.contains(`Successfully created "${shardPack}" pack`);
         closeToastIfVisible();
