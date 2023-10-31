@@ -10,11 +10,14 @@ import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FramesSummary } from '../../../components/frames_summary';
 import {
+  DifferentialTopNFunctionsGrid,
+  OnChangeSortParams,
+} from '../../../components/differential_topn_functions_grid';
+import {
   NormalizationMenu,
   NormalizationMode,
   NormalizationOptions,
 } from '../../../components/normalization_menu';
-import { OnChangeSortParams, OnWeelkDiffTopN } from '../../../components/onweek_diff_topn';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
@@ -196,7 +199,7 @@ export function DifferentialTopNFunctionsView() {
         </EuiFlexItem>
         <EuiFlexItem>
           <AsyncComponent {...comparisonState} size="xl" alignTop>
-            <OnWeelkDiffTopN
+            <DifferentialTopNFunctionsGrid
               base={state.data}
               comparison={comparisonState.data}
               baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}

@@ -15,11 +15,11 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   getCalleeFunction,
   StackFrameMetadata,
@@ -28,18 +28,23 @@ import {
   TopNFunctionSortField,
 } from '@kbn/profiling-utils';
 import { orderBy } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from '../topn_functions/function_row';
 import { getFunctionsRows, IFunctionRow } from '../topn_functions/utils';
-import './onweek.scss';
+import './diff_topn_functions.scss';
 
 interface Target {
   columnId: string;
   frame: string;
   className?: 'blinking';
+}
+
+interface CompareFrame {
+  frame?: IFunctionRow;
+  isComparison: boolean;
 }
 
 const removeComparisonFromId = (id: string) => id.replace('comparison_', '');
@@ -87,7 +92,7 @@ interface Props {
   totalSeconds: number;
 }
 
-export function OnWeelkDiffTopN({
+export function DifferentialTopNFunctionsGrid({
   base,
   baselineScaleFactor,
   comparison,
@@ -102,10 +107,19 @@ export function OnWeelkDiffTopN({
   comparisonSortDirection,
   comparisonSortField,
 }: Props) {
+  const timerIdRef = useRef<NodeJS.Timeout | undefined>();
   const calculateImpactEstimates = useCalculateImpactEstimate();
   const [target, setTarget] = useState<Target | undefined>();
-  const [isOpen, setIsOpen] = useState<string | undefined>();
+  const [selectedCompareFrame, setSelectedCompareFrame] = useState<CompareFrame | undefined>();
   const theme = useEuiTheme();
+
+  useEffect(() => {
+    return () => {
+      if (timerIdRef.current) {
+        clearTimeout(timerIdRef.current);
+      }
+    };
+  }, []);
 
   const totalCount = useMemo(() => {
     if (!base || !base.TotalCount) {
@@ -166,60 +180,57 @@ export function OnWeelkDiffTopN({
     totalSeconds,
   ]);
 
-  const highlightFrame: EuiDataGridColumnCellAction = useCallback(
-    ({ rowIndex, columnId, Component }) => {
-      const isComparison = isComparisonColumn(columnId);
-      const data = isComparison ? comparisonRows[rowIndex] : baseRows[rowIndex];
-      const _target: Target = {
-        columnId: isComparison ? removeComparisonFromId(columnId) : `comparison_${columnId}`,
-        frame: getFrameIdentification(data.frame),
-        className: 'blinking',
-      };
-      return (
-        <Component
-          onClick={() => {
-            setTarget(_target);
-            setTimeout(() => setTarget({ ..._target, className: undefined }), 2000);
-          }}
-          iconType="crosshairs"
-        >
-          <FormattedMessage
-            id="app_not_found_in_i18nrc.columns.component.findLabel"
-            defaultMessage="Find"
-          />
-        </Component>
-      );
-    },
-    [baseRows, comparisonRows]
-  );
-
   const compareFrame: EuiDataGridColumnCellAction = useCallback(
     ({ rowIndex, columnId, Component }) => {
       const isComparison = isComparisonColumn(columnId);
       const data = isComparison ? comparisonRows[rowIndex] : baseRows[rowIndex];
-      const dataFrameId = getFrameIdentification(data.frame);
-      const comparedData = isComparison
-        ? baseRows.find((item) => getFrameIdentification(item.frame) === dataFrameId)
-        : comparisonRows.find((item) => getFrameIdentification(item.frame) === dataFrameId);
+      const currentFrameId = getFrameIdentification(data.frame);
+      const selectedFrameId = selectedCompareFrame?.frame
+        ? getFrameIdentification(selectedCompareFrame.frame.frame)
+        : undefined;
+      const isOpen =
+        currentFrameId === selectedFrameId && selectedCompareFrame?.isComparison === isComparison;
 
       return (
         <EuiPopover
           button={
             <Component
               onClick={() => {
-                setIsOpen(dataFrameId);
+                if (timerIdRef.current) {
+                  clearTimeout(timerIdRef.current);
+                }
+
+                const _target: Target = {
+                  columnId: isComparison
+                    ? removeComparisonFromId(columnId)
+                    : `comparison_${columnId}`,
+                  frame: currentFrameId,
+                  className: 'blinking',
+                };
+                setTarget(_target);
+                const id = setTimeout(() => setTarget({ ..._target, className: undefined }), 2000);
+
+                timerIdRef.current = id;
+
+                setSelectedCompareFrame({
+                  isComparison,
+                  frame: isComparison
+                    ? baseRows.find((item) => getFrameIdentification(item.frame) === currentFrameId)
+                    : comparisonRows.find(
+                        (item) => getFrameIdentification(item.frame) === currentFrameId
+                      ),
+                });
               }}
               iconType="inspect"
             >
-              <FormattedMessage
-                id="app_not_found_in_i18nrc.columns.component.findLabel"
-                defaultMessage="Find"
-              />
+              {i18n.translate('xpack.profiling.compareFrame.component.findLabel', {
+                defaultMessage: 'Find corresponding frame',
+              })}
             </Component>
           }
-          isOpen={isOpen === dataFrameId}
+          isOpen={isOpen}
           closePopover={() => {
-            setIsOpen(undefined);
+            setSelectedCompareFrame(undefined);
           }}
           anchorPosition="upRight"
           css={css`
@@ -229,16 +240,29 @@ export function OnWeelkDiffTopN({
             }
           `}
         >
-          {comparedData ? (
+          {selectedCompareFrame?.frame ? (
             <div style={{ maxWidth: 400 }}>
               <EuiPopoverTitle paddingSize="s">
-                {getCalleeFunction(comparedData.frame)}
+                {isComparison
+                  ? i18n.translate('xpack.profiling.diffTopNFunctions.baseLineFunction', {
+                      defaultMessage: 'Baseline function',
+                    })
+                  : i18n.translate('xpack.profiling.diffTopNFunctions.comparisonLineFunction', {
+                      defaultMessage: 'Comparison function',
+                    })}
               </EuiPopoverTitle>
+              <EuiTitle size="xs">
+                <EuiText>{getCalleeFunction(selectedCompareFrame.frame.frame)}</EuiText>
+              </EuiTitle>
               <EuiBasicTable
-                items={[comparedData]}
+                items={[selectedCompareFrame.frame]}
                 columns={[
                   { field: 'rank', name: 'Rank' },
-                  { field: 'samples', name: 'Samples' },
+                  {
+                    field: 'samples',
+                    name: 'Samples',
+                    render: (_, value) => value.samples.toLocaleString(),
+                  },
                   {
                     field: 'selfCPUPerc',
                     name: 'Self CPU',
@@ -252,17 +276,11 @@ export function OnWeelkDiffTopN({
                 ]}
               />
             </div>
-          ) : (
-            <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.profiling.diffTopNFunctions.noCorrespondingValueFound', {
-                defaultMessage: 'No corresponding value found',
-              })}
-            </EuiText>
-          )}
+          ) : null}
         </EuiPopover>
       );
     },
-    [baseRows, comparisonRows, isOpen]
+    [baseRows, comparisonRows, selectedCompareFrame]
   );
 
   const sortedBaseRows = useMemo(() => {
@@ -292,7 +310,7 @@ export function OnWeelkDiffTopN({
         displayAsText: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
           defaultMessage: 'Function',
         }),
-        cellActions: [highlightFrame, compareFrame],
+        cellActions: [compareFrame],
       },
       {
         id: TopNFunctionSortField.Samples,
@@ -355,7 +373,7 @@ export function OnWeelkDiffTopN({
         displayAsText: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
           defaultMessage: 'Function',
         }),
-        cellActions: [highlightFrame, compareFrame],
+        cellActions: [compareFrame],
       },
       {
         id: TopNComparisonFunctionSortField.ComparisonSamples,
@@ -412,7 +430,7 @@ export function OnWeelkDiffTopN({
         isSortable: false,
       },
     ],
-    [compareFrame, highlightFrame]
+    [compareFrame]
   );
 
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
@@ -465,7 +483,10 @@ export function OnWeelkDiffTopN({
             border-left: ${theme.euiTheme.border.thick} !important;
           }
         `}
-        aria-label="TopN functions"
+        aria-label={i18n.translate(
+          'xpack.profiling.onWeelkDiffTopN.euiDataGrid.topNFunctionsLabel',
+          { defaultMessage: 'TopN functions' }
+        )}
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         rowCount={sortedBaseRows.length > 100 ? 100 : sortedBaseRows.length}
