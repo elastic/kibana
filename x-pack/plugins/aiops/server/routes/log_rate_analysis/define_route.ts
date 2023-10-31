@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { aiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
+import { aiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/v1/schema';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
 import type { AiopsLicense } from '../../types';
@@ -27,7 +27,6 @@ export const defineRoute = (
   router.versioned
     .post({
       path: AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS,
-
       access: 'internal',
     })
     .addVersion(

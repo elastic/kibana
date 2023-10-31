@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { significantTerms } from '../__mocks__/artificial_logs/significant_terms';
-import { finalSignificantTermGroups } from '../__mocks__/artificial_logs/final_significant_term_groups';
+import { significantTerms } from '../../../__mocks__/artificial_logs/significant_terms';
+import { finalSignificantTermGroups } from '../../../__mocks__/artificial_logs/final_significant_term_groups';
 
 import {
   addSignificantTermsAction,
@@ -14,7 +14,7 @@ import {
   resetAllAction,
   resetGroupsAction,
   updateLoadingStateAction,
-} from './log_rate_analysis';
+} from './actions';
 import { initialState, streamReducer } from './stream_reducer';
 
 describe('streamReducer', () => {

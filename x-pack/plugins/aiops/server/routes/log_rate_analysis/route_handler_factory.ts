@@ -44,8 +44,8 @@ import {
   resetGroupsAction,
   updateLoadingStateAction,
   AiopsLogRateAnalysisApiAction,
-  type AiopsLogRateAnalysisSchema,
-} from '../../../common/api/log_rate_analysis';
+} from '../../../common/api/log_rate_analysis/v1/actions';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/v1/schema';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
