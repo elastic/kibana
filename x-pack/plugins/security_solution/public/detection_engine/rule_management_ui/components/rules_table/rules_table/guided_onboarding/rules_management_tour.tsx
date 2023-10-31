@@ -32,7 +32,7 @@ const GUIDED_ONBOARDING_RULES_FILTER = {
   filter: '',
   showCustomRules: false,
   showElasticRules: true,
-  tags: ['Guided Onboarding'],
+  tags: ['Use Case: Guided Onboarding'],
 };
 
 export enum GuidedOnboardingRulesStatus {
@@ -84,7 +84,7 @@ export const RulesManagementTour = () => {
     }
 
     if (onboardingRules.total === 0) {
-      // Onboarding rules are not installed - show the install/update rules step
+      // Onboarding rules are not installed - show the navigate to Add Rules page step
       return GuidedOnboardingRulesStatus.installRules;
     }
 
