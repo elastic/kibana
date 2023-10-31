@@ -48,11 +48,10 @@ export const RulesManagementTour = () => {
   const { executeBulkAction } = useExecuteBulkAction();
   const { actions } = useRulesTableContext();
 
-  // const isRulesStepActive = useObservable(
-  //   guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
-  //   false
-  // );
-  const isRulesStepActive = true;
+  const isRulesStepActive = useObservable(
+    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
+    false
+  );
 
   const { data: onboardingRules } = useFindRulesQuery(
     { filterOptions: GUIDED_ONBOARDING_RULES_FILTER },
@@ -85,7 +84,7 @@ export const RulesManagementTour = () => {
     }
 
     if (onboardingRules.total === 0) {
-      // Onboarding rules are not installed - show the intall rule step
+      // Onboarding rules are not installed - show the navigate to Add Rules page step
       return GuidedOnboardingRulesStatus.installRules;
     }
 
