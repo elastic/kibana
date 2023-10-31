@@ -49,9 +49,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
         await rolesUsersProvider.deleteRoles(roles);
       });
 
-      loadTestFile(require.resolve('./metadata'));
-      loadTestFile(require.resolve('./policy'));
-      loadTestFile(require.resolve('./package'));
       loadTestFile(require.resolve('./endpoint_authz'));
       loadTestFile(require.resolve('./endpoint_response_actions/execute'));
       loadTestFile(require.resolve('./endpoint_artifacts/trusted_apps'));
@@ -62,6 +59,9 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
 
     describe('tests not using roles', () => {
       loadTestFile(require.resolve('./resolver'));
+      loadTestFile(require.resolve('./policy'));
+      loadTestFile(require.resolve('./package'));
+      loadTestFile(require.resolve('./metadata'));
     });
   });
 }
