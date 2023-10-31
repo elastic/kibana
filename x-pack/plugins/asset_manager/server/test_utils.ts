@@ -1,9 +1,16 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 // Helper function allows test to verify error was thrown,
 // verify error is of the right class type, and error has
 
-import { SavedObjectsClientContract } from "@kbn/core-saved-objects-api-server";
-import { GetApmIndicesMethod } from "./lib/asset_client_types";
-import { AssetsValidationError } from "./lib/validators/validation_error";
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { GetApmIndicesMethod } from './lib/asset_client_types';
+import { AssetsValidationError } from './lib/validators/validation_error';
 
 // the expected metadata such as statusCode on it
 export function expectToThrowValidationErrorWithStatusCode(

@@ -17,11 +17,14 @@ import { collectContainers } from '../../collectors';
 import { validateStringDateRange } from '../../validators/validate_date_range';
 
 export type GetContainersOptions = GetContainersOptionsPublic & AssetClientDependencies;
-export type GetContainersOptionsInjected = AssetClientOptionsWithInjectedValues<GetContainersOptions>;
+export type GetContainersOptionsInjected =
+  AssetClientOptionsWithInjectedValues<GetContainersOptions>;
 
-export async function getContainers(options: GetContainersOptionsInjected): Promise<{ containers: Asset[] }> {
+export async function getContainers(
+  options: GetContainersOptionsInjected
+): Promise<{ containers: Asset[] }> {
   validateStringDateRange(options.from, options.to);
-  
+
   const metricsIndices = await options.metricsClient.getMetricIndices({
     savedObjectsClient: options.savedObjectsClient,
   });
@@ -31,11 +34,11 @@ export async function getContainers(options: GetContainersOptionsInjected): Prom
   if (options.filters?.ean) {
     const ean = Array.isArray(options.filters.ean) ? options.filters.ean[0] : options.filters.ean;
     const { kind, id } = parseEan(ean);
-    
+
     // if EAN filter isn't targeting a container asset, we don't need to do this query
     if (kind !== 'container') {
       return {
-        containers: []
+        containers: [],
       };
     }
 

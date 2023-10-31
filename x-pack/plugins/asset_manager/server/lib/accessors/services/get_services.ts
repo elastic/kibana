@@ -22,7 +22,7 @@ export async function getServices(
   options: GetServicesOptionsInjected
 ): Promise<{ services: Asset[] }> {
   validateStringDateRange(options.from, options.to);
-  
+
   const filters = [];
 
   if (options.parent) {

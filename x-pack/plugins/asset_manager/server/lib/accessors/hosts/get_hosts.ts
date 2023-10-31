@@ -21,7 +21,7 @@ export type GetHostsOptionsInjected = AssetClientOptionsWithInjectedValues<GetHo
 
 export async function getHosts(options: GetHostsOptionsInjected): Promise<{ hosts: Asset[] }> {
   validateStringDateRange(options.from, options.to);
-  
+
   const metricsIndices = await options.metricsClient.getMetricIndices({
     savedObjectsClient: options.savedObjectsClient,
   });
@@ -31,11 +31,11 @@ export async function getHosts(options: GetHostsOptionsInjected): Promise<{ host
   if (options.filters?.ean) {
     const ean = Array.isArray(options.filters.ean) ? options.filters.ean[0] : options.filters.ean;
     const { kind, id } = parseEan(ean);
-    
+
     // if EAN filter isn't targeting a host asset, we don't need to do this query
     if (kind !== 'host') {
       return {
-        hosts: []
+        hosts: [],
       };
     }
 

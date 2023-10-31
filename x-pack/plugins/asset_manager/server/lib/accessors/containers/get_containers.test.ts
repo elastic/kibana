@@ -1,17 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { GetApmIndicesMethod } from '../../asset_client_types';
 import { getContainers } from './get_containers';
-import { createGetApmIndicesMock, expectToThrowValidationErrorWithStatusCode } from '../../../test_utils';
+import {
+  createGetApmIndicesMock,
+  expectToThrowValidationErrorWithStatusCode,
+} from '../../../test_utils';
 import { MetricsDataClient, MetricsDataClientMock } from '@kbn/metrics-data-access-plugin/server';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 function createBaseOptions({
   getApmIndicesMock,
-  metricsDataClientMock
+  metricsDataClientMock,
 }: {
-  getApmIndicesMock: GetApmIndicesMethod,
-  metricsDataClientMock: MetricsDataClient
+  getApmIndicesMock: GetApmIndicesMethod;
+  metricsDataClientMock: MetricsDataClient;
 }) {
   return {
     sourceIndices: {
@@ -19,23 +29,21 @@ function createBaseOptions({
     },
     getApmIndices: getApmIndicesMock,
     metricsClient: metricsDataClientMock,
-  }
+  };
 }
 
 describe('getHosts', () => {
   let getApmIndicesMock = createGetApmIndicesMock();
   let metricsDataClientMock = MetricsDataClientMock.create();
   let baseOptions = createBaseOptions({ getApmIndicesMock, metricsDataClientMock });
-  let esClientMock =
-    elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+  let esClientMock = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
   let soClientMock = savedObjectsClientMock.create();
 
   function resetMocks() {
     getApmIndicesMock = createGetApmIndicesMock();
     metricsDataClientMock = MetricsDataClientMock.create();
     baseOptions = createBaseOptions({ getApmIndicesMock, metricsDataClientMock });
-    esClientMock =
-    elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClientMock = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     soClientMock = savedObjectsClientMock.create();
   }
 
@@ -58,7 +66,6 @@ describe('getHosts', () => {
   });
 
   it('should query Elasticsearch correctly', async () => {
-
     await getContainers({
       ...baseOptions,
       from: 'now-5d',
@@ -112,26 +119,28 @@ describe('getHosts', () => {
       elasticsearchClient: esClientMock,
       savedObjectsClient: soClientMock,
       filters: {
-        ean: `container:${mockContainerId}`
-      }
+        ean: `container:${mockContainerId}`,
+      },
     });
 
     const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
     const { bool } = dsl?.query || {};
     expect(bool).toBeDefined();
 
-    expect(bool?.must).toEqual(expect.arrayContaining([
-      {
-        exists: {
-          field: 'container.id',
+    expect(bool?.must).toEqual(
+      expect.arrayContaining([
+        {
+          exists: {
+            field: 'container.id',
+          },
         },
-      },
-      {
-        term: {
-          'container.id': mockContainerId
-        }
-      }
-    ]));
+        {
+          term: {
+            'container.id': mockContainerId,
+          },
+        },
+      ])
+    );
   });
 
   it('should not query ES and return empty if filtering on non-container EAN', async () => {
@@ -143,8 +152,8 @@ describe('getHosts', () => {
       elasticsearchClient: esClientMock,
       savedObjectsClient: soClientMock,
       filters: {
-        ean: `pod:${mockId}`
-      }
+        ean: `pod:${mockId}`,
+      },
     });
 
     expect(esClientMock.search).toHaveBeenCalledTimes(0);
@@ -152,7 +161,6 @@ describe('getHosts', () => {
   });
 
   it('should throw an error when an invalid EAN is provided', async () => {
-
     try {
       await getContainers({
         ...baseOptions,
@@ -160,8 +168,8 @@ describe('getHosts', () => {
         elasticsearchClient: esClientMock,
         savedObjectsClient: soClientMock,
         filters: {
-          ean: `invalid`
-        }
+          ean: `invalid`,
+        },
       });
     } catch (error) {
       const hasMessage = 'message' in error;
@@ -176,8 +184,8 @@ describe('getHosts', () => {
         elasticsearchClient: esClientMock,
         savedObjectsClient: soClientMock,
         filters: {
-          ean: `invalid:toomany:colons`
-        }
+          ean: `invalid:toomany:colons`,
+        },
       });
     } catch (error) {
       const hasMessage = 'message' in error;
@@ -195,26 +203,28 @@ describe('getHosts', () => {
       elasticsearchClient: esClientMock,
       savedObjectsClient: soClientMock,
       filters: {
-        id: mockIdPattern
-      }
+        id: mockIdPattern,
+      },
     });
 
     const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
     const { bool } = dsl?.query || {};
     expect(bool).toBeDefined();
 
-    expect(bool?.must).toEqual(expect.arrayContaining([
-      {
-        exists: {
-          field: 'container.id',
+    expect(bool?.must).toEqual(
+      expect.arrayContaining([
+        {
+          exists: {
+            field: 'container.id',
+          },
         },
-      },
-      {
-        wildcard: {
-          'container.id': mockIdPattern
-        }
-      }
-    ]));
+        {
+          wildcard: {
+            'container.id': mockIdPattern,
+          },
+        },
+      ])
+    );
   });
 
   it('should include a term ID filter when an ID filter is provided without asterisks included', async () => {
@@ -226,26 +236,28 @@ describe('getHosts', () => {
       elasticsearchClient: esClientMock,
       savedObjectsClient: soClientMock,
       filters: {
-        id: mockId
-      }
+        id: mockId,
+      },
     });
 
     const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
     const { bool } = dsl?.query || {};
     expect(bool).toBeDefined();
 
-    expect(bool?.must).toEqual(expect.arrayContaining([
-      {
-        exists: {
-          field: 'container.id',
+    expect(bool?.must).toEqual(
+      expect.arrayContaining([
+        {
+          exists: {
+            field: 'container.id',
+          },
         },
-      },
-      {
-        term: {
-          'container.id': mockId
-        }
-      }
-    ]));
+        {
+          term: {
+            'container.id': mockId,
+          },
+        },
+      ])
+    );
   });
 
   it('should include a term filter for cloud filters', async () => {
@@ -259,35 +271,36 @@ describe('getHosts', () => {
       savedObjectsClient: soClientMock,
       filters: {
         'cloud.provider': mockCloudProvider,
-        'cloud.region': mockCloudRegion
-      }
+        'cloud.region': mockCloudRegion,
+      },
     });
 
     const dsl = esClientMock.search.mock.lastCall?.[0] as SearchRequest | undefined;
     const { bool } = dsl?.query || {};
     expect(bool).toBeDefined();
 
-    expect(bool?.must).toEqual(expect.arrayContaining([
-      {
-        exists: {
-          field: 'container.id',
+    expect(bool?.must).toEqual(
+      expect.arrayContaining([
+        {
+          exists: {
+            field: 'container.id',
+          },
         },
-      },
-      {
-        term: {
-          'cloud.provider': mockCloudProvider
-        }
-      },
-      {
-        term: {
-          'cloud.region': mockCloudRegion
-        }
-      }
-    ]));
+        {
+          term: {
+            'cloud.provider': mockCloudProvider,
+          },
+        },
+        {
+          term: {
+            'cloud.region': mockCloudRegion,
+          },
+        },
+      ])
+    );
   });
 
   it('should reject with 400 for invalid "from" date', () => {
-
     return expectToThrowValidationErrorWithStatusCode(
       () =>
         getContainers({
@@ -302,7 +315,6 @@ describe('getHosts', () => {
   });
 
   it('should reject with 400 for invalid "to" date', () => {
-
     return expectToThrowValidationErrorWithStatusCode(
       () =>
         getContainers({
@@ -317,7 +329,6 @@ describe('getHosts', () => {
   });
 
   it('should reject with 400 when "from" is a date that is after "to"', () => {
-
     return expectToThrowValidationErrorWithStatusCode(
       () =>
         getContainers({
@@ -332,7 +343,6 @@ describe('getHosts', () => {
   });
 
   it('should reject with 400 when "from" is in the future', () => {
-
     return expectToThrowValidationErrorWithStatusCode(
       () =>
         getContainers({
