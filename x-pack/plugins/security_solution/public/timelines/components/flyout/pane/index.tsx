@@ -48,10 +48,10 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
             height: inherit;
             bottom: 0;
             top: var(--euiFixedHeadersOffset, 0);
-            left: 0;
+            left: var(--euiCollapsibleNavOffset, 0);
+            right: 0;
             background: ${useEuiBackgroundColor('plain')};
             position: fixed;
-            width: 100%;
             z-index: ${euiTheme.levels.flyout};
             display: ${visible ? 'block' : 'none'};
           `}

@@ -6,7 +6,7 @@
  */
 
 import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
 
@@ -18,6 +18,7 @@ import { getTimelineShowStatusByIdSelector } from './selectors';
 import { useTimelineSavePrompt } from '../../../common/hooks/timeline/use_timeline_save_prompt';
 import { timelineActions } from '../../store/timeline';
 import { focusActiveTimelineButton } from '../timeline/helpers';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface OwnProps {
   timelineId: TimelineId;
@@ -25,9 +26,15 @@ interface OwnProps {
 }
 
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
+  const { setIsTimelineOpen } = useKibana().services;
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setIsTimelineOpen(show);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show]);
 
   const handleClose = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));

@@ -22,12 +22,14 @@ export class PluginContract {
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
+  public isTimelineOpen$: BehaviorSubject<boolean>;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
+    this.isTimelineOpen$ = new BehaviorSubject<boolean>(false);
   }
 
   public getStartServices(): ContractStartServices {
@@ -35,6 +37,7 @@ export class PluginContract {
       extraRoutes$: this.extraRoutes$.asObservable(),
       getComponent$: this.componentsService.getComponent$.bind(this.componentsService),
       upselling: this.upsellingService,
+      setIsTimelineOpen: (isTimelineOpen) => this.isTimelineOpen$.next(isTimelineOpen),
     };
   }
 
@@ -60,6 +63,7 @@ export class PluginContract {
       },
       getBreadcrumbsNav$: () => breadcrumbsNav$,
       getUpselling: () => this.upsellingService,
+      getIsTimelineOpen$: () => this.isTimelineOpen$.asObservable(),
     };
   }
 

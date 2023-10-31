@@ -149,6 +149,7 @@ export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
   getComponent$: GetComponent$;
   upselling: UpsellingService;
+  setIsTimelineOpen: (isTimelineOpen: boolean) => void;
 }
 
 export type StartServices = CoreStart &
@@ -188,6 +189,7 @@ export interface PluginStart {
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
+  getIsTimelineOpen$: () => Observable<boolean>;
 }
 
 export interface AppObservableLibs {
