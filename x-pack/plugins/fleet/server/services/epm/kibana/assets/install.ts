@@ -140,17 +140,16 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
-  // Create index patterns separately with `overwrite: false` to prevent blowing away users' runtime fields
+  // Create index patterns separately with `overwrite: false` to prevent blowing away users' runtime fields.
+  // These don't get retried on conflict, because we expect that they exist once an integration has been installed.
   const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
-  await retryImportOnConflictError(() =>
-    savedObjectsImporter.import({
-      overwrite: false,
-      readStream: createListStream(indexPatternSavedObjects),
-      createNewCopies: false,
-      refresh: false,
-      managed: true,
-    })
-  );
+  await savedObjectsImporter.import({
+    overwrite: false,
+    readStream: createListStream(indexPatternSavedObjects),
+    createNewCopies: false,
+    refresh: false,
+    managed: true,
+  });
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
