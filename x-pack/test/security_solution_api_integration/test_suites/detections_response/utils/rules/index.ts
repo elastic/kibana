@@ -26,14 +26,11 @@ export * from './find_immutable_rule_by_id';
 export * from './create_rule_with_exception_entries';
 export * from './downgrade_immutable_rule';
 export * from './get_eql_rule_for_alert_testing';
-<<<<<<< HEAD
 export * from './get_simple_preview_rule';
 export * from './get_simple_rule_preview_output';
-=======
 export * from './get_rule_with_web_hook_action';
 export * from './get_simple_rule_output_with_web_hook_action';
 export * from './rule_to_update_schema';
 export * from './update_rule';
->>>>>>> 0f3382f9360420360638c0ec9e7fa4eda11fd81f
 
 export * from './prebuilt_rules';
