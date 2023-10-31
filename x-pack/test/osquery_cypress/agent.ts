@@ -19,9 +19,14 @@ export class AgentManager extends Manager {
   private policyEnrollmentKey: string;
   private fleetServerPort: string;
   private agentContainerId?: string;
-  private kbnClient?: KbnClient;
+  private kbnClient: KbnClient;
 
-  constructor(policyEnrollmentKey: string, fleetServerPort: string, log: ToolingLog, kbnClient) {
+  constructor(
+    policyEnrollmentKey: string,
+    fleetServerPort: string,
+    log: ToolingLog,
+    kbnClient: KbnClient
+  ) {
     super();
     this.log = log;
     this.fleetServerPort = fleetServerPort;
