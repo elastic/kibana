@@ -17,7 +17,6 @@ export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
 export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle` as const;
 export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
-export const CHAT_BUTTON_TEST_ID = 'newChatById' as const;
 
 /* About section */
 
@@ -125,15 +124,12 @@ export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
 
 /* Visualizations section */
 
-const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
-export const VISUALIZATIONS_SECTION_TEST_ID = `${VISUALIZATIONS_TEST_ID}Title` as const;
-export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
-  `${VISUALIZATIONS_TEST_ID}TitleHeader` as const;
+export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
+export const VISUALIZATIONS_SECTION_HEADER_TEST_ID = `${VISUALIZATIONS_TEST_ID}Header` as const;
 export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;
 export const ANALYZER_PREVIEW_LOADING_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}Loading` as const;
 
 export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
-export const SESSION_PREVIEW_UPSELL_TEST_ID = `${SESSION_PREVIEW_TEST_ID}UpSell` as const;
 
 /* Response section */
 

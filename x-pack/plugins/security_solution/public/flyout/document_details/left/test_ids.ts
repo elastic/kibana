@@ -7,7 +7,7 @@
 
 import { PREFIX } from '../../shared/test_ids';
 
-export const VISUALIZE_TAB_TEST_ID = `${PREFIX}FlyoutVisualizeTab` as const;
-export const INSIGHTS_TAB_TEST_ID = `${PREFIX}FlyoutInsightsTab` as const;
-export const INVESTIGATION_TAB_TEST_ID = `${PREFIX}FlyoutInvestigationTab` as const;
-export const RESPONSE_TAB_TEST_ID = `${PREFIX}FlyoutResponseTab` as const;
+export const VISUALIZE_TAB_TEST_ID = `${PREFIX}VisualizeTab` as const;
+export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightsTab` as const;
+export const INVESTIGATION_TAB_TEST_ID = `${PREFIX}InvestigationTab` as const;
+export const RESPONSE_TAB_TEST_ID = `${PREFIX}ResponseTab` as const;
