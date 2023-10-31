@@ -25,16 +25,9 @@ import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
 describe('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    cy.task('esArchiverResetKibana');
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
-
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
-  });
-
-  afterEach(() => {
-    cy.task('esArchiverUnload', 'auditbeat');
   });
 
   it('adds correctly a filter to the global search bar', () => {
