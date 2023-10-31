@@ -9,7 +9,6 @@ import Url from 'url';
 
 import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
-import { waitForHostToEnroll } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
@@ -51,10 +50,8 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
 
   const port = config.get('servers.fleetserver.port');
 
-  const agent = await new AgentManager(policyEnrollmentKey, port, log).setup();
-  await waitForHostToEnroll(kbnClient, agent);
-  const agentTwo = await new AgentManager(policyEnrollmentKeyTwo, port, log).setup();
-  await waitForHostToEnroll(kbnClient, agentTwo);
+  await new AgentManager(policyEnrollmentKey, port, log, kbnClient).setup();
+  await new AgentManager(policyEnrollmentKeyTwo, port, log, kbnClient).setup();
 }
 
 export async function startOsqueryCypress(context: FtrProviderContext) {

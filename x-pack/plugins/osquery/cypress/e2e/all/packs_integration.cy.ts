@@ -61,10 +61,9 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         addIntegration(AGENT_POLICY_NAME);
         cy.contains('Add Elastic Agent later').click();
         navigateToWithoutWaitForReact('app/osquery/packs');
-        cy.get('span').contains('Add pack').click();
+        cy.getBySel('addPackButton').click();
         cy.get('input[name="name"]').type(`${REMOVING_PACK}{downArrow}{enter}`);
         cy.getBySel('policyIdsComboBox').type(`${AGENT_POLICY_NAME}{downArrow}{enter}`);
-        // cy.get('button').contains('Save pack').click();
         cy.getBySel('savePackButton').click();
         closeToastIfVisible();
         cy.getBySel('tablePaginationPopoverButton').click();
@@ -199,7 +198,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('add global packs to policies', () => {
-        cy.get('span').contains('Add pack').click();
+        cy.getBySel('addPackButton').click();
         cy.get('input[name="name"]').type(`${globalPack}{downArrow}{enter}`);
         cy.getBySel('policyIdsComboBox').should('exist');
         cy.getBySel('osqueryPackTypeGlobal').click();
@@ -261,7 +260,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       it('', () => {
         const shardPack = 'shardPack' + generateRandomStringName(1)[0];
 
-        cy.get('span').contains('Add pack').click();
+        cy.getBySel('addPackButton').click();
         cy.get('input[name="name"]').type(`${shardPack}{downArrow}{enter}`);
 
         cy.contains('Partial deployment (shards)').click();
