@@ -251,7 +251,10 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     getPanelEntries(contextMenu: WebElementWrapper) {
-      return contextMenu.findAllByCssSelector('.euiContextMenuItem:not([disabled])', 2000);
+      return contextMenu.findAllByCssSelector(
+        'button.euiContextMenuItem:not([disabled]):not([data-test-subj="contextMenuPanelTitleButton"])',
+        2000
+      );
     },
 
     getAllLogDatasetsButton() {
