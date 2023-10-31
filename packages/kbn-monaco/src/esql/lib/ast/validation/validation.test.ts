@@ -509,6 +509,20 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | drop m*', ['Unknown column [m*]']);
     testErrorsAndWarnings('from index | drop *m', ['Unknown column [*m]']);
     testErrorsAndWarnings('from index | drop d*m', ['Unknown column [d*m]']);
+    testErrorsAndWarnings('from index | drop *', ['Removing all fields is not allowed [*]']);
+    testErrorsAndWarnings('from index | drop stringField, *', [
+      'Removing all fields is not allowed [*]',
+    ]);
+    testErrorsAndWarnings(
+      'from index | drop @timestamp',
+      [],
+      ['Drop [@timestamp] will remove all time filters to the search results']
+    );
+    testErrorsAndWarnings(
+      'from index | drop stringField, @timestamp',
+      [],
+      ['Drop [@timestamp] will remove all time filters to the search results']
+    );
   });
 
   describe('mv_expand', () => {
