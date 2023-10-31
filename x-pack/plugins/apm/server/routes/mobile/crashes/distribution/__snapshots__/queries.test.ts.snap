@@ -1,5 +1,57 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`crash distribution queries fetches an crash distribution 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "distribution": Object {
+        "histogram": Object {
+          "extended_bounds": Object {
+            "max": 50000,
+            "min": 0,
+          },
+          "field": "@timestamp",
+          "interval": 3333,
+          "min_doc_count": 0,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "error.type": "crash",
+            }
+          },
+          Object {
+            "term": Object {
+              "service.name": "serviceName",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+    "track_total_hits": false,
+  },
+}
+`;
+
 exports[`error distribution queries fetches an error distribution 1`] = `
 Object {
   "apm": Object {
@@ -24,6 +76,11 @@ Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
+          Object {
+            "term": Object {
+              "error.type": "crash",
+            },
+          },
           Object {
             "term": Object {
               "service.name": "serviceName",
@@ -71,6 +128,11 @@ Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
+          Object {
+            "term": Object {
+              "error.type": "crash",
+            },
+          },
           Object {
             "term": Object {
               "service.name": "serviceName",

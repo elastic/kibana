@@ -29,6 +29,11 @@ Array [
             "filter": Array [
               Object {
                 "term": Object {
+                  "error.type": "crash",
+                },
+              },
+              Object {
+                "term": Object {
                   "service.name": "myServiceName",
                 },
               },
