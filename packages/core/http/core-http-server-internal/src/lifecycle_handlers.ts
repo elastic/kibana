@@ -8,6 +8,8 @@
 
 import type { OnPostAuthHandler, OnPreResponseHandler } from '@kbn/core-http-server';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { Logger } from '@kbn/logging';
+import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import { HttpConfig } from './http_config';
 
 const VERSION_HEADER = 'kbn-version';
@@ -90,5 +92,27 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
       [KIBANA_NAME_HEADER]: serverName,
     };
     return toolkit.next({ headers: additionalHeaders });
+  };
+};
+
+const logBuildNumberMismatch = (ourNumber: number, theirs: string, log: Logger): void => {
+  const theirNumber = parseInt(theirs, 10);
+  if (isNaN(theirNumber)) {
+    return;
+  }
+  log.info(`Client sent ${theirNumber}, but Kibana build is ${ourNumber}`);
+};
+
+export const createLoggerForNewBuilds = (
+  buildNrString: string,
+  log: Logger
+): OnPreResponseHandler => {
+  const buildNr = parseInt(buildNrString, 10);
+  return (request, response, toolkit) => {
+    const requestBuildNr = String(request.headers[KIBANA_BUILD_NR_HEADER]);
+    if (response.statusCode >= 400 && requestBuildNr !== buildNrString) {
+      logBuildNumberMismatch(buildNr, String(request.headers[KIBANA_BUILD_NR_HEADER]), log);
+    }
+    return toolkit.next();
   };
 };

@@ -28,6 +28,9 @@ export const registerCoreHandlers = (
   if (config.versioned.strictClientVersionCheck !== false) {
     // add check on version
     registrar.registerOnPostAuth(createVersionCheckPostAuthHandler(env.packageInfo.version));
+  } else {
+    // add logger for when we serve requests from non-matching UI versions
+    registrar.registerOnPreResponse(createVersionCheckPostAuthHandler(env.packageInfo.version));
   }
   // add check on header if the route is internal
   registrar.registerOnPostAuth(createRestrictInternalRoutesPostAuthHandler(config)); // strictly speaking, we should have access to route.options.access from the request on postAuth
