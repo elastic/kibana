@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { TimelineKpi } from './kpi';
+export { TimelineKpisContainer as TimelineKpi } from './kpi_container';

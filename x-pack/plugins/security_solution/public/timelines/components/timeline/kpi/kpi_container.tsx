@@ -10,14 +10,13 @@ import { isEmpty, pick } from 'lodash/fp';
 import { useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { TimerangeInput } from '@kbn/timelines-plugin/common';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { EuiPanel } from '@elastic/eui';
 import { TimelineId } from '../../../../../common/types';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { State } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { TimelineKPIs } from '../../flyout/header/kpis';
+import { TimelineKPIs } from './kpis';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useKibana } from '../../../../common/lib/kibana';
 import { timelineSelectors } from '../../../store/timeline';
@@ -32,15 +31,7 @@ interface KpiExpandedProps {
   timelineId: string;
 }
 
-const StyledEuiPanel = euiStyled(EuiPanel)`
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-  max-height: 308px;
-`;
-
-export const TimelineKpi = ({ timelineId }: KpiExpandedProps) => {
+export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   const { browserFields, indexPattern, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.timeline
   );
@@ -48,7 +39,7 @@ export const TimelineKpi = ({ timelineId }: KpiExpandedProps) => {
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { dataProviders, kqlQuery, filters, kqlMode } = useDeepEqualSelector((state) =>
+  const { dataProviders, filters, kqlMode } = useDeepEqualSelector((state) =>
     pick(
       [
         'activeTab',

@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { EuiStat, EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiBadge } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiBadge } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
@@ -16,12 +16,6 @@ import { useUiSetting$ } from '../../../../common/lib/kibana';
 import type { TimelineKpiStrategyResponse } from '../../../../../common/search_strategy';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import * as i18n from './translations';
-
-const NoWrapEuiStat = styled(EuiStat)`
-  & .euiStat__description {
-    white-space: nowrap;
-  }
-`;
 
 export const StatsContainer = styled.span`
   font-size: ${euiThemeVars.euiFontSizeXS};

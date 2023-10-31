@@ -1117,6 +1117,7 @@ describe('alert actions', () => {
               filterQuery: null,
             },
             resolveTimelineConfig: undefined,
+            isDataProviderVisible: false,
           },
           from: expectedFrom,
           to: expectedTo,
