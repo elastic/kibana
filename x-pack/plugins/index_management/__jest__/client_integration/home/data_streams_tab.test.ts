@@ -699,33 +699,6 @@ describe('Data Streams tab', () => {
       expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
     });
 
-    test('with ILM updating data retention should be disabled', async () => {
-      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
-
-      const dataStreamForDetailPanel = createDataStreamPayload({
-        name: 'dataStream1',
-        ilmPolicyName: 'my_ilm_policy',
-      });
-
-      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
-      setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
-
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-        url: urlServiceMock,
-      });
-      await act(async () => {
-        testBed.actions.goToDataStreamsList();
-      });
-      testBed.component.update();
-
-      const { actions } = testBed;
-      await actions.clickNameAt(0);
-
-      testBed.find('manageDataStreamButton').simulate('click');
-      // expect(testBed.find('editDataRetentionButton').exists()).toBeFalsy();
-    });
-
     test('with an ILM url locator and no ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
