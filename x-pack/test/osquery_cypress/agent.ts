@@ -10,12 +10,12 @@ import execa from 'execa';
 
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
+import { generateRandomString } from './utils';
 
 export class AgentManager extends Manager {
   private log: ToolingLog;
   private policyEnrollmentKey: string;
   private fleetServerPort: string;
-  private agentContainerId?: string;
 
   constructor(policyEnrollmentKey: string, fleetServerPort: string, log: ToolingLog) {
     super();
@@ -29,6 +29,7 @@ export class AgentManager extends Manager {
 
     const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
     this.log.info(artifact);
+    const containerName = generateRandomString(12);
 
     const dockerArgs = [
       'run',
@@ -37,6 +38,10 @@ export class AgentManager extends Manager {
       '--detach',
       '--add-host',
       'host.docker.internal:host-gateway',
+      '--name',
+      containerName,
+      '--hostname',
+      containerName,
       '--env',
       'FLEET_ENROLL=1',
       '--env',
@@ -50,7 +55,8 @@ export class AgentManager extends Manager {
     ];
 
     this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
-    return this.agentContainerId;
+
+    return containerName;
   }
 
   public cleanup() {
