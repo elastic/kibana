@@ -193,7 +193,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
 
   return (
     <I18nProvider>
-      <MemoryRouter initialEntries={['/infra/metrics']}>
+      <MemoryRouter initialEntries={['/infra/metrics/hosts']}>
         <PluginConfigProvider value={config}>
           <KibanaContextProvider services={mockServices}>
             <SourceProvider sourceId="default">{story()}</SourceProvider>
