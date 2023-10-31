@@ -14191,11 +14191,11 @@
               },
               {
                 "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis.ts"
+                "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis/define_route.ts"
               },
               {
                 "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/server/routes/log_categorization.ts"
+                "path": "x-pack/plugins/aiops/server/routes/categorization_field_validation/define_route.ts"
               },
               {
                 "plugin": "ml",
