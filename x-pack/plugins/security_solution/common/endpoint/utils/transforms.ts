@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import semverLte from 'semver/functions/lte';
-
 import type { Client } from '@elastic/elasticsearch';
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { isEndpointPackageV2 } from './package_v2';
 import { usageTracker } from '../data_loaders/usage_tracker';
 import {
   metadataCurrentIndexPattern,
@@ -171,9 +170,4 @@ async function waitFor(
       return;
     }
   }
-}
-
-const MIN_ENDPOINT_PACKAGE_V2_VERSION = '8.12.0';
-export function isEndpointPackageV2(version: string) {
-  return semverLte(MIN_ENDPOINT_PACKAGE_V2_VERSION, version);
 }
