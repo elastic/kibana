@@ -226,4 +226,15 @@ export const addAllExtensions = (
   extensionsService.addFilter(ilmFilterExtension);
 
   extensionsService.addIndexDetailsTab(indexLifecycleTab);
+
+  extensionsService.setIndexOverviewContent({
+    renderContent: ({ index }) => {
+      return (
+        <>
+          <h2>Custom content for index {index.name}</h2>
+          <pre>{JSON.stringify(index, null, 2)}</pre>
+        </>
+      );
+    },
+  });
 };
