@@ -263,6 +263,8 @@ export class SavedObjectsService
       );
 
       try {
+        // The Elasticsearch service should already ensure that, but let's double check just in case.
+        // Should it be replaced with elasticsearch.status$ API instead?
         await firstValueFrom(
           this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
             filter((nodes) => nodes.isCompatible)
