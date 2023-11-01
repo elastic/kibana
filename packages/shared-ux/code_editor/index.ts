@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { CodeEditor, CodeEditorProps } from './code_editor';
+export { CodeEditor, type CodeEditorProps } from './code_editor';
