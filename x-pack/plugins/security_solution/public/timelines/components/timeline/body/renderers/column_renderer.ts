@@ -11,6 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 
 export interface ColumnRenderer {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) => boolean;
@@ -28,6 +29,7 @@ export interface ColumnRenderer {
     truncate,
     values,
     key,
+    context,
   }: {
     asPlainText?: boolean;
     className?: string;
@@ -44,5 +46,6 @@ export interface ColumnRenderer {
     truncate?: boolean;
     values: string[] | null | undefined;
     key?: string;
+    context?: RenderCellValueContext;
   }) => React.ReactNode;
 }
