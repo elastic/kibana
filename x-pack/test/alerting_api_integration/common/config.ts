@@ -10,6 +10,7 @@ import getPort from 'get-port';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
+import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -54,6 +55,7 @@ const enabledActionTypes = [
   '.webhook',
   '.xmatters',
   '.torq',
+  SENTINELONE_CONNECTOR_ID,
   'test.sub-action-connector',
   'test.sub-action-connector-without-sub-actions',
   'test.authorization',

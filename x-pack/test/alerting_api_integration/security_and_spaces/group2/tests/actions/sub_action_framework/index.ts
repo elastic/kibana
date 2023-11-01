@@ -13,8 +13,49 @@ import {
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { Role } from '@kbn/security-plugin/common';
 import { PRIVILEGE_ID } from '@kbn/security-solution-features/src/security/kibana_sub_features';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+
+let log: ToolingLog;
+const DEFAULT_SECRETS = Object.freeze({ username: 'elastic', password: 'changeme' });
+
+interface LogErrorDetailsInterface {
+  (this: SuperTest.Test, err: Error & { response?: any }): SuperTest.Test;
+  ignoreCodes: (
+    codes: number[]
+  ) => (this: SuperTest.Test, err: Error & { response?: SuperTest.Response }) => SuperTest.Test;
+}
+
+const logErrorDetails: LogErrorDetailsInterface = function (err) {
+  if (err.response && (err.response.body || err.response.text)) {
+    let outputData =
+      'RESPONSE:\n' + err.response.body
+        ? JSON.stringify(err.response.body, null, 2)
+        : err.response.text;
+
+    if (err.response.request) {
+      const { url = '', method = '', _data = '' } = err.response.request;
+
+      outputData += `\nREQUEST:
+${method}  ${url}
+${JSON.stringify(_data, null, 2)}
+`;
+    }
+
+    log.error(outputData);
+  }
+
+  return this ?? err;
+};
+logErrorDetails.ignoreCodes = (codes) => {
+  return function (err) {
+    if (err.response && err.response.status && !codes.includes(err.response.status)) {
+      return logErrorDetails.call(this, err);
+    }
+    return this;
+  };
+};
 
 /**
  * The sub action connector is defined here
@@ -23,19 +64,22 @@ import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 const createSubActionConnector = async ({
   supertest,
   config,
-  secrets,
+  secrets = DEFAULT_SECRETS,
   connectorTypeId = 'test.sub-action-connector',
   expectedHttpCode = 200,
+  errorLogger = logErrorDetails,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   config?: Record<string, unknown>;
   secrets?: Record<string, unknown>;
   connectorTypeId?: string;
   expectedHttpCode?: number;
+  errorLogger?: (err: any) => void;
 }) => {
   const response = await supertest
     .post(`${getUrlPrefix('default')}/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
+    .on('error', errorLogger)
     .send({
       name: 'My sub connector',
       connector_type_id: connectorTypeId,
@@ -43,11 +87,7 @@ const createSubActionConnector = async ({
         url: 'https://example.com',
         ...config,
       },
-      secrets: {
-        username: 'elastic',
-        password: 'changeme',
-        ...secrets,
-      },
+      secrets,
     })
     .expect(expectedHttpCode);
 
@@ -62,6 +102,7 @@ const executeSubAction = async ({
   expectedHttpCode = 200,
   username = 'elastic',
   password = 'changeme',
+  errorLogger = logErrorDetails,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   connectorId: string;
@@ -70,10 +111,12 @@ const executeSubAction = async ({
   expectedHttpCode?: number;
   username?: string;
   password?: string;
+  errorLogger?: (err: any) => void;
 }) => {
   const response = await supertest
     .post(`${getUrlPrefix('default')}/api/actions/connector/${connectorId}/_execute`)
     .set('kbn-xsrf', 'foo')
+    .on('error', errorLogger)
     .auth(username, password)
     .send({
       params: {
@@ -89,7 +132,10 @@ const executeSubAction = async ({
 // eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const securityService = getService('security');
+
+  log = getService('log');
 
   describe('Sub action framework', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -121,6 +167,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           supertest,
           config: { foo: 'foo' },
           expectedHttpCode: 400,
+          errorLogger: logErrorDetails.ignoreCodes([400]),
         });
 
         expect(res.body).to.eql({
@@ -133,8 +180,9 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       it('passes the secrets schema to the actions framework and validates correctly', async () => {
         const res = await createSubActionConnector({
           supertest,
-          secrets: { foo: 'foo' },
+          secrets: { ...DEFAULT_SECRETS, foo: 'foo' },
           expectedHttpCode: 400,
+          errorLogger: logErrorDetails.ignoreCodes([400]),
         });
 
         expect(res.body).to.eql({
@@ -346,13 +394,6 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         let connectorId: string;
 
-        const getExpectedAuthzError = () => ({
-          status: 'error',
-          message: 'Unauthorized to execute actions',
-          retry: false,
-          connector_id: 'b8c2b050-772b-11ee-a142-41aacf030956',
-        });
-
         const createUser = async ({
           username,
           password = 'changeme',
@@ -363,8 +404,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           siemPrivileges?: string[];
         }): Promise<CreatedUser> => {
           const role: Role = {
-            name: `role_${username}`,
-            metadata: {},
+            name: username,
             elasticsearch: {
               cluster: [],
               indices: [],
@@ -387,7 +427,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             elasticsearch: role.elasticsearch,
           });
 
-          await securityService.user.create(role.name, {
+          await securityService.user.create(username, {
             password: 'changeme',
             full_name: role.name,
             roles: [role.name],
@@ -408,7 +448,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             await createSubActionConnector({
               supertest,
               connectorTypeId: SENTINELONE_CONNECTOR_ID,
-              config: { url: 'https://one.two.three.co' },
+              config: { url: 'https://some.non.existent.com' },
               secrets: { token: 'abc-123' },
             })
           ).body.id;
@@ -447,17 +487,22 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           });
 
           for (const s1SubAction of Object.keys(s1SubActions)) {
-            it(`should deny execute of ${s1SubAction} if no privileges`, async () => {
+            it(`should deny execute of ${s1SubAction}`, async () => {
               const execRes = await executeSubAction({
-                supertest,
+                supertest: supertestWithoutAuth,
                 connectorId,
                 subAction: s1SubAction,
-                subActionParams: { foo: 'foo' },
+                subActionParams: {},
                 username: user.username,
                 password: user.password,
               });
 
-              expect(execRes.body).to.equal(getExpectedAuthzError());
+              expect(execRes.body).to.eql({
+                status: 'error',
+                message: 'Unauthorized to execute actions',
+                retry: false,
+                connector_id: connectorId,
+              });
             });
           }
         });
@@ -477,16 +522,23 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             it(`should allow execute of ${s1SubAction}`, async () => {
               user = await createUser({ username: s1SubAction.toLowerCase(), siemPrivileges });
 
-              const execRes = await executeSubAction({
-                supertest,
+              const {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                body: { status, message, connector_id },
+              } = await executeSubAction({
+                supertest: supertestWithoutAuth,
                 connectorId,
                 subAction: s1SubAction,
-                subActionParams: { foo: 'foo' },
+                subActionParams: {},
                 username: user.username,
                 password: user.password,
               });
 
-              expect(execRes.body).to.equal({ to: 'do' });
+              expect({ status, message, connector_id }).to.eql({
+                status: 'error',
+                message: 'an error occurred while running the action',
+                connector_id: connectorId,
+              });
             });
           }
         });
