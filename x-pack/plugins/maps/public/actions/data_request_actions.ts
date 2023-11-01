@@ -39,7 +39,6 @@ import {
   LAYER_DATA_LOAD_STARTED,
   SET_GOTO,
   SET_JOINS,
-  SET_LAYER_ERROR_STATUS,
   SET_LAYER_STYLE_META,
   UPDATE_LAYER_PROP,
   UPDATE_SOURCE_DATA_REQUEST,
@@ -226,15 +225,6 @@ export function syncDataForLayerId(layerId: string | null, isForceRefresh: boole
     if (layer) {
       dispatch(syncDataForLayer(layer, isForceRefresh));
     }
-  };
-}
-
-export function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
-  return {
-    type: SET_LAYER_ERROR_STATUS,
-    isInErrorState: errorMessage !== null,
-    layerId,
-    errorMessage,
   };
 }
 

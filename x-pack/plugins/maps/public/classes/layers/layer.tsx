@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
@@ -42,7 +42,7 @@ import { IESSource } from '../sources/es_source';
 
 export interface LayerError {
   title: string;
-  error: string;
+  error: ReactNode;
 }
 
 export interface ILayer {
@@ -405,16 +405,26 @@ export class AbstractLayer implements ILayer {
   }
 
   getErrors(): LayerError[] {
-    const sourceDataRequest = this.getSourceDataRequest();
-    const error = sourceDataRequest?.getError();
-    return error
-      ? [
-          {
-            title: this._getSourceErrorTitle(),
-            error,
-          },
-        ]
-      : [];
+    const errors: LayerError[] = [];
+
+    const sourceError = this.getSourceDataRequest()?.getError();
+    if (sourceError) {
+      errors.push({
+        title: this._getSourceErrorTitle(),
+        error: sourceError,
+      });
+    }
+
+    if (this._descriptor.__tileErrors?.length) {
+      errors.push({
+        title: i18n.translate('xpack.maps.layer.tileErrorTitle', {
+          defaultMessage: `An error occurred when loading layer tiles`,
+        }),
+        error: <div>test</div>,
+      });
+    }
+    
+    return errors;
   }
 
   async syncData(syncContext: DataRequestContext) {
@@ -508,8 +518,8 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.parent;
   }
 
-  _getMetaFromTiles(): TileMetaFeature[] {
-    return this._descriptor.__metaFromTiles || [];
+  _getTileMetaFeatures(): TileMetaFeature[] {
+    return this._descriptor.__tileMetaFeatures ?? [];
   }
 
   _isTiled(): boolean {

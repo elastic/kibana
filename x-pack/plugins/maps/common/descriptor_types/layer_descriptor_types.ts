@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {
@@ -50,14 +51,19 @@ export type TileMetaFeature = Feature & {
   };
 };
 
+export type TileError = {
+  message: string;
+  tileZXYKey: string; // format zoom/x/y
+  error?: ErrorCause;
+};
+
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
-  __isInErrorState?: boolean;
   __isPreviewLayer?: boolean;
-  __errorMessage?: string;
   __trackedLayerDescriptor?: LayerDescriptor;
   __areTilesLoaded?: boolean;
-  __metaFromTiles?: TileMetaFeature[];
+  __tileMetaFeatures?: TileMetaFeature[];
+  __tileErrors?: TileError[];
   alpha?: number;
   attribution?: Attribution;
   id: string;

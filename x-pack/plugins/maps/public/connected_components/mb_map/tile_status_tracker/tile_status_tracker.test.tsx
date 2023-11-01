@@ -9,6 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
+import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
 import { TileStatusTracker } from './tile_status_tracker';
 import { ILayer } from '../../../classes/layers/layer';
 
@@ -115,7 +116,7 @@ describe('TileStatusTracker', () => {
       createMockLayer('foobar', 'foobarsource'),
     ];
     const loadedMap: Map<string, boolean> = new Map<string, boolean>();
-    const setAreTilesLoaded = (layerId: string, areTilesLoaded: boolean) => {
+    const onTileStateChange = (layerId: string, areTilesLoaded: boolean, tileMetaFeatures?: TileMetaFeature[], tileErrors?: TileError[]) => {
       loadedMap.set(layerId, areTilesLoaded);
     };
 
@@ -123,7 +124,7 @@ describe('TileStatusTracker', () => {
       <TileStatusTracker
         {...defaultProps}
         layerList={layerList}
-        setAreTilesLoaded={setAreTilesLoaded}
+        onTileStateChange={onTileStateChange}
       />
     );
 
