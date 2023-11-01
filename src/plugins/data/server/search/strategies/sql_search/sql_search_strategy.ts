@@ -82,7 +82,13 @@ export const sqlSearchStrategyProvider = (
         }
       }
 
-      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning, meta?.request?.params);
+      return toAsyncKibanaSearchResponse(
+        body, 
+        startTime, 
+        headers?.warning, 
+        // do not return requestParams on polling calls
+        id ? undefined : meta?.request?.params
+      );
     };
 
     const cancel = async () => {

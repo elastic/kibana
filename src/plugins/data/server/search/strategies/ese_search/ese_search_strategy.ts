@@ -83,7 +83,8 @@ export const enhancedEsSearchStrategyProvider = (
       return toAsyncKibanaSearchResponse(
         { ...body, response },
         headers?.warning,
-        meta?.request?.params
+        // do not return requestParams on polling calls
+        id ? undefined : meta?.request?.params
       );
     };
 
