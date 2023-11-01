@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { render } from '@testing-library/react';
 
 import { useStartServices } from '../../../../../hooks';
@@ -26,9 +26,9 @@ jest.mock('@kbn/logs-shared-plugin/public', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
+jest.mock('@kbn/shared-ux-link-redirect-app', () => {
   return {
-    RedirectAppLinks: ({ children }: { children: any }) => <div>{children}</div>,
+    RedirectAppLinks: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   };
 });
 

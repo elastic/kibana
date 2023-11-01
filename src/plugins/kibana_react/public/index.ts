@@ -76,9 +76,6 @@ export { Markdown, MarkdownSimple } from './markdown';
 export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
 
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
-export { RedirectAppLinks } from './app_links';
-
 /** @deprecated Use `KibanaThemeProvider`, `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */
 export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';
 
