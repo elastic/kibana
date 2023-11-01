@@ -171,9 +171,6 @@ export const assetFiltersSingleKindRT = rt.exact(
     type: rt.union([assetTypeRT, rt.array(assetTypeRT)]),
     ean: rt.union([rt.string, rt.array(rt.string)]),
     id: rt.string,
-    typeLike: rt.string,
-    kindLike: rt.string,
-    eanLike: rt.string,
     ['cloud.provider']: rt.string,
     ['cloud.region']: rt.string,
   })
@@ -187,30 +184,6 @@ export const assetFiltersRT = rt.intersection([
 ]);
 
 export type AssetFilters = rt.TypeOf<typeof assetFiltersRT>;
-
-/**
- * start asset filters with date range included
- *
- * DEPRECATED
- *
- * some older GET /assets endpoints accept from and to as part of the asset filters
- * these endpoints are going away but in the meantime, this type has been separated
- * out to avoid tangling it with the newer types where filters do not include from/to
- */
-
-export const assetFiltersWithDateRangeRT = rt.intersection([
-  rt.partial({
-    from: rt.string,
-    to: rt.string,
-  }),
-  assetFiltersRT,
-]);
-
-export type AssetFiltersWithDateRange = rt.TypeOf<typeof assetFiltersWithDateRangeRT>;
-
-/**
- * end asset filters with date range included
- */
 
 export const relationRT = rt.union([
   rt.literal('ancestors'),
