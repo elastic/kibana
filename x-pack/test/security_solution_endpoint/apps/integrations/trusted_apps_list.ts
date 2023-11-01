@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'trustedApps']);
@@ -16,6 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
 
   describe('When on the Trusted Apps list', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
