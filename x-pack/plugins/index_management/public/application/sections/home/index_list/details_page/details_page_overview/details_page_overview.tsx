@@ -35,7 +35,6 @@ import { languageDefinitions, curlDefinition } from './languages';
 import { DataStreamDetails } from './data_stream_details';
 import { StorageDetails } from './storage_details';
 import { AliasesDetails } from './aliases_details';
-import { IndexOverviewCards } from './index_overview_cards';
 
 interface Props {
   indexDetails: Index;
@@ -98,10 +97,8 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
       <EuiSpacer />
 
-      <IndexOverviewCards index={indexDetails} />
-
-      {extensionsService.indexOverviewMainCard ? (
-        extensionsService.indexOverviewMainCard.renderCardContent({
+      {extensionsService.indexOverviewContent ? (
+        extensionsService.indexOverviewContent.renderContent({
           index: indexDetails,
           getUrlForApp: core.getUrlForApp,
         })

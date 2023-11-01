@@ -11,8 +11,8 @@ import { ApplicationStart } from '@kbn/core-application-browser';
 import type { IndexDetailsTab } from '../../common/constants';
 import { Index } from '..';
 
-export interface IndexOverviewCard {
-  renderCardContent: (args: {
+export interface IndexOverviewContent {
+  renderContent: (args: {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
   }) => ReactNode;
@@ -25,12 +25,10 @@ export interface ExtensionsSetup {
   addBadge(badge: any): void;
   addToggle(toggle: any): void;
   addIndexDetailsTab(tab: IndexDetailsTab): void;
-  addIndexOverviewCard(card: IndexOverviewCard): void;
-  setIndexOverviewMainCard(card: IndexOverviewCard): void;
+  setIndexOverviewContent(content: IndexOverviewContent): void;
 }
 
 export class ExtensionsService {
-  private _indexDetailsTabs: IndexDetailsTab[] = [];
   private _actions: any[] = [];
   private _banners: any[] = [];
   private _filters: any[] = [];
@@ -47,13 +45,8 @@ export class ExtensionsService {
     },
   ];
   private _toggles: any[] = [];
-  private _indexOverview: {
-    cards: IndexOverviewCard[];
-    mainCard: IndexOverviewCard | null;
-  } = {
-    cards: [],
-    mainCard: null,
-  };
+  private _indexDetailsTabs: IndexDetailsTab[] = [];
+  private _indexOverviewContent: IndexOverviewContent | null = null;
   private service?: ExtensionsSetup;
 
   public setup(): ExtensionsSetup {
@@ -64,8 +57,7 @@ export class ExtensionsService {
       addFilter: this.addFilter.bind(this),
       addToggle: this.addToggle.bind(this),
       addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
-      addIndexOverviewCard: this.addIndexOverviewCard.bind(this),
-      setIndexOverviewMainCard: this.setIndexOverviewMainCard.bind(this),
+      setIndexOverviewContent: this.setIndexOverviewMainContent.bind(this),
     };
 
     return this.service;
@@ -95,15 +87,11 @@ export class ExtensionsService {
     this._indexDetailsTabs.push(tab);
   }
 
-  private addIndexOverviewCard(card: IndexOverviewCard) {
-    this._indexOverview.cards.push(card);
-  }
-
-  private setIndexOverviewMainCard(card: IndexOverviewCard) {
-    if (this._indexOverview.mainCard) {
-      throw new Error(`The main card for index overview has already been set.`);
+  private setIndexOverviewMainContent(content: IndexOverviewContent) {
+    if (this._indexOverviewContent) {
+      throw new Error(`The content for index overview has already been set.`);
     } else {
-      this._indexOverview.mainCard = card;
+      this._indexOverviewContent = content;
     }
   }
 
@@ -131,11 +119,7 @@ export class ExtensionsService {
     return this._indexDetailsTabs;
   }
 
-  public get indexOverviewCards() {
-    return this._indexOverview.cards;
-  }
-
-  public get indexOverviewMainCard() {
-    return this._indexOverview.mainCard;
+  public get indexOverviewContent() {
+    return this._indexOverviewContent;
   }
 }
