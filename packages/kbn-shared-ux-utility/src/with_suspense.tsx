@@ -12,7 +12,14 @@ import React, { ComponentType, ReactElement, Ref, Suspense } from 'react';
 
 import { Fallback } from './fallback';
 
-interface ExtendedDeps {
+/**
+ * Optional services that the Suspense wrapper can use
+ * @public
+ */
+export interface WithSuspenseExtendedDeps {
+  /**
+   * The `AnalyticsServiceStart` object from `CoreStart`
+   */
   analytics?: AnalyticsServiceStart;
 }
 
@@ -25,7 +32,7 @@ export const withSuspense = <P extends {}, R = {}>(
   Component: ComponentType<P>,
   fallback: ReactElement | null = <Fallback />
 ) =>
-  React.forwardRef((props: P & ExtendedDeps, ref: Ref<R>) => (
+  React.forwardRef((props: P & WithSuspenseExtendedDeps, ref: Ref<R>) => (
     <KibanaErrorBoundaryProvider analytics={props.analytics}>
       <KibanaErrorBoundary>
         <Suspense fallback={fallback}>
