@@ -132,9 +132,20 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(() =>
-        es.ingest.deletePipeline({
-          id: CUSTOM_PIPELINE,
-        })
+        Promise.all([
+          es.ingest.deletePipeline({
+            id: 'global@custom',
+          }),
+          es.ingest.deletePipeline({
+            id: 'logs@custom',
+          }),
+          es.ingest.deletePipeline({
+            id: 'logs-log@custom',
+          }),
+          es.ingest.deletePipeline({
+            id: CUSTOM_PIPELINE,
+          }),
+        ])
       );
       it('Should write doc correctly', async () => {
         const res = await es.index({
