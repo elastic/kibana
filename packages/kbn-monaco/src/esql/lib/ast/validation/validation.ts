@@ -465,7 +465,6 @@ function validateSource(
       })
     );
   } else {
-    // if it is a wildcard and the command does not support wildcards, then throw
     const isWildcardAndNotSupported =
       hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
     if (isWildcardAndNotSupported) {
