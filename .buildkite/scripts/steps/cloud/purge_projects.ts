@@ -28,7 +28,7 @@ async function getPrProjects() {
           id: project.id,
           name: project.name,
           prNumber,
-          projectType,
+          type: projectType,
         };
       });
   } catch (e) {
@@ -41,18 +41,18 @@ async function getPrProjects() {
 }
 
 async function deleteProject({
-  projectType,
+  type,
   id,
 }: {
-  projectType: 'elasticsearch' | 'observability' | 'security';
+  type: 'elasticsearch' | 'observability' | 'security';
   id: number;
 }) {
   try {
-    await projectRequest.delete(`/api/v1/serverless/projects/${projectType}/${id}`);
+    await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
   } catch (e) {
     if (e.isAxiosError) {
       const message =
-        JSON.stringify(e.response.data) || `unable to delete ${projectType} project with id ${id}`;
+        JSON.stringify(e.response.data) || `unable to delete ${type} project with id ${id}`;
       throw new Error(message);
     }
     throw e;
@@ -83,7 +83,7 @@ async function purgeProjects() {
 
     if (!prOpen) {
       console.log(
-        `Pull Request #${project.prNumber} is no longer open, will delete associated deployment`
+        `Pull Request #${project.prNumber} is no longer open, will delete associated ${project.type} project`
       );
       projectsToPurge.push(project);
     } else if (
