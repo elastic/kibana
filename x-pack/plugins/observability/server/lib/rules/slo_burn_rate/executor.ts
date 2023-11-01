@@ -63,6 +63,7 @@ export const getRuleExecutor = ({
     params,
     startedAt,
     spaceId,
+    getTimeRange,
   }): ReturnType<
     ExecutorType<
       BurnRateRuleParams,
@@ -88,7 +89,10 @@ export const getRuleExecutor = ({
       return { state: {} };
     }
 
-    const results = await evaluate(esClient.asCurrentUser, slo, params, startedAt);
+    // We only need the end timestamp to base all of queries on. The length of the time range
+    // doesn't matter for our use case since we allow the user to customize the window sizes,
+    const { dateEnd } = getTimeRange('1m');
+    const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
     if (results.length > 0) {
       for (const result of results) {

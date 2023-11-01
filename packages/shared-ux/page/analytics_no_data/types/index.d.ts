@@ -26,7 +26,7 @@ export interface Services {
  */
 export type AnalyticsNoDataPageServices = Services & KibanaNoDataPageServices;
 
-export type AnalyticsNoDataPageFlavor = 'kibana' | 'serverless_search';
+export type AnalyticsNoDataPageFlavor = 'kibana' | 'serverless_search' | 'serverless_observability';
 
 export interface KibanaDependencies {
   coreStart: {

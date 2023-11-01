@@ -62,7 +62,7 @@ describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
     deletePrebuiltRulesAssets();
     preventPrebuiltRulesPackageInstallation();
     visit(RULES_MANAGEMENT_URL);
-    createAndInstallMockedPrebuiltRules({ rules });
+    createAndInstallMockedPrebuiltRules(rules);
     cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();
     disableAutoRefresh();

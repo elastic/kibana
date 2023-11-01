@@ -458,7 +458,9 @@ export class SearchSource {
     const last$ = s$
       .pipe(
         catchError((e) => {
-          requestResponder?.error({ json: e });
+          requestResponder?.error({
+            json: 'attributes' in e ? e.attributes : { message: e.message },
+          });
           return EMPTY;
         }),
         last(undefined, null),
@@ -946,7 +948,7 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false, includeFields = true): SerializedSearchSourceFields {
+  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
       aggs: searchSourceAggs,
@@ -961,9 +963,7 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.isPersisted()
-        ? index.id
-        : index.toSpec(includeFields);
+      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;

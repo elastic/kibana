@@ -241,14 +241,15 @@ function getExeFileName(metadata: StackFrameMetadata) {
  * @returns string
  */
 export function getCalleeLabel(metadata: StackFrameMetadata) {
+  const inlineLabel = metadata.Inline ? '-> ' : '';
   if (metadata.FunctionName !== '') {
     const sourceFilename = metadata.SourceFilename;
     const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
-    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL}#${
-      metadata.SourceLine
-    }`;
+    return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(
+      metadata
+    )} in ${sourceURL}#${metadata.SourceLine}`;
   }
-  return getExeFileName(metadata);
+  return `${inlineLabel}${getExeFileName(metadata)}`;
 }
 /**
  * Get callee function name

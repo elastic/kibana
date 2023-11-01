@@ -35,3 +35,10 @@ export const onboardingLinkTitle = i18n.translate(
     defaultMessage: 'Add data',
   }
 );
+
+export const feedbackLinkTitle = i18n.translate(
+  'xpack.observabilityLogExplorer.feedbackLinkTitle',
+  {
+    defaultMessage: 'Give feedback',
+  }
+);

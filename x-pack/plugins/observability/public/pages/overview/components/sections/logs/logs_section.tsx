@@ -143,6 +143,7 @@ export function LogsSection({ bucketSize }: Props) {
           legendPosition={Position.Right}
           xDomain={{ min, max }}
           showLegendExtra
+          locale={i18n.getLocale()}
         />
         {series &&
           Object.keys(series).map((key) => {

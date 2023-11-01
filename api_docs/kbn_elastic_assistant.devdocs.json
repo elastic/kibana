@@ -652,7 +652,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"eql\" | \"kql\" | \"dsl\" | \"json\" | \"no-type\""
+              "\"eql\" | \"sql\" | \"kql\" | \"dsl\" | \"json\" | \"esql\" | \"no-type\""
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/helpers.ts",
             "deprecated": false,
@@ -1346,7 +1346,7 @@
         "label": "QueryType",
         "description": [],
         "signature": [
-          "\"eql\" | \"kql\" | \"dsl\" | \"json\" | \"no-type\""
+          "\"eql\" | \"sql\" | \"kql\" | \"dsl\" | \"json\" | \"esql\" | \"no-type\""
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/helpers.ts",
         "deprecated": false,

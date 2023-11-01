@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { IsoDateString } from '@kbn/securitysolution-io-ts-types';
-import { TRuleExecutionStatus, RuleExecutionStatusOrder } from './execution_status';
+import * as t from 'io-ts';
 import { RuleExecutionMetrics } from './execution_metrics';
+import { TRuleExecutionStatus } from './execution_status';
 
 export type RuleExecutionSummary = t.TypeOf<typeof RuleExecutionSummary>;
 export const RuleExecutionSummary = t.type({
   last_execution: t.type({
     date: IsoDateString,
     status: TRuleExecutionStatus,
-    status_order: RuleExecutionStatusOrder,
+    status_order: t.number,
     message: t.string,
     metrics: RuleExecutionMetrics,
   }),

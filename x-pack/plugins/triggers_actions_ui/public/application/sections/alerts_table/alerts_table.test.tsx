@@ -300,7 +300,6 @@ describe('AlertsTable', () => {
     pageSize: 1,
     pageSizeOptions: [1, 10, 20, 50, 100],
     leadingControlColumns: [],
-    showExpandToDetails: true,
     trailingControlColumns: [],
     useFetchAlertsData,
     visibleColumns: columns.map((c) => c.id),
@@ -416,11 +415,6 @@ describe('AlertsTable', () => {
     });
 
     describe('leading control columns', () => {
-      it('should return at least the flyout action control', async () => {
-        const wrapper = render(<AlertsTableWithProviders {...tableProps} />);
-        expect(wrapper.getByTestId('expandColumnHeaderLabel').textContent).toBe('Actions');
-      });
-
       it('should render other leading controls', () => {
         const customTableProps = {
           ...tableProps,
@@ -481,13 +475,11 @@ describe('AlertsTable', () => {
         const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
         expect(queryByTestId('testActionColumn')).not.toBe(null);
         expect(queryByTestId('testActionColumn2')).not.toBe(null);
-        expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).not.toBe(null);
       });
 
       it('should not add expansion action when not set', () => {
         const customTableProps = {
           ...tableProps,
-          showExpandToDetails: false,
           alertsTableConfiguration: {
             ...alertsTableConfiguration,
             useActionsColumn: () => {
@@ -532,7 +524,6 @@ describe('AlertsTable', () => {
       it('should render no action column if there is neither the action nor the expand action config is set', () => {
         const customTableProps = {
           ...tableProps,
-          showExpandToDetails: false,
         };
 
         const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);

@@ -49,7 +49,7 @@ export const AlertsSummaryContent = ({
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem>
           <AlertsSectionTitle />
         </EuiFlexItem>

@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('creates rule when settings are configured', async () => {
       await supertest
-        .post(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
           heartbeatIndices: 'heartbeat-*',
@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('updates rules when settings are updated', async () => {
       await supertest
-        .post(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
           heartbeatIndices: 'heartbeat-*',
@@ -136,7 +136,7 @@ const statusRule = {
   consumer: 'uptime',
   alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
   tags: ['SYNTHETICS_DEFAULT_ALERT'],
-  name: 'Synthetics status internal alert',
+  name: 'Synthetics status internal rule',
   enabled: true,
   throttle: null,
   apiKeyOwner: 'elastic',
@@ -344,7 +344,7 @@ const tlsRule = {
   consumer: 'uptime',
   alertTypeId: 'xpack.synthetics.alerts.tls',
   tags: ['SYNTHETICS_DEFAULT_ALERT'],
-  name: 'Synthetics internal TLS alert',
+  name: 'Synthetics internal TLS rule',
   enabled: true,
   throttle: null,
   apiKeyOwner: 'elastic',

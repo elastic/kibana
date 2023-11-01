@@ -32,5 +32,6 @@ export const fromSavedSearchAttributes = (
   timeRange: attributes.timeRange,
   refreshInterval: attributes.refreshInterval,
   rowsPerPage: attributes.rowsPerPage,
+  sampleSize: attributes.sampleSize,
   breakdownField: attributes.breakdownField,
 });

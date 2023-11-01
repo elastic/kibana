@@ -9,3 +9,4 @@
 export { toSavedObjectWithMeta } from './to_saved_object_with_meta';
 export { injectMetaAttributes } from './inject_meta_attributes';
 export { findRelationships } from './find_relationships';
+export { getSavedObjectCounts } from './get_saved_objects_counts';

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import useMap from 'react-use/lib/useMap';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 import { useLinks } from '../embeddable/links_embeddable';
 import { ExternalLinkComponent } from './external_link/external_link_component';
@@ -25,6 +26,22 @@ export const LinksComponent = () => {
   const links = linksEmbeddable.select((state) => state.componentState.links);
   const layout = linksEmbeddable.select((state) => state.componentState.layout);
 
+  const [linksLoading, { set: setLinkIsLoading }] = useMap(
+    Object.fromEntries(
+      (links ?? []).map((link) => {
+        return [link.id, true];
+      })
+    )
+  );
+
+  useEffect(() => {
+    if (Object.values(linksLoading).includes(true)) {
+      linksEmbeddable.onLoading();
+    } else {
+      linksEmbeddable.onRender();
+    }
+  }, [linksLoading, linksEmbeddable]);
+
   const orderedLinks = useMemo(() => {
     if (!links) return [];
     return memoizedGetOrderedLinkList(links);
@@ -42,18 +59,21 @@ export const LinksComponent = () => {
                 key={currentLink.id}
                 link={currentLink}
                 layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                onLoading={() => setLinkIsLoading(currentLink.id, true)}
+                onRender={() => setLinkIsLoading(currentLink.id, false)}
               />
             ) : (
               <ExternalLinkComponent
                 key={currentLink.id}
                 link={currentLink}
                 layout={layout ?? LINKS_VERTICAL_LAYOUT}
+                onRender={() => setLinkIsLoading(currentLink.id, false)}
               />
             ),
         },
       };
     }, {});
-  }, [links, layout]);
+  }, [links, layout, setLinkIsLoading]);
 
   return (
     <EuiPanel
