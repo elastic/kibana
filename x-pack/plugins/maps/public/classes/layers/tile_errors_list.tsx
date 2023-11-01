@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import type { TileError } from '../../../common/descriptor_types';
 
@@ -17,14 +16,10 @@ interface Props {
 export function TileErrorsList(props: Props) {
   const [selectedTileKey, setSelectedTileKey] = useState(props.tileErrors?.[0].tileZXYKey);
   const selectedTileContent = useMemo(() => {
-    const tileError = props.tileErrors.find(tileError => {
+    const tileError = props.tileErrors.find((tileError) => {
       return tileError.tileZXYKey === selectedTileKey;
     });
-    return tileError
-      ? <p>
-          {getDescription(tileError)}
-        </p>
-      : null;
+    return tileError ? <p>{getDescription(tileError)}</p> : null;
   }, [selectedTileKey]);
   const tabs = useMemo(() => {
     return props.tileErrors.map((tileError) => {
@@ -45,8 +40,8 @@ export function TileErrorsList(props: Props) {
       <EuiTabs size="s">{tabs}</EuiTabs>
       {selectedTileContent}
     </>
-  )
-  /*return (
+  );
+  /* return (
     <div>
       {
         props.tileErrors.map((tileError) => (

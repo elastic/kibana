@@ -9,7 +9,14 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiIcon, EuiButtonIcon, EuiCallOut, EuiConfirmModal, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiButtonEmpty,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
@@ -145,7 +152,7 @@ export class TOCEntry extends Component<Props, State> {
 
   _getLayerErrors = () => {
     return isLayerGroup(this.props.layer) ? [] : this.props.layer.getErrors();
-  }
+  };
 
   _renderCancelModal() {
     if (!this.state.shouldShowModal) {
@@ -318,8 +325,7 @@ export class TOCEntry extends Component<Props, State> {
                 <EuiSpacer size="m" />
               </div>
             ))
-          : this.props.layer.renderLegendDetails()
-        }
+          : this.props.layer.renderLegendDetails()}
       </div>
     );
   };

@@ -289,6 +289,6 @@ export class TileStatusTracker extends Component<Props> {
   }
 }
 
-function getTileZXYKey(canonical: { x: number; y: number; z: number; }) {
+function getTileZXYKey(canonical: { x: number; y: number; z: number }) {
   return `${canonical.z}/${canonical.x}/${canonical.y}`;
 }
