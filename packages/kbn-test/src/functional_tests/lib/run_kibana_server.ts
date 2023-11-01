@@ -25,6 +25,8 @@ export async function runKibanaServer(options: {
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
 }) {
+  // eslint-disable-next-line no-console
+  console.log('++++++++++++++++++ runKibanaServer.config', JSON.stringify(options.config));
   const { config, procs } = options;
   const runOptions = options.config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
