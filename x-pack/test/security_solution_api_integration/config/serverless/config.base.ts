@@ -9,6 +9,7 @@ export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
   kbnTestServerArgs?: string[];
+  kbnTestServerEnv?: Record<string, string>;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -26,6 +27,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           '--serverless=security',
           ...(options.kbnTestServerArgs || []),
         ],
+        env: {
+          ...svlSharedConfig.get('kbnTestServer.env'),
+          ...options.kbnTestServerEnv,
+        },
       },
       testFiles: options.testFiles,
       junit: options.junit,
