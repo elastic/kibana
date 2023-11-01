@@ -34,7 +34,6 @@ import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from '../topn_functions/function_row';
 import { getFunctionsRows, IFunctionRow } from '../topn_functions/utils';
-import './diff_topn_functions.scss';
 
 const removeComparisonFromId = (id: string) => id.replace('comparison_', '');
 const isComparisonColumn = (id: string) => id.startsWith('comparison_');
