@@ -57,6 +57,7 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { Conversation } from '@kbn/elastic-assistant';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -147,6 +148,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
+  aiConversations$: Observable<Record<string, Conversation>>;
   getComponent$: GetComponent$;
   upselling: UpsellingService;
 }
@@ -185,6 +187,7 @@ export interface PluginSetup {
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
+  setAiConversations: (conversations: Record<string, Conversation>) => void;
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;

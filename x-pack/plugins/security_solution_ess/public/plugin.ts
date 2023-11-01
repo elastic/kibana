@@ -16,6 +16,7 @@ import type {
   SecuritySolutionEssPluginSetupDeps,
   SecuritySolutionEssPluginStartDeps,
 } from './types';
+import { BASE_SECURITY_CONVERSATIONS } from './assistant';
 
 export class SecuritySolutionEssPlugin
   implements
@@ -49,6 +50,7 @@ export class SecuritySolutionEssPlugin
     });
 
     subscribeBreadcrumbs(services);
+    securitySolution.setAiConversations(BASE_SECURITY_CONVERSATIONS);
 
     return {};
   }

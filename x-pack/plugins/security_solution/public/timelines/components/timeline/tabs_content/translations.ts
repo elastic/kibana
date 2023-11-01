@@ -66,3 +66,7 @@ export const SESSION_TAB = i18n.translate(
     defaultMessage: 'Session View',
   }
 );
+
+export const TIMELINE_TITLE = i18n.translate('xpack.securitySolution.timeline.title', {
+  defaultMessage: 'Timeline',
+});

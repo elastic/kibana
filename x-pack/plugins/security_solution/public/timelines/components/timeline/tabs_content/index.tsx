@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Assistant } from '@kbn/elastic-assistant';
+import { Assistant, useAssistantContext } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
 import type { Ref, ReactElement, ComponentType, Dispatch, SetStateAction } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
@@ -43,9 +43,12 @@ import {
 } from './selectors';
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
+
 import { initializeTimelineSettings } from '../../../store/timeline/actions';
-import { DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW } from './translations';
+import {
+  DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW,
+  TIMELINE_TITLE as TIMELINE_CONVERSATION_TITLE,
+} from './translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -157,7 +160,8 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
-    const { conversations } = useConversationStore();
+    const { assistantConversations } = useAssistantContext();
+    const { conversations } = useConversationStore(assistantConversations);
 
     const hasTimelineConversationStarted = useMemo(
       () => conversations[TIMELINE_CONVERSATION_TITLE].messages.length > 0,
@@ -312,7 +316,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const isEnterprisePlus = useLicense().isEnterprise();
 
   const [conversationId, setConversationId] = useState<string>(TIMELINE_CONVERSATION_TITLE);
-  const { reportAssistantInvoked } = useAssistantTelemetry();
+  const { assistantConversations } = useAssistantContext();
+  const { reportAssistantInvoked } = useAssistantTelemetry(assistantConversations);
 
   const allTimelineNoteIds = useMemo(() => {
     const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(

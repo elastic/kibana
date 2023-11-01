@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { RouteProps } from 'react-router-dom';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { Conversation } from '@kbn/elastic-assistant';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import type { AppLinksSwitcher } from './common/links';
 import type { DeepLinksFormatter } from './common/links/deep_links';
@@ -20,11 +21,13 @@ export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
+  public aiConversations$: BehaviorSubject<Record<string, Conversation>>;
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
+    this.aiConversations$ = new BehaviorSubject<Record<string, Conversation>>({});
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
@@ -33,6 +36,7 @@ export class PluginContract {
   public getStartServices(): ContractStartServices {
     return {
       extraRoutes$: this.extraRoutes$.asObservable(),
+      aiConversations$: this.aiConversations$.asObservable(),
       getComponent$: this.componentsService.getComponent$.bind(this.componentsService),
       upselling: this.upsellingService,
     };
@@ -55,6 +59,7 @@ export class PluginContract {
     return {
       getNavLinks$: () => navLinks$,
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
+      setAiConversations: (conversations) => this.aiConversations$.next(conversations),
       setComponents: (components) => {
         this.componentsService.setComponents(components);
       },

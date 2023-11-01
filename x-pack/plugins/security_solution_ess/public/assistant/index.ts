@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { ELASTIC_AI_ASSISTANT_TITLE, WELCOME_CONVERSATION_TITLE } from '@kbn/elastic-assistant';
 import type { Conversation } from '@kbn/elastic-assistant';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
-import { DETECTION_RULES_CONVERSATION_ID } from '../../../detections/pages/detection_engine/rules/translations';
+
 import {
   ALERT_SUMMARY_CONVERSATION_ID,
+  DETECTION_RULES_CONVERSATION_ID,
   EVENT_SUMMARY_CONVERSATION_ID,
-} from '../../../common/components/event_details/translations';
-import { ELASTIC_AI_ASSISTANT } from '../../comment_actions/translations';
-import { TIMELINE_CONVERSATION_TITLE } from './translations';
+  TIMELINE_CONVERSATION_TITLE,
+  ELASTIC_AI_ASSISTANT,
+  ELASTIC_AI_ASSISTANT_TITLE,
+  WELCOME_CONVERSATION_TITLE,
+} from './translations';
 
 export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
   [ALERT_SUMMARY_CONVERSATION_ID]: {

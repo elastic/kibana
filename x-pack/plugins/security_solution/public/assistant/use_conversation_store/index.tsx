@@ -9,16 +9,17 @@ import type { Conversation } from '@kbn/elastic-assistant';
 
 import { useLocalStorage } from '../../common/components/local_storage';
 import { LOCAL_STORAGE_KEY } from '../helpers';
-import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 
 export interface UseConversationStore {
   conversations: Record<string, Conversation>;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
 }
 
-export const useConversationStore = (): UseConversationStore => {
+export const useConversationStore = (
+  aiConversations: Record<string, Conversation>
+): UseConversationStore => {
   const [conversations, setConversations] = useLocalStorage<Record<string, Conversation>>({
-    defaultValue: BASE_SECURITY_CONVERSATIONS,
+    defaultValue: aiConversations,
     key: LOCAL_STORAGE_KEY,
     isInvalidDefault: (valueFromStorage) => {
       return !valueFromStorage;

@@ -24,6 +24,7 @@ import {
   parseExperimentalConfigValue,
   type ExperimentalFeatures,
 } from '../common/experimental_features';
+import { BASE_SECURITY_CONVERSATIONS } from './assistant';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -75,6 +76,7 @@ export class SecuritySolutionServerlessPlugin
 
     startNavigation(services);
     setRoutes(services);
+    securitySolution.setAiConversations(BASE_SECURITY_CONVERSATIONS);
 
     return {};
   }
