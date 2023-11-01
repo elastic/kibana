@@ -25,6 +25,10 @@ required:
 properties:
   assignees:
     $ref: 'assignees.yaml'
+  category:
+    type: string
+    description: The case category.
+    nullable: true
   closed_at:
     type: string
     format: date-time
@@ -60,6 +64,14 @@ properties:
     example: '2022-05-13T09:16:17.416Z'
   created_by:
     $ref: 'case_response_created_by_properties.yaml'
+  customFields:
+    type: array
+    description: Custom field values for the case.
+    x-technical-preview: true
+    items:
+      type: object
+      properties:
+        $ref: 'case_customfields.yaml'
   description:
     type: string
     example: A case description.

@@ -2897,14 +2897,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/warnings/handle_warnings.tsx"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/search/session/sessions_mgmt/components/actions/delete_button.tsx"
           },
           {
@@ -5517,6 +5509,14 @@
             "docId": "kibKbnCoreThemeBrowserPluginApi",
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
+          },
+          " | undefined; plugins?: ",
+          {
+            "pluginId": "@kbn/core-plugins-contracts-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+            "section": "def-common.PluginsServiceStart",
+            "text": "PluginsServiceStart"
           },
           " | undefined; }"
         ],

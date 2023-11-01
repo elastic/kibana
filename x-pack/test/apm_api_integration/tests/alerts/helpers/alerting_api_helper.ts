@@ -9,7 +9,7 @@ import { Client, errors } from '@elastic/elasticsearch';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import pRetry from 'p-retry';
 import type { SuperTest, Test } from 'supertest';
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
@@ -39,7 +39,7 @@ export async function createApmRule<T extends ApmRuleType>({
         params,
         consumer: 'apm',
         schedule: {
-          interval: '1m',
+          interval: '5s',
         },
         tags: ['apm'],
         name,
@@ -154,9 +154,7 @@ export async function deleteApmRules(supertest: SuperTest<Test>) {
   );
 
   return Promise.all(
-    res.body.data.map(async (rule: any) => {
-      await supertest.delete(`/api/alerting/rule/${rule.id}`).set('kbn-xsrf', 'foo');
-    })
+    res.body.data.map((rule: any) => deleteRuleById({ supertest, ruleId: rule.id }))
   );
 }
 

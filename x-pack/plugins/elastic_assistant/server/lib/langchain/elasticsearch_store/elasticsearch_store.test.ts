@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { Document } from 'langchain/document';
-import { ElasticsearchStore } from './elasticsearch_store';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   IndicesCreateResponse,
-  MlGetTrainedModelsResponse,
+  MlGetTrainedModelsStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import { Document } from 'langchain/document';
+
+import {
+  ElasticsearchStore,
+  FALLBACK_SIMILARITY_SEARCH_SIZE,
+  TERMS_QUERY_SIZE,
+} from './elasticsearch_store';
+import { mockMsearchResponse } from '../../../__mocks__/msearch_response';
+import { mockQueryText } from '../../../__mocks__/query_text';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),
@@ -63,7 +70,18 @@ describe('ElasticsearchStore', () => {
       expect(created).toBe(true);
       expect(mockEsClient.indices.create).toHaveBeenCalledWith({
         index: KB_INDEX,
-        mappings: { properties: { vector: { properties: { tokens: { type: 'rank_features' } } } } },
+        mappings: {
+          properties: {
+            metadata: {
+              properties: {
+                kbResource: { type: 'keyword' },
+                required: { type: 'boolean' },
+                source: { type: 'keyword' },
+              },
+            },
+            vector: { properties: { tokens: { type: 'rank_features' } } },
+          },
+        },
         settings: { default_pipeline: '.kibana-elastic-ai-assistant-kb-ingest-pipeline' },
       });
     });
@@ -124,17 +142,69 @@ describe('ElasticsearchStore', () => {
     });
   });
 
-  describe('Model Management', () => {
-    it('Checks if a model is installed', async () => {
-      mockEsClient.ml.getTrainedModels.mockResolvedValue({
-        trained_model_configs: [{ fully_defined: true }],
-      } as MlGetTrainedModelsResponse);
+  describe('isModelInstalled', () => {
+    it('returns true if model is started and fully allocated', async () => {
+      mockEsClient.ml.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'started',
+              allocation_status: {
+                state: 'fully_allocated',
+              },
+            },
+          },
+        ],
+      } as MlGetTrainedModelsStatsResponse);
 
       const isInstalled = await esStore.isModelInstalled('.elser_model_2');
 
       expect(isInstalled).toBe(true);
-      expect(mockEsClient.ml.getTrainedModels).toHaveBeenCalledWith({
-        include: 'definition_status',
+      expect(mockEsClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+        model_id: '.elser_model_2',
+      });
+    });
+
+    it('returns false if model is not started', async () => {
+      mockEsClient.ml.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'starting',
+              allocation_status: {
+                state: 'fully_allocated',
+              },
+            },
+          },
+        ],
+      } as MlGetTrainedModelsStatsResponse);
+
+      const isInstalled = await esStore.isModelInstalled('.elser_model_2');
+
+      expect(isInstalled).toBe(false);
+      expect(mockEsClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
+        model_id: '.elser_model_2',
+      });
+    });
+
+    it('returns false if model is not fully allocated', async () => {
+      mockEsClient.ml.getTrainedModelsStats.mockResolvedValue({
+        trained_model_stats: [
+          {
+            deployment_stats: {
+              state: 'started',
+              allocation_status: {
+                state: 'starting',
+              },
+            },
+          },
+        ],
+      } as MlGetTrainedModelsStatsResponse);
+
+      const isInstalled = await esStore.isModelInstalled('.elser_model_2');
+
+      expect(isInstalled).toBe(false);
+      expect(mockEsClient.ml.getTrainedModelsStats).toHaveBeenCalledWith({
         model_id: '.elser_model_2',
       });
     });
@@ -197,59 +267,152 @@ describe('ElasticsearchStore', () => {
 
   describe('similaritySearch', () => {
     it('Checks if documents are found', async () => {
-      const query = 'find the docs!';
-      mockEsClient.search.mockResolvedValue({
-        took: 3,
-        timed_out: false,
-        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-        hits: {
-          total: { value: 129, relation: 'eq' },
-          max_score: 17.86367,
-          hits: [
-            {
-              _index: '.kibana-elastic-ai-assistant-kb',
-              _id: 'b71ea007-8b46-4e02-81b4-485faad06e79',
-              _score: 9.308316,
-              _ignored: ['text.keyword'],
-              _source: {
-                metadata: {
-                  source: '/found/in/test/land',
-                },
-                vector: {
-                  tokens: {},
-                  model_id: '.elser_model_2',
-                },
-                text: 'documents',
-              },
-            },
-          ],
-        },
-      });
+      mockEsClient.msearch.mockResolvedValue(mockMsearchResponse);
 
-      const searchResults = await esStore.similaritySearch(query);
+      const searchResults = await esStore.similaritySearch(mockQueryText);
 
       expect(searchResults).toStrictEqual([
-        new Document({
-          pageContent: 'documents',
-          metadata: { source: '/found/in/test/land' },
-        }),
-      ]);
-      expect(mockEsClient.search).toHaveBeenCalledWith({
-        index: KB_INDEX,
-        query: {
-          bool: {
-            must: [
-              {
-                text_expansion: {
-                  'vector.tokens': {
-                    model_id: '.elser_model_2',
-                    model_text: query,
-                  },
-                },
-              },
-            ],
+        {
+          pageContent:
+            "[[esql-from]]\n=== `FROM`\n\nThe `FROM` source command returns a table with up to 10,000 documents from a\ndata stream, index, or alias. Each row in the resulting table represents a\ndocument. Each column corresponds to a field, and can be accessed by the name\nof that field.\n\n[source,esql]\n----\nFROM employees\n----\n\nYou can use <<api-date-math-index-names,date math>> to refer to indices, aliases\nand data streams. This can be useful for time series data, for example to access\ntoday's index:\n\n[source,esql]\n----\nFROM <logs-{now/d}>\n----\n\nUse comma-separated lists or wildcards to query multiple data streams, indices,\nor aliases:\n\n[source,esql]\n----\nFROM employees-00001,employees-*\n----\n",
+          metadata: {
+            source:
+              '/Users/andrew.goldstein/Projects/forks/andrew-goldstein/kibana/x-pack/plugins/elastic_assistant/server/knowledge_base/esql/documentation/source_commands/from.asciidoc',
           },
         },
+        {
+          pageContent:
+            '[[esql-example-queries]]\n\nThe following is an example an ES|QL query:\n\n```\nFROM logs-*\n| WHERE NOT CIDR_MATCH(destination.ip, "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")\n| STATS destcount = COUNT(destination.ip) by user.name, host.name\n| ENRICH ldap_lookup_new ON user.name\n| WHERE group.name IS NOT NULL\n| EVAL follow_up = CASE(\n    destcount >= 100, "true",\n     "false")\n| SORT destcount desc\n| KEEP destcount, host.name, user.name, group.name, follow_up\n```\n',
+          metadata: {
+            source:
+              '/Users/andrew.goldstein/Projects/forks/andrew-goldstein/kibana/x-pack/plugins/elastic_assistant/server/knowledge_base/esql/example_queries/esql_example_query_0001.asciidoc',
+          },
+        },
+      ]);
+
+      expect(mockEsClient.msearch).toHaveBeenCalledWith({
+        body: [
+          {
+            index: '.elastic-assistant-kb',
+          },
+          {
+            query: {
+              bool: {
+                must_not: [
+                  {
+                    term: {
+                      'metadata.kbResource': 'esql',
+                    },
+                  },
+                  {
+                    term: {
+                      'metadata.required': true,
+                    },
+                  },
+                ],
+                must: [
+                  {
+                    text_expansion: {
+                      'vector.tokens': {
+                        model_id: '.elser_model_2',
+                        model_text: mockQueryText,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: FALLBACK_SIMILARITY_SEARCH_SIZE, // <-- `FALLBACK_SIMILARITY_SEARCH_SIZE` is used when `k` is not provided
+          },
+          {
+            index: '.elastic-assistant-kb',
+          },
+          {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'metadata.kbResource': 'esql',
+                    },
+                  },
+                  {
+                    term: {
+                      'metadata.required': true,
+                    },
+                  },
+                ],
+              },
+            },
+            size: TERMS_QUERY_SIZE,
+          },
+        ],
+      });
+    });
+
+    it('uses the value of `k` instead of the `FALLBACK_SIMILARITY_SEARCH_SIZE` when `k` is provided', async () => {
+      mockEsClient.msearch.mockResolvedValue(mockMsearchResponse);
+
+      const k = 4;
+      await esStore.similaritySearch(mockQueryText, k);
+
+      expect(mockEsClient.msearch).toHaveBeenCalledWith({
+        body: [
+          {
+            index: '.elastic-assistant-kb',
+          },
+          {
+            query: {
+              bool: {
+                must_not: [
+                  {
+                    term: {
+                      'metadata.kbResource': 'esql',
+                    },
+                  },
+                  {
+                    term: {
+                      'metadata.required': true,
+                    },
+                  },
+                ],
+                must: [
+                  {
+                    text_expansion: {
+                      'vector.tokens': {
+                        model_id: '.elser_model_2',
+                        model_text: mockQueryText,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: k, // <-- `k` is used instead of `FALLBACK_SIMILARITY_SEARCH_SIZE`
+          },
+          {
+            index: '.elastic-assistant-kb',
+          },
+          {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'metadata.kbResource': 'esql',
+                    },
+                  },
+                  {
+                    term: {
+                      'metadata.required': true,
+                    },
+                  },
+                ],
+              },
+            },
+            size: TERMS_QUERY_SIZE,
+          },
+        ],
       });
     });
   });

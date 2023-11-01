@@ -90,10 +90,10 @@ export class ManagementPlugin
   private hasAnyEnabledApps = true;
 
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-  private landingPageRedirect$ = new BehaviorSubject<string | undefined>(undefined);
   private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
     enabled: false,
     hideLinksTo: [],
+    extendCardNavDefinitions: {},
   });
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
@@ -151,7 +151,6 @@ export class ManagementPlugin
           },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
-          landingPageRedirect$: managementPlugin.landingPageRedirect$,
         });
       },
     });
@@ -207,10 +206,8 @@ export class ManagementPlugin
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
-      setupCardsNavigation: ({ enabled, hideLinksTo }) =>
-        this.cardsNavigationConfig$.next({ enabled, hideLinksTo }),
-      setLandingPageRedirect: (landingPageRedirect: string) =>
-        this.landingPageRedirect$.next(landingPageRedirect),
+      setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
+        this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
     };
   }
 }

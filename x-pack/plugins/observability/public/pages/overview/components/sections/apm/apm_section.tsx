@@ -150,6 +150,7 @@ export function APMSection({ bucketSize }: Props) {
           theme={chartTheme}
           showLegend={false}
           xDomain={{ min, max }}
+          locale={i18n.getLocale()}
         />
         {series?.transactions.coordinates && (
           <>

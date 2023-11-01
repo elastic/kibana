@@ -471,7 +471,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 <EuiFlexItem grow={false}>
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButtonEmpty
-                    color="ghost"
+                    color="text"
                     href={cancelUrl}
                     onClick={cancelClickHandler}
                     data-test-subj="createPackagePolicyCancelButton"
@@ -488,7 +488,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                       request={devtoolRequest}
                       description={devtoolRequestDescription}
                       btnProps={{
-                        color: 'ghost',
+                        color: 'text',
                       }}
                     />
                   </EuiFlexItem>

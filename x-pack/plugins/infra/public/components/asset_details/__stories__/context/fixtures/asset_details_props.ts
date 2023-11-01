@@ -49,10 +49,8 @@ const tabs: Tab[] = [
 ];
 
 export const assetDetailsProps: AssetDetailsProps = {
-  asset: {
-    name: 'host1',
-    id: 'host1',
-  },
+  assetName: 'host1',
+  assetId: 'host1',
   overrides: {
     metadata: {
       showActionsColumn: true,

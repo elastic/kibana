@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         .filter((t: string) => !TEST_TYPES.includes(t))
         .sort();
       expect(types).to.eql([
+        'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',

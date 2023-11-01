@@ -54,8 +54,40 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await headerPage.waitUntilLoadingHasFinished();
     },
 
+    async assertAdvancedEditorCodeEditorExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor', {
+        allowHidden: true,
+      });
+    },
+
+    async assertAdvancedEditorCodeEditorContent(expectedContent: string[]) {
+      await this.assertAdvancedEditorCodeEditorExists();
+      const wrapper = await testSubjects.find('mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const editorContentString = await editor.getVisibleText();
+      const splicedAdvancedEditorValue = editorContentString.split('\n').splice(0, 3);
+      expect(splicedAdvancedEditorValue).to.eql(
+        expectedContent,
+        `Expected the first editor lines to be '${expectedContent}' (got '${splicedAdvancedEditorValue}')`
+      );
+    },
+
+    async openAdvancedEditor() {
+      this.assertAdvancedEditorSwitchExists();
+      await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
+      this.assertAdvancedEditorSwitchCheckState(true);
+      this.assertAdvancedEditorCodeEditorExists();
+    },
+
+    async closeAdvancedEditor() {
+      this.assertAdvancedEditorSwitchExists();
+      await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
+      this.assertAdvancedEditorSwitchCheckState(false);
+      await testSubjects.missingOrFail('mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor');
+    },
+
     async assertAdvancedEditorSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardAdvancedEditorSwitch`, {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedEditorSwitch', {
         allowHidden: true,
       });
     },
