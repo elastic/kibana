@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ReactNode } from 'react';
+import { FunctionComponent } from 'react';
 import { ApplicationStart } from '@kbn/core-application-browser';
 import type { IndexDetailsTab } from '../../common/constants';
 import { Index } from '..';
@@ -15,7 +15,7 @@ export interface IndexOverviewContent {
   renderContent: (args: {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
-  }) => ReactNode;
+  }) => ReturnType<FunctionComponent>;
 }
 
 export interface ExtensionsSetup {

@@ -38,5 +38,7 @@ export interface IndexDetailsTab {
   }) => ReturnType<FunctionComponent>;
   // a number to specify the order of the tabs
   order: number;
+  // an optional function to return a boolean for when to render the tab
+  // if omitted, the tab is always rendered
   shouldRenderTab?: (args: { index: Index }) => boolean;
 }
