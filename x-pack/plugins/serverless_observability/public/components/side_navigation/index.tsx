@@ -25,9 +25,7 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Observability',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
-      accordionProps: {
-        arrowProps: { css: { display: 'none' } },
-      },
+      isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
         {
@@ -35,6 +33,14 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Log Explorer',
           }),
           link: 'observability-log-explorer',
+          renderAs: 'item',
+          children: [
+            {
+              // This is to show "discover" breadcrumbs when navigating from "log explorer" to "discover"
+              link: 'discover',
+              sideNavStatus: 'hidden',
+            },
+          ],
         },
         {
           title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
@@ -80,9 +86,6 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'aiops',
           title: 'AIOps',
           renderAs: 'accordion',
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
           spaceBefore: null,
           children: [
             {
@@ -135,9 +138,6 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Applications',
           }),
           renderAs: 'accordion',
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
           children: [
             {
               link: 'apm:services',
@@ -166,9 +166,6 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Infrastructure',
           }),
           renderAs: 'accordion',
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
           children: [
             {
               link: 'metrics:inventory',

@@ -11,6 +11,7 @@ import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 import { deleteAllDocuments } from './api_calls/elasticsearch';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './api_calls/alerts';
+import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../env_var_names_constants';
 
 const primaryButton = 0;
 
@@ -21,12 +22,13 @@ const primaryButton = 0;
 const dndSloppyClickDetectionThreshold = 5;
 
 export const API_AUTH = Object.freeze({
-  user: Cypress.env('ELASTICSEARCH_USERNAME'),
-  pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  user: Cypress.env(ELASTICSEARCH_USERNAME),
+  pass: Cypress.env(ELASTICSEARCH_PASSWORD),
 });
 
 export const API_HEADERS = Object.freeze({
-  'kbn-xsrf': 'cypress',
+  'kbn-xsrf': 'cypress-creds',
+  'x-elastic-internal-origin': 'security-solution',
   [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
 });
 
@@ -144,6 +146,48 @@ export const deleteAlertsAndRules = () => {
   });
 
   deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
+};
+
+export const deleteExceptionLists = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'exception-list',
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+};
+
+export const deleteEndpointExceptionList = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'exception-list-agnostic',
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
 };
 
 export const deleteTimelines = () => {

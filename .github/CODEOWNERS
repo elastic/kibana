@@ -553,7 +553,7 @@ x-pack/plugins/observability @elastic/actionable-observability
 x-pack/plugins/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
-packages/kbn-openapi-generator @elastic/security-detection-engine
+packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
@@ -828,6 +828,7 @@ packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-xstate-utils @elastic/infra-monitoring-ui
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
+packages/kbn-zod-helpers @elastic/security-detection-rule-management
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
@@ -890,6 +891,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
+packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 
 # Global Experience
 

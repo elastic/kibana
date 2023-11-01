@@ -91,8 +91,8 @@ describe('Timelines', (): void => {
 
     context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
-        login(ROLES.reader);
-        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.reader });
+        login(ROLES.t1_analyst);
+        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.t1_analyst });
       });
 
       it('should not be able to create/update timeline ', () => {
