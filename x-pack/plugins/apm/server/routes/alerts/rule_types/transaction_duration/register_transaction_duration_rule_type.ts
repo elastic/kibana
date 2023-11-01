@@ -24,6 +24,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -38,7 +39,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
 import {
-  ApmRuleType,
   APM_SERVER_FEATURE_ID,
   formatTransactionDurationReason,
   RULE_TYPES_CONFIG,
@@ -87,9 +87,9 @@ export const transactionDurationActionVariables = [
 
 export function registerTransactionDurationRuleType({
   alerting,
+  apmConfig,
   ruleDataClient,
   getApmIndices,
-  apmConfig,
   logger,
   basePath,
 }: RegisterRuleDependencies) {
