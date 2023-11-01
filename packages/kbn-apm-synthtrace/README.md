@@ -114,10 +114,10 @@ The script will try to automatically find bootstrapped APM indices. **If these i
 
 Scenario files accept 3 arguments, 2 of them optional and 1 mandatory
 
-| Arguments           | Type      | Description                                                                                                                                          |
-|---------------------|:----------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `generate`          | mandatory | This is the main function responsible for returning the events which will be indexed                                                                 |
-| `bootstra`          | optional  | In case some setup needs to be done, before the data is generated, this function provides access to all available ES Clients to play with            |
+| Arguments   | Type      | Description                                                                                                                                          |
+|-------------|:----------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `generate`  | mandatory | This is the main function responsible for returning the events which will be indexed                                                                 |
+| `bootstra`  | optional  | In case some setup needs to be done, before the data is generated, this function provides access to all available ES Clients to play with            |
 | `setClient` | optional  | By default the apmEsClient used to generate data. If anyother client like logsEsClient needs to be used instead, this is where it should be returned |
 
 The following options are supported:
