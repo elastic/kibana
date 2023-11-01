@@ -37,7 +37,7 @@ export class UpdateSLO {
       return this.toResponse(originalSlo);
     }
 
-    const fields = ['indicator', 'groupBy', 'timeWindow', 'budgetingMethod'];
+    const fields = ['indicator', 'groupBy', 'timeWindow', 'budgetingMethod', 'settings'];
     const requireRevisionBump = !isEqual(pick(originalSlo, fields), pick(updatedSlo, fields));
 
     updatedSlo = Object.assign(updatedSlo, {

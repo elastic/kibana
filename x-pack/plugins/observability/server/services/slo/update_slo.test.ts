@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { UpdateSLOParams } from '@kbn/slo-schema';
+import { Duration, DurationUnit, UpdateSLOParams } from '@kbn/slo-schema';
 import { cloneDeep, pick, omit } from 'lodash';
 
 import {
@@ -157,11 +157,14 @@ describe('UpdateSLO', () => {
     });
   });
 
-  it('updates the settings correctly', async () => {
+  it("bumps the revision when changing 'settings'", async () => {
     const slo = createSLO();
     mockRepository.findById.mockResolvedValueOnce(slo);
+    const newSettings = {
+      syncDelay: new Duration(2, DurationUnit.Minute),
+      frequency: new Duration(5, DurationUnit.Minute),
+    };
 
-    const newSettings = { ...slo.settings, timestamp_field: 'newField' };
     await updateSLO.execute(slo.id, { settings: newSettings });
 
     expectDeletionOfOriginalSLO(slo);
@@ -169,7 +172,7 @@ describe('UpdateSLO', () => {
       expect.objectContaining({
         ...slo,
         settings: newSettings,
-        revision: 2,
+        revision: slo.revision + 1,
         updatedAt: expect.anything(),
       })
     );
