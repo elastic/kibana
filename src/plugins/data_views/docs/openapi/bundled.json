@@ -37,7 +37,7 @@
       "get": {
         "summary": "Retrieves a list of all data views.",
         "operationId": "getAllDataViews",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -97,7 +97,7 @@
       "post": {
         "summary": "Creates a data view.",
         "operationId": "createDataView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -159,7 +159,7 @@
       "get": {
         "summary": "Retrieves a single data view by identifier.",
         "operationId": "getDataView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -199,7 +199,7 @@
       "delete": {
         "summary": "Deletes a data view.",
         "operationId": "deleteDataView",
-        "description": "WARNING: When you delete a data view, it cannot be recovered. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "WARNING: When you delete a data view, it cannot be recovered. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -232,7 +232,7 @@
       "post": {
         "summary": "Updates a data view.",
         "operationId": "updateDataView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -297,7 +297,7 @@
       "post": {
         "summary": "Creates a runtime field.",
         "operationId": "createRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -337,7 +337,7 @@
       "put": {
         "summary": "Create or update an existing runtime field.",
         "operationId": "updateRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -411,7 +411,7 @@
       "get": {
         "summary": "Retrieves a runtime field.",
         "operationId": "getRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -472,7 +472,7 @@
       "get": {
         "summary": "Retrieves the default data view identifier.",
         "operationId": "getDefaultDataView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],
@@ -502,7 +502,7 @@
       "post": {
         "summary": "Sets the default data view identifier.",
         "operationId": "setDefaultDatailView",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
         ],

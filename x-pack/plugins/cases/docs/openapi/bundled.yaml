@@ -2354,7 +2354,7 @@ components:
       in: query
       name: from
       description: |
-        [preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        [preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       schema:
         type: string
         example: now-1d
@@ -2480,7 +2480,7 @@ components:
       in: query
       name: to
       description: |
-        [preview] Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        [preview] Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       schema:
         type: string
       example: now+1d
@@ -3526,7 +3526,7 @@ components:
     alert_identifiers:
       title: Alert identifiers
       description: |
-        The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       oneOf:
         - type: string
         - type: array
@@ -3538,7 +3538,7 @@ components:
     alert_indices:
       title: Alert indices
       description: |
-        The alert indices. It is required only when `type` is `alert`.  If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        The alert indices. It is required only when `type` is `alert`.  If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       oneOf:
         - type: string
         - type: array
@@ -3549,7 +3549,7 @@ components:
     rule:
       title: Alerting rule
       description: |
-        The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       type: object
       x-technical-preview: true
       properties:
