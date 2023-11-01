@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const CURRENT_USER_PROFILE_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.currentUserProfile.failure',
+  { defaultMessage: 'Failed to find current user' }
+);
+
 export const USER_PROFILES_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.userProfiles.title',
+  'xpack.securitySolution.containers.detectionEngine.userProfiles.failure',
   { defaultMessage: 'Failed to find users' }
 );
