@@ -28,6 +28,7 @@ describe('getExportSettings', () => {
     maxSizeBytes: 180000,
     scroll: { size: 500, duration: '30s' },
     useByteOrderMarkEncoding: false,
+    maxConcurrentShardRequests: 5,
   };
   const logger = loggingSystemMock.createLogger();
 
