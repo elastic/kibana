@@ -44,8 +44,9 @@ export function SloOverview({
   useEffect(() => {
     refetch();
   }, [lastReloadRequestTime, refetch]);
-
   useEffect(() => {
+    if (!onRenderComplete) return;
+
     if (!isLoading) {
       onRenderComplete();
     }

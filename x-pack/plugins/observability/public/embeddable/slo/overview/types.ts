@@ -10,7 +10,7 @@ export interface EmbeddableSloProps {
   sloId: string | undefined;
   sloInstanceId: string | undefined;
   lastReloadRequestTime?: number | undefined;
-  onRenderComplete: () => void;
+  onRenderComplete?: () => void;
 }
 
 export type SloEmbeddableInput = EmbeddableInput & EmbeddableSloProps;
