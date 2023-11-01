@@ -15,12 +15,14 @@ import { batchTelemetryRecords, createTaskMetric, processK8sUsernames, tlog } fr
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
+  const taskVersion = '1.1.0';
+
   return {
     type: 'security:telemetry-prebuilt-rule-alerts',
     title: 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry',
     interval: '1h',
-    timeout: '5m',
-    version: '1.0.0',
+    timeout: '15m',
+    version: taskVersion,
     runTask: async (
       taskId: string,
       logger: Logger,
@@ -48,52 +50,48 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         const packageInfo =
           packageVersion.status === 'fulfilled' ? packageVersion.value : undefined;
 
-        const { events: telemetryEvents, count: totalPrebuiltAlertCount } =
-          await receiver.fetchPrebuiltRuleAlerts();
+        let fetchMore = true;
+        let pitId = await receiver.openPointInTime('index-replace-me');
 
-        sender.getTelemetryUsageCluster()?.incrementCounter({
-          counterName: 'telemetry_prebuilt_rule_alerts',
-          counterType: 'prebuilt_alert_count',
-          incrementBy: totalPrebuiltAlertCount,
-        });
+        while (fetchMore) {
+          const { moreToFetch, newPitId, alerts } = await receiver.fetchPrebuiltRuleAlertsBatch(
+            pitId
+          );
 
-        if (telemetryEvents.length === 0) {
-          tlog(logger, 'no prebuilt rule alerts retrieved');
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
-          return 0;
+          fetchMore = moreToFetch;
+          pitId = newPitId;
+
+          const processedAlerts = alerts.map(
+            (event: TelemetryEvent): TelemetryEvent =>
+              copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
+          );
+
+          const sanitizedAlerts = processedAlerts.map(
+            (event: TelemetryEvent): TelemetryEvent =>
+              processK8sUsernames(clusterInfo?.cluster_uuid, event)
+          );
+
+          const enrichedAlerts = sanitizedAlerts.map(
+            (event: TelemetryEvent): TelemetryEvent => ({
+              ...event,
+              licence_id: licenseInfo?.uid,
+              cluster_uuid: clusterInfo?.cluster_uuid,
+              cluster_name: clusterInfo?.cluster_name,
+              package_version: packageInfo?.version,
+              task_version: taskVersion,
+            })
+          );
+
+          tlog(logger, `sending ${enrichedAlerts.length} elastic prebuilt alerts`);
+          const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
+          for (const batch of batches) {
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
+          }
         }
 
-        const processedAlerts = telemetryEvents.map(
-          (event: TelemetryEvent): TelemetryEvent =>
-            copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
-        );
+        await receiver.closePointInTime(pitId);
 
-        const sanitizedAlerts = processedAlerts.map(
-          (event: TelemetryEvent): TelemetryEvent =>
-            processK8sUsernames(clusterInfo?.cluster_uuid, event)
-        );
-
-        const enrichedAlerts = sanitizedAlerts.map(
-          (event: TelemetryEvent): TelemetryEvent => ({
-            ...event,
-            licence_id: licenseInfo?.uid,
-            cluster_uuid: clusterInfo?.cluster_uuid,
-            cluster_name: clusterInfo?.cluster_name,
-            package_version: packageInfo?.version,
-          })
-        );
-
-        tlog(logger, `sending ${enrichedAlerts.length} elastic prebuilt alerts`);
-        const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
-        for (const batch of batches) {
-          await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
-        }
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, startTime),
-        ]);
-        return enrichedAlerts.length;
+        return 0;
       } catch (err) {
         logger.error('could not complete prebuilt alerts telemetry task');
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [

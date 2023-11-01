@@ -42,7 +42,7 @@ describe('security telemetry - detection rule alerts task test', () => {
       testTaskExecutionPeriod
     );
     expect(mockTelemetryReceiver.fetchDetectionRulesPackageVersion).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchPrebuiltRuleAlerts).toHaveBeenCalled();
+    expect(mockTelemetryReceiver.fetchPrebuiltRuleAlertsBatch).toHaveBeenCalled();
     expect(mockTelemetryEventsSender.getTelemetryUsageCluster).toHaveBeenCalled();
     expect(mockTelemetryEventsSender.getTelemetryUsageCluster()?.incrementCounter).toBeCalledTimes(
       1
