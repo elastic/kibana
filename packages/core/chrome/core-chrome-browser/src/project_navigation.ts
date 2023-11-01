@@ -8,7 +8,7 @@
 
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
-import type { EuiAccordionProps, EuiThemeSizes, IconType } from '@elastic/eui';
+import type { EuiThemeSizes, IconType } from '@elastic/eui';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -83,11 +83,7 @@ interface NodeDefinitionBase {
    */
   breadcrumbStatus?: 'hidden' | 'visible';
   /**
-   * Optional status to for the side navigation. "hidden" and "visible" are self explanatory.
-   * The `renderAsItem` status is _only_ for group nodes (nodes with children declared or with
-   * the "nodeType" set to `group`) and allow to render the node as an "item" instead of the head of
-   * a group. This is usefull to have sub-pages declared in the tree that will correctly be mapped
-   * in the Breadcrumbs, but are not rendered in the side navigation.
+   * Optional status to indicate if the node should be hidden in the side nav (but still present in the navigation tree).
    * @default 'visible'
    */
   sideNavStatus?: SideNavNodeStatus;
@@ -113,15 +109,27 @@ interface NodeDefinitionBase {
    */
   renderAs?: RenderAs;
   /**
+   * ["group" nodes only] Flag to indicate if the group is initially collapsed or not.
+   *
+   * `undefined`: (Recommended) the group will be opened if any of its children nodes matches the current URL.
+   *
+   * `false`: the group will be opened event if none of its children nodes matches the current URL.
+   *
+   * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
+   */
+  defaultIsCollapsed?: boolean;
+  /**
    * ["group" nodes only] Optional flag to indicate if a horizontal rule should be rendered after the node.
    * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation
    * panel opening on the right of the side nav.
    */
   appendHorizontalRule?: boolean;
   /**
-   * ["group" nodes only] Temp prop. Will be removed once the new navigation is fully implemented.
+   * ["group" nodes only] Flag to indicate if the accordion is collapsible.
+   * Must be used with `renderAs` set to `"accordion"`
+   * @default `true`
    */
-  accordionProps?: Partial<EuiAccordionProps>;
+  isCollapsible?: boolean;
   /**
    * ----------------------------------------------------------------------------------------------
    * -------------------------------- ITEM NODES ONLY PROPS ---------------------------------------

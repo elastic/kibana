@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { addProfile, getProfile } from '../../common/customizations';
 import type { DiscoverServices } from '../build_services';
 
@@ -23,12 +24,13 @@ function getRootBreadcrumbs({
 }: {
   breadcrumb?: string;
   services: DiscoverServices;
-}) {
+}): ChromeBreadcrumb[] {
   return [
     {
       text: i18n.translate('discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
+      deepLinkId: 'discover',
       href: breadcrumb || getRootPath(services),
     },
   ];
@@ -55,23 +57,13 @@ export function setBreadcrumbs({
     defaultMessage: 'Discover',
   });
 
-  if (services.serverless) {
-    // in serverless only set breadcrumbs for saved search title
-    // the root breadcrumbs are set automatically by the serverless navigation
-    if (titleBreadcrumbText) {
-      services.serverless.setBreadcrumbs([{ text: titleBreadcrumbText }]);
-    } else {
-      services.serverless.setBreadcrumbs([]);
-    }
+  if (titleBreadcrumbText) {
+    services.chrome.setBreadcrumbs([...rootBreadcrumbs, { text: titleBreadcrumbText }]);
   } else {
-    if (titleBreadcrumbText) {
-      services.chrome.setBreadcrumbs([...rootBreadcrumbs, { text: titleBreadcrumbText }]);
-    } else {
-      services.chrome.setBreadcrumbs([
-        {
-          text: discoverBreadcrumbsTitle,
-        },
-      ]);
-    }
+    services.chrome.setBreadcrumbs([
+      {
+        text: discoverBreadcrumbsTitle,
+      },
+    ]);
   }
 }

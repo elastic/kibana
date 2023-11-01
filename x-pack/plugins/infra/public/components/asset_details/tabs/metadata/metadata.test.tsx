@@ -13,9 +13,26 @@ import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ContextProviders } from '../../context_providers';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');
+jest.mock('../../../../hooks/use_kibana');
+
+const useKibanaMock = useKibanaContextForPlugin as jest.MockedFunction<
+  typeof useKibanaContextForPlugin
+>;
+
+const mockUseKibana = () => {
+  useKibanaMock.mockReturnValue({
+    services: {
+      ...coreMock.createStart(),
+      data: dataPluginMock.createStartContract(),
+    },
+  } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
+};
 
 const renderHostMetadata = () =>
   render(
@@ -42,6 +59,14 @@ const renderHostMetadata = () =>
     </I18nProvider>,
     { wrapper: EuiThemeProvider }
   );
+
+beforeEach(() => {
+  mockUseKibana();
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('Single Host Metadata (Hosts View)', () => {
   const mockUseMetadata = (props: any = {}) => {

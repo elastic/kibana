@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
 import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
+import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -80,7 +81,7 @@ export function useFetchActiveAlerts({ sloIdsAndInstanceIds = [] }: Params): Use
       try {
         const response = await http.post<FindApiResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
           body: JSON.stringify({
-            feature_ids: ['slo'],
+            feature_ids: [AlertConsumers.SLO, AlertConsumers.OBSERVABILITY],
             size: 0,
             query: {
               bool: {
