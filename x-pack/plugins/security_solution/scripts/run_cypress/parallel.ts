@@ -81,7 +81,8 @@ export const cli = () => {
             }
             return acc;
           }, {} as Record<string, string | number>)
-        );
+        )
+        .boolean('inspect');
 
       log.info(`
 ----------------------------------------------
@@ -319,6 +320,7 @@ ${JSON.stringify(
                   ? []
                   : ['--dev', '--no-dev-config', '--no-dev-credentials'],
               onEarlyExit,
+              inspect: argv.inspect,
             });
 
             await providers.loadAll();
