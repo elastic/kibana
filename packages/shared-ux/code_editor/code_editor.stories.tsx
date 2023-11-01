@@ -9,9 +9,9 @@
 import React from 'react';
 
 import { action } from '@storybook/addon-actions';
-
-import { CodeEditorStorybookMock, CodeEditorStorybookParams } from '@kbn/code-editor-mocks';
 import { monaco as monacoEditor } from '@kbn/monaco';
+
+import { CodeEditorStorybookMock, CodeEditorStorybookParams } from './mocks/storybook';
 
 import mdx from './README.mdx';
 

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { CodeEditor } from './code_editor';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/shared-ux/code_editor'],
+};

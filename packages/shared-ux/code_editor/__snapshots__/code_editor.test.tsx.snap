@@ -3,8 +3,8 @@
 exports[`<CodeEditor /> hint element should be tabable 1`] = `
 <div
   aria-label="Code Editor"
-  class="kibanaCodeEditor__keyboardHint"
-  data-test-subj="codeEditorHint"
+  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,false"
+  data-test-subj="codeEditorHint codeEditorHint--active"
   id="1234"
   role="button"
   tabindex="0"
@@ -135,7 +135,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Press {key} to start editing."
-              id="kibana-react.kibanaCodeEditor.startEditing"
+              id="sharedUXPackages.codeEditor.startEditing"
               values={
                 Object {
                   "key": <strong>
@@ -148,7 +148,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Press {key} to stop editing."
-              id="kibana-react.kibanaCodeEditor.stopEditing"
+              id="sharedUXPackages.codeEditor.stopEditing"
               values={
                 Object {
                   "key": <strong>
@@ -255,8 +255,28 @@ exports[`<CodeEditor /> is rendered 1`] = `
           >
             <div
               aria-label="Code Editor"
-              className="kibanaCodeEditor__keyboardHint"
-              data-test-subj="codeEditorHint"
+              css={
+                Array [
+                  Object {
+                    "map": undefined,
+                    "name": "jym74u",
+                    "next": undefined,
+                    "styles": "
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    &:focus {
+      z-index: 6000;
+    }
+  ",
+                    "toString": [Function],
+                  },
+                  false,
+                ]
+              }
+              data-test-subj="codeEditorHint codeEditorHint--active"
               id="1234"
               onBlur={[Function]}
               onClick={[Function]}
