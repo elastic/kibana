@@ -3,9 +3,9 @@
 
 preview::[]
 
-The Elasticsearch Query Language, ES|QL, has been created to make exploring your data easier without leaving the Discover application. 
+The Elasticsearch Query Language, {esql}, makes it easier to explore your data without leaving Discover. 
 
-In the tutorial below we'll use the {kib} Sample Data Logs in Discover and Lens suggestions to explore the data and visualization. 
+In this tutorial we'll use the {kib} sample web logs in Discover and Lens to explore the data and create visualizations. 
 
 [float]
 [[prerequisite]]
@@ -17,9 +17,7 @@ To be able to select **Try {esql}** from the Data views menu the `discover:enabl
 [[tutorial-try-esql]]
 === Trying ES|QL 
 
-Learn how to build queries to pull information out of your data and create visualizations using {esql}. 
-
-To get the sample data into Discover:
+To load the sample data:
 
 . On the home page, click **Try sample data**.
 . Click **Other sample data sets**.
@@ -30,7 +28,7 @@ To get the sample data into Discover:
 [role="screenshot"]
 image:images/try-esql.png[An image of the Discover UI where users can try the new ES|QL feature]
 
-Let's say we want to find out what machine operating system users have and how much ram is on their machine.  
+Let's say we want to find out what operating system users have and how much RAM is on their machine.  
 
 [NOTE]
 ====
@@ -44,8 +42,8 @@ Let's say we want to find out what machine operating system users have and how m
 +
 [source,esql]
 ----
-from kibana_sample_data_logs 
-| keep machine.os, machine.ram
+FROM kibana_sample_data_logs 
+| KEEP machine.os, machine.ram
 ----
 +
 . Click **Update**.
@@ -53,15 +51,15 @@ from kibana_sample_data_logs
 [role="screenshot"]
 image:images/esql-machine-os-ram.png[An image of the query result]
 
-Let's add to our query to find out the geographical destination of the visits and limit the results. 
+Let's add `geo.dest` to our query, to find out the geographical destination of the visits, and limit the results. 
 
 . Copy the query below:
 +
 [source,esql]
 ----
-from kibana_sample_data_logs 
-| keep machine.os, machine.ram, geo.dest
-| limit 10
+FROM kibana_sample_data_logs 
+| KEEP machine.os, machine.ram, geo.dest
+| LIMIT 10
 ----
 +
 . Click **Update**.
@@ -75,11 +73,11 @@ Let's sort the data by machine ram and filter out the destination GB.
 +
 [source,esql]
 ----
-from kibana_sample_data_logs 
-| keep machine.os, machine.ram, geo.dest
-| sort machine.ram desc
-| where geo.dest != "GB"
-| limit 10
+FROM kibana_sample_data_logs 
+| KEEP machine.os, machine.ram, geo.dest
+| SORT machine.ram desc
+| WHERE geo.dest != "GB"
+| LIMIT 10
 ----
 +
 . Click **Update**.
