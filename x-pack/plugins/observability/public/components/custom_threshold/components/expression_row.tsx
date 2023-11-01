@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -221,17 +220,8 @@ const ThresholdElement: React.FC<{
         onChangeSelectedThreshold={updateThreshold}
         errors={errors}
         display="fullWidth"
+        isMetricPct={isMetricPct}
       />
-
-      {isMetricPct && (
-        <div
-          style={{
-            alignSelf: 'center',
-          }}
-        >
-          <EuiText size={'s'}>%</EuiText>
-        </div>
-      )}
     </>
   );
 };

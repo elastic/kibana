@@ -46,6 +46,7 @@ export interface ThresholdExpressionProps {
     | 'rightUp'
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
+  isMetricPct?: boolean;
 }
 
 export const ThresholdExpression = ({
@@ -57,6 +58,7 @@ export const ThresholdExpression = ({
   display = 'inline',
   threshold = [],
   popupPosition,
+  isMetricPct = false,
 }: ThresholdExpressionProps) => {
   const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
@@ -88,7 +90,10 @@ export const ThresholdExpression = ({
         <EuiExpression
           data-test-subj="thresholdPopover"
           description={comparators[comparator].text}
-          value={(threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `)}
+          value={
+            (threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `) +
+            (isMetricPct ? '%' : '')
+          }
           isActive={Boolean(
             alertThresholdPopoverOpen ||
               (errors.threshold0 && errors.threshold0.length) ||

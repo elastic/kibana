@@ -9,13 +9,14 @@ import { DataViewBase } from '@kbn/es-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  MetricsExplorerResponse,
-  metricsExplorerResponseRT,
-} from '../../../../common/custom_threshold_rule/metrics_explorer';
 import { convertKueryToElasticSearchQuery } from '../helpers/kuery';
 import { decodeOrThrow } from '../helpers/runtime_types';
-import { ExpressionOptions, ExpressionTimestampsRT } from '../types';
+import {
+  ExpressionOptions,
+  ExpressionTimestampsRT,
+  MetricsExplorerResponse,
+  metricsExplorerResponseRT,
+} from '../types';
 
 export function useExpressionData(
   options: ExpressionOptions,

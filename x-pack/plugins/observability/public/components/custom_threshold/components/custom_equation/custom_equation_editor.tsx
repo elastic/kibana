@@ -22,7 +22,7 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/custom_threshold_rule/metrics_explorer';
+import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../types';
 import {
   Aggregators,
   CustomMetricAggTypes,

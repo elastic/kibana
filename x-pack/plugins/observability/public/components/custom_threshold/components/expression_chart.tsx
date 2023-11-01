@@ -25,7 +25,6 @@ import { first, last } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
-import { MetricsExplorerRow } from '../../../../common/custom_threshold_rule/metrics_explorer';
 import { Color } from '../../../../common/custom_threshold_rule/color_palette';
 import { MetricsExplorerChartType } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression, TimeRange } from '../types';
@@ -42,6 +41,7 @@ import { ThresholdAnnotations } from './criterion_preview_chart/threshold_annota
 import { CUSTOM_EQUATION } from '../i18n_strings';
 import { calculateDomain } from '../helpers/calculate_domain';
 import { MetricExplorerSeriesChart } from './series_chart';
+import { MetricsExplorerRow } from '../types';
 
 interface Props {
   expression: MetricExpression;

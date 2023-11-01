@@ -8,9 +8,14 @@
 import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
-import { MetricExplorerCustomMetricAggregations } from '../../../../common/custom_threshold_rule/metrics_explorer';
 import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
-import { ExpressionOptions, ExpressionTimestampsRT, MetricExpression, TimeRange } from '../types';
+import {
+  ExpressionOptions,
+  ExpressionTimestampsRT,
+  MetricExpression,
+  MetricsExplorerMetricRT,
+  TimeRange,
+} from '../types';
 import { useExpressionData } from './use_expression_data';
 
 const DEFAULT_TIME_RANGE = {};
@@ -73,18 +78,18 @@ export const useExpressionChartData = (
 
 const mapCustomThresholdMetricToMetricsExplorerMetric = (
   metric: CustomThresholdExpressionMetric
-) => {
+): MetricsExplorerMetricRT => {
   if (metric.aggType === 'count') {
     return {
       name: metric.name,
-      aggregation: 'count' as MetricExplorerCustomMetricAggregations,
+      aggregation: 'count',
       filter: metric.filter,
     };
   }
 
   return {
     name: metric.name,
-    aggregation: metric.aggType as MetricExplorerCustomMetricAggregations,
+    aggregation: metric.aggType,
     field: metric.field,
   };
 };

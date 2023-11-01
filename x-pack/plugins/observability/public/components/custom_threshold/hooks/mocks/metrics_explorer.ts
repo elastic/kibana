@@ -6,10 +6,11 @@
  */
 
 import {
+  ExpressionOptions,
+  ExpressionTimestampsRT,
   MetricsExplorerResponse,
   MetricsExplorerSeries,
-} from '../../common/custom_threshold_rule/metrics_explorer';
-import { ExpressionOptions, ExpressionTimestampsRT } from '../components/custom_threshold/types';
+} from '../../types';
 
 export const options: ExpressionOptions = {
   limit: 3,
@@ -35,12 +36,6 @@ export const source = {
   anomalyThreshold: 20,
 };
 export const derivedIndexPattern = { title: 'metricbeat-*', fields: [] };
-
-// export const timeRange: MetricsExplorerTimeOptions = {
-//   from: 'now-1h',
-//   to: 'now',
-//   interval: '>=10s',
-// };
 
 export const mockedTimestamps: ExpressionTimestampsRT = {
   fromTimestamp: 1678376367166,

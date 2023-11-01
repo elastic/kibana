@@ -124,7 +124,9 @@ export const expressionTimestampsRT = rt.type({
 });
 export type ExpressionTimestampsRT = rt.TypeOf<typeof expressionTimestampsRT>;
 
-// Expression options
+/*
+ * Expression options
+ */
 const aggType = rt.union([
   rt.literal('count'),
   rt.literal('avg'),
@@ -133,7 +135,7 @@ const aggType = rt.union([
   rt.literal('max'),
   rt.literal('cardinality'),
 ]);
-export const metricsExplorerCustomMetricRT = rt.intersection([
+export const metricsExplorerMetricRT = rt.intersection([
   rt.type({
     name: rt.string,
     aggregation: aggType,
@@ -149,7 +151,7 @@ const customThresholdExpressionMetricRT = rt.intersection([
   }),
   rt.partial({
     field: rt.union([rt.string, rt.undefined]),
-    custom_metrics: rt.array(metricsExplorerCustomMetricRT),
+    custom_metrics: rt.array(metricsExplorerMetricRT),
     equation: rt.string,
   }),
 ]);
@@ -168,4 +170,73 @@ export const expressionOptionsRT = rt.intersection([
   }),
 ]);
 
+export type AggType = rt.TypeOf<typeof aggType>;
+export type MetricsExplorerMetricRT = rt.TypeOf<typeof metricsExplorerMetricRT>;
 export type ExpressionOptions = rt.TypeOf<typeof expressionOptionsRT>;
+/*
+ * End of expression options
+ */
+
+/*
+ * Metrics explorer types
+ */
+export const OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS = ['custom', 'rate', 'p95', 'p99'];
+
+export const timeRangeRT = rt.type({
+  from: rt.number,
+  to: rt.number,
+  interval: rt.string,
+});
+
+export const afterKeyObjectRT = rt.record(rt.string, rt.union([rt.string, rt.null]));
+
+export const metricsExplorerPageInfoRT = rt.type({
+  total: rt.number,
+  afterKey: rt.union([rt.string, rt.null, afterKeyObjectRT]),
+});
+
+export const metricsExplorerColumnTypeRT = rt.keyof({
+  date: null,
+  number: null,
+  string: null,
+});
+
+export const metricsExplorerColumnRT = rt.type({
+  name: rt.string,
+  type: metricsExplorerColumnTypeRT,
+});
+
+export const metricsExplorerRowRT = rt.intersection([
+  rt.type({
+    timestamp: rt.number,
+  }),
+  rt.record(
+    rt.string,
+    rt.union([rt.string, rt.number, rt.null, rt.undefined, rt.array(rt.object)])
+  ),
+]);
+
+export const metricsExplorerSeriesRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    columns: rt.array(metricsExplorerColumnRT),
+    rows: rt.array(metricsExplorerRowRT),
+  }),
+  rt.partial({
+    keys: rt.array(rt.string),
+  }),
+]);
+
+export const metricsExplorerResponseRT = rt.type({
+  series: rt.array(metricsExplorerSeriesRT),
+  pageInfo: metricsExplorerPageInfoRT,
+});
+
+export type MetricsExplorerRow = rt.TypeOf<typeof metricsExplorerRowRT>;
+
+export type MetricsExplorerSeries = rt.TypeOf<typeof metricsExplorerSeriesRT>;
+
+export type MetricsExplorerResponse = rt.TypeOf<typeof metricsExplorerResponseRT>;
+/*
+ * End of metrics explorer types
+ */

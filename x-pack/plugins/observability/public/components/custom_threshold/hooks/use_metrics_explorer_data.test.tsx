@@ -6,20 +6,19 @@
  */
 
 import React from 'react';
+import { DataViewBase } from '@kbn/es-query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-
 import { ExpressionOptions, ExpressionTimestampsRT } from '../types';
 import { useExpressionData } from './use_expression_data';
-import { DataViewBase } from '@kbn/es-query';
 import {
   createSeries,
   derivedIndexPattern,
   mockedTimestamps,
   options,
   resp,
-} from '../../../utils/metrics_explorer';
+} from './mocks/metrics_explorer';
 
 const mockedFetch = jest.fn();
 

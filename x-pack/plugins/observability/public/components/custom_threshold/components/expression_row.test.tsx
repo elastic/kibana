@@ -75,7 +75,7 @@ describe('ExpressionRow', () => {
       wrapper
         .html()
         .match(
-          '<span class="euiExpression__value css-uocz3u-euiExpression__value-columns">50</span>'
+          '<span class="euiExpression__value css-uocz3u-euiExpression__value-columns">50%</span>'
         ) ?? [];
     expect(valueMatch).toBeTruthy();
   });

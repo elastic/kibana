@@ -6,10 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { values } from 'lodash';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { Color } from './color_palette';
-import { metricsExplorerMetricRT } from './metrics_explorer';
 import { TimeUnitChar } from '../utils/formatters/duration';
 
 type DeepPartialArray<T> = Array<DeepPartial<T>>;
@@ -93,17 +90,6 @@ export enum Aggregators {
   P99 = 'p99',
   CUSTOM = 'custom',
 }
-
-const metricsExplorerOptionsMetricRT = rt.intersection([
-  metricsExplorerMetricRT,
-  rt.partial({
-    rate: rt.boolean,
-    color: rt.keyof(Object.fromEntries(values(Color).map((c) => [c, null])) as Record<Color, null>),
-    label: rt.string,
-  }),
-]);
-
-export type MetricsExplorerOptionsMetric = rt.TypeOf<typeof metricsExplorerOptionsMetricRT>;
 
 export enum MetricsExplorerChartType {
   line = 'line',

@@ -6,7 +6,7 @@
  */
 
 import { min, max, isNumber } from 'lodash';
-import { MetricsExplorerSeries } from '../../../../common/custom_threshold_rule/metrics_explorer';
+import { MetricsExplorerSeries } from '../types';
 
 const getMin = (values: Array<number | null>) => {
   const minValue = min(values);

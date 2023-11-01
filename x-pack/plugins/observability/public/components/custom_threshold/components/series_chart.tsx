@@ -14,7 +14,7 @@ import {
   AreaSeriesStyle,
   BarSeriesStyle,
 } from '@elastic/charts';
-import { MetricsExplorerSeries } from '../../../../common/custom_threshold_rule/metrics_explorer';
+import { MetricsExplorerSeries } from '../types';
 import { Color, colorTransformer } from '../../../../common/custom_threshold_rule/color_palette';
 import { MetricsExplorerChartType } from '../../../../common/custom_threshold_rule/types';
 
