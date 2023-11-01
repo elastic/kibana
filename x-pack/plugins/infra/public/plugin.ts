@@ -251,7 +251,7 @@ export class Plugin implements InfraClientPluginClass {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
-      const navLinkStatus = this.isServerlessEnv
+      const serverlessNavLinkStatus = this.isServerlessEnv
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden;
 
@@ -262,7 +262,7 @@ export class Plugin implements InfraClientPluginClass {
             defaultMessage: 'Inventory',
           }),
           path: '/inventory',
-          navLinkStatus,
+          navLinkStatus: serverlessNavLinkStatus,
         },
         ...(hostsEnabled
           ? [
@@ -272,7 +272,7 @@ export class Plugin implements InfraClientPluginClass {
                   defaultMessage: 'Hosts',
                 }),
                 path: '/hosts',
-                navLinkStatus,
+                navLinkStatus: serverlessNavLinkStatus,
               },
             ]
           : []),
