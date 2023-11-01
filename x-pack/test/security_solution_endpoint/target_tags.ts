@@ -4,8 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './get_slack_action';
-export * from './get_web_hook_action';
-export * from './remove_uuid_from_actions';
-export * from './create_new_action';
-export * from './legacy_actions';
+
+export type TargetTags =
+  | '@ess'
+  | '@skipInEss'
+  | '@serverless'
+  | '@skipInServerless'
+  | '@brokenInServerless';
+
+export const targetTags = (thisSuite: Mocha.Suite, tags: TargetTags[]) => {
+  thisSuite.tags(tags);
+};
