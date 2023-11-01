@@ -58,7 +58,11 @@ export class CsvGenerator {
     private stream: Writable
   ) {}
 
-  private async openPointInTime(indexPatternTitle: string, settings: CsvExportSettings) {
+  private async openPointInTime(
+    indexPatternTitle: string,
+    settings: CsvExportSettings,
+    maxConcurrentShardRequests: number
+  ) {
     const { duration } = settings.scroll;
     let pitId: string | undefined;
     this.logger.debug(`Requesting PIT for: [${indexPatternTitle}]...`);
@@ -75,6 +79,7 @@ export class CsvGenerator {
         {
           requestTimeout: duration,
           maxRetries: 0,
+          maxConcurrentShardRequests,
         }
       );
       pitId = response.id;
@@ -327,7 +332,11 @@ export class CsvGenerator {
     let totalRelation = 'eq';
     let searchAfter: estypes.SortResults | undefined;
 
-    let pitId = await this.openPointInTime(indexPatternTitle, settings);
+    let pitId = await this.openPointInTime(
+      indexPatternTitle,
+      settings,
+      this.config.maxConcurrentShardRequests
+    );
 
     // apply timezone from the job to all date field formatters
     try {

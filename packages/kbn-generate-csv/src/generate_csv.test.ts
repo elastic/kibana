@@ -350,7 +350,7 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxRetries: 0, requestTimeout: '30s' }
+      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
     );
 
     expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
@@ -823,7 +823,7 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxRetries: 0, requestTimeout: '30s' }
+      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
     );
 
     expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
@@ -833,7 +833,7 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxRetries: 0, requestTimeout: '30s' }
+      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
     );
 
     expect(mockDataClient.search).toBeCalledWith(
