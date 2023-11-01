@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_INTERNAL_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
 
 export const searchCasesRoute = createCasesRoute({
   method: 'post',
-  path: `${CASES_URL}/_search`,
+  path: `${CASES_INTERNAL_URL}/_search`,
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-
-      console.log('search_cases server routes POST', {request});
 
       const options = request.body as caseApiV1.CasesFindRequest;
 

@@ -13,7 +13,7 @@ import { validate as uuidValidate } from 'uuid';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 
-import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, escapeKuery, toKqlExpression } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import type {
@@ -159,10 +159,14 @@ const addStatusFilter = (status: CaseStatuses): KueryNode => {
 };
 
 const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
-  return nodeBuilder.is(
+  const temp = nodeBuilder.is(
     `${CASE_SAVED_OBJECT}.attributes.severity`,
     `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`
   );
+
+  console.log({ severityFilter: toKqlExpression(temp) });
+
+  return temp;
 };
 
 const buildCategoryFilter = (
@@ -215,9 +219,13 @@ export const buildFilter = ({
     return;
   }
 
-  return nodeBuilder[operator](
+  const tempFilter = nodeBuilder[operator](
     filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
   );
+
+  console.log({ ownerFilter: toKqlExpression(tempFilter) });
+
+  return tempFilter;
 };
 
 /**
@@ -338,10 +346,10 @@ export const buildAssigneesFilter = ({
 
 export const buildCustomFieldsFilter = ({
   customFields,
-}: { 
-  customFields : CasesFindQueryParams['customFields']
+}: {
+  customFields: CasesFindQueryParams['customFields'];
 }): KueryNode | undefined => {
-  if(customFields === undefined) {
+  if (customFields === undefined) {
     return;
   }
 
@@ -352,9 +360,33 @@ export const buildCustomFieldsFilter = ({
   }
 
   const customFieldsFilter = customFieldsAsArray.map((filter) => {
-    
-  })
-}
+    const filterKey = Object.keys(filter)[0];
+
+    const customFieldKeyFilter = nodeBuilder.is(
+      `${CASE_SAVED_OBJECT}.attributes.customFields.key`,
+      `${filterKey}`
+    );
+
+    const customFieldValueFilter = Object.values(filter[filterKey].value).map((filterValue) => {
+      return nodeBuilder.is(
+        `${CASE_SAVED_OBJECT}.attributes.customFields.value.boolean`,
+        `${filterValue}`
+      );
+    });
+
+    const customFieldFilter = customFieldValueFilter.map((item) =>
+      nodeBuilder.and([customFieldKeyFilter, item])
+    );
+
+    return nodeBuilder.or([...customFieldFilter]);
+  });
+
+  const finalFilter = nodeBuilder.and([...customFieldsFilter]);
+
+  console.log({ customFieldsFilter: toKqlExpression(finalFilter) });
+
+  return finalFilter;
+};
 
 export const constructQueryOptions = ({
   tags,
@@ -378,8 +410,8 @@ export const constructQueryOptions = ({
   const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
-  const categoryFilter = buildCategoryFilter(category); 
-  const customFieldsFilter = buildCustomFieldsFilter({customFields});
+  const categoryFilter = buildCategoryFilter(category);
+  const customFieldsFilter = buildCustomFieldsFilter({ customFields });
 
   const filters = combineFilters([
     statusFilter,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomFieldTypes } from '../../common/types/domain';
+import type { CustomFieldTypes } from '../../common/types/domain';
 
 export interface ICasesCustomField {
   isFilterable: boolean;

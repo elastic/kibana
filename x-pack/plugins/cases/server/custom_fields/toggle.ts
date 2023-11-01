@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 export const getCasesToggleCustomField = () => ({
   isFilterable: true,
   isSortable: false,

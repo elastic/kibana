@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type { CasesFindRequest, CasesFindResponse } from '../../../common/types/api';
 import { CasesFindRequestRt, CasesFindResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
@@ -21,7 +22,6 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesFindQueryParams } from '../types';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { casesCustomFields } from '../../custom_fields';
-import { CustomFieldsConfiguration } from '@kbn/cases-plugin/common/types/domain';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -31,7 +31,7 @@ import { CustomFieldsConfiguration } from '@kbn/cases-plugin/common/types/domain
 export const find = async (
   params: CasesFindRequest,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient,
+  casesClient: CasesClient
 ): Promise<CasesFindResponse> => {
   const {
     services: { caseService, licensingService },
@@ -68,17 +68,21 @@ export const find = async (
     if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
       let customFieldsConfiguration: CustomFieldsConfiguration = [];
 
-      if(configurations.length) {
-        customFieldsConfiguration = paramArgs.owner ? configurations[0].customFields : configurations.map(config => config.customFields).flat();
+      if (configurations.length) {
+        customFieldsConfiguration = paramArgs.owner
+          ? configurations[0].customFields
+          : configurations.map((config) => config.customFields).flat();
       }
 
-      Object.keys(paramArgs.customFields).forEach(customFieldKey => {
-        const customFieldConfig = customFieldsConfiguration.find(item => item.key === customFieldKey);
+      Object.keys(paramArgs.customFields).forEach((customFieldKey) => {
+        const customFieldConfig = customFieldsConfiguration.find(
+          (item) => item.key === customFieldKey
+        );
 
         if (customFieldConfig) {
           const mapping = casesCustomFields.get(customFieldConfig.type);
-          
-          if(!mapping?.isFilterable) {
+
+          if (!mapping?.isFilterable) {
             throw Boom.forbidden(
               `Filtering by custom filed of type ${customFieldConfig.type} is not allowed.`
             );

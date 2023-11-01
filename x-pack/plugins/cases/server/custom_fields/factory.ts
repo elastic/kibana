@@ -10,13 +10,11 @@ import type { ICasesCustomField, CasesCustomFieldsMap } from './types';
 import { getCasesTextCustomField } from './text';
 import { getCasesToggleCustomField } from './toggle';
 
-
 const mapping: Record<CustomFieldTypes, ICasesCustomField | null> = {
   [CustomFieldTypes.TEXT]: getCasesTextCustomField(),
   [CustomFieldTypes.TOGGLE]: getCasesToggleCustomField(),
 };
 
 export const casesCustomFields: CasesCustomFieldsMap = {
-  get: (type: CustomFieldTypes): ICasesCustomField | undefined | null =>
-    mapping[type] ?? undefined,
+  get: (type: CustomFieldTypes): ICasesCustomField | undefined | null => mapping[type] ?? undefined,
 };

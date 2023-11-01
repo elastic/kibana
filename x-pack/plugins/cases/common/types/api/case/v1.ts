@@ -260,12 +260,12 @@ export const CasesFindRequestRt = rt.intersection([
       /**
        * custom fields of the case
        */
-         customFields: rt.record(
-          rt.string, 
-          rt.strict({
-            value: rt.union([rt.string, rt.boolean, rt.number]),
-          }),
-        ),
+      customFields: rt.record(
+        rt.string,
+        rt.strict({
+          value: rt.array(rt.union([rt.string, rt.boolean, rt.number])),
+        })
+      ),
     })
   ),
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
