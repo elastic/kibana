@@ -10,7 +10,6 @@ import moment from 'moment-timezone';
 import { init } from '../integration_tests/helpers/http_requests';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { Index } from '../common/types';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
@@ -22,6 +21,7 @@ import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { IndexLifecycleSummary } from '../public/extend_index_management/components/index_lifecycle_summary';
 import React from 'react';
+import { Index } from '@kbn/index-management-plugin/common';
 
 const { httpSetup } = init();
 
@@ -113,6 +113,7 @@ const indexWithLifecycleError: Index = {
     },
     phase_execution: {
       policy: 'testy',
+      // @ts-expect-error ILM type is incorrect https://github.com/elastic/elasticsearch-specification/issues/2326
       phase_definition: { min_age: '0s', actions: { rollover: { max_size: '1gb' } } },
       version: 1,
       modified_date_in_millis: 1544031699844,
