@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// TODO rename signal to alert
 export * from './create_alerts_index';
 export * from './delete_all_alerts';
 export * from './wait_for_alert_to_complete';
@@ -15,3 +14,5 @@ export * from './get_open_alerts';
 export * from './get_alerts_by_ids';
 export * from './get_query_alerts_ids';
 export * from './get_alerts_by_id';
+export * from './remove_random_valued_properties';
+export * from './migrations';
