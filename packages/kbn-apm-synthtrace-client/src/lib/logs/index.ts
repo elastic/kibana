@@ -24,6 +24,7 @@ export type LogDocument = Fields &
     'trace.id'?: string;
     'agent.name'?: string;
     'orchestrator.cluster.name'?: string;
+    'orchestrator.cluster.id'?: string;
     'orchestrator.resource.id'?: string;
     'cloud.provider'?: string;
     'cloud.region'?: string;
