@@ -31,15 +31,15 @@ let grepArgs = [];
 if (type !== 'server') {
   switch (environment) {
     case 'serverlessEnv':
-      grepArgs = ['--grep', '@serverless', '--grep', '@brokenInServerless', '--invert'];
+      grepArgs = ['--grep', '/^(?!.*@brokenInServerless).*@serverless.*/'];
       break;
 
     case 'essEnv':
-      grepArgs = ['--grep', '@ess'];
+      grepArgs = ['--grep', '/^(?!.*@brokenInEss).*@ess.*/'];
       break;
 
     case 'qaEnv':
-      grepArgs = ['--grep', '@serverless', '--grep', '@brokenInServerless|@skipInQA', '--invert'];
+      grepArgs = ['--grep', '/^(?!.*@brokenInServerless|.*@skipInQA).*@serverless.*/'];
       break;
 
     default:
