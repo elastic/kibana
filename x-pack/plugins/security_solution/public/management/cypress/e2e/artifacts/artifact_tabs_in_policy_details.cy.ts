@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users';
 import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
-import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import {
-  createPerPolicyArtifact,
   createArtifactList,
+  createPerPolicyArtifact,
   removeAllArtifacts,
   removeExceptionsList,
   yieldFirstPolicyID,
