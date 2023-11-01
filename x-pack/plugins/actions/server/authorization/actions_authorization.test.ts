@@ -14,6 +14,7 @@ import {
 } from '../constants/saved_objects';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { AuthorizationMode } from './get_authorization_mode_by_source';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const request = {} as KibanaRequest;
 
@@ -38,9 +39,12 @@ beforeEach(() => {
 });
 
 describe('ensureAuthorized', () => {
+  const logger = loggingSystemMock.create().get();
+
   test('is a no-op when there is no authorization api', async () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
+      logger,
     });
 
     await actionsAuthorization.ensureAuthorized({ operation: 'create', actionTypeId: 'myType' });
@@ -52,6 +56,7 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
+      logger,
     });
 
     await actionsAuthorization.ensureAuthorized({ operation: 'create', actionTypeId: 'myType' });
@@ -66,6 +71,7 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
+      logger,
     });
 
     checkPrivileges.mockResolvedValueOnce({
@@ -96,6 +102,7 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
+      logger,
     });
 
     checkPrivileges.mockResolvedValueOnce({
@@ -136,6 +143,7 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
+      logger,
     });
 
     checkPrivileges.mockResolvedValueOnce({
@@ -169,6 +177,7 @@ describe('ensureAuthorized', () => {
       authorization,
       authentication,
       authorizationMode: AuthorizationMode.Legacy,
+      logger,
     });
 
     authentication.getCurrentUser.mockReturnValueOnce({
@@ -191,6 +200,7 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
+      logger,
     });
 
     checkPrivileges.mockResolvedValueOnce({

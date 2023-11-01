@@ -246,6 +246,7 @@ export class ActionExecutor {
             actionTypeId,
             actionTypeRegistry,
             authorization,
+            logger,
           });
 
           rawResult = await actionType.executor({
@@ -571,6 +572,7 @@ interface EnsureAuthorizedToExecuteOpts {
   params: Record<string, unknown>;
   actionTypeRegistry: ActionTypeRegistryContract;
   authorization: ActionsAuthorization;
+  logger: Logger;
 }
 
 const ensureAuthorizedToExecute = async ({
@@ -579,6 +581,7 @@ const ensureAuthorizedToExecute = async ({
   params,
   actionTypeRegistry,
   authorization,
+  logger,
 }: EnsureAuthorizedToExecuteOpts) => {
   try {
     const additionalPrivileges: string[] = [];
@@ -599,7 +602,7 @@ const ensureAuthorizedToExecute = async ({
     }
 
     if (additionalPrivileges.length) {
-      await authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
+      await authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges, logger });
     }
   } catch (error) {
     throw new ActionExecutionError(error.message, ActionExecutionErrorReason.Authorization, {
