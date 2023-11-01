@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`UpdateSLO index a temporary summary document 1`] = `
+exports[`UpdateSLO when the revision bumps indexes a temporary summary document 1`] = `
 Array [
   Object {
     "document": Object {
