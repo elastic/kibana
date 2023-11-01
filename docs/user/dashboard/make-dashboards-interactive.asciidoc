@@ -262,7 +262,7 @@ To edit links panels:
 . Click image:images/lens_layerActions_8.5.0.png[], then **Edit Links**. 
 . Click image:images/dashboard_controlsEditControl_8.3.0.png[] on the link.
 . Click **Update link**.
-. Click **Saved**.
+. Click **Save**.
 
 [float]
 [[delete-links-panels]]
