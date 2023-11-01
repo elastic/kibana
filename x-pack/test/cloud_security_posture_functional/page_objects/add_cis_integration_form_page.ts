@@ -105,6 +105,7 @@ export function AddCisIntegrationFormPageProvider({
       /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
       const integrationList = await testSubjects.findAll('agentEnrollmentFlyout');
       await integrationList[0].click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
       return fieldValue;
     },
