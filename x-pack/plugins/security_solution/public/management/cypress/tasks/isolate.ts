@@ -52,8 +52,8 @@ export const isolateHostFromEndpointList = (index: number = 0): void => {
   // close details flyout
   cy.getByTestSubj('euiFlyoutCloseButton').click();
 
-  // ensure the host is isolated
-  cy.wait(12000);
+  // ensure the host is isolated, wait for 3 minutes for the host to be isolated
+  cy.wait(18000);
 
   cy.getByTestSubj('endpointListTable').within(() => {
     cy.get('tbody tr')

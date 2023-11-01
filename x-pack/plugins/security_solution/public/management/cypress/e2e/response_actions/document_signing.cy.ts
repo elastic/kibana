@@ -78,6 +78,7 @@ describe('Document signing', { tags: ['@ess', '@serverless', '@brokenInServerles
 
     const actionValidationErrorMsg =
       'Fleet action response error: Failed to validate action signature; check Endpoint logs for details';
-    cy.contains(actionValidationErrorMsg, { timeout: 120000 }).should('exist');
+    // wait for 3 minutes for the response to be indexed
+    cy.contains(actionValidationErrorMsg, { timeout: 180000 }).should('exist');
   });
 });
