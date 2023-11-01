@@ -68,6 +68,7 @@ describe('SearchBarComponent', () => {
       fields: [],
       title: '',
     },
+    sourcererDataView: {},
     updateSearch: jest.fn(),
     setSavedQuery: jest.fn(),
     setSearchBarFilter: jest.fn(),
