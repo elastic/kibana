@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { errorCountActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/error_count/register_error_count_rule_type';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
