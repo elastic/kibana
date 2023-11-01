@@ -86,7 +86,8 @@ export class TileStatusTracker extends Component<Props> {
       if (layerId && !this._layerCache.has(layerId)) {
         this._layerCache.set(layerId, true);
       }
-      // clear tile errors when tile starts loading
+
+      // clear previous tile error when tile starts loading
       if (layerId && this._tileErrorCache[layerId]) {
         const tileZXYKey = getTileZXYKey(e.tile.tileID.canonical);
         const tileErrorIndex = this._tileErrorCache[layerId].findIndex((tileError) => {
@@ -149,24 +150,28 @@ export class TileStatusTracker extends Component<Props> {
       } as TileError);
       this._tileErrorCache[layerId] = layerErrors;
 
-      if (ajaxError && targetLayer?.getSource().isESSource()) {
-        try {
-          ajaxError.body.text().then((body) => {
-            const layerErrors = this._tileErrorCache[layerId] ? this._tileErrorCache[layerId] : [];
-            const targetTileError = layerErrors.find((tileError) => {
-              return tileError.tileZXYKey === tileZXYKey;
-            });
-            if (targetTileError) {
-              const parsedJson = JSON.parse(body) as { error?: ErrorCause };
-              if (parsedJson.error && 'type' in parsedJson.error) {
-                targetTileError.error = parsedJson.error;
-              }
-            }
+      if (!ajaxError || !targetLayer?.getSource().isESSource()) {
+        this._updateTileStatusForAllLayers();
+        return;
+      }
+
+      try {
+        ajaxError.body.text().then((body) => {
+          const layerErrors = this._tileErrorCache[layerId] ? this._tileErrorCache[layerId] : [];
+          const targetTileError = layerErrors.find((tileError) => {
+            return tileError.tileZXYKey === tileZXYKey;
           });
-        } catch (e) {
-          // ignore errors reading or parsing ajax request body
-          // Contents are used to provide better UI messaging and are not required
-        }
+          if (targetTileError) {
+            const parsedJson = JSON.parse(body) as { error?: ErrorCause };
+            if (parsedJson.error && 'type' in parsedJson.error) {
+              targetTileError.error = parsedJson.error;
+              this._updateTileStatusForAllLayers();
+            }
+          }
+        });
+      } catch (e) {
+        // ignore errors reading or parsing ajax request body
+        // Contents are used to provide better UI messaging and are not required
       }
     }
   };
