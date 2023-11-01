@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { updatePromptContexts } from './helpers';
+import { isLocalStorageConversationIdValid, updatePromptContexts } from './helpers';
 import type {
   PromptContext,
   RegisterPromptContext,
@@ -304,7 +304,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       showAssistantOverlay,
       title,
       unRegisterPromptContext,
-      localStorageLastConversationId,
+      localStorageLastConversationId: isLocalStorageConversationIdValid(
+        localStorageLastConversationId,
+        assistantBaseConversations
+      ),
       setLastConversationId: setLocalStorageLastConversationId,
     }),
     [
