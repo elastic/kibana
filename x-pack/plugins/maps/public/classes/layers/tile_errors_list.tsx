@@ -16,14 +16,14 @@ interface Props {
 
 export function TileErrorsList(props: Props) {
   const listItems = useMemo(() => {
-    return props.tileErrors.map(tileError => {
+    return props.tileErrors.map((tileError) => {
       return {
         title: i18n.translate('xpack.maps.tileErrorsList.tileTitle', {
           defaultMessage: `Tile {tileZXYKey}`,
-          values: { tileZXYKey: tileError.tileZXYKey }
+          values: { tileZXYKey: tileError.tileZXYKey },
         }),
         description: getDescription(tileError),
-      }
+      };
     });
   }, [props.tileErrors]);
   return <EuiDescriptionList listItems={listItems} />;
