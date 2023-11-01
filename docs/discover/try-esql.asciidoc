@@ -24,16 +24,8 @@ To load the sample data:
 . On the Sample web logs card, click **Add data**.
 . Open the main menu and select *Discover*.
 . From the Data views menu, select *Try ES|QL*.
-+
-[role="screenshot"]
-image:images/try-esql.png[An image of the Discover UI where users can try the new ES|QL feature]
 
 Let's say we want to find out what operating system users have and how much RAM is on their machine.  
-
-[NOTE]
-====
-{esql} keywords are not case sensitive. 
-====
 
 . Set the time range to **Last 7 days**.
 . Expand image:images/expand-icon-2.png[An image of the expand icon] the query bar.
@@ -50,6 +42,11 @@ FROM kibana_sample_data_logs
 +
 [role="screenshot"]
 image:images/esql-machine-os-ram.png[An image of the query result]
++
+[NOTE]
+====
+{esql} keywords are not case sensitive. 
+====
 
 Let's add `geo.dest` to our query, to find out the geographical destination of the visits, and limit the results. 
 
