@@ -20,7 +20,7 @@ import { FinderApp } from './finder';
 
 export const renderApp = (
   core: CoreStart,
-  { contentManagement, savedObjectsTaggingOss }: StartDeps,
+  { contentManagement, savedObjectsTaggingOss, spaces }: StartDeps,
   { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
@@ -69,6 +69,7 @@ export const renderApp = (
                   contentClient={contentManagement.client}
                   core={core}
                   savedObjectsTagging={savedObjectsTaggingOss}
+                  spaces={spaces}
                 />
               </Route>
               <Route path="/finder">

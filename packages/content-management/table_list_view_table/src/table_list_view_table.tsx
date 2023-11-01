@@ -43,6 +43,7 @@ import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
+import { SpacesList } from './components/spaces_list';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -147,6 +148,7 @@ export interface UserContentCommonSchema {
   id: string;
   updatedAt: string;
   managed?: boolean;
+  namespaces: string[];
   references: SavedObjectsReference[];
   type: string;
   attributes: {
@@ -246,6 +248,10 @@ const tableColumnMetadata = {
     field: 'attributes.title',
     name: 'Name, description, tags',
   },
+  spaces: {
+    field: 'namespaces',
+    name: 'Spaces',
+  },
   updatedAt: {
     field: 'updatedAt',
     name: 'Last updated',
@@ -322,6 +328,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     notifyError,
     DateFormatterComp,
     getTagList,
+    spacesApi,
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
@@ -527,6 +534,31 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       columns.push(customTableColumn);
     }
 
+    if (spacesApi) {
+      columns.push({
+        field: tableColumnMetadata.spaces.field,
+        name: i18n.translate('contentManagement.tableList.spacesColumnTitle', {
+          defaultMessage: 'Spaces',
+        }),
+        width: '20%',
+        render: (
+          field: string,
+          record: { id: string; attributes: { title: string }; type: string; namespaces: string[] }
+        ) => (
+          <SpacesList
+            capabilities={undefined}
+            spacesApi={spacesApi}
+            spaceIds={record.namespaces}
+            type={record.type}
+            noun={record.type}
+            id={record.id}
+            title={record.attributes.title}
+            refresh={() => fetchItems()}
+          />
+        ),
+      });
+    }
+
     if (hasUpdatedAtMetadata) {
       columns.push({
         field: tableColumnMetadata.updatedAt.field,
@@ -609,6 +641,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   }, [
     titleColumnName,
     customTableColumn,
+    spacesApi,
     hasUpdatedAtMetadata,
     editItem,
     contentEditor.enabled,
@@ -618,6 +651,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     searchQuery.text,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
+    fetchItems,
     DateFormatterComp,
     isEditable,
     inspectItem,
