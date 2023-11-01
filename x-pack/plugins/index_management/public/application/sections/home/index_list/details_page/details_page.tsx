@@ -91,7 +91,6 @@ export const DetailsPage: FunctionComponent<
   }
   return (
     <DetailsPageContent
-      indexName={indexName}
       index={index}
       tab={tab}
       fetchIndexDetails={fetchIndexDetails}
