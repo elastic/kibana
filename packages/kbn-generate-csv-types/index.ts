@@ -24,4 +24,5 @@ export interface CsvConfig {
     duration: string;
     size: number;
   };
+  maxConcurrentShardRequests: number;
 }

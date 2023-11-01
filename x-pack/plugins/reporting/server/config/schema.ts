@@ -74,6 +74,7 @@ const CsvSchema = schema.object({
     }),
     size: schema.number({ defaultValue: 500 }),
   }),
+  maxConcurrentShardRequests: schema.number({ defaultValue: 5 }),
 });
 
 const EncryptionKeySchema = schema.conditional(
