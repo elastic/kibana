@@ -15,7 +15,13 @@ import { Y_AXIS_LABEL_WIDTH } from '../swimlane_annotation_container';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { useMlKibana } from '../../contexts/kibana';
 
-export const AnomalyDetectionAlertsOverviewChart: FC = () => {
+export interface AnomalyDetectionAlertsOverviewChart {
+  seriesType?: 'bar_stacked' | 'line';
+}
+
+export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverviewChart> = ({
+  seriesType = 'line',
+}) => {
   const {
     services: {
       lens: { EmbeddableComponent },
@@ -71,13 +77,13 @@ export const AnomalyDetectionAlertsOverviewChart: FC = () => {
             yLeft: true,
             yRight: true,
           },
-          preferredSeriesType: 'line',
+          preferredSeriesType: seriesType,
           layers: [
             {
               layerId: 'cb8ce4c0-d0a7-4498-8212-20f6c32efddd',
               accessors: ['7327df72-9def-4642-a72d-dc2b0790d5f9'],
               position: 'top',
-              seriesType: 'line',
+              seriesType,
               showGridlines: false,
               layerType: 'data',
               xAccessor: '953f9efc-fbf6-44e0-a450-c645d2b5ec22',
@@ -147,7 +153,7 @@ export const AnomalyDetectionAlertsOverviewChart: FC = () => {
         adHocDataViews: {},
       },
     } as TypedLensByValueInput['attributes'];
-  }, [interval?.expression]);
+  }, [interval?.expression, seriesType]);
 
   if (!interval) return null;
 
