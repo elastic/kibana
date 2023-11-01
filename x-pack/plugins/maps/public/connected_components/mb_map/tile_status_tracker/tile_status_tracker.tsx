@@ -219,8 +219,6 @@ export class TileStatusTracker extends Component<Props> {
         }
       }
 
-      console.log(this._tileErrorCache[layer.getId()]);
-
       this.props.onTileStateChange(
         layer.getId(),
         !atLeastOnePendingTile,

@@ -124,21 +124,6 @@ export class EditLayerPanel extends Component<Props, State> {
     return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
   };
 
-  _renderLayerErrors() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.hasErrors()) {
-      return null;
-    }
-
-    return this.props.selectedLayer.getErrors().map(({ title, error }, index) => (
-      <div key={index}>
-        <EuiCallOut color="danger" iconType="error" title={title}>
-          {error}
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </div>
-    ));
-  }
-
   _renderFilterSection() {
     if (
       !this.props.selectedLayer ||
@@ -243,8 +228,6 @@ export class EditLayerPanel extends Component<Props, State> {
 
           <div className="mapLayerPanel__body">
             <div className="mapLayerPanel__bodyOverflow">
-              {this._renderLayerErrors()}
-
               <LayerSettings
                 layer={this.props.selectedLayer}
                 supportsFitToBounds={this.state.supportsFitToBounds}

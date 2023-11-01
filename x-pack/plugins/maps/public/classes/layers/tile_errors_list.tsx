@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDescriptionList } from '@elastic/eui';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import type { TileError } from '../../../common/descriptor_types';
 
 interface Props {
@@ -15,22 +15,64 @@ interface Props {
 }
 
 export function TileErrorsList(props: Props) {
-  const listItems = useMemo(() => {
-    return props.tileErrors.map((tileError) => {
-      return {
-        title: i18n.translate('xpack.maps.tileErrorsList.tileTitle', {
-          defaultMessage: `Tile {tileZXYKey}`,
-          values: { tileZXYKey: tileError.tileZXYKey },
-        }),
-        description: getDescription(tileError),
-      };
+  const [selectedTileKey, setSelectedTileKey] = useState(props.tileErrors?.[0].tileZXYKey);
+  const selectedTileContent = useMemo(() => {
+    const tileError = props.tileErrors.find(tileError => {
+      return tileError.tileZXYKey === selectedTileKey;
     });
-  }, [props.tileErrors]);
-  return <EuiDescriptionList listItems={listItems} />;
+    return tileError
+      ? <p>
+          {getDescription(tileError)}
+        </p>
+      : null;
+  }, [selectedTileKey]);
+  const tabs = useMemo(() => {
+    return props.tileErrors.map((tileError) => {
+      return (
+        <EuiTab
+          key={tileError.tileZXYKey}
+          onClick={() => setSelectedTileKey(tileError.tileZXYKey)}
+          isSelected={tileError.tileZXYKey === selectedTileKey}
+        >
+          {tileError.tileZXYKey}
+        </EuiTab>
+      );
+    });
+  }, [props.tileErrors, selectedTileKey]);
+
+  return (
+    <>
+      <EuiTabs size="s">{tabs}</EuiTabs>
+      {selectedTileContent}
+    </>
+  )
+  /*return (
+    <div>
+      {
+        props.tileErrors.map((tileError) => (
+          <div key={tileError.tileZXYKey}>
+            <EuiAccordion
+              key={tileError.tileZXYKey}
+              id={tileError.tileZXYKey}
+              arrowDisplay="none"
+              buttonContent={i18n.translate('xpack.maps.tileErrorsList.tileTitle', {
+                defaultMessage: `Tile {tileZXYKey}`,
+                values: { tileZXYKey: tileError.tileZXYKey },
+              })}
+            >
+              <p>
+                {getDescription(tileError)}
+              </p>
+            </EuiAccordion>
+            <EuiSpacer size="s" />
+          </div>
+        ))
+      }
+    </div>
+  );*/
 }
 
 function getDescription(tileError: TileError) {
-  console.log(tileError);
   if (tileError.error?.root_cause?.[0]?.reason) {
     return tileError.error.root_cause[0].reason;
   }
