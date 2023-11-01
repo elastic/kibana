@@ -10,7 +10,7 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
