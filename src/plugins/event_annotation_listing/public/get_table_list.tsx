@@ -9,6 +9,7 @@
 import React, { FC } from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { type TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -24,6 +25,7 @@ import { EventAnnotationGroupTableList } from './components/table_list';
 export interface EventAnnotationListingPageServices {
   core: CoreStart;
   savedObjectsTagging: SavedObjectsTaggingApi;
+  spaces?: SpacesPluginStart;
   eventAnnotationService: EventAnnotationServiceType;
   PresentationUtilContextProvider: FC;
   dataViews: DataView[];
@@ -45,6 +47,7 @@ export const getTableList = (
           toMountPoint,
           savedObjectsTagging: services.savedObjectsTagging,
           FormattedRelative,
+          spacesApi: services.spaces,
         }}
       >
         <EventAnnotationGroupTableList

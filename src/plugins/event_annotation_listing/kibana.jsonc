@@ -21,6 +21,7 @@
     "optionalPlugins": [
       "savedObjectsTagging",
       "lens",
+      "spaces"
     ],
     "requiredBundles": [
       "kibanaReact",

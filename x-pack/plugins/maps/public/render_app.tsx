@@ -10,6 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
+import { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -60,16 +61,20 @@ function setAppChrome() {
   });
 }
 
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+
 export async function renderApp(
   { element, history, onAppLeave, setHeaderActionMenu, theme$ }: AppMountParameters,
   {
     coreStart,
     AppUsageTracker,
     savedObjectsTagging,
+    spaces,
   }: {
     coreStart: CoreStart;
     savedObjectsTagging?: SavedObjectTaggingPluginStart;
     AppUsageTracker: React.FC;
+    spaces?: SpacesPluginStart;
   }
 ) {
   const stateTransfer = getEmbeddableService().getStateTransfer();
@@ -108,40 +113,49 @@ export async function renderApp(
   }
 
   const I18nContext = getCoreI18n().Context;
+
+  const SpacesContextWrapper = spaces
+    ? spaces.ui.components.getSpacesContextProvider
+    : getEmptyFunctionComponent;
+
   render(
     <AppUsageTracker>
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
-          <TableListViewKibanaProvider
-            {...{
-              core: coreStart,
-              toMountPoint,
-              savedObjectsTagging,
-              FormattedRelative,
-            }}
-          >
-            <Router history={history}>
-              <Routes>
-                <Route path={`/map/:savedMapId`} render={renderMapApp} />
-                <Route exact path={`/map`} render={renderMapApp} />
-                // Redirect other routes to list, or if hash-containing, their non-hash equivalents
-                <Route
-                  path={``}
-                  render={({ location: { pathname, hash } }) => {
-                    if (hash) {
-                      // Remove leading hash
-                      const newPath = hash.substr(1);
-                      return <Redirect to={newPath} />;
-                    } else if (pathname === '/' || pathname === '') {
-                      return <ListPage history={history} stateTransfer={stateTransfer} />;
-                    } else {
-                      return <Redirect to="/" />;
-                    }
-                  }}
-                />
-              </Routes>
-            </Router>
-          </TableListViewKibanaProvider>
+          <SpacesContextWrapper feature={APP_ID}>
+            <TableListViewKibanaProvider
+              {...{
+                core: coreStart,
+                toMountPoint,
+                savedObjectsTagging,
+                spacesApi: spaces,
+                FormattedRelative,
+              }}
+            >
+              <Router history={history}>
+                <Routes>
+                  <Route path={`/map/:savedMapId`} render={renderMapApp} />
+                  <Route exact path={`/map`} render={renderMapApp} />
+                  // Redirect other routes to list, or if hash-containing, their non-hash
+                  equivalents
+                  <Route
+                    path={``}
+                    render={({ location: { pathname, hash } }) => {
+                      if (hash) {
+                        // Remove leading hash
+                        const newPath = hash.substr(1);
+                        return <Redirect to={newPath} />;
+                      } else if (pathname === '/' || pathname === '') {
+                        return <ListPage history={history} stateTransfer={stateTransfer} />;
+                      } else {
+                        return <Redirect to="/" />;
+                      }
+                    }}
+                  />
+                </Routes>
+              </Router>
+            </TableListViewKibanaProvider>
+          </SpacesContextWrapper>
         </KibanaThemeProvider>
       </I18nContext>
     </AppUsageTracker>,

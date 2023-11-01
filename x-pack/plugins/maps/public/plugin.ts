@@ -198,11 +198,16 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
-        const [coreStart, { savedObjectsTagging }] = await core.getStartServices();
+        const [coreStart, { savedObjectsTagging, spaces }] = await core.getStartServices();
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const { renderApp } = await import('./render_app');
-        return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
+        return renderApp(params, {
+          coreStart,
+          AppUsageTracker: UsageTracker,
+          savedObjectsTagging,
+          spaces,
+        });
       },
     });
 

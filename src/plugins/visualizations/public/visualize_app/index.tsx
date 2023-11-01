@@ -17,10 +17,13 @@ import {
   toMountPoint,
 } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
+
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const renderApp = (
   { element, onAppLeave }: AppMountParameters,
@@ -33,24 +36,31 @@ export const renderApp = (
     addBadgeToAppChrome(services.chrome);
   }
 
+  const SpacesContextWrapper = services.spaces
+    ? services.spaces.ui.components.getSpacesContextProvider
+    : getEmptyFunctionComponent;
+
   const app = (
     <KibanaThemeProvider theme$={services.theme.theme$}>
       <Router history={services.history}>
         <KibanaContextProvider services={services}>
-          <services.presentationUtil.ContextProvider>
-            <services.i18n.Context>
-              <TableListViewKibanaProvider
-                {...{
-                  core: services.core,
-                  toMountPoint,
-                  savedObjectsTagging: services.savedObjectsTagging,
-                  FormattedRelative,
-                }}
-              >
-                <VisualizeApp onAppLeave={onAppLeave} />
-              </TableListViewKibanaProvider>
-            </services.i18n.Context>
-          </services.presentationUtil.ContextProvider>
+          <SpacesContextWrapper feature="visualize">
+            <services.presentationUtil.ContextProvider>
+              <services.i18n.Context>
+                <TableListViewKibanaProvider
+                  {...{
+                    core: services.core,
+                    toMountPoint,
+                    savedObjectsTagging: services.savedObjectsTagging,
+                    FormattedRelative,
+                    spacesApi: services.spaces,
+                  }}
+                >
+                  <VisualizeApp onAppLeave={onAppLeave} />
+                </TableListViewKibanaProvider>
+              </services.i18n.Context>
+            </services.presentationUtil.ContextProvider>
+          </SpacesContextWrapper>
         </KibanaContextProvider>
       </Router>
     </KibanaThemeProvider>

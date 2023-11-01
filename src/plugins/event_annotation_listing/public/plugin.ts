@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
@@ -31,6 +32,7 @@ export interface EventAnnotationListingStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   contentManagement: ContentManagementPublicStart;
   lens: LensPublicStart;
+  spaces?: SpacesPluginStart;
 }
 
 interface SetupDependencies {
@@ -77,6 +79,7 @@ export class EventAnnotationListingPlugin
           dataViews,
           createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
           sessionService: pluginsStart.data.search.session,
+          spaces: pluginsStart.spaces,
           queryInputServices: {
             http: coreStart.http,
             docLinks: coreStart.docLinks,

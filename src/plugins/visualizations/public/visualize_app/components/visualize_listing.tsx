@@ -65,6 +65,7 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
   return {
     id: savedObject.id as string,
     updatedAt: savedObject.updatedAt as string,
+    namespaces: savedObject.namespaces as string[],
     references: savedObject.references as Array<{ id: string; type: string; name: string }>,
     type: savedObject.savedObjectType as string,
     editUrl: savedObject.editUrl as string,

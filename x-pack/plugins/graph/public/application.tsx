@@ -77,7 +77,7 @@ export interface GraphDependencies {
 export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;
 
 export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
-  const { chrome, capabilities, core } = deps;
+  const { chrome, capabilities, core, spaces } = deps;
   const { theme$ } = core.theme;
 
   if (!capabilities.graph.save) {
@@ -122,6 +122,7 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
         {...{
           core,
           toMountPoint,
+          spacesApi: spaces,
           FormattedRelative,
         }}
       >
