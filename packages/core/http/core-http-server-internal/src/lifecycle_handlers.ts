@@ -103,11 +103,11 @@ const logBuildNumberMismatch = (ourNumber: number, theirs: string, log: Logger):
   log.info(`Client sent ${theirNumber}, but Kibana build is ${ourNumber}`);
 };
 
-export const createLoggerForNewBuilds = (
-  buildNrString: string,
+export const createLoggerForNewBuildNrMismatch = (
+  buildNr: number,
   log: Logger
 ): OnPreResponseHandler => {
-  const buildNr = parseInt(buildNrString, 10);
+  const buildNrString = String(buildNr);
   return (request, response, toolkit) => {
     const requestBuildNr = String(request.headers[KIBANA_BUILD_NR_HEADER]);
     if (response.statusCode >= 400 && requestBuildNr !== buildNrString) {

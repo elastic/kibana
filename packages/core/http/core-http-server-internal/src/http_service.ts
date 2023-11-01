@@ -102,7 +102,7 @@ export class HttpService
       },
     });
 
-    registerCoreHandlers(prebootSetup, config, this.env);
+    registerCoreHandlers(prebootSetup, config, this.env, this.log.get('lifecycle'));
 
     if (this.shouldListen(config)) {
       this.log.debug('starting preboot server');

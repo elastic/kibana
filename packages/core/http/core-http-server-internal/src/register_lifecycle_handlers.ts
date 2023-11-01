@@ -7,19 +7,22 @@
  */
 
 import type { Env } from '@kbn/config';
+import { Logger } from '@kbn/logging';
 import type { HttpConfig } from './http_config';
 import type { LifecycleRegistrar } from './http_server';
 import {
   createCustomHeadersPreResponseHandler,
   createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
+  createLoggerForNewBuildNrMismatch,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
 
 export const registerCoreHandlers = (
   registrar: LifecycleRegistrar,
   config: HttpConfig,
-  env: Env
+  env: Env,
+  log: Logger
 ) => {
   // add headers based on config
   registrar.registerOnPreResponse(createCustomHeadersPreResponseHandler(config));
@@ -29,8 +32,9 @@ export const registerCoreHandlers = (
     // add check on version
     registrar.registerOnPostAuth(createVersionCheckPostAuthHandler(env.packageInfo.version));
   } else {
-    // add logger for when we serve requests from non-matching UI versions
-    registrar.registerOnPreResponse(createVersionCheckPostAuthHandler(env.packageInfo.version));
+    registrar.registerOnPreResponse(
+      createLoggerForNewBuildNrMismatch(env.packageInfo.buildNum, log)
+    );
   }
   // add check on header if the route is internal
   registrar.registerOnPostAuth(createRestrictInternalRoutesPostAuthHandler(config)); // strictly speaking, we should have access to route.options.access from the request on postAuth
