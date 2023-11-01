@@ -45,15 +45,16 @@ export const AnomalyDetectionAlertsOverviewChart: FC = () => {
       ],
       state: {
         visualization: {
+          hideEndzones: true,
           legend: {
             isVisible: false,
           },
           valueLabels: 'hide',
           fittingFunction: 'None',
           axisTitlesVisibilitySettings: {
-            x: true,
+            x: false,
             yLeft: false,
-            yRight: true,
+            yRight: false,
           },
           tickLabelsVisibilitySettings: {
             x: true,
@@ -121,7 +122,7 @@ export const AnomalyDetectionAlertsOverviewChart: FC = () => {
                         id: 'number',
                         params: {
                           decimals: 0,
-                          compact: false,
+                          compact: true,
                         },
                       },
                     },
@@ -153,14 +154,14 @@ export const AnomalyDetectionAlertsOverviewChart: FC = () => {
   return (
     <div
       css={css`
-        padding-left: ${Y_AXIS_LABEL_WIDTH - 30}px;
-        height: 150px;
+        padding-left: ${Y_AXIS_LABEL_WIDTH - 45}px;
+        height: 120px;
         width: 100%;
       `}
     >
       <EmbeddableComponent
         id="mlExplorerAlertsPreview"
-        style={{ height: 150 }}
+        style={{ height: 120 }}
         timeRange={timeRange}
         attributes={attributes}
         renderMode={'view'}
