@@ -218,7 +218,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
             label={
               <FormattedMessage
                 id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
-                defaultMessage="Username"
+                defaultMessage="Testing an update"
               />
             }
             {...this.validator.validateUsername(this.state.username)}
@@ -227,7 +227,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
               autoComplete="off"
               id="username"
               name="username"
-              data-test-subj="loginUsername"
+              data-test-subj="loginUsernameTest"
               value={this.state.username}
               onChange={this.onUsernameChange}
               disabled={!this.isLoadingState(LoadingStateType.None)}
