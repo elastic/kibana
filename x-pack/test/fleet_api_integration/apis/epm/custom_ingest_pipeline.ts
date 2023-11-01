@@ -14,8 +14,6 @@ const TEST_INDEX = 'logs-log.log-test';
 
 const CUSTOM_PIPELINE = 'logs-log.log@custom';
 
-const CUSTOM_GLOBAL_PIPELINE = 'logs-log.log@custom';
-
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
