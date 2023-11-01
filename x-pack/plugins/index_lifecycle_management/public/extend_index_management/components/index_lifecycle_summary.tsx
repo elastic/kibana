@@ -26,6 +26,7 @@ import {
 
 import { ApplicationStart } from '@kbn/core/public';
 import { Index } from '@kbn/index-management-plugin/common';
+import { IndexDetailsTab } from '@kbn/index-management-plugin/common/constants';
 import { getPolicyEditPath } from '../../application/services/navigation';
 import { IndexLifecyclePolicy } from '../../../common/types';
 
@@ -84,7 +85,7 @@ interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
+const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
   const [showPhaseExecutionPopover, setShowPhaseExecutionPopover] = useState<boolean>(false);
   const { ilm } = index;
 
@@ -244,4 +245,19 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
       </EuiFlexGroup>
     </>
   );
+};
+
+export const indexLifecycleTab: IndexDetailsTab = {
+  id: 'ilm',
+  name: (
+    <FormattedMessage
+      defaultMessage="Index Lifecycle"
+      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.tabHeaderLabel"
+    />
+  ),
+  order: 50,
+  renderTabContent: IndexLifecycleSummary,
+  shouldRenderTab: ({ index }) => {
+    return !!index && !!index.ilm && index.ilm.managed;
+  },
 };

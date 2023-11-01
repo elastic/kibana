@@ -8,14 +8,13 @@
 import React from 'react';
 import { get, every, some } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSearchBar } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
 
 import { Index, IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 
 import { retryLifecycleForIndex } from '../application/services/api';
-import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
+import { indexLifecycleTab } from './components/index_lifecycle_summary';
 
 import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
 import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
@@ -226,18 +225,5 @@ export const addAllExtensions = (
   extensionsService.addBanner(ilmBannerExtension);
   extensionsService.addFilter(ilmFilterExtension);
 
-  extensionsService.addIndexDetailsTab({
-    id: 'ilm',
-    name: (
-      <FormattedMessage
-        defaultMessage="ILM"
-        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.tabHeaderLabel"
-      />
-    ),
-    order: 50,
-    renderTabContent: IndexLifecycleSummary,
-    shouldRenderTab: ({ index }) => {
-      return !!index && !!index.ilm && index.ilm.managed;
-    },
-  });
+  extensionsService.addIndexDetailsTab(indexLifecycleTab);
 };
