@@ -439,6 +439,13 @@ detections_admin:
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
+        - feature_securitySolutionAssistant.all
+        - feature_discover.all
+        - feature_dashboard.all
+        - feature_canvas.all
+        - feature_graph.all
+        - feature_maps.all
+        - feature_visualize.all
       resources: "*"
 
 platform_engineer:
