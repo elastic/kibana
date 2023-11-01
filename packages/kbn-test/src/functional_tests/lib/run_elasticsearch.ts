@@ -130,9 +130,6 @@ async function startEsNode({
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
 }) {
-  // eslint-disable-next-line no-console
-  console.log('++++++++++++++++ config.esServerlessOptions', JSON.stringify(config));
-
   const cluster = createTestEsCluster({
     clusterName: `cluster-${name}`,
     esArgs: config.esArgs,

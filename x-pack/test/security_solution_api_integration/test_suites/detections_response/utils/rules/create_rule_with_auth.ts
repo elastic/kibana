@@ -28,13 +28,8 @@ export const createRuleWithAuth = async (
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '2023-10-31')
     .auth(auth.user, auth.pass)
-    .send(rule);
-  // .expect(200);
-
-  // eslint-disable-next-line no-console
-  console.log('auth', auth);
-  // eslint-disable-next-line no-console
-  console.log('body', body);
+    .send(rule)
+    .expect(200);
 
   return body;
 };
