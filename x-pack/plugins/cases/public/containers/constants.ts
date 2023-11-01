@@ -47,7 +47,7 @@ export const casesQueriesKeys = {
   categories: () => [...casesQueriesKeys.all, 'categories'] as const,
   alertFeatureIds: (alertRegistrationContexts: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
-  configuration: () => [...casesQueriesKeys.all, 'configuration'] as const,
+  configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
 };
 
 export const casesMutationsKeys = {
