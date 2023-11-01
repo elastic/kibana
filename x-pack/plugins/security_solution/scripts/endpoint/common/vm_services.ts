@@ -102,10 +102,12 @@ export const createMultipassHostVmClient = (
 
   const unmount = async (hostVmDir: string) => {
     await execa.command(`multipass unmount ${name}:${hostVmDir}`);
+    log.verbose(`multipass unmount response:\n`, response);
   };
 
   const mount = async (localDir: string, hostVmDir: string) => {
-    await execa.command(`multipass mount ${localDir} ${name}:${hostVmDir}`);
+    const response = await execa.command(`multipass mount ${localDir} ${name}:${hostVmDir}`);
+    log.verbose(`multipass mount response:\n`, response);
 
     return {
       hostDir: hostVmDir,
@@ -114,11 +116,13 @@ export const createMultipassHostVmClient = (
   };
 
   const start = async () => {
-    await execa.command(`multipass start ${name}`);
+    const response = await execa.command(`multipass start ${name}`);
+    log.verbose(`multipass start response:\n`, response);
   };
 
   const stop = async () => {
-    await execa.command(`multipass stop ${name}`);
+    const response = await execa.command(`multipass stop ${name}`);
+    log.verbose(`multipass stop response:\n`, response);
   };
 
   return {
@@ -261,9 +265,10 @@ export const createVagrantHostVmClient = (
     env: {
       VAGRANT_CWD,
     },
+    stdio: ['inherit', 'pipe', 'pipe'],
   };
 
-  log.verbose(`Creating Vagrant VM client for [${name}] with vagrantfile [${vagrantFile}]`);
+  log.debug(`Creating Vagrant VM client for [${name}] with vagrantfile [${vagrantFile}]`);
 
   const exec = async (command: string): Promise<HostVmExecResponse> => {
     const execResponse = await execa.command(`vagrant ssh -- ${command}`, execaOptions);
@@ -280,7 +285,7 @@ export const createVagrantHostVmClient = (
   const destroy = async (): Promise<void> => {
     const destroyResponse = await execa.command(`vagrant destroy -f`, execaOptions);
 
-    log.verbose(`VM [${name}] was destroyed successfully`, destroyResponse);
+    log.debug(`VM [${name}] was destroyed successfully`, destroyResponse);
   };
 
   const info = () => {
@@ -301,11 +306,13 @@ export const createVagrantHostVmClient = (
   };
 
   const start = async () => {
-    await execa.command(`vagrant up`, execaOptions);
+    const response = await execa.command(`vagrant up`, execaOptions);
+    log.verbose('vagrant up response:\n', response);
   };
 
   const stop = async () => {
-    await execa.command(`vagrant suspend`, execaOptions);
+    const response = await execa.command(`vagrant suspend`, execaOptions);
+    log.verbose('vagrant suspend response:\n', response);
   };
 
   return {
