@@ -10,7 +10,7 @@ image:images/try-esql.png[An image of the Discover UI where users can access the
 
 This new piped language allows you to chain together multiple commands to query your data. Based on the query, Lens suggestions in Discover create a visualization of the query results.
 
-{esql} comes with it's own dedicated {esql} Compute Engine for greater efficiency. From one query you can search, aggregate, calculate and perform data transformations without leaving **Discover**. Write your query directly in **Discover** or use the **Dev Tools** with the {ref}/esql-rest.html[ES|QL API]. 
+{esql} comes with its own dedicated {esql} Compute Engine for greater efficiency. From one query you can search, aggregate, calculate and perform data transformations without leaving **Discover**. Write your query directly in **Discover** or use the **Dev Tools** with the {ref}/esql-rest.html[{esql} API]. 
 
 {esql} also features in-app help, so you can get started faster and don't have to leave the application to check syntax. 
 
