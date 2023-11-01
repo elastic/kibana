@@ -160,6 +160,10 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
             navigateToAllIndices={navigateToAllIndices}
           />,
         ]}
+        rightSideGroupProps={{
+          wrap: false,
+        }}
+        responsive="reverse"
         tabs={headerTabs}
       />
       <EuiSpacer size="l" />
