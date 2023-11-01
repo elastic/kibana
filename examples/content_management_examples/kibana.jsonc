@@ -13,6 +13,9 @@
       "kibanaReact",
       "savedObjectsTaggingOss"
     ],
+    "optionalPlugins": [
+      "spaces"
+    ],
     "requiredBundles": ["savedObjectsFinder"]
   }
 }
