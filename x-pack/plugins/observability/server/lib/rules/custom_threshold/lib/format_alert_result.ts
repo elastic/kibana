@@ -24,7 +24,7 @@ export type FormattedEvaluation = Omit<Evaluation, 'currentValue' | 'threshold'>
   threshold: string[];
 };
 
-const getLabel = (criterion: Evaluation) => {
+export const getLabel = (criterion: Evaluation) => {
   if (!criterion.label && criterion.metrics.length === 1) {
     switch (criterion.metrics[0].aggType) {
       case Aggregators.COUNT:
@@ -53,7 +53,6 @@ export const formatAlertResult = (evaluationResult: Evaluation): FormattedEvalua
 
   let formatter = createFormatter('highPrecision');
   const label = getLabel(evaluationResult);
-  console.log('label', label);
 
   if (metrics.length === 1 && metrics[0].field && metrics[0].field.endsWith('.pct')) {
     formatter = createFormatter('percent');

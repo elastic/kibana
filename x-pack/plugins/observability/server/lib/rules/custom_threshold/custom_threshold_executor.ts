@@ -43,7 +43,7 @@ import {
   getFormattedGroupBy,
 } from './utils';
 
-import { formatAlertResult } from './lib/format_alert_result';
+import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
@@ -214,7 +214,9 @@ export const createCustomThresholdExecutor = ({
         if (nextState === AlertStates.NO_DATA) {
           reason = alertResults
             .filter((result) => result[group]?.isNoData)
-            .map((result) => buildNoDataAlertReason({ ...result[group], group }))
+            .map((result) =>
+              buildNoDataAlertReason({ ...result[group], label: getLabel(result[group]), group })
+            )
             .join('\n');
         }
       }

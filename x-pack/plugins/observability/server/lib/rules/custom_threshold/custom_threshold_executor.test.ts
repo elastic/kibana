@@ -234,7 +234,7 @@ describe('The metric threshold alert type', () => {
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBeUndefined();
       expect(action.reason).toBe(
-        'test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedIndexPattern)'
+        'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedIndexPattern)'
       );
     });
   });
@@ -1051,7 +1051,7 @@ describe('The metric threshold alert type', () => {
       const { action } = mostRecentAction(instanceID);
       const reasons = action.reason;
       expect(reasons).toBe(
-        'test.metric.1 is 1, above the threshold of 1; test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedIndexPattern)'
+        'Average test.metric.1 is 1, above the threshold of 1; Average test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedIndexPattern)'
       );
     });
   });
@@ -1374,7 +1374,9 @@ describe('The metric threshold alert type', () => {
       ]);
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
-      expect(recentAction.action.reason).toEqual('test.metric.3 reported no data in the last 1m');
+      expect(recentAction.action.reason).toEqual(
+        'Average test.metric.3 reported no data in the last 1m'
+      );
       expect(recentAction).toBeNoDataAction();
     });
     test('does not send a No Data alert when not configured to do so', async () => {
@@ -1463,7 +1465,7 @@ describe('The metric threshold alert type', () => {
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
         alertDetailsUrl: '',
-        reason: 'test.metric.3 reported no data in the last 1m',
+        reason: 'Average test.metric.3 reported no data in the last 1m',
         timestamp: STARTED_AT_MOCK_DATE.toISOString(),
         value: ['[NO DATA]', null],
         tags: [],

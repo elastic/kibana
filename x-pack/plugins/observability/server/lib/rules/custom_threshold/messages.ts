@@ -151,14 +151,13 @@ export const buildRecoveredAlertReason: (alertResult: {
 export const buildNoDataAlertReason: (alertResult: Evaluation & { group: string }) => string = ({
   group,
   label = CUSTOM_EQUATION_I18N,
-  metrics,
   timeSize,
   timeUnit,
 }) =>
   i18n.translate('xpack.observability.customThreshold.rule.threshold.noDataAlertReason', {
     defaultMessage: '{label} reported no data in the last {interval}{group}',
     values: {
-      label: metrics.length === 1 && metrics[0].field ? metrics[0].field : label,
+      label,
       interval: `${timeSize}${timeUnit}`,
       group: formatGroup(group),
     },
