@@ -446,9 +446,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .send([{ ...getSimpleRule(), investigation_fields: ['foo'] }])
             .expect(400);
 
-          expect(body.message).to.eql(
-            '[request body]: Invalid value "["foo"]" supplied to "investigation_fields"'
-          );
+          expect(body.message).to.eql('[request body]: 0: Invalid input');
         });
       });
     });

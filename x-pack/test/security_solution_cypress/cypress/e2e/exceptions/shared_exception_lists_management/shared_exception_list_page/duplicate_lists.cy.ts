@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../tasks/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getExceptionList } from '../../../../objects/exception';
 import { assertNumberOfExceptionItemsExists } from '../../../../tasks/exceptions';
@@ -45,9 +46,9 @@ const getExceptionList2 = () => ({
 // Flaky in serverless tests
 describe('Duplicate List', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   beforeEach(() => {
-    cy.task('esArchiverResetKibana');
     login();
-
+    deleteAlertsAndRules();
+    deleteExceptionLists();
     createRule(getNewRule({ name: 'Another rule' }));
 
     // Create exception list associated with a rule
