@@ -22,10 +22,7 @@ import {
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
-import {
-  getCustomPipelineNameForDatastream,
-  getPipelineNameForDatastream,
-} from '../../../../../common/services';
+import { getPipelineNameForDatastream } from '../../../../../common/services';
 
 import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';
