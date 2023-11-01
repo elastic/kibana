@@ -779,9 +779,9 @@ export function trainedModelsRoutes(
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /internal/ml/trained_models/install_elastic_trained_model/:modelId Installs ELSER model
+   * @api {post} /internal/ml/trained_models/install_elastic_trained_model/:modelId Installs Elastic trained model
    * @apiName InstallElasticTrainedModel
-   * @apiDescription Downloads and installs ELSER model.
+   * @apiDescription Downloads and installs Elastic trained model.
    */
   router.versioned
     .post({
