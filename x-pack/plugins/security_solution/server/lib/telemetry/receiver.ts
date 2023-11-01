@@ -43,6 +43,7 @@ import type {
   PackageService,
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import moment from 'moment';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
   exceptionListItemToTelemetryEntry,
