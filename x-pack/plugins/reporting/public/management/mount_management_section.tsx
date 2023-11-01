@@ -29,7 +29,7 @@ export async function mountManagementSection(
   urlService: SharePluginSetup['url'],
   params: ManagementAppMountParams
 ) {
-  const ilmCtxProviderOrNoIlm = config.statefulSettings.enabled ? (
+  const CtxProvider = config.statefulSettings.enabled ? (
     <IlmPolicyStatusContextProvider>
       <ReportListing
         toasts={coreSetup.notifications.toasts}
@@ -63,9 +63,7 @@ export async function mountManagementSection(
             docLinks: coreStart.docLinks,
           }}
         >
-          <InternalApiClientProvider apiClient={apiClient}>
-            {ilmCtxProviderOrNoIlm}
-          </InternalApiClientProvider>
+          <InternalApiClientProvider apiClient={apiClient}>{CtxProvider}</InternalApiClientProvider>
         </KibanaContextProvider>
       </I18nProvider>
     </KibanaThemeProvider>,

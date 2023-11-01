@@ -9,6 +9,7 @@ import { ApplicationStart, ToastsSetup } from '@kbn/core/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { DoNotUseIlmPolicyStatusReturn } from '../lib/stateless_status_context';
 import { ClientConfigType } from '../plugin';
 import type { SharePluginSetup } from '../shared_imports';
 
@@ -21,7 +22,8 @@ export interface ListingProps {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   toasts: ToastsSetup;
   urlService: SharePluginSetup['url'];
-  ilmPolicyContextValue: UseIlmPolicyStatusReturn;
+  ilmPolicyContextValue?: UseIlmPolicyStatusReturn;
+  policyContextValue?: DoNotUseIlmPolicyStatusReturn;
 }
 
 export { ReportListing } from './report_listing';

@@ -26,6 +26,7 @@ import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus } from '../lib/ilm_policy_status_context';
+import { DoNotUseIlmPolicyStatus } from '../lib/stateless_status_context';
 import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
 import { useInternalApiClient } from '../lib/reporting_api_client';
@@ -90,49 +91,86 @@ class ReportListingUi extends Component<Props, State> {
       capabilities,
       config,
     } = this.props;
-    const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
-    const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
-    const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
-    return (
-      <>
-        <EuiPageHeader
-          data-test-subj="reportingPageHeader"
-          bottomBorder
-          pageTitle={
-            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.reporting.listing.reports.subtitle"
-              defaultMessage="Get reports generated in Kibana applications."
-            />
-          }
-        />
+    if (config.statefulSettings.enabled) {
+      const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
+      // @ts-ignore
+      const hasIlmPolicy = ilmPolicyContextValue!.status !== 'policy-not-found';
+      const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
+      return (
+        <>
+          <EuiPageHeader
+            data-test-subj="reportingPageHeader"
+            bottomBorder
+            pageTitle={
+              <FormattedMessage
+                id="xpack.reporting.listing.reportstitle"
+                defaultMessage="Reports"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.reporting.listing.reports.subtitle"
+                defaultMessage="Get reports generated in Kibana applications."
+              />
+            }
+          />
 
-        {config.statefulSettings.enabled ? <MigrateIlmPolicyCallOut toasts={toasts} /> : null}
+          <MigrateIlmPolicyCallOut toasts={toasts} />
 
-        <EuiSpacer size={'l'} />
-        <div>{this.renderTable()}</div>
+          <EuiSpacer size={'l'} />
+          <div>{this.renderTable()}</div>
 
-        <EuiSpacer size="s" />
-        <EuiFlexGroup justifyContent="flexEnd">
-          {capabilities?.management?.data?.index_lifecycle_management && (
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="flexEnd">
+            {capabilities?.management?.data?.index_lifecycle_management && (
+              <EuiFlexItem grow={false}>
+                {ilmPolicyContextValue?.isLoading ? (
+                  <EuiLoadingSpinner />
+                ) : (
+                  showIlmPolicyLink && (
+                    <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
+                  )
+                )}
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
-              {ilmPolicyContextValue.isLoading ? (
-                <EuiLoadingSpinner />
-              ) : (
-                showIlmPolicyLink && (
-                  <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
-                )
-              )}
+              <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
+          </EuiFlexGroup>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <EuiPageHeader
+            data-test-subj="reportingPageHeader"
+            bottomBorder
+            pageTitle={
+              <FormattedMessage
+                id="xpack.reporting.listing.reportstitle"
+                defaultMessage="Reports"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.reporting.listing.reports.subtitle"
+                defaultMessage="Get reports generated in Kibana applications."
+              />
+            }
+          />
+
+          <EuiSpacer size={'l'} />
+          <div>{this.renderTable()}</div>
+
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      );
+    }
   }
 
   public componentWillUnmount() {
@@ -512,19 +550,25 @@ export const ReportListing = (
     'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities' | 'configAllowsImages'
   >
 ) => {
-  const ilmPolicyStatusValue = useIlmPolicyStatus();
   const { apiClient } = useInternalApiClient();
   const {
     services: {
       application: { capabilities },
     },
   } = useKibana();
-  return (
+  return props.config.statefulSettings.enabled ? (
     <ReportListingUi
       {...props}
       apiClient={apiClient}
       capabilities={capabilities}
-      ilmPolicyContextValue={ilmPolicyStatusValue}
+      ilmPolicyContextValue={useIlmPolicyStatus()}
+    />
+  ) : (
+    <ReportListingUi
+      {...props}
+      apiClient={apiClient}
+      capabilities={capabilities}
+      policyContextValue={DoNotUseIlmPolicyStatus()}
     />
   );
 };

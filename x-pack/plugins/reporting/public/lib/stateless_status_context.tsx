@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React, { createContext } from 'react';
+import React, { createContext, useContext, FunctionComponent } from 'react';
+import { DoNotCheckIlmPolicyStatus } from './reporting_api_client';
 
-import { DoNotUseIlmPolicyStatus } from './reporting_api_client';
-
-type DoNotCheckIlmPolicy = ReturnType<typeof DoNotUseIlmPolicyStatus>;
+type DoNotCheckIlmPolicy = ReturnType<typeof DoNotCheckIlmPolicyStatus>;
 
 interface ContextValue {
-  isLoading: DoNotCheckIlmPolicy['isLoading'];
   recheckStatus: DoNotCheckIlmPolicy['resendRequest'];
 }
 
 const PolicyStatusContext = createContext<undefined | ContextValue>(undefined);
 
-export const PolicyStatusContextProvider: FunctionComponent<{}> = ({ children }) => {
-  const { isLoading, resendRequest: recheckStatus } = DoNotUseIlmPolicyStatus();
+export const PolicyStatusContextProvider: FunctionComponent = ({ children }) => {
+  const { resendRequest: recheckStatus } = DoNotCheckIlmPolicyStatus();
 
   return (
-    <PolicyStatusContext.Provider value={{ isLoading, recheckStatus }}>
+    <PolicyStatusContext.Provider value={{ recheckStatus }}>
       {children}
     </PolicyStatusContext.Provider>
   );
+};
+
+export type DoNotUseIlmPolicyStatusReturn = ReturnType<typeof DoNotUseIlmPolicyStatus>;
+
+export const DoNotUseIlmPolicyStatus = (): ContextValue => {
+  const ctx = useContext(PolicyStatusContext);
+  if (!ctx) {
+    throw new Error('"PolicyStatus" can only be used inside of "PolicyStatusContext"');
+  }
+  return ctx;
 };
