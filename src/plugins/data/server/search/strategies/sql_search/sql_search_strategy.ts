@@ -83,9 +83,9 @@ export const sqlSearchStrategyProvider = (
       }
 
       return toAsyncKibanaSearchResponse(
-        body, 
-        startTime, 
-        headers?.warning, 
+        body,
+        startTime,
+        headers?.warning,
         // do not return requestParams on polling calls
         id ? undefined : meta?.request?.params
       );
