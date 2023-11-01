@@ -67,9 +67,10 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       }
     });
 
-    it('should release host from response console', () => {
+    it('should release an isolated host from response console', () => {
       const command = 'release';
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      // isolate the host first
       isolateHostFromEndpointList();
       checkEndpointListForOnlyIsolatedHosts();
       openResponseConsoleFromEndpointList();
@@ -80,7 +81,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       checkEndpointListForOnlyUnIsolatedHosts();
     });
 
-    it('should isolate host from response console', () => {
+    it('should isolate a host from response console', () => {
       const command = 'isolate';
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyUnIsolatedHosts();
