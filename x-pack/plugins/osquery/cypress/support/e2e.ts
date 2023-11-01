@@ -23,6 +23,7 @@
 // ***********************************************************
 
 // force ESM in this module
+
 export {};
 
 // @ts-expect-error ts(2306)  module has some interesting ways of importing, see https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
@@ -31,6 +32,11 @@ import registerCypressGrep from '@cypress/grep';
 registerCypressGrep();
 
 import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
+<<<<<<< HEAD
+=======
+import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
+
+>>>>>>> a15a9484e67 ([EDR Workflows] Verify flaky osquery tests (#169749))
 import type { ServerlessRoleName } from './roles';
 
 import 'cypress-react-selector';
