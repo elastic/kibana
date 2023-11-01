@@ -104,17 +104,19 @@ export const create = async (
     });
 
     await userActionService.creator.createUserAction({
-      type: UserActionTypes.create_case,
-      caseId: newCase.id,
-      user,
-      payload: {
-        ...query,
-        severity: query.severity ?? CaseSeverity.LOW,
-        assignees: query.assignees ?? [],
-        category: query.category ?? null,
-        customFields: query.customFields ?? [],
+      userAction: {
+        type: UserActionTypes.create_case,
+        caseId: newCase.id,
+        user,
+        payload: {
+          ...query,
+          severity: query.severity ?? CaseSeverity.LOW,
+          assignees: query.assignees ?? [],
+          category: query.category ?? null,
+          customFields: query.customFields ?? [],
+        },
+        owner: newCase.attributes.owner,
       },
-      owner: newCase.attributes.owner,
     });
 
     if (query.assignees && query.assignees.length !== 0) {
