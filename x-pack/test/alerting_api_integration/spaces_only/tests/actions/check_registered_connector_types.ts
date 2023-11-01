@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -44,6 +45,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.servicenow-itom',
           '.jira',
           '.resilient',
+          SENTINELONE_CONNECTOR_ID,
           '.teams',
           '.tines',
           '.torq',
