@@ -41,15 +41,23 @@ export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverv
     return {
       title: '',
       visualizationType: 'lnsXY',
+      references: [],
       type: 'lens',
-      references: [
-        {
-          type: 'index-pattern',
-          id: 'a552783c-3088-4835-bd82-5dd7def30c72',
-          name: 'indexpattern-datasource-layer-cb8ce4c0-d0a7-4498-8212-20f6c32efddd',
-        },
-      ],
       state: {
+        internalReferences: [
+          {
+            type: 'index-pattern',
+            id: 'ml-alerts-data-view',
+            name: 'indexpattern-datasource-layer-layer1',
+          },
+        ],
+        adHocDataViews: {
+          'ml-alerts-data-view': {
+            id: 'ml-alerts-data-view',
+            title: '.alerts-ml.anomaly-detection.alerts-default',
+            timeFieldName: '@timestamp',
+          },
+        },
         visualization: {
           hideEndzones: true,
           legend: {
@@ -80,7 +88,7 @@ export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverv
           preferredSeriesType: seriesType,
           layers: [
             {
-              layerId: 'cb8ce4c0-d0a7-4498-8212-20f6c32efddd',
+              layerId: 'layer1',
               accessors: ['7327df72-9def-4642-a72d-dc2b0790d5f9'],
               position: 'top',
               seriesType,
@@ -98,7 +106,7 @@ export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverv
         datasourceStates: {
           formBased: {
             layers: {
-              'cb8ce4c0-d0a7-4498-8212-20f6c32efddd': {
+              layer1: {
                 columns: {
                   '953f9efc-fbf6-44e0-a450-c645d2b5ec22': {
                     label: '@timestamp',
@@ -150,7 +158,6 @@ export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverv
             layers: {},
           },
         },
-        adHocDataViews: {},
       },
     } as TypedLensByValueInput['attributes'];
   }, [interval?.expression, seriesType]);
