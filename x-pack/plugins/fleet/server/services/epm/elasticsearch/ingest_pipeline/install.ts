@@ -207,10 +207,7 @@ export async function installAllPipelines({
   }
 
   const installationPromises = pipelinesToInstall.map(async (pipeline) => {
-    return installPipeline({ esClient, pipeline, installablePackage, logger }).catch((err) => {
-      console.log('TESTSTST', JSON.stringify(pipeline, null, 2));
-      return Promise.reject(err);
-    });
+    return installPipeline({ esClient, pipeline, installablePackage, logger });
   });
 
   return Promise.all(installationPromises);

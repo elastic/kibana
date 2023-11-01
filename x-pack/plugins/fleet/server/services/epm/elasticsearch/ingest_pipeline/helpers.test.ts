@@ -188,7 +188,7 @@ processors:
     });
 
     expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
-      `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}]}"`
+      `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"pipeline\\":{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}}]}"`
     );
   });
 
@@ -228,14 +228,15 @@ processors:
           - set:
               field: test
               value: toto
-          - name: global@custom
-            ignore_missing_pipeline: true
-          - name: logs@custom
-            ignore_missing_pipeline: true
-          - name: logs-test@custom
-            ignore_missing_pipeline: true
-          - name: logs-test.access@custom
-            ignore_missing_pipeline: true
+          - pipeline:
+              name: global@custom
+              ignore_missing_pipeline: true
+          - pipeline:
+              name: logs@custom
+              ignore_missing_pipeline: true
+          - pipeline:
+              name: logs-test.access@custom
+              ignore_missing_pipeline: true
           - reroute:
               tag: test.access
               dataset: test.reroute
@@ -279,7 +280,7 @@ processors:
       });
 
       expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
-        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true},{\\"name\\":\\"logs-test.access@custom\\",\\"ignore_missing_pipeline\\":true},{\\"reroute\\":{\\"tag\\":\\"test.access\\",\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
+        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"pipeline\\":{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"pipeline\\":{\\"name\\":\\"logs-test.access@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"reroute\\":{\\"tag\\":\\"test.access\\",\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
       );
     });
   });
