@@ -250,46 +250,52 @@ export class Plugin implements InfraClientPluginClass {
     }: {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
-    }): AppDeepLink[] => [
-      {
-        id: 'inventory',
-        title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-          defaultMessage: 'Inventory',
-        }),
-        path: '/inventory',
-        navLinkStatus: AppNavLinkStatus.visible,
-      },
-      ...(hostsEnabled
-        ? [
-            {
-              id: 'hosts',
-              title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-                defaultMessage: 'Hosts',
-              }),
-              path: '/hosts',
-              navLinkStatus: AppNavLinkStatus.visible,
-            },
-          ]
-        : []),
-      ...(metricsExplorerEnabled
-        ? [
-            {
-              id: 'metrics-explorer',
-              title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                defaultMessage: 'Metrics Explorer',
-              }),
-              path: '/explorer',
-            },
-          ]
-        : []),
-      {
-        id: 'settings',
-        title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-          defaultMessage: 'Settings',
-        }),
-        path: '/settings',
-      },
-    ];
+    }): AppDeepLink[] => {
+      const serverlessNavLinkStatus = this.isServerlessEnv
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden;
+
+      return [
+        {
+          id: 'inventory',
+          title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+            defaultMessage: 'Inventory',
+          }),
+          path: '/inventory',
+          navLinkStatus: serverlessNavLinkStatus,
+        },
+        ...(hostsEnabled
+          ? [
+              {
+                id: 'hosts',
+                title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+                  defaultMessage: 'Hosts',
+                }),
+                path: '/hosts',
+                navLinkStatus: serverlessNavLinkStatus,
+              },
+            ]
+          : []),
+        ...(metricsExplorerEnabled
+          ? [
+              {
+                id: 'metrics-explorer',
+                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                  defaultMessage: 'Metrics Explorer',
+                }),
+                path: '/explorer',
+              },
+            ]
+          : []),
+        {
+          id: 'settings',
+          title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+            defaultMessage: 'Settings',
+          }),
+          path: '/settings',
+        },
+      ];
+    };
 
     core.application.register({
       id: 'metrics',

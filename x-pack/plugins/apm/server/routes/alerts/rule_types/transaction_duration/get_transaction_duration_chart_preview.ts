@@ -11,10 +11,8 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import {
-  AggregationType,
-  ApmRuleType,
-} from '../../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,

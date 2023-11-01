@@ -34,7 +34,6 @@ const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kib
 
 describe('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
 
