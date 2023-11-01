@@ -13,12 +13,13 @@ import { EuiButton } from '@elastic/eui';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
 
 import { isEmpty } from 'lodash';
+import { useGetCurrentUser } from '../../../detections/containers/detection_engine/user_profiles/use_get_current_user';
 import * as i18n from './translations';
 import type { AssigneesIdsSelection, AssigneesProfilesSelection } from './types';
 import { NO_ASSIGNEES_VALUE } from './constants';
 import { useSuggestUsers } from '../../../detections/containers/detection_engine/user_profiles/use_suggest_users';
 import { useGetUserProfiles } from '../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
-import { removeNoAssigneesSelection } from './utils';
+import { bringCurrentUserToFrontAndSort, removeNoAssigneesSelection } from './utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
 
 export interface AssigneesApplyPanelProps {
@@ -59,6 +60,7 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
     onSelectionChange,
     onAssigneesApply,
   }) => {
+    const { userProfile: currentUserProfile } = useGetCurrentUser();
     const existingIds = useMemo(
       () => removeNoAssigneesSelection(assignedUserIds),
       [assignedUserIds]
@@ -70,11 +72,14 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
     const { loading: isLoadingSuggestedUsers, userProfiles } = useSuggestUsers(searchTerm);
 
     const searchResultProfiles = useMemo(() => {
+      const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
+
       if (showUnassignedOption && isEmpty(searchTerm)) {
-        return [NO_ASSIGNEES_VALUE, ...userProfiles];
+        return [NO_ASSIGNEES_VALUE, ...sortedUsers];
       }
-      return userProfiles;
-    }, [searchTerm, showUnassignedOption, userProfiles]);
+
+      return sortedUsers;
+    }, [currentUserProfile, searchTerm, showUnassignedOption, userProfiles]);
 
     const [selectedAssignees, setSelectedAssignees] = useState<AssigneesProfilesSelection[]>([]);
     useEffect(() => {
