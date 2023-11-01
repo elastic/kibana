@@ -102,6 +102,8 @@ post:
         schema:
           $ref: '../components/schemas/create_rule_request.yaml'
         examples:
+          createEsQueryEsqlRuleIdRequest:
+            $ref: '../components/examples/create_es_query_esql_rule_request.yaml'
           createEsQueryRuleIdRequest:
             $ref: '../components/examples/create_es_query_rule_request.yaml'
           createEsQueryKqlRuleIdRequest:
@@ -116,6 +118,8 @@ post:
           schema:
             $ref: '../components/schemas/rule_response_properties.yaml' 
           examples:
+            createEsQueryEsqlRuleIdResponse:
+              $ref: '../components/examples/create_es_query_esql_rule_response.yaml'
             createEsQueryRuleIdResponse:
               $ref: '../components/examples/create_es_query_rule_response.yaml'
             createEsQueryKqlRuleIdResponse:

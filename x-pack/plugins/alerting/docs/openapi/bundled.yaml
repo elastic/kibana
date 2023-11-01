@@ -36,6 +36,8 @@ paths:
             schema:
               $ref: '#/components/schemas/create_rule_request'
             examples:
+              createEsQueryEsqlRuleRequest:
+                $ref: '#/components/examples/create_es_query_esql_rule_request'
               createEsQueryRuleRequest:
                 $ref: '#/components/examples/create_es_query_rule_request'
               createEsQueryKqlRuleRequest:
@@ -50,6 +52,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
+                createEsQueryEsqlRuleResponse:
+                  $ref: '#/components/examples/create_es_query_esql_rule_response'
                 createEsQueryRuleResponse:
                   $ref: '#/components/examples/create_es_query_rule_response'
                 createEsQueryKqlRuleResponse:
@@ -160,6 +164,8 @@ paths:
             schema:
               $ref: '#/components/schemas/create_rule_request'
             examples:
+              createEsQueryEsqlRuleIdRequest:
+                $ref: '#/components/examples/create_es_query_esql_rule_request'
               createEsQueryRuleIdRequest:
                 $ref: '#/components/examples/create_es_query_rule_request'
               createEsQueryKqlRuleIdRequest:
@@ -174,6 +180,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
+                createEsQueryEsqlRuleIdResponse:
+                  $ref: '#/components/examples/create_es_query_esql_rule_response'
                 createEsQueryRuleIdResponse:
                   $ref: '#/components/examples/create_es_query_rule_response'
                 createEsQueryKqlRuleIdResponse:
@@ -2224,32 +2232,10 @@ components:
         - all
         - top
       default: all
-    size:
-      description: |
-        The number of documents to pass to the configured actions when the threshold condition is met.
-      type: integer
     termsize:
       description: |
         This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
       type: integer
-    threshold:
-      description: |
-        The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
-      type: array
-      items:
-        type: integer
-        example: 4000
-    thresholdcomparator:
-      description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
-      type: string
-      enum:
-        - '>'
-        - '>='
-        - <
-        - <=
-        - between
-        - notBetween
-      example: '>'
     timefield:
       description: The field that is used to calculate the time window.
       type: string
@@ -2268,20 +2254,43 @@ components:
         - h
         - d
       example: m
+    size:
+      description: |
+        The number of documents to pass to the configured actions when the threshold condition is met.
+      type: integer
     termfield:
       description: |
         This property is required when `groupBy` is `top`. The name of the field that is used for grouping the aggregation.
       type: string
+    threshold:
+      description: |
+        The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
+      type: array
+      items:
+        type: integer
+        example: 4000
+    thresholdcomparator:
+      description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
+      type: string
+      enum:
+        - '>'
+        - '>='
+        - <
+        - <=
+        - between
+        - notBetween
+      example: '>'
     params_es_query_rule:
       oneOf:
         - type: object
-          description: The parameters for an Elasticsearch query rule that uses ES|QL to define the query.
+          description: |
+            The parameters for an Elasticsearch query rule that uses ES|QL to define the query.
           required:
             - esqlQuery
             - searchType
+            - size
             - threshold
             - thresholdComparator
-            - timeField
             - timeWindowSize
             - timeWindowUnit
           properties:
@@ -2308,13 +2317,18 @@ components:
                 - esqlQuery
               example: esqlQuery
             size:
-              $ref: '#/components/schemas/size'
+              type: integer
+              description: TBD
             termSize:
               $ref: '#/components/schemas/termsize'
             threshold:
-              $ref: '#/components/schemas/threshold'
+              type: array
+              description: TBD
+              items:
+                type: integer
             thresholdComparator:
-              $ref: '#/components/schemas/thresholdcomparator'
+              type: string
+              description: TBD
             timeField:
               $ref: '#/components/schemas/timefield'
             timeWindowSize:
@@ -4687,6 +4701,36 @@ components:
           nullable: true
           example: elastic
   examples:
+    create_es_query_esql_rule_request:
+      summary: Create an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL).
+      value:
+        name: my Elasticsearch query ESQL rule
+        params:
+          searchType: esqlQuery
+          esqlQuery:
+            esql: FROM kibana_sample_data_logs | KEEP bytes, clientip, host, geo.dest | where geo.dest != "GB" | STATS sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | SORT sumbytes desc | LIMIT 10
+          timeField: '@timestamp'
+          timeWindowSize: 1
+          timeWindowUnit: d
+          size: 0
+          thresholdComparator: '>'
+          threshold:
+            - 0
+        consumer: stackAlerts
+        rule_type_id: .es-query
+        schedule:
+          interval: 1d
+        actions:
+          - group: query matched
+            id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
+            params:
+              level: info
+              message: |-
+                Elasticsearch query rule '{{rule.name}}' is active:
+                - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
+            frequency:
+              summary: false
+              notify_when: onActiveAlert
     create_es_query_rule_request:
       summary: Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.
       value:
@@ -4786,6 +4830,61 @@ components:
           interval: 1m
         tags:
           - cpu
+    create_es_query_esql_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        id: e0d62360-78e8-11ee-9177-f7d404c8c945
+        enabled: true
+        name: my Elasticsearch query ESQL rule
+        tags: []
+        rule_type_id: .es-query
+        consumer: stackAlerts
+        schedule:
+          interval: 1d
+        actions:
+          - group: query matched
+            id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
+            params:
+              level: info
+              message: |-
+                Elasticsearch query rule '{{rule.name}}' is active:
+                - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
+            connector_type_id: .server-log
+            frequency:
+              summary: false
+              notify_when: onActiveAlert
+              throttle: null
+            uuid: bfe370a3-531b-4855-bbe6-ad739f578844
+        params:
+          searchType: esqlQuery
+          esqlQuery:
+            esql: FROM kibana_sample_data_logs | keep bytes, clientip, host, geo.dest | WHERE geo.dest != "GB" | stats sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | sort sumbytes desc | limit 10
+          timeField: '@timestamp'
+          timeWindowSize: 1
+          timeWindowUnit: d
+          size: 0
+          thresholdComparator: '>'
+          threshold:
+            - 0
+          excludeHitsFromPreviousRun": true,
+          aggType: count
+          groupBy: all
+        scheduled_task_id: e0d62360-78e8-11ee-9177-f7d404c8c945
+        created_by: elastic
+        updated_by: elastic",
+        created_at: '2023-11-01T19:00:10.453Z'
+        updated_at: '2023-11-01T19:00:10.453Z'
+        api_key_owner: elastic
+        api_key_created_by_user: false
+        throttle: null
+        mute_all: false
+        notify_when: null
+        muted_alert_ids: []
+        execution_status:
+          status: pending
+          last_execution_date: '2023-11-01T19:00:10.453Z'
+        revision: 0
+        running: false
     create_es_query_rule_response:
       summary: The create rule API returns a JSON object that contains details about the rule.
       value:

@@ -1,12 +1,13 @@
 oneOf:
   - type: object
-    description: The parameters for an Elasticsearch query rule that uses ES|QL to define the query. 
+    description: >
+      The parameters for an Elasticsearch query rule that uses ES|QL to define the query.
     required:
       - esqlQuery
       - searchType
+      - size
       - threshold
       - thresholdComparator
-      - timeField
       - timeWindowSize
       - timeWindowUnit
     properties:
@@ -33,13 +34,18 @@ oneOf:
           - esqlQuery
         example: esqlQuery
       size:
-        $ref: 'size.yaml'
+        type: integer
+        description: TBD
       termSize:
         $ref: 'termsize.yaml'
       threshold:
-        $ref: 'threshold.yaml'
+        type: array
+        description: TBD
+        items:
+          type: integer
       thresholdComparator:
-        $ref: 'thresholdcomparator.yaml'
+        type: string
+        description: TBD
       timeField:
         $ref: 'timefield.yaml'
       timeWindowSize:
