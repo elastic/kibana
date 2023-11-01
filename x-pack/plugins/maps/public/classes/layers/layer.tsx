@@ -39,6 +39,7 @@ import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
+import { TileErrorsList } from './tile_errors_list';
 
 export interface LayerError {
   title: string;
@@ -420,7 +421,7 @@ export class AbstractLayer implements ILayer {
         title: i18n.translate('xpack.maps.layer.tileErrorTitle', {
           defaultMessage: `An error occurred when loading layer tiles`,
         }),
-        error: <div>test</div>,
+        error: <TileErrorsList tileErrors={this._descriptor.__tileErrors} />,
       });
     }
 
