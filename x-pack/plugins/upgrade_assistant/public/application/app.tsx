@@ -163,7 +163,12 @@ export const RootComponent = (dependencies: AppDependencies) => {
   executionContext.set({ type: 'application', page: 'upgradeAssistant' });
 
   return (
-    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+      className={APP_WRAPPER_CLASS}
+    >
       <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}/privileges`}>
         <i18n.Context>
           <KibanaThemeProvider theme$={dependencies.theme$}>

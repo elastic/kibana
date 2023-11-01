@@ -29,7 +29,6 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
   return (
     <>
       {features.length > 1 ? <EuiHorizontalRule margin="xl" aria-hidden="true" /> : null}
-
       {features.length > 0 ? (
         <section
           className="kbnOverviewDataManage"
@@ -50,7 +49,11 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
           <EuiFlexGroup className="kbnOverviewDataManage__content" wrap>
             {features.map((feature) => (
               <EuiFlexItem className="kbnOverviewDataManage__item" key={feature.id}>
-                <RedirectAppLinks application={application}>
+                <RedirectAppLinks
+                  coreStart={{
+                    application,
+                  }}
+                >
                   <Synopsis
                     id={feature.id}
                     description={feature.description}

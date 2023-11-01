@@ -134,7 +134,9 @@ export const ViewApiRequestFlyout = (props: ViewApiRequestFlyoutProps) => {
   if (props.application) {
     return (
       <RedirectAppLinks
-        application={props.application}
+        coreStart={{
+          application: props.application,
+        }}
         className={APP_WRAPPER_CLASS}
         data-test-subj="apiRequestFlyoutRedirectWrapper"
       >

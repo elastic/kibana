@@ -81,7 +81,11 @@ export const IntegrationsAppContext: React.FC<{
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
-      <RedirectAppLinks application={startServices.application}>
+      <RedirectAppLinks
+        coreStart={{
+          application: startServices.application,
+        }}
+      >
         <startServices.i18n.Context>
           <KibanaContextProvider services={{ ...startServices }}>
             <EuiErrorBoundary>

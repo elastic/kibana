@@ -92,7 +92,9 @@ export const renderApp = ({
                   <EuiThemeProvider darkMode={isDarkMode}>
                     <i18nCore.Context>
                       <RedirectAppLinks
-                        application={core.application}
+                        coreStart={{
+                          application: core.application,
+                        }}
                         className={APP_WRAPPER_CLASS}
                         data-test-subj="exploratoryViewMainContainer"
                       >

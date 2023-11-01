@@ -108,7 +108,9 @@ const Application = (props: SyntheticsAppProps) => {
                               <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
                                 <RedirectAppLinks
                                   className={APP_WRAPPER_CLASS}
-                                  application={core.application}
+                                  coreStart={{
+                                    application: core.application,
+                                  }}
                                 >
                                   <InspectorContextProvider>
                                     <PageRouter />

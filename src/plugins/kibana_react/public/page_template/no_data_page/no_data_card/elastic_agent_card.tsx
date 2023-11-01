@@ -91,7 +91,11 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     );
 
   return (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <EuiCard
         paddingSize="l"
         image={image}

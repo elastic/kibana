@@ -151,7 +151,9 @@ export function ObservabilityOnboardingAppRoot({
   return (
     <RedirectAppLinks
       className={APP_WRAPPER_CLASS}
-      application={core.application}
+      coreStart={{
+        application: core.application,
+      }}
     >
       <KibanaContextProvider
         services={{

@@ -150,7 +150,11 @@ export const createConnectedSearchSessionIndicator = ({
 
     if (!sessionService.isSessionStorageReady()) return null;
     return (
-      <RedirectAppLinks application={application}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
         <SearchSessionIndicator
           ref={searchSessionIndicatorRef}
           state={state}

@@ -40,7 +40,11 @@ export const renderApp = async (
       .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
 
     render(
-      <RedirectAppLinks application={coreStart.application}>
+      <RedirectAppLinks
+        coreStart={{
+          application: coreStart.application,
+        }}
+      >
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...coreStart }}>
             <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric }}>

@@ -138,7 +138,9 @@ const Application = (props: UptimeAppProps) => {
                               <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
                                 <RedirectAppLinks
                                   className={APP_WRAPPER_CLASS}
-                                  application={core.application}
+                                  coreStart={{
+                                    application: core.application,
+                                  }}
                                 >
                                   <InspectorContextProvider>
                                     <UptimeAlertsFlyoutWrapper />

@@ -89,7 +89,11 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
-                <RedirectAppLinks application={application}>
+                <RedirectAppLinks
+                  coreStart={{
+                    application,
+                  }}
+                >
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
                     data-test-subj="homeAddData"

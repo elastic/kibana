@@ -58,13 +58,15 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => {
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="m" />
-
       <EuiFlexGroup className="kbnOverviewDataAdd__content">
         {features.map((feature) => (
           <EuiFlexItem key={feature.id}>
-            <RedirectAppLinks application={application}>
+            <RedirectAppLinks
+              coreStart={{
+                application,
+              }}
+            >
               <Synopsis
                 id={feature.id}
                 description={feature.description}

@@ -23,7 +23,11 @@ const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo((
   });
 
   return hasIntegrationsPermissions && noticeState.settingsDataLoaded ? (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('integrations')}>
         <FormattedMessage
           id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"

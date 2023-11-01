@@ -50,7 +50,9 @@ const SavedObjectsEditionPage = ({
 
   return (
     <RedirectAppLinks
-      application={coreStart.application}
+      coreStart={{
+        application: coreStart.application,
+      }}
       className="savedObjectsManagementEditionPage"
     >
       <SavedObjectEdition

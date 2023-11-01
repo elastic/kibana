@@ -68,7 +68,11 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
               <EuiSplitPanel.Inner grow={false} key={index}>
                 <EuiText size="m">
                   <p>
-                    <RedirectAppLinks application={application}>
+                    <RedirectAppLinks
+                      coreStart={{
+                        application,
+                      }}
+                    >
                       <EuiLink href={view.url}>{view.name}</EuiLink>
                     </RedirectAppLinks>
                   </p>

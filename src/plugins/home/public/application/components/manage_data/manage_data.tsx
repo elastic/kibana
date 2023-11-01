@@ -58,7 +58,11 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                 {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
                 {isDevToolsEnabled && consoleHref !== undefined ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks application={application}>
+                    <RedirectAppLinks
+                      coreStart={{
+                        application,
+                      }}
+                    >
                       <EuiButtonEmpty
                         data-test-subj="homeDevTools"
                         className="kbnOverviewPageHeader__actionButton"
@@ -77,7 +81,11 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
 
                 {isManagementEnabled ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks application={application}>
+                    <RedirectAppLinks
+                      coreStart={{
+                        application,
+                      }}
+                    >
                       <EuiButtonEmpty
                         data-test-subj="homeManage"
                         className="kbnOverviewPageHeader__actionButton"

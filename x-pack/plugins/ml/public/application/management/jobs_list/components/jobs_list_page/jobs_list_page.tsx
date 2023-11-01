@@ -121,7 +121,11 @@ export const JobsListPage: FC<Props> = ({
   }
 
   return (
-    <RedirectAppLinks application={coreStart.application}>
+    <RedirectAppLinks
+      coreStart={{
+        application: coreStart.application,
+      }}
+    >
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider

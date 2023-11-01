@@ -706,7 +706,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           filteredCount={filteredItemCount}
         />
         <EuiSpacer size="l" />
-        <RedirectAppLinks application={applications}>
+        <RedirectAppLinks
+          coreStart={{
+            application: applications,
+          }}
+        >
           <Table
             basePath={http.basePath}
             taggingApi={taggingApi}

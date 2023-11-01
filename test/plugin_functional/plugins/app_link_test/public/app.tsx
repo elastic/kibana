@@ -23,7 +23,11 @@ const FooApp = ({
   application: ApplicationStart;
 }) => (
   <div data-test-subj={`app-${appId}`}>
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <h1>{appId}</h1>
       <div>
         <a data-test-subj="applink-basic-test" href={basePath.prepend(`/app/${targetAppId}`)}>

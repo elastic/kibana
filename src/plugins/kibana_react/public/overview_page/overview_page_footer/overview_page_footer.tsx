@@ -43,7 +43,11 @@ export const OverviewPageFooter: FC<Props> = ({
   if (!show && !save) return <></>;
 
   const defaultRouteButton = defaultRoute.includes(path) ? (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <EuiButtonEmpty
         className="kbnOverviewPageFooter__button"
         flush="both"

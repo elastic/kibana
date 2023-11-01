@@ -30,7 +30,11 @@ export const simpleAlertEnabled = (
       defaultMessage: 'Rule successfully enabled ',
     }),
     text: toMountPoint(
-      <RedirectAppLinks application={kibanaService.core.application}>
+      <RedirectAppLinks
+        coreStart={{
+          application: kibanaService.core.application,
+        }}
+      >
         <EuiText>
           <FormattedMessage
             id="xpack.uptime.overview.alerts.enabled.success.description"

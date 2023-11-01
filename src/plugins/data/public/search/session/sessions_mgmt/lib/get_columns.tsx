@@ -140,7 +140,11 @@ export const getColumns = (
           ) : null;
 
         return (
-          <RedirectAppLinks application={core.application}>
+          <RedirectAppLinks
+            coreStart={{
+              application: core.application,
+            }}
+          >
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               href={href}

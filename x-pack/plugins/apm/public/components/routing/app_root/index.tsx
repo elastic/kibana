@@ -61,7 +61,9 @@ export function ApmAppRoot({
 
   return (
     <RedirectAppLinks
-      application={core.application}
+      coreStart={{
+        application: core.application,
+      }}
       className={APP_WRAPPER_CLASS}
       data-test-subj="apmMainContainer"
       role="main"

@@ -260,7 +260,11 @@ export const FleetAppContext: React.FC<{
     const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     return (
-      <RedirectAppLinks application={startServices.application}>
+      <RedirectAppLinks
+        coreStart={{
+          application: startServices.application,
+        }}
+      >
         <startServices.i18n.Context>
           <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
             <EuiErrorBoundary>

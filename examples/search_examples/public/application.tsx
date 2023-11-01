@@ -45,7 +45,11 @@ export const renderApp = (
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <RedirectAppLinks application={application}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
         <SearchExamplePage exampleLinks={LINKS} basePath={http.basePath}>
           <Router history={history}>
             <Routes>

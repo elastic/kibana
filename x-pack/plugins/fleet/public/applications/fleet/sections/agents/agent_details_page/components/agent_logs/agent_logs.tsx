@@ -352,7 +352,11 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               />
             </DatePickerFlexItem>
             <EuiFlexItem grow={false}>
-              <RedirectAppLinks application={application}>
+              <RedirectAppLinks
+                coreStart={{
+                  application,
+                }}
+              >
                 {isLogsUIAvailable ? (
                   <EuiButtonEmpty
                     href={viewInLogsUrl}
