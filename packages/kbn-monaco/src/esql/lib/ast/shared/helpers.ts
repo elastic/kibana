@@ -363,20 +363,61 @@ export function getDurationItemsWithQuantifier(quantifier: number = 1) {
     }));
 }
 
+function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
+  const wildCardPosition = getWildcardPosition(fuzzyName);
+  if (wildCardPosition !== 'none') {
+    const matcher = getMatcher(fuzzyName, wildCardPosition);
+    for (const resourceName of resources) {
+      if (matcher(resourceName)) {
+        return true;
+      }
+    }
+  }
+}
+
+function getMatcher(name: string, position: 'start' | 'end' | 'middle') {
+  if (position === 'start') {
+    const prefix = name.substring(1);
+    return (resource: string) => resource.endsWith(prefix);
+  }
+  if (position === 'end') {
+    const prefix = name.substring(0, name.length - 1);
+    return (resource: string) => resource.startsWith(prefix);
+  }
+  const [prefix, postFix] = name.split('*');
+  return (resource: string) => resource.startsWith(prefix) && resource.endsWith(postFix);
+}
+
+function getWildcardPosition(name: string) {
+  if (!hasWildcard(name)) {
+    return 'none';
+  }
+  if (name.startsWith('*')) {
+    return 'start';
+  }
+  if (name.endsWith('*')) {
+    return 'end';
+  }
+  return 'middle';
+}
+
+export function hasWildcard(name: string) {
+  return name.includes('*');
+}
+
+export function columnExists(
+  column: string,
+  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
+) {
+  if (fields.has(column) || variables.has(column)) {
+    return true;
+  }
+  return Boolean(fuzzySearch(column, fields.keys()) || fuzzySearch(column, variables.keys()));
+}
+
 export function sourceExists(index: string, sources: Set<string>) {
   if (sources.has(index)) {
     return true;
   }
-  // it is a fuzzy match
-  if (index[index.length - 1] === '*') {
-    const prefix = index.substring(0, index.length - 1);
-    for (const sourceName of sources.keys()) {
-      if (sourceName.includes(prefix)) {
-        // just to be sure that there's not an exact match here
-        // i.e. index-* should not match index-
-        return sourceName.length > prefix.length;
-      }
-    }
-  }
-  return false;
+  return Boolean(fuzzySearch(index, sources.keys()));
 }

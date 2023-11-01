@@ -153,6 +153,16 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
+    case 'wildcardNotSupportedForCommand':
+      return {
+        message: i18n.translate('monaco.esql.validation.wildcardNotSupportedForCommand', {
+          defaultMessage: 'Using wildcards (*) in {command} is not allowed [{value}]',
+          values: {
+            command: out.command,
+            value: out.value,
+          },
+        }),
+      };
   }
   return { message: '' };
 }
