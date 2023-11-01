@@ -59,29 +59,47 @@ export const buildCustomThresholdRule = (
     params: {
       criteria: [
         {
-          aggType: Aggregators.COUNT,
+          aggType: Aggregators.CUSTOM,
           comparator: Comparator.GT,
+          metrics: [
+            {
+              name: 'A',
+              aggType: Aggregators.COUNT,
+            },
+          ],
           threshold: [2000],
           timeSize: 15,
           timeUnit: 'm',
         },
         {
-          aggType: Aggregators.MAX,
+          aggType: Aggregators.CUSTOM,
           comparator: Comparator.GT,
+          metrics: [
+            {
+              name: 'B',
+              aggType: Aggregators.MAX,
+              field: 'system.cpu.user.pct',
+            },
+          ],
           threshold: [4],
           timeSize: 15,
           timeUnit: 'm',
-          metric: 'system.cpu.user.pct',
           warningComparator: Comparator.GT,
           warningThreshold: [2.2],
         },
         {
-          aggType: Aggregators.MIN,
+          aggType: Aggregators.CUSTOM,
           comparator: Comparator.GT,
+          metrics: [
+            {
+              name: 'C',
+              aggType: Aggregators.MIN,
+              field: 'system.memory.used.pct',
+            },
+          ],
           threshold: [0.8],
           timeSize: 15,
           timeUnit: 'm',
-          metric: 'system.memory.used.pct',
         },
       ],
       searchConfiguration: {
@@ -136,20 +154,32 @@ export const buildCustomThresholdAlert = (
       'kibana.alert.rule.parameters': {
         criteria: [
           {
-            aggType: Aggregators.AVERAGE,
+            aggType: Aggregators.CUSTOM,
             comparator: Comparator.GT,
+            metrics: [
+              {
+                name: 'A',
+                aggType: Aggregators.AVERAGE,
+                field: 'system.cpu.user.pct',
+              },
+            ],
             threshold: [2000],
             timeSize: 15,
             timeUnit: 'm',
-            metric: 'system.cpu.user.pct',
           },
           {
-            aggType: Aggregators.MAX,
+            aggType: Aggregators.CUSTOM,
             comparator: Comparator.GT,
+            metrics: [
+              {
+                name: 'B',
+                aggType: Aggregators.MAX,
+                metric: 'system.cpu.user.pct',
+              },
+            ],
             threshold: [4],
             timeSize: 15,
             timeUnit: 'm',
-            metric: 'system.cpu.user.pct',
             warningComparator: Comparator.GT,
             warningThreshold: [2.2],
           },

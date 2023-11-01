@@ -13,18 +13,14 @@ import {
   MetricsExplorerResponse,
   metricsExplorerResponseRT,
 } from '../../../../common/custom_threshold_rule/metrics_explorer';
-
-import {
-  MetricsExplorerOptions,
-  MetricsExplorerTimestampsRT,
-} from './use_metrics_explorer_options';
 import { convertKueryToElasticSearchQuery } from '../helpers/kuery';
 import { decodeOrThrow } from '../helpers/runtime_types';
+import { ExpressionOptions, ExpressionTimestampsRT } from '../types';
 
-export function useMetricsExplorerData(
-  options: MetricsExplorerOptions,
+export function useExpressionData(
+  options: ExpressionOptions,
   derivedIndexPattern: DataViewBase,
-  { fromTimestamp, toTimestamp, interval, timeFieldName }: MetricsExplorerTimestampsRT,
+  { fromTimestamp, toTimestamp, interval, timeFieldName }: ExpressionTimestampsRT,
   enabled = true
 ) {
   const { http } = useKibana().services;
@@ -51,7 +47,7 @@ export function useMetricsExplorerData(
         body: JSON.stringify({
           forceInterval: options.forceInterval,
           dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
-          metrics: options.aggregation === 'count' ? [{ aggregation: 'count' }] : options.metrics,
+          metrics: options.metrics,
           groupBy: options.groupBy,
           afterKey,
           limit: options.limit,

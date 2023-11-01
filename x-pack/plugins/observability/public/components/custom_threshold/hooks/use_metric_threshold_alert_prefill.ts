@@ -7,19 +7,27 @@
 
 import { isEqual } from 'lodash';
 import { useState } from 'react';
-import { MetricsExplorerMetric } from '../../../../common/custom_threshold_rule/metrics_explorer';
+import {
+  Aggregators,
+  CustomThresholdExpressionMetric,
+} from '../../../../common/custom_threshold_rule/types';
 
 export interface CustomThresholdPrefillOptions {
-  groupBy: string | string[] | undefined;
+  groupBy?: string[];
   filterQuery: string | undefined;
-  metrics: MetricsExplorerMetric[];
+  metrics: CustomThresholdExpressionMetric[];
 }
 
 export const useCustomThresholdAlertPrefill = () => {
   const [prefillOptionsState, setPrefillOptionsState] = useState<CustomThresholdPrefillOptions>({
     groupBy: undefined,
     filterQuery: undefined,
-    metrics: [],
+    metrics: [
+      {
+        name: 'A',
+        aggType: Aggregators.COUNT,
+      },
+    ],
   });
 
   const { groupBy, filterQuery, metrics } = prefillOptionsState;

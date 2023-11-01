@@ -10,7 +10,10 @@ import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
-import { Comparator, MetricExpressionParams } from '../../../../common/custom_threshold_rule/types';
+import {
+  Comparator,
+  CustomMetricExpressionParams,
+} from '../../../../common/custom_threshold_rule/types';
 
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
@@ -18,7 +21,7 @@ export function validateCustomThreshold({
   criteria,
   searchConfiguration,
 }: {
-  criteria: MetricExpressionParams[];
+  criteria: CustomMetricExpressionParams[];
   searchConfiguration: SerializedSearchSourceFields;
 }): ValidationResult {
   const validationResult = { errors: {} };
@@ -35,7 +38,6 @@ export function validateCustomThreshold({
         threshold0: string[];
         threshold1: string[];
       };
-      metric: string[];
       metricsError?: string;
       metrics: Record<string, { aggType?: string; field?: string; filter?: string }>;
       equation?: string;

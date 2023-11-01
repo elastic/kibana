@@ -7,15 +7,11 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useMetricsExplorerData } from './use_metrics_explorer_data';
-
 import { renderHook } from '@testing-library/react-hooks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import {
-  MetricsExplorerOptions,
-  MetricsExplorerTimestampsRT,
-} from './use_metrics_explorer_options';
+import { ExpressionOptions, ExpressionTimestampsRT } from '../types';
+import { useExpressionData } from './use_expression_data';
 import { DataViewBase } from '@kbn/es-query';
 import {
   createSeries,
@@ -51,10 +47,10 @@ const renderUseMetricsExplorerDataHook = () => {
   };
   return renderHook(
     (props: {
-      options: MetricsExplorerOptions;
+      options: ExpressionOptions;
       derivedIndexPattern: DataViewBase;
-      timestamps: MetricsExplorerTimestampsRT;
-    }) => useMetricsExplorerData(props.options, props.derivedIndexPattern, props.timestamps),
+      timestamps: ExpressionTimestampsRT;
+    }) => useExpressionData(props.options, props.derivedIndexPattern, props.timestamps),
     {
       initialProps: {
         options,
@@ -72,7 +68,7 @@ jest.mock('../helpers/kuery', () => {
   };
 });
 
-describe('useMetricsExplorerData Hook', () => {
+describe('useExpressionData Hook', () => {
   afterEach(() => {
     queryClient.clear();
   });

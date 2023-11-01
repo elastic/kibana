@@ -6,7 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { values } from 'lodash';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Color } from './color_palette';
@@ -73,30 +72,6 @@ export const logIndexNameReferenceRT = rt.type({
 
 export const logIndexReferenceRT = rt.union([logDataViewReferenceRT, logIndexNameReferenceRT]);
 
-/**
- * Source status
- */
-const SourceStatusFieldRuntimeType = rt.type({
-  name: rt.string,
-  type: rt.string,
-  searchable: rt.boolean,
-  aggregatable: rt.boolean,
-  displayable: rt.boolean,
-});
-export const SourceStatusRuntimeType = rt.type({
-  logIndicesExist: rt.boolean,
-  metricIndicesExist: rt.boolean,
-  remoteClustersExist: rt.boolean,
-  indexFields: rt.array(SourceStatusFieldRuntimeType),
-});
-export const metricsSourceStatusRT = rt.strict({
-  metricIndicesExist: SourceStatusRuntimeType.props.metricIndicesExist,
-  remoteClustersExist: SourceStatusRuntimeType.props.metricIndicesExist,
-  indexFields: SourceStatusRuntimeType.props.indexFields,
-});
-
-export type MetricsSourceStatus = rt.TypeOf<typeof metricsSourceStatusRT>;
-
 export enum Comparator {
   GT = '>',
   LT = '<',
@@ -149,27 +124,6 @@ export enum AlertStates {
   ERROR,
 }
 
-const metricAnomalyNodeTypeRT = rt.union([rt.literal('hosts'), rt.literal('k8s')]);
-const metricAnomalyMetricRT = rt.union([
-  rt.literal('memory_usage'),
-  rt.literal('network_in'),
-  rt.literal('network_out'),
-]);
-const metricAnomalyInfluencerFilterRT = rt.type({
-  fieldName: rt.string,
-  fieldValue: rt.string,
-});
-
-export interface MetricAnomalyParams {
-  nodeType: rt.TypeOf<typeof metricAnomalyNodeTypeRT>;
-  metric: rt.TypeOf<typeof metricAnomalyMetricRT>;
-  alertInterval?: string;
-  sourceId?: string;
-  spaceId?: string;
-  threshold: Exclude<ML_ANOMALY_THRESHOLD, ML_ANOMALY_THRESHOLD.LOW>;
-  influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
-}
-
 // Types for the executor
 
 export interface ThresholdParams {
@@ -182,7 +136,7 @@ export interface ThresholdParams {
   groupBy?: string[];
 }
 
-interface BaseMetricExpressionParams {
+export interface BaseMetricExpressionParams {
   timeSize: number;
   timeUnit: TimeUnitChar;
   sourceId?: string;

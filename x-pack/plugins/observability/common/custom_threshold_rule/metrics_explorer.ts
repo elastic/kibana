@@ -49,11 +49,9 @@ export const metricsExplorerCustomMetricRT = rt.intersection([
   }),
 ]);
 
-export type MetricsExplorerCustomMetric = rt.TypeOf<typeof metricsExplorerCustomMetricRT>;
-
 export const metricsExplorerMetricOptionalFieldsRT = rt.partial({
   field: rt.union([rt.string, rt.undefined]),
-  custom_metrics: rt.array(metricsExplorerCustomMetricRT),
+  metrics: rt.array(metricsExplorerCustomMetricRT),
   equation: rt.string,
 });
 
@@ -138,8 +136,6 @@ export type AfterKey = rt.TypeOf<typeof afterKeyObjectRT>;
 export type MetricsExplorerAggregation = rt.TypeOf<typeof metricsExplorerAggregationRT>;
 
 export type MetricsExplorerMetric = rt.TypeOf<typeof metricsExplorerMetricRT>;
-
-export type MetricsExplorerPageInfo = rt.TypeOf<typeof metricsExplorerPageInfoRT>;
 
 export type MetricsExplorerRow = rt.TypeOf<typeof metricsExplorerRowRT>;
 

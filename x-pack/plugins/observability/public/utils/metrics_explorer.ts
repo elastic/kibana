@@ -9,16 +9,9 @@ import {
   MetricsExplorerResponse,
   MetricsExplorerSeries,
 } from '../../common/custom_threshold_rule/metrics_explorer';
-import {
-  MetricsExplorerChartOptions,
-  MetricsExplorerChartType,
-  MetricsExplorerOptions,
-  MetricsExplorerTimeOptions,
-  MetricsExplorerTimestampsRT,
-  MetricsExplorerYAxisMode,
-} from '../components/custom_threshold/hooks/use_metrics_explorer_options';
+import { ExpressionOptions, ExpressionTimestampsRT } from '../components/custom_threshold/types';
 
-export const options: MetricsExplorerOptions = {
+export const options: ExpressionOptions = {
   limit: 3,
   groupBy: 'host.name',
   aggregation: 'avg',
@@ -41,22 +34,15 @@ export const source = {
   },
   anomalyThreshold: 20,
 };
-
-export const chartOptions: MetricsExplorerChartOptions = {
-  type: MetricsExplorerChartType.line,
-  yAxisMode: MetricsExplorerYAxisMode.fromZero,
-  stack: false,
-};
-
 export const derivedIndexPattern = { title: 'metricbeat-*', fields: [] };
 
-export const timeRange: MetricsExplorerTimeOptions = {
-  from: 'now-1h',
-  to: 'now',
-  interval: '>=10s',
-};
+// export const timeRange: MetricsExplorerTimeOptions = {
+//   from: 'now-1h',
+//   to: 'now',
+//   interval: '>=10s',
+// };
 
-export const mockedTimestamps: MetricsExplorerTimestampsRT = {
+export const mockedTimestamps: ExpressionTimestampsRT = {
   fromTimestamp: 1678376367166,
   toTimestamp: 1678379973620,
   interval: '>=10s',

@@ -270,9 +270,7 @@ export const createCustomThresholdExecutor = ({
           timestamp,
           value: alertResults.map((result, index) => {
             const evaluation = result[group];
-            if (!evaluation && criteria[index].aggType === 'count') {
-              return 0;
-            } else if (!evaluation) {
+            if (!evaluation) {
               return null;
             }
             return formatAlertResult(evaluation).currentValue;
