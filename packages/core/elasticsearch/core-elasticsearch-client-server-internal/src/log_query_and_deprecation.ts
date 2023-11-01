@@ -186,8 +186,8 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   const deprecationLogger = logger.get('deprecation');
 
   client.diagnostic.on('response', (error, event) => {
-    // we could check this once and not even listen to response events,
-    // but then we would not be supported hot reload of the logging configuration
+    // we could check this once and not subscribe to response events if both are disabled,
+    // but then we would not be supporting hot reload of the logging configuration.
     const logQuery = queryLogger.isLevelEnabled('debug');
     const logDeprecation = deprecationLogger.isLevelEnabled('debug');
 
