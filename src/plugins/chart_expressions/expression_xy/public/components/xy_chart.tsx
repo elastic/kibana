@@ -146,6 +146,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   uiState?: PersistedState;
   timeFormat: string;
   setDimensions: (dimensions: ChartDimensionOptions) => void;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -209,6 +210,7 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
+  shouldShowLegendAction,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -856,6 +858,7 @@ export function XYChart({
                     fieldFormats,
                     formattedDatatables,
                     titles,
+                    shouldShowLegendAction,
                     singleTable
                   )
                 : undefined

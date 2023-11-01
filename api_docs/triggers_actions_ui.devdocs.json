@@ -6332,7 +6332,7 @@
         "label": "RuleCreationValidConsumer",
         "description": [],
         "signature": [
-          "\"logs\" | \"infrastructure\" | \"stackAlerts\""
+          "\"observability\" | \"stackAlerts\" | \"logs\" | \"infrastructure\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
