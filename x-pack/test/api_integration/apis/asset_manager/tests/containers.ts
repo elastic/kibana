@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtrace = getService('infraSynthtraceEsClient');
 
-  describe.only(`GET ${routePaths.GET_CONTAINERS}`, () => {
+  describe(`GET ${routePaths.GET_CONTAINERS}`, () => {
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
 
