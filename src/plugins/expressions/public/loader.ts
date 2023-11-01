@@ -63,6 +63,7 @@ export class ExpressionLoader {
       hasCompatibleActions: params?.hasCompatibleActions,
       getCompatibleCellValueActions: params?.getCompatibleCellValueActions,
       executionContext: params?.executionContext,
+      shouldShowLegendAction: params?.shouldShowLegendAction,
     });
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;

@@ -29,6 +29,7 @@ export function AlertFlyout(props: Props) {
         canChangeTrigger: false,
         ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
         validConsumers: observabilityRuleCreationValidConsumers,
+        useRuleProducer: true,
       }),
     [triggersActionsUI, onCloseFlyout]
   );

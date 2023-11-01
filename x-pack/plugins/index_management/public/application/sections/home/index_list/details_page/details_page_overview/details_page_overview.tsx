@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiStat,
   EuiTitle,
   EuiText,
   EuiTextColor,
   EuiLink,
+  EuiFlexGrid,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import {
   CodeBox,
@@ -26,12 +26,16 @@ import {
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
 } from '@kbn/search-api-panels';
+import { StatusDetails } from './status_details';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../../services/breadcrumbs';
 import { languageDefinitions, curlDefinition } from './languages';
 import { ExtensionsSummary } from './extensions_summary';
+import { DataStreamDetails } from './data_stream_details';
+import { StorageDetails } from './storage_details';
+import { AliasesDetails } from './aliases_details';
 
 interface Props {
   indexDetails: Index;
@@ -41,13 +45,17 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const {
     name,
     status,
+    health,
     documents,
     documents_deleted: documentsDeleted,
     primary,
     replica,
     aliases,
+    data_stream: dataStream,
+    size,
+    primary_size: primarySize,
   } = indexDetails;
-  const { config, core, plugins } = useAppContext();
+  const { core, plugins } = useAppContext();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsOverview);
@@ -65,99 +73,24 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
     indexName: name,
   };
 
+  const isLarge = useIsWithinBreakpoints(['xl']);
+
   return (
     <>
-      <EuiFlexGroup>
-        {config.enableIndexStats && (
-          <EuiFlexItem data-test-subj="overviewTabIndexStats">
-            <EuiPanel>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiStat
-                    title={status}
-                    titleColor={status === 'open' ? 'success' : 'danger'}
-                    description={i18n.translate(
-                      'xpack.idxMgmt.indexDetails.overviewTab.statusLabel',
-                      {
-                        defaultMessage: 'Status',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiStat
-                    title={documents}
-                    titleColor="primary"
-                    description={i18n.translate(
-                      'xpack.idxMgmt.indexDetails.overviewTab.documentsLabel',
-                      {
-                        defaultMessage: 'Documents',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiStat
-                    title={documentsDeleted}
-                    description={i18n.translate(
-                      'xpack.idxMgmt.indexDetails.overviewTab.documentsDeletedLabel',
-                      {
-                        defaultMessage: 'Documents deleted',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
+      <EuiFlexGrid columns={isLarge ? 3 : 1}>
+        <StorageDetails size={size} primarySize={primarySize} primary={primary} replica={replica} />
 
-        <EuiFlexItem data-test-subj="overviewTabIndexDetails">
-          <EuiPanel>
-            <EuiFlexGroup>
-              {primary && (
-                <EuiFlexItem>
-                  <EuiStat
-                    title={primary}
-                    description={i18n.translate(
-                      'xpack.idxMgmt.indexDetails.overviewTab.primaryLabel',
-                      {
-                        defaultMessage: 'Primaries',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-              )}
+        <StatusDetails
+          documents={documents}
+          documentsDeleted={documentsDeleted!}
+          status={status}
+          health={health}
+        />
 
-              {replica && (
-                <EuiFlexItem>
-                  <EuiStat
-                    title={replica}
-                    description={i18n.translate(
-                      'xpack.idxMgmt.indexDetails.overviewTab.replicaLabel',
-                      {
-                        defaultMessage: 'Replicas',
-                      }
-                    )}
-                  />
-                </EuiFlexItem>
-              )}
+        <AliasesDetails aliases={aliases} />
 
-              <EuiFlexItem>
-                <EuiStat
-                  title={Array.isArray(aliases) ? aliases.length : aliases}
-                  description={i18n.translate(
-                    'xpack.idxMgmt.indexDetails.overviewTab.aliasesLabel',
-                    {
-                      defaultMessage: 'Aliases',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        {dataStream && <DataStreamDetails dataStreamName={dataStream} />}
+      </EuiFlexGrid>
 
       <EuiSpacer />
 
