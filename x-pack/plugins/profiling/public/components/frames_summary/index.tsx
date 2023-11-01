@@ -5,67 +5,74 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { TopNFunctions } from '@kbn/profiling-utils';
+import { i18n } from '@kbn/i18n';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { calculateBaseComparisonDiff } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
-import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
+
+interface FrameValue {
+  selfCPU: number;
+  totalCPU: number;
+  totalCount: number;
+  duration: number;
+  scaleFactor?: number;
+}
 
 interface Props {
-  baselineTopNFunctions?: TopNFunctions;
-  comparisonTopNFunctions?: TopNFunctions;
-  baselineScaleFactor?: number;
-  comparisonScaleFactor?: number;
+  baseValue?: FrameValue;
+  comparisonValue?: FrameValue;
   isLoading: boolean;
-  baselineDuration: number;
-  comparisonDuration: number;
 }
 
 const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.estimatedValue', {
   defaultMessage: 'Estimated value',
 }) as string;
 
-export function TopNFunctionsSummary({
-  baselineTopNFunctions,
-  comparisonTopNFunctions,
-  baselineScaleFactor = 1,
-  comparisonScaleFactor = 1,
-  isLoading,
-  baselineDuration,
-  comparisonDuration,
-}: Props) {
+function getScaleFactor(scaleFactor: number = 1) {
+  return scaleFactor;
+}
+
+export function FramesSummary({ baseValue, comparisonValue, isLoading }: Props) {
   const calculateImpactEstimates = useCalculateImpactEstimate();
 
-  const baselineScaledTotalSamples = baselineTopNFunctions
-    ? baselineTopNFunctions.TotalCount * baselineScaleFactor
+  const baselineScaledTotalSamples = baseValue
+    ? baseValue.totalCount * getScaleFactor(baseValue.scaleFactor)
     : 0;
 
-  const comparisonScaledTotalSamples = comparisonTopNFunctions
-    ? comparisonTopNFunctions.TotalCount * comparisonScaleFactor
+  const comparisonScaledTotalSamples = comparisonValue
+    ? comparisonValue.totalCount * getScaleFactor(comparisonValue.scaleFactor)
     : 0;
 
   const { co2EmissionDiff, costImpactDiff, totalSamplesDiff } = useMemo(() => {
-    const baseImpactEstimates = baselineTopNFunctions
+    const baseImpactEstimates = baseValue
       ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
         calculateImpactEstimates({
-          countExclusive: baselineTopNFunctions.selfCPU,
-          countInclusive: baselineTopNFunctions.totalCPU,
-          totalSamples: baselineTopNFunctions.TotalCount,
-          totalSeconds: baselineDuration,
+          countExclusive: baseValue.selfCPU,
+          countInclusive: baseValue.totalCPU,
+          totalSamples: baseValue.totalCount,
+          totalSeconds: baseValue.duration,
         })
       : undefined;
 
-    const comparisonImpactEstimates = comparisonTopNFunctions
+    const comparisonImpactEstimates = comparisonValue
       ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
         calculateImpactEstimates({
-          countExclusive: comparisonTopNFunctions.selfCPU,
-          countInclusive: comparisonTopNFunctions.totalCPU,
-          totalSamples: comparisonTopNFunctions.TotalCount,
-          totalSeconds: comparisonDuration,
+          countExclusive: comparisonValue.selfCPU,
+          countInclusive: comparisonValue.totalCPU,
+          totalSamples: comparisonValue.totalCount,
+          totalSeconds: comparisonValue.duration,
         })
       : undefined;
 
@@ -86,13 +93,11 @@ export function TopNFunctionsSummary({
       }),
     };
   }, [
-    baselineDuration,
+    baseValue,
     baselineScaledTotalSamples,
-    baselineTopNFunctions,
     calculateImpactEstimates,
-    comparisonDuration,
     comparisonScaledTotalSamples,
-    comparisonTopNFunctions,
+    comparisonValue,
   ]);
 
   const data = [
@@ -155,14 +160,41 @@ export function TopNFunctionsSummary({
   ];
 
   return (
-    <EuiFlexGroup direction="row">
-      {data.map((item, idx) => {
-        return (
-          <EuiFlexItem key={idx}>
-            <SummaryItem {...item} isLoading={isLoading} />
+    <EuiAccordion
+      initialIsOpen
+      id="TopNFunctionsSummary"
+      buttonContent={
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiText color={data[0].baseColor} style={{ fontWeight: 'bold' }} textAlign="left">
+              {data[0].title}
+            </EuiText>
           </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
+          {data[0].baseIcon && (
+            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+              <EuiIcon type={data[0].baseIcon} color={data[0].baseColor} size="s" />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiTextColor style={{ fontWeight: 'bold' }} color={data[0].baseColor}>
+              {data[0].baseValue}
+            </EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="row">
+          {data.map((item, idx) => {
+            return (
+              <EuiFlexItem key={idx}>
+                <SummaryItem {...item} isLoading={isLoading} />
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      </>
+    </EuiAccordion>
   );
 }
