@@ -96,7 +96,7 @@ Array [
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
-                data-test-subj="securitySolutionAssigneesAvatarsPanel"
+                data-test-subj="securitySolutionUsersAvatarsPanel"
               />
             </div>
             <div
@@ -272,7 +272,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
               >
                 <div
                   class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
-                  data-test-subj="securitySolutionAssigneesAvatarsPanel"
+                  data-test-subj="securitySolutionUsersAvatarsPanel"
                 />
               </div>
               <div

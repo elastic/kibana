@@ -65,7 +65,7 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
       () => removeNoAssigneesSelection(assignedUserIds),
       [assignedUserIds]
     );
-    const { loading: isLoadingAssignedUserProfiles, userProfiles: assignedUserProfiles } =
+    const { loading: isLoadingAssignedUsers, userProfiles: assignedUsers } =
       useGetUserProfiles(existingIds);
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -83,16 +83,16 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
 
     const [selectedAssignees, setSelectedAssignees] = useState<AssigneesProfilesSelection[]>([]);
     useEffect(() => {
-      if (isLoadingAssignedUserProfiles) {
+      if (isLoadingAssignedUsers) {
         return;
       }
       const hasNoAssigneesSelection = assignedUserIds.find((uid) => uid === NO_ASSIGNEES_VALUE);
       const newAssignees =
         hasNoAssigneesSelection !== undefined
-          ? [NO_ASSIGNEES_VALUE, ...assignedUserProfiles]
-          : assignedUserProfiles;
+          ? [NO_ASSIGNEES_VALUE, ...assignedUsers]
+          : assignedUsers;
       setSelectedAssignees(newAssignees);
-    }, [assignedUserIds, assignedUserProfiles, isLoadingAssignedUserProfiles]);
+    }, [assignedUserIds, assignedUsers, isLoadingAssignedUsers]);
 
     const handleSelectedAssignees = useCallback(
       (newAssignees: AssigneesProfilesSelection[]) => {
@@ -114,7 +114,7 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
       []
     );
 
-    const isLoading = isLoadingAssignedUserProfiles || isLoadingSuggestedUsers;
+    const isLoading = isLoadingAssignedUsers || isLoadingSuggestedUsers;
 
     return (
       <div data-test-subj={ASSIGNEES_APPLY_PANEL_TEST_ID}>

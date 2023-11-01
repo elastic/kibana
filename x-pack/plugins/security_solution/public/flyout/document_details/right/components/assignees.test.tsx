@@ -18,9 +18,9 @@ import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk
 import { TestProviders } from '../../../../common/mock';
 import {
   ASSIGNEES_APPLY_BUTTON_TEST_ID,
-  ASSIGNEES_AVATARS_COUNT_BADGE_TEST_ID,
-  ASSIGNEES_AVATARS_PANEL_TEST_ID,
-  ASSIGNEES_AVATAR_ITEM_TEST_ID,
+  USERS_AVATARS_COUNT_BADGE_TEST_ID,
+  USERS_AVATARS_PANEL_TEST_ID,
+  USER_AVATAR_ITEM_TEST_ID,
 } from '../../../../common/components/assignees/test_ids';
 
 jest.mock('../../../../common/components/user_profiles/use_get_user_profiles');
@@ -70,7 +70,7 @@ describe('<Assignees />', () => {
     const { getByTestId } = renderAssignees();
 
     expect(getByTestId(ASSIGNEES_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ASSIGNEES_AVATARS_PANEL_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(USERS_AVATARS_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
@@ -78,23 +78,23 @@ describe('<Assignees />', () => {
     const assignees = ['user-id-1', 'user-id-2'];
     const { getByTestId, queryByTestId } = renderAssignees('test-event', assignees);
 
-    expect(getByTestId(ASSIGNEES_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
-    expect(getByTestId(ASSIGNEES_AVATAR_ITEM_TEST_ID('user2'))).toBeInTheDocument();
+    expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
+    expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user2'))).toBeInTheDocument();
 
-    expect(queryByTestId(ASSIGNEES_AVATARS_COUNT_BADGE_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(USERS_AVATARS_COUNT_BADGE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render badge with assignees count in case there are more than two users assigned to an alert', () => {
     const assignees = ['user-id-1', 'user-id-2', 'user-id-3'];
     const { getByTestId, queryByTestId } = renderAssignees('test-event', assignees);
 
-    const assigneesCountBadge = getByTestId(ASSIGNEES_AVATARS_COUNT_BADGE_TEST_ID);
+    const assigneesCountBadge = getByTestId(USERS_AVATARS_COUNT_BADGE_TEST_ID);
     expect(assigneesCountBadge).toBeInTheDocument();
     expect(assigneesCountBadge).toHaveTextContent(`${assignees.length}`);
 
-    expect(queryByTestId(ASSIGNEES_AVATAR_ITEM_TEST_ID('user1'))).not.toBeInTheDocument();
-    expect(queryByTestId(ASSIGNEES_AVATAR_ITEM_TEST_ID('user2'))).not.toBeInTheDocument();
-    expect(queryByTestId(ASSIGNEES_AVATAR_ITEM_TEST_ID('user3'))).not.toBeInTheDocument();
+    expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).not.toBeInTheDocument();
+    expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user2'))).not.toBeInTheDocument();
+    expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).not.toBeInTheDocument();
   });
 
   it('should call assignees update functionality with the right arguments', () => {

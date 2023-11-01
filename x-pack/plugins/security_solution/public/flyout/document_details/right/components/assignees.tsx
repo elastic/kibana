@@ -13,10 +13,11 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useGetUserProfiles } from '../../../../common/components/user_profiles/use_get_user_profiles';
 import { removeNoAssigneesSelection } from '../../../../common/components/assignees/utils';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { AssigneesPopover } from '../../../../common/components/assignees/assignees_popover';
-import { AssigneesAvatarsPanel } from '../../../../common/components/assignees/assignees_avatars_panel';
+import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/users_avatars_panel';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_TITLE_TEST_ID } from './test_ids';
 
@@ -63,6 +64,7 @@ export interface AssigneesProps {
 export const Assignees: FC<AssigneesProps> = memo(
   ({ eventId, assignedUserIds, onAssigneesUpdated }) => {
     const setAlertAssignees = useSetAlertAssignees();
+    const { userProfiles: assignedUsers } = useGetUserProfiles(assignedUserIds);
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -106,7 +108,7 @@ export const Assignees: FC<AssigneesProps> = memo(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AssigneesAvatarsPanel assignedUserIds={assignedUserIds} maxVisibleAvatars={2} />
+          <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AssigneesPopover

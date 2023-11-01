@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import type { UserProfile } from '@kbn/security-plugin/common';
-import type { UserProfileAvatarData } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { PreFetchPageContext } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useBulkGetUserProfiles } from '../../../common/hooks/use_bulk_get_user_profiles';
 
 export interface RenderCellValueContext {
-  profiles: Array<UserProfile<{ avatar: UserProfileAvatarData }>> | undefined;
+  profiles: UserProfileWithAvatar[] | undefined;
   isLoading: boolean;
 }
 
 // Add new columns names to this array to render the user's display name instead of profile_uid
-export const profileUidColumns = ['kibana.alert.workflow_user'];
+export const profileUidColumns = [
+  'kibana.alert.workflow_assignee_ids',
+  'kibana.alert.workflow_user',
+];
 
 export const useFetchPageContext: PreFetchPageContext<RenderCellValueContext> = ({
   alerts,

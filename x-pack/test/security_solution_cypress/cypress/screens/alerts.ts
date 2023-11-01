@@ -193,4 +193,4 @@ export const ALERT_ASSIGNING_UPDATE_BUTTON =
   '[data-test-subj="securitySolutionAssigneesApplyButton"]';
 
 export const ALERT_ASSIGNING_USER_AVATAR = (assignee: string) =>
-  `[data-test-subj="securitySolutionAssigneesAvatar-${assignee}"][title='${assignee}']`;
+  `[data-test-subj="securitySolutionUsersAvatar-${assignee}"][title='${assignee}']`;
