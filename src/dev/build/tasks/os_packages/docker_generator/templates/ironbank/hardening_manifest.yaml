@@ -48,6 +48,10 @@ resources:
 
 # List of project maintainers
 maintainers:
+  - email: 'jon@elastic.co'
+    name: 'Jonathan Budzenski'
+    username: 'jbudz'
+    cht_member: false
   - email: 'klepal_alexander@bah.com'
     name: 'Alexander Klepal'
     username: 'alexander.klepal'
