@@ -24,5 +24,7 @@
     "@kbn/security-solution-navigation",
     "@kbn/licensing-plugin",
     "@kbn/security-solution-upselling",
+    "@kbn/elastic-assistant",
+    "@kbn/ecs-data-quality-dashboard",
   ]
 }
