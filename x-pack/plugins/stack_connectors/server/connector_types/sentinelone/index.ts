@@ -25,6 +25,8 @@ import { SentinelOneConfig, SentinelOneSecrets } from '../../../common/sentinelo
 import { SentinelOneConnector } from './sentinelone';
 import { renderParameterTemplates } from './render';
 
+const toApiTag = (tagName: string) => `api:${tagName}`;
+
 export const getSentinelOneConnectorType = (): SubActionConnectorType<
   SentinelOneConfig,
   SentinelOneSecrets
@@ -46,17 +48,17 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
     switch (subActionName) {
       case SUB_ACTION.ISOLATE_AGENT:
       case SUB_ACTION.RELEASE_AGENT:
-        return PRIVILEGE_API_TAGS.hostIsolationAll;
+        return PRIVILEGE_API_TAGS.hostIsolationAll.map(toApiTag);
 
       case SUB_ACTION.KILL_PROCESS:
-        return PRIVILEGE_API_TAGS.processOperationsAll;
+        return PRIVILEGE_API_TAGS.processOperationsAll.map(toApiTag);
 
       case SUB_ACTION.GET_AGENTS:
-        return PRIVILEGE_API_TAGS.endpointListRead;
+        return PRIVILEGE_API_TAGS.endpointListRead.map(toApiTag);
 
       case SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS:
       case SUB_ACTION.GET_REMOTE_SCRIPT_STATUS:
-        return PRIVILEGE_API_TAGS.responseActionsHistoryLogRead;
+        return PRIVILEGE_API_TAGS.responseActionsHistoryLogRead.map(toApiTag);
     }
 
     // trigger authz to fail since we don't recognize the sub-action name
