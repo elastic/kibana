@@ -4109,7 +4109,7 @@
               "\nserializes search source fields (which can later be passed to {@link ISearchStartSearchSource})"
             ],
             "signature": [
-              "(recurse?: boolean, includeFields?: boolean) => ",
+              "(recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -4128,21 +4128,6 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "recurse",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchSource.getSerializedFields.$2",
-                "type": "boolean",
-                "tags": [],
-                "label": "includeFields",
                 "description": [],
                 "signature": [
                   "boolean"
@@ -10642,7 +10627,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
           {
             "pluginId": "data",
             "scope": "common",

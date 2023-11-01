@@ -11,6 +11,7 @@ import {
   termQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -21,7 +22,6 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import {
   BarSeriesDataMap,
   getFilteredBarSeries,

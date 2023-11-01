@@ -962,7 +962,7 @@ function validateEventLog(event: any, params: ValidateEventLogParams) {
     id: params.ruleId,
     license: 'basic',
     category: params.ruleTypeId,
-    ruleset: 'stackAlerts',
+    ruleset: event?.rule.ruleset,
     name: params.name,
   });
 
