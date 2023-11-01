@@ -148,7 +148,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
-  aiConversations$: Observable<Record<string, Conversation>>;
+  assistantBaseConversations$: Observable<Record<string, Conversation>>;
   getComponent$: GetComponent$;
   upselling: UpsellingService;
 }

@@ -28,10 +28,10 @@ const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title',
 });
 
 export const AssistantConversationsProvider: React.FC<{
-  aiConversations: Record<string, Conversation>;
+  assistantBaseConversations: Record<string, Conversation>;
   children: React.ReactNode;
-}> = ({ aiConversations, children }) => {
-  const { conversations, setConversations } = useConversationStore(aiConversations);
+}> = ({ assistantBaseConversations, children }) => {
+  const { conversations, setConversations } = useConversationStore(assistantBaseConversations);
 
   const {
     http,
@@ -45,7 +45,7 @@ export const AssistantConversationsProvider: React.FC<{
   }, [conversations]);
 
   const assistantAvailability = useAssistantAvailability();
-  const assistantTelemetry = useAssistantTelemetry(aiConversations);
+  const assistantTelemetry = useAssistantTelemetry(assistantBaseConversations);
 
   const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
     useAnonymizationStore();
@@ -57,7 +57,7 @@ export const AssistantConversationsProvider: React.FC<{
       actionTypeRegistry={actionTypeRegistry}
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
-      assistantConversations={aiConversations}
+      assistantBaseConversations={assistantBaseConversations}
       assistantTelemetry={assistantTelemetry}
       defaultAllow={defaultAllow}
       defaultAllowReplacement={defaultAllowReplacement}

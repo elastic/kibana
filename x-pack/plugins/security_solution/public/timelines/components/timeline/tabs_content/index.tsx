@@ -160,8 +160,8 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
-    const { assistantConversations } = useAssistantContext();
-    const { conversations } = useConversationStore(assistantConversations);
+    const { assistantBaseConversations } = useAssistantContext();
+    const { conversations } = useConversationStore(assistantBaseConversations);
 
     const hasTimelineConversationStarted = useMemo(
       () => conversations[TIMELINE_CONVERSATION_TITLE].messages.length > 0,
@@ -316,8 +316,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const isEnterprisePlus = useLicense().isEnterprise();
 
   const [conversationId, setConversationId] = useState<string>(TIMELINE_CONVERSATION_TITLE);
-  const { assistantConversations } = useAssistantContext();
-  const { reportAssistantInvoked } = useAssistantTelemetry(assistantConversations);
+  const { assistantBaseConversations } = useAssistantContext();
+  const { reportAssistantInvoked } = useAssistantTelemetry(assistantBaseConversations);
 
   const allTimelineNoteIds = useMemo(() => {
     const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(

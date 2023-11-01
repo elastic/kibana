@@ -14,11 +14,11 @@ import { AssistantConversationsProvider } from './wrapper';
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
 export const AssistantProvider: React.FC = ({ children }) => {
-  const { aiConversations$ } = useKibana().services;
-  const aiConversations = useObservable(aiConversations$, null);
+  const { assistantBaseConversations$ } = useKibana().services;
+  const assistantBaseConversations = useObservable(assistantBaseConversations$, null);
 
-  return aiConversations ? (
-    <AssistantConversationsProvider aiConversations={aiConversations}>
+  return assistantBaseConversations ? (
+    <AssistantConversationsProvider assistantBaseConversations={assistantBaseConversations}>
       {children}
     </AssistantConversationsProvider>
   ) : null;

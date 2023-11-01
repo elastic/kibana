@@ -11,9 +11,9 @@ import { useConversationStore } from '../use_conversation_store';
 import { useKibana } from '../../common/lib/kibana';
 
 export const useAssistantTelemetry = (
-  assistantConversations: Record<string, Conversation>
+  assistantBaseConversations: Record<string, Conversation>
 ): AssistantTelemetry => {
-  const { conversations } = useConversationStore(assistantConversations);
+  const { conversations } = useConversationStore(assistantBaseConversations);
   const {
     services: { telemetry },
   } = useKibana();

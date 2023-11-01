@@ -21,13 +21,13 @@ export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
-  public aiConversations$: BehaviorSubject<Record<string, Conversation>>;
+  public assistantBaseConversations$: BehaviorSubject<Record<string, Conversation>>;
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
-    this.aiConversations$ = new BehaviorSubject<Record<string, Conversation>>({});
+    this.assistantBaseConversations$ = new BehaviorSubject<Record<string, Conversation>>({});
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
@@ -36,7 +36,7 @@ export class PluginContract {
   public getStartServices(): ContractStartServices {
     return {
       extraRoutes$: this.extraRoutes$.asObservable(),
-      aiConversations$: this.aiConversations$.asObservable(),
+      assistantBaseConversations$: this.assistantBaseConversations$.asObservable(),
       getComponent$: this.componentsService.getComponent$.bind(this.componentsService),
       upselling: this.upsellingService,
     };
@@ -59,7 +59,7 @@ export class PluginContract {
     return {
       getNavLinks$: () => navLinks$,
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
-      setAiConversations: (conversations) => this.aiConversations$.next(conversations),
+      setAiConversations: (conversations) => this.assistantBaseConversations$.next(conversations),
       setComponents: (components) => {
         this.componentsService.setComponents(components);
       },

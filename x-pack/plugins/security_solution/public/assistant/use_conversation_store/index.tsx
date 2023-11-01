@@ -16,10 +16,10 @@ export interface UseConversationStore {
 }
 
 export const useConversationStore = (
-  aiConversations: Record<string, Conversation>
+  assistantBaseConversations: Record<string, Conversation>
 ): UseConversationStore => {
   const [conversations, setConversations] = useLocalStorage<Record<string, Conversation>>({
-    defaultValue: aiConversations,
+    defaultValue: assistantBaseConversations,
     key: LOCAL_STORAGE_KEY,
     isInvalidDefault: (valueFromStorage) => {
       return !valueFromStorage;
