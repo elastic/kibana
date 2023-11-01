@@ -681,7 +681,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_bytes-runtimefield2')).to.be(true);
         expect(allFields.includes('_bytes-runtimefield')).to.be(false);
-
         await PageObjects.discover.removeField('_bytes-runtimefield');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();

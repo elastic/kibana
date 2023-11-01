@@ -111,8 +111,8 @@ export const indexHostsAndAlerts = usageTracker.track(
 
     const shouldWaitForEndpointMetadataDocs = fleet;
     if (shouldWaitForEndpointMetadataDocs) {
-      await waitForMetadataTransformsReady(client);
-      await stopMetadataTransforms(client);
+      await waitForMetadataTransformsReady(client, epmEndpointPackage.version);
+      await stopMetadataTransforms(client, epmEndpointPackage.version);
     }
 
     for (let i = 0; i < numHosts; i++) {
@@ -147,7 +147,8 @@ export const indexHostsAndAlerts = usageTracker.track(
     if (shouldWaitForEndpointMetadataDocs) {
       await startMetadataTransforms(
         client,
-        response.agents.map((agent) => agent.agent?.id ?? '')
+        response.agents.map((agent) => agent.agent?.id ?? ''),
+        epmEndpointPackage.version
       );
     }
 
