@@ -110,24 +110,22 @@ node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost
 
 The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
 
-Logs can be generated similarily with the below commands
+### Understanding Scenario Files
 
-```
-# Live Data
+Scenario files accept 3 arguments, 2 of them optional and 1 mandatory
 
-node scripts/synthtrace simple_logs.ts --clean --type=log --live
-
-# Static Data
-
-node scripts/synthtrace simple_logs.ts --clean --type=log
-```
+| Arguments           | Type      | Description                                                                                                                                          |
+|---------------------|:----------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `generate`          | mandatory | This is the main function responsible for returning the events which will be indexed                                                                 |
+| `bootstra`          | optional  | In case some setup needs to be done, before the data is generated, this function provides access to all available ES Clients to play with            |
+| `setClient` | optional  | By default the apmEsClient used to generate data. If anyother client like logsEsClient needs to be used instead, this is where it should be returned |
 
 The following options are supported:
 
 ### Connection options
 
 | Option              | Type     | Default | Description                                                                                |
-| ------------------- | -------- | :------ | ------------------------------------------------------------------------------------------ |
+|---------------------|----------|:--------|--------------------------------------------------------------------------------------------|
 | `--target`          | [string] |         | Elasticsearch target                                                                       |
 | `--kibana`          | [string] |         | Kibana target, used to bootstrap datastreams/mappings/templates/settings                   |
 | `--versionOverride` | [string] |         | String to be used for `observer.version`. Defauls to the version of the installed package. |
@@ -141,12 +139,11 @@ Note:
 
 ### Scenario options
 
-| Option           | Type      | Default | Description                          |
-| ---------------- | --------- | :------ | ------------------------------------ |
-| `--from`         | [date]    | `now()` | The start of the time window         |
-| `--to`           | [date]    |         | The end of the time window           |
-| `--live`         | [boolean] |         | Generate and index data continuously |
-| `--scenarioOpts` |           |         | Raw options specific to the scenario |
+| Option   | Type      | Default | Description                          |
+|----------|-----------|:--------|--------------------------------------|
+| `--from` | [date]    | `now()` | The start of the time window         |
+| `--to`   | [date]    |         | The end of the time window           |
+| `--live` | [boolean] |         | Generate and index data continuously |
 
 Note:
 
