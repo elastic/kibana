@@ -45,6 +45,7 @@ export const find = async (
     const paramArgs = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
+    let customFieldsMapping = null;
 
     /**
      * Assign users to a case is only available to Platinum+
@@ -80,9 +81,11 @@ export const find = async (
         );
 
         if (customFieldConfig) {
-          const mapping = casesCustomFields.get(customFieldConfig.type);
+          customFieldsMapping = casesCustomFields.get(customFieldConfig.type);
 
-          if (!mapping?.isFilterable) {
+          // validateCustomFields(customFieldsMapping, customFieldConfig, paramArgs.customFields);
+
+          if (!customFieldsMapping?.isFilterable) {
             throw Boom.forbidden(
               `Filtering by custom filed of type ${customFieldConfig.type} is not allowed.`
             );

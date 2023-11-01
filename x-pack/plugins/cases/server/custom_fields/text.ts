@@ -8,4 +8,5 @@
 export const getCasesTextCustomField = () => ({
   isFilterable: false,
   isSortable: false,
+  savedObjectMappingType: 'string',
 });

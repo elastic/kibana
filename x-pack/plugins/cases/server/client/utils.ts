@@ -362,15 +362,13 @@ export const buildCustomFieldsFilter = ({
   const customFieldsFilter = customFieldsAsArray.map((filter) => {
     const filterKey = Object.keys(filter)[0];
 
-    const customFieldKeyFilter = nodeBuilder.is(
-      `${CASE_SAVED_OBJECT}.attributes.customFields.key`,
-      `${filterKey}`
+    const customFieldKeyFilter = fromKueryExpression(
+      `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${filterKey}}`,
     );
 
     const customFieldValueFilter = Object.values(filter[filterKey].value).map((filterValue) => {
-      return nodeBuilder.is(
-        `${CASE_SAVED_OBJECT}.attributes.customFields.value.boolean`,
-        `${filterValue}`
+      return fromKueryExpression(
+        `${CASE_SAVED_OBJECT}.attributes.customFields:{value.boolean: ${filterValue}}`
       );
     });
 

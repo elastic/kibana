@@ -8,4 +8,5 @@
 export const getCasesToggleCustomField = () => ({
   isFilterable: true,
   isSortable: false,
+  savedObjectMappingType: 'boolean',
 });

@@ -10,6 +10,7 @@ import type { CustomFieldTypes } from '../../common/types/domain';
 export interface ICasesCustomField {
   isFilterable: boolean;
   isSortable: boolean;
+  savedObjectMappingType: string;
 }
 
 export interface CasesCustomFieldsMap {
