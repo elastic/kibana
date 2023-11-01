@@ -56,7 +56,6 @@
     "@kbn/es-archiver",
     "@kbn/rule-data-utils",
     "@kbn/rison",
-    "@kbn/std",
     "@kbn/serverless-common-settings",
     "@kbn/serverless-observability-settings",
     "@kbn/serverless-search-settings",

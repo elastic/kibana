@@ -3075,7 +3075,7 @@
             "label": "sharingSavedObjectProps",
             "description": [],
             "signature": [
-              "{ outcome?: \"conflict\" | \"exactMatch\" | \"aliasMatch\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
+              "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
@@ -5583,7 +5583,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<Attr>; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }>"
+              "<Attr>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }>"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
