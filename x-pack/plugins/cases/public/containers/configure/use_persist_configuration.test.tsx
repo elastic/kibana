@@ -131,7 +131,7 @@ describe('useCreateAttachments', () => {
     await waitForNextUpdate();
 
     expect(queryClientSpy).toHaveBeenCalledWith(
-      casesQueriesKeys.configuration({ owner: SECURITY_SOLUTION_OWNER })
+      casesQueriesKeys.configuration({ owner: [SECURITY_SOLUTION_OWNER] })
     );
   });
 
