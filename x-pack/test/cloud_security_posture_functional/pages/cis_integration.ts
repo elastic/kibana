@@ -250,6 +250,26 @@ export default function (providerContext: FtrProviderContext) {
           'credentials_json_option_test_id'
         );
         await cisIntegrationGcp.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
+        await cisIntegrationGcp.clickSaveIntegrationButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.navigateToIntegrationCspList();
+        expect(
+          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
+            credentialJsonName
+        ).to.be(true);
+      });
+      it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON', async () => {
+        const projectName = 'PRJ_NAME_TEST';
+        const credentialJsonName = 'CRED_JSON_TEST_NAME';
+        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegrationGcp.clickOptionButton(GCP_MANUAL_TEST_ID);
+        await cisIntegrationGcp.fillInTextField(PRJ_ID_TEST_ID, projectName);
+        await cisIntegrationGcp.chooseDropDown(
+          CREDENTIALS_TYPE_TEST_ID,
+          'credentials_json_option_test_id'
+        );
+        await cisIntegrationGcp.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
         await cisIntegrationGcp.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
@@ -259,27 +279,23 @@ export default function (providerContext: FtrProviderContext) {
             credentialJsonName
         ).to.be(true);
       });
-    });
-    it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON', async () => {
-      const projectName = 'PRJ_NAME_TEST';
-      const credentialJsonName = 'CRED_JSON_TEST_NAME';
-      await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-      await cisIntegrationGcp.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-      await cisIntegrationGcp.clickOptionButton(GCP_MANUAL_TEST_ID);
-      await cisIntegrationGcp.fillInTextField(PRJ_ID_TEST_ID, projectName);
-      await cisIntegrationGcp.chooseDropDown(
-        CREDENTIALS_TYPE_TEST_ID,
-        'credentials_json_option_test_id'
-      );
-      await cisIntegrationGcp.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
-      await cisIntegrationGcp.clickSaveButton();
-      pageObjects.header.waitUntilLoadingHasFinished();
-      expect((await cisIntegrationGcp.getPostInstallModal()) !== undefined).to.be(true);
-      await cisIntegration.navigateToIntegrationCspList();
-      expect(
-        (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
-          credentialJsonName
-      ).to.be(true);
+      it('Users are able to switch credentials_type from/to Credential File fields ', async () => {
+        const credentialFileName = 'CRED_FILE_TEST_NAME';
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        await cisIntegrationGcp.chooseDropDown(
+          CREDENTIALS_TYPE_TEST_ID,
+          'credentials_file_option_test_id'
+        );
+        await cisIntegrationGcp.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
+        await cisIntegrationGcp.clickSaveIntegrationButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.navigateToIntegrationCspList();
+        expect(
+          (await cisIntegrationGcp.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===
+            credentialFileName
+        ).to.be(true);
+      });
     });
   });
 }

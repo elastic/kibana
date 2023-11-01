@@ -45,6 +45,11 @@ export function AddCisIntegrationFormPageProvider({
       await optionToBeClicked.click();
     },
 
+    clickSaveIntegrationButton: async () => {
+      const optionToBeClicked = await cisGcp.findOptionInPage('saveIntegration');
+      await optionToBeClicked.click();
+    },
+
     getPostInstallModal: async () => {
       return await testSubjects.find('confirmModalTitleText');
     },
