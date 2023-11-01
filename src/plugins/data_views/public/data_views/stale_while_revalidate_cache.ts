@@ -64,29 +64,21 @@ export class StaleWhileRevalidateCache {
 
     // Don't check the cache or active requests if we're forcing a refresh
     if (!forceRefresh) {
-      const cachedResponse = await cache?.match(url);
+      const { cachedResponse, isStale } = await resolveCachedResponse({
+        cache,
+        url,
+        identityHash,
+        version: fetchOptions.version ?? '',
+        cacheEntryFreshTimeMs: this.deps.cacheEntryFreshTimeMs,
+      });
 
       if (cachedResponse) {
-        const identityHashHeader = cachedResponse.headers.get(IDENTITY_HASH_HEADER) ?? '';
-        const version = fetchOptions.version ?? '';
-        const versionHeader = cachedResponse.headers.get(ELASTIC_HTTP_VERSION_HEADER) ?? '';
-        const dateHeader = cachedResponse.headers.get(RESPONSE_DATE_HEADER);
-
-        // If the identity hash or version doesn't match, or the
-        // response doesn't have a date header, then it's invalid
-        if (identityHash === identityHashHeader && version === versionHeader && dateHeader) {
-          const date = new Date(dateHeader);
-          const now = new Date();
-          const diff = now.getTime() - date.getTime();
-          const isStale = diff > this.deps.cacheEntryFreshTimeMs;
-
-          // If the response is stale we'll still return it,
-          // but first we'll make a request to update the cache
-          if (isStale) {
-            staleResponse = cachedResponse;
-          } else {
-            return cachedResponse;
-          }
+        // If the response is stale we'll still return it,
+        // but first we'll make a request to update the cache
+        if (isStale) {
+          staleResponse = cachedResponse;
+        } else {
+          return cachedResponse;
         }
       }
 
@@ -117,32 +109,15 @@ export class StaleWhileRevalidateCache {
           return response;
         }
 
-        // Create request headers to store some metadata about the response
+        // Create shared headers to store some metadata about the response
         const headers = {
-          // Add the identity hash to the response headers so we can check it later
           [IDENTITY_HASH_HEADER]: identityHash,
-          // Add the content length to the response headers so we can check it later
           [CONTENT_LENGTH_HEADER]: await getContentLength(response.clone()),
         };
 
-        // Clone the response so we can cache it and still read the original response body
-        const clonedResponse = response.clone();
-        const responseHeaders = Array.from(clonedResponse.headers).reduce(
-          (acc, [key, value]) => ({ ...acc, [key]: value }),
-          {}
-        );
-        const cachedResponse = new Response(clonedResponse.body, {
-          ...clonedResponse,
-          headers: { ...responseHeaders, ...headers },
-        });
+        const cachedRequest = createCachedRequest(url, response, headers);
+        const cachedResponse = createCachedResponse(response, headers);
 
-        // Create a request to store the response in the cache
-        const dateHeader = response.headers.get(RESPONSE_DATE_HEADER);
-        const cachedRequest = new Request(url, {
-          headers: dateHeader ? { ...headers, [REQUEST_DATE_HEADER]: dateHeader } : headers,
-        });
-
-        // Cache the response
         await cache?.put(cachedRequest, cachedResponse);
 
         return response;
@@ -195,12 +170,12 @@ export class StaleWhileRevalidateCache {
       return;
     }
 
-    const cacheEntries = [...(await cache.keys())];
+    const cacheRequests = Array.from(await cache.keys());
 
-    // Sort the cache entries by date
-    cacheEntries.sort((a, b) => {
-      const aDate = new Date(a.headers.get(REQUEST_DATE_HEADER) ?? Date.now());
-      const bDate = new Date(b.headers.get(REQUEST_DATE_HEADER) ?? Date.now());
+    // Sort the cache entries by date asc
+    cacheRequests.sort((a, b) => {
+      const aDate = parseRequestDate(a.headers);
+      const bDate = parseRequestDate(b.headers);
 
       return aDate.getTime() - bDate.getTime();
     });
@@ -209,17 +184,17 @@ export class StaleWhileRevalidateCache {
     let contentLength = 0;
 
     await Promise.all(
-      cacheEntries.map(async (cacheEntry) => {
-        const date = new Date(cacheEntry.headers.get(REQUEST_DATE_HEADER) ?? Date.now());
-        const now = new Date();
-        const diff = now.getTime() - date.getTime();
-        const isExpired = diff > this.deps.cacheEntryMaxAgeMs;
+      cacheRequests.map(async (cacheEntry) => {
+        const isExpired = isOlderThanMs(
+          parseRequestDate(cacheEntry.headers),
+          this.deps.cacheEntryMaxAgeMs
+        );
 
         if (isExpired) {
           await cache.delete(cacheEntry);
-          cacheEntries.splice(cacheEntries.indexOf(cacheEntry), 1);
+          cacheRequests.splice(cacheRequests.indexOf(cacheEntry), 1);
         } else {
-          contentLength += parseInt(cacheEntry.headers.get(CONTENT_LENGTH_HEADER) ?? '0', 10);
+          contentLength += parseContentLength(cacheEntry.headers);
         }
       })
     );
@@ -227,12 +202,12 @@ export class StaleWhileRevalidateCache {
     // Delete cache entries until the cache size is below the max size
     if (contentLength > this.deps.cacheMaxSizeBytes) {
       await Promise.all(
-        cacheEntries.map((cacheEntry) => {
+        cacheRequests.map((cacheEntry) => {
           if (contentLength <= this.deps.cacheMaxSizeBytes) {
             return;
           }
 
-          contentLength -= parseInt(cacheEntry.headers.get(CONTENT_LENGTH_HEADER) ?? '0', 10);
+          contentLength -= parseContentLength(cacheEntry.headers);
 
           return cache.delete(cacheEntry);
         })
@@ -243,6 +218,53 @@ export class StaleWhileRevalidateCache {
 
 // We need to clone responses when reusing them since streams can only be read once
 const cloneResponse = (response: Response) => response.clone();
+
+const isOlderThanMs = (date: ConstructorParameters<typeof Date>[0], ms: number) => {
+  const parsedDate = new Date(date);
+  const now = new Date();
+  const diff = now.getTime() - parsedDate.getTime();
+
+  return diff > ms;
+};
+
+const resolveCachedResponse = async ({
+  cache,
+  url,
+  identityHash,
+  version,
+  cacheEntryFreshTimeMs,
+}: {
+  cache: Cache | undefined;
+  url: string;
+  identityHash: string;
+  version: string;
+  cacheEntryFreshTimeMs: number;
+}) => {
+  const cachedResponse = await cache?.match(url);
+
+  if (!cachedResponse) {
+    return {
+      cachedResponse: undefined,
+    };
+  }
+
+  const identityHashHeader = cachedResponse.headers.get(IDENTITY_HASH_HEADER) ?? '';
+  const versionHeader = cachedResponse.headers.get(ELASTIC_HTTP_VERSION_HEADER) ?? '';
+  const dateHeader = cachedResponse.headers.get(RESPONSE_DATE_HEADER);
+
+  // If the identity hash or version doesn't match, or the
+  // response doesn't have a date header, then it's invalid
+  if (identityHash !== identityHashHeader || version !== versionHeader || !dateHeader) {
+    return {
+      cachedResponse: undefined,
+    };
+  }
+
+  return {
+    cachedResponse,
+    isStale: isOlderThanMs(dateHeader, cacheEntryFreshTimeMs),
+  };
+};
 
 // Calculate the content length of a response by reading the entire body
 const getContentLength = async (response: Response) => {
@@ -261,3 +283,34 @@ const getContentLength = async (response: Response) => {
 
   return contentLength.toString();
 };
+
+const createCachedResponse = (response: Response, newHeaders: Record<string, string>) => {
+  // Clone the response so we can cache it and still read the original response body
+  const clonedResponse = response.clone();
+  const clonedHeaders = Array.from(clonedResponse.headers).reduce(
+    (acc, [key, value]) => ({ ...acc, [key]: value }),
+    {}
+  );
+
+  return new Response(clonedResponse.body, {
+    ...clonedResponse,
+    headers: { ...clonedHeaders, ...newHeaders },
+  });
+};
+
+const createCachedRequest = (
+  url: string,
+  response: Response,
+  newHeaders: Record<string, string>
+) => {
+  const dateHeader = response.headers.get(RESPONSE_DATE_HEADER);
+  const headers = dateHeader ? { ...newHeaders, [REQUEST_DATE_HEADER]: dateHeader } : newHeaders;
+
+  return new Request(url, { headers });
+};
+
+const parseRequestDate = (headers: Headers) =>
+  new Date(headers.get(REQUEST_DATE_HEADER) ?? Date.now());
+
+const parseContentLength = (headers: Headers) =>
+  parseInt(headers.get(CONTENT_LENGTH_HEADER) ?? '0', 10);

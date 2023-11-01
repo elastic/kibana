@@ -103,7 +103,6 @@ export class DataViewsPublicPlugin
       onPruneError: console.error,
     });
 
-    debugger;
     this.stopSwrCachePruning = staleWhileRevalidateCache.startPruning();
 
     return new DataViewsServicePublic({
