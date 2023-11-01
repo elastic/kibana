@@ -101,7 +101,7 @@ export const createMultipassHostVmClient = (
   };
 
   const unmount = async (hostVmDir: string) => {
-    await execa.command(`multipass unmount ${name}:${hostVmDir}`);
+    const response = await execa.command(`multipass unmount ${name}:${hostVmDir}`);
     log.verbose(`multipass unmount response:\n`, response);
   };
 
