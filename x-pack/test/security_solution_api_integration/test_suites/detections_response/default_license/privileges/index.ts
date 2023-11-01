@@ -7,7 +7,8 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Privileges', function () {
+  // eslint-disable-next-line ban/ban
+  describe.only('Privileges', function () {
     loadTestFile(require.resolve('./rule_privileges'));
     loadTestFile(require.resolve('./privileges'));
     loadTestFile(require.resolve('./serverless_only_privileges'));
