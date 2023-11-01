@@ -655,7 +655,7 @@ export const enrollHostVmWithFleet = async ({
   const agentEnrollCommand = [
     'sudo',
 
-    `/home/ubuntu/${agentUrlInfo.dirName}/elastic-agent`,
+    `./${agentUrlInfo.dirName}/elastic-agent`,
 
     'install',
 
