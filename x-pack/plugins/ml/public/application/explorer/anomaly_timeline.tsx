@@ -61,7 +61,7 @@ import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
-import { SwimLaneWrapper } from './swim_lane_wrapper';
+import { SwimLaneWrapper } from './alerts';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({

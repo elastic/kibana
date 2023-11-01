@@ -22,13 +22,13 @@ import { i18n } from '@kbn/i18n';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_TIMESTAMP,
-} from '../../../common/constants/alerts';
-import { getAlertEntryFormatter } from '../../alerting/anomaly_detection_alerts_table/render_cell_value';
-import { useMlKibana } from '../contexts/kibana';
-import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import type { AppStateSelectedCells, SwimlaneData } from './explorer_utils';
-import { Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
-import { CELL_HEIGHT } from './swimlane_container';
+} from '../../../../common/constants/alerts';
+import { getAlertEntryFormatter } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
+import { useMlKibana } from '../../contexts/kibana';
+import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
+import type { AppStateSelectedCells, SwimlaneData } from '../explorer_utils';
+import { Y_AXIS_LABEL_WIDTH } from '../swimlane_annotation_container';
+import { CELL_HEIGHT } from '../swimlane_container';
 
 export interface SwimLaneWrapperProps {
   selection?: AppStateSelectedCells | null;
@@ -36,6 +36,10 @@ export interface SwimLaneWrapperProps {
   swimLaneData: SwimlaneData;
 }
 
+/**
+ * Wrapper component for the swim lane
+ * that handles the popover for the selected cells.
+ */
 export const SwimLaneWrapper: FC<SwimLaneWrapperProps> = ({
   children,
   selection,
@@ -70,7 +74,6 @@ export const SwimLaneWrapper: FC<SwimLaneWrapperProps> = ({
       data-test-subj="mlSwimLanePopoverTrigger"
       css={css`
         position: absolute;
-        background: red;
         top: 0;
         visibility: hidden;
       `}

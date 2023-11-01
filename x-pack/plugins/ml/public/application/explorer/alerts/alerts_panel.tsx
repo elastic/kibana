@@ -10,11 +10,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { AnomalyDetectionAlertsOverviewChart } from './alerts';
-import { ML_ALERTS_CONFIG_ID } from '../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
-import { CollapsiblePanel } from '../components/collapsible_panel';
-import { useMlKibana } from '../contexts/kibana';
-import { useAnomalyExplorerContext } from './anomaly_explorer_context';
+import { AnomalyDetectionAlertsOverviewChart } from './chart';
+import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
+import { CollapsiblePanel } from '../../components/collapsible_panel';
+import { useMlKibana } from '../../contexts/kibana';
+import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 
 export const AlertsPanel: FC = () => {
   const {

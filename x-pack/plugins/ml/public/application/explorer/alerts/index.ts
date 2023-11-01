@@ -6,3 +6,5 @@
  */
 
 export { AnomalyDetectionAlertsOverviewChart } from './chart';
+export { AlertsPanel } from './alerts_panel';
+export { SwimLaneWrapper } from './swim_lane_wrapper';

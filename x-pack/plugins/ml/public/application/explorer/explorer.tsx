@@ -78,7 +78,7 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
-import { AlertsPanel } from './alerts_panel';
+import { AlertsPanel } from './alerts';
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
