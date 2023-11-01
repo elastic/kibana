@@ -38,7 +38,7 @@ export const getLogEntryAtTime = (entries: LogEntry[], time: TimeKey) => {
 };
 
 export const isTimestampColumn = (column: LogColumn): column is LogTimestampColumn =>
-  column != null && 'timestamp' in column;
+  column != null && 'time' in column;
 
 export const isMessageColumn = (column: LogColumn): column is LogMessageColumn =>
   column != null && 'message' in column;

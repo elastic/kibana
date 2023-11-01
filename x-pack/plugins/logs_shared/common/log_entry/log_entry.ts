@@ -34,7 +34,7 @@ export type LogMessagePart = rt.TypeOf<typeof logMessagePartRT>;
  * columns
  */
 
-export const logTimestampColumnRT = rt.type({ columnId: rt.string, timestamp: rt.number });
+export const logTimestampColumnRT = rt.type({ columnId: rt.string, time: rt.string });
 export type LogTimestampColumn = rt.TypeOf<typeof logTimestampColumnRT>;
 
 export const logFieldColumnRT = rt.type({

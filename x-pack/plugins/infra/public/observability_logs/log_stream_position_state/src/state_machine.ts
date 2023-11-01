@@ -7,6 +7,7 @@
 
 import { IToasts } from '@kbn/core-notifications-browser';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import moment from 'moment';
 import { actions, ActorRefFrom, createMachine, EmittedFrom, SpecialTargets } from 'xstate';
 import { isSameTimeKey } from '../../../../common/time';
 import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
@@ -162,8 +163,8 @@ export const createPureLogStreamPositionStateMachine = (initialContext: LogStrea
           // Reset the target position if it doesn't fall within the new range.
           const targetPositionShouldReset =
             _context.targetPosition &&
-            (event.timestamps.startTimestamp > _context.targetPosition.time ||
-              event.timestamps.endTimestamp < _context.targetPosition.time);
+            (moment(event.timestamps.startTimestamp).toISOString() > _context.targetPosition.time ||
+              moment(event.timestamps.endTimestamp).toISOString() < _context.targetPosition.time);
 
           return {
             targetPosition: targetPositionShouldReset ? null : _context.targetPosition,

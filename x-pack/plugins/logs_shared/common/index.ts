@@ -44,6 +44,8 @@ export {
 // eslint-disable-next-line @kbn/eslint/no_export_all
 export * from './log_entry';
 
+export { DateFromStringOrNumber } from './time';
+
 // Http types
 export type { LogEntriesSummaryBucket, LogEntriesSummaryHighlightsBucket } from './http_api';
 
