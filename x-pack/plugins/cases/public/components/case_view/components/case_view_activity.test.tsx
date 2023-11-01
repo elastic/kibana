@@ -133,7 +133,7 @@ const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
-
+for (let index = 0; index < 50; index++) {
 describe('Case View Page activity tab', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
 
@@ -537,3 +537,4 @@ describe('Case View Page activity tab', () => {
     });
   });
 });
+}
