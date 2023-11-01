@@ -14,7 +14,7 @@ import { ApplicationStart } from '@kbn/core/public';
 import { Index, IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 
 import { retryLifecycleForIndex } from '../application/services/api';
-import { IndexLifecycleSummary, indexLifecycleTab } from './components/index_lifecycle_summary';
+import { indexLifecycleTab } from './components/index_lifecycle_summary';
 
 import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
 import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
@@ -226,8 +226,4 @@ export const addAllExtensions = (
   extensionsService.addFilter(ilmFilterExtension);
 
   extensionsService.addIndexDetailsTab(indexLifecycleTab);
-
-  extensionsService.setIndexOverviewContent({
-    renderContent: IndexLifecycleSummary,
-  });
 };

@@ -85,7 +85,7 @@ interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
+const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
   const [showPhaseExecutionPopover, setShowPhaseExecutionPopover] = useState<boolean>(false);
   const { ilm } = index;
 
