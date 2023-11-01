@@ -13,7 +13,6 @@ import { Index } from '..';
 
 export interface IndexOverviewContent {
   renderContent: (args: {
-    indexName: string;
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
   }) => ReactNode;

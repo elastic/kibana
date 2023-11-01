@@ -98,7 +98,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       sortedTabs.push(statsTab);
     }
     extensionsService.indexDetailsTabs.forEach((dynamicTab) => {
-      if (dynamicTab.shouldRenderTab && dynamicTab.shouldRenderTab({ index, indexName })) {
+      if (!dynamicTab.shouldRenderTab || dynamicTab.shouldRenderTab({ index, indexName })) {
         sortedTabs.push(dynamicTab);
       }
     });
