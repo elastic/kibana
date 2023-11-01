@@ -246,29 +246,24 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   const keys = new Set([
     ...Object.keys(prevSavedSearch),
     ...Object.keys(nextSavedSearchWithoutSearchSource),
-  ]);
+  ] as Array<keyof Omit<SavedSearch, 'searchSource'>>);
 
   // at least one change in saved search attributes
-  const hasChangesInSavedSearch = [...keys].some((key: string) => {
+  const hasChangesInSavedSearch = [...keys].some((key) => {
     if (
       ['usesAdHocDataView', 'hideChart'].includes(key) &&
-      // @ts-expect-error
       typeof prevSavedSearch[key] === 'undefined' &&
-      // @ts-expect-error
       nextSavedSearchWithoutSearchSource[key] === false
     ) {
       return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
     }
 
-    // @ts-expect-error
     const isSame = isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
 
     if (!isSame) {
       addLog('[savedSearch] difference between initial and changed version', {
         key,
-        // @ts-expect-error
         before: prevSavedSearch[key],
-        // @ts-expect-error
         after: nextSavedSearchWithoutSearchSource[key],
       });
     }
