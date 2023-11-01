@@ -7,7 +7,7 @@
  */
 
 import { createLogger } from '../../lib/utils/create_logger';
-import { getEsClient } from './get_es_client';
+import { getApmEsClient } from './get_apm_es_client';
 import { getLogsEsClient } from './get_logs_es_client';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
@@ -27,7 +27,7 @@ export async function bootstrap(runOptions: RunOptions) {
 
   const version = runOptions.versionOverride || latestPackageVersion;
 
-  const apmEsClient = getEsClient({
+  const apmEsClient = getApmEsClient({
     target: esUrl,
     logger,
     concurrency: runOptions.concurrency,

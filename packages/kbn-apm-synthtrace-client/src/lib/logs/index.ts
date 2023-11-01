@@ -13,7 +13,7 @@ export type LogDocument = Fields &
   Partial<{
     'input.type': string;
     'log.file.path'?: string;
-    'service.name': string;
+    'service.name'?: string;
     'data_stream.namespace': string;
     'data_stream.type': string;
     'data_stream.dataset': string;
@@ -21,6 +21,15 @@ export type LogDocument = Fields &
     'event.dataset': string;
     'log.level'?: string;
     'host.name'?: string;
+    'trace.id'?: string;
+    'agent.name'?: string;
+    'orchestrator.cluster.name'?: string;
+    'orchestrator.resource.id'?: string;
+    'cloud.provider'?: string;
+    'cloud.region'?: string;
+    'cloud.availability_zone'?: string;
+    'cloud.project.id'?: string;
+    'cloud.instance.id'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {
@@ -51,10 +60,9 @@ class Log extends Serializable<LogDocument> {
   }
 }
 
-function service(serviceName: string = 'synth-service'): Log {
+function create(): Log {
   return new Log({
     'input.type': 'logs',
-    'service.name': serviceName,
     'data_stream.namespace': 'default',
     'data_stream.type': 'logs',
     'data_stream.dataset': 'synth',
@@ -64,5 +72,5 @@ function service(serviceName: string = 'synth-service'): Log {
 }
 
 export const log = {
-  service,
+  create,
 };

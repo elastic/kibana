@@ -11,7 +11,7 @@ import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_cl
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 
-export function getEsClient({
+export function getApmEsClient({
   target,
   logger,
   version,
