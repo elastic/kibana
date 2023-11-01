@@ -5,16 +5,9 @@
  * 2.0.
  */
 import Url from 'url';
-import expect from '@kbn/expect';
 import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
-import { setupFleetAndAgents } from '../../fleet_api_integration/apis/agents/services';
-import { generateAgent } from '../../fleet_api_integration/helpers';
-import { FtrProviderContext, FtrProviderContext2 } from '../ftr_provider_context';
-import { createPackagePolicy } from '../../api_integration/apis/cloud_security_posture/helper';
-import { useLocation } from 'react-router-dom';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { FleetManager } from '../../osquery_cypress/fleet_server';
 import { AgentManager } from '../../osquery_cypress/agent';
 import { getLatestAvailableAgentVersion, createAgentPolicy } from '../../osquery_cypress/utils';
@@ -50,13 +43,13 @@ export default function (providerContext2: FtrProviderContext) {
     hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.fleetserver.port'),
   });
-  console.log(elasticUrl)
-  console.log(kibanaUrl)
-  console.log(fleetServerUrl)
+  console.log(elasticUrl);
+  console.log(kibanaUrl);
+  console.log(fleetServerUrl);
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
-  console.log(username)
-  console.log(password)
+  console.log(username);
+  console.log(password);
 
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
