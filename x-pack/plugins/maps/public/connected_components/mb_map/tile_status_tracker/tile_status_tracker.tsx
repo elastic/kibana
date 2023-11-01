@@ -86,6 +86,18 @@ export class TileStatusTracker extends Component<Props> {
       if (layerId && !this._layerCache.has(layerId)) {
         this._layerCache.set(layerId, true);
       }
+      // clear tile errors when tile starts loading
+      if (layerId && this._tileErrorCache[layerId]) {
+        const tileZXYKey = getTileZXYKey(e.tile.tileID.canonical);
+        const tileErrorIndex = this._tileErrorCache[layerId].findIndex((tileError) => {
+          return tileError.tileZXYKey === tileZXYKey;
+        });
+
+        if (tileErrorIndex >= 0) {
+          this._tileErrorCache[layerId].splice(tileErrorIndex, 1);
+          this._updateTileStatusForAllLayers();
+        }
+      }
 
       const tracked = this._tileCache.find((tile) => {
         return (
@@ -127,7 +139,7 @@ export class TileStatusTracker extends Component<Props> {
       }
 
       const layerId = targetLayer.getId();
-      const tileZXYKey = `${e.tile.tileID.canonical.z}/${e.tile.tileID.canonical.x}/${e.tile.tileID.canonical.y}`;
+      const tileZXYKey = getTileZXYKey(e.tile.tileID.canonical);
       const ajaxError =
         'body' in e.error && 'statusText' in e.error ? (e.error as AJAXError) : undefined;
       const layerErrors = this._tileErrorCache[layerId] ? this._tileErrorCache[layerId] : [];
@@ -270,4 +282,8 @@ export class TileStatusTracker extends Component<Props> {
   render() {
     return null;
   }
+}
+
+function getTileZXYKey(canonical: { x: number; y: number; z: number; }) {
+  return `${canonical.z}/${canonical.x}/${canonical.y}`;
 }
