@@ -7,13 +7,19 @@
  */
 
 import type { HttpFetchOptions, HttpSetup } from '@kbn/core-http-browser';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { format } from 'url';
-
-const IDENTITY_HASH_HEADER = 'x-swr-identity-hash';
-const CONTENT_LENGTH_HEADER = 'x-swr-content-length';
-const REQUEST_DATE_HEADER = 'x-swr-date';
-const RESPONSE_DATE_HEADER = 'date';
+import {
+  cloneResponse,
+  CONTENT_LENGTH_HEADER,
+  createCachedRequest,
+  createCachedResponse,
+  getContentLength,
+  IDENTITY_HASH_HEADER,
+  isOlderThanMs,
+  parseContentLength,
+  parseRequestDate,
+  resolveCachedResponse,
+} from './stale_while_revalidate_utils';
 
 export interface StaleWhileRevalidateCacheDependencies {
   http: HttpSetup;
@@ -99,7 +105,6 @@ export class StaleWhileRevalidateCache {
         rawResponse: true,
       })
       .then(async ({ response }) => {
-        // This shouldn't happen, but just in case
         if (!response) {
           throw new Error('Response is undefined');
         }
@@ -112,7 +117,7 @@ export class StaleWhileRevalidateCache {
         // Create shared headers to store some metadata about the response
         const headers = {
           [IDENTITY_HASH_HEADER]: identityHash,
-          [CONTENT_LENGTH_HEADER]: await getContentLength(response.clone()),
+          [CONTENT_LENGTH_HEADER]: await getContentLength(response),
         };
 
         const cachedRequest = createCachedRequest(url, response, headers);
@@ -138,7 +143,7 @@ export class StaleWhileRevalidateCache {
   }
 
   // Starts pruning immediately and then sets up a timer to execute prune periodically,
-  // waiting for the previous prune to finish before starting a new one.
+  // waiting for the previous prune to finish before calculating the next interval.
   startPruning() {
     let pruneTimeout: ReturnType<typeof setTimeout>;
 
@@ -215,102 +220,3 @@ export class StaleWhileRevalidateCache {
     }
   }
 }
-
-// We need to clone responses when reusing them since streams can only be read once
-const cloneResponse = (response: Response) => response.clone();
-
-const isOlderThanMs = (date: ConstructorParameters<typeof Date>[0], ms: number) => {
-  const parsedDate = new Date(date);
-  const now = new Date();
-  const diff = now.getTime() - parsedDate.getTime();
-
-  return diff > ms;
-};
-
-const resolveCachedResponse = async ({
-  cache,
-  url,
-  identityHash,
-  version,
-  cacheEntryFreshTimeMs,
-}: {
-  cache: Cache | undefined;
-  url: string;
-  identityHash: string;
-  version: string;
-  cacheEntryFreshTimeMs: number;
-}) => {
-  const cachedResponse = await cache?.match(url);
-
-  if (!cachedResponse) {
-    return {
-      cachedResponse: undefined,
-    };
-  }
-
-  const identityHashHeader = cachedResponse.headers.get(IDENTITY_HASH_HEADER) ?? '';
-  const versionHeader = cachedResponse.headers.get(ELASTIC_HTTP_VERSION_HEADER) ?? '';
-  const dateHeader = cachedResponse.headers.get(RESPONSE_DATE_HEADER);
-
-  // If the identity hash or version doesn't match, or the
-  // response doesn't have a date header, then it's invalid
-  if (identityHash !== identityHashHeader || version !== versionHeader || !dateHeader) {
-    return {
-      cachedResponse: undefined,
-    };
-  }
-
-  return {
-    cachedResponse,
-    isStale: isOlderThanMs(dateHeader, cacheEntryFreshTimeMs),
-  };
-};
-
-// Calculate the content length of a response by reading the entire body
-const getContentLength = async (response: Response) => {
-  if (!response.body) {
-    return '0';
-  }
-
-  const reader = response.body.getReader();
-  let contentLength = 0;
-  let chunk = await reader.read();
-
-  while (!chunk.done) {
-    contentLength += chunk.value.length;
-    chunk = await reader.read();
-  }
-
-  return contentLength.toString();
-};
-
-const createCachedResponse = (response: Response, newHeaders: Record<string, string>) => {
-  // Clone the response so we can cache it and still read the original response body
-  const clonedResponse = response.clone();
-  const clonedHeaders = Array.from(clonedResponse.headers).reduce(
-    (acc, [key, value]) => ({ ...acc, [key]: value }),
-    {}
-  );
-
-  return new Response(clonedResponse.body, {
-    ...clonedResponse,
-    headers: { ...clonedHeaders, ...newHeaders },
-  });
-};
-
-const createCachedRequest = (
-  url: string,
-  response: Response,
-  newHeaders: Record<string, string>
-) => {
-  const dateHeader = response.headers.get(RESPONSE_DATE_HEADER);
-  const headers = dateHeader ? { ...newHeaders, [REQUEST_DATE_HEADER]: dateHeader } : newHeaders;
-
-  return new Request(url, { headers });
-};
-
-const parseRequestDate = (headers: Headers) =>
-  new Date(headers.get(REQUEST_DATE_HEADER) ?? Date.now());
-
-const parseContentLength = (headers: Headers) =>
-  parseInt(headers.get(CONTENT_LENGTH_HEADER) ?? '0', 10);
