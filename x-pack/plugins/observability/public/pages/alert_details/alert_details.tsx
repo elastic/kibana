@@ -75,6 +75,7 @@ export function AlertDetails() {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
         defaultMessage: 'Alerts',
       }),
+      deepLinkId: 'observability-overview:alerts',
     },
     {
       text: alert ? pageTitleContent(alert.fields[ALERT_RULE_CATEGORY]) : defaultBreadcrumb,
