@@ -38,7 +38,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     const cacheOptions = forceRefresh ? { cache: 'reload' } : {};
     const request = body
       ? this.http.post<T>(url, { query, body, version })
-      : this.http.fetch<T>(url, { query, version, headers });
+      : this.http.fetch<T>(url, { query, version, ...cacheOptions });
     return request.catch((resp) => {
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
