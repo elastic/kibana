@@ -51,7 +51,7 @@ describe('create', () => {
 
   describe('Assignees', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -112,7 +112,7 @@ describe('create', () => {
 
   describe('Attributes', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -130,7 +130,7 @@ describe('create', () => {
 
   describe('title', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -173,7 +173,7 @@ describe('create', () => {
     it('should trim title', async () => {
       await create({ ...theCase, title: 'title with spaces      ' }, clientArgs, casesClientMock);
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -199,7 +199,7 @@ describe('create', () => {
 
   describe('description', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -250,7 +250,7 @@ describe('create', () => {
         casesClientMock
       );
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -276,7 +276,7 @@ describe('create', () => {
 
   describe('tags', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -329,7 +329,7 @@ describe('create', () => {
     it('should trim tags', async () => {
       await create({ ...theCase, tags: ['pepsi     ', 'coke'] }, clientArgs, casesClientMock);
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -355,7 +355,7 @@ describe('create', () => {
 
   describe('Category', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -396,7 +396,7 @@ describe('create', () => {
     it('should trim category', async () => {
       await create({ ...theCase, category: 'reporting       ' }, clientArgs, casesClientMock);
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -421,7 +421,7 @@ describe('create', () => {
 
   describe('Custom Fields', () => {
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     const casesClient = createCasesClientMock();
     casesClient.configure.get = jest.fn().mockResolvedValue([
@@ -473,7 +473,7 @@ describe('create', () => {
         )
       ).resolves.not.toThrow();
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -517,7 +517,7 @@ describe('create', () => {
       ]);
       await expect(create({ ...theCase }, clientArgs, casesClient)).resolves.not.toThrow();
 
-      expect(clientArgs.services.caseService.postNewCase).toHaveBeenCalledWith(
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
           attributes: {
             ...theCase,
@@ -758,7 +758,7 @@ describe('create', () => {
 
     const casesClient = createCasesClientMock();
     const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.postNewCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     casesClient.configure.get = jest.fn().mockResolvedValue([
       {

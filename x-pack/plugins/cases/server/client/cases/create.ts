@@ -94,7 +94,7 @@ export const create = async (
       }),
     };
 
-    const newCase = await caseService.postNewCase({
+    const newCase = await caseService.createCase({
       attributes: transformNewCase({
         user,
         newCase: normalizedQuery,

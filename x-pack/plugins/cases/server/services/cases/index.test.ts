@@ -667,7 +667,7 @@ describe('CasesService', () => {
       it('creates a null external_service field when the attribute was null in the creation parameters', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({ connector: createJiraConnector() }),
           id: '1',
         });
@@ -680,7 +680,7 @@ describe('CasesService', () => {
       it('includes the creation attributes excluding the connector.id and connector_id', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({
             connector: createJiraConnector(),
             externalService: createExternalService(),
@@ -780,7 +780,7 @@ describe('CasesService', () => {
       it('includes default values for total_alerts and total_comments', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({
             connector: getNoneCaseConnector(),
           }),
@@ -797,7 +797,7 @@ describe('CasesService', () => {
       it('moves the connector.id and connector_id to the references', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({
             connector: createJiraConnector(),
             externalService: createExternalService(),
@@ -826,7 +826,7 @@ describe('CasesService', () => {
       it('sets fields to an empty array when it is not included with the connector', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({
             connector: createJiraConnector({ setFieldsToNull: true }),
             externalService: createExternalService(),
@@ -842,7 +842,7 @@ describe('CasesService', () => {
       it('does not create a reference for a none connector', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
           id: '1',
         });
@@ -855,7 +855,7 @@ describe('CasesService', () => {
       it('does not create a reference for an external_service field that is null', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
           id: '1',
         });
@@ -875,7 +875,7 @@ describe('CasesService', () => {
         async (postParamsSeverity, expectedSeverity) => {
           unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-          await service.postNewCase({
+          await service.createCase({
             attributes: createCasePostParams({
               connector: getNoneCaseConnector(),
               severity: postParamsSeverity,
@@ -898,7 +898,7 @@ describe('CasesService', () => {
         async (postParamsStatus, expectedStatus) => {
           unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-          await service.postNewCase({
+          await service.createCase({
             attributes: createCasePostParams({
               connector: getNoneCaseConnector(),
               status: postParamsStatus,
@@ -1373,7 +1373,7 @@ describe('CasesService', () => {
           })
         );
 
-        const res = await service.postNewCase({
+        const res = await service.createCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
           id: '1',
         });
@@ -1394,7 +1394,7 @@ describe('CasesService', () => {
             createCaseSavedObjectResponse({ overrides: { severity: internalSeverityValue } })
           );
 
-          const res = await service.postNewCase({
+          const res = await service.createCase({
             attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
             id: '1',
           });
@@ -1414,7 +1414,7 @@ describe('CasesService', () => {
             createCaseSavedObjectResponse({ overrides: { status: internalStatusValue } })
           );
 
-          const res = await service.postNewCase({
+          const res = await service.createCase({
             attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
             id: '1',
           });
@@ -1426,7 +1426,7 @@ describe('CasesService', () => {
       it('does not include total_alerts and total_comments fields in the response', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse({}));
 
-        const res = await service.postNewCase({
+        const res = await service.createCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
           id: '1',
         });
@@ -2474,7 +2474,7 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
         await expect(
-          service.postNewCase({
+          service.createCase({
             attributes: createCasePostParams({ connector: createJiraConnector() }),
             id: '1',
           })
@@ -2489,7 +2489,7 @@ describe('CasesService', () => {
           unsecuredSavedObjectsClient.create.mockResolvedValue({ ...theCase, attributes });
 
           await expect(
-            service.postNewCase({
+            service.createCase({
               attributes: createCasePostParams({ connector: createJiraConnector() }),
               id: '1',
             })
@@ -2503,7 +2503,7 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue({ ...theCase, attributes });
 
         await expect(
-          service.postNewCase({
+          service.createCase({
             attributes: createCasePostParams({ connector: createJiraConnector() }),
             id: '1',
           })
@@ -2740,7 +2740,7 @@ describe('CasesService', () => {
       it('decodes correctly the requested attributes', async () => {
         const attributes = createCasePostParams({ connector: createJiraConnector() });
 
-        await expect(service.postNewCase({ id: 'a', attributes })).resolves.not.toThrow();
+        await expect(service.createCase({ id: 'a', attributes })).resolves.not.toThrow();
       });
 
       it('throws if title is omitted', async () => {
@@ -2748,7 +2748,7 @@ describe('CasesService', () => {
         unset(attributes, 'title');
 
         await expect(
-          service.postNewCase({
+          service.createCase({
             attributes,
             id: '1',
           })
@@ -2761,7 +2761,7 @@ describe('CasesService', () => {
           foo: 'bar',
         };
 
-        await expect(service.postNewCase({ id: 'a', attributes })).resolves.not.toThrow();
+        await expect(service.createCase({ id: 'a', attributes })).resolves.not.toThrow();
 
         const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
         expect(persistedAttributes).not.toHaveProperty('foo');
