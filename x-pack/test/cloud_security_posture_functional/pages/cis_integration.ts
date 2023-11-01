@@ -65,6 +65,19 @@ export default function (providerContext: FtrProviderContext) {
           ).includes('https://console.aws.amazon.com/cloudformation/')
         ).to.be(true);
       });
+
+      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
+        await cisIntegration.navigateToAddIntegrationCnvmPage();
+        await cisIntegrationGcp.clickSaveButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
+        expect(
+          (
+            await cisIntegration.clickLaunchAndGetCurrentUrl(
+              'confirmCloudFormationModalConfirmButton'
+            )
+          ).includes('console.aws.amazon.com%2Fcloudformation')
+        ).to.be(true);
+      });
     });
 
     describe('CIS_AWS', () => {
@@ -92,6 +105,18 @@ export default function (providerContext: FtrProviderContext) {
               'href'
             )
           ).includes('https://console.aws.amazon.com/cloudformation/')
+        ).to.be(true);
+      });
+      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
+        await cisIntegrationGcp.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegrationGcp.clickSaveButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
+        expect(
+          (
+            await cisIntegration.clickLaunchAndGetCurrentUrl(
+              'confirmCloudFormationModalConfirmButton'
+            )
+          ).includes('console.aws.amazon.com%2Fcloudformation')
         ).to.be(true);
       });
     });
@@ -177,6 +202,19 @@ export default function (providerContext: FtrProviderContext) {
           (await cisIntegration.getUrlOnPostInstallModal()) ===
             'https://cloud.google.com/shell/docs'
         );
+      });
+
+      it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page', async () => {
+        await cisIntegrationGcp.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
+        await cisIntegrationGcp.clickSaveButton();
+        pageObjects.header.waitUntilLoadingHasFinished();
+        expect(
+          (
+            await cisIntegration.clickLaunchAndGetCurrentUrl(
+              'confirmGoogleCloudShellModalConfirmButton'
+            )
+          ).includes('shell.cloud.google.com%2Fcloudshell')
+        ).to.be(true);
       });
     });
 

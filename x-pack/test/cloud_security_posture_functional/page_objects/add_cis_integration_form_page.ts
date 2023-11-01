@@ -13,6 +13,7 @@ export function AddCisIntegrationFormPageProvider({
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
+  const browser = getService('browser');
 
   const cisAws = {
     getUrlValueInEditPage: async () => {
@@ -164,6 +165,16 @@ export function AddCisIntegrationFormPageProvider({
     await integrationList[0].click();
   };
 
+  const clickLaunchAndGetCurrentUrl = async (buttonId: string) => {
+    const button = await testSubjects.find(buttonId);
+    await button.click();
+    await browser.switchTab(1);
+    await new Promise((r) => setTimeout(r, 3000));
+    const currentUrl = await browser.getCurrentUrl();
+    await browser.switchTab(0);
+    return currentUrl;
+  };
+
   return {
     cisAws,
     cisGcp,
@@ -175,5 +186,6 @@ export function AddCisIntegrationFormPageProvider({
     clickPolicyToBeEdited,
     clickFirstElementOnIntegrationTable,
     clickFirstElementOnIntegrationTableAddAgent,
+    clickLaunchAndGetCurrentUrl,
   };
 }
