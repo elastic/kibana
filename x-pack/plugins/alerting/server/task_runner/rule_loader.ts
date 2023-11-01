@@ -80,11 +80,7 @@ export function validateRule<Params extends RuleTypeParams>(
   try {
     ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
   } catch (err) {
-    throw new ErrorWithReason(
-      RuleExecutionStatusErrorReasons.License,
-      err,
-      TaskErrorSource.RULE_TYPE
-    );
+    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err, TaskErrorSource.USER);
   }
 
   let validatedParams: Params;

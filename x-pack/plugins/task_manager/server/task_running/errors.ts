@@ -18,8 +18,6 @@ const source = Symbol('TaskManagerErrorSource');
 export enum TaskErrorSource {
   FRAMEWORK = 'framework',
   USER = 'user',
-  RULE_TYPE = 'rule_type',
-  CONNECTOR_TYPE = 'connector_type',
 }
 
 export interface TaskRunError extends Error {
