@@ -443,7 +443,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page: 1,
       perPage: 10_000,
-      filter: undefined,
+      filter: `exception-list-agnostic.attributes.created_at > ${moment
+        .utc()
+        .subtract(24, 'hours')
+        .valueOf()}`,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
