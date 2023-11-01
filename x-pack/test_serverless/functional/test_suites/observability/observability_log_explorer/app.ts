@@ -56,14 +56,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 function generateLogsData({ from, to, count = 1 }: { from: string; to: string; count: number }) {
   const range = timerange(from, to);
 
-  const services = Array(count)
-    .fill(0)
-    .map((_, idx) => log.service(`service-${idx}`));
-
   return range
     .interval('1m')
     .rate(1)
-    .generator((timestamp, index) =>
-      services.map((service) => service.message('A sample log').timestamp(timestamp))
+    .generator((timestamp) =>
+      Array(count)
+        .fill(0)
+        .map(() => {
+          return log.create().message('A sample log').timestamp(timestamp);
+        })
     );
 }
