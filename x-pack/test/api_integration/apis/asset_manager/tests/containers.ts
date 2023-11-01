@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(response.body).to.have.property('containers');
-      expect(response.body.hosts.length).to.equal(5);
+      expect(response.body.containers.length).to.equal(5);
     });
 
     it('should return a specific container asset by EAN', async () => {
