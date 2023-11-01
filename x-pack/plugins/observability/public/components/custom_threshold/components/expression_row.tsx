@@ -220,7 +220,7 @@ const ThresholdElement: React.FC<{
         onChangeSelectedThreshold={updateThreshold}
         errors={errors}
         display="fullWidth"
-        isMetricPct={isMetricPct}
+        unit={isMetricPct ? '%' : ''}
       />
     </>
   );
