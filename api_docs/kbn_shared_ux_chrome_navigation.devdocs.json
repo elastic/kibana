@@ -1258,6 +1258,42 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+        "id": "def-common.ContentProvider",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentProvider",
+        "description": [],
+        "signature": [
+          "(nodeId: string) => void | ",
+          {
+            "pluginId": "@kbn/shared-ux-chrome-navigation",
+            "scope": "common",
+            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
+            "section": "def-common.PanelContent",
+            "text": "PanelContent"
+          }
+        ],
+        "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-common.ContentProvider.$1",
+            "type": "string",
+            "tags": [],
+            "label": "nodeId",
+            "description": [],
+            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
         "id": "def-common.NavigationGroupPreset",
         "type": "Type",
         "tags": [],

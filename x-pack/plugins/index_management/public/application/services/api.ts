@@ -85,14 +85,27 @@ export async function deleteDataStreams(dataStreams: string[]) {
 
 export async function updateDataRetention(
   name: string,
-  data: { dataRetention: string; timeUnit: string; infiniteRetentionPeriod: boolean }
+  data: {
+    dataRetention: string;
+    timeUnit: string;
+    infiniteRetentionPeriod: boolean;
+    dataRetentionEnabled: boolean;
+  }
 ) {
+  let body;
+
+  if (!data.dataRetentionEnabled) {
+    body = { enabled: false };
+  } else {
+    body = data.infiniteRetentionPeriod
+      ? {}
+      : { dataRetention: `${data.dataRetention}${data.timeUnit}` };
+  }
+
   return sendRequest({
     path: `${API_BASE_PATH}/data_streams/${encodeURIComponent(name)}/data_retention`,
     method: 'put',
-    body: data.infiniteRetentionPeriod
-      ? {}
-      : { dataRetention: `${data.dataRetention}${data.timeUnit}` },
+    body,
   });
 }
 
