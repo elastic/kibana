@@ -14,16 +14,15 @@ import { DetailsPageOverview } from './details_page_overview';
 interface Props {
   tabs: IndexDetailsTab[];
   tab: IndexDetailsTabId;
-  indexName: string;
   index: Index;
 }
-export const DetailsPageTab: FunctionComponent<Props> = ({ tabs, tab, indexName, index }) => {
+export const DetailsPageTab: FunctionComponent<Props> = ({ tabs, tab, index }) => {
   const selectedTab = tabs.find((tabConfig) => tabConfig.id === tab);
   const {
     core: { getUrlForApp },
   } = useAppContext();
   return selectedTab ? (
-    selectedTab.renderTabContent({ indexName, index, getUrlForApp })
+    selectedTab.renderTabContent({ index, getUrlForApp })
   ) : (
     <DetailsPageOverview indexDetails={index} />
   );

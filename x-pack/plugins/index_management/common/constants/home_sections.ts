@@ -33,11 +33,10 @@ export interface IndexDetailsTab {
   name: ReactNode;
   // a function that renders the content of the tab
   renderTabContent: (args: {
-    indexName: string;
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
   }) => ReturnType<FunctionComponent>;
   // a number to specify the order of the tabs
   order: number;
-  shouldRenderTab?: (args: { indexName: string; index?: Index | null }) => boolean;
+  shouldRenderTab?: (args: { index: Index }) => boolean;
 }

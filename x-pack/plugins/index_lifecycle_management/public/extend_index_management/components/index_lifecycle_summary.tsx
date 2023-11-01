@@ -258,6 +258,6 @@ export const indexLifecycleTab: IndexDetailsTab = {
   order: 50,
   renderTabContent: IndexLifecycleSummary,
   shouldRenderTab: ({ index }) => {
-    return !!index && !!index.ilm && index.ilm.managed;
+    return !!index.ilm && index.ilm.managed;
   },
 };

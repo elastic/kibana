@@ -41,7 +41,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.overviewTitle" defaultMessage="Overview" />
     ),
-    renderTabContent: ({ indexName, index }) => <DetailsPageOverview indexDetails={index} />,
+    renderTabContent: ({ index }) => <DetailsPageOverview indexDetails={index} />,
     order: 10,
   },
   {
@@ -49,7 +49,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.mappingsTitle" defaultMessage="Mappings" />
     ),
-    renderTabContent: ({ indexName, index }) => <DetailsPageMappings indexName={indexName} />,
+    renderTabContent: ({ index }) => <DetailsPageMappings indexName={index.name} />,
     order: 20,
   },
   {
@@ -57,8 +57,8 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.settingsTitle" defaultMessage="Settings" />
     ),
-    renderTabContent: ({ indexName, index }) => (
-      <DetailsPageSettings indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
+    renderTabContent: ({ index }) => (
+      <DetailsPageSettings indexName={index.name} isIndexOpen={index.status === INDEX_OPEN} />
     ),
     order: 30,
   },
@@ -67,21 +67,19 @@ const defaultTabs: IndexDetailsTab[] = [
 const statsTab: IndexDetailsTab = {
   id: IndexDetailsSection.Stats,
   name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Statistics" />,
-  renderTabContent: ({ indexName, index }) => (
-    <DetailsPageStats indexName={indexName} isIndexOpen={index.status === INDEX_OPEN} />
+  renderTabContent: ({ index }) => (
+    <DetailsPageStats indexName={index.name} isIndexOpen={index.status === INDEX_OPEN} />
   ),
   order: 40,
 };
 
 interface Props {
-  indexName: string;
   index: Index;
   tab: IndexDetailsTabId;
   history: RouteComponentProps['history'];
   fetchIndexDetails: () => Promise<void>;
 }
 export const DetailsPageContent: FunctionComponent<Props> = ({
-  indexName,
   index,
   tab,
   history,
@@ -98,7 +96,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       sortedTabs.push(statsTab);
     }
     extensionsService.indexDetailsTabs.forEach((dynamicTab) => {
-      if (!dynamicTab.shouldRenderTab || dynamicTab.shouldRenderTab({ index, indexName })) {
+      if (!dynamicTab.shouldRenderTab || dynamicTab.shouldRenderTab({ index })) {
         sortedTabs.push(dynamicTab);
       }
     });
@@ -107,13 +105,13 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       return tabA.order - tabB.order;
     });
     return sortedTabs;
-  }, [enableIndexStats, extensionsService.indexDetailsTabs, index, indexName]);
+  }, [enableIndexStats, extensionsService.indexDetailsTabs, index]);
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
-      return history.push(getIndexDetailsLink(indexName, newSection));
+      return history.push(getIndexDetailsLink(index.name, newSection));
     },
-    [history, indexName]
+    [history, index]
   );
 
   const navigateToAllIndices = useCallback(() => {
@@ -149,13 +147,12 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       <EuiSpacer size="l" />
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
-        pageTitle={indexName}
+        pageTitle={index.name}
         bottomBorder
         rightSideItems={[
-          <DiscoverLink indexName={indexName} asButton={true} />,
+          <DiscoverLink indexName={index.name} asButton={true} />,
           <ManageIndexButton
-            indexName={indexName}
-            indexDetails={index}
+            index={index}
             reloadIndexDetails={fetchIndexDetails}
             navigateToAllIndices={navigateToAllIndices}
           />,
@@ -173,7 +170,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
           height: 100%;
         `}
       >
-        <DetailsPageTab tabs={tabs} tab={tab} indexName={indexName} index={index} />
+        <DetailsPageTab tabs={tabs} tab={tab} index={index} />
       </div>
     </>
   );

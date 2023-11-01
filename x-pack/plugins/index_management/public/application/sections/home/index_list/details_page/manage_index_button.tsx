@@ -41,21 +41,19 @@ const getIndexStatusByName = (
 };
 
 interface Props {
-  indexName: string;
-  indexDetails: Index;
+  index: Index;
   reloadIndexDetails: () => Promise<void>;
   navigateToAllIndices: () => void;
 }
 export const ManageIndexButton: FunctionComponent<Props> = ({
-  indexName,
-  indexDetails,
+  index,
   reloadIndexDetails,
   navigateToAllIndices,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // the variables are created to write the index actions in a way to later re-use for indices list without redux
-  const indexNames = useMemo(() => [indexName], [indexName]);
+  const indexNames = useMemo(() => [index.name], [index]);
 
   const reloadIndices = useCallback(async () => {
     setIsLoading(true);
@@ -63,7 +61,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     setIsLoading(false);
   }, [reloadIndexDetails]);
 
-  const indices = [indexDetails];
+  const indices = [index];
   const indexStatusByName = getIndexStatusByName(indexNames, indices);
 
   const closeIndices = useCallback(async () => {
