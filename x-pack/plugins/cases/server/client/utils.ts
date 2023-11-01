@@ -363,7 +363,7 @@ export const buildCustomFieldsFilter = ({
     const filterKey = Object.keys(filter)[0];
 
     const customFieldKeyFilter = fromKueryExpression(
-      `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${filterKey}}`,
+      `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${filterKey}}`
     );
 
     const customFieldValueFilter = Object.values(filter[filterKey].value).map((filterValue) => {
