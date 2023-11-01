@@ -103,6 +103,12 @@ export const getSLOSummaryPipelineTemplate = (id: string) => ({
         field: '_enrich',
       },
     },
+    {
+      set: {
+        field: 'summaryUpdatedAt',
+        value: '{{{_ingest.timestamp}}}',
+      },
+    },
   ],
   _meta: {
     description: 'SLO summary ingest pipeline',

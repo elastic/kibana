@@ -130,7 +130,7 @@ export const SUMMARY_TIMESLICES_30D_ROLLING: TransformPutTransformRequest = {
           },
         },
       },
-      lastUpdatedAt: {
+      latestSliTimestamp: {
         max: {
           field: '@timestamp',
         },

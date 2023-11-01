@@ -118,7 +118,11 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
         isTempDoc: {
           type: 'boolean',
         },
-        lastUpdatedAt: {
+        latestSliTimestamp: {
+          type: 'date',
+          format: 'date_optional_time||epoch_millis',
+        },
+        summaryUpdatedAt: {
           type: 'date',
           format: 'date_optional_time||epoch_millis',
         },

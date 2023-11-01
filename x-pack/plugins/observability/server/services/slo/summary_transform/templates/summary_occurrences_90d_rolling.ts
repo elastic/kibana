@@ -130,7 +130,7 @@ export const SUMMARY_OCCURRENCES_90D_ROLLING: TransformPutTransformRequest = {
           },
         },
       },
-      lastUpdatedAt: {
+      latestSliTimestamp: {
         max: {
           field: '@timestamp',
         },
