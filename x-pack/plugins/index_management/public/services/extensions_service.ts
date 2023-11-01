@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexDetailsTab } from '../../common/constants';
 import { ReactNode } from 'react';
 import { ApplicationStart } from '@kbn/core-application-browser';
+import type { IndexDetailsTab } from '../../common/constants';
 import { Index } from '..';
 
 export interface IndexOverviewCard {
@@ -92,10 +92,10 @@ export class ExtensionsService {
   }
 
   private addIndexDetailsTab(tab: IndexDetailsTab) {
-      this._indexDetailsTabs.push(tab);
+    this._indexDetailsTabs.push(tab);
   }
 
-    private addIndexOverviewCard(card: IndexOverviewCard) {
+  private addIndexOverviewCard(card: IndexOverviewCard) {
     this._indexOverview.cards.push(card);
   }
 

@@ -23,7 +23,9 @@ export const IndexOverviewCards: FunctionComponent<{ index: Index }> = ({ index 
     }
     return (
       <Fragment key={`extensionsSummary-${i}`}>
-        <EuiPanel data-test-subj={`extensionsSummary-${i}`} hasBorder={true}>{card}</EuiPanel>
+        <EuiPanel data-test-subj={`extensionsSummary-${i}`} hasBorder={true}>
+          {card}
+        </EuiPanel>
         <EuiSpacer />
       </Fragment>
     );

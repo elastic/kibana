@@ -55,7 +55,11 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
     size,
     primary_size: primarySize,
   } = indexDetails;
-  const { core, plugins, services: { extensionsService } } = useAppContext();
+  const {
+    core,
+    plugins,
+    services: { extensionsService },
+  } = useAppContext();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsOverview);
