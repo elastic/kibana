@@ -10,12 +10,20 @@ import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 
 import React from 'react';
-import { IndexDetailsSection } from '../../../common/constants';
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
+
+import {
+  IndexDetailsSection,
+  IndexDetailsTab,
+  IndexDetailsTabIds,
+} from '../../../common/constants';
+import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
+
 import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
+import { humanizeTimeStamp } from '../../../public/application/sections/home/data_stream_list/humanize_time_stamp';
+import { createDataStreamPayload } from '../home/data_streams_tab.helpers';
 import {
   testIndexEditableSettingsAll,
   testIndexEditableSettingsLimited,
@@ -230,13 +238,149 @@ describe('<IndexDetailsPage />', () => {
       );
     });
 
-    it('renders index details', () => {
-      expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
-      expect(testBed.actions.overview.indexStatsContentExists()).toBe(true);
-      expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
+    it('renders storage details', () => {
+      const storageDetails = testBed.actions.overview.getStorageDetailsContent();
+      expect(storageDetails).toBe(
+        `Storage${testIndexMock.primary_size}Primary${testIndexMock.size}TotalShards${testIndexMock.primary} Primary / ${testIndexMock.replica} Replicas `
+      );
     });
 
-    it('hides index stats from detail panels if enableIndexStats===false', async () => {
+    it('renders status details', () => {
+      const statusDetails = testBed.actions.overview.getStatusDetailsContent();
+      expect(statusDetails).toBe(
+        `Status${'Open'}${'Healthy'}${testIndexMock.documents} Document / ${
+          testIndexMock.documents_deleted
+        } Deleted`
+      );
+    });
+
+    describe('aliases', () => {
+      it('not rendered when no aliases', async () => {
+        const aliasesExist = testBed.actions.overview.aliasesDetailsExist();
+        expect(aliasesExist).toBe(false);
+      });
+
+      it('renders less than 3 aliases', async () => {
+        const aliases = ['test_alias1', 'test_alias2'];
+        const testWith2Aliases = {
+          ...testIndexMock,
+          aliases,
+        };
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWith2Aliases);
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const aliasesExist = testBed.actions.overview.aliasesDetailsExist();
+        expect(aliasesExist).toBe(true);
+
+        const aliasesContent = testBed.actions.overview.getAliasesDetailsContent();
+        expect(aliasesContent).toBe(
+          `Aliases${aliases.length}AliasesView all aliases${aliases.join('')}`
+        );
+      });
+
+      it('renders more than 3 aliases', async () => {
+        const aliases = ['test_alias1', 'test_alias2', 'test_alias3', 'test_alias4', 'test_alias5'];
+        const testWith5Aliases = {
+          ...testIndexMock,
+          aliases,
+        };
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWith5Aliases);
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const aliasesExist = testBed.actions.overview.aliasesDetailsExist();
+        expect(aliasesExist).toBe(true);
+
+        const aliasesContent = testBed.actions.overview.getAliasesDetailsContent();
+        expect(aliasesContent).toBe(
+          `Aliases${aliases.length}AliasesView all aliases${aliases.slice(0, 3).join('')}+${2}`
+        );
+      });
+    });
+
+    describe('data stream', () => {
+      it('not rendered when no data stream', async () => {
+        const aliasesExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(aliasesExist).toBe(false);
+      });
+
+      it('renders data stream details', async () => {
+        const dataStreamName = 'test_data_stream';
+        const testWithDataStream: Index = {
+          ...testIndexMock,
+          data_stream: dataStreamName,
+        };
+        const dataStreamDetails = createDataStreamPayload({
+          name: dataStreamName,
+          generation: 5,
+          maxTimeStamp: 1696600607689,
+        });
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWithDataStream);
+        httpRequestsMockHelpers.setLoadDataStreamResponse(dataStreamName, dataStreamDetails);
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const dataStreamDetailsExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(dataStreamDetailsExist).toBe(true);
+
+        const dataStreamContent = testBed.actions.overview.getDataStreamDetailsContent();
+        expect(dataStreamContent).toBe(
+          `Data stream${
+            dataStreamDetails.generation
+          }GenerationsSee detailsRelated templateLast update${humanizeTimeStamp(
+            dataStreamDetails.maxTimeStamp!
+          )}`
+        );
+      });
+
+      it('renders error message if the request fails', async () => {
+        const dataStreamName = 'test_data_stream';
+        const testWithDataStream: Index = {
+          ...testIndexMock,
+          data_stream: dataStreamName,
+        };
+
+        httpRequestsMockHelpers.setLoadIndexDetailsResponse(testIndexName, testWithDataStream);
+        httpRequestsMockHelpers.setLoadDataStreamResponse(dataStreamName, undefined, {
+          statusCode: 400,
+          message: `Unable to load data stream details`,
+        });
+
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+
+        const dataStreamDetailsExist = testBed.actions.overview.dataStreamDetailsExist();
+        expect(dataStreamDetailsExist).toBe(true);
+
+        const dataStreamContent = testBed.actions.overview.getDataStreamDetailsContent();
+        expect(dataStreamContent).toBe(
+          `Data streamUnable to load data stream detailsReloadLast update`
+        );
+
+        // already sent 3 requests while setting up the component
+        const numberOfRequests = 3;
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
+        await testBed.actions.overview.reloadDataStreamDetails();
+        expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+      });
+    });
+
+    it('hides storage and status details if enableIndexStats===false', async () => {
       await act(async () => {
         testBed = await setup({
           httpSetup,
@@ -247,8 +391,12 @@ describe('<IndexDetailsPage />', () => {
       });
       testBed.component.update();
 
-      expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
-      expect(testBed.actions.overview.indexStatsContentExists()).toBe(false);
+      expect(testBed.actions.overview.statusDetailsExist()).toBe(false);
+      expect(testBed.actions.overview.storageDetailsExist()).toBe(false);
+    });
+
+    it('renders code block', () => {
+      expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
     });
 
     describe('extension service summary', () => {
@@ -701,6 +849,60 @@ describe('<IndexDetailsPage />', () => {
         `${API_BASE_PATH}/stats/${encodeURIComponent(percentSignName)}`,
         requestOptions
       );
+    });
+  });
+  describe('extension service tabs', () => {
+    const testTabId = 'testTab' as IndexDetailsTabIds;
+    const testContent = 'Test content';
+    const additionalTab: IndexDetailsTab = {
+      id: testTabId,
+      name: 'Test tab',
+      renderTabContent: () => {
+        return <span>{testContent}</span>;
+      },
+      order: 1,
+    };
+    beforeAll(async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [additionalTab],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+    });
+
+    it('renders an additional tab', async () => {
+      await testBed.actions.clickIndexDetailsTab(testTabId);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toEqual(testContent);
+    });
+
+    it('additional tab is the first in the order', () => {
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Test tab', 'Overview', 'Mappings', 'Settings', 'Statistics']);
+    });
+
+    it('additional tab is the last in the order', async () => {
+      const extensionsServiceMock = {
+        indexDetailsTabs: [{ ...additionalTab, order: 100 }],
+      };
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: { extensionsService: extensionsServiceMock },
+          },
+        });
+      });
+      testBed.component.update();
+      const tabs = testBed.actions.getIndexDetailsTabs();
+      expect(tabs).toEqual(['Overview', 'Mappings', 'Settings', 'Statistics', 'Test tab']);
     });
   });
 });
