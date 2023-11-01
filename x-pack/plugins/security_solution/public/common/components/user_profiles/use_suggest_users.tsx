@@ -8,20 +8,19 @@
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useEffect, useState } from 'react';
 
-import { CURRENT_USER_PROFILE_FAILURE } from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { suggestUsers } from './api';
+import { USER_PROFILES_FAILURE } from './translations';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
-interface GetCurrentUserReturn {
+interface SuggestUsersReturn {
   loading: boolean;
-  userProfile?: UserProfileWithAvatar;
+  userProfiles: UserProfileWithAvatar[];
 }
 
-export const useGetCurrentUser = (): GetCurrentUserReturn => {
+export const useSuggestUsers = (searchTerm: string): SuggestUsersReturn => {
   const [loading, setLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState<UserProfileWithAvatar | undefined>(undefined);
+  const [users, setUsers] = useState<UserProfileWithAvatar[]>([]);
   const { addError } = useAppToasts();
-  const userProfiles = useKibana().services.security.userProfiles;
 
   useEffect(() => {
     // isMounted tracks if a component is mounted before changing state
@@ -29,12 +28,12 @@ export const useGetCurrentUser = (): GetCurrentUserReturn => {
     setLoading(true);
     const fetchData = async () => {
       try {
-        const profile = await userProfiles.getCurrent({ dataPath: 'avatar' });
+        const usersResponse = await suggestUsers({ searchTerm });
         if (isMounted) {
-          setCurrentUser(profile);
+          setUsers(usersResponse);
         }
       } catch (error) {
-        addError(error.message, { title: CURRENT_USER_PROFILE_FAILURE });
+        addError(error.message, { title: USER_PROFILES_FAILURE });
       }
       if (isMounted) {
         setLoading(false);
@@ -45,6 +44,6 @@ export const useGetCurrentUser = (): GetCurrentUserReturn => {
       // updates to show component is unmounted
       isMounted = false;
     };
-  }, [addError, userProfiles]);
-  return { loading, userProfile: currentUser };
+  }, [addError, searchTerm]);
+  return { loading, userProfiles: users };
 };

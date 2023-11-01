@@ -9,15 +9,15 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../mock';
-import { useGetUserProfiles } from '../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
-import { useSuggestUsers } from '../../../../detections/containers/detection_engine/user_profiles/use_suggest_users';
+import { useGetUserProfiles } from '../../user_profiles/use_get_user_profiles';
+import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 
-jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles');
-jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_suggest_users');
+jest.mock('../../user_profiles/use_get_user_profiles');
+jest.mock('../../user_profiles/use_suggest_users');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'user1' }, data: {} },

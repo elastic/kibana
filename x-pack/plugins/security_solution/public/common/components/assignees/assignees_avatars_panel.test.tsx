@@ -16,7 +16,7 @@ import {
 } from './test_ids';
 import { AssigneesAvatarsPanel } from './assignees_avatars_panel';
 
-import { useGetUserProfiles } from '../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
+import { useGetUserProfiles } from '../user_profiles/use_get_user_profiles';
 import { TestProviders } from '../../mock';
 import { mockUserProfiles } from './mocks';
 

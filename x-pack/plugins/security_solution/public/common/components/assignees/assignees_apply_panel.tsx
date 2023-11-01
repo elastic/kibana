@@ -13,12 +13,12 @@ import { EuiButton } from '@elastic/eui';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
 
 import { isEmpty } from 'lodash';
-import { useGetCurrentUser } from '../../../detections/containers/detection_engine/user_profiles/use_get_current_user';
+import { useGetCurrentUser } from '../user_profiles/use_get_current_user';
 import * as i18n from './translations';
 import type { AssigneesIdsSelection, AssigneesProfilesSelection } from './types';
 import { NO_ASSIGNEES_VALUE } from './constants';
-import { useSuggestUsers } from '../../../detections/containers/detection_engine/user_profiles/use_suggest_users';
-import { useGetUserProfiles } from '../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
+import { useSuggestUsers } from '../user_profiles/use_suggest_users';
+import { useGetUserProfiles } from '../user_profiles/use_get_user_profiles';
 import { bringCurrentUserToFrontAndSort, removeNoAssigneesSelection } from './utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
 

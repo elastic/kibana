@@ -10,13 +10,13 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockCurrentUserProfile } from './mock';
 import { useGetCurrentUser } from './use_get_current_user';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
-import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { useKibana } from '../../lib/kibana';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
+import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../lib/kibana');
+jest.mock('../../hooks/use_app_toasts');
 
 describe('useGetCurrentUser hook', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;

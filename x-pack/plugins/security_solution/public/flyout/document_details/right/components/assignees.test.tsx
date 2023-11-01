@@ -11,8 +11,8 @@ import { render } from '@testing-library/react';
 import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_TITLE_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 
-import { useGetUserProfiles } from '../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
-import { useSuggestUsers } from '../../../../detections/containers/detection_engine/user_profiles/use_suggest_users';
+import { useGetUserProfiles } from '../../../../common/components/user_profiles/use_get_user_profiles';
+import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
 import type { SetAlertAssigneesFunc } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { TestProviders } from '../../../../common/mock';
@@ -23,8 +23,8 @@ import {
   ASSIGNEES_AVATAR_ITEM_TEST_ID,
 } from '../../../../common/components/assignees/test_ids';
 
-jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles');
-jest.mock('../../../../detections/containers/detection_engine/user_profiles/use_suggest_users');
+jest.mock('../../../../common/components/user_profiles/use_get_user_profiles');
+jest.mock('../../../../common/components/user_profiles/use_suggest_users');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
 
 const mockUserProfiles = [

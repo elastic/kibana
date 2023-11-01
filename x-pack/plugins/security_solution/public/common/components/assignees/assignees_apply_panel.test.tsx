@@ -11,14 +11,14 @@ import { render } from '@testing-library/react';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
 import { AssigneesApplyPanel } from './assignees_apply_panel';
 
-import { useGetUserProfiles } from '../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
-import { useSuggestUsers } from '../../../detections/containers/detection_engine/user_profiles/use_suggest_users';
+import { useGetUserProfiles } from '../user_profiles/use_get_user_profiles';
+import { useSuggestUsers } from '../user_profiles/use_suggest_users';
 import { TestProviders } from '../../mock';
 import * as i18n from './translations';
 import { mockUserProfiles } from './mocks';
 
-jest.mock('../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles');
-jest.mock('../../../detections/containers/detection_engine/user_profiles/use_suggest_users');
+jest.mock('../user_profiles/use_get_user_profiles');
+jest.mock('../user_profiles/use_suggest_users');
 
 const renderAssigneesApplyPanel = (
   {

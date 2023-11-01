@@ -9,10 +9,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 import { mockUserProfiles } from './mock';
 import { suggestUsers } from './api';
-import { KibanaServices } from '../../../../common/lib/kibana';
+import { KibanaServices } from '../../lib/kibana';
 
 const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 
 const coreStartMock = coreMock.createStart({ basePath: '/mock' });
 mockKibanaServices.mockReturnValue(coreStartMock);

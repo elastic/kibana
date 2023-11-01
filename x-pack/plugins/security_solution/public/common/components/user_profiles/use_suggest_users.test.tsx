@@ -10,11 +10,11 @@ import { useSuggestUsers } from './use_suggest_users';
 
 import * as api from './api';
 import { mockUserProfiles } from './mock';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
 
 jest.mock('./api');
-jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../hooks/use_app_toasts');
 
 describe('useSuggestUsers hook', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;

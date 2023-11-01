@@ -9,8 +9,8 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useEffect, useState } from 'react';
 
 import { USER_PROFILES_FAILURE } from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../lib/kibana';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 interface GetUserProfilesReturn {
   loading: boolean;

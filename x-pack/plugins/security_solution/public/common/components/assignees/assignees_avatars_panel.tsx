@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { UserAvatar } from '@kbn/user-profile-components';
 
-import { useGetUserProfiles } from '../../../detections/containers/detection_engine/user_profiles/use_get_user_profiles';
+import { useGetUserProfiles } from '../user_profiles/use_get_user_profiles';
 import {
   ASSIGNEES_AVATAR_ITEM_TEST_ID,
   ASSIGNEES_AVATARS_COUNT_BADGE_TEST_ID,
