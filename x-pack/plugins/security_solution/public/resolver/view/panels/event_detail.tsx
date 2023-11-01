@@ -330,6 +330,9 @@ function EventDetailBreadcrumbs({
 }
 
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
+  .euiDescriptionList__title {
+    word-break: normal;
+  }
   .euiDescriptionList__title,
   .euiDescriptionList__description {
     overflow-wrap: break-word;
