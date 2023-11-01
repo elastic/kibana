@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { SharedCreateProps, TypeSpecificCreateProps } from '../model';
+import * as z from 'zod';
+import { SharedCreateProps, TypeSpecificCreateProps } from '../model/rule_schema';
 
-export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
-export const previewRulesSchema = t.intersection([
-  SharedCreateProps,
-  TypeSpecificCreateProps,
-  t.type({ invocationCount: t.number, timeframeEnd: t.string }),
-]);
+export type PreviewRulesSchema = z.infer<typeof PreviewRulesSchema>;
+export const PreviewRulesSchema = SharedCreateProps.and(TypeSpecificCreateProps).and(
+  z.object({ invocationCount: z.number(), timeframeEnd: z.string() })
+);
 
 export interface RulePreviewLogs {
   errors: string[];

@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { Subject } from 'rxjs';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { type InfraMetadata, InfraMetadataRT } from '../../../../common/http_api/metadata_api';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
@@ -24,6 +25,7 @@ interface UseMetadataProps {
     from: number;
     to: number;
   };
+  request$?: Subject<() => Promise<unknown>>;
 }
 export function useMetadata({
   assetId,
@@ -31,10 +33,12 @@ export function useMetadata({
   sourceId,
   timeRange,
   requiredMetrics = [],
+  request$,
 }: UseMetadataProps) {
   const decodeResponse = (response: any) => {
     return pipe(InfraMetadataRT.decode(response), fold(throwErrors(createPlainError), identity));
   };
+
   const { error, loading, response, makeRequest } = useHTTPRequest<InfraMetadata>(
     '/api/infra/metadata',
     'POST',
@@ -51,10 +55,12 @@ export function useMetadata({
   );
 
   useEffect(() => {
-    (async () => {
-      await makeRequest();
-    })();
-  }, [makeRequest]);
+    if (request$) {
+      request$.next(makeRequest);
+    } else {
+      makeRequest();
+    }
+  }, [makeRequest, request$]);
 
   return {
     name: (response && response.name) || '',
