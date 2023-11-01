@@ -34,7 +34,7 @@ export interface Props {
     layerId: string,
     areTilesLoaded: boolean,
     tileMetaFeatures?: TileMetaFeature[],
-    tileErrors?: TileError[],
+    tileErrors?: TileError[]
   ) => void;
 }
 
@@ -104,14 +104,13 @@ export class TileStatusTracker extends Component<Props> {
     }
   };
 
-  _onError = (e: MapSourceDataEvent & { error: { message: string } | AJAXError } ) => {
+  _onError = (e: MapSourceDataEvent & { error: { message: string } | AJAXError }) => {
     if (
       e.sourceId &&
       e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
       e.tile &&
       (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
-
       this._removeTileFromCache(e.sourceId, e.tile.tileID.key as unknown as string);
 
       // maplibre requests entire tile pyramid from current zoom level to top
@@ -129,7 +128,8 @@ export class TileStatusTracker extends Component<Props> {
 
       const layerId = targetLayer.getId();
       const tileZXYKey = `${e.tile.tileID.canonical.z}/${e.tile.tileID.canonical.x}/${e.tile.tileID.canonical.y}`;
-      const ajaxError = 'body' in e.error && 'statusText' in e.error ? e.error as AJAXError : undefined;
+      const ajaxError =
+        'body' in e.error && 'statusText' in e.error ? (e.error as AJAXError) : undefined;
       const layerErrors = this._tileErrorCache[layerId] ? this._tileErrorCache[layerId] : [];
       layerErrors.push({
         message: e.error.message,
@@ -139,9 +139,9 @@ export class TileStatusTracker extends Component<Props> {
 
       if (ajaxError && targetLayer?.getSource().isESSource()) {
         try {
-          ajaxError.body.text().then(body => {
+          ajaxError.body.text().then((body) => {
             const layerErrors = this._tileErrorCache[layerId] ? this._tileErrorCache[layerId] : [];
-            const targetTileError = layerErrors.find(tileError => {
+            const targetTileError = layerErrors.find((tileError) => {
               return tileError.tileZXYKey === tileZXYKey;
             });
             if (targetTileError) {
@@ -225,7 +225,7 @@ export class TileStatusTracker extends Component<Props> {
         layer.getId(),
         !atLeastOnePendingTile,
         this._getTileMetaFeatures(layer),
-        this._tileErrorCache[layer.getId()],
+        this._tileErrorCache[layer.getId()]
       );
     }
   }, 100);
@@ -238,24 +238,25 @@ export class TileStatusTracker extends Component<Props> {
       (source as IVectorSource).isMvt()
       ? // querySourceFeatures can return duplicated features when features cross tile boundaries.
         // Tile meta will never have duplicated features since by their nature, tile meta is a feature contained within a single tile
-        this.props.mbMap.querySourceFeatures(layer.getMbSourceId(), {
-          sourceLayer: ES_MVT_META_LAYER_NAME,
-        })
-        .map((mbFeature) => {
-          try {
-            return {
-              type: 'Feature',
-              id: mbFeature?.id,
-              geometry: mbFeature?.geometry, // this getter might throw with non-conforming geometries
-              properties: mbFeature?.properties,
-            } as TileMetaFeature;
-          } catch (e) {
-            return null;
-          }
-        })
-        .filter((feature: TileMetaFeature | null) => feature !== null) as TileMetaFeature[]
+        (this.props.mbMap
+          .querySourceFeatures(layer.getMbSourceId(), {
+            sourceLayer: ES_MVT_META_LAYER_NAME,
+          })
+          .map((mbFeature) => {
+            try {
+              return {
+                type: 'Feature',
+                id: mbFeature?.id,
+                geometry: mbFeature?.geometry, // this getter might throw with non-conforming geometries
+                properties: mbFeature?.properties,
+              } as TileMetaFeature;
+            } catch (e) {
+              return null;
+            }
+          })
+          .filter((feature: TileMetaFeature | null) => feature !== null) as TileMetaFeature[])
       : undefined;
-  }
+  };
 
   _removeTileFromCache = (mbSourceId: string, mbKey: string) => {
     const trackedIndex = this._tileCache.findIndex((tile) => {

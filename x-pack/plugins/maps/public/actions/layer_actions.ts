@@ -797,7 +797,12 @@ export function setHiddenLayers(hiddenLayerIds: string[]) {
   };
 }
 
-export function setTileState(layerId: string, areTilesLoaded: boolean, tileMetaFeatures?: TileMetaFeature[], tileErrors?: TileError[]) {
+export function setTileState(
+  layerId: string,
+  areTilesLoaded: boolean,
+  tileMetaFeatures?: TileMetaFeature[],
+  tileErrors?: TileError[]
+) {
   return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -832,7 +837,7 @@ export function setTileState(layerId: string, areTilesLoaded: boolean, tileMetaF
       newValue: tileMetaFeatures,
     });
     dispatch(updateStyleMeta(layerId));
-  }
+  };
 }
 
 function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {

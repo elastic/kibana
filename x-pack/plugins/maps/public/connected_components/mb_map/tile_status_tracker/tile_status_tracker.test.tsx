@@ -116,7 +116,12 @@ describe('TileStatusTracker', () => {
       createMockLayer('foobar', 'foobarsource'),
     ];
     const loadedMap: Map<string, boolean> = new Map<string, boolean>();
-    const onTileStateChange = (layerId: string, areTilesLoaded: boolean, tileMetaFeatures?: TileMetaFeature[], tileErrors?: TileError[]) => {
+    const onTileStateChange = (
+      layerId: string,
+      areTilesLoaded: boolean,
+      tileMetaFeatures?: TileMetaFeature[],
+      tileErrors?: TileError[]
+    ) => {
       loadedMap.set(layerId, areTilesLoaded);
     };
 

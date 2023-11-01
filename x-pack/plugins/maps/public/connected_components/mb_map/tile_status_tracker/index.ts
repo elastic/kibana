@@ -22,7 +22,12 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    onTileStateChange(layerId: string, areTilesLoaded: boolean, tileMetaFeatures?: TileMetaFeature[], tileErrors?: TileError[]) {
+    onTileStateChange(
+      layerId: string,
+      areTilesLoaded: boolean,
+      tileMetaFeatures?: TileMetaFeature[],
+      tileErrors?: TileError[]
+    ) {
       dispatch(setTileState(layerId, areTilesLoaded, tileMetaFeatures, tileErrors));
     },
   };
