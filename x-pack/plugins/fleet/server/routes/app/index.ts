@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler, RouteValidationResultFactory } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -16,7 +16,7 @@ import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
-import type { FleetRequestHandler } from '../../types';
+import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
 import { CheckPermissionsRequestSchema } from '../../types';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
@@ -61,16 +61,24 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
   }
 };
 
-export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
+export const generateServiceTokenHandler: RequestHandler<
+  null,
+  null,
+  TypeOf<typeof GenerateServiceTokenRequestSchema.body>
+> = async (context, request, response) => {
   // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const serviceAccount = request.body.remote ? 'fleet-server-remote' : 'fleet-server';
+  appContextService
+    .getLogger()
+    .debug(`Creating service token for account elastic/${serviceAccount}`);
   try {
     const tokenResponse = await esClient.transport.request<{
       created?: boolean;
       token?: GenerateServiceTokenResponse;
     }>({
       method: 'POST',
-      path: `_security/service/elastic/fleet-server/credential/token/token-${Date.now()}`,
+      path: `_security/service/elastic/${serviceAccount}/credential/token/token-${Date.now()}`,
     });
 
     if (tokenResponse.created && tokenResponse.token) {
@@ -86,6 +94,15 @@ export const generateServiceTokenHandler: RequestHandler = async (context, reque
     const error = new GenerateServiceTokenError(e);
     return defaultFleetErrorHandler({ error, response });
   }
+};
+
+const serviceTokenBodyValidation = (data: any, validationResult: RouteValidationResultFactory) => {
+  const { ok } = validationResult;
+  if (!data) {
+    return ok({ remote: false });
+  }
+  const { remote } = data;
+  return ok({ remote });
 };
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -111,9 +128,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {},
+        validate: {
+          request: { body: serviceTokenBodyValidation },
+        },
       },
-
       generateServiceTokenHandler
     );
 
