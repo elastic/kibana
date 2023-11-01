@@ -23,7 +23,8 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';

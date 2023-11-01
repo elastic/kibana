@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SearchSessionStatus } from '../../../../../common';
 import { OnActionComplete, PopoverActionsMenu, TableText } from '../components';
 import { StatusIndicator } from '../components/status';
