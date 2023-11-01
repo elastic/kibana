@@ -11,8 +11,9 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { format } from 'url';
 
 const IDENTITY_HASH_HEADER = 'x-swr-identity-hash';
-const DATE_HEADER = 'date';
-const CONTENT_LENGTH_HEADER = 'content-length';
+const CONTENT_LENGTH_HEADER = 'x-swr-content-length';
+const REQUEST_DATE_HEADER = 'x-swr-date';
+const RESPONSE_DATE_HEADER = 'date';
 
 export interface StaleWhileRevalidateCacheDependencies {
   http: HttpSetup;
@@ -69,7 +70,7 @@ export class StaleWhileRevalidateCache {
         const identityHashHeader = cachedResponse.headers.get(IDENTITY_HASH_HEADER) ?? '';
         const version = fetchOptions.version ?? '';
         const versionHeader = cachedResponse.headers.get(ELASTIC_HTTP_VERSION_HEADER) ?? '';
-        const dateHeader = cachedResponse.headers.get(DATE_HEADER);
+        const dateHeader = cachedResponse.headers.get(RESPONSE_DATE_HEADER);
 
         // If the identity hash or version doesn't match, or the
         // response doesn't have a date header, then it's invalid
@@ -106,7 +107,6 @@ export class StaleWhileRevalidateCache {
         rawResponse: true,
       })
       .then(async ({ response }) => {
-        debugger;
         // This shouldn't happen, but just in case
         if (!response) {
           throw new Error('Response is undefined');
@@ -118,21 +118,32 @@ export class StaleWhileRevalidateCache {
         }
 
         // Create request headers to store some metadata about the response
-        const headers = new Headers();
-        const cachedRequest = new Request(url, { headers });
-
-        // Add the identity hash to the response headers so we can check it later
-        headers.set(IDENTITY_HASH_HEADER, identityHash);
-
-        // Add the content length to the response headers so we can check it later
-        headers.set(CONTENT_LENGTH_HEADER, await getContentLength(response.clone()));
+        const headers = {
+          // Add the identity hash to the response headers so we can check it later
+          [IDENTITY_HASH_HEADER]: identityHash,
+          // Add the content length to the response headers so we can check it later
+          [CONTENT_LENGTH_HEADER]: await getContentLength(response.clone()),
+        };
 
         // Clone the response so we can cache it and still read the original response body
         const clonedResponse = response.clone();
-        const cachedResponse = new Response(clonedResponse.body, { ...clonedResponse, headers });
+        const responseHeaders = Array.from(clonedResponse.headers).reduce(
+          (acc, [key, value]) => ({ ...acc, [key]: value }),
+          {}
+        );
+        const cachedResponse = new Response(clonedResponse.body, {
+          ...clonedResponse,
+          headers: { ...responseHeaders, ...headers },
+        });
+
+        // Create a request to store the response in the cache
+        const dateHeader = response.headers.get(RESPONSE_DATE_HEADER);
+        const cachedRequest = new Request(url, {
+          headers: dateHeader ? { ...headers, [REQUEST_DATE_HEADER]: dateHeader } : headers,
+        });
 
         // Cache the response
-        cache?.put(cachedRequest, cachedResponse);
+        await cache?.put(cachedRequest, cachedResponse);
 
         return response;
       })
@@ -151,10 +162,9 @@ export class StaleWhileRevalidateCache {
     return staleResponse ?? currentRequest.then(cloneResponse);
   }
 
-  // Starts pruning immediately and then sets up a timer to execute a prune periodically,
+  // Starts pruning immediately and then sets up a timer to execute prune periodically,
   // waiting for the previous prune to finish before starting a new one.
   startPruning() {
-    debugger;
     let pruneTimeout: ReturnType<typeof setTimeout>;
 
     const prune = async () => {
@@ -189,8 +199,8 @@ export class StaleWhileRevalidateCache {
 
     // Sort the cache entries by date
     cacheEntries.sort((a, b) => {
-      const aDate = new Date(a.headers.get(DATE_HEADER) ?? '');
-      const bDate = new Date(b.headers.get(DATE_HEADER) ?? '');
+      const aDate = new Date(a.headers.get(REQUEST_DATE_HEADER) ?? Date.now());
+      const bDate = new Date(b.headers.get(REQUEST_DATE_HEADER) ?? Date.now());
 
       return aDate.getTime() - bDate.getTime();
     });
@@ -200,7 +210,7 @@ export class StaleWhileRevalidateCache {
 
     await Promise.all(
       cacheEntries.map(async (cacheEntry) => {
-        const date = new Date(cacheEntry.headers.get(DATE_HEADER) ?? '');
+        const date = new Date(cacheEntry.headers.get(REQUEST_DATE_HEADER) ?? Date.now());
         const now = new Date();
         const diff = now.getTime() - date.getTime();
         const isExpired = diff > this.deps.cacheEntryMaxAgeMs;
@@ -209,7 +219,7 @@ export class StaleWhileRevalidateCache {
           await cache.delete(cacheEntry);
           cacheEntries.splice(cacheEntries.indexOf(cacheEntry), 1);
         } else {
-          contentLength += parseInt(cacheEntry.headers.get(CONTENT_LENGTH_HEADER) ?? '', 10);
+          contentLength += parseInt(cacheEntry.headers.get(CONTENT_LENGTH_HEADER) ?? '0', 10);
         }
       })
     );
@@ -218,11 +228,13 @@ export class StaleWhileRevalidateCache {
     if (contentLength > this.deps.cacheMaxSizeBytes) {
       await Promise.all(
         cacheEntries.map((cacheEntry) => {
-          contentLength -= parseInt(cacheEntry.headers.get(CONTENT_LENGTH_HEADER) ?? '', 10);
-
-          if (contentLength > this.deps.cacheMaxSizeBytes) {
-            return cache.delete(cacheEntry);
+          if (contentLength <= this.deps.cacheMaxSizeBytes) {
+            return;
           }
+
+          contentLength -= parseInt(cacheEntry.headers.get(CONTENT_LENGTH_HEADER) ?? '0', 10);
+
+          return cache.delete(cacheEntry);
         })
       );
     }

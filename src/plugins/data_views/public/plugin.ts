@@ -35,8 +35,7 @@ import { StaleWhileRevalidateCache } from './data_views/stale_while_revalidate_c
 
 const SWR_CACHE_NAME = 'data-views';
 const SWR_CACHE_ENTRY_FRESH_TIME_MS = 1000 * 60 * 5; // 5 minutes
-const SWR_CACHE_MAX_AGE_MS = 1000; // 30 days
-// const SWR_CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
+const SWR_CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 const SWR_CACHE_MAX_SIZE_BYTES = 500 * 1024 * 1024; // 500 MB
 const SWR_CACHE_PRUNE_INTERVAL_MS = 1000 * 60 * 60; // 1 hour
 
