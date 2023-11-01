@@ -8,6 +8,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
+  kbnTestServerArgs?: string[];
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -20,7 +21,11 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       ...svlSharedConfig.getAll(),
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
-        serverArgs: [...svlSharedConfig.get('kbnTestServer.serverArgs'), '--serverless=security'],
+        serverArgs: [
+          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
+          '--serverless=security',
+          ...(options.kbnTestServerArgs || []),
+        ],
       },
       testFiles: options.testFiles,
       junit: options.junit,

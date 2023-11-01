@@ -9,25 +9,15 @@ import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type SuperTest from 'supertest';
 
 /**
- * Delete the security_detection_engine package using fleet API.
+ * Gets the security_detection_engine package using fleet API.
  *
  * @param supertest Supertest instance
+ * @returns The API endpoint response. Will have status 200 if package installed or 404 if not
  */
-export async function deletePrebuiltRulesFleetPackage(
-  supertest: SuperTest.SuperTest<SuperTest.Test>
-) {
-  const resp = await supertest
+export async function getPrebuiltRulesFleetPackage(supertest: SuperTest.SuperTest<SuperTest.Test>) {
+  return await supertest
     .get(epmRouteService.getInfoPath('security_detection_engine'))
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '2023-10-31')
     .send();
-
-  if (resp.status === 200 && resp.body.response.status === 'installed') {
-    await supertest
-      .delete(
-        epmRouteService.getRemovePath('security_detection_engine', resp.body.response.version)
-      )
-      .set('kbn-xsrf', 'true')
-      .send({ force: true });
-  }
 }
