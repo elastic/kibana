@@ -11,6 +11,7 @@ import { Scenario } from '../cli/scenario';
 
 const scenario: Scenario<LogDocument> = async () => {
   return {
+    setClient: ({ logsEsClient }) => logsEsClient,
     generate: ({ range }) => {
       const LOG_LEVELS = ['info', 'debug', 'error'];
       const MESSAGES = ['A simple log', 'Yet another log', 'Something went wrong'];

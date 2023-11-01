@@ -42,23 +42,25 @@ async function start() {
     logger,
   });
 
-  const clientType = runOptions.type;
-
   const file = runOptions.file;
 
   let client: ApmSynthtraceEsClient | LogsSynthtraceEsClient = apmEsClient;
-  if (clientType === 'log') {
-    client = logsEsClient;
-  }
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
   logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
 
-  const { generate, bootstrap } = await scenario({ ...runOptions, logger });
+  const { generate, bootstrap, setClient } = await scenario({ ...runOptions, logger });
 
   if (bootstrap) {
-    await bootstrap({ apmEsClient });
+    await bootstrap({ apmEsClient, logsEsClient });
+  }
+
+  if (setClient) {
+    client = setClient({
+      logsEsClient,
+      apmEsClient,
+    });
   }
 
   logger.debug('Generating scenario');

@@ -66,12 +66,6 @@ function options(y: Argv) {
         return arg as Record<string, any> | undefined;
       },
     })
-    .option('type', {
-      describe:
-        'Type of data to be generated, defaults to APM events, can be logs for generating logs',
-      default: 'apm',
-      string: true,
-    })
     .showHelpOnFail(false);
 }
 
