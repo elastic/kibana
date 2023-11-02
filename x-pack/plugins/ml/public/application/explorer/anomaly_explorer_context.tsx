@@ -16,7 +16,7 @@ import { useExplorerUrlState } from './hooks/use_explorer_url_state';
 import { AnomalyChartsStateService } from './anomaly_charts_state_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { useTableSeverity } from '../components/controls/select_severity';
-import { AnomalyDetectionAlertsStateService } from './anomaly_detection_alerts_state_service';
+import { AnomalyDetectionAlertsStateService } from './alerts';
 
 export type AnomalyExplorerContextValue =
   | {

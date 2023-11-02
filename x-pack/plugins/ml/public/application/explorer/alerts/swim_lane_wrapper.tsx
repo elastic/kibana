@@ -22,7 +22,7 @@ import React, { useMemo, useRef, type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { AnomalyDetectionAlert } from '../anomaly_detection_alerts_state_service';
+import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_TIMESTAMP,

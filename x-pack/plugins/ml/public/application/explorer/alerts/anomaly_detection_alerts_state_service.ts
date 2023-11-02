@@ -18,11 +18,11 @@ import type {
 } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_DURATION,
+  ALERT_END,
   ALERT_RULE_NAME,
   ALERT_RULE_TYPE_ID,
   ALERT_START,
   ALERT_STATUS,
-  ALERT_TIME_RANGE,
   ALERT_UUID,
   AlertConsumers,
 } from '@kbn/rule-data-utils';
@@ -33,9 +33,9 @@ import {
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
   ML_ALERT_TYPES,
-} from '../../../common/constants/alerts';
-import { StateService } from '../services/state_service';
-import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
+} from '../../../../common/constants/alerts';
+import { StateService } from '../../services/state_service';
+import { AnomalyTimelineStateService } from '../anomaly_timeline_state_service';
 
 export interface AnomalyDetectionAlert {
   id: string;
@@ -43,10 +43,10 @@ export interface AnomalyDetectionAlert {
   [ALERT_ANOMALY_DETECTION_JOB_ID]: string;
   [ALERT_ANOMALY_TIMESTAMP]: number;
   [ALERT_START]: number;
+  [ALERT_END]: number;
   [ALERT_RULE_NAME]: string;
   [ALERT_STATUS]: string;
   [ALERT_DURATION]: string;
-  end_timestamp: number;
   // Additional fields for the UI
   color: string;
 }
@@ -165,8 +165,7 @@ export class AnomalyDetectionAlertsStateService extends StateService {
               response.rawResponse.hits.hits
                 .map(({ fields }) => {
                   if (!isDefined(fields)) return;
-                  const { lte } = fields[ALERT_TIME_RANGE][0];
-                  const anomalyScore = Math.floor(fields[ALERT_ANOMALY_SCORE][0]);
+                  const anomalyScore = Number(fields[ALERT_ANOMALY_SCORE][0]);
                   return {
                     id: fields[ALERT_UUID][0],
                     [ALERT_RULE_NAME]: fields[ALERT_RULE_NAME][0],
@@ -176,10 +175,10 @@ export class AnomalyDetectionAlertsStateService extends StateService {
                       fields[ALERT_ANOMALY_TIMESTAMP][0]
                     ).getTime(),
                     [ALERT_START]: fields[ALERT_START][0],
-                    end_timestamp: Number(lte),
-                    color: getSeverityColor(anomalyScore),
+                    [ALERT_END]: fields[ALERT_END][0],
                     [ALERT_STATUS]: fields[ALERT_STATUS][0],
                     [ALERT_DURATION]: fields[ALERT_DURATION][0],
+                    color: getSeverityColor(anomalyScore),
                   };
                 })
                 .filter(isDefined)
