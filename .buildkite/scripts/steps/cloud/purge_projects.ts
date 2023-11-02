@@ -89,7 +89,7 @@ async function purgeProjects() {
     } else if (
       !Boolean(
         pullRequest.labels.filter((label: any) =>
-          /^ci:project-deploy-(es|security|oblt)$/.test(label.name)
+          /^ci:project-deploy-(elasticearch|security|observability)$/.test(label.name)
         ).length
       )
     ) {
