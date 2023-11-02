@@ -64,7 +64,7 @@ class MockLayer {
   getSource() {
     return {
       isESSource() {
-        return false;
+        return true;
       },
     };
   }
@@ -91,15 +91,6 @@ function createSourceDataEvent(mbSourceId: string, tileKey: string) {
     source: {
       type: 'vector',
     },
-  };
-}
-
-function createSourceDataErrorEvent(mbSourceId: string, tileKey: string) {
-  return {
-    ...createSourceDataEvent(mbSourceId, tileKey),
-    error: {
-      message: 'simulated error'
-    }
   };
 }
 
@@ -152,7 +143,12 @@ describe('TileStatusTracker', () => {
     (aa11BarTile.tile as MapSourceDataEvent['tile'])!.aborted = true; // abort tile
     mockMbMap.emit('sourcedataloading', createSourceDataEvent('barsource', 'af1d'));
     mockMbMap.emit('sourcedataloading', createSourceDataEvent('foosource', 'af1d'));
-    mockMbMap.emit('error', createSourceDataErrorEvent('barsource', 'af1d'));
+    mockMbMap.emit('error', {
+      ...createSourceDataEvent('barsource', 'af1d'),
+      error: {
+        message: 'simulated error'
+      }
+    });
 
     // simulate delay. Cache-checking is debounced.
     await sleep(300);
@@ -191,12 +187,21 @@ describe('TileStatusTracker', () => {
 
       mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
       mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer2Source', 'aa11'));
-      mockMbMap.emit('error', createSourceDataErrorEvent('layer1Source', 'aa11'));
+      mockMbMap.emit('error', {
+        ...createSourceDataEvent('layer1Source', 'aa11'),
+        error: {
+          message: 'simulated error'
+        }
+      });
 
       // simulate delay. Cache-checking is debounced.
       await sleep(300);
 
       expect(tileErrorsMap.get('layer1')?.length).toBe(1);
+      expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
+        message: 'simulated error',
+        tileKey: '5/80/10',
+      });
       expect(tileErrorsMap.get('layer2')).toBeUndefined();
       
       mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
@@ -206,6 +211,93 @@ describe('TileStatusTracker', () => {
 
       expect(tileErrorsMap.get('layer1')).toBeUndefined();
       expect(tileErrorsMap.get('layer2')).toBeUndefined();
+    });
+
+    test('should extract elasticsearch ErrorCause from response body', async () => {
+      const tileErrorsMap: Map<string, TileError[] | undefined> = new Map<string, TileError[] | undefined>();
+      const mockMbMap = new MockMbMap();
+      const mockESErrorCause = {
+        type: 'failure',
+        reason: 'simulated es error',
+      }
+
+      mount(
+        <TileStatusTracker
+          mbMap={mockMbMap as unknown as MbMap}
+          layerList={[
+            createMockLayer('layer1', 'layer1Source'),
+          ]}
+          onTileStateChange={(
+            layerId: string,
+            areTilesLoaded: boolean,
+            tileMetaFeatures?: TileMetaFeature[],
+            tileErrors?: TileError[]
+          ) => {
+            tileErrorsMap.set(layerId, tileErrors);
+          }}
+        />
+      );
+
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
+      mockMbMap.emit('error', {
+        ...createSourceDataEvent('layer1Source', 'aa11'),
+        error: {
+          message: 'simulated error',
+          status: 400,
+          statusText: 'simulated ajax error',
+          body: new Blob([JSON.stringify({ error: mockESErrorCause })]),
+        }
+      });
+
+      // simulate delay. Cache-checking is debounced.
+      await sleep(300);
+
+      expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
+        message: 'simulated error',
+        tileKey: '5/80/10',
+        error: mockESErrorCause
+      });
+    });
+
+    test('should safely handle non-json response body', async () => {
+      const tileErrorsMap: Map<string, TileError[] | undefined> = new Map<string, TileError[] | undefined>();
+      const mockMbMap = new MockMbMap();
+      
+      mount(
+        <TileStatusTracker
+          mbMap={mockMbMap as unknown as MbMap}
+          layerList={[
+            createMockLayer('layer1', 'layer1Source'),
+          ]}
+          onTileStateChange={(
+            layerId: string,
+            areTilesLoaded: boolean,
+            tileMetaFeatures?: TileMetaFeature[],
+            tileErrors?: TileError[]
+          ) => {
+            tileErrorsMap.set(layerId, tileErrors);
+          }}
+        />
+      );
+
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
+      mockMbMap.emit('error', {
+        ...createSourceDataEvent('layer1Source', 'aa11'),
+        error: {
+          message: 'simulated error',
+          status: 400,
+          statusText: 'simulated ajax error',
+          body: new Blob(['I am not json']),
+        }
+      });
+
+      // simulate delay. Cache-checking is debounced.
+      await sleep(300);
+
+      expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
+        message: 'simulated error',
+        tileKey: '5/80/10',
+      });
     });
   });
 });

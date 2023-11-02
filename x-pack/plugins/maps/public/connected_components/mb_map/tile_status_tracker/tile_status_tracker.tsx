@@ -142,26 +142,31 @@ export class TileStatusTracker extends Component<Props> {
       const ajaxError =
         'body' in e.error && 'statusText' in e.error ? (e.error as AJAXError) : undefined;
 
-      if (!ajaxError || !targetLayer?.getSource().isESSource()) {
+      if (!ajaxError || !targetLayer.getSource().isESSource()) {
         this._updateTileStatusForAllLayers();
         return;
       }
 
       try {
-        ajaxError.body.text().then((body) => {
-          if (this._tileErrorCache.hasTileError(layerId, tileKey)) {
-            const parsedJson = JSON.parse(body) as { error?: ErrorCause };
-            if (parsedJson.error && 'type' in parsedJson.error) {
-              this._tileErrorCache.setTileError(layerId, {
-                ...tileError,
-                error: parsedJson.error,
-              });
-              this._updateTileStatusForAllLayers();
+        ajaxError.body.text()
+          .then((body) => {
+            if (this._tileErrorCache.hasTileError(layerId, tileKey)) {
+              const parsedJson = JSON.parse(body) as { error?: ErrorCause };
+              if (parsedJson.error && 'type' in parsedJson.error) {
+                this._tileErrorCache.setTileError(layerId, {
+                  ...tileError,
+                  error: parsedJson.error,
+                });
+                this._updateTileStatusForAllLayers();
+              }
             }
-          }
-        });
-      } catch (processAjaxBodyError) {
-        // ignore errors reading or parsing ajax request body
+          })
+          .catch((processAjaxBodyError) => {
+            // ignore errors parsing ajax request body
+            // Contents are used to provide better UI messaging and are not required
+          });
+      } catch (readAjaxBodyError) {
+        // ignore errors readingajax request body
         // Contents are used to provide better UI messaging and are not required
       }
     }
