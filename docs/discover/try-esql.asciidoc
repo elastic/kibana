@@ -1,5 +1,5 @@
 [[try-esql]]
-== Try ES|QL
+== Try {esql}
 
 preview::[]
 
@@ -15,7 +15,7 @@ To be able to select **Try {esql}** from the Data views menu the `discover:enabl
 
 [float]
 [[tutorial-try-esql]]
-=== Trying ES|QL 
+=== Trying {esql}
 
 To load the sample data:
 
@@ -23,7 +23,7 @@ To load the sample data:
 . Click **Other sample data sets**.
 . On the Sample web logs card, click **Add data**.
 . Open the main menu and select *Discover*.
-. From the Data views menu, select *Try ES|QL*.
+. From the Data views menu, select *Try {esql}*.
 
 Let's say we want to find out what operating system users have and how much RAM is on their machine.  
 
