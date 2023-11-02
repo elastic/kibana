@@ -14,6 +14,7 @@ import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies
 import { registerExistingIndicesPath } from './rest_api_routes/internal/existing_indices';
 import { registerFieldForWildcard } from './rest_api_routes/internal/fields_for';
 import { registerHasDataViewsRoute } from './rest_api_routes/internal/has_data_views';
+import { registerFields } from './rest_api_routes/internal/fields';
 
 export function registerRoutes(
   http: HttpServiceSetup,
@@ -30,5 +31,6 @@ export function registerRoutes(
 
   registerExistingIndicesPath(router);
   registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
+  registerFields(router, getStartServices, isRollupsEnabled);
   registerHasDataViewsRoute(router);
 }

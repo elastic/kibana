@@ -10,7 +10,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
-import { FIELDS_FOR_WILDCARD_PATH } from '../../common/constants';
+import { FIELDS_FOR_WILDCARD_PATH, FIELDS_PATH } from '../../common/constants';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
@@ -35,15 +35,19 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     body?: string,
     forceRefresh?: boolean
   ): Promise<T | undefined> {
+    /*
     console.log('HERE', new Date().getMinutes());
     if (new Date().getMinutes() % 2 === 0) {
       forceRefresh = true;
     }
-    const cacheOptions = forceRefresh ? { cache: 'reload' as RequestCache } : {};
+    */
+    // const headers = forceRefresh ? { 'Cache-Control': '' } : undefined;
+    // const cacheOptions = forceRefresh ? { cache: 'reload' as RequestCache } : {};
 
     const request = body
       ? this.http.post<T>(url, { query, body, version })
-      : this.http.fetch<T>(url, { query, version, ...cacheOptions });
+      : this.http.fetch<T>(url, { query, version });
+    // : this.http.fetch<T>(url, { query, version, ...cacheOptions });
     return request.catch((resp) => {
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
@@ -73,8 +77,10 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       fields,
       forceRefresh,
     } = options;
+    const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
+
     return this._request<FieldsForWildcardResponse>(
-      FIELDS_FOR_WILDCARD_PATH,
+      path,
       {
         pattern,
         meta_fields: metaFields,
