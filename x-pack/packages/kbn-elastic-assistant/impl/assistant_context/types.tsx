@@ -8,6 +8,7 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 export type ConversationRole = 'system' | 'user' | 'assistant';
+export type IsValidConversationId = (conversationId: string | null | undefined) => boolean;
 
 export interface MessagePresentation {
   delay?: number;

@@ -8,7 +8,6 @@
 import { BehaviorSubject } from 'rxjs';
 import type { RouteProps } from 'react-router-dom';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
-import type { Conversation } from '@kbn/elastic-assistant';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import type { AppLinksSwitcher } from './common/links';
 import type { DeepLinksFormatter } from './common/links/deep_links';
@@ -16,18 +15,19 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
+import { ContractAssistantConversationService } from './contract_assistant_conversation';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
-  public assistantBaseConversations$: BehaviorSubject<Record<string, Conversation>>;
+  public assistantBaseConversations: ContractAssistantConversationService;
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
-    this.assistantBaseConversations$ = new BehaviorSubject<Record<string, Conversation>>({});
+    this.assistantBaseConversations = new ContractAssistantConversationService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
@@ -36,7 +36,7 @@ export class PluginContract {
   public getStartServices(): ContractStartServices {
     return {
       extraRoutes$: this.extraRoutes$.asObservable(),
-      assistantBaseConversations$: this.assistantBaseConversations$.asObservable(),
+      assistantBaseConversations: this.assistantBaseConversations,
       getComponent$: this.componentsService.getComponent$.bind(this.componentsService),
       upselling: this.upsellingService,
     };
@@ -60,7 +60,7 @@ export class PluginContract {
       getNavLinks$: () => navLinks$,
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setAssistantBaseConversations: (conversations) =>
-        this.assistantBaseConversations$.next(conversations),
+        this.assistantBaseConversations.setAssistantBaseConversations(conversations),
       setComponents: (components) => {
         this.componentsService.setComponents(components);
       },

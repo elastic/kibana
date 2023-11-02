@@ -22,6 +22,7 @@ import { APP_ID } from '../../common/constants';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useConversationStore } from './use_conversation_store';
+import type { IsValidConversationId } from '../contract_assistant_conversation';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
@@ -30,7 +31,8 @@ const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title',
 export const AssistantConversationsProvider: React.FC<{
   assistantBaseConversations: Record<string, Conversation>;
   children: React.ReactNode;
-}> = ({ assistantBaseConversations, children }) => {
+  isValidConversationId: IsValidConversationId;
+}> = ({ assistantBaseConversations, children, isValidConversationId }) => {
   const { conversations, setConversations } = useConversationStore(assistantBaseConversations);
 
   const {
@@ -71,6 +73,7 @@ export const AssistantConversationsProvider: React.FC<{
       getInitialConversations={getInitialConversation}
       getComments={getComments}
       http={http}
+      isValidConversationId={isValidConversationId}
       modelEvaluatorEnabled={isModelEvaluationEnabled}
       nameSpace={nameSpace}
       setConversations={setConversations}

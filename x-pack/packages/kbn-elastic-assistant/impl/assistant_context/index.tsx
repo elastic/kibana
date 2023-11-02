@@ -19,7 +19,7 @@ import type {
   RegisterPromptContext,
   UnRegisterPromptContext,
 } from '../assistant/prompt_context/types';
-import type { Conversation } from './types';
+import type { Conversation, IsValidConversationId } from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
@@ -73,8 +73,9 @@ export interface AssistantProviderProps {
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
-  http: HttpSetup;
   getInitialConversations: () => Record<string, Conversation>;
+  http: HttpSetup;
+  isValidConversationId: IsValidConversationId;
   modelEvaluatorEnabled?: boolean;
   nameSpace?: string;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
@@ -154,6 +155,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   children,
   getComments,
   http,
+  isValidConversationId,
   getInitialConversations,
   modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
@@ -306,7 +308,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       unRegisterPromptContext,
       localStorageLastConversationId: isLocalStorageConversationIdValid(
         localStorageLastConversationId,
-        assistantBaseConversations
+        isValidConversationId
       ),
       setLastConversationId: setLocalStorageLastConversationId,
     }),
@@ -329,6 +331,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
+      isValidConversationId,
       localStorageKnowledgeBase,
       localStorageLastConversationId,
       localStorageQuickPrompts,

@@ -84,6 +84,7 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { SetComponents, GetComponent$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
+import type { ContractAssistantConversationService } from './contract_assistant_conversation';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -148,7 +149,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
-  assistantBaseConversations$: Observable<Record<string, Conversation>>;
+  assistantBaseConversations: ContractAssistantConversationService;
   getComponent$: GetComponent$;
   upselling: UpsellingService;
 }
