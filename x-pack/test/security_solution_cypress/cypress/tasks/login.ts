@@ -9,8 +9,8 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
-import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
+import type { SecurityRoleName } from '../../../common/services/security_solution/roles';
+import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '../../../common/services/security_solution/roles';
 import { LOGOUT_URL } from '../urls/navigation';
 import { rootRequest } from './common';
 import {

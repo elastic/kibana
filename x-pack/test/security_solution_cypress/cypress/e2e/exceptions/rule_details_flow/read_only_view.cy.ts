@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '../../../../../common/services/security_solution/roles';
 
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';

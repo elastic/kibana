@@ -6,7 +6,7 @@
  */
 
 import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '../../../../../../../common/services/security_solution/roles';
 import {
   MISSING_PRIVILEGES_CALLOUT,
   waitForCallOutToBeShown,

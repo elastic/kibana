@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import type { SecurityRoleName } from '../../../common/services/security_solution/roles';
 import { LAST_BREADCRUMB, RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import { RULES_MANAGEMENT_URL } from '../urls/rules_management';
 import { resetRulesTableState } from './common';

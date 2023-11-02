@@ -21,7 +21,7 @@ import {
   getImportExceptionsListSchemaMock,
   getImportExceptionsListItemNewerVersionSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
-import { ROLES } from 'x-pack/test/common/services/security_solution/roles';
+import { ROLES } from '../../../common/services/security_solution/roles';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,

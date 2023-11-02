@@ -10,7 +10,7 @@ import {
   RULES_ADD_PATH,
   RULES_UPDATES,
 } from '@kbn/security-solution-plugin/common/constants';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '../../../../../common/services/security_solution/roles';
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {

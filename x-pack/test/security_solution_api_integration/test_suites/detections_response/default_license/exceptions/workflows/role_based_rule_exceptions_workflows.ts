@@ -25,8 +25,8 @@ import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/c
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { ROLES } from '../../../../../../common/services/security_solution/roles';
 
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 import {

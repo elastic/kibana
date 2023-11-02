@@ -15,7 +15,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '../../../../../common/services/security_solution/roles';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {

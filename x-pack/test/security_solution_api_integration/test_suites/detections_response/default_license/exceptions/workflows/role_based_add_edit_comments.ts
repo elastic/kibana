@@ -15,9 +15,9 @@ import {
   getCreateExceptionListMinimalSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
 import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ROLES } from '../../../../../../common/services/security_solution/roles';
 import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
 import {
   createUserAndRole,

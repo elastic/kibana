@@ -11,7 +11,7 @@ import registerCypressGrep from '@cypress/grep';
 import {
   KNOWN_ESS_ROLE_DEFINITIONS,
   KNOWN_SERVERLESS_ROLE_DEFINITIONS,
-} from '@kbn/security-solution-plugin/common/test';
+} from '../../../common/services/security_solution/roles';
 import { setupUsers } from './setup_users';
 import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
 

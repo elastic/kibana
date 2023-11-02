@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '../../../../../common/services/security_solution/roles';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';

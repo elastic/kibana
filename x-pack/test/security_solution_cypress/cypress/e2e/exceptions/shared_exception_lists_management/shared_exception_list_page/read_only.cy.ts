@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from '../../../../../../common/services/security_solution/roles';
 
 import { getExceptionList } from '../../../../objects/exception';
 import {
