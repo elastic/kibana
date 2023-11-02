@@ -105,6 +105,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/infra-plugin"
     "@kbn/shared-ux-link-redirect-app"
+    "@kbn/infra-plugin"
   ],
   "exclude": ["target/**/*"]
 }
