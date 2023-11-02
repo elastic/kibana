@@ -658,5 +658,43 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('Column Selection', () => {
+      afterEach(async () => {
+        await toasts.dismissAllToastsWithChecks();
+      });
+
+      before(async () => {
+        await cases.api.createNthRandomCases(1);
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+        await browser.clearLocalStorage();
+      });
+
+      it('column selection popover exists', async () => {
+        await testSubjects.existOrFail('column-selection-popover-button');
+      });
+
+      it('selecting a column works correctly', async () => {
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(false);
+
+        await cases.casesTable.toggleColumnInPopover('closedAt');
+
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(true);
+      });
+
+      it('deselecting columns works correctly', async () => {
+        expect(await cases.casesTable.hasColumn('Name')).to.be(true);
+
+        await cases.casesTable.toggleColumnInPopover('title');
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+      });
+    });
   });
 };

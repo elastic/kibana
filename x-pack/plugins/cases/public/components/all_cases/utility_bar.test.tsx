@@ -9,7 +9,7 @@ import { act, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
-import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import { DEFAULT_CASES_TABLE_COLUMNS, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import {
   noCasesPermissions,
   onlyDeleteCasesPermission,
@@ -34,6 +34,8 @@ describe('Severity form field', () => {
       pageSize: 10,
       totalItemCount: 5,
     },
+    selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
+    onSelectedColumnsChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -88,9 +90,21 @@ describe('Severity form field', () => {
         pageIndex: 1,
         totalItemCount: 0,
       },
+      selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
+      onSelectedColumnsChange: jest.fn(),
     };
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
     expect(screen.getByText('Showing 0 of 0 cases')).toBeInTheDocument();
+  });
+
+  it('renders columns popover button when isSelectorView=False', async () => {
+    appMockRender.render(<CasesTableUtilityBar {...props} />);
+    expect(screen.getByTestId('column-selection-popover-button')).toBeInTheDocument();
+  });
+
+  it('does not render columns popover button when isSelectorView=True', async () => {
+    appMockRender.render(<CasesTableUtilityBar {...props} isSelectorView={true} />);
+    expect(screen.queryByTestId('column-selection-popover-button')).not.toBeInTheDocument();
   });
 
   it('opens the bulk actions correctly', async () => {

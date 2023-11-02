@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CasesColumnSelection } from '../../public/components/all_cases/types';
 import type { CasesFeaturesAllRequired } from '../ui/types';
 
 export * from './owners';
@@ -165,6 +166,32 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 
 /**
+ * Cases UI Constants
+ */
+
+export const DEFAULT_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
+  { field: 'title', name: 'title', isChecked: true },
+  { field: 'assignees', name: 'assignees', isChecked: true },
+  { field: 'tags', name: 'tags', isChecked: true },
+  { field: 'totalAlerts', name: 'totalAlerts', isChecked: true },
+  { field: 'totalComment', name: 'totalComment', isChecked: true },
+  { field: 'category', name: 'category', isChecked: true },
+  { field: 'createdAt', name: 'createdAt', isChecked: true },
+  { field: 'updatedAt', name: 'updatedAt', isChecked: true },
+  { field: 'closedAt', name: 'closedAt', isChecked: false },
+  { field: 'externalIncident', name: 'externalIncident', isChecked: true },
+  { field: 'status', name: 'status', isChecked: true },
+  { field: 'severity', name: 'severity', isChecked: true },
+];
+
+export const SELECTOR_VIEW_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
+  { field: 'title', name: 'title', isChecked: true },
+  { field: 'category', name: 'category', isChecked: true },
+  { field: 'createdAt', name: 'createdAt', isChecked: true },
+  { field: 'severity', name: 'severity', isChecked: true },
+];
+
+/**
  * Cases API Tags
  */
 
@@ -202,6 +229,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
+  casesTableColumns: 'cases.list.tableColumns',
 };
 
 /**

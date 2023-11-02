@@ -176,3 +176,7 @@ export const NO_ATTACHMENTS_ADDED = i18n.translate(
     defaultMessage: 'No attachments added to the case',
   }
 );
+
+export const COLUMNS = i18n.translate('xpack.cases.allCasesView.columnSelection', {
+  defaultMessage: 'Columns',
+});
