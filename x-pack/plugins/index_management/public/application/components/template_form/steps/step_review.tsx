@@ -188,7 +188,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListDescription>
 
               {/* Allow auto create */}
-              {isLegacy === false && (
+              {isLegacy !== true && (
                 <>
                   <EuiDescriptionListTitle>
                     <FormattedMessage
