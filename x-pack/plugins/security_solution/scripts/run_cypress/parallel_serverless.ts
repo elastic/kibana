@@ -61,7 +61,6 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
     return jsonData.api_key.qa;
   } catch (e) {
     log.info('API KEY could not be found in .elastic/cloud.json');
-    return undefined;
   }
 };
 
