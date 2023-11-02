@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map, pick } from 'lodash';
+import { map, memoize, pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   Agent,
@@ -23,6 +23,7 @@ import type {
   PackagePolicy,
   GetInfoResponse,
   GetOneAgentPolicyResponse,
+  PostFleetSetupResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
@@ -35,6 +36,7 @@ import {
   APP_API_ROUTES,
   epmRouteService,
   PACKAGE_POLICY_API_ROUTES,
+  SETUP_API_ROUTE,
 } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -1111,3 +1113,27 @@ export const addEndpointIntegrationToAgentPolicy = async ({
 
   return newIntegrationPolicy;
 };
+
+/**
+ * Calls the fleet setup API to ensure fleet configured with default settings
+ * @param kbnClient
+ * @param log
+ */
+export const ensureFleetSetup = memoize(
+  async (kbnClient: KbnClient, log: ToolingLog): Promise<PostFleetSetupResponse> => {
+    const setupResponse = await kbnClient
+      .request<PostFleetSetupResponse>({
+        path: SETUP_API_ROUTE,
+        headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+
+    if (!setupResponse.data.isInitialized) {
+      log.verbose(`Fleet setup response:`, setupResponse);
+      throw new Error(`Call to initialize Fleet [${SETUP_API_ROUTE}] failed`);
+    }
+
+    return setupResponse.data;
+  }
+);

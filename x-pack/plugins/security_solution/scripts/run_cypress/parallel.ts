@@ -366,8 +366,6 @@ ${JSON.stringify(
                 log,
               });
 
-              log.info(`is Kibana up?\n`, JSON.stringify(await kbnClient.status.get(), null, 2));
-
               fleetServer = await startFleetServerIfNecessary({
                 kbnClient,
                 logger: log,

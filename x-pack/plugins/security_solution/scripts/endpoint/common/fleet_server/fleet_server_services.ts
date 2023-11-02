@@ -51,6 +51,7 @@ import { isServerlessKibanaFlavor } from '../stack_services';
 import type { FormattedAxiosError } from '../format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import {
+  ensureFleetSetup,
   fetchFleetOutputs,
   fetchFleetServerHostList,
   fetchFleetServerUrl,
@@ -125,6 +126,8 @@ export const startFleetServer = async ({
         `Fleet server is already configured and running for this instance of Kibana.\n(Use 'force' option to bypass this error)`
       );
     }
+
+    await ensureFleetSetup(kbnClient, logger);
 
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     const policyId =
