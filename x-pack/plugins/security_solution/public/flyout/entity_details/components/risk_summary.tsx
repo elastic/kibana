@@ -39,8 +39,9 @@ interface TableItem {
   count: number;
 }
 const LENS_VISUALIZATION_SIZE = 110;
+const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
 
-export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
+export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
   const { data: userRisk } = riskScoreData;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
@@ -90,16 +91,15 @@ export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const items: TableItem[] = [
-    {
-      category: 'Alerts',
-      count: userRiskData?.user.risk.inputs?.length ?? 0,
-    },
-  ];
-
-  if (!userRiskData) {
-    return null;
-  }
+  const items: TableItem[] = useMemo(
+    () => [
+      {
+        category: 'Alerts',
+        count: userRiskData?.user.risk.inputs?.length ?? 0,
+      },
+    ],
+    [userRiskData?.user.risk.inputs?.length]
+  );
 
   return (
     <>
@@ -121,19 +121,21 @@ export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
               font-size: ${xsFontSize};
             `}
           >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.riskUpdatedTime"
-              defaultMessage="Updated {time}"
-              values={{
-                time: (
-                  <FormattedRelativePreferenceDate
-                    value={userRiskData['@timestamp']}
-                    dateFormat="MMM D, YYYY"
-                    relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
-                  />
-                ),
-              }}
-            />
+            {userRiskData && (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.riskUpdatedTime"
+                defaultMessage="Updated {time}"
+                values={{
+                  time: (
+                    <FormattedRelativePreferenceDate
+                      value={userRiskData['@timestamp']}
+                      dateFormat="MMM D, YYYY"
+                      relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
+                    />
+                  ),
+                }}
+              />
+            )}
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -148,14 +150,16 @@ export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
                 height: ${LENS_VISUALIZATION_SIZE}px;
               `}
             >
-              <VisualizationEmbeddable
-                applyGlobalQueriesAndFilters={false}
-                lensAttributes={lensAttributes}
-                id={`RiskSummary-risk_score_metric`}
-                timerange={{ from: 'now-30d', to: 'now' }}
-                width={LENS_VISUALIZATION_SIZE}
-                height={LENS_VISUALIZATION_SIZE}
-              />
+              {userRiskData && (
+                <VisualizationEmbeddable
+                  applyGlobalQueriesAndFilters={false}
+                  lensAttributes={lensAttributes}
+                  id={`RiskSummary-risk_score_metric`}
+                  timerange={LAST_30_DAYS}
+                  width={LENS_VISUALIZATION_SIZE}
+                  height={LENS_VISUALIZATION_SIZE}
+                />
+              )}
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -187,4 +191,5 @@ export const RiskSummary = ({ riskScoreData }: RiskSummaryProps) => {
       </EuiPanel>
     </>
   );
-};
+});
+RiskSummary.displayName = 'RiskSummary';
