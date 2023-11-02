@@ -237,13 +237,13 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  context.only('User is readonly', () => {
+  context('User is readonly', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
       deleteAlertsAndRules();
       createRule(getNewRule());
-      login(ROLES.reader);
+      login(ROLES.t1_analyst);
       visit(ALERTS_URL, { role: ROLES.reader });
       waitForAlertsToPopulate();
     });
