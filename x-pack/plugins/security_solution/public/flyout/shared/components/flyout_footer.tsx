@@ -7,23 +7,23 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlyoutBody, EuiPanel } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 
-interface FlyoutBodyProps extends React.ComponentProps<typeof EuiFlyoutBody> {
+interface FlyoutFooterProps extends React.ComponentProps<typeof EuiFlyoutFooter> {
   children: React.ReactNode;
 }
 
 /**
- * Wrapper of `EuiFlyoutBody`, setting the recommended `16px` padding using a EuiPanel.
+ * Wrapper of `EuiFlyoutFooter`, setting the recommended `16px` padding using a EuiPanel.
  */
-export const FlyoutBody: FC<FlyoutBodyProps> = memo(({ children, ...flyoutBodyProps }) => {
+export const FlyoutFooter: FC<FlyoutFooterProps> = memo(({ children, ...flyoutFooterProps }) => {
   return (
-    <EuiFlyoutBody {...flyoutBodyProps}>
+    <EuiFlyoutFooter {...flyoutFooterProps}>
       <EuiPanel hasShadow={false} color="transparent">
         {children}
       </EuiPanel>
-    </EuiFlyoutBody>
+    </EuiFlyoutFooter>
   );
 });
 
-FlyoutBody.displayName = 'FlyoutBody';
+FlyoutFooter.displayName = 'FlyoutFooter';

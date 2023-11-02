@@ -26,7 +26,7 @@ export interface CopyToClipboardProps {
   /**
    * Icon name (value coming from EUI)
    */
-  iconType: string;
+  iconType: EuiButtonEmptyProps['iconType'];
   /**
    * Button size (values coming from EUI)
    */

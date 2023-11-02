@@ -20,16 +20,63 @@ import { mockFlyoutContextValue } from '../../document_details/shared/mocks/mock
 const expandDetails = jest.fn();
 
 describe('<FlyoutNavigation />', () => {
-  it('should render expand details button if flyout is expandable', () => {
-    const { getByTestId } = render(
+  describe('when flyout is expandable', () => {
+    it('should render expand button', () => {
+      const flyoutContextValue = {
+        panels: {},
+      } as unknown as ExpandableFlyoutContext;
+
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+            <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+          </ExpandableFlyoutContext.Provider>
+        </TestProviders>
+      );
+      expect(getByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).toHaveTextContent('Expand details');
+      expect(queryByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
+
+      getByTestId(EXPAND_DETAILS_BUTTON_TEST_ID).click();
+      expect(expandDetails).toHaveBeenCalled();
+    });
+
+    it('should render collapse button', () => {
+      const flyoutContextValue = {
+        closeLeftPanel: jest.fn(),
+        panels: {
+          left: {},
+        },
+      } as unknown as ExpandableFlyoutContext;
+
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+            <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+          </ExpandableFlyoutContext.Provider>
+        </TestProviders>
+      );
+
+      expect(getByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID)).toHaveTextContent('Collapse details');
+      expect(queryByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
+
+      getByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID).click();
+      expect(flyoutContextValue.closeLeftPanel).toHaveBeenCalled();
+    });
+  });
+
+  it('should not render expand details button if flyout is not expandable', () => {
+    const { queryByTestId, getByTestId } = render(
       <TestProviders>
         <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-          <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+          <FlyoutNavigation flyoutIsExpandable={false} actions={<div />} />
         </ExpandableFlyoutContext.Provider>
       </TestProviders>
     );
-
-    expect(getByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HEADER_ACTIONS_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render actions if there are actions available', () => {
@@ -46,19 +93,6 @@ describe('<FlyoutNavigation />', () => {
     );
     expect(getByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HEADER_ACTIONS_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should not render expand details button if flyout is not expandable', () => {
-    const { queryByTestId, getByTestId } = render(
-      <TestProviders>
-        <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-          <FlyoutNavigation flyoutIsExpandable={false} actions={<div />} />
-        </ExpandableFlyoutContext.Provider>
-      </TestProviders>
-    );
-    expect(getByTestId(HEADER_ACTIONS_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render empty component if panel is not expandable and no action is available', async () => {

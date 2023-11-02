@@ -50,11 +50,14 @@ flyout
     └─── components
 ```
 
-## Shared Flyout Components
-In the top level `shared` folder, components that start with `flyout` are generic flyout components with predefined styles and padding. We recommend using these components to create an unified flyout experience. 
+## Shared flyout components
 
- - Flyout navigation: navigation menu on the Right Panel only, with expand/collapse button and option to pass in a list of actions to be displayed on top 
- - Flyout header: wrapper of `EuiFlyoutHeader`
- - Flyout body: wrapper of `EuiFlyoutHeader`
- - Flyout error: error message to used in the full panel
- - Flyout loading: loading spinner to used in the full panel
+Here's a non-exhaustive list of the reusable component in the top-level `shared` folder. We recommend using these components to create a unified flyout experience. 
+
+ - [FlyoutNavigation](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout/shared/components/flyout_navigation.tsx): navigation menu on the **right panel** only, with expand/collapse button and option to pass in a list of actions to be displayed on top. Works best when used in combination with the header component below. 
+ - [FlyoutHeader](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout/shared/components/flyout_header.tsx): wrapper of `EuiFlyoutHeader`, setting the recommended `16px` padding using a EuiPanel.
+ - [FlyoutBody](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout/shared/components/flyout_body.tsx): wrapper of `EuiFlyoutHeader`, setting the recommended `16px` padding using a EuiPanel. 
+ - [FlyoutTabs](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout/shared/components/flyout_tabs.tsx): Wrapper of `EuiTabs`, setting bottom margin to align with the flyout header divider
+ - [FlyoutFooter](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout/shared/components/flyout_footer.tsx): wrapper of `EuiFlyoutFooter`, setting the recommended `16px` padding using a EuiPanel. 
+ - [FlyoutError](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout/shared/components/flyout_error.tsx): displays a `EuiEmptyPrompt` for error messages, correctly positioned and sized when used in at the panel level (not for individual components)
+ - [FlyoutLoading](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout/shared/components/flyout_loading.tsx): displays an `EuiLoadingSpinner` component correctly positioned and sized when used in at the panel level (not for individual components)

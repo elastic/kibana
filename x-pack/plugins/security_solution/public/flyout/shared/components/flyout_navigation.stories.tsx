@@ -18,12 +18,34 @@ export default {
   title: 'Flyout/Navigation',
 };
 
-export const CollapsableWithAction: Story<void> = () => {
-  const flyoutContextValue = {
-    closeLeftPanel: () => window.alert('close left panel'),
-    panels: {},
-  } as unknown as ExpandableFlyoutContext;
+const flyoutContextValue = {
+  closeLeftPanel: () => window.alert('close left panel'),
+  panels: {},
+} as unknown as ExpandableFlyoutContext;
 
+export const Expand: Story<void> = () => {
+  return (
+    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+    </ExpandableFlyoutContext.Provider>
+  );
+};
+
+export const Collapse: Story<void> = () => {
+  return (
+    <ExpandableFlyoutContext.Provider
+      value={
+        {
+          ...flyoutContextValue,
+          panels: { left: {} },
+        } as unknown as ExpandableFlyoutContext
+      }
+    >
+      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+    </ExpandableFlyoutContext.Provider>
+  );
+};
+export const CollapsableWithAction: Story<void> = () => {
   return (
     <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
       <FlyoutNavigation
@@ -35,22 +57,7 @@ export const CollapsableWithAction: Story<void> = () => {
   );
 };
 
-export const CollapsableWithoutAction: Story<void> = () => {
-  const flyoutContextValue = {
-    closeLeftPanel: () => window.alert('close left panel'),
-    panels: {},
-  } as unknown as ExpandableFlyoutContext;
-
-  return (
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
-    </ExpandableFlyoutContext.Provider>
-  );
-};
-
 export const NonCollapsableWithAction: Story<void> = () => {
-  const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
-
   return (
     <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
       <FlyoutNavigation flyoutIsExpandable={false} actions={<EuiButtonIcon iconType="share" />} />
@@ -59,8 +66,6 @@ export const NonCollapsableWithAction: Story<void> = () => {
 };
 
 export const Empty: Story<void> = () => {
-  const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
-
   return (
     <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
       <FlyoutNavigation flyoutIsExpandable={false} />

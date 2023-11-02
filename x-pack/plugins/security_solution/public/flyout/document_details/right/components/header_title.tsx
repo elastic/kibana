@@ -12,12 +12,14 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiIcon,
-  EuiTextColor,
   useEuiTheme,
+  EuiTextColor,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { DocumentStatus } from './status';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
@@ -36,34 +38,41 @@ export const HeaderTitle: FC = memo(() => {
   const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
-
   const { euiTheme } = useEuiTheme();
-
   const ruleTitle = useMemo(
     () => (
-      <RenderRuleName
-        contextId={scopeId}
-        eventId={eventId}
-        fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
-        fieldType={'string'}
-        isAggregatable={false}
-        isDraggable={false}
-        linkValue={ruleId}
-        value={ruleName}
-        openInNewTab
-      >
-        <div>
-          <EuiIcon type={'warning'} size="m" className="eui-alignBaseline" />
-          &nbsp;
-          <EuiTitle size="s">
-            <EuiTextColor color={euiTheme.colors.primaryText}>
-              <span data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>{ruleName}</span>
-            </EuiTextColor>
-          </EuiTitle>
-          &nbsp;
-          <EuiIcon type="popout" size="m" className="eui-alignBaseline" />
-        </div>
-      </RenderRuleName>
+      <EuiToolTip content={ruleName}>
+        <RenderRuleName
+          contextId={scopeId}
+          eventId={eventId}
+          fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
+          fieldType={'string'}
+          isAggregatable={false}
+          isDraggable={false}
+          linkValue={ruleId}
+          value={ruleName}
+          openInNewTab
+        >
+          <div
+            css={css`
+              word-break: break-word;
+              display: -webkit-box;
+              -webkit-line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            `}
+          >
+            <EuiIcon type={'warning'} size="m" className="eui-alignBaseline" />
+            &nbsp;
+            <EuiTitle size="s">
+              <EuiTextColor color={euiTheme.colors.primaryText}>
+                <span data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>{ruleName}</span>
+              </EuiTextColor>
+            </EuiTitle>
+          </div>
+        </RenderRuleName>
+      </EuiToolTip>
     ),
     [ruleName, ruleId, eventId, scopeId, euiTheme.colors.primaryText]
   );
