@@ -17,4 +17,6 @@ export * from './install_mock_prebuilt_rules';
 export * from './install_prebuilt_rules_and_timelines';
 export * from './install_prebuilt_rules_fleet_package';
 export * from './install_prebuilt_rules';
+export * from './review_install_prebuilt_rules';
+export * from './review_upgrade_prebuilt_rules';
 export * from './upgrade_prebuilt_rules';

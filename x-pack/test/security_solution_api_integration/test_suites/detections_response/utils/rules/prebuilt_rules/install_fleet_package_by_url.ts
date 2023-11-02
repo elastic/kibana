@@ -67,6 +67,7 @@ export const installPrebuiltRulesPackageByVersion = async (
   const fleetResponse = await supertest
     .post(epmRouteService.getInstallPath('security_detection_engine', version))
     .set('kbn-xsrf', 'xxxx')
+    .set('elastic-api-version', '2023-10-31')
     .type('application/json')
     .send({ force: true })
     .expect(200);

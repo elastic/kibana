@@ -42,7 +42,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         /*  Limit the heap memory to the lowest amount with which Kibana doesn't crash with an out of memory error
          *  when installing the large package.
          */
-        NODE_OPTIONS: '--max-old-space-size=700',
+        NODE_OPTIONS: '--max-old-space-size=800',
       },
     },
   };
