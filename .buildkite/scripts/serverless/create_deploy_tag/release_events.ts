@@ -194,8 +194,7 @@ function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | 
       }[stateStatus || 'missing'];
 
       if (stateStatus === 'pending') {
-        const rotatingEmoji = makeRotate(stateEmoji);
-        return `<div>[${rotatingEmoji}] ${stateInfo.name}<br />&nbsp - ${stateInfo.description}</div>`;
+        return `<div>[${stateEmoji}] ${stateInfo.name}<br />&nbsp; - ${stateInfo.description}</div>`;
       } else {
         return `<div>[${stateEmoji}] ${stateInfo.name}(${stateName})</div>`;
       }
@@ -227,14 +226,6 @@ async function tryCall(fn: any, ...args: any[]) {
   } else {
     return true;
   }
-}
-
-function makeRotate(str: string) {
-  return `
-<style> @keyframes rotating { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } </style>
-<span style="display:inline-block; animation: rotating 5s infinite">
-${str}
-</span>`;
 }
 
 /**

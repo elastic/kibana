@@ -19,16 +19,10 @@ steps:
   - label: "Collect commit info"
     commands:
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state collect_commit_info
-      - .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.sh
+      - sh .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.sh
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state wait_for_confirmation
     key: collect_data
     depends_on: select_commit
-
-  - wait: ~
-
-  - block: "Confirm deployment"
-    prompt: "Are you sure you want to deploy to production?"
-    depends_on: collect_data
 
   - wait: ~
 
