@@ -121,7 +121,13 @@ function toStoredSLO(slo: SLO): StoredSLO {
 
 function toSLO(storedSLO: StoredSLO): SLO {
   return pipe(
-    sloSchema.decode(storedSLO),
+    sloSchema.decode({
+      ...storedSLO,
+      // version was added in 8.12.0. This is a safeguard against SO migration issue.
+      // if not present, we considered the version to be 1, e.g. not migrated.
+      // We would need to call the _reset api on this SLO.
+      version: storedSLO.version ?? 1,
+    }),
     fold(() => {
       throw new Error('Invalid Stored SLO');
     }, t.identity)
