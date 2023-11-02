@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, screen, within, fireEvent } from '@testing-library/react';
+import { screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 // eslint-disable-next-line @kbn/eslint/module_migration
@@ -75,143 +75,158 @@ const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
-describe(`UserActions`, () => {
-  const sampleData = {
-    content: 'what a great comment update',
-  };
-  let appMockRender: AppMockRenderer;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useUpdateCommentMock.mockReturnValue({
-      isLoadingIds: [],
-      mutate: patchComment,
-    });
-    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
-    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-
-    jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
-    appMockRender = createAppMockRenderer();
-  });
-
-  it('Renders service now update line with top and bottom when push is required', async () => {
-    const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
-    const ourActions = [
-      getUserAction('pushed', 'push_to_service', {
-        createdAt: '2023-01-17T09:46:29.813Z',
-      }),
-    ];
-
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: ourActions },
-    });
-
-    const props = {
-      ...defaultProps,
-      caseConnectors,
+for (let i = 0; i < 50; i++) {
+  describe(`UserActions`, () => {
+    const sampleData = {
+      content: 'what a great comment update',
     };
+    let appMockRender: AppMockRenderer;
 
-    appMockRender.render(<UserActions {...props} />);
+    beforeEach(() => {
+      jest.clearAllMocks();
+      useUpdateCommentMock.mockReturnValue({
+        isLoadingIds: [],
+        mutate: patchComment,
+      });
+      useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
+      useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
 
-    await waitForComponentToUpdate();
-
-    await waitFor(() => {
-      expect(screen.getByTestId('top-footer')).toBeInTheDocument();
-      expect(screen.getByTestId('bottom-footer')).toBeInTheDocument();
-    });
-  });
-
-  it('Renders service now update line with top only when push is up to date', async () => {
-    const ourActions = [
-      getUserAction('pushed', 'push_to_service', {
-        createdAt: '2023-01-17T09:46:29.813Z',
-      }),
-    ];
-
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: ourActions },
+      jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
+      appMockRender = createAppMockRenderer();
     });
 
-    appMockRender.render(<UserActions {...defaultProps} />);
-    await waitFor(() => {
-      expect(screen.getByTestId('top-footer')).toBeInTheDocument();
+    it('Renders service now update line with top and bottom when push is required', async () => {
+      const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
+      const ourActions = [
+        getUserAction('pushed', 'push_to_service', {
+          createdAt: '2023-01-17T09:46:29.813Z',
+        }),
+      ];
+
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: ourActions },
+      });
+
+      const props = {
+        ...defaultProps,
+        caseConnectors,
+      };
+
+      appMockRender.render(<UserActions {...props} />);
+
+      await waitForComponentToUpdate();
+
+      expect(await screen.findByTestId('top-footer')).toBeInTheDocument();
+      expect(await screen.findByTestId('bottom-footer')).toBeInTheDocument();
+    });
+
+    it('Renders service now update line with top only when push is up to date', async () => {
+      const ourActions = [
+        getUserAction('pushed', 'push_to_service', {
+          createdAt: '2023-01-17T09:46:29.813Z',
+        }),
+      ];
+
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: ourActions },
+      });
+
+      appMockRender.render(<UserActions {...defaultProps} />);
+
+      expect(await screen.findByTestId('top-footer')).toBeInTheDocument();
       expect(screen.queryByTestId('bottom-footer')).not.toBeInTheDocument();
     });
-  });
 
-  it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
-    const ourActions = [getUserAction('comment', UserActionActions.create)];
+    it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
+      const ourActions = [getUserAction('comment', UserActionActions.create)];
 
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: ourActions },
-    });
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: ourActions },
+      });
 
-    appMockRender.render(<UserActions {...defaultProps} />);
+      appMockRender.render(<UserActions {...defaultProps} />);
 
-    userEvent.click(
-      within(
-        screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('property-actions-user-action-ellipses')
-    );
+      userEvent.click(
+        await within(
+          (
+            await screen.findAllByTestId(
+              `comment-create-action-${defaultProps.data.comments[0].id}`
+            )
+          )[1]
+        ).findByTestId('property-actions-user-action-ellipses')
+      );
 
-    await waitForEuiPopoverOpen();
+      await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
+      userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
-    userEvent.click(
-      within(
-        screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('editable-cancel-markdown')
-    );
+      userEvent.click(
+        await within(
+          (
+            await screen.findAllByTestId(
+              `comment-create-action-${defaultProps.data.comments[0].id}`
+            )
+          )[1]
+        ).findByTestId('editable-cancel-markdown')
+      );
 
-    await waitFor(() => {
       expect(
         within(
-          screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
+          (
+            await screen.findAllByTestId(
+              `comment-create-action-${defaultProps.data.comments[0].id}`
+            )
+          )[1]
         ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
     });
-  });
 
-  it('calls update comment when comment markdown is saved', async () => {
-    const ourActions = [getUserAction('comment', UserActionActions.create)];
+    it('calls update comment when comment markdown is saved', async () => {
+      const ourActions = [getUserAction('comment', UserActionActions.create)];
 
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: ourActions },
-    });
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: ourActions },
+      });
 
-    appMockRender.render(<UserActions {...defaultProps} />);
+      appMockRender.render(<UserActions {...defaultProps} />);
 
-    userEvent.click(
-      within(
-        screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('property-actions-user-action-ellipses')
-    );
+      userEvent.click(
+        await within(
+          (
+            await screen.findAllByTestId(
+              `comment-create-action-${defaultProps.data.comments[0].id}`
+            )
+          )[1]
+        ).findByTestId('property-actions-user-action-ellipses')
+      );
 
-    await waitForEuiPopoverOpen();
+      await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
+      userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
-    await waitForComponentToUpdate();
+      await waitForComponentToUpdate();
 
-    fireEvent.change(screen.getAllByTestId(`euiMarkdownEditorTextArea`)[0], {
-      target: { value: sampleData.content },
-    });
+      fireEvent.change((await screen.findAllByTestId(`euiMarkdownEditorTextArea`))[0], {
+        target: { value: sampleData.content },
+      });
 
-    userEvent.click(
-      within(
-        screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('editable-save-markdown')
-    );
-
-    await waitFor(() => {
-      expect(
+      userEvent.click(
         within(
           screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
+        ).getByTestId('editable-save-markdown')
+      );
+
+      expect(
+        within(
+          (
+            await screen.findAllByTestId(
+              `comment-create-action-${defaultProps.data.comments[0].id}`
+            )
+          )[1]
         ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
 
@@ -225,48 +240,48 @@ describe(`UserActions`, () => {
         { onSuccess: expect.anything(), onError: expect.anything() }
       );
     });
-  });
 
-  it('shows quoted text in last MarkdownEditorTextArea', async () => {
-    const quoteableText = `> Solve this fast! \n\n`;
-    const ourActions = [getUserAction('comment', UserActionActions.create)];
+    it('shows quoted text in last MarkdownEditorTextArea', async () => {
+      const quoteableText = `> Solve this fast! \n\n`;
+      const ourActions = [getUserAction('comment', UserActionActions.create)];
 
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: ourActions },
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: ourActions },
+      });
+
+      appMockRender.render(<UserActions {...defaultProps} />);
+
+      expect((await screen.findByTestId(`euiMarkdownEditorTextArea`)).textContent).not.toContain(
+        quoteableText
+      );
+
+      userEvent.click(
+        await within(
+          (
+            await screen.findAllByTestId(
+              `comment-create-action-${defaultProps.data.comments[0].id}`
+            )
+          )[1]
+        ).findByTestId('property-actions-user-action-ellipses')
+      );
+
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(await screen.findByTestId('property-actions-user-action-quote'));
+
+      expect((await screen.findAllByTestId('add-comment'))[0].textContent).toContain(quoteableText);
     });
 
-    appMockRender.render(<UserActions {...defaultProps} />);
+    it('does not show add comment markdown when history filter is selected', async () => {
+      appMockRender.render(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, type: 'action' }}
+        />
+      );
 
-    expect((await screen.findByTestId(`euiMarkdownEditorTextArea`)).textContent).not.toContain(
-      quoteableText
-    );
-
-    userEvent.click(
-      within(
-        screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('property-actions-user-action-ellipses')
-    );
-
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId('add-comment')[0].textContent).toContain(quoteableText);
-    });
-  });
-
-  it('does not show add comment markdown when history filter is selected', async () => {
-    appMockRender.render(
-      <UserActions
-        {...defaultProps}
-        userActivityQueryParams={{ ...userActivityQueryParams, type: 'action' }}
-      />
-    );
-
-    await waitFor(() => {
       expect(screen.queryByTestId('add-comment')).not.toBeInTheDocument();
     });
   });
-});
+}
