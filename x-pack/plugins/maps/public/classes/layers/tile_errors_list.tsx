@@ -14,22 +14,24 @@ interface Props {
 }
 
 export function TileErrorsList(props: Props) {
-  const [selectedTileKey, setSelectedTileKey] = useState(props.tileErrors?.[0].tileZXYKey);
+  const [selectedTileKey, setSelectedTileKey] = useState(props.tileErrors?.[0].tileKey);
+  
   const selectedTileContent = useMemo(() => {
     const tileError = props.tileErrors.find((tileError) => {
-      return tileError.tileZXYKey === selectedTileKey;
+      return tileError.tileKey === selectedTileKey;
     });
     return tileError ? <p>{getDescription(tileError)}</p> : null;
   }, [selectedTileKey]);
+  
   const tabs = useMemo(() => {
     return props.tileErrors.map((tileError) => {
       return (
         <EuiTab
-          key={tileError.tileZXYKey}
-          onClick={() => setSelectedTileKey(tileError.tileZXYKey)}
-          isSelected={tileError.tileZXYKey === selectedTileKey}
+          key={tileError.tileKey}
+          onClick={() => setSelectedTileKey(tileError.tileKey)}
+          isSelected={tileError.tileKey === selectedTileKey}
         >
-          {tileError.tileZXYKey}
+          {tileError.tileKey}
         </EuiTab>
       );
     });
@@ -41,30 +43,6 @@ export function TileErrorsList(props: Props) {
       {selectedTileContent}
     </>
   );
-  /* return (
-    <div>
-      {
-        props.tileErrors.map((tileError) => (
-          <div key={tileError.tileZXYKey}>
-            <EuiAccordion
-              key={tileError.tileZXYKey}
-              id={tileError.tileZXYKey}
-              arrowDisplay="none"
-              buttonContent={i18n.translate('xpack.maps.tileErrorsList.tileTitle', {
-                defaultMessage: `Tile {tileZXYKey}`,
-                values: { tileZXYKey: tileError.tileZXYKey },
-              })}
-            >
-              <p>
-                {getDescription(tileError)}
-              </p>
-            </EuiAccordion>
-            <EuiSpacer size="s" />
-          </div>
-        ))
-      }
-    </div>
-  );*/
 }
 
 function getDescription(tileError: TileError) {

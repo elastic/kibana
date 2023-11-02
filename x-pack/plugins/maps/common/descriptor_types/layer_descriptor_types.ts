@@ -53,7 +53,7 @@ export type TileMetaFeature = Feature & {
 
 export type TileError = {
   message: string;
-  tileZXYKey: string; // format zoom/x/y
+  tileKey: string; // format zoom/x/y
   error?: ErrorCause;
 };
 

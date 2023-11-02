@@ -13,8 +13,9 @@ import type { TileError, TileMetaFeature } from '../../../../common/descriptor_t
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import { ILayer } from '../../../classes/layers/layer';
 import { IVectorSource } from '../../../classes/sources/vector_source';
-import { getTileKey } from '../../../classes/util/geo_tile_utils';
+import { getTileKey as getCenterTileKey } from '../../../classes/util/geo_tile_utils';
 import { ES_MVT_META_LAYER_NAME } from '../../../classes/util/tile_meta_feature_utils';
+import { TileErrorCache } from './tile_error_cache';
 
 interface MbTile {
   // references internal object from mapbox
@@ -45,9 +46,7 @@ export class TileStatusTracker extends Component<Props> {
   // 'sourcedata' and 'error' events remove tile request from cache
   // Tile requests with 'aborted' status are removed from cache when reporting 'areTilesLoaded' status
   private _tileCache: Tile[] = [];
-  // Tile error cache tracks tile request errors per layer
-  // Error cache is cleared when map center tile changes
-  private _tileErrorCache: Record<string, TileError[]> = {};
+  private _tileErrorCache = new TileErrorCache();
   // Layer cache tracks layers that have requested one or more tiles
   // Layer cache is used so that only a layer that has requested one or more tiles reports 'areTilesLoaded' status
   // layer cache is never cleared
@@ -87,17 +86,10 @@ export class TileStatusTracker extends Component<Props> {
         this._layerCache.set(layerId, true);
       }
 
-      // clear previous tile error when tile starts loading
-      if (layerId && this._tileErrorCache[layerId]) {
-        const tileZXYKey = getTileZXYKey(e.tile.tileID.canonical);
-        const tileErrorIndex = this._tileErrorCache[layerId].findIndex((tileError) => {
-          return tileError.tileZXYKey === tileZXYKey;
-        });
-
-        if (tileErrorIndex >= 0) {
-          this._tileErrorCache[layerId].splice(tileErrorIndex, 1);
-          this._updateTileStatusForAllLayers();
-        }
+      const tileKey = getTileKey(e.tile.tileID.canonical);
+      if (layerId && this._tileErrorCache.hasTileError(layerId, tileKey)) {
+        this._tileErrorCache.clearTileError(layerId, tileKey);
+        this._updateTileStatusForAllLayers();
       }
 
       const tracked = this._tileCache.find((tile) => {
@@ -140,15 +132,15 @@ export class TileStatusTracker extends Component<Props> {
       }
 
       const layerId = targetLayer.getId();
-      const tileZXYKey = getTileZXYKey(e.tile.tileID.canonical);
+      const tileKey = getTileKey(e.tile.tileID.canonical);
+      const tileError = {
+        message: e.error.message,
+        tileKey,
+      }
+      this._tileErrorCache.setTileError(layerId, tileError);
+
       const ajaxError =
         'body' in e.error && 'statusText' in e.error ? (e.error as AJAXError) : undefined;
-      const layerErrors = this._tileErrorCache[layerId] ? this._tileErrorCache[layerId] : [];
-      layerErrors.push({
-        message: e.error.message,
-        tileZXYKey,
-      } as TileError);
-      this._tileErrorCache[layerId] = layerErrors;
 
       if (!ajaxError || !targetLayer?.getSource().isESSource()) {
         this._updateTileStatusForAllLayers();
@@ -157,14 +149,13 @@ export class TileStatusTracker extends Component<Props> {
 
       try {
         ajaxError.body.text().then((body) => {
-          const layerErrors = this._tileErrorCache[layerId] ? this._tileErrorCache[layerId] : [];
-          const targetTileError = layerErrors.find((tileError) => {
-            return tileError.tileZXYKey === tileZXYKey;
-          });
-          if (targetTileError) {
+          if (this._tileErrorCache.hasTileError(layerId, tileKey)) {
             const parsedJson = JSON.parse(body) as { error?: ErrorCause };
             if (parsedJson.error && 'type' in parsedJson.error) {
-              targetTileError.error = parsedJson.error;
+              this._tileErrorCache.setTileError(layerId, {
+                ...tileError,
+                error: parsedJson.error
+              });
               this._updateTileStatusForAllLayers();
             }
           }
@@ -199,14 +190,14 @@ export class TileStatusTracker extends Component<Props> {
     // 'source.roundZoom' is false for vector layers
     // Always floor zoom to keep logic as simple as possible and not have to track center tile by source.
     // We are mainly concerned with showing errors from Elasticsearch vector tile requests (which are vector sources)
-    const centerTileKey = getTileKey(
+    const centerTileKey = getCenterTileKey(
       center.lat,
       center.lng,
       Math.floor(this.props.mbMap.getZoom())
     );
     if (this._prevCenterTileKey !== centerTileKey) {
       this._prevCenterTileKey = centerTileKey;
-      this._tileErrorCache = {};
+      this._tileErrorCache.clear();
     }
   };
 
@@ -240,7 +231,7 @@ export class TileStatusTracker extends Component<Props> {
         layer.getId(),
         !atLeastOnePendingTile,
         this._getTileMetaFeatures(layer),
-        this._tileErrorCache[layer.getId()]
+        this._tileErrorCache.getTileErrors(layer.getId())
       );
     }
   }, 100);
@@ -289,6 +280,6 @@ export class TileStatusTracker extends Component<Props> {
   }
 }
 
-function getTileZXYKey(canonical: { x: number; y: number; z: number }) {
+function getTileKey(canonical: { x: number; y: number; z: number }) {
   return `${canonical.z}/${canonical.x}/${canonical.y}`;
 }
