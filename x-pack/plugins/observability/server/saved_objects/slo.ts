@@ -46,7 +46,7 @@ export const slo: SavedObjectsType = {
           type: 'data_backfill',
           backfillFn: (doc) => {
             // we explicitely set the version to 1, so we know which SLOs requires a migration to the following version.
-            return { attributes: { version: 1 } };
+            return { attributes: { version: doc.attributes.version ?? 1 } };
           },
         },
       ],
