@@ -21,10 +21,10 @@ export function runCli() {
             demandOption: true,
             string: true,
           })
-          .option('sourceGlob', {
+          .option('sourceGlobs', {
             describe: 'Elasticsearch target',
-            default: './**/*.schema.yaml',
-            string: true,
+            default: ['./security_solution/**/*.schema.yaml', './osquery/**/*.schema.yaml'],
+            array: true,
           })
           .option('templateName', {
             describe: 'Template to use for code generation',
