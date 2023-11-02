@@ -36,7 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonPage']);
 
-  describe('Flyout content customization', () => {
+  // Skip the tests until the feature will be fully enabled on the Log Explorer.
+  describe.skip('Flyout content customization', () => {
     let cleanupDataStreamSetup: () => Promise<void>;
 
     before('initialize tests', async () => {
