@@ -9,25 +9,35 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllRules, getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
-// eslint-disable-next-line import/no-default-export
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../../../common/services/security_solution';
+
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
+
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('preview_rules', () => {
+  describe('@serverless @ess preview_rules', () => {
     describe('previewing rules', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(path);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(path);
       });
 
       afterEach(async () => {
@@ -84,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('t1_analyst', () => {
+      describe('@brokenInServerless t1_analyst', () => {
         const role = ROLES.t1_analyst;
 
         beforeEach(async () => {
@@ -105,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('hunter', () => {
+      describe('@brokenInServerless hunter', () => {
         const role = ROLES.hunter;
 
         beforeEach(async () => {
