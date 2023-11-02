@@ -8,6 +8,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { type BehaviorSubject, combineLatest, from, map, Subscription } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { dynamic } from '../utils/dynamic';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 import { LogExplorerStateContainer } from '../components/log_explorer';
@@ -116,25 +117,20 @@ export const createLogExplorerProfileCustomizations =
           viewSurroundingDocument: { disabled: true },
         },
       },
-      /**
-       * The Content customization is currently under development, but not MVP ready.
-       * As soon as the following application is commented, the flyout will keep showing the default Discover flyout content.
-       * For local development, just uncomment the following code and you'll be able to see the changes you are working on applied.
-       */
-      // Content: (props) => {
-      //   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
+      Content: (props) => {
+        const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
 
-      //   const internalState = useObservable(
-      //     stateContainer.internalState.state$,
-      //     stateContainer.internalState.get()
-      //   );
+        const internalState = useObservable(
+          stateContainer.internalState.state$,
+          stateContainer.internalState.get()
+        );
 
-      //   return (
-      //     <KibanaContextProviderForPlugin>
-      //       <LazyCustomFlyoutContent {...props} dataView={internalState.dataView} />
-      //     </KibanaContextProviderForPlugin>
-      //   );
-      // },
+        return (
+          <KibanaContextProviderForPlugin>
+            <LazyCustomFlyoutContent {...props} dataView={internalState.dataView} />
+          </KibanaContextProviderForPlugin>
+        );
+      },
     });
 
     return () => {
