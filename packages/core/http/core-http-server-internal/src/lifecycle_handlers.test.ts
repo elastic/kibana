@@ -476,6 +476,14 @@ describe('build number mismatch logger on error pre-response handler', () => {
     expect(logger.get).toHaveBeenCalledWith(`kbn-build-number-mismatch`);
   });
 
+  it('does not log for same server-client build', () => {
+    const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+    const request = forgeRequest({ buildNr: '123' });
+    const response: OnPreResponseInfo = { statusCode: 500 }; // should log for errors, but not this time bc same build nr
+    handler(request, response, createToolkit());
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   const badStatusCodeTestCases = [
     /** just test a few common ones */
     [400],
