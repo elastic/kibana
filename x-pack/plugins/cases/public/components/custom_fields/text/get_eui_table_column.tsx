@@ -12,7 +12,7 @@ import type { CustomFieldEuiTableColumn } from '../types';
 
 export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiTableColumn => ({
   name: label,
-  width: '100px',
+  width: '250px',
   render: (customField: CaseCustomField) => (
     <p
       className="eui-textTruncate"

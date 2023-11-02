@@ -28,7 +28,7 @@ describe('getEuiTableColumn ', () => {
     expect(getEuiTableColumn({ label })).toEqual({
       name: label,
       render: expect.any(Function),
-      width: '100px',
+      width: '250px',
     });
   });
 

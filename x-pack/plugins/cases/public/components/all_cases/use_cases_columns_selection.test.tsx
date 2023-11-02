@@ -12,33 +12,28 @@ import type { AppMockRenderer } from '../../common/mock';
 
 import { createAppMockRenderer } from '../../common/mock';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
-import { mergeSelectedColumnsWithConfiguration } from './utils';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
-import { DEFAULT_CASES_TABLE_COLUMNS } from '../../../common/constants';
 
 jest.mock('./use_cases_columns_configuration');
-jest.mock('./utils');
 
 const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as jest.Mock;
-const mergeSelectedColumnsWithConfigurationMock =
-  mergeSelectedColumnsWithConfiguration as jest.Mock;
 
 const localStorageKey = 'testAppId.cases.list.tableColumns';
 const casesColumnsConfig = {
   title: {
     field: 'title',
     name: 'Name',
-    isChecked: false,
+    canDisplay: true,
   },
   assignees: {
     field: 'assignees',
     name: 'Assignees',
-    isChecked: false,
+    canDisplay: true,
   },
   tags: {
     field: 'tags',
     name: 'Tags',
-    isChecked: false,
+    canDisplay: true,
   },
 };
 
@@ -52,23 +47,6 @@ describe('useCasesColumnsSelection ', () => {
     appMockRender = createAppMockRenderer({ license });
 
     useCasesColumnsConfigurationMock.mockReturnValue(casesColumnsConfig);
-    mergeSelectedColumnsWithConfigurationMock.mockReturnValue([
-      {
-        field: 'title',
-        name: 'Name',
-        isChecked: true,
-      },
-      {
-        field: 'assignees',
-        name: 'Assignees',
-        isChecked: true,
-      },
-      {
-        field: 'tags',
-        name: 'Tags',
-        isChecked: true,
-      },
-    ]);
 
     localStorage.clear();
   });
@@ -77,7 +55,7 @@ describe('useCasesColumnsSelection ', () => {
     jest.clearAllMocks();
   });
 
-  it('returns the expected selectedColumns', async () => {
+  it('returns the expected selectedColumns when the localstorage is empty', async () => {
     const { result } = renderHook(() => useCasesColumnsSelection(), {
       wrapper: appMockRender.AppWrapper,
     });
@@ -117,24 +95,31 @@ describe('useCasesColumnsSelection ', () => {
 
     localStorage.setItem(localStorageKey, JSON.stringify(selectedColumns));
 
-    renderHook(() => useCasesColumnsSelection(), {
+    const { result } = renderHook(() => useCasesColumnsSelection(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    expect(mergeSelectedColumnsWithConfigurationMock).toBeCalledWith({
-      selectedColumns,
-      casesColumnsConfig,
-    });
-  });
-
-  it('calls mergeSelectedColumnsWithConfiguration with the default params when the localstorage is empty', async () => {
-    renderHook(() => useCasesColumnsSelection(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    expect(mergeSelectedColumnsWithConfigurationMock).toBeCalledWith({
-      selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
-      casesColumnsConfig,
-    });
+    expect(result.current).toMatchInlineSnapshot(`
+      Object {
+        "selectedColumns": Array [
+          Object {
+            "field": "title",
+            "isChecked": false,
+            "name": "Name",
+          },
+          Object {
+            "field": "assignees",
+            "isChecked": false,
+            "name": "Assignees",
+          },
+          Object {
+            "field": "tags",
+            "isChecked": false,
+            "name": "Tags",
+          },
+        ],
+        "setSelectedColumns": [Function],
+      }
+    `);
   });
 });

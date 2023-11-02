@@ -33,9 +33,9 @@ describe('getEuiTableColumn ', () => {
   });
 
   it.each([
-    ['true', 'true', { key, type: CustomFieldTypes.TOGGLE as const, value: true }],
-    ['false', 'false', { key, type: CustomFieldTypes.TOGGLE as const, value: false }],
-    ['null', 'false', { key, type: CustomFieldTypes.TOGGLE as const, value: null }],
+    ['true', 'check', { key, type: CustomFieldTypes.TOGGLE as const, value: true }],
+    ['false', 'cross', { key, type: CustomFieldTypes.TOGGLE as const, value: false }],
+    ['null', 'cross', { key, type: CustomFieldTypes.TOGGLE as const, value: null }],
   ])(
     'render function renders a toggle column with value %s correctly',
     async (_, expectedResult, customField) => {
@@ -44,11 +44,9 @@ describe('getEuiTableColumn ', () => {
 
       appMockRender.render(<div>{column.render(customField)}</div>);
 
-      expect(screen.getByTestId(`toggle-custom-field-column-view-${key}`)).toBeInTheDocument();
-      expect(screen.getByTestId(`toggle-custom-field-column-view-${key}`)).toHaveAttribute(
-        'aria-checked',
-        expectedResult
-      );
+      expect(
+        screen.getByTestId(`toggle-custom-field-column-view-${key}-${expectedResult}`)
+      ).toBeInTheDocument();
     }
   );
 });

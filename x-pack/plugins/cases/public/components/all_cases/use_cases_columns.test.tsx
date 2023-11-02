@@ -577,7 +577,7 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Text Label",
             "render": [Function],
-            "width": "100px",
+            "width": "250px",
           },
           Object {
             "name": "Toggle Label",
