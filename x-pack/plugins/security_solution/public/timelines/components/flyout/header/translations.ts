@@ -92,6 +92,6 @@ export const SAVE_TOUR_CLOSE = i18n.translate(
 export const SAVE_TOUR_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.flyout.saveTour.title',
   {
-    defaultMessage: 'Timelines are now saved manually',
+    defaultMessage: 'Timeline changes now require manual saves',
   }
 );
