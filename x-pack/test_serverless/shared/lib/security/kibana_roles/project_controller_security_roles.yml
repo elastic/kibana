@@ -43,6 +43,7 @@ viewer:
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
         - feature_securitySolutionCases.read
+        - feature_securitySolutionAssistant.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -111,6 +112,7 @@ editor:
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -156,6 +158,7 @@ t1_analyst:
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
         - feature_securitySolutionCases.read
+        - feature_securitySolutionAssistant.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -203,6 +206,7 @@ t2_analyst:
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -267,6 +271,7 @@ t3_analyst:
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -317,6 +322,7 @@ threat_intelligence_analyst:
         - feature_siem.endpoint_list_read
         - feature_siem.blocklist_all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.all
@@ -381,6 +387,7 @@ rule_author:
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -448,6 +455,7 @@ soc_manager:
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -500,6 +508,7 @@ detections_admin:
         - feature_siem.read_alerts
         - feature_siem.crud_alerts
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
@@ -548,6 +557,7 @@ platform_engineer:
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_fleet.all
@@ -611,6 +621,7 @@ endpoint_operations_analyst:
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all # Execute
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -670,6 +681,7 @@ endpoint_policy_manager:
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_securitySolutionCases.all
+        - feature_securitySolutionAssistant.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
