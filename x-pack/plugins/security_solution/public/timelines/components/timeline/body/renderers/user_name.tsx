@@ -7,14 +7,20 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { UserDetailsPanelKey } from '../../../../../flyout/entity_details/user_details';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import type { ExpandedDetailType } from '../../../../../../common/types';
+import { getScopedActions, isTimelineScope } from '../../../../../helpers';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
+import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   contextId: string;
@@ -43,10 +49,10 @@ const UserNameComponent: React.FC<Props> = ({
   title,
   value,
 }) => {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
+  const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
   const userName = `${value}`;
-
   const isInTimelineContext = userName && eventContext?.timelineID;
   const { openRightPanel } = useExpandableFlyoutContext();
 
@@ -59,40 +65,53 @@ const UserNameComponent: React.FC<Props> = ({
       }
 
       if (eventContext && isInTimelineContext) {
-        openRightPanel({
-          id: 'user-details',
-          params: {
-            userName,
-            contextID: contextId,
-            // const contextID = `${scopeId}-${activeTab}`;
-            scopeId: TimelineId.detectionsAlertDetailsPage,
-            isDraggable,
-          },
-        });
+        const { timelineID, tabType } = eventContext;
 
-        // const { timelineID, tabType } = eventContext;
-        // const updatedExpandedDetail: ExpandedDetailType = {
-        //   panelView: 'userDetail',
-        //   params: {
-        //     userName,
-        //   },
-        // };
-        // const scopedActions = getScopedActions(timelineID);
-        // if (scopedActions) {
-        //   dispatch(
-        //     scopedActions.toggleDetailPanel({
-        //       ...updatedExpandedDetail,
-        //       id: timelineID,
-        //       tabType: tabType as TimelineTabs,
-        //     })
-        //   );
-        // }
-        // if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-        //   activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-        // }
+        if (isNewUserDetailsFlyoutEnable && !isTimelineScope(timelineID)) {
+          openRightPanel({
+            id: UserDetailsPanelKey,
+            params: {
+              userName,
+              contextID: contextId,
+              scopeId: TimelineId.detectionsAlertDetailsPage,
+              isDraggable,
+            },
+          });
+        } else {
+          const updatedExpandedDetail: ExpandedDetailType = {
+            panelView: 'userDetail',
+            params: {
+              userName,
+            },
+          };
+          const scopedActions = getScopedActions(timelineID);
+          if (scopedActions) {
+            dispatch(
+              scopedActions.toggleDetailPanel({
+                ...updatedExpandedDetail,
+                id: timelineID,
+                tabType: tabType as TimelineTabs,
+              })
+            );
+          }
+
+          if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
+            activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+          }
+        }
       }
     },
-    [onClick, eventContext, isInTimelineContext, openRightPanel, userName, contextId, isDraggable]
+    [
+      onClick,
+      eventContext,
+      isNewUserDetailsFlyoutEnable,
+      isInTimelineContext,
+      openRightPanel,
+      userName,
+      contextId,
+      isDraggable,
+      dispatch,
+    ]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
