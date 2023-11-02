@@ -136,7 +136,7 @@ export class TileStatusTracker extends Component<Props> {
       const tileError = {
         message: e.error.message,
         tileKey,
-      }
+      };
       this._tileErrorCache.setTileError(layerId, tileError);
 
       const ajaxError =
@@ -154,7 +154,7 @@ export class TileStatusTracker extends Component<Props> {
             if (parsedJson.error && 'type' in parsedJson.error) {
               this._tileErrorCache.setTileError(layerId, {
                 ...tileError,
-                error: parsedJson.error
+                error: parsedJson.error,
               });
               this._updateTileStatusForAllLayers();
             }

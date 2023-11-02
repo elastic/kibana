@@ -15,14 +15,14 @@ interface Props {
 
 export function TileErrorsList(props: Props) {
   const [selectedTileKey, setSelectedTileKey] = useState(props.tileErrors?.[0].tileKey);
-  
+
   const selectedTileContent = useMemo(() => {
     const selectedTileError = props.tileErrors.find((tileError) => {
       return tileError.tileKey === selectedTileKey;
     });
     return selectedTileError ? <p>{getDescription(selectedTileError)}</p> : null;
   }, [props.tileErrors, selectedTileKey]);
-  
+
   const tabs = useMemo(() => {
     return props.tileErrors.map((tileError) => {
       return (

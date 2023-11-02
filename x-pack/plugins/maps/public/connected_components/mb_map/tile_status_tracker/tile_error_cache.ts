@@ -32,9 +32,7 @@ export class TileErrorCache {
   }
 
   public hasTileError(layerId: string, tileKey: string) {
-    return layerId in this._cache
-      ? tileKey in this._cache[layerId]
-      : false;
+    return layerId in this._cache ? tileKey in this._cache[layerId] : false;
   }
 
   public setTileError(layerId: string, tileError: TileError) {
@@ -44,8 +42,6 @@ export class TileErrorCache {
   }
 
   public getTileErrors(layerId: string) {
-    return this._cache[layerId]
-      ? Object.values(this._cache[layerId])
-      : undefined;
+    return this._cache[layerId] ? Object.values(this._cache[layerId]) : undefined;
   }
 }
