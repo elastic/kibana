@@ -14,7 +14,7 @@ import {
   createCustomHeadersPreResponseHandler,
   createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
-  createLoggerForNewBuildNrMismatch,
+  createBuildNrMismatchLoggerPreResponseHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
 
@@ -33,7 +33,7 @@ export const registerCoreHandlers = (
     registrar.registerOnPostAuth(createVersionCheckPostAuthHandler(env.packageInfo.version));
   } else {
     registrar.registerOnPreResponse(
-      createLoggerForNewBuildNrMismatch(env.packageInfo.buildNum, log)
+      createBuildNrMismatchLoggerPreResponseHandler(env.packageInfo.buildNum, log)
     );
   }
   // add check on header if the route is internal

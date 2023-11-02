@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { OnPostAuthHandler, OnPreResponseHandler } from '@kbn/core-http-server';
+import type {
+  OnPostAuthHandler,
+  OnPreResponseHandler,
+  OnPreResponseInfo,
+  KibanaRequest,
+} from '@kbn/core-http-server';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 import { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
@@ -95,23 +100,43 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
   };
 };
 
-const logBuildNumberMismatch = (ourNumber: number, theirs: string, log: Logger): void => {
-  const theirNumber = parseInt(theirs, 10);
-  if (isNaN(theirNumber)) {
-    return;
+/**
+ * This should remain part of the logger prefix so that we can notify/track
+ * when we see this logged for observability purposes.
+ */
+
+const shouldLogBuildNumberMismatch = (
+  serverBuild: { number: number; string: string },
+  request: KibanaRequest,
+  response: OnPreResponseInfo
+): { log: true; clientBuild: number } | { log: false } => {
+  if (
+    response.statusCode >= 400 &&
+    request.headers[KIBANA_BUILD_NR_HEADER] !== serverBuild.string
+  ) {
+    const clientBuildNumber = parseInt(String(request.headers[KIBANA_BUILD_NR_HEADER]), 10);
+    if (!isNaN(clientBuildNumber)) {
+      return { log: true, clientBuild: clientBuildNumber };
+    }
   }
-  log.info(`Client sent ${theirNumber}, but Kibana build is ${ourNumber}`);
+  return { log: false };
 };
 
-export const createLoggerForNewBuildNrMismatch = (
-  buildNr: number,
+const BUILD_NUMBER_MISMATCH_LOGGER_NAME = 'kbn-build-number-mismatch';
+export const createBuildNrMismatchLoggerPreResponseHandler = (
+  serverBuildNumber: number,
   log: Logger
 ): OnPreResponseHandler => {
-  const buildNrString = String(buildNr);
+  const serverBuild = { number: serverBuildNumber, string: String(serverBuildNumber) };
+  log = log.get(BUILD_NUMBER_MISMATCH_LOGGER_NAME);
+
   return (request, response, toolkit) => {
-    const requestBuildNr = String(request.headers[KIBANA_BUILD_NR_HEADER]);
-    if (response.statusCode >= 400 && requestBuildNr !== buildNrString) {
-      logBuildNumberMismatch(buildNr, String(request.headers[KIBANA_BUILD_NR_HEADER]), log);
+    const result = shouldLogBuildNumberMismatch(serverBuild, request, response);
+    if (result.log === true) {
+      const clientCompAdjective = result.clientBuild > serverBuildNumber ? 'newer' : 'older';
+      log.info(
+        `Client build (${result.clientBuild}) is ${clientCompAdjective} than this Kibana server build (${serverBuildNumber}). The [${response.statusCode}] error status in req id [${request.id}] may be due to client-server incompatibility!`
+      );
     }
     return toolkit.next();
   };
