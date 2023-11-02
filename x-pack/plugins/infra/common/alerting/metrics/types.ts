@@ -7,8 +7,8 @@
 import * as rt from 'io-ts';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotCustomMetricInput } from '../../http_api';
-import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/types';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
