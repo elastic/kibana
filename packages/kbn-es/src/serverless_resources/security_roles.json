@@ -20,7 +20,8 @@
             "winlogbeat-*",
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
-            ".fleet-actions*"
+            ".fleet-actions*",
+            "risk-score.risk-score-*"
           ],
           "privileges": ["read"]
         }
@@ -31,11 +32,18 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["read", "read_alerts"],
+          "siem": ["read", "read_alerts", "endpoint_list_read"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionCases": ["read"],
           "actions": ["read"],
-          "builtInAlerts": ["read"]
+          "builtInAlerts": ["read"],
+          "osquery":["read", "run_saved_queries"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []
@@ -65,7 +73,8 @@
             "winlogbeat-*",
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
-            ".fleet-actions*"
+            ".fleet-actions*",
+            "risk-score.risk-score-*"
           ],
           "privileges": ["read"]
         }
@@ -76,11 +85,18 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["read", "read_alerts"],
+          "siem": ["read", "read_alerts", "endpoint_list_read"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionCases": ["read"],
           "actions": ["read"],
-          "builtInAlerts": ["read"]
+          "builtInAlerts": ["read"],
+          "osquery":["read", "run_saved_queries"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []
@@ -114,7 +130,7 @@
           "privileges": ["read", "write"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", "risk-score.risk-score-*"],
           "privileges": ["read"]
         }
       ],
@@ -140,9 +156,74 @@
             "file_operations_all"
           ],
           "securitySolutionCases": ["all"],
+          "securitySolutionAssistant": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
-          "osquery": ["all"]
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "threat_intelligence_analyst": {
+    "name": "threat_intelligence_analyst",
+    "elasticsearch": {
+      "cluster": [],
+      "indices":[
+        {
+          "names": [".alerts-security*", ".siem-signals-*"],
+          "privileges": ["read", "write", "maintenance"]
+        },
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            ".lists*",
+            ".items*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "privileges": ["read"]
+        },
+        {
+          "names": [
+            "metrics-endpoint.metadata_current_*",
+            ".fleet-actions*",
+            ".fleet-agents*",
+            "risk-score.risk-score-*"
+          ],
+          "privileges": ["read"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "siem": ["read", "read_alerts", "endpoint_list_read", "blocklist_all"],
+          "securitySolutionAssistant": ["all"],
+          "securitySolutionCases": ["all"],
+          "actions": ["read"],
+          "builtInAlerts": ["read"],
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []
@@ -163,9 +244,7 @@
             "filebeat-*",
             "logs-*",
             "packetbeat-*",
-            "winlogbeat-*",
-            ".lists*",
-            ".items*"
+            "winlogbeat-*"
           ],
           "privileges": ["read", "write"]
         },
@@ -179,7 +258,13 @@
           "privileges": ["read", "write", "maintenance", "view_index_metadata"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": [".lists*", ".items*"],
+          "privileges": [
+            "read", "write"
+          ]
+        },
+        {
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", "risk-score.risk-score-*"],
           "privileges": ["read"]
         }
       ],
@@ -189,11 +274,18 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["all", "read_alerts", "crud_alerts"],
+          "siem": ["all", "read_alerts", "crud_alerts", "policy_management_all", "endpoint_list_all", "trusted_applications_all", "event_filters_all", "host_isolation_exceptions_read", "blocklist_all", "actions_log_management_read"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionCases": ["all"],
           "actions": ["read"],
-          "builtInAlerts": ["all"]
+          "builtInAlerts": ["all"],
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []
@@ -230,7 +322,7 @@
           "privileges": ["read", "write", "manage"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", "risk-score.risk-score-*"],
           "privileges": ["read"]
         }
       ],
@@ -240,11 +332,18 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["all", "read_alerts", "crud_alerts"],
+          "siem": ["all", "read_alerts", "crud_alerts", "policy_management_all", "endpoint_list_all", "trusted_applications_all","event_filters_all","host_isolation_exceptions_all","blocklist_all","host_isolation_all","process_operations_all","actions_log_management_all","file_operations_all","execute_operations_all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionCases": ["all"],
           "actions": ["all"],
-          "builtInAlerts": ["all"]
+          "builtInAlerts": ["all"],
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []
@@ -254,7 +353,7 @@
   "detections_admin": {
     "name": "detections_admin",
     "elasticsearch": {
-      "cluster": ["manage"],
+      "cluster": ["manage_index_templates", "manage_transform"],
       "indices": [
         {
           "names": [
@@ -278,6 +377,10 @@
         {
           "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
           "privileges": ["read"]
+        },
+        {
+          "names": ["risk-score.risk-score-*"],
+          "privileges": ["all"]
         }
       ],
       "run_as": []
@@ -289,9 +392,15 @@
           "siem": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionCases": ["all"],
-          "actions": ["read"],
+          "actions": ["all"],
           "builtInAlerts": ["all"],
-          "dev_tools": ["all"]
+          "dev_tools": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []
@@ -339,11 +448,143 @@
       {
         "feature": {
           "ml": ["all"],
-          "siem": ["all", "read_alerts", "crud_alerts"],
+          "siem": ["all", "read_alerts", "crud_alerts", "policy_management_all","endpoint_list_all","trusted_applications_all","event_filters_all","host_isolation_exceptions_all","blocklist_all","actions_log_management_read"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionCases": ["all"],
           "actions": ["all"],
-          "builtInAlerts": ["all"]
+          "builtInAlerts": ["all"],
+          "fleet": ["all"],
+          "fleetv2": ["all"],
+          "indexPatterns": ["all"],
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "endpoint_operations_analyst": {
+    "name": "endpoint_operations_analyst",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-actions*",".fleet-agents*"],
+          "privileges": ["read"]
+        },
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            ".lists*",
+            ".items*",
+            "risk-score.risk-score-*"
+          ],
+          "privileges": ["read"]
+        },
+        {
+          "names": [
+            ".alerts-security*",
+            ".preview.alerts-security*",
+            ".internal.preview.alerts-security*",
+            ".siem-signals-*"
+          ],
+          "privileges": ["read", "write"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["all"],
+          "siem": ["all", "read_alerts", "policy_management_all","endpoint_list_all","trusted_applications_all","event_filters_all","host_isolation_exceptions_all","blocklist_all", "host_isolation_all", "process_operations_all","actions_log_management_read", "file_operations_all","execute_operations_all"],
+          "securitySolutionAssistant": ["all"],
+          "securitySolutionCases": ["all"],
+          "actions": ["all"],
+          "builtInAlerts": ["all"],
+          "fleet": ["all"],
+          "fleetv2": ["all"],
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "endpoint_policy_manager": {
+    "name": "endpoint_policy_manager",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-actions*",".fleet-agents*"],
+          "privileges": ["read"]
+        },
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            ".lists*",
+            ".items*",
+            "risk-score.risk-score-*"
+          ],
+          "privileges": ["read"]
+        },
+        {
+          "names": [
+            ".alerts-security*",
+            ".preview.alerts-security*",
+            ".internal.preview.alerts-security*",
+            ".siem-signals-*"
+          ],
+          "privileges": ["read", "write","manage"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["all"],
+          "siem": ["all", "read_alerts","crud_alerts", "policy_management_all","endpoint_list_all","trusted_applications_all","event_filters_all","host_isolation_exceptions_all","blocklist_all"],
+          "securitySolutionAssistant": ["all"],
+          "securitySolutionCases": ["all"],
+          "actions": ["all"],
+          "builtInAlerts": ["all"],
+          "fleet": ["all"],
+          "fleetv2": ["all"],
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []

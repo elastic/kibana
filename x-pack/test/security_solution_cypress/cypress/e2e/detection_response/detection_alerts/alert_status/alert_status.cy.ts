@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../objects/rule';
-import { ALERTS_COUNT, SELECTED_ALERTS } from '../../../screens/alerts';
+import { getNewRule } from '../../../../objects/rule';
+import { ALERTS_COUNT, SELECTED_ALERTS } from '../../../../screens/alerts';
 
 import {
   selectNumberOfAlerts,
@@ -20,14 +20,14 @@ import {
   goToOpenedAlerts,
   openAlerts,
   openFirstAlert,
-} from '../../../tasks/alerts';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+} from '../../../../tasks/alerts';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { deleteAlertsAndRules } from '../../../../tasks/common';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 
-import { ALERTS_URL } from '../../../urls/navigation';
+import { ALERTS_URL } from '../../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/169091
 describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
