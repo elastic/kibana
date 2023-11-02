@@ -59,7 +59,8 @@ export class PluginContract {
     return {
       getNavLinks$: () => navLinks$,
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
-      setAiConversations: (conversations) => this.assistantBaseConversations$.next(conversations),
+      setAssistantBaseConversations: (conversations) =>
+        this.assistantBaseConversations$.next(conversations),
       setComponents: (components) => {
         this.componentsService.setComponents(components);
       },

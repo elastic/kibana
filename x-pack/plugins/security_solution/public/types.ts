@@ -187,7 +187,7 @@ export interface PluginSetup {
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
-  setAiConversations: (conversations: Record<string, Conversation>) => void;
+  setAssistantBaseConversations: (conversations: Record<string, Conversation>) => void;
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;

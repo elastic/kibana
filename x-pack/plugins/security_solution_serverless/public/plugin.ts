@@ -76,7 +76,7 @@ export class SecuritySolutionServerlessPlugin
 
     startNavigation(services);
     setRoutes(services);
-    securitySolution.setAiConversations(BASE_SECURITY_CONVERSATIONS);
+    securitySolution.setAssistantBaseConversations(BASE_SECURITY_CONVERSATIONS);
 
     return {};
   }
