@@ -587,6 +587,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.submitQuery('cloud.provider="gcp" A');
           await testSubjects.existOrFail('hostsViewErrorCallout');
         });
+
+        it('should show no data message in the table content', async () => {
+          await pageObjects.infraHostsView.submitQuery('host.name : "foo"');
+
+          await waitForPageToLoad();
+
+          await retry.try(async () => {
+            await testSubjects.exists('hostsViewTableNoData');
+          });
+        });
       });
 
       describe('Pagination and Sorting', () => {
