@@ -44,6 +44,7 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
     updatedAt: hit.updatedAt!,
     references: hit.references,
     managed: hit.managed,
+    namespaces: hit.namespaces!,
     attributes: {
       title,
       description,

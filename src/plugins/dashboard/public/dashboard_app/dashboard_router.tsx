@@ -15,6 +15,7 @@ import { HashRouter, RouteComponentProps, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
@@ -44,6 +45,8 @@ export const dashboardUrlParams = {
   hideFilterBar: 'hide-filter-bar',
 };
 
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+
 export interface DashboardMountProps {
   appUnMounted: () => void;
   element: AppMountParameters['element'];
@@ -61,6 +64,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     data: dataStart,
     notifications,
     embeddable,
+    spaces: { spacesApi },
   } = pluginServices.getServices();
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
@@ -144,23 +148,29 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
+  const SpacesContextWrapper = spacesApi
+    ? spacesApi.ui.components.getSpacesContextProvider
+    : getEmptyFunctionComponent;
+
   const app = (
     <I18nProvider>
       <DashboardMountContext.Provider value={mountContext}>
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <HashRouter>
-            <Routes>
-              <Route
-                path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
-                render={renderDashboard}
-              />
-              <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
-              <Route exact path="/">
-                <Redirect to={LANDING_PAGE_PATH} />
-              </Route>
-              <Route render={renderNoMatch} />
-            </Routes>
-          </HashRouter>
+          <SpacesContextWrapper feature={DASHBOARD_APP_ID}>
+            <HashRouter>
+              <Routes>
+                <Route
+                  path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
+                  render={renderDashboard}
+                />
+                <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+                <Route exact path="/">
+                  <Redirect to={LANDING_PAGE_PATH} />
+                </Route>
+                <Route render={renderNoMatch} />
+              </Routes>
+            </HashRouter>
+          </SpacesContextWrapper>
         </KibanaThemeProvider>
       </DashboardMountContext.Provider>
     </I18nProvider>
