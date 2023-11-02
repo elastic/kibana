@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 # SO migration comparison lives in the Kibana dev app code, needs bootstrapping

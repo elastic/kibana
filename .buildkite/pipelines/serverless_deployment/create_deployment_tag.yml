@@ -19,7 +19,7 @@ steps:
   - label: "Collect commit info"
     commands:
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state collect_commit_info
-      - sh .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.sh
+      - bash .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.sh
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state wait_for_confirmation
     key: collect_data
     depends_on: select_commit
@@ -29,7 +29,7 @@ steps:
   - label: ":ship: Create Deploy Tag"
     commands:
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state create_deploy_tag
-      - .buildkite/scripts/serverless/create_deploy_tag/create_deploy_tag.sh
+      - bash .buildkite/scripts/serverless/create_deploy_tag/create_deploy_tag.sh
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state tag_created
     env:
       DRY_RUN: $DRY_RUN
