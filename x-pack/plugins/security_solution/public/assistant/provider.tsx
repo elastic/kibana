@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../common/lib/kibana';
 
-import { AssistantConversationsProvider } from './wrapper';
+import { AssistantConversationsProvider } from './conversations_provider';
 
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
