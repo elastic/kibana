@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
 
       await PageObjects.discover.selectIndexPattern('metricbeat-*');
-      //await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
       await retry.try(async function () {
         const hitCount = await PageObjects.discover.getHitCountInt();
         expect(hitCount).to.be.greaterThan(0);

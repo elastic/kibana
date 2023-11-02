@@ -20,8 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
       await PageObjects.discover.selectIndexPattern('filebeat-*');
-      //await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
-
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCountInt();
         expect(hitCount).to.be.greaterThan(0);
