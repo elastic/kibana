@@ -73,7 +73,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmCloudFormationModalConfirmButton'
+              'confirmCloudFormationModalConfirmButton',
+              1
             )
           ).includes('console.aws.amazon.com%2Fcloudformation')
         ).to.be(true);
@@ -114,7 +115,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmCloudFormationModalConfirmButton'
+              'confirmCloudFormationModalConfirmButton',
+              2
             )
           ).includes('console.aws.amazon.com%2Fcloudformation')
         ).to.be(true);
@@ -211,7 +213,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmGoogleCloudShellModalConfirmButton'
+              'confirmGoogleCloudShellModalConfirmButton',
+              3
             )
           ).includes('shell.cloud.google.com%2Fcloudshell')
         ).to.be(true);

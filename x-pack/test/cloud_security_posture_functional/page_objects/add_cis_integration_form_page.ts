@@ -165,10 +165,10 @@ export function AddCisIntegrationFormPageProvider({
     await integrationList[0].click();
   };
 
-  const clickLaunchAndGetCurrentUrl = async (buttonId: string) => {
+  const clickLaunchAndGetCurrentUrl = async (buttonId: string, tabNumber: number) => {
     const button = await testSubjects.find(buttonId);
     await button.click();
-    await browser.switchTab(1);
+    await browser.switchTab(tabNumber);
     await new Promise((r) => setTimeout(r, 3000));
     const currentUrl = await browser.getCurrentUrl();
     await browser.switchTab(0);
