@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ALL_VALUE, FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   buildDegradingSummary,
@@ -151,5 +151,5 @@ export function buildForecastedSlo(
 }
 
 export function buildSlo(params: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse {
-  return cloneDeep({ ...baseSlo, id: uuidv1(), ...params });
+  return cloneDeep({ ...baseSlo, id: uuidv4(), ...params });
 }
