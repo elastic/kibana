@@ -120,11 +120,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     return this.execute(async () => {
       const existingPolicy = await this.esClient.enrich.getPolicy({ name: policy.name });
       if (existingPolicy.policies.some(({ config }) => config.match?.name === policy.name)) {
-        this.logger.info(
-          `SLO summary erich policy [${policy.name}] already exists, deleting policy.`
-        );
+        this.logger.info(`SLO summary erich policy [${policy.name}] already exists.`);
         return;
-        // await this.esClient.enrich.deletePolicy({ name: policy.name });
       }
       this.logger.info(`Installing SLO summary erich policy [${policy.name}]`);
       return this.esClient.enrich
