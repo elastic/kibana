@@ -22,7 +22,8 @@ export interface IndexOverviewContent {
 export interface IndexBadge {
   matchIndex: (index: Index) => boolean;
   label: string;
-  filterExpression: string;
+  // a parseable search bar filter expression, for example "isFollowerIndex:true"
+  filterExpression?: string;
   color: EuiBadgeProps['color'];
 }
 
@@ -30,7 +31,7 @@ export interface ExtensionsSetup {
   addAction(action: any): void;
   addBanner(banner: any): void;
   addFilter(filter: any): void;
-  addBadge(badge: any): void;
+  addBadge(badge: IndexBadge): void;
   addToggle(toggle: any): void;
   addIndexDetailsTab(tab: IndexDetailsTab): void;
   setIndexOverviewContent(content: IndexOverviewContent): void;

@@ -21,7 +21,7 @@ export const renderBadges = (
   extensionsService.badges.forEach(({ matchIndex, label, color, filterExpression }) => {
     if (matchIndex(index)) {
       const clickHandler = () => {
-        if (filterChanged) {
+        if (filterChanged && filterExpression) {
           filterChanged(Query.parse(filterExpression));
         }
       };
@@ -29,13 +29,14 @@ export const renderBadges = (
         defaultMessage: '{label}. Select to filter on this.',
         values: { label },
       });
-      const badge = filterChanged ? (
-        <EuiBadge color={color} onClick={clickHandler} onClickAriaLabel={ariaLabel}>
-          {label}
-        </EuiBadge>
-      ) : (
-        <EuiBadge color={color}>{label}</EuiBadge>
-      );
+      const badge =
+        filterChanged && filterExpression ? (
+          <EuiBadge color={color} onClick={clickHandler} onClickAriaLabel={ariaLabel}>
+            {label}
+          </EuiBadge>
+        ) : (
+          <EuiBadge color={color}>{label}</EuiBadge>
+        );
       badgeLabels.push(<Fragment key={label}> {badge}</Fragment>);
     }
   });
