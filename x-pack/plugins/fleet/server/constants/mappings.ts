@@ -6,9 +6,12 @@
  */
 
 /**
- * The mappings declared closely mirror the ones declared in indices and SOs
- * But they are only used to perform validation on those endpoints using ListWithKuery
- * Whenever a field is added on any of these mappings, make sure to add it here as well
+ * ATTENTION: New mappings for Fleet are defined in the ElasticSearch repo.
+ *
+ * The following mappings declared here closely mirror them
+ * But they are only used to perform validation on the endpoints using ListWithKuery
+ * They're needed to perform searches on these mapping trough the KQL searchboxes in the UI.
+ * Whenever a field is added on any of these mappings in ES, make sure to add it here as well
  */
 
 export const AGENT_POLICY_MAPPINGS = {
@@ -294,6 +297,47 @@ export const AGENT_MAPPINGS = {
     },
     upgrade_status: {
       type: 'keyword',
+    },
+    upgrade_details: {
+      properties: {
+        target_version: {
+          type: 'text',
+          fields: {
+            keyword: {
+              type: 'keyword',
+              ignore_above: 16,
+            },
+          },
+        },
+        action_id: {
+          type: 'keyword',
+        },
+        state: {
+          type: 'keyword',
+        },
+        metadata: {
+          properties: {
+            scheduled_at: {
+              type: 'date',
+            },
+            download_percent: {
+              type: 'double',
+            },
+            failed_state: {
+              type: 'keyword',
+            },
+            error_msg: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 1024,
+                },
+              },
+            },
+          },
+        },
+      },
     },
     // added to allow validation on status field
     status: {

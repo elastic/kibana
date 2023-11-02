@@ -16,15 +16,15 @@ export const riskEngineDisableRoute = (
   router: SecuritySolutionPluginRouter,
   getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: RISK_ENGINE_DISABLE_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
-    },
-    async (context, request, response) => {
+    })
+    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
       const [_, { taskManager }] = await getStartServices();
@@ -52,6 +52,5 @@ export const riskEngineDisableRoute = (
           body: { message: error.message, full_error: JSON.stringify(e) },
         });
       }
-    }
-  );
+    });
 };

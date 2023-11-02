@@ -38,7 +38,6 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
 export interface EsContextCtorParams {
   logger: Logger;
   indexNameRoot: string;
-  kibanaVersion: string;
   shouldSetExistingAssetsToHidden: boolean;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
 }
@@ -54,7 +53,7 @@ class EsContextImpl implements EsContext {
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
-    this.esNames = getEsNames(params.indexNameRoot, params.kibanaVersion);
+    this.esNames = getEsNames(params.indexNameRoot);
     this.readySignal = createReadySignal();
     this.initialized = false;
     this.retryDelay = RETRY_DELAY;

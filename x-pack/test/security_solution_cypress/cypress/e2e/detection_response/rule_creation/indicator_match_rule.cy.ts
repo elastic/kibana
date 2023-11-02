@@ -109,9 +109,9 @@ import {
   waitForTheRuleToBeExecuted,
   visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
-
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
@@ -286,7 +286,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             validColumns: 'indicatorField',
           });
           getIndicatorDeleteButton().click();
-          getIndicatorIndexComboField().should('have.text', 'agent.name');
+          getIndicatorIndexComboField().find('input').should('have.value', 'agent.name');
           getIndicatorMappingComboField().should(
             'have.text',
             getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
@@ -309,7 +309,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             validColumns: 'indexField',
           });
           getIndicatorDeleteButton().click();
-          getIndicatorMappingComboField().should('have.text', 'second-non-existent-value');
+          getIndicatorMappingComboField()
+            .find('input')
+            .should('have.value', 'second-non-existent-value');
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
@@ -328,7 +330,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             validColumns: 'indicatorField',
           });
           getIndicatorDeleteButton().click();
-          getIndicatorIndexComboField().should('have.text', 'second-non-existent-value');
+          getIndicatorIndexComboField()
+            .find('input')
+            .should('have.value', 'second-non-existent-value');
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
@@ -435,6 +439,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         fillAboutRuleAndContinue(rule);
         fillScheduleRuleAndContinue(rule);
         createAndEnableRule();
+        openRuleManagementPageViaBreadcrumbs();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

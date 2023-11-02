@@ -31,6 +31,10 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           },
+          lifecycle: {
+            // @ts-expect-error @elastic/elasticsearch enabled prop is not typed yet
+            enabled: true,
+          },
         },
         data_stream: {},
       },
@@ -117,14 +121,18 @@ export default function ({ getService }: FtrProviderContext) {
           },
           privileges: {
             delete_index: true,
+            manage_data_stream_lifecycle: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
             {
               name: indexName,
               uuid,
+              preferILM: true,
+              managedBy: 'Data stream lifecycle',
             },
           ],
+          nextGenerationManagedBy: 'Data stream lifecycle',
           generation: 1,
           health: 'yellow',
           indexTemplateName: testDataStreamName,
@@ -156,17 +164,21 @@ export default function ({ getService }: FtrProviderContext) {
           name: testDataStreamName,
           privileges: {
             delete_index: true,
+            manage_data_stream_lifecycle: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
             {
               name: indexName,
+              managedBy: 'Data stream lifecycle',
+              preferILM: true,
               uuid,
             },
           ],
           generation: 1,
           health: 'yellow',
           indexTemplateName: testDataStreamName,
+          nextGenerationManagedBy: 'Data stream lifecycle',
           maxTimeStamp: 0,
           hidden: false,
           lifecycle: {
@@ -190,23 +202,69 @@ export default function ({ getService }: FtrProviderContext) {
           name: testDataStreamName,
           privileges: {
             delete_index: true,
+            manage_data_stream_lifecycle: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
             {
               name: indexName,
+              managedBy: 'Data stream lifecycle',
+              preferILM: true,
               uuid,
             },
           ],
           generation: 1,
           health: 'yellow',
           indexTemplateName: testDataStreamName,
+          nextGenerationManagedBy: 'Data stream lifecycle',
           maxTimeStamp: 0,
           hidden: false,
           lifecycle: {
             enabled: true,
           },
         });
+      });
+    });
+
+    describe('Update', () => {
+      const testDataStreamName = 'test-data-stream';
+
+      before(async () => await createDataStream(testDataStreamName));
+      after(async () => await deleteDataStream(testDataStreamName));
+
+      it('updates the data retention of a DS', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            dataRetention: '7d',
+          })
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+      });
+
+      it('sets data retention to infinite', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({})
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+      });
+
+      it('can disable lifecycle for a given policy', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ enabled: false })
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
+
+        const datastream = await getDatastream(testDataStreamName);
+        expect(datastream.lifecycle).to.be(undefined);
       });
     });
 

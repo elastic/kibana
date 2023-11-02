@@ -139,6 +139,7 @@ export const ChartSectionVis = ({
             showLegend
             showLegendExtra
             legendPosition="right"
+            locale={i18n.getLocale()}
           />
         </Chart>
       </div>

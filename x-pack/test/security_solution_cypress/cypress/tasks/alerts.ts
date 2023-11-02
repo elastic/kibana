@@ -9,15 +9,12 @@ import { encode } from '@kbn/rison';
 import { recurse } from 'cypress-recurse';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/components/filter_group/types';
-import { TOP_N_CONTAINER } from '../screens/network/flows';
 import {
   ADD_EXCEPTION_BTN,
   ALERT_CHECKBOX,
   CLOSE_ALERT_BTN,
   CLOSE_SELECTED_ALERTS_BTN,
   EXPAND_ALERT_BTN,
-  GROUP_BY_TOP_INPUT,
-  MANAGE_ALERT_DETECTION_RULES_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
@@ -43,7 +40,6 @@ import {
   ALERT_COUNT_TABLE_COLUMN,
   SELECT_HISTOGRAM,
   CELL_FILTER_OUT_BUTTON,
-  SHOW_TOP_N_CLOSE_BUTTON,
   ALERTS_HISTOGRAM_LEGEND,
   LEGEND_ACTIONS,
   SESSION_VIEWER_BUTTON,
@@ -113,6 +109,7 @@ export const openAddEndpointExceptionFromAlertActionButton = () => {
 };
 export const closeFirstAlert = () => {
   expandFirstAlertActions();
+  cy.get(CLOSE_ALERT_BTN).should('be.visible');
   cy.get(CLOSE_ALERT_BTN).click();
   cy.get(CLOSE_ALERT_BTN).should('not.exist');
 };
@@ -121,13 +118,14 @@ export const closeAlerts = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
   cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
   cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
-  cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.be.visible');
+  cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
 };
 
 export const expandFirstAlertActions = () => {
   waitForAlerts();
 
   const togglePopover = () => {
+    cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible');
     cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
     cy.get(TIMELINE_CONTEXT_MENU_BTN)
       .first()
@@ -160,7 +158,7 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
       cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);
     }
   });
-  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click();
+  cy.get(UPDATE_ENRICHMENT_RANGE_BUTTON).click({ force: true });
 };
 
 export const refreshAlertPageFilter = () => {
@@ -191,6 +189,7 @@ export const closePageFilterPopover = (filterIndex: number) => {
 };
 
 export const clearAllSelections = (filterIndex: number) => {
+  cy.scrollTo('top');
   recurse(
     () => {
       cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();
@@ -236,10 +235,6 @@ export const goToClosedAlerts = () => {
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
-export const goToManageAlertsDetectionRules = () => {
-  cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click();
-};
-
 export const goToOpenedAlertsOnRuleDetailsPage = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
@@ -264,7 +259,7 @@ export const goToOpenedAlerts = () => {
 export const openFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(OPEN_ALERT_BTN).should('be.visible');
-  cy.get(OPEN_ALERT_BTN).click({ force: true });
+  cy.get(OPEN_ALERT_BTN).click();
 };
 
 export const openAlerts = () => {
@@ -278,11 +273,6 @@ export const selectCountTable = () => {
 
 export const selectAlertsHistogram = () => {
   cy.get(SELECT_HISTOGRAM).click({ force: true });
-};
-
-export const clearGroupByTopInput = () => {
-  cy.get(GROUP_BY_TOP_INPUT).focus();
-  cy.get(GROUP_BY_TOP_INPUT).type('{backspace}');
 };
 
 export const goToAcknowledgedAlerts = () => {
@@ -301,8 +291,15 @@ export const goToAcknowledgedAlerts = () => {
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
+export const markAlertsAcknowledged = () => {
+  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible');
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
+};
+
 export const markAcknowledgedFirstAlert = () => {
   expandFirstAlertActions();
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('be.visible');
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
@@ -361,11 +358,6 @@ export const filterOutAlertProperty = (propertySelector: string, rowIndex: numbe
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickExpandActions(propertySelector, rowIndex);
   cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
-};
-export const closeTopNAlertProperty = () => {
-  cy.get(TOP_N_CONTAINER).then(() => {
-    cy.get(SHOW_TOP_N_CLOSE_BUTTON).click();
-  });
 };
 
 export const waitForAlerts = () => {
@@ -465,11 +457,6 @@ export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) =
 
 export const openSessionViewerFromAlertTable = (rowIndex: number = 0) => {
   cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).click();
-};
-
-export const openAlertTaggingContextMenu = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
-  cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).click();
 };
 
 export const openAlertTaggingBulkActionMenu = () => {

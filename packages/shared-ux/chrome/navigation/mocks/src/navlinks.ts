@@ -62,7 +62,7 @@ const allNavLinks: AppDeepLinkId[] = [
   'ml:fileUpload',
   'ml:filterListsSettings',
   'ml:indexDataVisualizer',
-  'ml:dataComparison',
+  'ml:dataDrift',
   'ml:logPatternAnalysis',
   'ml:logRateAnalysis',
   'ml:memoryUsage',

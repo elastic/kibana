@@ -642,7 +642,9 @@ describe('StatefulOpenTimeline', () => {
 
     await waitFor(() => {
       wrapper
-        .find(`[data-test-subj="title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`)
+        .find(
+          `[data-test-subj="timeline-title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`
+        )
         .last()
         .simulate('click');
 

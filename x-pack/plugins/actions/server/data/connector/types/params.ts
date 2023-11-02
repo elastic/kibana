@@ -18,3 +18,8 @@ export interface SearchConnectorsSoParams {
 export interface FindConnectorsSoParams {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }
+
+export interface GetConnectorSoParams {
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  id: string;
+}

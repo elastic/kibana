@@ -89,6 +89,7 @@ describe('output preconfiguration', () => {
       Array [
         Object {
           "ca_sha256": undefined,
+          "ca_trusted_fingerprint": undefined,
           "hosts": Array [
             "http://elasticsearc:9201",
           ],

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
+
 import { DataStream } from '../../../common';
 
 export const isFleetManaged = (dataStream: DataStream): boolean => {
@@ -37,4 +41,77 @@ export const isSelectedDataStreamHidden = (
     !!dataStreams.find((dataStream: DataStream) => dataStream.name === selectedDataStreamName)
       ?.hidden
   );
+};
+
+export const getLifecycleValue = (
+  lifecycle?: DataStream['lifecycle'],
+  inifniteAsIcon?: boolean
+) => {
+  if (!lifecycle?.enabled) {
+    return i18n.translate('xpack.idxMgmt.dataStreamList.dataRetentionDisabled', {
+      defaultMessage: 'Disabled',
+    });
+  } else if (!lifecycle?.data_retention) {
+    const infiniteDataRetention = i18n.translate(
+      'xpack.idxMgmt.dataStreamList.dataRetentionInfinite',
+      {
+        defaultMessage: 'Keep data indefinitely',
+      }
+    );
+
+    if (inifniteAsIcon) {
+      return (
+        <EuiToolTip
+          data-test-subj="infiniteRetention"
+          position="top"
+          content={infiniteDataRetention}
+        >
+          <EuiIcon type="infinity" />
+        </EuiToolTip>
+      );
+    }
+
+    return infiniteDataRetention;
+  }
+
+  return lifecycle?.data_retention;
+};
+
+export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
+  return (
+    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management' &&
+    dataStream?.indices?.every(
+      (index) => index.managedBy.toLowerCase() === 'index lifecycle management'
+    )
+  );
+};
+
+export const isDataStreamFullyManagedByDSL = (dataStream?: DataStream | null) => {
+  return (
+    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle' &&
+    dataStream?.indices?.every((index) => index.managedBy.toLowerCase() === 'data stream lifecycle')
+  );
+};
+
+export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {
+  if (dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle') {
+    const ilmIndices = dataStream?.indices?.filter(
+      (index) => index.managedBy.toLowerCase() === 'index lifecycle management'
+    );
+    const dslIndices = dataStream?.indices?.filter(
+      (index) => index.managedBy.toLowerCase() === 'data stream lifecycle'
+    );
+
+    // When there arent any ILM indices, there's no need to show anything.
+    if (!ilmIndices?.length) {
+      return;
+    }
+
+    return {
+      ilmIndices,
+      dslIndices,
+    };
+  }
+
+  return;
 };

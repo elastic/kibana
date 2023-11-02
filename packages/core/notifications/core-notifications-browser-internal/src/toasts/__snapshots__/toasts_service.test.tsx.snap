@@ -19,6 +19,11 @@ Array [
     >
       <GlobalToastList
         dismissToast={[Function]}
+        reportEvent={
+          EventReporter {
+            "reportEvent": [MockFunction],
+          }
+        }
         toasts$={
           Observable {
             "source": BehaviorSubject {

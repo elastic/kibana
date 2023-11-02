@@ -10,7 +10,7 @@ import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
 import type { LogLevel } from '../../model';
 
 // -------------------------------------------------------------------------------------------------
-// Stats history (date histogram)
+// History of health stats (date histogram)
 
 /**
  * History of change of a set of stats over a time interval. The interval is split into discreet buckets,
@@ -19,14 +19,14 @@ import type { LogLevel } from '../../model';
  * This model corresponds to the `date_histogram` aggregation of Elasticsearch:
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html
  */
-export interface StatsHistory<TStats> {
-  buckets: Array<StatsBucket<TStats>>;
+export interface HealthHistory<TStats> {
+  buckets: Array<HealthBucket<TStats>>;
 }
 
 /**
  * Sub-interval with stats calculated over it.
  */
-export interface StatsBucket<TStats> {
+export interface HealthBucket<TStats> {
   /**
    * Start timestamp of the sub-interval.
    */
@@ -39,23 +39,15 @@ export interface StatsBucket<TStats> {
 }
 
 // -------------------------------------------------------------------------------------------------
-// Rule stats
+// Health overview state
 
-// TODO: https://github.com/elastic/kibana/issues/125642 Add more stats, such as:
-// - number of Kibana instances
-// - number of Kibana spaces
-// - number of rules with exceptions
-// - number of rules with notification actions (total, normal, legacy)
-// - number of rules with response actions
-// - top X last failed status messages + rule ids for each status
-// - top X last partial failure status messages + rule ids for each status
-// - top X slowest rules by any metrics (last total execution time, search time, indexing time, etc)
-// - top X rules with the largest schedule delay (drift)
+// TODO: https://github.com/elastic/kibana/issues/125642 Add more data, see health_data.md
 
 /**
- * "Static" stats calculated for a set of rules, such as number of enabled and disabled rules, etc.
+ * "Static" health state at the moment of the API call. Calculated for a set of rules.
+ * Example: number of enabled and disabled rules.
  */
-export interface RuleStats {
+export interface HealthOverviewState {
   /**
    * Various counts of different rules.
    */
@@ -108,19 +100,15 @@ export interface TotalEnabledDisabled {
 }
 
 // -------------------------------------------------------------------------------------------------
-// Rule execution stats
+// Health overview stats
 
-// TODO: https://github.com/elastic/kibana/issues/125642 Add more stats, such as:
-// - number of detected alerts (source event "hits")
-// - number of created alerts (those we wrote to the .alerts-* index)
-// - number of times rule hit cirquit breaker, number of not created alerts because of that
-// - number of triggered actions
-// - top gaps
+// TODO: https://github.com/elastic/kibana/issues/125642 Add more data, see health_data.md
 
 /**
- * "Dynamic" rule execution stats. Can be calculated either for a set of rules or for a single rule.
+ * "Dynamic" health stats over a specified "health interval". Can be calculated either
+ * for a set of rules or for a single rule.
  */
-export interface RuleExecutionStats {
+export interface HealthOverviewStats {
   /**
    * Number of rule executions.
    */
@@ -242,13 +230,10 @@ export interface AggregatedMetric<T> {
  * Distribution of values of an aggregated metric represented by a set of discreet percentiles.
  * @example
  * {
- *   '1.0': 27,
- *   '5.0': 150,
- *   '25.0': 240,
  *   '50.0': 420,
- *   '75.0': 700,
  *   '95.0': 2500,
  *   '99.0': 7800,
+ *   '99.9': 10000,
  * }
  */
 export type Percentiles<T> = Record<string, T>;

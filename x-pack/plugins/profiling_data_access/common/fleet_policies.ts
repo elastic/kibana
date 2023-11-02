@@ -7,8 +7,9 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { getApmPolicy } from './get_apm_policy';
-import { PartialSetupState, ProfilingSetupOptions } from './setup';
+import { PartialCloudSetupState, ProfilingCloudSetupOptions } from './cloud_setup';
 
 export const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
 export const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
@@ -21,9 +22,11 @@ async function getPackagePolicy({
   packagePolicyClient: PackagePolicyClient;
   soClient: SavedObjectsClientContract;
   packageName: string;
-}) {
-  const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return packagePolicies.items.find((pkg) => pkg.name === packageName);
+}): Promise<PackagePolicy | undefined> {
+  const packagePolicies = await packagePolicyClient.list(soClient, {
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:${packageName}`,
+  });
+  return packagePolicies.items[0];
 }
 
 export async function getCollectorPolicy({
@@ -43,7 +46,7 @@ export async function getCollectorPolicy({
 export async function validateCollectorPackagePolicy({
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
+}: ProfilingCloudSetupOptions): Promise<PartialCloudSetupState> {
   const collectorPolicy = await getCollectorPolicy({ soClient, packagePolicyClient });
   return { policies: { collector: { installed: !!collectorPolicy } } };
 }
@@ -77,7 +80,7 @@ export async function getSymbolizerPolicy({
 export async function validateSymbolizerPackagePolicy({
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
+}: ProfilingCloudSetupOptions): Promise<PartialCloudSetupState> {
   const symbolizerPackagePolicy = await getSymbolizerPolicy({ soClient, packagePolicyClient });
   return { policies: { symbolizer: { installed: !!symbolizerPackagePolicy } } };
 }
@@ -85,7 +88,7 @@ export async function validateSymbolizerPackagePolicy({
 export async function validateProfilingInApmPackagePolicy({
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
+}: ProfilingCloudSetupOptions): Promise<PartialCloudSetupState> {
   try {
     const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
     return {

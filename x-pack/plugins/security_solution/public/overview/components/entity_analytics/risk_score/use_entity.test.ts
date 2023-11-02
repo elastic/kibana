@@ -22,7 +22,6 @@ describe('useEntityInfo', () => {
     const { result } = renderHook(() => useEntityInfo(RiskScoreEntity.host));
     expect(result?.current).toMatchInlineSnapshot(`
       Object {
-        "docLink": "https://www.elastic.co/guide/en/security/current/host-risk-score.html",
         "kpiQueryId": "headerHostRiskScoreKpiQuery",
         "linkProps": Object {
           "deepLinkId": "hosts",
@@ -37,7 +36,6 @@ describe('useEntityInfo', () => {
     const { result } = renderHook(() => useEntityInfo(RiskScoreEntity.user));
     expect(result?.current).toMatchInlineSnapshot(`
       Object {
-        "docLink": "https://www.elastic.co/guide/en/security/current/user-risk-score.html",
         "kpiQueryId": "headerUserRiskScoreKpiQuery",
         "linkProps": Object {
           "deepLinkId": "users",

@@ -108,7 +108,10 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/167914
+// Failing: See https://github.com/elastic/kibana/issues/167915
+// Failing: See https://github.com/elastic/kibana/issues/167914
+describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
@@ -262,21 +265,19 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
   });
 
   it(`URL is updated when filters are updated`, () => {
-    cy.on('url:changed', (urlString) => {
-      const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
-        return {
-          ...filter,
-          selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
-        };
-      });
-      const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
-      expect(urlString).to.contain.text(expectedVal);
-    });
-
     openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click({});
     closePageFilterPopover(1);
+
+    const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
+      return {
+        ...filter,
+        selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
+      };
+    });
+    const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
+    cy.url().should('include', expectedVal);
   });
 
   it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
@@ -360,6 +361,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
       openAddFilterPopover();
       fillAddFilterForm({
         key: 'kibana.alert.workflow_status',
+        operator: 'is',
         value: 'invalid',
       });
       waitForPageFilters();

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { ConnectionRequestParams } from '@elastic/transport';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ISearchOptions } from '../../../../common';
 
@@ -25,15 +24,11 @@ export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
  * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
  * @internal
  */
-export function toKibanaSearchResponse(
-  rawResponse: estypes.SearchResponse<unknown>,
-  requestParams?: ConnectionRequestParams
-) {
+export function toKibanaSearchResponse(rawResponse: estypes.SearchResponse<unknown>) {
   return {
     rawResponse,
     isPartial: false,
     isRunning: false,
-    ...(requestParams ? { requestParams } : {}),
     ...getTotalLoaded(rawResponse),
   };
 }

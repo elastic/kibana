@@ -58,7 +58,7 @@ describe('UnifiedFieldList useFieldFilters()', () => {
     expect(result.current.onFilterField).toBeUndefined();
 
     act(() => {
-      result.current.fieldListFiltersProps.onChangeNameFilter('Time');
+      result.current.fieldListFiltersProps.onChangeNameFilter('Time ');
     });
 
     expect(result.current.fieldSearchHighlight).toBe('time');

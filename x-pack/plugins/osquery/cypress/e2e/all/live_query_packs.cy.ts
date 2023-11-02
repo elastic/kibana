@@ -18,7 +18,8 @@ import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { loadPack, cleanupPack, cleanupCase, loadCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query Packs', { tags: ['@serverless', '@ess'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/169888
+describe.skip('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
   let packName: string;
   let packId: string;
   let caseId: string;
@@ -75,7 +76,6 @@ describe('ALL - Live Query Packs', { tags: ['@serverless', '@ess'] }, () => {
     cy.contains('failingQuery');
     selectAllAgents();
     submitQuery();
-    cy.getBySel('live-query-loading').should('exist');
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     checkResults();
     checkActionItemsInResults({

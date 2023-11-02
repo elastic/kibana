@@ -16,11 +16,11 @@ import { getFieldValue } from '../utils/events';
 export const getIsHostRiskScoreAvailable: GetIsRiskScoreAvailable = async ({
   spaceId,
   services,
-  isNewRiskScoreModuleAvailable,
+  isNewRiskScoreModuleInstalled,
 }) => {
   const isHostRiskScoreIndexExist = await services.scopedClusterClient.asCurrentUser.indices.exists(
     {
-      index: getHostRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable),
+      index: getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
     }
   );
 
@@ -32,11 +32,11 @@ export const createHostRiskEnrichments: CreateRiskEnrichment = async ({
   logger,
   events,
   spaceId,
-  isNewRiskScoreModuleAvailable,
+  isNewRiskScoreModuleInstalled,
 }) => {
   return createSingleFieldMatchEnrichment({
     name: 'Host Risk',
-    index: [getHostRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)],
+    index: [getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
     services,
     logger,
     events,

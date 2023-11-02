@@ -49,6 +49,7 @@ import {
   KQLCustomTransformGenerator,
   MetricCustomTransformGenerator,
   TransformGenerator,
+  TimesliceMetricTransformGenerator,
 } from '../../services/slo/transform_generators';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
@@ -59,6 +60,7 @@ const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.kql.custom': new KQLCustomTransformGenerator(),
   'sli.metric.custom': new MetricCustomTransformGenerator(),
   'sli.histogram.custom': new HistogramTransformGenerator(),
+  'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
 };
 
 const assertPlatinumLicense = async (context: ObservabilityRequestHandlerContext) => {

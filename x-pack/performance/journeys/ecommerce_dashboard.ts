@@ -20,5 +20,5 @@ export const journey = new Journey({
 
   .step('Go to Ecommerce Dashboard', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard'));
-    await kibanaPage.waitForVisualizations(13);
+    await kibanaPage.waitForVisualizations({ count: 13 });
   });

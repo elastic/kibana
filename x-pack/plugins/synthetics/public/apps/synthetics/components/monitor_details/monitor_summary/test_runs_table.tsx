@@ -15,12 +15,14 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiText,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { css } from '@kbn/kibana-react-plugin/common';
 import { INSPECT_DOCUMENT, ViewDocument } from '../../common/components/view_document';
 import {
   ExpandRowColumn,
@@ -162,11 +164,43 @@ export const TestRunsTable = ({
         ),
       },
     },
+    {
+      align: 'left',
+      valign: 'middle',
+      field: 'monitor.status',
+      name: RESULT_LABEL,
+      sortable: true,
+      render: (status: string, test: Ping) => {
+        const attemptNo = test.summary?.attempt ?? 1;
+        const isFinalAttempt = test.summary?.final_attempt ?? false;
+        if (!isFinalAttempt || attemptNo === 1) {
+          return <StatusBadge status={parseBadgeStatus(status ?? 'skipped')} />;
+        }
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem>
+              <StatusBadge status={parseBadgeStatus(status ?? 'skipped')} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiIconTip
+                data-test-subj="isRetestIcon"
+                type="refresh"
+                content={FINAL_ATTEMPT_LABEL}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
+      mobileOptions: {
+        show: false,
+      },
+    },
     ...(!isBrowserMonitor
       ? [
           {
             align: 'left',
             field: 'monitor.ip',
+            sortable: true,
             name: i18n.translate('xpack.synthetics.pingList.ipAddressColumnLabel', {
               defaultMessage: 'IP',
             }),
@@ -175,20 +209,12 @@ export const TestRunsTable = ({
       : []),
     {
       align: 'left',
-      valign: 'middle',
-      field: 'monitor.status',
-      name: RESULT_LABEL,
-      sortable: true,
-      render: (status: string) => <StatusBadge status={parseBadgeStatus(status ?? 'skipped')} />,
-      mobileOptions: {
-        show: false,
-      },
-    },
-    {
-      align: 'left',
       field: 'error.message',
       name: MESSAGE_LABEL,
       textOnly: true,
+      css: css`
+        max-width: 500px;
+      `,
       render: (errorMessage: string) => (
         <EuiText size="s">{errorMessage?.length > 0 ? errorMessage : '-'}</EuiText>
       ),
@@ -243,31 +269,16 @@ export const TestRunsTable = ({
     return {
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
-        const targetElem = evt.target as HTMLElement;
-        const isTableRow =
-          targetElem.parentElement?.classList.contains('euiTableCellContent') ||
-          targetElem.parentElement?.classList.contains('euiTableCellContent__text') ||
-          targetElem?.classList.contains('euiTableCellContent') ||
-          targetElem?.classList.contains('euiBadge__text');
-        // we dont want to capture image click event
-        if (
-          isTableRow &&
-          targetElem.tagName !== 'IMG' &&
-          targetElem.tagName !== 'path' &&
-          targetElem.tagName !== 'BUTTON' &&
-          !targetElem.parentElement?.classList.contains('euiLink')
-        ) {
-          if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
-            toggleDetails(item, expandedRows, setExpandedRows);
-          } else {
-            history.push(
-              getTestRunDetailRelativeLink({
-                monitorId,
-                checkGroup: item.monitor.check_group,
-                locationId: selectedLocation?.id,
-              })
-            );
-          }
+        if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
+          toggleDetails(item, expandedRows, setExpandedRows);
+        } else {
+          history.push(
+            getTestRunDetailRelativeLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
+          );
         }
       },
     };
@@ -290,15 +301,7 @@ export const TestRunsTable = ({
         columns={columns}
         error={pingsError?.body?.message}
         items={sortedPings}
-        noItemsMessage={
-          pingsLoading
-            ? i18n.translate('xpack.synthetics.monitorDetails.loadingTestRuns', {
-                defaultMessage: 'Loading test runs...',
-              })
-            : i18n.translate('xpack.synthetics.monitorDetails.noDataFound', {
-                defaultMessage: 'No data found',
-              })
-        }
+        noItemsMessage={pingsLoading ? LOADING_TEST_RUNS : NO_DATA_FOUND}
         tableLayout={'auto'}
         sorting={sorting}
         onChange={handleTableChange}
@@ -309,7 +312,7 @@ export const TestRunsTable = ({
                 pageIndex: page.index,
                 pageSize: page.size,
                 totalItemCount: total,
-                pageSizeOptions: [10, 20, 50], // TODO Confirm with Henry,
+                pageSizeOptions: [5, 10, 20, 50],
               }
             : undefined
         }
@@ -400,6 +403,10 @@ const SCREENSHOT_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary
   defaultMessage: 'Screenshot',
 });
 
+const FINAL_ATTEMPT_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.finalAttempt', {
+  defaultMessage: 'This is a retest since retry on failure is enabled.',
+});
+
 const RESULT_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.result', {
   defaultMessage: 'Result',
 });
@@ -410,4 +417,12 @@ const MESSAGE_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.me
 
 const DURATION_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.duration', {
   defaultMessage: 'Duration',
+});
+
+const LOADING_TEST_RUNS = i18n.translate('xpack.synthetics.monitorDetails.loadingTestRuns', {
+  defaultMessage: 'Loading test runs...',
+});
+
+const NO_DATA_FOUND = i18n.translate('xpack.synthetics.monitorDetails.noDataFound', {
+  defaultMessage: 'No data found',
 });

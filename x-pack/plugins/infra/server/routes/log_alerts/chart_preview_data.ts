@@ -16,6 +16,10 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
+  if (!framework.config.featureFlags.logThresholdAlertRuleEnabled) {
+    return;
+  }
+
   framework
     .registerVersionedRoute({
       access: 'internal',

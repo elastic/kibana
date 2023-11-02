@@ -143,7 +143,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
       class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
     >
       <div
-        class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+        class="euiText emotion-euiText-s-euiTextColor-default"
       >
         <dl
           class="euiDescriptionList emotion-euiDescriptionList-row-left"

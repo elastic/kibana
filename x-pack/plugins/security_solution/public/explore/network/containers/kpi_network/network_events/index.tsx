@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { NetworkKpiEventsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
@@ -90,7 +90,7 @@ export const useNetworkKpiNetworkEvents = ({
           )
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 setLoading(false);
                 setNetworkKpiNetworkEventsResponse((prevResponse) => ({
                   ...prevResponse,

@@ -45,7 +45,7 @@ async function updateWithOCC(
 ): Promise<MaintenanceWindow> {
   const { savedObjectsClient, getModificationMetadata, logger } = context;
   const { id, data } = params;
-  const { title, enabled, duration, rRule } = data;
+  const { title, enabled, duration, rRule, categoryIds } = data;
 
   try {
     updateMaintenanceWindowParamsSchema.validate(params);
@@ -87,6 +87,7 @@ async function updateWithOCC(
         ...maintenanceWindow,
         ...(title ? { title } : {}),
         ...(rRule ? { rRule: rRule as MaintenanceWindow['rRule'] } : {}),
+        ...(categoryIds !== undefined ? { categoryIds } : {}),
         ...(typeof duration === 'number' ? { duration } : {}),
         ...(typeof enabled === 'boolean' ? { enabled } : {}),
         expirationDate,

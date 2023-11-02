@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import React, { useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
 import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
-
+import { ObservabilityLogExplorerAppMountParameters } from '../../types';
+import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
 export interface ObservablityLogExplorerMainRouteProps {
-  appParams: AppMountParameters;
+  appParams: ObservabilityLogExplorerAppMountParameters;
   core: CoreStart;
 }
 
@@ -38,6 +39,7 @@ export const ObservablityLogExplorerMainRoute = ({
         state$={state$}
         theme$={theme$}
       />
+      <LazyOriginInterpreter history={history} toasts={core.notifications.toasts} />
       <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
         <logExplorer.LogExplorer scopedHistory={history} state$={state$} />
       </ObservabilityLogExplorerPageTemplate>

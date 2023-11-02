@@ -19,7 +19,7 @@ import {
 import { TaskManagerMetrics } from './task_metrics_collector';
 import { ITaskMetricsAggregator } from './types';
 
-const HDR_HISTOGRAM_MAX = 1800; // 30 minutes
+const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
 
 const OVERDUE_BY_KEY = 'overdue_by';

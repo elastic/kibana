@@ -158,7 +158,7 @@
                 "section": "def-common.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
-              "<unknown>, { allowDowngrade }?: ",
+              "<unknown>, { allowDowngrade, targetTypeVersion }?: ",
               "DocumentMigrateOptions",
               ") => ",
               {
@@ -201,7 +201,7 @@
                 "id": "def-common.DocumentMigrator.migrate.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ allowDowngrade = false }",
+                "label": "{ allowDowngrade = false, targetTypeVersion }",
                 "description": [],
                 "signature": [
                   "DocumentMigrateOptions"

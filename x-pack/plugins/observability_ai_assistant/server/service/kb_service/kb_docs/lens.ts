@@ -6,10 +6,16 @@
  */
 
 import dedent from 'dedent';
+import type { Logger } from '@kbn/logging';
 import type { ObservabilityAIAssistantService } from '../..';
 
-export function addLensDocsToKb(service: ObservabilityAIAssistantService) {
-  service.addToKnowledgeBase([
+export function addLensDocsToKb({
+  service,
+}: {
+  service: ObservabilityAIAssistantService;
+  logger: Logger;
+}) {
+  service.addCategoryToKnowledgeBase('lens', [
     {
       id: 'lens_formulas_how_it_works',
       texts: [

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { ConnectionRequestParams } from '@elastic/transport';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlSearchStrategyResponse } from '../../../../common';
 
@@ -16,8 +15,7 @@ import { SqlSearchStrategyResponse } from '../../../../common';
 export function toAsyncKibanaSearchResponse(
   response: SqlQueryResponse,
   startTime: number,
-  warning?: string,
-  requestParams?: ConnectionRequestParams
+  warning?: string
 ): SqlSearchStrategyResponse {
   return {
     id: response.id,
@@ -26,6 +24,5 @@ export function toAsyncKibanaSearchResponse(
     isRunning: response.is_running,
     took: Date.now() - startTime,
     ...(warning ? { warning } : {}),
-    ...(requestParams ? { requestParams } : {}),
   };
 }

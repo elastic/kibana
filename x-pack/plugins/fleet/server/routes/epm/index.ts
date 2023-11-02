@@ -47,6 +47,7 @@ import {
   ReauthorizeTransformRequestSchema,
   GetDataStreamsRequestSchema,
   CreateCustomIntegrationRequestSchema,
+  GetInputsRequestSchema,
 } from '../../types';
 
 import {
@@ -67,6 +68,7 @@ import {
   reauthorizeTransformsHandler,
   getDataStreamsHandler,
   createCustomIntegrationHandler,
+  getInputsHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -143,6 +145,19 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: { request: GetStatsRequestSchema },
       },
       getStatsHandler
+    );
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.INPUTS_PATTERN,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetInputsRequestSchema },
+      },
+      getInputsHandler
     );
 
   router.versioned

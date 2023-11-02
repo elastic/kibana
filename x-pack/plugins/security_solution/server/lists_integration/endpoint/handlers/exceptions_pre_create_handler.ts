@@ -11,10 +11,11 @@ import type {
 } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
-  EventFilterValidator,
-  TrustedAppValidator,
-  HostIsolationExceptionsValidator,
   BlocklistValidator,
+  EndpointExceptionsValidator,
+  EventFilterValidator,
+  HostIsolationExceptionsValidator,
+  TrustedAppValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreCreateItemServerExtension['callback'];
@@ -62,6 +63,17 @@ export const getExceptionsPreCreateItemHandler = (
       const blocklistValidator = new BlocklistValidator(endpointAppContext, request);
       const validatedItem = await blocklistValidator.validatePreCreateItem(data);
       blocklistValidator.notifyFeatureUsage(data, 'BLOCKLIST_BY_POLICY');
+      return validatedItem;
+    }
+
+    // validate endpoint exceptions
+    if (EndpointExceptionsValidator.isEndpointException(data)) {
+      const endpointExceptionValidator = new EndpointExceptionsValidator(
+        endpointAppContext,
+        request
+      );
+      const validatedItem = await endpointExceptionValidator.validatePreCreateItem(data);
+      endpointExceptionValidator.notifyFeatureUsage(data, 'ENDPOINT_EXCEPTIONS');
       return validatedItem;
     }
 

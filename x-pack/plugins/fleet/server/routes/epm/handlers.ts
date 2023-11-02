@@ -53,6 +53,7 @@ import type {
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
+  GetInputsRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -67,6 +68,7 @@ import {
   getLimitedPackages,
   getInstallation,
   getBulkAssets,
+  getTemplateInputs,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
@@ -392,6 +394,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
     authorizationHeader,
+    ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
+    skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
 
   if (!res.error) {
@@ -509,7 +513,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
 
 export const installPackageByUploadHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof InstallPackageByUploadRequestSchema.query>,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -531,6 +535,8 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     spaceId,
     contentType,
     authorizationHeader,
+    ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
+    skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
@@ -641,6 +647,28 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
     });
 
     return response.ok({ body: resp });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getInputsHandler: FleetRequestHandler<
+  TypeOf<typeof GetInputsRequestSchema.params>,
+  TypeOf<typeof GetInputsRequestSchema.query>,
+  undefined
+> = async (context, request, response) => {
+  const soClient = (await context.fleet).internalSoClient;
+
+  try {
+    const { pkgName, pkgVersion } = request.params;
+    const { format } = request.query;
+    let body;
+    if (format === 'json') {
+      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'json');
+    } else if (format === 'yml' || format === 'yaml') {
+      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'yml');
+    }
+    return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

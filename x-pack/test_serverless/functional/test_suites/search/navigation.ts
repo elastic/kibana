@@ -48,9 +48,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // navigate to discover
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Explore` });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'discover' });
-      await expect(await browser.getCurrentUrl()).contain('/app/discover');
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
 
       // navigate to a different section
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
@@ -61,11 +60,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await testSubjects.existOrFail(`indicesTab`);
 
       // navigate back to serverless search overview
-      await svlCommonNavigation.breadcrumbs.clickHome();
+      await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'serverlessElasticsearch',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Getting started` });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Get started` });
       await testSubjects.existOrFail(`svlSearchOverviewPage`);
 
       await expectNoPageReload();
@@ -104,7 +103,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.search.clickOnOption(0);
       await svlCommonNavigation.search.hideSearch();
 
-      await expect(await browser.getCurrentUrl()).contain('/app/discover');
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
     });
 
     it('does not show cases in sidebar navigation', async () => {

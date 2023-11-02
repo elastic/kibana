@@ -137,7 +137,7 @@ export class JobsListView extends Component {
         loadFullJob(jobId)
           .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
-            if (this.props.isServerless) {
+            if (this.props.showNodeInfo === false) {
               job = removeNodeInfo(job);
             }
             fullJobsList[jobId] = job;
@@ -318,7 +318,7 @@ export class JobsListView extends Component {
       const fullJobsList = {};
       const jobsSummaryList = jobs.map((job) => {
         if (job.fullJob !== undefined) {
-          if (this.props.isServerless) {
+          if (this.props.showNodeInfo === false) {
             job.fullJob = removeNodeInfo(job.fullJob);
           }
           fullJobsList[job.id] = job.fullJob;
@@ -417,7 +417,7 @@ export class JobsListView extends Component {
                 <EuiFlexItem grow={false}>
                   <JobStatsBar
                     jobsSummaryList={jobsSummaryList}
-                    isServerless={this.props.isServerless}
+                    showNodeInfo={this.props.showNodeInfo}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

@@ -68,7 +68,12 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   }, [createRuleFn, http, notifications, queryClient]);
 
   return (
-    <EuiSkeletonText lines={1} size="m" isLoading={ruleIsLoading || alertsIsLoading}>
+    <EuiSkeletonText
+      data-test-subj="csp:detection-rule-counter-loading"
+      lines={1}
+      size="m"
+      isLoading={ruleIsLoading || alertsIsLoading}
+    >
       {rulesData?.total === 0 ? (
         <>
           <EuiText size="s">
@@ -78,11 +83,17 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
                   id="xpack.csp.findingsFlyout.alerts.creatingRule"
                   defaultMessage="Creating detection rule"
                 />{' '}
-                <EuiLoadingSpinner size="s" />
+                <EuiLoadingSpinner
+                  size="s"
+                  data-test-subj="csp:findings-flyout-detection-rule-counter-loading"
+                />
               </>
             ) : (
               <>
-                <EuiLink onClick={createDetectionRuleOnClick}>
+                <EuiLink
+                  onClick={createDetectionRuleOnClick}
+                  data-test-subj="csp:findings-flyout-create-detection-rule-link"
+                >
                   <FormattedMessage
                     id="xpack.csp.findingsFlyout.alerts.createRuleAction"
                     defaultMessage="Create a detection rule"
@@ -98,7 +109,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
         </>
       ) : (
         <>
-          <EuiLink onClick={alertsPageNavigation}>
+          <EuiLink onClick={alertsPageNavigation} data-test-subj="csp:findings-flyout-alert-count">
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.alertCount"
               defaultMessage="{alertCount, plural, one {# alert} other {# alerts}}"
@@ -109,7 +120,10 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
             id="xpack.csp.findingsFlyout.alerts.detectedBy"
             defaultMessage="detected by"
           />{' '}
-          <EuiLink onClick={rulePageNavigation}>
+          <EuiLink
+            onClick={rulePageNavigation}
+            data-test-subj="csp:findings-flyout-detection-rule-count"
+          >
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.detectionRuleCount"
               defaultMessage="{ruleCount, plural, one {# detection rule} other {# detection rules}}"

@@ -7,8 +7,10 @@
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
+import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
@@ -17,10 +19,17 @@ import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmLatencyIndicatorTypeForm() {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
-  const index = watch('indicator.params.index');
+  const { control, watch, getFieldState, setValue } = useFormContext<CreateSLOForm>();
+  const { data: apmIndex } = useFetchApmIndex();
+
+  useEffect(() => {
+    if (apmIndex !== '') {
+      setValue('indicator.params.index', apmIndex);
+    }
+  }, [setValue, apmIndex]);
+
   const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
-    useFetchIndexPatternFields(index);
+    useFetchIndexPatternFields(apmIndex);
   const partitionByFields = indexFields.filter((field) => field.aggregatable);
 
   return (
@@ -171,6 +180,7 @@ export function ApmLatencyIndicatorTypeForm() {
       <IndexFieldSelector
         indexFields={partitionByFields}
         name="groupBy"
+        defaultValue={ALL_VALUE}
         label={
           <span>
             {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
@@ -187,8 +197,8 @@ export function ApmLatencyIndicatorTypeForm() {
         placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
           defaultMessage: 'Select an optional field to partition by',
         })}
-        isLoading={!!index && isIndexFieldsLoading}
-        isDisabled={!index}
+        isLoading={!!apmIndex && isIndexFieldsLoading}
+        isDisabled={!apmIndex}
       />
 
       <DataPreviewChart />

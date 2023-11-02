@@ -13,7 +13,7 @@ import { render } from '../../lib/helper/rtl_helpers';
 import * as reactRouterDom from 'react-router-dom';
 
 import { Ping } from '../../../../common/runtime_types';
-import { MonitorPageTitle, MonitorPageTitleContent } from './monitor_title';
+import { MonitorPageTitle } from './monitor_title';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -51,23 +51,6 @@ describe('MonitorTitle component', () => {
     },
   };
 
-  const defaultBrowserMonitorStatus: Ping = {
-    docId: 'few213kl',
-    timestamp: moment(new Date()).subtract(15, 'm').toString(),
-    monitor: {
-      duration: {
-        us: 1234567,
-      },
-      id: 'browser',
-      status: 'up',
-      type: 'browser',
-      check_group: 'test-group',
-    },
-    url: {
-      full: 'https://www.elastic.co/',
-    },
-  };
-
   const monitorStatusWithName: Ping = {
     ...defaultMonitorStatus,
     monitor: {
@@ -84,14 +67,12 @@ describe('MonitorTitle component', () => {
     render(
       <>
         <MonitorPageTitle />
-        <MonitorPageTitleContent />
       </>,
       {
         state: { monitorStatus: { status: monitorStatusWithName, loading: false } },
       }
     );
     expect(screen.getByText(monitorName));
-    expect(screen.getByRole('switch')).toBeInTheDocument();
   });
 
   it('renders the user provided monitorId when the name is not present', () => {
@@ -113,17 +94,5 @@ describe('MonitorTitle component', () => {
       }
     );
     expect(screen.getByText(defaultMonitorStatus!.url!.full!));
-  });
-
-  it('renders beta disclaimer for synthetics monitors', () => {
-    render(<MonitorPageTitleContent />, {
-      state: { monitorStatus: { status: defaultBrowserMonitorStatus, loading: false } },
-    });
-    const betaLink = screen.getByRole('link', {
-      name: 'See more External link (opens in a new tab or window)',
-    }) as HTMLAnchorElement;
-    expect(betaLink).toBeInTheDocument();
-    expect(betaLink.href).toBe('https://www.elastic.co/what-is/synthetic-monitoring');
-    expect(screen.getByText('Browser (BETA)')).toBeInTheDocument();
   });
 });

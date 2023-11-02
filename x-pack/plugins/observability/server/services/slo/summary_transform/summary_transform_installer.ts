@@ -8,7 +8,7 @@
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
-  SLO_RESOURCES_VERSION,
+  SLO_SUMMARY_TRANSFORMS_VERSION,
   SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
 } from '../../../assets/constants';
 import { retryTransientEsErrors } from '../../../utils/retry';
@@ -32,7 +32,7 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
     const alreadyInstalled =
       summaryTransforms.count === allTransformIds.length &&
       summaryTransforms.transforms.every(
-        (transform) => transform._meta?.version === SLO_RESOURCES_VERSION
+        (transform) => transform._meta?.version === SLO_SUMMARY_TRANSFORMS_VERSION
       ) &&
       summaryTransforms.transforms.every((transform) => allTransformIds.includes(transform.id));
 
@@ -46,9 +46,9 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
       const transform = summaryTransforms.transforms.find((t) => t.id === transformId);
 
       const transformAlreadyInstalled =
-        !!transform && transform._meta?.version === SLO_RESOURCES_VERSION;
+        !!transform && transform._meta?.version === SLO_SUMMARY_TRANSFORMS_VERSION;
       const previousTransformAlreadyInstalled =
-        !!transform && transform._meta?.version !== SLO_RESOURCES_VERSION;
+        !!transform && transform._meta?.version !== SLO_SUMMARY_TRANSFORMS_VERSION;
 
       if (transformAlreadyInstalled) {
         this.logger.info(`SLO summary transform [${transformId}] already installed - skipping`);

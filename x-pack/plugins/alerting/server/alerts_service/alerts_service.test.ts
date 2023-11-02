@@ -196,6 +196,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
@@ -896,6 +897,18 @@ describe('Alerts Service', () => {
             });
           }).toThrowErrorMatchingInlineSnapshot(
             `"test has already been registered with different options"`
+          );
+        });
+
+        test('should allow same context with different "shouldWrite" option', async () => {
+          alertsService.register(TestRegistrationContext);
+          alertsService.register({
+            ...TestRegistrationContext,
+            shouldWrite: false,
+          });
+
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Resources for context "test" have already been registered.`
           );
         });
 
@@ -2357,10 +2370,10 @@ describe('Alerts Service', () => {
             dataStreamAdapter,
           });
 
-          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          await retryUntil('debug logger called', async () => logger.debug.mock.calls.length > 0);
 
-          expect(logger.error).toHaveBeenCalledWith(
-            new Error(`Server is stopping; must stop all async operations`)
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Server is stopping; must stop all async operations`
           );
         });
       });

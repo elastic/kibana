@@ -6,6 +6,7 @@
  */
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -24,9 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const pageObjects = getPageObjects(['discover']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/165146
-  // Failing: See https://github.com/elastic/kibana/issues/165144
-  describe.skip('creation_continuous_transform', function () {
+  describe('creation_continuous_transform', function () {
     before(async () => {
       // installing the sample data with test user with super user role and then switching roles with limited privileges
       await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });
@@ -515,9 +514,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/158612
-        // FLAKY: https://github.com/elastic/kibana/issues/158613
-        it.skip('runs the transform and displays it correctly in the job list', async () => {
+        it('runs the transform and displays it correctly in the job list', async () => {
           await transform.testExecution.logTestStep('creates the transform');
           await transform.wizard.createTransform();
 

@@ -74,7 +74,7 @@ export function getGroupsFromJobs(jobs: MlSummaryJobs): {
   return { groups, count };
 }
 
-export function getStatsBarData(jobsList: MlSummaryJob[] | undefined, isServerless: boolean) {
+export function getStatsBarData(jobsList: MlSummaryJob[] | undefined, showNodeInfo: boolean) {
   const jobStats = {
     total: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.totalJobsLabel', {
@@ -108,9 +108,8 @@ export function getStatsBarData(jobsList: MlSummaryJob[] | undefined, isServerle
       show: false,
       group: 0,
     },
-    ...(isServerless
-      ? {}
-      : {
+    ...(showNodeInfo
+      ? {
           activeNodes: {
             label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
               defaultMessage: 'Active ML nodes',
@@ -119,7 +118,8 @@ export function getStatsBarData(jobsList: MlSummaryJob[] | undefined, isServerle
             show: true,
             group: 1,
           },
-        }),
+        }
+      : {}),
     activeDatafeeds: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.activeDatafeedsLabel', {
         defaultMessage: 'Active datafeeds',
@@ -166,7 +166,7 @@ export function getStatsBarData(jobsList: MlSummaryJob[] | undefined, isServerle
     jobStats.failed.show = false;
   }
 
-  if (isServerless === false) {
+  if (showNodeInfo) {
     jobStats.activeNodes!.value = Object.keys(mlNodes).length;
   }
 

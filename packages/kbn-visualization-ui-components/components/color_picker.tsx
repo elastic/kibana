@@ -31,6 +31,7 @@ const tooltipContent = {
 export const ColorPicker = ({
   overwriteColor,
   defaultColor,
+  isClearable,
   setConfig,
   label,
   disableHelpTooltip,
@@ -39,6 +40,7 @@ export const ColorPicker = ({
 }: {
   overwriteColor?: string | null;
   defaultColor?: string | null;
+  isClearable?: boolean;
   setConfig: (config: { color?: string }) => void;
   label?: string;
   disableHelpTooltip?: boolean;
@@ -93,14 +95,14 @@ export const ColorPicker = ({
       fullWidth
       data-test-subj="indexPattern-dimension-colorPicker"
       compressed
-      isClearable={Boolean(overwriteColor)}
+      isClearable={typeof isClearable !== 'undefined' ? isClearable : Boolean(overwriteColor)}
       onChange={handleColor}
       color={isDisabled ? '' : colorText}
       disabled={isDisabled}
       placeholder={' '}
       onBlur={() => {
         if (!colorText) {
-          setColorText(overwriteColor ?? defaultColor);
+          setColorText(validatedColor ?? defaultColor);
         }
       }}
       aria-label={inputLabel}

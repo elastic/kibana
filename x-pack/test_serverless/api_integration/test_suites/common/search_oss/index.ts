@@ -10,7 +10,9 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   // TODO: This `search` folder was renamed to `search_oss` to
   // differentiate it from the x-pack `search` folder (now `search_xpack`)
-  describe('search', () => {
+  describe('search', function () {
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('./search'));
     // TODO: Removed `sql_search` since
     // SQL is not supported in Serverless

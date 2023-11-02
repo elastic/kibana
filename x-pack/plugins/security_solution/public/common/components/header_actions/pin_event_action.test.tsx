@@ -19,7 +19,7 @@ const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('PinEventAction', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('isDisabled', () => {

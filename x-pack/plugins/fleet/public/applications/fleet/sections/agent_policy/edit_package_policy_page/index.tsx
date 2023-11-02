@@ -439,7 +439,7 @@ export const EditPackagePolicyForm = memo<{
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                      <EuiButtonEmpty color="text" href={cancelUrl}>
                         <FormattedMessage
                           id="xpack.fleet.editPackagePolicy.cancelButton"
                           defaultMessage="Cancel"
@@ -451,7 +451,7 @@ export const EditPackagePolicyForm = memo<{
                         <DevtoolsRequestFlyoutButton
                           isDisabled={formState !== 'VALID'}
                           btnProps={{
-                            color: 'ghost',
+                            color: 'text',
                           }}
                           description={i18n.translate(
                             'xpack.fleet.editPackagePolicy.devtoolsRequestDescription',

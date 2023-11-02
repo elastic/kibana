@@ -16,14 +16,6 @@ import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
-// Hiding this until page is in a better space
-const _connectorItem = {
-  link: 'serverlessConnectors',
-  title: i18n.translate('xpack.serverlessSearch.nav.connectors', {
-    defaultMessage: 'Connectors',
-  }),
-};
-
 const navigationTree: NavigationTreeDefinition = {
   body: [
     { type: 'recentlyAccessed' },
@@ -33,21 +25,18 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Elasticsearch',
       icon: 'logoElasticsearch',
       defaultIsCollapsed: false,
+      isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
-        {
-          id: 'search_getting_started',
-          title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-            defaultMessage: 'Getting started',
-          }),
-          link: 'serverlessElasticsearch',
-        },
         {
           id: 'dev_tools',
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          children: [{ link: 'dev_tools:console' }, { link: 'dev_tools:searchprofiler' }],
+          link: 'dev_tools:console',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+          },
         },
         {
           id: 'explore',
@@ -66,6 +55,9 @@ const navigationTree: NavigationTreeDefinition = {
             },
             {
               link: 'visualize',
+              title: i18n.translate('xpack.serverlessSearch.nav.visualize', {
+                defaultMessage: 'Visualizations',
+              }),
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return (
                   pathNameSerialized.startsWith(prepend('/app/visualize')) ||
@@ -124,6 +116,15 @@ const navigationTree: NavigationTreeDefinition = {
   ],
   footer: [
     {
+      type: 'navItem',
+      id: 'search_getting_started',
+      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+        defaultMessage: 'Get started',
+      }),
+      icon: 'launch',
+      link: 'serverlessElasticsearch',
+    },
+    {
       type: 'navGroup',
       id: 'project_settings_project_nav',
       title: i18n.translate('xpack.serverlessSearch.nav.projectSettings', {
@@ -133,30 +134,25 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'settings',
-          children: [
-            {
-              link: 'management',
-              title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
-                defaultMessage: 'Management',
-              }),
-            },
-            {
-              id: 'cloudLinkDeployment',
-              cloudLink: 'deployment',
-              title: i18n.translate('xpack.serverlessSearch.nav.performance', {
-                defaultMessage: 'Performance',
-              }),
-            },
-            {
-              id: 'cloudLinkUserAndRoles',
-              cloudLink: 'userAndRoles',
-            },
-            {
-              id: 'cloudLinkBilling',
-              cloudLink: 'billingAndSub',
-            },
-          ],
+          link: 'management',
+          title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
+            defaultMessage: 'Management',
+          }),
+        },
+        {
+          id: 'cloudLinkDeployment',
+          cloudLink: 'deployment',
+          title: i18n.translate('xpack.serverlessSearch.nav.performance', {
+            defaultMessage: 'Performance',
+          }),
+        },
+        {
+          id: 'cloudLinkUserAndRoles',
+          cloudLink: 'userAndRoles',
+        },
+        {
+          id: 'cloudLinkBilling',
+          cloudLink: 'billingAndSub',
         },
       ],
     },

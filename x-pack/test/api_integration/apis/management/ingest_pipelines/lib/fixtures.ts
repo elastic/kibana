@@ -12,7 +12,7 @@ import {
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
-interface Pipeline {
+export interface Pipeline {
   name: string;
   description?: string;
   onFailureProcessors?: IngestProcessorContainer[];
@@ -21,7 +21,7 @@ interface Pipeline {
   metadata?: Metadata;
 }
 
-interface IngestPutPipelineInternalRequest extends Omit<IngestPutPipelineRequest, 'id'> {
+export interface IngestPutPipelineInternalRequest extends Omit<IngestPutPipelineRequest, 'id'> {
   name: string;
 }
 

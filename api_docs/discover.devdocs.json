@@ -281,6 +281,22 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.sampleSize",
+            "type": "number",
+            "tags": [],
+            "label": "sampleSize",
+            "description": [
+              "\nCustom sample size"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverAppState.breakdownField",
             "type": "string",
             "tags": [],
@@ -569,6 +585,22 @@
         "children": [
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.globalState",
+            "type": "Object",
+            "tags": [],
+            "label": "globalState",
+            "description": [
+              "\nGlobal State, the _g part of the URL"
+            ],
+            "signature": [
+              "DiscoverGlobalStateContainer"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverStateContainer.appState",
             "type": "Object",
             "tags": [],
@@ -813,6 +845,22 @@
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutCustomization.Content",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Content",
+            "description": [],
+            "signature": [
+              "React.ComponentType<",
+              "FlyoutContentProps",
+              "> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -871,7 +919,8 @@
                 "docId": "kibSavedSearchPluginApi",
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
-              }
+              },
+              " | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
             "deprecated": false,
@@ -976,6 +1025,20 @@
                 "text": "AggregateQuery"
               },
               ">> | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchBarCustomization.hideDataViewPicker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideDataViewPicker",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
@@ -2001,20 +2064,20 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
               },
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/multi_page_layout/hooks/use_get_logs_discover_link.tsx"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
               },
               {
                 "plugin": "cloudSecurityPosture",

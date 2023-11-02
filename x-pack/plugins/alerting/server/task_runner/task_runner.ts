@@ -80,6 +80,7 @@ import { RuleResultService } from '../monitoring/rule_result_service';
 import { LegacyAlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { getTimeRange } from '../lib/get_time_range';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -325,6 +326,7 @@ export class TaskRunner<
 
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const flappingSettings = await rulesSettingsClient.flapping().get();
+    const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
 
     const alertsClientParams = {
       logger: this.logger,
@@ -380,6 +382,7 @@ export class TaskRunner<
       maxAlerts: this.maxAlerts,
       ruleLabel,
       flappingSettings,
+      startedAt: this.taskInstance.startedAt!,
       activeAlertsFromState: alertRawInstances,
       recoveredAlertsFromState: alertRecoveredRawInstances,
     });
@@ -415,9 +418,20 @@ export class TaskRunner<
       );
     }
 
-    const maintenanceWindowIds = activeMaintenanceWindows.map(
-      (maintenanceWindow) => maintenanceWindow.id
-    );
+    const maintenanceWindowIds = activeMaintenanceWindows
+      .filter(({ categoryIds }) => {
+        // If category IDs array doesn't exist: allow all
+        if (!Array.isArray(categoryIds)) {
+          return true;
+        }
+        // If category IDs array exist: check category
+        if ((categoryIds as string[]).includes(ruleType.category)) {
+          return true;
+        }
+        return false;
+      })
+      .map(({ id }) => id);
+
     if (maintenanceWindowIds.length) {
       this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
     }
@@ -503,6 +517,8 @@ export class TaskRunner<
               logger: this.logger,
               flappingSettings,
               ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
+              getTimeRange: (timeWindow) =>
+                getTimeRange(this.logger, queryDelaySettings, timeWindow),
             })
           );
 

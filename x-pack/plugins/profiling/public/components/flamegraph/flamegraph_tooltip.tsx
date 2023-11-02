@@ -7,18 +7,21 @@
 import { TooltipContainer } from '@elastic/charts';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
@@ -39,6 +42,8 @@ interface Props {
   comparisonTotalSamples?: number;
   comparisonTotalSeconds?: number;
   onShowMoreClick?: () => void;
+  inline: boolean;
+  parentLabel?: string;
 }
 
 export function FlameGraphTooltip({
@@ -55,8 +60,11 @@ export function FlameGraphTooltip({
   comparisonTotalSamples,
   comparisonTotalSeconds,
   onShowMoreClick,
+  inline,
+  parentLabel,
 }: Props) {
   const theme = useEuiTheme();
+  const calculateImpactEstimates = useCalculateImpactEstimate();
 
   const impactEstimates = calculateImpactEstimates({
     countExclusive,
@@ -82,8 +90,33 @@ export function FlameGraphTooltip({
     <TooltipContainer>
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>{label}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <EuiText>{label}</EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
+
           <EuiHorizontalRule margin="none" style={{ background: theme.euiTheme.border.color }} />
+          {inline && (
+            <EuiCallOut
+              css={css`
+                p {
+                  display: flex;
+                }
+              `}
+              color="primary"
+              title={
+                <EuiText size="xs">
+                  {i18n.translate('xpack.profiling.flameGraphTooltip.inlineCallout', {
+                    defaultMessage: 'This function has been inlined by {parentLabel}',
+                    values: { parentLabel },
+                  })}
+                </EuiText>
+              }
+              size="s"
+              iconType="iInCircle"
+            />
+          )}
           {isRoot === false && (
             <>
               <TooltipRow

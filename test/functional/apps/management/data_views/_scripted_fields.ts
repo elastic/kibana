@@ -155,7 +155,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should see scripted field value in Discover', async function () {
           await PageObjects.common.navigateToApp('discover');
 
-          await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName);
           await retry.try(async function () {
             await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName);
           });
@@ -261,7 +260,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
 
-        await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
@@ -366,7 +364,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
 
-        await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
@@ -464,7 +461,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
 
-        await PageObjects.unifiedFieldList.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
@@ -500,9 +496,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const documentCell = await dataGrid.getCellElement(0, 3);
-        await documentCell.click();
-        await testSubjects.click('filterForButton');
+        await dataGrid.clickCellFilterForButton(0, 3);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {

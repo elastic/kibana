@@ -9,6 +9,10 @@ import { JsonObject } from '@kbn/utility-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PromiseType } from 'utility-types';
 import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  SUMMARY_FILTER,
+} from '../../../../common/constants/client_defaults';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../../common/runtime_types/ping';
@@ -91,11 +95,8 @@ const executeQueryParams = async ({
       query: {
         bool: {
           filter: [
-            {
-              exists: {
-                field: 'summary',
-              },
-            },
+            SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
             {
               range: {
                 'summary.down': {

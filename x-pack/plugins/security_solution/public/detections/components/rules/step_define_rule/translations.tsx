@@ -21,6 +21,13 @@ export const EQL_QUERY_REQUIRED = i18n.translate(
   }
 );
 
+export const ESQL_QUERY_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryFieldRequiredError',
+  {
+    defaultMessage: 'An ES|QL query is required.',
+  }
+);
+
 export const INVALID_CUSTOM_QUERY = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError',
   {
@@ -169,6 +176,13 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsDoNotSuppressLabel',
   {
     defaultMessage: 'Do not suppress alerts for events with missing fields',
+  }
+);
+
+export const ESQL_QUERY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryLabel',
+  {
+    defaultMessage: 'ES|QL query',
   }
 );
 

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -81,8 +82,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
 
       const docs = await waitForDocs(2);
-      const messagePattern =
-        /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/;
+      const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
 
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
@@ -97,12 +97,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
       const aadDocs = await getAllAADDocs(1);
 
-      const alertDoc = aadDocs.body.hits.hits[0]._source.kibana.alert;
-      expect(alertDoc.reason).to.match(messagePattern);
-      expect(alertDoc.title).to.be("rule 'always fire' matched query");
-      expect(alertDoc.evaluation.conditions).to.be('Query matched documents');
-      expect(alertDoc.evaluation.value).greaterThan(0);
-      expect(alertDoc.url).to.contain('/s/space1/app/');
+      const alertDoc = aadDocs.body.hits.hits[0]._source;
+      expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+      expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
+      expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('Query matched documents');
+      const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+      expect(value).greaterThan(0);
+      expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
     });
 
     it('runs correctly: use epoch millis - threshold on hit count < >', async () => {
@@ -131,8 +132,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern =
-          /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/;
+        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -153,8 +153,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern =
-          /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/;
+        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -184,7 +183,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
       expect(activeValue).to.be('1');
       expect(activeMessage).to.match(
-        /rule 'fire then recovers' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
+        /Document count is \d+ in the last 4s. Alert when greater than 0./
       );
       await createEsDocumentsInGroups(1, endDate);
       docs = await waitForDocs(2);
@@ -198,7 +197,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(recoveredName).to.be('fire then recovers');
       expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
       expect(recoveredMessage).to.match(
-        /rule 'fire then recovers' is recovered:\n\n- Value: \d+\n- Conditions Met: Query did NOT match documents over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
+        /Document count is \d+ in the last 4s. Alert when greater than 0./
       );
     });
 
@@ -229,8 +228,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern =
-          /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/;
+        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
