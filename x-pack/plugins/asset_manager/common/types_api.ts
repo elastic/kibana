@@ -22,12 +22,10 @@ export const assetTypeRT = rt.keyof({
 export type AssetType = rt.TypeOf<typeof assetTypeRT>;
 
 export const assetKindRT = rt.keyof({
-  cluster: null,
   host: null,
   pod: null,
   container: null,
   service: null,
-  alert: null,
 });
 
 export type AssetKind = rt.TypeOf<typeof assetKindRT>;
