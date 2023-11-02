@@ -8,6 +8,8 @@
 import { startFleetServerIfNecessary } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 import { setupStackServicesUsingCypressConfig } from './common';
 
+// FIXME:PT delete this
+
 export const setupFleetServerForCypressTestRun = async (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions

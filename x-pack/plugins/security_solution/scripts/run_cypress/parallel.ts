@@ -10,7 +10,6 @@ import yargs from 'yargs';
 import _ from 'lodash';
 import globby from 'globby';
 import pMap from 'p-map';
-import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
@@ -27,6 +26,10 @@ import {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
+import { createKbnClient } from '../endpoint/common/stack_services';
+import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
+import { startFleetServerIfNecessary } from '../endpoint/common/fleet_server/fleet_server_services';
 import { renderSummaryTable } from './print_run';
 import { isSkipped, parseTestFileConfig } from './utils';
 import { getFTRConfig } from './get_ftr_config';
@@ -62,12 +65,7 @@ const retrieveIntegrations = (integrationsPaths: string[]) => {
 
 export const cli = () => {
   run(
-    async () => {
-      const log = new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      });
-
+    async ({ log: _cliLogger }) => {
       const { argv } = yargs(process.argv.slice(2))
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
@@ -84,7 +82,7 @@ export const cli = () => {
         )
         .boolean('inspect');
 
-      log.info(`
+      _cliLogger.info(`
 ----------------------------------------------
 Script arguments:
 ----------------------------------------------
@@ -95,9 +93,14 @@ ${JSON.stringify(argv, null, 2)}
 `);
 
       const isOpen = argv._.includes('open');
-
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
+
+      if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
+        createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
+      }
+
+      const log = createToolingLogger();
 
       log.info(`
 ----------------------------------------------
@@ -263,6 +266,34 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               isOpen,
             });
 
+            const createUrlFromFtrConfig = (
+              type: 'elasticsearch' | 'kibana' | 'fleetserver',
+              withAuth: boolean = false
+            ): string => {
+              const getKeyPath = (keyPath: string = ''): string => {
+                return `servers.${type}${keyPath ? `.${keyPath}` : ''}`;
+              };
+
+              if (!config.get(getKeyPath())) {
+                throw new Error(`Unable to create URL for ${type}. Not found in FTR config at `);
+              }
+
+              const url = new URL('http://localhost');
+
+              url.port = config.get(getKeyPath('port'));
+              url.protocol = config.get(getKeyPath('protocol'));
+              url.hostname = config.get(getKeyPath('hostname'));
+
+              if (withAuth) {
+                url.username = config.get(getKeyPath('username'));
+                url.password = config.get(getKeyPath('password'));
+              }
+
+              return url.toString().replace(/\/$/, '');
+            };
+
+            const baseUrl = createUrlFromFtrConfig('kibana');
+
             log.info(`
 ----------------------------------------------
 Cypress FTR setup for file: ${filePath}:
@@ -323,6 +354,22 @@ ${JSON.stringify(
               inspect: argv.inspect,
             });
 
+            // Setup fleet if Cypress config requires it
+            let fleetServer: void | StartedFleetServer;
+            if (cypressConfigFile.env?.WITH_FLEET_SERVER) {
+              const kbnClient = createKbnClient({
+                url: baseUrl,
+                username: config.get('servers.kibana.username'),
+                password: config.get('servers.kibana.password'),
+                log,
+              });
+
+              fleetServer = await startFleetServerIfNecessary({
+                kbnClient,
+                logger: log,
+              });
+            }
+
             await providers.loadAll();
 
             const functionalTestRunner = new FunctionalTestRunner(
@@ -330,34 +377,6 @@ ${JSON.stringify(
               config,
               EsVersion.getDefault()
             );
-
-            const createUrlFromFtrConfig = (
-              type: 'elasticsearch' | 'kibana' | 'fleetserver',
-              withAuth: boolean = false
-            ): string => {
-              const getKeyPath = (keyPath: string = ''): string => {
-                return `servers.${type}${keyPath ? `.${keyPath}` : ''}`;
-              };
-
-              if (!config.get(getKeyPath())) {
-                throw new Error(`Unable to create URL for ${type}. Not found in FTR config at `);
-              }
-
-              const url = new URL('http://localhost');
-
-              url.port = config.get(getKeyPath('port'));
-              url.protocol = config.get(getKeyPath('protocol'));
-              url.hostname = config.get(getKeyPath('hostname'));
-
-              if (withAuth) {
-                url.username = config.get(getKeyPath('username'));
-                url.password = config.get(getKeyPath('password'));
-              }
-
-              return url.toString().replace(/\/$/, '');
-            };
-
-            const baseUrl = createUrlFromFtrConfig('kibana');
 
             const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
               retries: 1,
@@ -435,6 +454,10 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               } catch (error) {
                 result = error;
               }
+            }
+
+            if (fleetServer) {
+              await fleetServer.stop();
             }
 
             await procs.stop('kibana');
