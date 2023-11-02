@@ -15,4 +15,8 @@ export * from './get_alerts_by_ids';
 export * from './get_query_alerts_ids';
 export * from './get_alerts_by_id';
 export * from './remove_random_valued_properties';
+export * from './set_alert_status';
+export * from './get_alert_status_empty_response';
+export * from './get_query_alert_ids';
+export * from './set_alert_tags';
 export * from './migrations';
