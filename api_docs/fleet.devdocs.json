@@ -24999,6 +24999,8 @@
         "signature": [
           "NewElasticsearchOutput",
           " | ",
+          "NewRemoteElasticsearchOutput",
+          " | ",
           "NewLogstashOutput",
           " | ",
           "KafkaOutput"
