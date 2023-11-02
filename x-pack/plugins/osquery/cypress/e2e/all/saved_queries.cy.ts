@@ -17,7 +17,7 @@ import {
   submitQuery,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
-import { navigateTo } from '../../tasks/navigation';
+import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import {
   loadCase,
@@ -40,7 +40,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
-    navigateTo('/app/osquery');
+    navigateToWithoutWaitForReact('/app/osquery');
   });
 
   after(() => {
@@ -94,7 +94,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
     beforeEach(() => {
       cy.login(ServerlessRoleName.SOC_MANAGER);
-      navigateTo('/app/osquery/saved_queries');
+      navigateToWithoutWaitForReact('/app/osquery/saved_queries');
       cy.getBySel('tablePaginationPopoverButton').click();
       cy.getBySel('tablePagination-50-rows').click();
     });
@@ -124,7 +124,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     it('user can not delete prebuilt saved query but can delete normal saved query', () => {
       cy.get(`[aria-label="Edit users_elastic"]`).click();
       cy.contains('Delete query').should('not.exist');
-      navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
+      navigateToWithoutWaitForReact(`/app/osquery/saved_queries/${savedQueryId}`);
 
       deleteAndConfirm('query');
     });
