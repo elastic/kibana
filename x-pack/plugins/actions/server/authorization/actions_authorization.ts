@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   ACTION_SAVED_OBJECT_TYPE,
@@ -26,7 +26,6 @@ export interface ConstructorOptions {
   // `get` for Connectors and `execute` for Action execution when used by
   // these legacy alerts
   authorizationMode?: AuthorizationMode;
-  logger: Logger;
 }
 
 const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz']) => string[]> = {
@@ -45,32 +44,26 @@ export class ActionsAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly authorizationMode: AuthorizationMode;
-  private readonly logger: Logger;
   constructor({
     request,
     authorization,
     authentication,
     authorizationMode = AuthorizationMode.RBAC,
-    logger,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.authorizationMode = authorizationMode;
-    this.logger = logger;
   }
 
   public async ensureAuthorized({
     operation,
     actionTypeId,
     additionalPrivileges = [],
-    logger: _logger,
   }: {
     operation: string;
     actionTypeId?: string;
     additionalPrivileges?: string[];
-    logger?: Logger;
   }) {
-    const logger = _logger ?? this.logger;
     const { authorization } = this;
     if (authorization?.mode?.useRbacForRequest(this.request)) {
       if (!this.isOperationExemptDueToLegacyRbac(operation)) {
@@ -80,21 +73,10 @@ export class ActionsAuthorization {
           ? operationAlias[operation](authorization)
           : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
 
-        privileges.push(...additionalPrivileges);
-
-        const privilegesCheckResponse = await checkPrivileges({
-          kibana: privileges,
+        const { hasAllRequested } = await checkPrivileges({
+          kibana: [...privileges, ...additionalPrivileges],
         });
-
-        if (!privilegesCheckResponse.hasAllRequested) {
-          logger.info(
-            `Authz for user [${privilegesCheckResponse.username}] failed: ${JSON.stringify(
-              privilegesCheckResponse,
-              null,
-              2
-            )}`
-          );
-
+        if (!hasAllRequested) {
           throw Boom.forbidden(
             `Unauthorized to ${operation} ${
               actionTypeId ? `a "${actionTypeId}" action` : `actions`

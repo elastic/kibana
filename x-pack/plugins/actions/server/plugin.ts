@@ -607,7 +607,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       authorizationMode,
       authorization: this.security?.authz,
       authentication: this.security?.authc,
-      logger: this.logger,
     });
   };
 
