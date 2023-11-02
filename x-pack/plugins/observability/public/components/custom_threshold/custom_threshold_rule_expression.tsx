@@ -491,15 +491,8 @@ export default function Expressions(props: Props) {
                   dataView={dataView}
                   filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
                   groupBy={ruleParams.groupBy}
+                  error={(errors[idx] as IErrorObject) || emptyError}
                 />
-                {/* Preview
-                {/* <ExpressionChart
-                  expression={e}
-                  derivedIndexPattern={derivedIndexPattern}
-                  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
-                  groupBy={ruleParams.groupBy}
-                  timeFieldName={dataView?.timeFieldName}
-                /> */}
               </ExpressionRow>
             </div>
           );

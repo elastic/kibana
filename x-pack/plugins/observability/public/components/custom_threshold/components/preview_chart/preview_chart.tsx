@@ -19,6 +19,8 @@ import {
   XYReferenceLinesLayer,
 } from '@kbn/lens-embeddable-utils';
 
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   Aggregators,
   Comparator,
@@ -33,23 +35,56 @@ interface PreviewChartPros {
   dataView?: DataView;
   filterQuery?: string;
   groupBy?: string | string[];
+  error?: IErrorObject;
 }
 
-function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: PreviewChartPros) {
+function PreviewChart({
+  metricExpression,
+  dataView,
+  filterQuery,
+  groupBy,
+  error,
+}: PreviewChartPros) {
   const {
     services: { lens },
   } = useKibana();
 
   const { metrics, timeSize, timeUnit, threshold, comparator, equation } = metricExpression;
-
   const [attributes, setAttributes] = useState<LensAttributes>();
   const [aggMap, setAggMap] = useState<AggMap>();
   const [formula, setFormula] = useState<string>('');
   const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
+  const [chartLoading, setChartLoading] = useState<boolean>(false);
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
 
+  // Handle Lens error
+  useEffect(() => {
+    // Lens does not expose or provide a way to check if there is an error in the chart, yet.
+    // To work around this, we check if the element with class 'lnsEmbeddedError' is found in the DOM.
+    setTimeout(function () {
+      const errorDiv = document.querySelector('.lnsEmbeddedError');
+      if (errorDiv) {
+        const paragraphElements = errorDiv.querySelectorAll('p');
+        if (!paragraphElements || paragraphElements.length < 2) return;
+        paragraphElements[0].innerText = i18n.translate(
+          'xpack.observability.customThreshold.rule..charts.error_equation.title',
+          {
+            defaultMessage: 'An error occurred while rendering the chart',
+          }
+        );
+        paragraphElements[1].innerText = i18n.translate(
+          'xpack.observability.customThreshold.rule..charts.error_equation.description',
+          {
+            defaultMessage: 'Check the rule equation.',
+          }
+        );
+      }
+    });
+  }, [chartLoading, attributes]);
+
+  // Build the threshold reference line
   useEffect(() => {
     if (!threshold) return;
     const refLayers = [];
@@ -114,6 +149,7 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
     }
     setThresholdReferenceLine(refLayers);
   }, [threshold, comparator]);
+
   // Build the aggregation map from the metrics
   useEffect(() => {
     if (!metrics || metrics.length === 0) {
@@ -151,9 +187,8 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
 
       setFormula(parser.parse());
     } catch (e) {
-      console.error('PainlessTinyMathParser', e);
+      // The error will appear on Lens chart.
       setAttributes(undefined);
-      // Fail silently as Lens chart will show the error
       return;
     }
   }, [aggMap, equation]);
@@ -238,16 +273,30 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
     threshold,
     thresholdReferenceLine,
   ]);
-  if (!dataView || !attributes) {
+
+  if (
+    !dataView ||
+    !attributes ||
+    error?.equation ||
+    Object.keys(error?.metrics || {}).length !== 0
+  ) {
     return (
       <div style={{ maxHeight: 180, minHeight: 180 }}>
         <EuiEmptyPrompt
           iconType="visArea"
-          titleSize="xs"
+          titleSize="xxs"
           body={
             <FormattedMessage
-              id="xpack.observability.customThreshold.rule..charts.noDataMessage"
-              defaultMessage="No chart data available"
+              id="xpack.observability.customThreshold.rule..charts.noData.title"
+              defaultMessage="No chart data available, check the rule {errorSourceField}"
+              values={{
+                errorSourceField:
+                  Object.keys(error?.metrics || {}).length !== 0
+                    ? 'aggregation fields'
+                    : error?.equation
+                    ? 'equation'
+                    : 'conditions',
+              }}
             />
           }
         />
@@ -257,6 +306,7 @@ function PreviewChart({ metricExpression, dataView, filterQuery, groupBy }: Prev
   return (
     <div>
       <lens.EmbeddableComponent
+        onLoad={setChartLoading}
         id="customThresholdPreviewChart"
         style={{ height: 180 }}
         timeRange={{ from: `now-${timeSize}${timeUnit}`, to: 'now' }}
