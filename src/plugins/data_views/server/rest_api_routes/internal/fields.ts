@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { createHash } from 'crypto';
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
-import { FullValidationConfig } from '@kbn/core-http-server';
+// import { FullValidationConfig } from '@kbn/core-http-server';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
   DataViewsServerPluginStart,
@@ -38,8 +39,6 @@ export const parseFields = (fields: string | string[]): string[] => {
   }
 };
 
-const access = 'internal';
-
 type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
 interface IQuery {
   pattern: string;
@@ -63,11 +62,13 @@ const querySchema = schema.object({
   fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
 });
 
+/**
 const fieldSubTypeSchema = schema.object({
   multi: schema.maybe(schema.object({ parent: schema.string() })),
   nested: schema.maybe(schema.object({ path: schema.string() })),
 });
 
+/*
 const FieldDescriptorSchema = schema.object({
   aggregatable: schema.boolean(),
   name: schema.string(),
@@ -94,6 +95,7 @@ const FieldDescriptorSchema = schema.object({
   ),
 });
 
+/*
 const validate: FullValidationConfig<any, any, any> = {
   request: {
     query: querySchema,
@@ -107,10 +109,19 @@ const validate: FullValidationConfig<any, any, any> = {
     },
   },
 };
+*/
+
+function calculateHash(srcBuffer: Buffer) {
+  const hash = createHash('sha1');
+  hash.update(srcBuffer);
+  return hash.digest('hex');
+}
 
 const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
-    const { asCurrentUser } = (await context.core).elasticsearch.client;
+    const core = await context.core;
+    const uiSettings = core.uiSettings.client;
+    const { asCurrentUser } = core.elasticsearch.client;
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
     const {
       pattern,
@@ -149,16 +160,29 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         indices,
       };
 
+      const etag = calculateHash(Buffer.from(JSON.stringify(body)));
+
       // todo are these needed?
       const headers: Record<string, string> = {
         'content-type': 'application/json',
-        Etag: '123456',
-        'If-None-Match': '123456',
-        // Etag?
+        // 'If-None-Match': '123456',
+        etag,
         // Expires
       };
 
-      headers['cache-control'] = 'private, max-age=300, stale-while-revalidate=2592000';
+      // todo consider running in parallel with the request
+      const cacheMaxAge = await uiSettings.get<number>('data_views:cache_max_age');
+
+      if (cacheMaxAge) {
+        const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
+        headers[
+          'cache-control'
+        ] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
+      }
+
+      if (etag === request.headers.etag) {
+        return response.notModified({ headers });
+      }
 
       return response.ok({
         body,
@@ -193,7 +217,7 @@ export const registerFields = async (
   isRollupsEnabled: () => boolean
 ) => {
   // handler
-  /*
+  /* This seems to fail due to lack of custom headers on cache requests
   router.versioned
     .get({ path, access })
     .addVersion(

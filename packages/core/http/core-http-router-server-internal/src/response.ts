@@ -17,6 +17,7 @@ import type {
   ErrorHttpResponseOptions,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
+  KibanaNotModifiedResponseFactory,
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
@@ -49,6 +50,11 @@ const successResponseFactory: KibanaSuccessResponseFactory = {
 
 const redirectionResponseFactory: KibanaRedirectionResponseFactory = {
   redirected: (options: RedirectResponseOptions) => new KibanaResponse(302, options.body, options),
+};
+
+const notModifiedResponseFactory: KibanaNotModifiedResponseFactory = {
+  notModified: (options: HttpResponseOptions = {}) =>
+    new KibanaResponse(304, options.body, options),
 };
 
 const errorResponseFactory: KibanaErrorResponseFactory = {
@@ -120,6 +126,7 @@ export const fileResponseFactory = {
 export const kibanaResponseFactory: KibanaResponseFactory = {
   ...successResponseFactory,
   ...redirectionResponseFactory,
+  ...notModifiedResponseFactory,
   ...errorResponseFactory,
   ...fileResponseFactory,
   custom: <T extends HttpResponsePayload | ResponseError>(

@@ -23,6 +23,7 @@ import {
   DataViewsServerPluginStartDependencies,
 } from './types';
 import { DataViewsStorage } from './content_management';
+import { cacheMaxAge } from './ui_settings';
 
 export class DataViewsServerPlugin
   implements
@@ -46,6 +47,7 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+    core.uiSettings.register(cacheMaxAge);
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
     registerRoutes(
