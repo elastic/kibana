@@ -18,9 +18,8 @@ import {
 } from './live_query';
 import { navigateTo } from './navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169786
 export const getSavedQueriesComplexTest = () =>
-  describe.skip('Saved queries Complex Test', () => {
+  describe('Saved queries Complex Test', () => {
     const suffix = generateRandomStringName(1)[0];
     const savedQueryId = `Saved-Query-Id-${suffix}`;
     const savedQueryDescription = `Test saved query description ${suffix}`;
