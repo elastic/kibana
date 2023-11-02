@@ -57,6 +57,7 @@ import type {
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
 import './query_bar.scss';
+import { DateClipboardItems } from './date_clipboard_items';
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
@@ -478,6 +479,23 @@ export const QueryBarTopRow = React.memo(
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
           compressed={shouldShowDatePickerAsBadge()}
+          customQuickSelectPanels={
+            props.dateRangeFrom != null && props.dateRangeTo != null
+              ? [
+                  {
+                    title: i18n.translate(
+                      'unifiedSearch.queryBarTopRow.datePicker.clipboardPanelTitle',
+                      {
+                        defaultMessage: 'From clipboard',
+                      }
+                    ),
+                    content: (
+                      <DateClipboardItems start={props.dateRangeFrom} end={props.dateRangeTo} />
+                    ),
+                  },
+                ]
+              : undefined
+          }
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
