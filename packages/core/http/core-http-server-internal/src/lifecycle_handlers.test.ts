@@ -493,8 +493,8 @@ describe('build number mismatch logger on error pre-response handler', () => {
       const request = forgeRequest({ buildNr: '124' });
       const response: OnPreResponseInfo = { statusCode: responseStatusCode };
       handler(request, response, createToolkit());
-      expect(logger.info).toHaveBeenCalledTimes(1);
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
         `Client build (124) is newer than this Kibana server build (123). The [${responseStatusCode}] error status in req id [123] may be due to client-server incompatibility!`
       );
     }
@@ -505,8 +505,8 @@ describe('build number mismatch logger on error pre-response handler', () => {
     const request = forgeRequest({ buildNr: '122' });
     const response: OnPreResponseInfo = { statusCode };
     handler(request, response, createToolkit());
-    expect(logger.info).toHaveBeenCalledTimes(1);
-    expect(logger.info).toHaveBeenCalledWith(
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
       `Client build (122) is older than this Kibana server build (123). The [${statusCode}] error status in req id [123] may be due to client-server incompatibility!`
     );
   });
@@ -516,7 +516,7 @@ describe('build number mismatch logger on error pre-response handler', () => {
     const request = forgeRequest({ buildNr: '124' });
     const response: OnPreResponseInfo = { statusCode };
     handler(request, response, createToolkit());
-    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it.each([['foo'], [['yes']], [true], [null], [[]], [undefined]])(
@@ -526,7 +526,7 @@ describe('build number mismatch logger on error pre-response handler', () => {
       const request = forgeRequest({ buildNr: bogusBuild as any });
       const response: OnPreResponseInfo = { statusCode: 500 };
       handler(request, response, createToolkit());
-      expect(logger.info).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
     }
   );
 });

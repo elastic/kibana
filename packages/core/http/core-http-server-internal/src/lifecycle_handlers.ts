@@ -134,7 +134,7 @@ export const createBuildNrMismatchLoggerPreResponseHandler = (
     const result = shouldLogBuildNumberMismatch(serverBuild, request, response);
     if (result.log === true) {
       const clientCompAdjective = result.clientBuild > serverBuildNumber ? 'newer' : 'older';
-      log.info(
+      log.warn(
         `Client build (${result.clientBuild}) is ${clientCompAdjective} than this Kibana server build (${serverBuildNumber}). The [${response.statusCode}] error status in req id [${request.id}] may be due to client-server incompatibility!`
       );
     }
