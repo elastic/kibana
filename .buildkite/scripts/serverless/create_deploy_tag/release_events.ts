@@ -42,7 +42,7 @@ const states: Record<
   {
     name: string;
     description: string;
-    instruction: string;
+    instruction?: string;
     instructionStyle?: 'success' | 'warning' | 'error' | 'info';
     display: boolean;
     pre?: (state: StateShape) => Promise<void | boolean>;
@@ -52,7 +52,6 @@ const states: Record<
   start: {
     name: 'Starting state',
     description: 'No description',
-    instruction: 'No instruction',
     display: false,
   },
   initialize: {
@@ -86,7 +85,7 @@ const states: Record<
   wait_for_confirmation: {
     name: 'Waiting for confirmation',
     description: 'Waiting for the Release Manager to confirm the release.',
-    instruction: `If you're happy with the projected information, please unblock the release on Buildkite.`,
+    instruction: `Please review the collected information above and unblock the release on Buildkite, if you're satisfied.`,
     instructionStyle: 'warning',
     display: true,
   },
@@ -117,7 +116,6 @@ Your deployment will appear <a href='https://buildkite.com/elastic/kibana-server
   end: {
     name: 'End of the release process',
     description: 'The release process has ended.',
-    instruction: `No instructions`,
     display: false,
   },
   error_generic: {
@@ -168,14 +166,10 @@ export async function transition(targetStateName: StateNames, data?: any) {
   buildkite.setMetadata('release_state', targetStateName);
   buildkite.setMetadata('state_data', JSON.stringify(stateData));
 
-  if (targetState.display) {
-    updateWizardState(stateData);
-    updateWizardInstruction(targetStateName, stateData);
-  }
+  updateWizardState(stateData);
+  updateWizardInstruction(targetStateName, stateData);
 
-  if (targetStateName === 'tag_created') {
-    await transition('end');
-  }
+  return targetStateName;
 }
 
 function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | undefined>) {
@@ -196,7 +190,7 @@ function updateWizardState(stateData: Record<string, 'ok' | 'nok' | 'pending' | 
       if (stateStatus === 'pending') {
         return `<div>[${stateEmoji}] ${stateInfo.name}<br />&nbsp; - ${stateInfo.description}</div>`;
       } else {
-        return `<div>[${stateEmoji}] ${stateInfo.name}(${stateName})</div>`;
+        return `<div>[${stateEmoji}] ${stateInfo.name}</div>`;
       }
     });
 
@@ -211,7 +205,9 @@ ${wizardSteps.join('\n')}
 function updateWizardInstruction(targetState: string, stateData: any) {
   const { instructionStyle, instruction } = states[targetState];
 
-  buildkite.setAnnotation(WIZARD_CTX_INSTRUCTION, instructionStyle || 'info', instruction);
+  if (instruction) {
+    buildkite.setAnnotation(WIZARD_CTX_INSTRUCTION, instructionStyle || 'info', instruction);
+  }
 }
 
 async function tryCall(fn: any, ...args: any[]) {
@@ -242,14 +238,19 @@ export async function main(args: string[]) {
     data = args.slice(args.indexOf('--data') + 1)[0];
   }
 
-  return transition(targetState, data);
+  const resultingTargetState = await transition(targetState, data);
+  if (resultingTargetState === 'tag_created') {
+    return await transition('end');
+  } else {
+    return resultingTargetState;
+  }
 }
 
 if (require.main === module) {
   const args = process.argv.slice(2);
   main(args).then(
-    () => {
-      console.log('Transition completed');
+    (targetState) => {
+      console.log('Transition completed to: ' + targetState);
     },
     (error) => {
       console.error(error);
