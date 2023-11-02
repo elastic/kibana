@@ -46,11 +46,6 @@ describe('useCasesColumnsConfiguration ', () => {
 
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "assignCaseAction": Object {
-          "canDisplay": true,
-          "field": "",
-          "name": "",
-        },
         "assignees": Object {
           "canDisplay": true,
           "field": "assignees",
@@ -75,11 +70,6 @@ describe('useCasesColumnsConfiguration ', () => {
           "canDisplay": true,
           "field": "externalIncident",
           "name": "External incident",
-        },
-        "owner": Object {
-          "canDisplay": false,
-          "field": "owner",
-          "name": "Solution",
         },
         "severity": Object {
           "canDisplay": true,
@@ -154,20 +144,6 @@ describe('useCasesColumnsConfiguration ', () => {
         "canDisplay": false,
         "field": "totalAlerts",
         "name": "Alerts",
-      }
-    `);
-  });
-
-  it('cannot display owner if none is available', async () => {
-    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    expect(result.current.owner).toMatchInlineSnapshot(`
-      Object {
-        "canDisplay": false,
-        "field": "owner",
-        "name": "Solution",
       }
     `);
   });

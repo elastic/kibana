@@ -8,11 +8,11 @@
 import type React from 'react';
 import type { EuiTableComputedColumnType } from '@elastic/eui';
 
-import type { CustomFieldTypes } from '../../../common/types/domain';
+import type { CaseCustomField, CustomFieldTypes } from '../../../common/types/domain';
 import type {
   CasesConfigurationUICustomField,
-  CaseUICustomField,
   CaseUI,
+  CaseUICustomField,
 } from '../../containers/types';
 
 export interface CustomFieldType<T extends CaseUICustomField> {
@@ -33,10 +33,17 @@ export interface CustomFieldType<T extends CaseUICustomField> {
   }>;
 }
 
+export type CustomFieldEuiTableColumn = Pick<
+  EuiTableComputedColumnType<CaseUI>,
+  'name' | 'width'
+> & {
+  render: (customField: CaseCustomField) => React.ReactNode;
+};
+
 export type CustomFieldFactory<T extends CaseUICustomField> = () => {
   id: string;
   label: string;
-  getEuiTableColumn: (params: { key: string; label: string }) => EuiTableComputedColumnType<CaseUI>;
+  getEuiTableColumn: (params: { label: string }) => CustomFieldEuiTableColumn;
   build: () => CustomFieldType<T>;
 };
 

@@ -218,7 +218,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       isSelectorView,
       connectors,
       onRowClick,
-      showSolutionColumn: !hasOwner && availableSolutions.length > 1,
       disableActions: selectedCases.length > 0,
       selectedColumns,
     });

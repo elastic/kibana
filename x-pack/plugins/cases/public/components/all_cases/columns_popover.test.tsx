@@ -22,14 +22,18 @@ describe('ColumnsPopover', () => {
     { field: 'category', name: 'Category', isChecked: false },
   ];
 
-  it('renders correctly a list of selected columns', () => {
+  it('renders correctly a list of selected columns', async () => {
     render(
       <TestProviders>
         <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('column-selection-popover'));
+    userEvent.click(screen.getByTestId('column-selection-popover-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('column-selection-popover')).toBeInTheDocument();
+    });
 
     selectedColumns.forEach(({ field, name, isChecked }) => {
       expect(screen.getByTestId(`column-selection-switch-${field}`)).toHaveAttribute(
@@ -52,7 +56,7 @@ describe('ColumnsPopover', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('column-selection-popover'));
+    userEvent.click(screen.getByTestId('column-selection-popover-button'));
     userEvent.click(
       screen.getByTestId(`column-selection-switch-${selectedColumns[0].field}`),
       undefined,

@@ -7,33 +7,18 @@
 
 import React from 'react';
 
-import type { EuiTableComputedColumnType } from '@elastic/eui';
-import type { CaseUI } from '../../../containers/types';
-import { getEmptyTagValue } from '../../empty_value';
+import type { CaseCustomField } from '../../../../common/types/domain';
+import type { CustomFieldEuiTableColumn } from '../types';
 
-export const getEuiTableColumn = ({
-  key,
-  label,
-}: {
-  key: string;
-  label: string;
-}): EuiTableComputedColumnType<CaseUI> => ({
+export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiTableColumn => ({
   name: label,
-  render: (theCase: CaseUI) => {
-    const index = theCase.customFields.findIndex(
-      (element) => element.key === key && element.value !== null
-    );
-
-    if (index !== -1) {
-      return (
-        <p data-test-subj={`text-custom-field-column-view-${key}`}>
-          {theCase.customFields[index].value}
-        </p>
-      );
-    }
-
-    return (
-      <div data-test-subj={`empty-text-custom-field-column-view-${key}`}>{getEmptyTagValue()}</div>
-    );
-  },
+  width: '100px',
+  render: (customField: CaseCustomField) => (
+    <p
+      className="eui-textTruncate"
+      data-test-subj={`text-custom-field-column-view-${customField.key}`}
+    >
+      {customField.value}
+    </p>
+  ),
 });

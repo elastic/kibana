@@ -30,7 +30,7 @@ import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
-import { OWNER_INFO, SELECTOR_VIEW_CASES_TABLE_COLUMNS } from '../../../common/constants';
+import { SELECTOR_VIEW_CASES_TABLE_COLUMNS } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
@@ -40,7 +40,6 @@ import { useCasesColumnsConfiguration } from './use_cases_columns_configuration'
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { severities } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
@@ -78,7 +77,6 @@ export interface GetCasesColumn {
   selectedColumns: CasesColumnSelection[];
   connectors?: ActionConnector[];
   onRowClick?: (theCase: CaseUI) => void;
-  showSolutionColumn?: boolean;
   disableActions?: boolean;
 }
 
@@ -198,24 +196,6 @@ export const useCasesColumns = ({
             ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
             : getEmptyTagValue(),
         width: !isSelectorView ? '80px' : '55px',
-      },
-      owner: {
-        field: casesColumnsConfig.owner.field,
-        name: casesColumnsConfig.owner.name,
-        align: RIGHT_ALIGNMENT,
-        render: (caseOwner: CasesOwners) => {
-          const ownerInfo = OWNER_INFO[caseOwner];
-          return ownerInfo ? (
-            <EuiIcon
-              size="m"
-              type={ownerInfo.iconType}
-              title={ownerInfo.label}
-              data-test-subj={`case-table-column-owner-icon-${caseOwner}`}
-            />
-          ) : (
-            getEmptyTagValue()
-          );
-        },
       },
       totalComment: {
         field: casesColumnsConfig.totalComment.field,
@@ -355,7 +335,24 @@ export const useCasesColumns = ({
   // we need to extend the columnsDict with the columns of
   // the customFields
   customFields.forEach(({ key, type, label }) => {
-    columnsDict[key] = customFieldsBuilderMap[type]().getEuiTableColumn({ key, label });
+    if (type in customFieldsBuilderMap) {
+      const columnDefinition = customFieldsBuilderMap[type]().getEuiTableColumn({ label });
+
+      columnsDict[key] = {
+        ...columnDefinition,
+        render: (theCase: CaseUI) => {
+          const customField = theCase.customFields.find(
+            (element) => element.key === key && element.value !== null
+          );
+
+          if (!customField) {
+            return getEmptyTagValue();
+          }
+
+          return columnDefinition.render(customField);
+        },
+      };
+    }
   });
 
   const columns: CasesColumns[] = [];
@@ -364,9 +361,11 @@ export const useCasesColumns = ({
     SELECTOR_VIEW_CASES_TABLE_COLUMNS.forEach(({ field }) => {
       columns.push(columnsDict[field]);
     });
+
+    columns.push(columnsDict.assignCaseAction);
   } else {
     selectedColumns.forEach(({ field, isChecked }) => {
-      if (field in columnsDict && isChecked) {
+      if (field in columnsDict && isChecked && casesColumnsConfig[field].canDisplay) {
         columns.push(columnsDict[field]);
       }
     });

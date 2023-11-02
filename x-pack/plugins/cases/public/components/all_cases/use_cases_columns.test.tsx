@@ -32,7 +32,6 @@ describe('useCasesColumns ', () => {
     filterStatus: CaseStatuses.open,
     userProfiles: userProfilesMap,
     isSelectorView: false,
-    showSolutionColumn: true,
     selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
   };
 
@@ -104,12 +103,6 @@ describe('useCasesColumns ', () => {
             "render": [Function],
             "sortable": true,
             "width": "100px",
-          },
-          Object {
-            "align": "right",
-            "field": "owner",
-            "name": "Solution",
-            "render": [Function],
           },
           Object {
             "field": "createdAt",
@@ -420,12 +413,6 @@ describe('useCasesColumns ', () => {
             "width": "20%",
           },
           Object {
-            "field": "assignees",
-            "name": "Assignees",
-            "render": [Function],
-            "width": "180px",
-          },
-          Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
@@ -532,12 +519,6 @@ describe('useCasesColumns ', () => {
             "width": "20%",
           },
           Object {
-            "field": "assignees",
-            "name": "Assignees",
-            "render": [Function],
-            "width": "180px",
-          },
-          Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
@@ -596,10 +577,12 @@ describe('useCasesColumns ', () => {
           Object {
             "name": "Text Label",
             "render": [Function],
+            "width": "100px",
           },
           Object {
             "name": "Toggle Label",
             "render": [Function],
+            "width": "100px",
           },
         ],
         "isLoadingColumns": false,

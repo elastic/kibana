@@ -6,44 +6,43 @@
  */
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
-import { TestProviders } from '../../../common/mock';
-import { basicCase } from '../../../containers/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 import { getEuiTableColumn } from './get_eui_table_column';
 
 describe('getEuiTableColumn ', () => {
+  let appMockRender: AppMockRenderer;
   const key = 'test_key_1';
 
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('returns a name and a render function', async () => {
     const label = 'MockLabel';
 
-    expect(getEuiTableColumn({ key: 'test_key_1', label })).toEqual({
+    expect(getEuiTableColumn({ label })).toEqual({
       name: label,
       render: expect.any(Function),
+      width: '100px',
     });
   });
 
   it.each([
-    ['true', 'true', [{ key, type: CustomFieldTypes.TOGGLE as const, value: true }]],
-    ['false', 'false', [{ key, type: CustomFieldTypes.TOGGLE as const, value: false }]],
-    ['null', 'false', [{ key, type: CustomFieldTypes.TOGGLE as const, value: null }]],
-    ['missing', 'false', []],
+    ['true', 'true', { key, type: CustomFieldTypes.TOGGLE as const, value: true }],
+    ['false', 'false', { key, type: CustomFieldTypes.TOGGLE as const, value: false }],
+    ['null', 'false', { key, type: CustomFieldTypes.TOGGLE as const, value: null }],
   ])(
     'render function renders a toggle column with value %s correctly',
-    async (_, expectedResult, customFields) => {
+    async (_, expectedResult, customField) => {
       const label = 'MockLabel';
-      const column = getEuiTableColumn({ key, label });
-      const theCase = { ...basicCase };
+      const column = getEuiTableColumn({ label });
 
-      theCase.customFields = customFields;
-
-      render(<TestProviders>{column.render(theCase)}</TestProviders>);
+      appMockRender.render(<div>{column.render(customField)}</div>);
 
       expect(screen.getByTestId(`toggle-custom-field-column-view-${key}`)).toBeInTheDocument();
       expect(screen.getByTestId(`toggle-custom-field-column-view-${key}`)).toHaveAttribute(
@@ -52,15 +51,4 @@ describe('getEuiTableColumn ', () => {
       );
     }
   );
-
-  it('render function handles a wrong type custom field error correctly', async () => {
-    const column = getEuiTableColumn({ key, label: 'MockLabel' });
-    const theCase = { ...basicCase };
-
-    theCase.customFields = [{ key, type: CustomFieldTypes.TEXT as const, value: 'true' }];
-
-    render(<TestProviders>{column.render(theCase)}</TestProviders>);
-
-    expect(screen.getByTestId(`empty-toggle-custom-field-column-view-${key}`)).toBeInTheDocument();
-  });
 });

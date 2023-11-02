@@ -169,30 +169,26 @@ export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
  * Cases UI Constants
  */
 
-// We just need the default ids(field) and isChecked.
-// The name comes from the cases columns configuration.
 export const DEFAULT_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
-  { field: 'title', name: '', isChecked: true },
-  { field: 'assignees', name: '', isChecked: true },
-  { field: 'tags', name: '', isChecked: true },
-  { field: 'totalAlerts', name: '', isChecked: true },
-  { field: 'totalComment', name: '', isChecked: true },
-  { field: 'category', name: '', isChecked: true },
-  { field: 'owner', name: '', isChecked: false },
-  { field: 'createdAt', name: '', isChecked: true },
-  { field: 'updatedAt', name: '', isChecked: true },
-  { field: 'closedAt', name: '', isChecked: false },
-  { field: 'externalIncident', name: '', isChecked: true },
-  { field: 'status', name: '', isChecked: true },
-  { field: 'severity', name: '', isChecked: true },
+  { field: 'title', name: 'title', isChecked: true },
+  { field: 'assignees', name: 'assignees', isChecked: true },
+  { field: 'tags', name: 'tags', isChecked: true },
+  { field: 'totalAlerts', name: 'totalAlerts', isChecked: true },
+  { field: 'totalComment', name: 'totalComment', isChecked: true },
+  { field: 'category', name: 'category', isChecked: true },
+  { field: 'createdAt', name: 'createdAt', isChecked: true },
+  { field: 'updatedAt', name: 'updatedAt', isChecked: true },
+  { field: 'closedAt', name: 'closedAt', isChecked: false },
+  { field: 'externalIncident', name: 'externalIncident', isChecked: true },
+  { field: 'status', name: 'status', isChecked: true },
+  { field: 'severity', name: 'severity', isChecked: true },
 ];
 
 export const SELECTOR_VIEW_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
-  { field: 'title', name: '', isChecked: true },
-  { field: 'category', name: '', isChecked: true },
-  { field: 'createdAt', name: '', isChecked: true },
-  { field: 'severity', name: '', isChecked: true },
-  { field: 'assignCaseAction', name: '', isChecked: true },
+  { field: 'title', name: 'title', isChecked: true },
+  { field: 'category', name: 'category', isChecked: true },
+  { field: 'createdAt', name: 'createdAt', isChecked: true },
+  { field: 'severity', name: 'severity', isChecked: true },
 ];
 
 /**

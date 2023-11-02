@@ -8,9 +8,6 @@
 import * as i18n from './translations';
 import { ALERTS } from '../../common/translations';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 export type CasesColumnsConfiguration = Record<
@@ -28,11 +25,7 @@ export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
     data: { customFields },
   } = useGetCaseConfiguration();
 
-  const { owner } = useCasesContext();
-  const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
-
   const canDisplayDefault = true;
-  const canDisplayOwner = !!owner.length && availableSolutions.length > 1;
 
   const result: CasesColumnsConfiguration = {
     title: {
@@ -54,11 +47,6 @@ export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
       field: 'totalAlerts',
       name: ALERTS,
       canDisplay: isAlertsEnabled,
-    },
-    owner: {
-      field: 'owner',
-      name: i18n.SOLUTION,
-      canDisplay: canDisplayOwner,
     },
     totalComment: {
       field: 'totalComment',
@@ -98,11 +86,6 @@ export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
     severity: {
       field: 'severity',
       name: i18n.SEVERITY,
-      canDisplay: canDisplayDefault,
-    },
-    assignCaseAction: {
-      field: '',
-      name: '',
       canDisplay: canDisplayDefault,
     },
   };

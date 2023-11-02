@@ -72,7 +72,7 @@ export const ColumnsPopover: React.FC<Props> = ({
         <EuiButtonEmpty
           aria-label="Columns"
           className="columns"
-          data-test-subj="column-selection-popover"
+          data-test-subj="column-selection-popover-button"
           iconType="indexOpen"
           iconSide="left"
           onClick={togglePopover}
@@ -87,12 +87,13 @@ export const ColumnsPopover: React.FC<Props> = ({
       anchorPosition="leftUp"
       hasDragDrop
       zIndex={0}
+      data-test-subj="column-selection-popover"
     >
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiFlexGroup css={{ width: 300 }}>
           <EuiFlexItem>
             <EuiDroppable
-              droppableId="DROPPABLE_AREA_BARE"
+              droppableId="casesColumnDroppableArea"
               css={{ paddingBottom: euiTheme.size.base }}
             >
               {selectedColumns.map(({ field, name, isChecked }, idx) => (

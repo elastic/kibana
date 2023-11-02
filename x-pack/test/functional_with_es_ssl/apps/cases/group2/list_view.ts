@@ -677,7 +677,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('column selection popover exists', async () => {
-        await testSubjects.existOrFail('column-selection-popover');
+        await testSubjects.existOrFail('column-selection-popover-button');
       });
 
       it('selecting a column works correctly', async () => {

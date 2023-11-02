@@ -401,7 +401,7 @@ export function CasesTableServiceProvider(
     },
 
     async toggleColumnInPopover(columnId: string) {
-      await testSubjects.click('column-selection-popover');
+      await testSubjects.click('column-selection-popover-button');
 
       await testSubjects.existOrFail(`column-selection-switch-${columnId}`);
       await testSubjects.click(`column-selection-switch-${columnId}`);
