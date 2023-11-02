@@ -23,19 +23,21 @@ import { initTemplateService, TemplateName } from './template_service/template_s
 
 export interface GeneratorConfig {
   rootDir: string;
-  sourceGlob: string;
+  sourceGlobs: string[];
   templateName: TemplateName;
 }
 
 export const generate = async (config: GeneratorConfig) => {
-  const { rootDir, sourceGlob, templateName } = config;
+  const { rootDir, sourceGlobs, templateName } = config;
 
   console.log(chalk.bold(`Generating API route schemas`));
   console.log(chalk.bold(`Working directory: ${chalk.underline(rootDir)}`));
 
   console.log(`👀  Searching for source files`);
-  const sourceFilesGlob = resolve(rootDir, sourceGlob);
-  const schemaPaths = await globby([sourceFilesGlob]);
+  const sourceFilesGlob = sourceGlobs.map((singleGlob) => {
+    return resolve(rootDir, singleGlob);
+  });
+  const schemaPaths = await globby(sourceFilesGlob);
 
   console.log(`🕵️‍♀️   Found ${schemaPaths.length} schemas, parsing`);
   const parsedSources = await Promise.all(

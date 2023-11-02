@@ -9,10 +9,10 @@ require('../../../../../src/setup_node_env');
 const { generate } = require('@kbn/openapi-generator');
 const { resolve } = require('path');
 
-const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
+const X_PACK_PLUGINS_ROOT = resolve(__dirname, '../../..');
 
 generate({
-  rootDir: SECURITY_SOLUTION_ROOT,
-  sourceGlob: './**/*.schema.yaml',
+  rootDir: X_PACK_PLUGINS_ROOT,
+  sourceGlobs: ['./security_solution/**/*.schema.yaml', './osquery/**/*.schema.yaml'],
   templateName: 'zod_operation_schema',
 });
