@@ -187,84 +187,88 @@ describe('Alert details flyout', () => {
     });
   });
 
-  describe('Localstorage management', { tags: ['@ess', '@serverless'] }, () => {
-    const ARCHIVED_RULE_ID = '7015a3e2-e4ea-11ed-8c11-49608884878f';
-    const ARCHIVED_RULE_NAME = 'Endpoint Security';
+  describe(
+    'Localstorage management',
+    { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+    () => {
+      const ARCHIVED_RULE_ID = '7015a3e2-e4ea-11ed-8c11-49608884878f';
+      const ARCHIVED_RULE_NAME = 'Endpoint Security';
 
-    before(() => {
-      cleanKibana();
+      before(() => {
+        cleanKibana();
 
-      // It just imports an alert without a rule but rule details page should work anyway
-      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
-    });
+        // It just imports an alert without a rule but rule details page should work anyway
+        cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
+      });
 
-    beforeEach(() => {
-      login();
-      disableExpandableFlyout();
-      visitWithTimeRange(ALERTS_URL);
-      waitForAlertsToPopulate();
-      expandFirstAlert();
-    });
+      beforeEach(() => {
+        login();
+        disableExpandableFlyout();
+        visitWithTimeRange(ALERTS_URL);
+        waitForAlertsToPopulate();
+        expandFirstAlert();
+      });
 
-    const alertTableKey = 'alerts-page';
-    const getFlyoutConfig = (dataTable: { [alertTableKey]: DataTableModel }) =>
-      dataTable?.[alertTableKey]?.expandedDetail?.query;
+      const alertTableKey = 'alerts-page';
+      const getFlyoutConfig = (dataTable: { [alertTableKey]: DataTableModel }) =>
+        dataTable?.[alertTableKey]?.expandedDetail?.query;
 
-    /**
-     * Localstorage is updated after a delay here x-pack/plugins/security_solution/public/common/store/data_table/epic_local_storage.ts
-     * We create this config to re-check localStorage 3 times, every 500ms to avoid any potential flakyness from that delay
-     */
-    const storageCheckRetryConfig = {
-      timeout: 1500,
-      interval: 500,
-    };
+      /**
+       * Localstorage is updated after a delay here x-pack/plugins/security_solution/public/common/store/data_table/epic_local_storage.ts
+       * We create this config to re-check localStorage 3 times, every 500ms to avoid any potential flakyness from that delay
+       */
+      const storageCheckRetryConfig = {
+        timeout: 1500,
+        interval: 500,
+      };
 
-    it('should store the flyout state in localstorage', () => {
-      cy.get(OVERVIEW_RULE).should('be.visible');
-      const localStorageCheck = () =>
-        cy.getAllLocalStorage().then((storage) => {
-          const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
-          return getFlyoutConfig(securityDataTable)?.panelView === 'eventDetail';
-        });
+      it('should store the flyout state in localstorage', () => {
+        cy.get(OVERVIEW_RULE).should('be.visible');
+        const localStorageCheck = () =>
+          cy.getAllLocalStorage().then((storage) => {
+            const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
+            return getFlyoutConfig(securityDataTable)?.panelView === 'eventDetail';
+          });
 
-      cy.waitUntil(localStorageCheck, storageCheckRetryConfig);
-    });
+        cy.waitUntil(localStorageCheck, storageCheckRetryConfig);
+      });
 
-    it('should remove the flyout details from local storage when closed', () => {
-      cy.get(OVERVIEW_RULE).should('be.visible');
-      closeAlertFlyout();
-      const localStorageCheck = () =>
-        cy.getAllLocalStorage().then((storage) => {
-          const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
-          return getFlyoutConfig(securityDataTable)?.panelView === undefined;
-        });
+      it('should remove the flyout details from local storage when closed', () => {
+        cy.get(OVERVIEW_RULE).should('be.visible');
+        closeAlertFlyout();
+        const localStorageCheck = () =>
+          cy.getAllLocalStorage().then((storage) => {
+            const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
+            return getFlyoutConfig(securityDataTable)?.panelView === undefined;
+          });
 
-      cy.waitUntil(localStorageCheck, storageCheckRetryConfig);
-    });
+        cy.waitUntil(localStorageCheck, storageCheckRetryConfig);
+      });
 
-    it('should remove the flyout state from localstorage when navigating away without closing the flyout', () => {
-      cy.get(OVERVIEW_RULE).should('be.visible');
+      it('should remove the flyout state from localstorage when navigating away without closing the flyout', () => {
+        cy.get(OVERVIEW_RULE).should('be.visible');
 
-      visitRuleDetailsPage(ARCHIVED_RULE_ID);
-      waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
+        visitRuleDetailsPage(ARCHIVED_RULE_ID);
+        waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
-      const localStorageCheck = () =>
-        cy.getAllLocalStorage().then((storage) => {
-          const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
-          return getFlyoutConfig(securityDataTable)?.panelView === undefined;
-        });
+        const localStorageCheck = () =>
+          cy.getAllLocalStorage().then((storage) => {
+            const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
+            return getFlyoutConfig(securityDataTable)?.panelView === undefined;
+          });
 
-      cy.waitUntil(localStorageCheck, storageCheckRetryConfig);
-    });
+        cy.waitUntil(localStorageCheck, storageCheckRetryConfig);
+      });
 
-    it('should not reopen the flyout when navigating away from the alerts page and returning to it', () => {
-      cy.get(OVERVIEW_RULE).should('be.visible');
+      it('should not reopen the flyout when navigating away from the alerts page and returning to it', () => {
+        cy.get(OVERVIEW_RULE).should('be.visible');
 
-      visitRuleDetailsPage(ARCHIVED_RULE_ID);
-      waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
+        visitRuleDetailsPage(ARCHIVED_RULE_ID);
+        waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
-      visit(ALERTS_URL);
-      cy.get(OVERVIEW_RULE).should('not.exist');
-    });
-  });
+        visit(ALERTS_URL);
+        cy.get(OVERVIEW_RULE).should('not.exist');
+      });
+    }
+  );
 });
