@@ -88,28 +88,6 @@ export interface EditConfigPanelProps {
   displayFlyoutHeader?: boolean;
 }
 
-// const getUserMessages =
-//   (
-//     currentDataSource: Datasource | null,
-//     currentDatasourceState: unknown,
-//     currentVisualization: Visualization,
-//     currentVisualizationState: unknown,
-//     frame: FramePublicAPI
-//   ) =>
-//   (
-//     locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
-//     filters?: UserMessageFilters
-//   ) => {
-//     const userMessages = [
-//       ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
-//         frame,
-//         setState: () => {},
-//       }) ?? []),
-//       ...(currentVisualization?.getUserMessages?.(currentVisualizationState, { frame }) ?? []),
-//     ];
-//     return filterAndSortUserMessages([...userMessages], locationId, filters ?? {});
-//   };
-
 export function LensEditConfigurationFlyout({
   attributes,
   coreStart,

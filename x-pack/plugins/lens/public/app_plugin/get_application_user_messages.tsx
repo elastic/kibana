@@ -270,7 +270,7 @@ export const useGetUserMessages = ({
 
   useEffect(() => {
     setUserMessages([
-      ...(datasourceState && datasource && activeDatasourceId
+      ...(datasourceState && datasourceState.state && datasource && activeDatasourceId
         ? datasource.getUserMessages(datasourceState.state, {
             frame: framePublicAPI,
             setState: (newStateOrUpdater) => {

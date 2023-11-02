@@ -50,6 +50,7 @@ import { cloneDeep } from 'lodash';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { createMockFramePublicAPI } from '../../mocks';
+import { createMockDataViewsState } from '../../data_views_service/mocks';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -3077,7 +3078,9 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFramePublicAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3129,7 +3132,9 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFramePublicAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3218,7 +3223,9 @@ describe('IndexPattern Data Source', () => {
           (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFramePublicAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           });
 
@@ -3256,7 +3263,9 @@ describe('IndexPattern Data Source', () => {
           ] as ReturnType<typeof getErrorMessages>);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFramePublicAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           });
 
@@ -3402,9 +3411,9 @@ describe('IndexPattern Data Source', () => {
               ],
             },
           },
-          dataViews: {
+          dataViews: createMockDataViewsState({
             indexPatterns: expectedIndexPatterns,
-          },
+          }),
         });
       });
 
@@ -3536,9 +3545,9 @@ describe('IndexPattern Data Source', () => {
                 activeData: {
                   first: createDatatableForLayer(0),
                 },
-                dataViews: {
+                dataViews: createMockDataViewsState({
                   indexPatterns: expectedIndexPatterns,
-                },
+                }),
               }),
               setState: () => {},
               visualizationInfo: { layers: [] },
@@ -3562,9 +3571,9 @@ describe('IndexPattern Data Source', () => {
               first: createDatatableForLayer(0),
               second: createDatatableForLayer(1),
             },
-            dataViews: {
+            dataViews: createMockDataViewsState({
               indexPatterns: expectedIndexPatterns,
-            },
+            }),
           }),
           setState: () => {},
           visualizationInfo: { layers: [] },

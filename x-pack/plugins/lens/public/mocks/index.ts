@@ -32,26 +32,17 @@ export { lensPluginMock } from './lens_plugin_mock';
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
 
-export const createMockFramePublicAPI = ({
-  datasourceLayers,
-  dateRange,
-  dataViews,
-  activeData,
-}: Partial<Omit<FramePublicAPI, 'dataViews'>> & {
-  dataViews?: Partial<FramePublicAPI['dataViews']>;
-} = {}): FrameMock => ({
-  datasourceLayers: datasourceLayers ?? {},
-  dateRange: dateRange ?? {
+export const createMockFramePublicAPI = (overrides: Partial<FramePublicAPI> = {}): FrameMock => ({
+  datasourceLayers: {},
+  dateRange: {
     fromDate: '2022-03-17T08:25:00.000Z',
     toDate: '2022-04-17T08:25:00.000Z',
   },
-  dataViews: createMockDataViewsState(dataViews),
-  activeData,
+  dataViews: createMockDataViewsState(),
   query: { query: '', language: 'lucene' },
   filters: [],
+  ...overrides,
 });
-
-export type FrameDatasourceMock = jest.Mocked<FramePublicAPI>;
 
 export function createMockedDragDropContext(
   partialState?: Partial<DragContextState>,
