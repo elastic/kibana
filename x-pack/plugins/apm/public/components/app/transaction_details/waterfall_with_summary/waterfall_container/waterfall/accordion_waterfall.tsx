@@ -12,11 +12,13 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { groupBy } from 'lodash';
 import { transparentize } from 'polished';
 import React, { useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { Margins } from '../../../../../shared/charts/timeline';
@@ -148,8 +150,9 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
             <ToggleAccordionButton
               show={hasToggle}
               isOpen={isOpen}
-              childrenAmount={children.length}
+              childrenCount={children.length}
               onClick={toggleAccordion}
+              maxWidth={timelineMargins.left}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -200,20 +203,29 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
 function ToggleAccordionButton({
   show,
   isOpen,
-  childrenAmount,
+  childrenCount,
+  maxWidth,
   onClick,
 }: {
   show: boolean;
   isOpen: boolean;
-  childrenAmount: number;
+  childrenCount: number;
+  maxWidth: number;
   onClick: () => void;
 }) {
+  const { euiTheme } = useEuiTheme();
+
   if (!show) {
     return null;
   }
 
   return (
-    <div style={{ height: ACCORDION_HEIGHT, display: 'flex' }}>
+    <div
+      style={{
+        height: ACCORDION_HEIGHT,
+        display: 'flex',
+      }}
+    >
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
@@ -226,8 +238,36 @@ function ToggleAccordionButton({
             <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">{childrenAmount}</EuiText>
+        <EuiFlexItem grow={false} style={{ position: 'relative' }}>
+          <div
+            style={{
+              height: `calc(${euiTheme.size.s} * 2)`,
+              position: 'absolute',
+              top: '50%',
+              transform: 'translate(0, -50%)',
+            }}
+          >
+            <EuiToolTip
+              content={childrenCount}
+              delay="long"
+              anchorProps={{
+                style: {
+                  maxWidth: `calc(${maxWidth}px - ${euiTheme.size.l} * 2`,
+                },
+              }}
+            >
+              <EuiText
+                size="xs"
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {childrenCount}
+              </EuiText>
+            </EuiToolTip>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
