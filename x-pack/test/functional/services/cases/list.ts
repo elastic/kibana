@@ -85,7 +85,6 @@ export function CasesTableServiceProvider(
 
     async validateCasesTableHasNthRows(nrRows: number) {
       await retry.waitFor(`the cases table to have ${nrRows} cases`, async () => {
-        await this.refreshTable();
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
         return rows.length === nrRows;
       });
