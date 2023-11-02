@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import type { TileError } from '../../../common/descriptor_types';
 
@@ -14,33 +14,38 @@ interface Props {
 }
 
 export function TileErrorsList(props: Props) {
-  const [selectedTileKey, setSelectedTileKey] = useState(props.tileErrors?.[0].tileKey);
+  const [selectedTileError, setSelectedTileError] = useState<TileError | undefined>(undefined);
 
-  const selectedTileContent = useMemo(() => {
-    const selectedTileError = props.tileErrors.find((tileError) => {
-      return tileError.tileKey === selectedTileKey;
+  useEffect(() => {
+    const hasSelectedTileError = selectedTileError && props.tileErrors.some(({tileKey}) => {
+      return tileKey === selectedTileError.tileKey;
     });
-    return selectedTileError ? <p>{getDescription(selectedTileError)}</p> : null;
-  }, [props.tileErrors, selectedTileKey]);
-
-  const tabs = useMemo(() => {
-    return props.tileErrors.map((tileError) => {
-      return (
-        <EuiTab
-          key={tileError.tileKey}
-          onClick={() => setSelectedTileKey(tileError.tileKey)}
-          isSelected={tileError.tileKey === selectedTileKey}
-        >
-          {tileError.tileKey}
-        </EuiTab>
-      );
-    });
-  }, [props.tileErrors, selectedTileKey]);
+    if (!hasSelectedTileError) {
+      setSelectedTileError(props.tileErrors?.[0]);
+    }
+  }, [props.tileErrors, selectedTileError])
 
   return (
     <>
-      <EuiTabs size="s">{tabs}</EuiTabs>
-      {selectedTileContent}
+      <EuiTabs size="s">
+        {props.tileErrors.map((tileError) => {
+          return (
+            <EuiTab
+              key={tileError.tileKey}
+              onClick={() => {
+                const nextTileError = props.tileErrors.find(({tileKey}) => {
+                  return tileKey === tileError.tileKey;
+                });
+                setSelectedTileError(nextTileError);
+              }}
+              isSelected={tileError.tileKey === selectedTileError?.tileKey}
+            >
+              {tileError.tileKey}
+            </EuiTab>
+          );
+        })}
+      </EuiTabs>
+      {selectedTileError ? <p>{getDescription(selectedTileError)}</p> : null}
     </>
   );
 }
