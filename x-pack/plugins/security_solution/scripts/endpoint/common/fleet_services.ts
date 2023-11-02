@@ -548,7 +548,10 @@ export const fetchFleetOutputs = async (kbnClient: KbnClient): Promise<GetOutput
     .catch(catchAxiosErrorFormatAndThrow);
 };
 
-export const getFleetElasticsearchOutputHost = async (kbnClient: KbnClient): Promise<string> => {
+export const getFleetElasticsearchOutputHost = async (
+  kbnClient: KbnClient,
+  log: ToolingLog = createToolingLogger()
+): Promise<string> => {
   const outputs = await fetchFleetOutputs(kbnClient);
   let host: string = '';
 
@@ -559,7 +562,7 @@ export const getFleetElasticsearchOutputHost = async (kbnClient: KbnClient): Pro
   }
 
   if (!host) {
-    log.error(`Outputs returned from Fleet:`, outputs);
+    log.error(`Outputs returned from Fleet:\n${JSON.stringify(outputs, null, 2)}`);
     throw new Error(`An output for Elasticsearch was not found in Fleet settings`);
   }
 
