@@ -18,18 +18,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Component, default as React, Fragment } from 'react';
+import { Component, default as React, FC, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus } from '../lib/ilm_policy_status_context';
-import { DoNotUseIlmPolicyStatus } from '../lib/stateless_status_context';
 import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
-import { useInternalApiClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient, useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
 import { ListingProps as Props } from '.';
 import {
@@ -42,6 +42,7 @@ import {
 } from './components';
 import { guessAppIconTypeFromObjectType } from './utils';
 import './report_listing.scss';
+import { useDefaultPolicyStatus } from '../lib/default_status_context';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -544,12 +545,46 @@ class ReportListingUi extends Component<Props, State> {
   }
 }
 
-export const ReportListing = (
-  props: Omit<
-    Props,
-    'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities' | 'configAllowsImages'
-  >
-) => {
+type ReportListingProps = Omit<
+  Props,
+  'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities' | 'configAllowsImages'
+>;
+
+const ReportListingStateful: FC<
+  ReportListingProps & {
+    apiClient: ReportingAPIClient;
+    capabilities: ApplicationStart['capabilities'];
+  }
+> = (props) => {
+  const { apiClient, capabilities, ...listingProps } = props;
+  return (
+    <ReportListingUi
+      {...listingProps}
+      apiClient={apiClient}
+      capabilities={capabilities}
+      ilmPolicyContextValue={useIlmPolicyStatus()}
+    />
+  );
+};
+
+const ReportListingDefault: FC<
+  ReportListingProps & {
+    apiClient: ReportingAPIClient;
+    capabilities: ApplicationStart['capabilities'];
+  }
+> = (props) => {
+  const { apiClient, capabilities, ...listingProps } = props;
+  return (
+    <ReportListingUi
+      {...listingProps}
+      apiClient={apiClient}
+      capabilities={capabilities}
+      policyContextValue={useDefaultPolicyStatus()}
+    />
+  );
+};
+
+export const ReportListing = (props: ReportListingProps) => {
   const { apiClient } = useInternalApiClient();
   const {
     services: {
@@ -557,17 +592,8 @@ export const ReportListing = (
     },
   } = useKibana();
   return props.config.statefulSettings.enabled ? (
-    <ReportListingUi
-      {...props}
-      apiClient={apiClient}
-      capabilities={capabilities}
-      ilmPolicyContextValue={useIlmPolicyStatus()}
-    />
+    <ReportListingStateful {...props} apiClient={apiClient} capabilities={capabilities} />
   ) : (
-    <ReportListingUi
-      {...props}
-      apiClient={apiClient}
-      capabilities={capabilities}
-    />
+    <ReportListingDefault {...props} apiClient={apiClient} capabilities={capabilities} />
   );
 };

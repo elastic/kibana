@@ -6,18 +6,18 @@
  */
 
 import React, { createContext, useContext, FunctionComponent } from 'react';
-import { DoNotCheckIlmPolicyStatus } from './reporting_api_client';
+import { useCheckDefaultPolicyStatus } from './reporting_api_client';
 
-type DoNotCheckIlmPolicy = ReturnType<typeof DoNotCheckIlmPolicyStatus>;
+type UseCheckDefaultPolicyStatusolicy = ReturnType<typeof useCheckDefaultPolicyStatus>;
 
 interface ContextValue {
-  recheckStatus: DoNotCheckIlmPolicy['resendRequest'];
+  recheckStatus: UseCheckDefaultPolicyStatusolicy['resendRequest'];
 }
 
 const PolicyStatusContext = createContext<undefined | ContextValue>(undefined);
 
 export const PolicyStatusContextProvider: FunctionComponent = ({ children }) => {
-  const { resendRequest: recheckStatus } = DoNotCheckIlmPolicyStatus();
+  const { resendRequest: recheckStatus } = useCheckDefaultPolicyStatus();
 
   return (
     <PolicyStatusContext.Provider value={{ recheckStatus }}>

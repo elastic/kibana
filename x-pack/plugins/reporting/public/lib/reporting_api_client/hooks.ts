@@ -6,7 +6,7 @@
  */
 
 import { INTERNAL_ROUTES } from '../../../common/constants';
-import { IlmPolicyStatusResponse, NoPolicyStatusResponse } from '../../../common/types';
+import { IlmPolicyStatusResponse, DefaultPolicyStatusResponse } from '../../../common/types';
 import { useKibana, useRequest, UseRequestResponse } from '../../shared_imports';
 
 export const useCheckIlmPolicyStatus = (): UseRequestResponse<IlmPolicyStatusResponse> => {

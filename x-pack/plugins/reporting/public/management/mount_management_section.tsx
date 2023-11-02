@@ -14,7 +14,7 @@ import { ILicense } from '@kbn/licensing-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ReportingAPIClient, InternalApiClientProvider } from '../lib/reporting_api_client';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
-import { PolicyStatusContextProvider } from '../lib/stateless_status_context';
+import { PolicyStatusContextProvider } from '../lib/default_status_context';
 import { ClientConfigType } from '../plugin';
 import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
 import { KibanaContextProvider } from '../shared_imports';
