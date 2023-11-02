@@ -21,11 +21,13 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import axios from 'axios';
 import path from 'path';
 import os from 'os';
+import type {
+  SecurityProductTypes,
+  SecurityProductType,
+} from '@kbn/security-solution-serverless/common/config';
 import { renderSummaryTable } from './print_run';
 import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
-import type { SecurityProductTypes, SecurityProductType } from '../../../security_solution_serverless/common/config';
-
 
 interface CreateEnvironmentRequestBody {
   name: string;
