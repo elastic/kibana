@@ -4,6 +4,7 @@
   "owner": [
     "@elastic/security-detections-response",
     "@elastic/actionable-observability",
-    "@elastic/response-ops"
+    "@elastic/response-ops",
+    "@elastic/obs-ux-management-team"
   ]
 }

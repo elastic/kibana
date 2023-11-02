@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/eslint-plugin-i18n",
-  "owner": "@elastic/actionable-observability",
+  "owner": ["@elastic/actionable-observability", "@elastic/obs-knowledge-team"],
   "devOnly": true
 }
