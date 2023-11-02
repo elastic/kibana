@@ -19,6 +19,7 @@ import {
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
+  resetSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import type { IndicatorTypes } from '../../domain/models';
@@ -41,6 +42,7 @@ import { GetPreviewData } from '../../services/slo/get_preview_data';
 import { GetSLOInstances } from '../../services/slo/get_slo_instances';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
 import { ManageSLO } from '../../services/slo/manage_slo';
+import { ResetSLO } from '../../services/slo/reset_slo';
 import { DefaultSummarySearchClient } from '../../services/slo/summary_search_client';
 import {
   ApmTransactionDurationTransformGenerator,
@@ -209,6 +211,29 @@ const disableSLORoute = createObservabilityServerRoute({
     const manageSLO = new ManageSLO(repository, transformManager);
 
     const response = await manageSLO.disable(params.path.id);
+
+    return response;
+  },
+});
+
+const resetSLORoute = createObservabilityServerRoute({
+  endpoint: 'POST /api/observability/slos/{id}/_reset 2023-10-31',
+  options: {
+    tags: ['access:slo_write'],
+    access: 'public',
+  },
+  params: resetSLOParamsSchema,
+  handler: async ({ context, params, logger }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const resetSLO = new ResetSLO(esClient, repository, transformManager);
+
+    const response = await resetSLO.execute(params.path.id);
 
     return response;
   },
@@ -395,4 +420,5 @@ export const sloRouteRepository = {
   ...getSloBurnRates,
   ...getPreviewData,
   ...getSLOInstancesRoute,
+  ...resetSLORoute,
 };

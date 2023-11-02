@@ -105,6 +105,7 @@ const sloResponseSchema = t.intersection([
     groupBy: allOrAnyString,
     createdAt: dateType,
     updatedAt: dateType,
+    version: t.number,
   }),
   t.partial({
     instanceId: allOrAnyString,
@@ -152,6 +153,12 @@ const updateSLOParamsSchema = t.type({
 const manageSLOParamsSchema = t.type({
   path: t.type({ id: sloIdSchema }),
 });
+
+const resetSLOParamsSchema = t.type({
+  path: t.type({ id: sloIdSchema }),
+});
+
+const resetSLOResponseSchema = sloResponseSchema;
 
 const updateSLOResponseSchema = sloResponseSchema;
 
@@ -240,6 +247,9 @@ type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
 type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
 
+type ResetSLOParams = t.TypeOf<typeof resetSLOParamsSchema.props.path>;
+type ResetSLOResponse = t.OutputOf<typeof resetSLOResponseSchema>;
+
 type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
@@ -296,6 +306,8 @@ export {
   findSloDefinitionsParamsSchema,
   findSloDefinitionsResponseSchema,
   manageSLOParamsSchema,
+  resetSLOParamsSchema,
+  resetSLOResponseSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
@@ -323,6 +335,8 @@ export type {
   HistoricalSummaryResponse,
   FindSloDefinitionsResponse,
   ManageSLOParams,
+  ResetSLOParams,
+  ResetSLOResponse,
   SLOResponse,
   SLOWithSummaryResponse,
   UpdateSLOInput,
