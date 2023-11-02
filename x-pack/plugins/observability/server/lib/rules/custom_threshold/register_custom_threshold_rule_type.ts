@@ -8,6 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { dataViewSpecSchema } from '@kbn/data-views-plugin/server/rest_api_routes/schema';
 import { i18n } from '@kbn/i18n';
 import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
@@ -52,7 +53,7 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
 };
 
 export const searchConfigurationSchema = schema.object({
-  index: schema.string(),
+  index: schema.oneOf([schema.string(), dataViewSpecSchema]),
   query: schema.object({
     language: schema.string({
       validate: validateKQLStringFilter,

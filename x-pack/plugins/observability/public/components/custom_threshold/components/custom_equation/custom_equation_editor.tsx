@@ -17,15 +17,13 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
-import { omit, range, first, xor, debounce } from 'lodash';
+import { range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../types';
 import {
   Aggregators,
-  CustomMetricAggTypes,
   CustomThresholdExpressionMetric,
 } from '../../../../../common/custom_threshold_rule/types';
 
@@ -46,7 +44,7 @@ export interface CustomEquationEditorProps {
 
 const NEW_METRIC = {
   name: 'A',
-  aggType: Aggregators.COUNT as CustomMetricAggTypes,
+  aggType: Aggregators.COUNT as Aggregators,
 };
 const MAX_VARIABLES = 26;
 const CHAR_CODE_FOR_A = 65;
@@ -112,14 +110,12 @@ export function CustomEquationEditor({
   const disableAdd = customMetrics?.length === MAX_VARIABLES;
   const disableDelete = customMetrics?.length === 1;
 
-  const filteredAggregationTypes = omit(aggregationTypes, OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS);
-
   const metricRows = customMetrics?.map((row) => (
     <MetricRowWithAgg
       key={row.name}
       name={row.name}
       aggType={row.aggType}
-      aggregationTypes={filteredAggregationTypes}
+      aggregationTypes={aggregationTypes}
       field={row.field}
       filter={row.filter}
       fields={fields}

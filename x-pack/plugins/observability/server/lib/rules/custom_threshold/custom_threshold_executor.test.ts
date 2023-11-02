@@ -21,6 +21,7 @@ import { CustomThresholdAlertContext } from './types';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { CUSTOM_AGGREGATOR } from '../../../../common/custom_threshold_rule/constants';
 import {
   Aggregators,
   Comparator,
@@ -1193,136 +1194,6 @@ describe('The metric threshold alert type', () => {
       });
     });
   });
-  describe('querying with the p99 aggregator', () => {
-    afterAll(() => clearInstances());
-    const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
-      executor({
-        ...mockOptions,
-        services,
-        params: {
-          ...mockOptions.params,
-          criteria: [
-            {
-              ...customThresholdNonCountCriterion,
-              comparator,
-              threshold,
-              aggType: Aggregators.P99,
-              metrics: [
-                {
-                  aggType: Aggregators.AVERAGE,
-                  name: 'A',
-                  field: 'test.metric.2',
-                },
-              ],
-            },
-          ],
-        },
-      });
-    test('alerts based on the p99 values', async () => {
-      setEvaluationResults([
-        {
-          '*': {
-            ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
-            threshold: [1],
-            metrics: [
-              {
-                aggType: Aggregators.AVERAGE,
-                name: 'A',
-                field: 'test.metric.2',
-              },
-            ],
-            currentValue: 3,
-            timestamp: new Date().toISOString(),
-            shouldFire: true,
-            isNoData: false,
-            bucketKey: { groupBy0: '*' },
-          },
-        },
-      ]);
-      await execute(Comparator.GT, [1]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setEvaluationResults([
-        {
-          '*': {
-            ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
-            threshold: [1],
-            metrics: [
-              {
-                aggType: Aggregators.AVERAGE,
-                name: 'A',
-                field: 'test.metric.2',
-              },
-            ],
-            currentValue: 3,
-            timestamp: new Date().toISOString(),
-            shouldFire: false,
-            isNoData: false,
-            bucketKey: { groupBy0: '*' },
-          },
-        },
-      ]);
-      await execute(Comparator.LT, [1]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-    });
-  });
-  describe('querying with the p95 aggregator', () => {
-    afterAll(() => clearInstances());
-    const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
-      executor({
-        ...mockOptions,
-        services,
-        params: {
-          ...mockOptions.params,
-          sourceId,
-          criteria: [
-            {
-              ...customThresholdNonCountCriterion,
-              comparator,
-              threshold,
-              aggType: Aggregators.P95,
-            },
-          ],
-        },
-      });
-    test('alerts based on the p95 values', async () => {
-      setEvaluationResults([
-        {
-          '*': {
-            ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
-            threshold: [0.25],
-            currentValue: 1.0,
-            timestamp: new Date().toISOString(),
-            shouldFire: true,
-            isNoData: false,
-            bucketKey: { groupBy0: '*' },
-          },
-        },
-      ]);
-      await execute(Comparator.GT, [0.25]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setEvaluationResults([
-        {
-          '*': {
-            ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
-            threshold: [0.95],
-            currentValue: 1.0,
-            timestamp: new Date().toISOString(),
-            shouldFire: false,
-            isNoData: false,
-            bucketKey: { groupBy0: '*' },
-          },
-        },
-      ]);
-      await execute(Comparator.LT, [0.95]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-    });
-  });
   describe("querying a metric that hasn't reported data", () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -2011,7 +1882,7 @@ declare global {
 }
 
 const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
-  aggType: Aggregators.CUSTOM,
+  aggType: CUSTOM_AGGREGATOR,
   comparator: Comparator.GT,
   metrics: [
     {
@@ -2026,7 +1897,7 @@ const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
 };
 
 const customThresholdCountCriterion: CustomMetricExpressionParams = {
-  aggType: Aggregators.CUSTOM,
+  aggType: CUSTOM_AGGREGATOR,
   comparator: Comparator.GT,
   metrics: [
     {

@@ -8,7 +8,11 @@
 import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
-import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
+import {
+  Aggregators,
+  AggType,
+  CustomThresholdExpressionMetric,
+} from '../../../../common/custom_threshold_rule/types';
 import {
   ExpressionOptions,
   ExpressionTimestampsRT,
@@ -48,7 +52,7 @@ export const useExpressionChartData = (
           equation: expression.equation,
         },
       ],
-      aggregation: expression.aggType || 'avg',
+      aggregation: expression.aggType || 'custom',
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -82,14 +86,14 @@ const mapCustomThresholdMetricToMetricsExplorerMetric = (
   if (metric.aggType === 'count') {
     return {
       name: metric.name,
-      aggregation: 'count',
+      aggregation: Aggregators.COUNT,
       filter: metric.filter,
     };
   }
 
   return {
     name: metric.name,
-    aggregation: metric.aggType,
+    aggregation: metric.aggType as AggType,
     field: metric.field,
   };
 };

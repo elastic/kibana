@@ -13,3 +13,5 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
   'count',
   'sum',
 ] as const;
+
+export const CUSTOM_AGGREGATOR = 'custom';

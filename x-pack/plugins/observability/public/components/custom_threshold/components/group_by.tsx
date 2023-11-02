@@ -26,7 +26,6 @@ interface Props {
 }
 
 export function GroupBy({ options, onChange, fields, errorOptions, ...rest }: Props) {
-  console.log('options:', options);
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
       const groupBy = selectedOptions.map((option) => option.label);

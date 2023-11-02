@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import { CUSTOM_AGGREGATOR } from '../../../../../common/custom_threshold_rule/constants';
 import {
   Comparator,
   Aggregators,
   CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
-import moment from 'moment';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
@@ -22,7 +23,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
         field: 'system.is.a.good.puppy.dog',
       },
     ],
-    aggType: Aggregators.CUSTOM,
+    aggType: CUSTOM_AGGREGATOR,
     timeUnit: 'm',
     timeSize: 1,
     threshold: [1],

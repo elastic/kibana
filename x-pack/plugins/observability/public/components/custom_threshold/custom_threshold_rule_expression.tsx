@@ -36,6 +36,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
+import { CUSTOM_AGGREGATOR } from '../../../common/custom_threshold_rule/constants';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
@@ -50,8 +51,8 @@ type Props = Omit<
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
-export const defaultExpression = {
-  aggType: Aggregators.CUSTOM,
+export const defaultExpression: MetricExpression = {
+  aggType: CUSTOM_AGGREGATOR,
   comparator: Comparator.GT,
   metrics: [
     {
@@ -62,7 +63,7 @@ export const defaultExpression = {
   threshold: [1000],
   timeSize: 1,
   timeUnit: 'm',
-} as MetricExpression;
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {

@@ -9,6 +9,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { CUSTOM_AGGREGATOR } from '../../../../common/custom_threshold_rule/constants';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
@@ -56,7 +57,7 @@ describe('ExpressionRow', () => {
 
   it('should display thresholds as a percentage for pct metrics', async () => {
     const expression: MetricExpression = {
-      aggType: Aggregators.CUSTOM,
+      aggType: CUSTOM_AGGREGATOR,
       comparator: Comparator.GT,
       metrics: [
         {
@@ -82,7 +83,7 @@ describe('ExpressionRow', () => {
 
   it('should display thresholds as a decimal for all other metrics', async () => {
     const expression = {
-      aggType: Aggregators.CUSTOM,
+      aggType: CUSTOM_AGGREGATOR,
       comparator: Comparator.GT,
       metrics: [
         {

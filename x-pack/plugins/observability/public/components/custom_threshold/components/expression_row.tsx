@@ -24,8 +24,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
-import { AGGREGATION_TYPES, MetricExpression } from '../types';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
+import { MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
 import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
@@ -236,7 +236,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     ),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'histogram'],
-    value: AGGREGATION_TYPES.AVERAGE,
+    value: Aggregators.AVERAGE,
   },
   max: {
     text: i18n.translate(
@@ -247,7 +247,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     ),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date', 'histogram'],
-    value: AGGREGATION_TYPES.MAX,
+    value: Aggregators.MAX,
   },
   min: {
     text: i18n.translate(
@@ -258,7 +258,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     ),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date', 'histogram'],
-    value: AGGREGATION_TYPES.MIN,
+    value: Aggregators.MIN,
   },
   cardinality: {
     text: i18n.translate(
@@ -268,7 +268,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
       }
     ),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.CARDINALITY,
+    value: Aggregators.CARDINALITY,
     validNormalizedTypes: ['number', 'string', 'ip', 'date'],
   },
   count: {
@@ -279,7 +279,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
       }
     ),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.COUNT,
+    value: Aggregators.COUNT,
     validNormalizedTypes: ['number'],
   },
   sum: {
@@ -290,13 +290,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
       }
     ),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.SUM,
-    validNormalizedTypes: ['number', 'histogram'],
-  },
-  custom: {
-    text: CUSTOM_EQUATION,
-    fieldRequired: false,
-    value: AGGREGATION_TYPES.CUSTOM,
+    value: Aggregators.SUM,
     validNormalizedTypes: ['number', 'histogram'],
   },
 };

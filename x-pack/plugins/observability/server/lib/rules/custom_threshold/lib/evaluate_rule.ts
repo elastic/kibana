@@ -49,12 +49,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const interval = `${criterion.timeSize}${criterion.timeUnit}`;
       const intervalAsSeconds = getIntervalInSeconds(interval);
       const intervalAsMS = intervalAsSeconds * 1000;
-      const calculatedTimerange = createTimerange(
-        intervalAsMS,
-        criterion.aggType,
-        timeframe,
-        lastPeriodEnd
-      );
+      const calculatedTimerange = createTimerange(intervalAsMS, timeframe, lastPeriodEnd);
 
       const currentValues = await getData(
         esClient,

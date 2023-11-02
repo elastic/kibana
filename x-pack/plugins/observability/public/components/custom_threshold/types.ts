@@ -27,6 +27,7 @@ import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   CustomMetricExpressionParams,
   BaseMetricExpressionParams,
+  aggType,
 } from '../../../common/custom_threshold_rule/types';
 import { ObservabilityPublicStart } from '../../plugin';
 
@@ -38,33 +39,6 @@ export type MetricExpression = Omit<CustomMetricExpressionParams, 'timeSize' | '
   timeSize?: BaseMetricExpressionParams['timeSize'];
   timeUnit?: BaseMetricExpressionParams['timeUnit'];
 };
-
-export enum AGGREGATION_TYPES {
-  COUNT = 'count',
-  AVERAGE = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
-  RATE = 'rate',
-  CARDINALITY = 'cardinality',
-  P95 = 'p95',
-  P99 = 'p99',
-  CUSTOM = 'custom',
-}
-
-export interface CustomThresholdAlertParams {
-  criteria?: MetricExpression[];
-  groupBy?: string | string[];
-  filterQuery?: string;
-  sourceId?: string;
-}
-
-export interface ExpressionChartRow {
-  timestamp: number;
-  value: number;
-}
-
-export type ExpressionChartSeries = ExpressionChartRow[][];
 
 export interface TimeRange {
   from?: string;
@@ -90,8 +64,6 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
-  // TODO:: check if needed => https://github.com/elastic/kibana/issues/159340
-  // ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   osquery?: unknown; // OsqueryPluginStart;
@@ -127,14 +99,6 @@ export type ExpressionTimestampsRT = rt.TypeOf<typeof expressionTimestampsRT>;
 /*
  * Expression options
  */
-const aggType = rt.union([
-  rt.literal('count'),
-  rt.literal('avg'),
-  rt.literal('sum'),
-  rt.literal('min'),
-  rt.literal('max'),
-  rt.literal('cardinality'),
-]);
 export const metricsExplorerMetricRT = rt.intersection([
   rt.type({
     name: rt.string,
@@ -170,7 +134,6 @@ export const expressionOptionsRT = rt.intersection([
   }),
 ]);
 
-export type AggType = rt.TypeOf<typeof aggType>;
 export type MetricsExplorerMetricRT = rt.TypeOf<typeof metricsExplorerMetricRT>;
 export type ExpressionOptions = rt.TypeOf<typeof expressionOptionsRT>;
 /*
@@ -180,8 +143,6 @@ export type ExpressionOptions = rt.TypeOf<typeof expressionOptionsRT>;
 /*
  * Metrics explorer types
  */
-export const OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS = ['custom', 'rate', 'p95', 'p99'];
-
 export const timeRangeRT = rt.type({
   from: rt.number,
   to: rt.number,
@@ -233,9 +194,7 @@ export const metricsExplorerResponseRT = rt.type({
 });
 
 export type MetricsExplorerRow = rt.TypeOf<typeof metricsExplorerRowRT>;
-
 export type MetricsExplorerSeries = rt.TypeOf<typeof metricsExplorerSeriesRT>;
-
 export type MetricsExplorerResponse = rt.TypeOf<typeof metricsExplorerResponseRT>;
 /*
  * End of metrics explorer types

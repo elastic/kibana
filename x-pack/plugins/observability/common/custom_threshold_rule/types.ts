@@ -8,6 +8,7 @@
 import * as rt from 'io-ts';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { TimeUnitChar } from '../utils/formatters/duration';
+import { CUSTOM_AGGREGATOR } from './constants';
 
 type DeepPartialArray<T> = Array<DeepPartial<T>>;
 
@@ -84,22 +85,15 @@ export enum Aggregators {
   SUM = 'sum',
   MIN = 'min',
   MAX = 'max',
-  RATE = 'rate',
   CARDINALITY = 'cardinality',
-  P95 = 'p95',
-  P99 = 'p99',
-  CUSTOM = 'custom',
 }
+export const aggType = fromEnum('Aggregators', Aggregators);
+export type AggType = rt.TypeOf<typeof aggType>;
 
 export enum MetricsExplorerChartType {
   line = 'line',
   area = 'area',
   bar = 'bar',
-}
-
-export enum InfraRuleType {
-  MetricThreshold = 'metrics.alert.threshold',
-  InventoryThreshold = 'metrics.alert.inventory.threshold',
 }
 
 export enum AlertStates {
@@ -132,38 +126,21 @@ export interface BaseMetricExpressionParams {
   warningThreshold?: number[];
 }
 
-export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Exclude<Aggregators, [Aggregators.COUNT, Aggregators.CUSTOM]>;
-  metric: string;
-}
-
-export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Aggregators.COUNT;
-}
-
-export type CustomMetricAggTypes = Exclude<
-  Aggregators,
-  Aggregators.CUSTOM | Aggregators.RATE | Aggregators.P95 | Aggregators.P99
->;
-
 export interface CustomThresholdExpressionMetric {
   name: string;
-  aggType: CustomMetricAggTypes;
+  aggType: AggType;
   field?: string;
   filter?: string;
 }
 
 export interface CustomMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Aggregators.CUSTOM;
+  aggType: typeof CUSTOM_AGGREGATOR;
   metrics: CustomThresholdExpressionMetric[];
   equation?: string;
   label?: string;
 }
 
-export type MetricExpressionParams =
-  | NonCountMetricExpressionParams
-  | CountMetricExpressionParams
-  | CustomMetricExpressionParams;
+export type MetricExpressionParams = CustomMetricExpressionParams;
 
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 
@@ -180,4 +157,24 @@ export enum InfraFormatterType {
   bytes = 'bytes',
   bits = 'bits',
   percent = 'percent',
+}
+
+/*
+ * Utils
+ *
+ * This utility function can be used to turn a TypeScript enum into a io-ts codec.
+ */
+export function fromEnum<EnumType extends string>(
+  enumName: string,
+  theEnum: Record<string, EnumType>
+): rt.Type<EnumType, EnumType, unknown> {
+  const isEnumValue = (input: unknown): input is EnumType =>
+    Object.values<unknown>(theEnum).includes(input);
+
+  return new rt.Type<EnumType>(
+    enumName,
+    isEnumValue,
+    (input, context) => (isEnumValue(input) ? rt.success(input) : rt.failure(input, context)),
+    rt.identity
+  );
 }
