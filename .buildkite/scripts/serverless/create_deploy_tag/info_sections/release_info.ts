@@ -7,7 +7,7 @@
  */
 
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
-import { exec, octokit, SELECTED_COMMIT_META_KEY } from '../shared';
+import { buildkite, octokit, SELECTED_COMMIT_META_KEY } from '../shared';
 
 type GithubCommitType = RestEndpointMethodTypes['repos']['getCommit']['response']['data'];
 
@@ -42,7 +42,7 @@ export async function getCurrentQARelease() {
 }
 
 export function getSelectedCommitHash() {
-  const commitHash = exec(`buildkite-agent meta-data get "${SELECTED_COMMIT_META_KEY}"`);
+  const commitHash = buildkite.getMetadata(SELECTED_COMMIT_META_KEY);
   if (!commitHash) {
     throw new Error(
       `Could not find selected commit (by '${SELECTED_COMMIT_META_KEY}' in buildkite meta-data)`

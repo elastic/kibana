@@ -25,11 +25,11 @@ const PREPARED_RESPONSES_PATH =
  * @param id - an optional ID, used to distinguish between different instances of exec.
  */
 const getExec = (fake = false, id: string = randomId()) => {
-  return fake ? makePreparedExec(id) : exec;
+  return fake ? makeMockExec(id) : exec;
 };
 
 /**
- * Lazy getter for a storage for calls to the prepared exec.
+ * Lazy getter for a storage for calls to the mock exec.
  */
 const getCallStorage: () => Record<string, Array<{ command: string; opts: any }>> = (() => {
   let callStorage: Record<string, Array<{ command: string; opts: any }>> | null = null;
@@ -74,12 +74,12 @@ const loadFakeResponses = (() => {
   };
 })();
 
-const makePreparedExec = (id: string) => {
-  console.warn("--- Using mock/prepared exec, don't use this on CI. ---");
+const makeMockExec = (id: string) => {
+  console.warn("--- Using mock exec, don't use this on CI. ---");
   const callStorage = getCallStorage();
   const calls = callStorage[id];
 
-  const preparedExecInstance = (command: string, opts: ExecSyncOptions = {}): string | null => {
+  const mockExecInstance = (command: string, opts: ExecSyncOptions = {}): string | null => {
     const responses = loadFakeResponses();
     calls.push({ command, opts });
 
@@ -96,10 +96,10 @@ const makePreparedExec = (id: string) => {
     }
   };
 
-  preparedExecInstance.id = id;
-  preparedExecInstance.calls = calls;
+  mockExecInstance.id = id;
+  mockExecInstance.calls = calls;
 
-  return preparedExecInstance;
+  return mockExecInstance;
 };
 
 const exec = (command: string, opts: any = {}) => {

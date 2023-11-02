@@ -3,8 +3,6 @@
 agents:
  queue: kibana-default
 
-# TODO: Replace inline buildkite-agent commands with a central script that manages contexts/banners better
-
 steps:
   - label: "Select target commit to deploy"
     commands:
