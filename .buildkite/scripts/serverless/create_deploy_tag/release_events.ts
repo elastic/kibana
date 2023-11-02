@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildkite } from './shared';
+import { buildkite, COMMIT_INFO_CTX } from './shared';
 
 /**
  * For debugging
@@ -53,6 +53,9 @@ const states: Record<
     name: 'Starting state',
     description: 'No description',
     display: false,
+    post: async () => {
+      buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Release candidate info</h4>`);
+    },
   },
   initialize: {
     name: 'Initializing',

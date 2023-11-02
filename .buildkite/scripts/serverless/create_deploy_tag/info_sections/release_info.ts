@@ -11,7 +11,7 @@ import { exec, octokit, SELECTED_COMMIT_META_KEY } from '../shared';
 
 type GithubCommitType = RestEndpointMethodTypes['repos']['getCommit']['response']['data'];
 
-const KIBANA_PR_BASE = 'https://github.com/elastic/kibana/pulls';
+const KIBANA_PR_BASE = 'https://github.com/elastic/kibana/pull';
 
 export interface GitCommitExtract {
   date: string | undefined;

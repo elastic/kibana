@@ -11,6 +11,8 @@ import { BuildkiteClient, getGithubClient } from '#pipeline-utils';
 
 const SELECTED_COMMIT_META_KEY = 'selected-commit-hash';
 
+const COMMIT_INFO_CTX = 'commit-info';
+
 const octokit = getGithubClient();
 const exec = getExec(!process.env.CI);
 
@@ -36,4 +38,4 @@ const buildStateToEmoji = (state: string, useRealEmoji = false) => {
   }
 };
 
-export { octokit, exec, buildkite, buildStateToEmoji, SELECTED_COMMIT_META_KEY };
+export { octokit, exec, buildkite, buildStateToEmoji, SELECTED_COMMIT_META_KEY, COMMIT_INFO_CTX };
