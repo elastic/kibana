@@ -311,25 +311,23 @@ export class TOCEntry extends Component<Props, State> {
 
     const errors = this._getLayerErrors();
 
-    return this.state.hasLegendDetails || errors.length
-      ? (
-          <div
-            className="mapTocEntry__layerDetails"
-            data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
-          >
-            {errors.length
-              ? errors.map(({ title, error }, index) => (
-                  <div key={index}>
-                    <EuiCallOut color="danger" size="s" title={title}>
-                      {error}
-                    </EuiCallOut>
-                    <EuiSpacer size="m" />
-                  </div>
-                ))
-              : this.props.layer.renderLegendDetails()}
-          </div>
-        )
-      : null;
+    return this.state.hasLegendDetails || errors.length ? (
+      <div
+        className="mapTocEntry__layerDetails"
+        data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
+      >
+        {errors.length
+          ? errors.map(({ title, error }, index) => (
+              <div key={index}>
+                <EuiCallOut color="danger" size="s" title={title}>
+                  {error}
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </div>
+            ))
+          : this.props.layer.renderLegendDetails()}
+      </div>
+    ) : null;
   };
 
   _hightlightAsSelectedLayer() {

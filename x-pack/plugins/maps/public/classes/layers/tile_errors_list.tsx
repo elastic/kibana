@@ -17,13 +17,15 @@ export function TileErrorsList(props: Props) {
   const [selectedTileError, setSelectedTileError] = useState<TileError | undefined>(undefined);
 
   useEffect(() => {
-    const hasSelectedTileError = selectedTileError && props.tileErrors.some(({tileKey}) => {
-      return tileKey === selectedTileError.tileKey;
-    });
+    const hasSelectedTileError =
+      selectedTileError &&
+      props.tileErrors.some(({ tileKey }) => {
+        return tileKey === selectedTileError.tileKey;
+      });
     if (!hasSelectedTileError) {
       setSelectedTileError(props.tileErrors?.[0]);
     }
-  }, [props.tileErrors, selectedTileError])
+  }, [props.tileErrors, selectedTileError]);
 
   return (
     <>
@@ -33,7 +35,7 @@ export function TileErrorsList(props: Props) {
             <EuiTab
               key={tileError.tileKey}
               onClick={() => {
-                const nextTileError = props.tileErrors.find(({tileKey}) => {
+                const nextTileError = props.tileErrors.find(({ tileKey }) => {
                   return tileKey === tileError.tileKey;
                 });
                 setSelectedTileError(nextTileError);
