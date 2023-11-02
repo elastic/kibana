@@ -8,6 +8,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ALL_VALUE, SLOResponse, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { SLO_RESOURCES_VERSION } from '../../../../common/constants';
 
 export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
@@ -555,7 +556,7 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
       adHocDataViews: {
         '32ca1ad4-81c0-4daf-b9d1-07118044bdc5': {
           id: '32ca1ad4-81c0-4daf-b9d1-07118044bdc5',
-          title: '.slo-observability.sli-v3.*',
+          title: `.slo-observability.sli-${SLO_RESOURCES_VERSION}.*`,
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},

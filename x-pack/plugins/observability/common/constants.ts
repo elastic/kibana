@@ -62,3 +62,6 @@ export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[
   AlertConsumers.LOGS,
   AlertConsumers.OBSERVABILITY,
 ];
+
+export const SLO_RESOURCES_VERSION = 3;
+export const SLO_SUMMARY_TRANSFORMS_VERSION = 4;
