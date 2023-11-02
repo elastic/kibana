@@ -152,7 +152,6 @@ export const WorkspacePanel = ({
 
   const [{ dragging }] = useDragDropContext();
 
-
   const renderDeps = useRef<{
     datasourceMap: DatasourceMap;
     datasourceStates: DatasourceStates;
