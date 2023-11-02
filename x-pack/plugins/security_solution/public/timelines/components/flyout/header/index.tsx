@@ -485,7 +485,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
                   <EuiText>
                     <FormattedMessage
                       id="xpack.securitySolution.timeline.flyout.saveTour.description"
-                      defaultMessage="Use the {saveButton} button to save the timeline."
+                      defaultMessage="Click {saveButton} to manually save changes."
                       values={{
                         saveButton: <EuiCode>{SAVE}</EuiCode>,
                       }}
