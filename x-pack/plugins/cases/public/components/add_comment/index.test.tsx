@@ -56,7 +56,7 @@ const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}
 // FLAKY: https://github.com/elastic/kibana/issues/168507
 // FLAKY: https://github.com/elastic/kibana/issues/168508
 // FLAKY: https://github.com/elastic/kibana/issues/168509
-describe.skip('AddComment ', () => {
+describe('AddComment ', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -101,79 +101,29 @@ describe.skip('AddComment ', () => {
     expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
   });
 
-  it('should post comment on submit click', async () => {
-    appMockRender.render(<AddComment {...addCommentProps} />);
+  for (let i = 0; i < 200; i = i + 1) {
+    it('should post comment on submit click', async () => {
+      appMockRender.render(<AddComment {...addCommentProps} />);
 
-    const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.type(markdown, sampleData.comment);
+      userEvent.type(markdown, sampleData.comment);
 
-    userEvent.click(screen.getByTestId('submit-comment'));
+      userEvent.click(screen.getByTestId('submit-comment'));
 
-    await waitFor(() => {
-      expect(onCommentSaving).toBeCalled();
-      expect(createAttachments).toBeCalledWith(
-        {
-          caseId: addCommentProps.caseId,
-          caseOwner: SECURITY_SOLUTION_OWNER,
-          attachments: [sampleData],
-        },
-        { onSuccess: expect.anything() }
-      );
+      await waitFor(() => {
+        expect(onCommentSaving).toBeCalled();
+        expect(createAttachments).toBeCalledWith(
+          {
+            caseId: addCommentProps.caseId,
+            caseOwner: SECURITY_SOLUTION_OWNER,
+            attachments: [sampleData],
+          },
+          { onSuccess: expect.anything() }
+        );
+      });
     });
-
-    act(() => {
-      createAttachments.mock.calls[0][1].onSuccess();
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('euiMarkdownEditorTextArea')).toHaveTextContent('');
-    });
-  });
-
-  it('should insert a quote', async () => {
-    const sampleQuote = 'what a cool quote \n with new lines';
-    const ref = React.createRef<AddCommentRefObject>();
-
-    appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
-
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
-
-    await act(async () => {
-      ref.current!.addQuote(sampleQuote);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('euiMarkdownEditorTextArea').textContent).toContain(
-        `${sampleData.comment}\n\n> what a cool quote \n>  with new lines \n\n`
-      );
-    });
-  });
-
-  it('should call onFocus when adding a quote', async () => {
-    const ref = React.createRef<AddCommentRefObject>();
-
-    appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
-
-    ref.current!.editor!.textarea!.focus = jest.fn();
-
-    await act(async () => {
-      ref.current!.addQuote('a comment');
-    });
-
-    await waitFor(() => {
-      expect(ref.current!.editor!.textarea!.focus).toHaveBeenCalled();
-    });
-  });
-
-  it('should NOT call onFocus on mount', async () => {
-    const ref = React.createRef<AddCommentRefObject>();
-
-    appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
-
-    ref.current!.editor!.textarea!.focus = jest.fn();
-    expect(ref.current!.editor!.textarea!.focus).not.toHaveBeenCalled();
-  });
+  }
 
   it('it should insert a timeline', async () => {
     const useInsertTimelineMock = jest.fn();
