@@ -10,7 +10,6 @@ import {
   addToCase,
   checkResults,
   deleteAndConfirm,
-  findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
   selectAllAgents,
@@ -131,9 +130,10 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
     it('user can edit prebuilt saved query under pack', () => {
       preparePack(packName);
-      findAndClickButton('Edit');
+      cy.get('span').contains('Edit').click();
       cy.contains(`Edit ${packName}`);
-      findAndClickButton('Add query');
+      cy.get('span').contains('Add query').click();
+
       cy.contains('Attach next query');
 
       cy.getBySel('savedQuerySelect').click().type('users_elastic{downArrow} {enter}');
