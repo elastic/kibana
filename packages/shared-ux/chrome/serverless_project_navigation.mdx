@@ -545,26 +545,96 @@ Breadcrumbs is a list of links that represent the current navigation path. Proje
 
 Project breadcrumbs are built from 3 sections:
 
-1. **Home link:** 🏠
-2. **Platform navigation:** is automatically controlled by SharedUX services
-3. **Deeper context:** is manually controlled by projects
+1. **Project name**
+2. **Project navigation:** automatically set based on the project's navigation tree and the currently active navigation path
+3. **Deeper context:** manually set by currently active application
 
 ### Project breadcrumbs sections
 
-#### 🏠 Home breadcrumb
+#### Project name breadcrumb
 
-Home breadcrumb is always displayed as the first breadcrumb and leads to what project specifies as home page in `kibana.yml`.
+Project name breadcrumb is always displayed as the first breadcrumb. It displays the project name and opens a popup with links to manage the project and view all projects.
 
-#### Navigation breadcrumbs
+#### Project navigation breadcrumbs
 
-Navigation breadcrumbs are automatically generated based on the navigation tree set for the [side navigation](#left-side-navigation) and the currently active navigation path.
+Project navigation breadcrumbs are automatically generated based on the project's navigation tree set for the [side navigation](#left-side-navigation) and the currently active navigation path.
+
+> **Note**
+> If you have static pages that are accessible from an app and should display breadcrumbs but shouldn't be visible in the sidenav, you can add such pages to the navigation tree with `sideNavStatus: 'hidden'`.
 
 #### Deeper context breadcrumbs
 
-Deeper context breadcrumbs are manually controlled by projects. They are added to the breadcrumbs using the `pluginsStart.serverless.setBreadcrumbs` method.
+Most of the applications are already setting the complete breadcrumb path for stateful Kibana navigation using the `chrome.setBreadcrumbs` API. It is possible to reuse the existing breadcrumbs for deeper context breadcrumbs in the serverless project navigation. For this, apps need to add a deepLinkId to the breadcrumb object. This `deepLinkId` will be used to match and merge the project navigation breadcrumbs with the deeper context breadcrumbs set in `chrome.setBreadcrumbs`.
+
+For example, consider the navigation tree:
+
+````tsx
+<Navigation>
+  <Navigation.Group id="aiops" title="AI Ops">
+    <Navigation.Item id="ml:anomalyexplorer" link="ml:anomalyexplorer" title="Anomaly Explorer" />
+  </Navigation.Group>
+</Navigation>
+```
+
+When on `ml:anomalyexplorer` page, the project navigation breadcrumbs will be:
 
 ```ts
-pluginsStart.serverless.setBreadcrumbs([
+[
+  {
+    text: 'AI Ops'
+  },
+  {
+    text: 'Anomaly Explorer',
+    link: 'ml:anomalyexplorer',
+  },
+];
+```
+
+The ml app sets the stateless Kibana breadcrumbs using `chrome.setBreadcrumbs`:
+
+```ts
+chrome.setBreadcrumbs([
+  {
+    text: 'Kibana',
+  },
+  {
+    text: 'Machine Learning',
+    href: '/app/ml',
+    deepLinkId: 'ml',
+  },
+  {
+    text: 'Anomaly Explorer',
+    link: 'ml:anomalyexplorer',
+    deepLinkId: 'ml:anomalyexplorer',
+  },
+  {
+    text: 'Jobs'
+  }
+])
+```
+
+The resulting project breadcrumbs list will be:
+
+```ts
+[
+  {}, // project name breadcrumb
+  {
+      text: 'AI Ops'
+  },
+  {
+    text: 'Anomaly Explorer',
+    link: 'ml:anomalyexplorer',
+  },
+  {
+      text: 'Jobs'
+  }
+]
+```
+
+Alternatively, the deeper context breadcrumbs can be manually set using the `serverless.setBreadcrumbs` API.
+
+```ts
+serverless.setBreadcrumbs([
   {
     text: 'Deeper Context',
     href: '/some/deeper/context',
@@ -576,7 +646,7 @@ These breadcrumbs are removed when the active navigation path changes.
 
 ### Overriding breadcrumbs
 
-Projects can override navigation breadcrumbs. This will override navigation breadcrumbs, but will keep the Home breadcrumb:
+Apps can override navigation breadcrumbs. This will override navigation breadcrumbs keeping the root "project name" breadcrumb:
 
 ```ts
 pluginsStart.serverless.setBreadcrumbs([b1, b2, b3], { absolute: true });
