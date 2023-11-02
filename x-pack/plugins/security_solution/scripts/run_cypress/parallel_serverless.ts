@@ -21,19 +21,19 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import axios from 'axios';
 import path from 'path';
 import os from 'os';
-import type {
-  SecurityProductTypes,
-  SecurityProductType,
-} from '@kbn/security-solution-serverless/common/config';
 import { renderSummaryTable } from './print_run';
 import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
 
+interface ProductType {
+  product_line: string;
+  product_tier: string;
+}
 
 interface CreateEnvironmentRequestBody {
   name: string;
   region_id: string;
-  product_types: SecurityProductTypes;
+  product_types: ProductType[];
 }
 
 interface Environment {
@@ -99,9 +99,9 @@ async function createEnvironment(
     region_id: DEFAULT_REGION,
   } as CreateEnvironmentRequestBody;
 
-  const productTypes: SecurityProductTypes = [];
+  const productTypes: ProductType[] = [];
   ftrConfig?.productTypes?.forEach((t) => {
-    productTypes.push(t as SecurityProductType);
+    productTypes.push(t as ProductType);
   });
   if (productTypes.length > 0) body.product_types = productTypes;
 
