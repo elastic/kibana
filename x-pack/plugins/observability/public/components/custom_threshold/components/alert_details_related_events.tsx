@@ -136,23 +136,13 @@ export default function AlertDetailsRelatedEvents({
     ruleParams.criteria[0].timeUnit ?? 'minutes'
   );
 
-  const relatedEventsTimeRangeDiff =
-    relatedEventsTimeRangeStart.diff(relatedEventsTimeRangeEnd, 'minutes') > 10;
-
-  const relatedEventsTimeRangeFrom = relatedEventsTimeRangeDiff
-    ? relatedEventsTimeRangeStart.toISOString()
-    : moment(alert.start).subtract(10, 'minutes').toISOString();
-
-  const relatedEventsTimeRangeTo = relatedEventsTimeRangeDiff
-    ? relatedEventsTimeRangeEnd.valueOf() > moment.now()
-      ? moment().toISOString()
-      : relatedEventsTimeRangeEnd.toISOString()
-    : moment(alert.start).add(10, 'minutes').toISOString();
-
   const relatedEventsTimeRange = (): TimeRange => {
     return {
-      from: relatedEventsTimeRangeFrom,
-      to: relatedEventsTimeRangeTo,
+      from: relatedEventsTimeRangeStart.toISOString(),
+      to:
+        relatedEventsTimeRangeEnd.valueOf() > moment.now()
+          ? moment().toISOString()
+          : relatedEventsTimeRangeEnd.toISOString(),
       mode: 'absolute',
     };
   };
