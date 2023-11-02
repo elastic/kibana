@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ML_ANOMALY_DETECTION_ID } from '@kbn/rule-data-utils';
 import { JobsHealthTests } from '../types/alerts';
 
 export const ML_ALERT_TYPES = {
-  ANOMALY_DETECTION: 'xpack.ml.anomaly_detection_alert',
+  ANOMALY_DETECTION: ML_ANOMALY_DETECTION_ID,
   AD_JOBS_HEALTH: 'xpack.ml.anomaly_detection_jobs_health',
 } as const;
 
