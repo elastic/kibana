@@ -28,8 +28,13 @@ const renderAssigneesPopover = ({
 }: {
   assignedUserIds: string[];
   isPopoverOpen: boolean;
-}) =>
-  render(
+}) => {
+  const assignedProfiles = mockUserProfiles.filter((user) => assignedUserIds.includes(user.uid));
+  (useGetUserProfiles as jest.Mock).mockReturnValue({
+    loading: false,
+    userProfiles: assignedProfiles,
+  });
+  return render(
     <TestProviders>
       <AssigneesPopover
         assignedUserIds={assignedUserIds}
@@ -39,14 +44,11 @@ const renderAssigneesPopover = ({
       />
     </TestProviders>
   );
+};
 
 describe('<AssigneesPopover />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useGetUserProfiles as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: mockUserProfiles,
-    });
     (useSuggestUsers as jest.Mock).mockReturnValue({
       loading: false,
       userProfiles: mockUserProfiles,

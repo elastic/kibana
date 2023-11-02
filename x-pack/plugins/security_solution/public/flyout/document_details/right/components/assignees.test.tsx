@@ -16,12 +16,12 @@ import { useSuggestUsers } from '../../../../common/components/user_profiles/use
 import type { SetAlertAssigneesFunc } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { TestProviders } from '../../../../common/mock';
+import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../../common/components/assignees/test_ids';
 import {
-  ASSIGNEES_APPLY_BUTTON_TEST_ID,
   USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,
   USER_AVATAR_ITEM_TEST_ID,
-} from '../../../../common/components/assignees/test_ids';
+} from '../../../../common/components/user_profiles/test_ids';
 
 jest.mock('../../../../common/components/user_profiles/use_get_user_profiles');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
@@ -37,8 +37,13 @@ const renderAssignees = (
   eventId = 'event-1',
   alertAssignees = ['user-id-1'],
   onAssigneesUpdated = jest.fn()
-) =>
-  render(
+) => {
+  const assignedProfiles = mockUserProfiles.filter((user) => alertAssignees.includes(user.uid));
+  (useGetUserProfiles as jest.Mock).mockReturnValue({
+    loading: false,
+    userProfiles: assignedProfiles,
+  });
+  return render(
     <TestProviders>
       <Assignees
         eventId={eventId}
@@ -47,16 +52,13 @@ const renderAssignees = (
       />
     </TestProviders>
   );
+};
 
 describe('<Assignees />', () => {
   let setAlertAssigneesMock: jest.Mocked<SetAlertAssigneesFunc>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useGetUserProfiles as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: mockUserProfiles,
-    });
     (useSuggestUsers as jest.Mock).mockReturnValue({
       loading: false,
       userProfiles: mockUserProfiles,
