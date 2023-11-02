@@ -13,7 +13,7 @@ import { keys } from '@elastic/eui';
 import {
   getExitFullScreenButtonServicesMock,
   getExitFullScreenButtonKibanaDependenciesMock,
-} from '@kbn/shared-ux-button-exit-full-screen-mocks';
+} from '../mocks';
 
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { ExitFullScreenButtonKibanaProvider, ExitFullScreenButtonProvider } from './services';

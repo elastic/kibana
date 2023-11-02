@@ -9,3 +9,9 @@
 export { ExitFullScreenButtonKibanaProvider, ExitFullScreenButtonProvider } from './src/services';
 export { ExitFullScreenButton as ExitFullScreenButtonComponent } from './src/exit_full_screen_button.component';
 export { ExitFullScreenButton } from './src/exit_full_screen_button';
+export type {
+  ExitFullScreenButtonProps,
+  ExitFullScreenButtonKibanaDependencies,
+  ExitFullScreenButtonServices,
+  ExitFullScreenButtonComponentProps,
+} from './types';

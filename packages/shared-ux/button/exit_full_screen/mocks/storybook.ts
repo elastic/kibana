@@ -8,11 +8,8 @@
 
 import { action } from '@storybook/addon-actions';
 import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
-import type {
-  ExitFullScreenButtonProps as Props,
-  ExitFullScreenButtonServices,
-} from '@kbn/shared-ux-button-exit-full-screen-types';
 import { of } from 'rxjs';
+import type { ExitFullScreenButtonProps as Props, ExitFullScreenButtonServices } from '../types';
 
 type PropArguments = Pick<Props, 'toggleChrome'>;
 

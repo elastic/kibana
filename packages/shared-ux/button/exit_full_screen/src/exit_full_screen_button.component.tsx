@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import cx from 'classnames';
 
-import type { ExitFullScreenButtonComponentProps as Props } from '@kbn/shared-ux-button-exit-full-screen-types';
+import type { ExitFullScreenButtonComponentProps as Props } from '../types';
 
 import './exit_full_screen_button.scss';
 
