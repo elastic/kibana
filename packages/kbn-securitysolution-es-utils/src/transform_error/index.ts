@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import { ZodError } from 'zod';
 import { BadRequestError } from '../bad_request_error';
 
@@ -60,15 +61,3 @@ export const transformError = (err: Error & Partial<errors.ResponseError>): Outp
     }
   }
 };
-
-export function stringifyZodError(err: ZodError<any>) {
-  return err.issues
-    .map((issue) => {
-      // If the path is empty, the error is for the root object
-      if (issue.path.length === 0) {
-        return issue.message;
-      }
-      return `${issue.path.join('.')}: ${issue.message}`;
-    })
-    .join(', ');
-}

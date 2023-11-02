@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { ReactNode } from 'react';
+import { Index } from '../types';
+
 export enum Section {
   Indices = 'indices',
   DataStreams = 'data_streams',
@@ -18,4 +21,17 @@ export enum IndexDetailsSection {
   Mappings = 'mappings',
   Settings = 'settings',
   Stats = 'stats',
+}
+
+export type IndexDetailsTabIds = IndexDetailsSection | string;
+
+export interface IndexDetailsTab {
+  // a unique key to identify the tab
+  id: IndexDetailsTabIds;
+  // a text that is displayed on the tab label, usually a Formatted message component
+  name: ReactNode;
+  // a function that renders the content of the tab
+  renderTabContent: (indexName: string, index: Index) => ReactNode;
+  // a number to specify the order of the tabs
+  order: number;
 }

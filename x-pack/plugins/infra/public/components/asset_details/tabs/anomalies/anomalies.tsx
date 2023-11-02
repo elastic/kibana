@@ -5,22 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useRef } from 'react';
 import { AnomaliesTable } from '../../../../pages/metrics/inventory_view/components/ml/anomaly_detection/anomalies_table/anomalies_table';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { useIntersectingState } from '../../hooks/use_intersecting_state';
+import { useRequestObservable } from '../../hooks/use_request_observable';
 
 export const Anomalies = () => {
-  const { dateRange } = useDateRangeProviderContext();
+  const ref = useRef<HTMLDivElement>(null);
+  const { request$ } = useRequestObservable();
+  const { getParsedDateRange } = useDatePickerContext();
   const { asset, overrides } = useAssetDetailsRenderPropsContext();
   const { onClose = () => {} } = overrides?.anomalies ?? {};
 
+  const parsedDateRange = useMemo(() => getParsedDateRange(), [getParsedDateRange]);
+  const state = useIntersectingState(ref, {
+    parsedDateRange,
+  });
+
   return (
-    <AnomaliesTable
-      closeFlyout={onClose}
-      hostName={asset.name}
-      dateRange={dateRange}
-      hideDatePicker
-    />
+    <div ref={ref}>
+      <AnomaliesTable
+        closeFlyout={onClose}
+        hostName={asset.name}
+        dateRange={state.parsedDateRange}
+        hideDatePicker
+        request$={request$}
+      />
+    </div>
   );
 };

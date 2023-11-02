@@ -35,6 +35,8 @@ export const paths = {
     sloCreateWithEncodedForm: (encodedParams: string) =>
       `${OBSERVABILITY_BASE_PATH}${SLO_CREATE_PATH}?_a=${encodedParams}`,
     sloEdit: (sloId: string) => `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}`,
+    sloEditWithEncodedForm: (sloId: string, encodedParams: string) =>
+      `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}?_a=${encodedParams}`,
     sloDetails: (sloId: string, instanceId?: string) =>
       !!instanceId
         ? `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}?instanceId=${encodeURI(

@@ -135,6 +135,10 @@ export interface DiscoverAppState {
    */
   rowsPerPage?: number;
   /**
+   * Custom sample size
+   */
+  sampleSize?: number;
+  /**
    * Breakdown field of chart
    */
   breakdownField?: string;
@@ -299,7 +303,7 @@ export function getInitialState(
       ? defaultAppState
       : {
           ...defaultAppState,
-          ...cleanupUrlState(stateStorageURL),
+          ...cleanupUrlState(stateStorageURL, services.uiSettings),
         },
     services.uiSettings
   );
