@@ -107,7 +107,7 @@ export async function getLaunchesByLocation({
       response.aggregations?.timeseries?.buckets.map((bucket) => ({
         x: bucket.key,
         y:
-          response.aggregations?.launches?.byLocation?.buckets[0]?.doc_count ??
+          bucket.launches?.byLocation?.buckets[0]?.doc_count ?? 0
           0,
       })) ?? [],
   };
