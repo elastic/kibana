@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  KNOWN_ESS_ROLE_DEFINITIONS,
-  KNOWN_SERVERLESS_ROLE_DEFINITIONS,
-} from '@kbn/security-solution-plugin/common/test';
-import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import { KNOWN_ESS_ROLE_DEFINITIONS, KNOWN_SERVERLESS_ROLE_DEFINITIONS } from './roles';
+import type { SecurityRoleName } from './roles';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const KNOWN_ROLE_DEFINITIONS = {

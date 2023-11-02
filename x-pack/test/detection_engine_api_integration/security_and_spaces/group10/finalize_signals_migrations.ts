@@ -12,7 +12,7 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from 'x-pack/test/common/services/security_solution/roles';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,

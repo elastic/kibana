@@ -17,7 +17,7 @@ import {
   getCreateExceptionListMinimalSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES } from 'x-pack/test/common/services/security_solution/roles';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
