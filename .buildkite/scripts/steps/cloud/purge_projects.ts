@@ -118,9 +118,7 @@ const projectRequest = axios.create({
   },
 });
 
-try {
-  purgeProjects();
-} catch (e) {
+purgeProjects().catch((e) => {
   console.error(e.toString());
   process.exitCode = 1;
-}
+});
