@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ColumnsFromLocatorFn, SearchSourceFromLocatorFn, TitleFromLocatorFn } from './locator';
 import { DiscoverServerPlugin } from './plugin';
@@ -29,4 +29,6 @@ export interface DiscoverServerPluginStart {
   locator: DiscoverServerPluginLocatorService;
 }
 
-export const plugin = () => new DiscoverServerPlugin();
+export { config } from './config';
+
+export const plugin = (context: PluginInitializerContext) => new DiscoverServerPlugin(context);
