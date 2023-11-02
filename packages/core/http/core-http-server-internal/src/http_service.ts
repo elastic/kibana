@@ -162,7 +162,7 @@ export class HttpService
       deps.executionContext
     );
 
-    registerCoreHandlers(serverContract, config, this.env);
+    registerCoreHandlers(serverContract, config, this.env, this.log);
 
     this.internalSetup = {
       ...serverContract,
