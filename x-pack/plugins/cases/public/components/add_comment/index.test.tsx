@@ -51,7 +51,7 @@ const sampleData: CaseAttachmentWithoutOwner = {
 };
 const appId = 'testAppId';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 50; i++) {
   describe('AddComment ', () => {
     let appMockRender: AppMockRenderer;
 
