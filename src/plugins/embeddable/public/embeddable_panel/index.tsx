@@ -10,7 +10,6 @@ import React from 'react';
 
 import { EmbeddablePanelProps } from './types';
 import { useEmbeddablePanel } from './use_embeddable_panel';
-import { EmbeddableLoadingIndicator } from './embeddable_loading_indicator';
 
 /**
  * Loads and renders an embeddable.
