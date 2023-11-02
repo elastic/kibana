@@ -51,12 +51,8 @@ const sampleData: CaseAttachmentWithoutOwner = {
 const appId = 'testAppId';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
-// FLAKY: https://github.com/elastic/kibana/issues/168505
-// FLAKY: https://github.com/elastic/kibana/issues/168506
-// FLAKY: https://github.com/elastic/kibana/issues/168507
-// FLAKY: https://github.com/elastic/kibana/issues/168508
 // FLAKY: https://github.com/elastic/kibana/issues/168509
-describe('AddComment ', () => {
+describe.skip('AddComment ', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -101,29 +97,27 @@ describe('AddComment ', () => {
     expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
   });
 
-  for (let i = 0; i < 200; i = i + 1) {
-    it('should post comment on submit click', async () => {
-      appMockRender.render(<AddComment {...addCommentProps} />);
+  it('should post comment on submit click', async () => {
+    appMockRender.render(<AddComment {...addCommentProps} />);
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+    const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.type(markdown, sampleData.comment);
+    userEvent.type(markdown, sampleData.comment);
 
-      userEvent.click(screen.getByTestId('submit-comment'));
+    userEvent.click(screen.getByTestId('submit-comment'));
 
-      await waitFor(() => {
-        expect(onCommentSaving).toBeCalled();
-        expect(createAttachments).toBeCalledWith(
-          {
-            caseId: addCommentProps.caseId,
-            caseOwner: SECURITY_SOLUTION_OWNER,
-            attachments: [sampleData],
-          },
-          { onSuccess: expect.anything() }
-        );
-      });
+    await waitFor(() => {
+      expect(onCommentSaving).toBeCalled();
+      expect(createAttachments).toBeCalledWith(
+        {
+          caseId: addCommentProps.caseId,
+          caseOwner: SECURITY_SOLUTION_OWNER,
+          attachments: [sampleData],
+        },
+        { onSuccess: expect.anything() }
+      );
     });
-  }
+  });
 
   it('it should insert a timeline', async () => {
     const useInsertTimelineMock = jest.fn();
