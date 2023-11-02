@@ -39,6 +39,7 @@ export * from './get_open_signals';
 export * from './get_preview_alerts';
 export * from './get_query_all_signals';
 export * from './get_query_signals_rule_id';
+export * from './get_query_signal_ids';
 export * from './get_rule';
 export * from './get_rules_as_ndjson';
 export * from './get_rule_for_signal_testing';
