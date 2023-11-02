@@ -55,7 +55,7 @@ export const validateSelectedPatterns = (
       (pattern) => !dedupeAllDefaultPatterns.includes(pattern)
     );
   }
-  const selectedPatterns =
+  let selectedPatterns =
     // shouldValidateSelectedPatterns is false when upgrading from
     // legacy pre-8.0 timeline index patterns to data view.
     shouldValidateSelectedPatterns &&
@@ -75,6 +75,21 @@ export const validateSelectedPatterns = (
         // but removed from the security data view
         // or its a legacy pre-8.0 timeline
         dedupePatterns;
+  const signalIndexName = state.signalIndexName;
+  switch (id) {
+    case SourcererScopeName.default:
+      selectedPatterns = sortWithExcludesAtEnd(
+        selectedPatterns.filter((index) => index !== signalIndexName)
+      );
+      break;
+    case SourcererScopeName.detections:
+      // set to signalIndexName whether or not it exists yet in the patternList
+      selectedPatterns = signalIndexName != null ? [signalIndexName] : [];
+      break;
+    case SourcererScopeName.timeline:
+      selectedPatterns = sortWithExcludesAtEnd(selectedPatterns);
+      break;
+  }
 
   return {
     [id]: {
