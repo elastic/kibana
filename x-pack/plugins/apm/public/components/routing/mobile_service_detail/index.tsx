@@ -160,10 +160,6 @@ export const mobileServiceDetailRoute = {
                   transactionName: t.string,
                   comparisonEnabled: toBooleanRt,
                   showCriticalPath: toBooleanRt,
-                  device: t.string,
-                  osVersion: t.string,
-                  appVersion: t.string,
-                  netConnectionType: t.string,
                 }),
                 t.partial({
                   traceId: t.string,
