@@ -188,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
+                aggType: CUSTOM_AGGREGATOR,
                 comparator: Comparator.GT,
                 threshold: [0.9],
                 timeSize: 1,
