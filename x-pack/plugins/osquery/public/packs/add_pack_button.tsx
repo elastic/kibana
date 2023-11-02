@@ -25,6 +25,7 @@ const AddPackButtonComponent: React.FC<AddPackButtonComponentProps> = ({ fill = 
       {...newQueryLinkProps}
       iconType="plusInCircle"
       isDisabled={!permissions.writePacks}
+      data-test-subj={'addPackButton'}
     >
       <FormattedMessage id="xpack.osquery.packList.addPackButtonLabel" defaultMessage="Add pack" />
     </EuiButton>
