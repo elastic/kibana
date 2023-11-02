@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { exec } from './shared';
+import { COMMIT_INFO_CTX, exec } from './shared';
 import {
   getCommitExtract,
   getCurrentQARelease,
@@ -65,7 +65,7 @@ async function main() {
 }
 
 async function addBuildkiteInfoSection(html: string) {
-  exec(`buildkite-agent annotate --append --style 'info' --context 'commit-info'`, {
+  exec(`buildkite-agent annotate --append --style 'info' --context '${COMMIT_INFO_CTX}'`, {
     input: html + '<br />',
   });
 }
