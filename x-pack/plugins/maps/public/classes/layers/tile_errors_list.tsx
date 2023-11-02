@@ -17,11 +17,11 @@ export function TileErrorsList(props: Props) {
   const [selectedTileKey, setSelectedTileKey] = useState(props.tileErrors?.[0].tileKey);
   
   const selectedTileContent = useMemo(() => {
-    const tileError = props.tileErrors.find((tileError) => {
+    const selectedTileError = props.tileErrors.find((tileError) => {
       return tileError.tileKey === selectedTileKey;
     });
-    return tileError ? <p>{getDescription(tileError)}</p> : null;
-  }, [selectedTileKey]);
+    return selectedTileError ? <p>{getDescription(selectedTileError)}</p> : null;
+  }, [props.tileErrors, selectedTileKey]);
   
   const tabs = useMemo(() => {
     return props.tileErrors.map((tileError) => {

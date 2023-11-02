@@ -160,7 +160,7 @@ export class TileStatusTracker extends Component<Props> {
             }
           }
         });
-      } catch (e) {
+      } catch (processAjaxBodyError) {
         // ignore errors reading or parsing ajax request body
         // Contents are used to provide better UI messaging and are not required
       }
