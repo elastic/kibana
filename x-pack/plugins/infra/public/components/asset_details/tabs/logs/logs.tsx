@@ -13,8 +13,8 @@ import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elas
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
