@@ -24,8 +24,10 @@ import os from 'os';
 import { renderSummaryTable } from './print_run';
 import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
-import type { SecurityProductTypes, SecurityProductType } from '../../../security_solution_serverless/common/config';
-
+import type {
+  SecurityProductTypes,
+  SecurityProductType,
+} from '../../../security_solution_serverless/common/config';
 
 interface CreateEnvironmentRequestBody {
   name: string;
@@ -50,15 +52,15 @@ interface Credentials {
 const DEFAULT_REGION = 'aws-eu-west-1';
 let log: ToolingLog;
 
-const getApiKeyFromElasticCloudJsonFile = () => {
+const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   const userHomeDir = os.homedir();
   try {
     const jsonString = fs.readFileSync(path.join(userHomeDir, '.elastic/cloud.json'), 'utf-8');
     const jsonData = JSON.parse(jsonString);
     return jsonData.api_key.qa;
   } catch (e) {
-    log.info('API KEY could not be found in ');
-    return null;
+    log.info('API KEY could not be found in .elastic/cloud.json');
+    return undefined;
   }
 };
 
@@ -131,7 +133,7 @@ async function deleteEnvironment(
   runnerId: string,
   apiKey: string,
   onEarlyExit: (msg: string) => void
-) {
+): Promise<void> {
   await axios
     .delete(`${baseUrl}/api/v1/serverless/projects/security/${projectId}`, {
       headers: {
@@ -179,7 +181,7 @@ async function resetCredentials(
 }
 
 // Wait until elasticsearch status goes green
-async function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string) {
+async function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
   await poll(async () => {
     await axios
       .get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
@@ -200,7 +202,11 @@ async function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: strin
 }
 
 // Wait until Kibana is available
-async function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string) {
+async function waitForKibanaAvailable(
+  kbUrl: string,
+  auth: string,
+  runnerId: string
+): Promise<void> {
   await poll(async () => {
     await axios
       .get(`${kbUrl}/api/status`, {
@@ -378,6 +384,12 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             const id = crypto.randomBytes(8).toString('hex');
             const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
             const specFileFTRConfig = parseTestFileConfig(filePath);
+
+            if (!API_KEY) {
+              log.info('API KEY to create environment could not be retrieved.');
+              // eslint-disable-next-line no-process-exit
+              return process.exit(0);
+            }
 
             // Creating environment for the test to run
             const environment = await createEnvironment(
