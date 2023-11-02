@@ -118,12 +118,6 @@ export class TileStatusTracker extends Component<Props> {
     ) {
       this._removeTileFromCache(e.sourceId, e.tile.tileID.key as unknown as string);
 
-      // maplibre requests entire tile pyramid from current zoom level to top
-      // to avoid UI clutter, do not track errors out of map zoom range
-      if (Math.abs(e.tile.tileID.canonical.z - this.props.mbMap.getZoom()) >= 1) {
-        return;
-      }
-
       const targetLayer = this.props.layerList.find((layer) => {
         return layer.ownsMbSourceId(e.sourceId);
       });
