@@ -6,7 +6,7 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from 'x-pack/test/common/services/security_solution/roles';
+import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../common/services/security_solution/roles';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
 const TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ = 'flyoutBottomBar';

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { SecurityRoleName } from 'x-pack/test/common/services/security_solution/roles';
+import { SecurityRoleName } from '../../../common/services/security_solution/roles';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import { targetTags } from '../../target_tags';
