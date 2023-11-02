@@ -8,7 +8,7 @@
 
 import { http } from './data_views_api_client.test.mock';
 import { DataViewsApiClient } from './data_views_api_client';
-import { FIELDS_FOR_WILDCARD_PATH as expectedPath } from '../../common/constants';
+import { FIELDS_PATH as expectedPath } from '../../common/constants';
 
 describe('IndexPatternsApiClient', () => {
   let fetchSpy: jest.SpyInstance;
