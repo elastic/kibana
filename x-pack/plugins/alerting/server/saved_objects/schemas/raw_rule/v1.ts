@@ -266,5 +266,5 @@ export const rawRuleSchema = schema.object({
       severity: schema.maybe(schema.string()),
     })
   ),
-  params: schema.recordOf(schema.string(), schema.any()),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any())),
 });
