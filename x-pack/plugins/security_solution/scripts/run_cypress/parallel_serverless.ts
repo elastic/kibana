@@ -13,7 +13,6 @@ import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
-import { findChangedFiles } from 'find-cypress-specs';
 import grep from '@cypress/grep/src/plugin';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -21,6 +20,8 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import axios from 'axios';
 import path from 'path';
 import os from 'os';
+import pRetry from 'p-retry';
+
 import { renderSummaryTable } from './print_run';
 import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
@@ -51,6 +52,8 @@ interface Credentials {
 }
 
 const DEFAULT_REGION = 'aws-eu-west-1';
+const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
+const BASE_ENV_URL = 'https://global.qa.cld.elstc.co';
 let log: ToolingLog;
 
 const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
@@ -64,27 +67,8 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   }
 };
 
-// Poller function that is polling every 20s, forever until function is resolved.
-async function poll<T>(
-  fn: () => Promise<T>,
-  retries: number = 200,
-  interval: number = 20000
-): Promise<T> {
-  return Promise.resolve()
-    .then(fn)
-    .catch(async function retry(err: Error): Promise<T> {
-      let remainingRetries = retries;
-      if (remainingRetries-- > 0) {
-        remainingRetries -= 1;
-        return new Promise((resolve) => setTimeout(resolve, interval)).then(fn).catch(retry);
-      }
-      throw err;
-    });
-}
-
 // Method to invoke the create environment API for serverless.
 async function createEnvironment(
-  baseUrl: string,
   projectName: string,
   runnerId: string,
   apiKey: string,
@@ -105,7 +89,7 @@ async function createEnvironment(
   if (productTypes.length > 0) body.product_types = productTypes;
 
   await axios
-    .post(`${baseUrl}/api/v1/serverless/projects/security`, body, {
+    .post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
       headers: {
         Authorization: `ApiKey ${apiKey}`,
         'Content-Type': 'application/json',
@@ -127,7 +111,6 @@ async function createEnvironment(
 
 // Method to invoke the delete environment API for serverless.
 async function deleteEnvironment(
-  baseUrl: string,
   projectId: string,
   projectName: string,
   runnerId: string,
@@ -135,7 +118,7 @@ async function deleteEnvironment(
   onEarlyExit: (msg: string) => void
 ): Promise<void> {
   await axios
-    .delete(`${baseUrl}/api/v1/serverless/projects/security/${projectId}`, {
+    .delete(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}`, {
       headers: {
         Authorization: `ApiKey ${apiKey}`,
       },
@@ -150,7 +133,6 @@ async function deleteEnvironment(
 
 // Method to reset the credentials for the created environment.
 async function resetCredentials(
-  baseUrl: string,
   environmentId: string,
   runnerId: string,
   apiKey: string
@@ -158,47 +140,55 @@ async function resetCredentials(
   log.info(`${runnerId} : Reseting credentials`);
   const credentials = {} as Credentials;
 
-  await poll(async () => {
-    return axios
-      .post(
-        `${baseUrl}/api/v1/serverless/projects/security/${environmentId}/_reset-credentials`,
-        {},
-        {
-          headers: {
-            Authorization: `ApiKey ${apiKey}`,
-          },
-        }
-      )
-      .then((response) => {
-        credentials.password = response.data.password;
-        credentials.username = response.data.username;
-      })
-      .catch((error) => {
-        throw new Error(`${error.code}:${error.data}`);
-      });
-  });
+  await axios
+    .post(
+      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${environmentId}/_reset-credentials`,
+      {},
+      {
+        headers: {
+          Authorization: `ApiKey ${apiKey}`,
+        },
+      }
+    )
+    .then((response) => {
+      credentials.password = response.data.password;
+      credentials.username = response.data.username;
+    })
+    .catch((error) => {
+      throw new Error(`${error.code}:${error.data}`);
+    });
   return credentials;
 }
 
 // Wait until elasticsearch status goes green
 async function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
-  await poll(async () => {
-    await axios
-      .get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
-        headers: {
-          Authorization: `Basic ${auth}`,
-        },
-      })
-      .then((response) => {
+  await pRetry(
+    async (num) => {
+      log.info(`Retry number ${num} to check if es is green.`);
+      try {
+        const response = await axios.get(
+          `${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`,
+          {
+            headers: {
+              Authorization: `Basic ${auth}`,
+            },
+          }
+        );
         log.info(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
-      })
-      .catch((error) => {
+        return true;
+      } catch (error) {
         if (error.code === 'ENOTFOUND') {
-          log.info(`${runnerId}: The elasticsearch url is not yet reachable. Retrying in 20s...`);
+          log.info(
+            `${runnerId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
+          );
         }
         throw new Error(`${runnerId} - ${error.code}:${error.data}`);
-      });
-  });
+      }
+    },
+    {
+      retries: 50,
+    }
+  );
 }
 
 // Wait until Kibana is available
@@ -207,26 +197,32 @@ async function waitForKibanaAvailable(
   auth: string,
   runnerId: string
 ): Promise<void> {
-  await poll(async () => {
-    await axios
-      .get(`${kbUrl}/api/status`, {
-        headers: {
-          Authorization: `Basic ${auth}`,
-        },
-      })
-      .then((response) => {
+  await pRetry(
+    async (num) => {
+      log.info(`Retry number ${num} to check if kibana is available.`);
+      try {
+        const response = await axios.get(`${kbUrl}/api/status`, {
+          headers: {
+            Authorization: `Basic ${auth}`,
+          },
+        });
         if (response.data.status.overall.level !== 'available') {
           log.info(`${runnerId}: Kibana is not available. Retrying in 20s...`);
           throw new Error(`${runnerId}: Kibana is not available. Retrying in 20s...`);
+        } else {
+          return true;
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         if (error.code === 'ENOTFOUND') {
           log.info(`${runnerId}: The kibana url is not yet reachable. Retrying in 20s...`);
         }
         throw new Error(`${runnerId} - ${error.code}:${error.data}`);
-      });
-  });
+      }
+    },
+    {
+      retries: 50,
+    }
+  );
 }
 
 export const cli = () => {
@@ -236,9 +232,6 @@ export const cli = () => {
         level: 'info',
         writeTo: process.stdout,
       });
-
-      const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-      const QA_BASE_ENV_URL = 'https://global.qa.cld.elstc.co';
 
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
       if (!process.env.CLOUD_QA_API_KEY && !getApiKeyFromElasticCloudJsonFile()) {
@@ -256,7 +249,6 @@ export const cli = () => {
 
       const PARALLEL_COUNT = process.env.PARALLEL_COUNT ? Number(process.env.PARALLEL_COUNT) : 1;
 
-      const BASE_ENV_URL = QA_BASE_ENV_URL;
       if (!process.env.CLOUD_ENV) {
         log.warning(
           'The cloud environment to be provided with the env var CLOUD_ENV. Currently working only for QA so the script can proceed.'
@@ -348,20 +340,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
 
-      if (argv.changedSpecsOnly) {
-        files = (findChangedFiles('main', false) as string[]).reduce((acc, itemPath) => {
-          const existing = files.find((grepFilePath) => grepFilePath.includes(itemPath));
-          if (existing) {
-            acc.push(existing);
-          }
-          return acc;
-        }, [] as string[]);
-
-        // to avoid running too many tests, we limit the number of files to 3
-        // we may extend this in the future
-        files = files.slice(0, 3);
-      }
-
       if (!files?.length) {
         log.info('No tests found');
         // eslint-disable-next-line no-process-exit
@@ -393,7 +371,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
             // Creating environment for the test to run
             const environment = await createEnvironment(
-              BASE_ENV_URL,
               PROJECT_NAME,
               id,
               API_KEY,
@@ -402,7 +379,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             );
 
             // Reset credentials for elastic user
-            const credentials = await resetCredentials(BASE_ENV_URL, environment.id, id, API_KEY);
+            const credentials = await resetCredentials(environment.id, id, API_KEY);
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = btoa(`${credentials.username}:${credentials.password}`);
@@ -471,14 +448,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             }
 
             // Delete serverless environment
-            await deleteEnvironment(
-              BASE_ENV_URL,
-              environment.id,
-              PROJECT_NAME,
-              id,
-              API_KEY,
-              onEarlyExit
-            );
+            await deleteEnvironment(environment.id, PROJECT_NAME, id, API_KEY, onEarlyExit);
 
             return result;
           });
