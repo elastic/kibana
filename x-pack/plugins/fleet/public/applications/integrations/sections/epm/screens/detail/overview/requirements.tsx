@@ -7,7 +7,7 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiDescriptionList } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiDescriptionList, EuiToolTip } from '@elastic/eui';
 
 export const Requirements: React.FC = memo(() => {
   return (
@@ -43,10 +43,20 @@ export const Requirements: React.FC = memo(() => {
               }),
               description: (
                 <>
-                  <FormattedMessage
-                    id="xpack.fleet.epm.requirements.permissionRequireRootMessage"
-                    defaultMessage="root privileges"
-                  />
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.fleet.epm.requirements.permissionRequireRootTooltip',
+                      {
+                        defaultMessage:
+                          'Elastic agent need to be run with root or administor privaleges',
+                      }
+                    )}
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.epm.requirements.permissionRequireRootMessage"
+                      defaultMessage="root privileges"
+                    />
+                  </EuiToolTip>
                 </>
               ),
             },
