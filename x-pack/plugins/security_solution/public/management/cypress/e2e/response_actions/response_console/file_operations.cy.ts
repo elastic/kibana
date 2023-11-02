@@ -26,7 +26,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     login();
   });
 
-  describe('File operations: get-file and upload', () => {
+  describe('File operations:', () => {
     const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
 
     const fileContent = 'This is a test file for the get-file command.';
