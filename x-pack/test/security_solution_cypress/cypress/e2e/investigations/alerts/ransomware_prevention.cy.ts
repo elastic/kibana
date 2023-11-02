@@ -12,13 +12,12 @@ import { ALERTS_URL } from '../../../urls/navigation';
 import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../../screens/alerts';
 import { TIMELINE_VIEW_IN_ANALYZER } from '../../../screens/timeline';
 import { selectAlertsHistogram } from '../../../tasks/alerts';
-import { cleanKibana } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/common';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
 describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     cy.task('esArchiverLoad', {
       archiveName: 'ransomware_prevention',
       useCreate: true,
@@ -53,16 +52,18 @@ describe('Ransomware Prevention Alerts', { tags: ['@ess', '@serverless'] }, () =
     });
   });
 
-  describe('Ransomware in Timelines', () => {
-    beforeEach(() => {
-      login();
+  describe('Ransomware in Timelines', function () {
+    before(() => {
+      deleteTimelines();
       createTimeline({ ...getTimeline(), query: 'event.code: "ransomware"' }).then((response) => {
-        const timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
-        visitTimeline(timelineId);
+        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
       });
     });
 
-    it('Renders ransomware entries in timelines table', () => {
+    it('Renders ransomware entries in timelines table', function () {
+      login();
+      const timeline = this.timelineId;
+      visitTimeline(timeline);
       // Wait for grid to load, it should have an analyzer icon
       cy.get(TIMELINE_VIEW_IN_ANALYZER).should('exist');
 
