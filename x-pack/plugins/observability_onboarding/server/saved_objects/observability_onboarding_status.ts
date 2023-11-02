@@ -26,8 +26,6 @@ export interface ElasticAgentStepPayload {
   agentId: string;
 }
 
-export type StepPayloadType = ElasticAgentStepPayload;
-
 export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs';
 
 type ObservabilityOnboardingFlowState =
@@ -43,7 +41,7 @@ export interface ObservabilityOnboardingFlow {
     {
       status: string;
       message?: string;
-      payload?: StepPayloadType;
+      payload?: ElasticAgentStepPayload;
     }
   >;
 }

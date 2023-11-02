@@ -12,8 +12,8 @@ import {
   saveObservabilityOnboardingFlow,
 } from '../../lib/state';
 import {
+  ElasticAgentStepPayload,
   ObservabilityOnboardingFlow,
-  StepPayloadType,
 } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
@@ -110,7 +110,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
           [name]: {
             status,
             message,
-            payload: payload as unknown as StepPayloadType,
+            payload: payload as unknown as ElasticAgentStepPayload,
           },
         },
       },

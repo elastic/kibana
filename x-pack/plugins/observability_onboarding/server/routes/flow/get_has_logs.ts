@@ -9,9 +9,9 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { AGENT_ID } from '../../../common/es_fields';
 import {
+  ElasticAgentStepPayload,
   LogFilesState,
   ObservabilityOnboardingType,
-  StepPayloadType,
   SystemLogsState,
 } from '../../saved_objects/observability_onboarding_status';
 
@@ -24,7 +24,7 @@ export async function getHasLogs({
   type: ObservabilityOnboardingType;
   state?: LogFilesState | SystemLogsState;
   esClient: ElasticsearchClient;
-  payload?: StepPayloadType;
+  payload?: ElasticAgentStepPayload;
 }) {
   if (!state) {
     return false;
