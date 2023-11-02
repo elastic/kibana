@@ -11,7 +11,7 @@ import { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RawRule, IntervalSchedule } from '../../types';
+import { RawRule, IntervalSchedule, SanitizedRule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
@@ -23,7 +23,6 @@ import { getRuleCircuitBreakerErrorMessage } from '../../../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  getAlertFromRaw,
   scheduleTask,
   updateMeta,
   createNewAPIKeySet,
@@ -32,6 +31,12 @@ import {
 import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
 import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
 import { RuleAttributes } from '../../data/rule/types';
+import {
+  transformRuleAttributesToRuleDomain,
+  transformRuleDomainToRule,
+} from '../../application/rule/transforms';
+import type { RuleParams, RuleDomain } from '../../application/rule/types';
+import { ruleDomainSchema } from '../../application/rule/schemas';
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,
@@ -57,8 +62,12 @@ const getShouldScheduleTask = async (
   }
 };
 
-export const bulkEnableRules = async (context: RulesClientContext, options: BulkOptions) => {
+export const bulkEnableRules = async <Params extends RuleParams>(
+  context: RulesClientContext,
+  options: BulkOptions
+) => {
   const { ids, filter } = getAndValidateCommonBulkOptions(options);
+  const actionsClient = await context.getActionsClient();
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'ENABLE' });
@@ -89,18 +98,36 @@ export const bulkEnableRules = async (context: RulesClientContext, options: Bulk
     taskManager: context.taskManager,
   });
 
-  const updatedRules = rules.map(({ id, attributes, references }) => {
-    return getAlertFromRaw(
-      context,
-      id,
-      attributes.alertTypeId as string,
-      attributes as RawRule,
-      references,
-      false
+  const enabledRules = rules.map(({ id, attributes, references }) => {
+    // TODO (http-versioning): alertTypeId should never be null, but we need to
+    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+    // when we are doing the bulk disable and this should fix itself
+    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+      attributes as RuleAttributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+        omitGeneratedValues: false,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
-  });
 
-  return { errors, rules: updatedRules, total, taskIdsFailedToBeEnabled };
+    try {
+      ruleDomainSchema.validate(ruleDomain);
+    } catch (e) {
+      context.logger.warn(`Error validating bulk enabled rule domain object for id: ${id}, ${e}`);
+    }
+    return ruleDomain;
+  });
+  // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
+  const enabledPublicRules = enabledRules.map((rule: RuleDomain<Params>) => {
+    return transformRuleDomainToRule<Params>(rule);
+  }) as Array<SanitizedRule<Params>>;
+
+  return { errors, rules: enabledPublicRules, total, taskIdsFailedToBeEnabled };
 };
 
 const bulkEnableRulesWithOCC = async (
