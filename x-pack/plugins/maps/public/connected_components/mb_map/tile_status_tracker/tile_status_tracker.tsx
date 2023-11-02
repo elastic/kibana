@@ -147,28 +147,23 @@ export class TileStatusTracker extends Component<Props> {
         return;
       }
 
-      try {
-        ajaxError.body.text()
-          .then((body) => {
-            if (this._tileErrorCache.hasTileError(layerId, tileKey)) {
-              const parsedJson = JSON.parse(body) as { error?: ErrorCause };
-              if (parsedJson.error && 'type' in parsedJson.error) {
-                this._tileErrorCache.setTileError(layerId, {
-                  ...tileError,
-                  error: parsedJson.error,
-                });
-                this._updateTileStatusForAllLayers();
-              }
+      ajaxError.body.text()
+        .then((body) => {
+          if (this._tileErrorCache.hasTileError(layerId, tileKey)) {
+            const parsedJson = JSON.parse(body) as { error?: ErrorCause };
+            if (parsedJson.error && 'type' in parsedJson.error) {
+              this._tileErrorCache.setTileError(layerId, {
+                ...tileError,
+                error: parsedJson.error,
+              });
+              this._updateTileStatusForAllLayers();
             }
-          })
-          .catch((processAjaxBodyError) => {
-            // ignore errors parsing ajax request body
-            // Contents are used to provide better UI messaging and are not required
-          });
-      } catch (readAjaxBodyError) {
-        // ignore errors readingajax request body
-        // Contents are used to provide better UI messaging and are not required
-      }
+          }
+        })
+        .catch((processAjaxBodyError) => {
+          // ignore errors reading and parsing ajax request body
+          // Contents are used to provide better UI messaging and are not required
+        });
     }
   };
 
