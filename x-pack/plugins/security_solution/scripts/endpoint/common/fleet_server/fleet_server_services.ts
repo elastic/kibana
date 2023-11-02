@@ -653,12 +653,12 @@ export const isFleetServerRunning = async (
       httpsAgent: new https.Agent({ rejectUnauthorized: false }),
     })
     .then((response) => {
-      log.verbose(`Fleet server is up and running as [${fleetServerUrl}]`, response.data);
+      log.debug(`Fleet server is up and running as [${fleetServerUrl}]`, response.data);
       return true;
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .catch((e) => {
-      log.verbose(`Fleet server not up. Attempt to call [${url.toString()}] failed with:`, e);
+      log.debug(`Fleet server not up. Attempt to call [${url.toString()}] failed with:`, e);
       return false;
     });
 };
