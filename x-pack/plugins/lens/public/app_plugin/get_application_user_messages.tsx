@@ -20,7 +20,7 @@ import {
 import type {
   AddUserMessages,
   Datasource,
-  FrameDatasourceAPI,
+  FramePublicAPI,
   UserMessage,
   UserMessageFilters,
   UserMessagesDisplayLocationId,
@@ -247,7 +247,7 @@ export const useGetUserMessages = ({
   activeDatasourceId,
   datasource,
   datasourceState,
-  frameDatasourceAPI,
+  framePublicAPI,
   visualizationType,
   visualization,
   visualizationState,
@@ -257,7 +257,7 @@ export const useGetUserMessages = ({
   datasource: Datasource | null;
   datasourceState: DatasourceState | null;
   dispatch: Dispatch;
-  frameDatasourceAPI: FrameDatasourceAPI;
+  framePublicAPI: FramePublicAPI;
   visualizationType: string | null;
   visualizationState?: VisualizationState;
   visualization?: Visualization;
@@ -272,7 +272,7 @@ export const useGetUserMessages = ({
     setUserMessages([
       ...(datasourceState && datasource && activeDatasourceId
         ? datasource.getUserMessages(datasourceState.state, {
-            frame: frameDatasourceAPI,
+            frame: framePublicAPI,
             setState: (newStateOrUpdater) => {
               dispatch(
                 updateDatasourceState({
@@ -288,7 +288,7 @@ export const useGetUserMessages = ({
         : []),
       ...(visualizationState?.activeId && visualizationState.state
         ? visualization?.getUserMessages?.(visualizationState.state, {
-            frame: frameDatasourceAPI,
+            frame: framePublicAPI,
           }) ?? []
         : []),
       ...getApplicationUserMessages({
@@ -298,7 +298,7 @@ export const useGetUserMessages = ({
         activeDatasource: datasource,
         activeDatasourceState: datasourceState,
         core: coreStart,
-        dataViews: frameDatasourceAPI.dataViews,
+        dataViews: framePublicAPI.dataViews,
       }),
     ]);
   }, [
@@ -306,7 +306,7 @@ export const useGetUserMessages = ({
     datasource,
     datasourceState,
     dispatch,
-    frameDatasourceAPI,
+    framePublicAPI,
     visualization,
     visualizationState,
     visualizationType,

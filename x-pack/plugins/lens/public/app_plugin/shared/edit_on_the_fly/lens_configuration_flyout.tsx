@@ -35,7 +35,7 @@ import {
   useLensSelector,
   useLensDispatch,
   updateIndexPatterns,
-  selectFrameDatasourceAPI,
+  selectFramePublicAPI,
 } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
@@ -94,7 +94,7 @@ export interface EditConfigPanelProps {
 //     currentDatasourceState: unknown,
 //     currentVisualization: Visualization,
 //     currentVisualizationState: unknown,
-//     frame: FrameDatasourceAPI
+//     frame: FramePublicAPI
 //   ) =>
 //   (
 //     locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
@@ -285,7 +285,7 @@ export function LensEditConfigurationFlyout({
     [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
   );
 
-  const frameDatasourceAPI = useLensSelector((state) => {
+  const framePublicAPI = useLensSelector((state) => {
     const newState = {
       ...state,
       lens: {
@@ -293,12 +293,12 @@ export function LensEditConfigurationFlyout({
         activeData,
       },
     };
-    return selectFrameDatasourceAPI(newState, datasourceMap);
+    return selectFramePublicAPI(newState, datasourceMap);
   });
 
   const { getUserMessages } = useGetUserMessages({
     coreStart,
-    frameDatasourceAPI,
+    framePublicAPI,
     activeDatasourceId: datasourceId,
     datasourceState: datasourceStates[datasourceId],
     datasource: datasourceMap[datasourceId],
@@ -321,9 +321,9 @@ export function LensEditConfigurationFlyout({
       visualizationState: visualization.state,
       datasourceMap,
       datasourceStates,
-      datasourceLayers: frameDatasourceAPI.datasourceLayers,
-      indexPatterns: frameDatasourceAPI.dataViews.indexPatterns,
-      dateRange: frameDatasourceAPI.dateRange,
+      datasourceLayers: framePublicAPI.datasourceLayers,
+      indexPatterns: framePublicAPI.dataViews.indexPatterns,
+      dateRange: framePublicAPI.dateRange,
       nowInstant: startDependencies.data.nowProvider.get(),
       searchSessionId,
     });
@@ -332,9 +332,9 @@ export function LensEditConfigurationFlyout({
     activeVisualization,
     datasourceMap,
     datasourceStates,
-    frameDatasourceAPI.dataViews.indexPatterns,
-    frameDatasourceAPI.dateRange,
-    frameDatasourceAPI.datasourceLayers,
+    framePublicAPI.dataViews.indexPatterns,
+    framePublicAPI.dateRange,
+    framePublicAPI.datasourceLayers,
     searchSessionId,
     startDependencies.data.nowProvider,
     visualization.activeId,
@@ -429,11 +429,11 @@ export function LensEditConfigurationFlyout({
             <EuiSpacer size="m" />
             <VisualizationToolbar
               activeVisualization={activeVisualization}
-              framePublicAPI={frameDatasourceAPI}
+              framePublicAPI={framePublicAPI}
             />
             <EuiSpacer size="m" />
             <ConfigPanelWrapper
-              framePublicAPI={frameDatasourceAPI}
+              framePublicAPI={framePublicAPI}
               datasourceMap={datasourceMap}
               visualizationMap={visualizationMap}
               core={coreStart}

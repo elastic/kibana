@@ -29,7 +29,7 @@ import {
   selectSavedObjectFormat,
   updateIndexPatterns,
   selectActiveDatasourceId,
-  selectFrameDatasourceAPI,
+  selectFramePublicAPI,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -505,13 +505,11 @@ export function App({
 
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
 
-  const frameDatasourceAPI = useLensSelector((state) =>
-    selectFrameDatasourceAPI(state, datasourceMap)
-  );
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
 
   const { getUserMessages, addUserMessages } = useGetUserMessages({
     coreStart,
-    frameDatasourceAPI,
+    framePublicAPI,
     activeDatasourceId,
     datasourceState:
       activeDatasourceId && datasourceStates[activeDatasourceId]

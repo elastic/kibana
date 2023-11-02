@@ -8,7 +8,7 @@
 import { DragContextState, DragContextValue } from '@kbn/dom-drag-drop';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { createMockDataViewsState } from '../data_views_service/mocks';
-import { FramePublicAPI, FrameDatasourceAPI } from '../types';
+import { FramePublicAPI } from '../types';
 export { mockDataPlugin } from './data_plugin_mock';
 export {
   visualizationMap,
@@ -47,26 +47,11 @@ export const createMockFramePublicAPI = ({
   },
   dataViews: createMockDataViewsState(dataViews),
   activeData,
+  query: { query: '', language: 'lucene' },
+  filters: [],
 });
 
-export type FrameDatasourceMock = jest.Mocked<FrameDatasourceAPI>;
-
-export const createMockFrameDatasourceAPI = ({
-  datasourceLayers,
-  dateRange,
-  dataViews,
-  query,
-  filters,
-}: Partial<FrameDatasourceAPI> = {}): FrameDatasourceMock => ({
-  datasourceLayers: datasourceLayers ?? {},
-  dateRange: dateRange ?? {
-    fromDate: '2022-03-17T08:25:00.000Z',
-    toDate: '2022-04-17T08:25:00.000Z',
-  },
-  query: query ?? { query: '', language: 'lucene' },
-  filters: filters ?? [],
-  dataViews: createMockDataViewsState(dataViews),
-});
+export type FrameDatasourceMock = jest.Mocked<FramePublicAPI>;
 
 export function createMockedDragDropContext(
   partialState?: Partial<DragContextState>,

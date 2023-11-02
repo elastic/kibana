@@ -26,7 +26,6 @@ import {
   Datasource,
   FramePublicAPI,
   OperationDescriptor,
-  FrameDatasourceAPI,
   UserMessage,
 } from '../../types';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -49,8 +48,8 @@ import {
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { createMockFramePublicAPI } from '../../mocks';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { createMockFramePublicAPI } from '../../mocks';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -3062,22 +3061,6 @@ describe('IndexPattern Data Source', () => {
   });
 
   describe('#getUserMessages', () => {
-    function createMockFrameDatasourceAPI({
-      activeData,
-      dataViews,
-    }: Partial<Omit<FramePublicAPI, 'dataViews'>> & {
-      dataViews?: Partial<FramePublicAPI['dataViews']>;
-    }): FrameDatasourceAPI {
-      return {
-        ...createMockFramePublicAPI({
-          activeData,
-          dataViews,
-        }),
-        query: { query: '', language: 'kuery' },
-        filters: [],
-      };
-    }
-
     describe('error messages', () => {
       it('should generate error messages for a single layer', () => {
         (getErrorMessages as jest.Mock).mockClear();
@@ -3094,7 +3077,7 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({ dataViews: { indexPatterns } }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3146,7 +3129,7 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({ dataViews: { indexPatterns } }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3235,7 +3218,7 @@ describe('IndexPattern Data Source', () => {
           (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({ dataViews: { indexPatterns } }),
             setState: () => {},
           });
 
@@ -3273,7 +3256,7 @@ describe('IndexPattern Data Source', () => {
           ] as ReturnType<typeof getErrorMessages>);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({ dataViews: { indexPatterns } }),
             setState: () => {},
           });
 
@@ -3303,7 +3286,7 @@ describe('IndexPattern Data Source', () => {
 
     describe('warning messages', () => {
       let state: FormBasedPrivateState;
-      let framePublicAPI: FrameDatasourceAPI;
+      let framePublicAPI: FramePublicAPI;
 
       beforeEach(() => {
         (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
@@ -3385,7 +3368,7 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
         };
 
-        framePublicAPI = createMockFrameDatasourceAPI({
+        framePublicAPI = createMockFramePublicAPI({
           activeData: {
             first: {
               type: 'datatable',
@@ -3549,7 +3532,7 @@ describe('IndexPattern Data Source', () => {
               currentIndexPatternId: '1',
             },
             {
-              frame: createMockFrameDatasourceAPI({
+              frame: createMockFramePublicAPI({
                 activeData: {
                   first: createDatatableForLayer(0),
                 },
@@ -3574,7 +3557,7 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
         };
         const messages = FormBasedDatasource.getUserMessages!(state, {
-          frame: createMockFrameDatasourceAPI({
+          frame: createMockFramePublicAPI({
             activeData: {
               first: createDatatableForLayer(0),
               second: createDatatableForLayer(1),
