@@ -9,9 +9,7 @@ import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
-  createOrUpdateIlmPolicy,
   createOrUpdateIndexTemplate,
-  type DataStreamAdapter,
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -23,8 +21,6 @@ import {
   getIndexPatternDataStream,
   totalFieldsLimit,
   mappingComponentName,
-  ilmPolicyName,
-  ilmPolicy,
   getTransformOptions,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
@@ -69,7 +65,6 @@ interface RiskEngineDataClientOpts {
   esClient: ElasticsearchClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
-  dataStreamAdapter: DataStreamAdapter;
 }
 
 export class RiskEngineDataClient {
@@ -281,13 +276,6 @@ export class RiskEngineDataClient {
       };
 
       await Promise.all([
-        createOrUpdateIlmPolicy({
-          logger: this.options.logger,
-          esClient,
-          name: ilmPolicyName,
-          policy: ilmPolicy,
-          dataStreamAdapter: this.options.dataStreamAdapter,
-        }),
         createOrUpdateComponentTemplate({
           logger: this.options.logger,
           esClient,
@@ -315,12 +303,8 @@ export class RiskEngineDataClient {
             index_patterns: [indexPatterns.alias],
             composed_of: [mappingComponentName],
             template: {
+              lifecycle: {},
               settings: {
-                auto_expand_replicas: '0-1',
-                hidden: true,
-                'index.lifecycle': {
-                  name: ilmPolicyName,
-                },
                 'index.mapping.total_fields.limit': totalFieldsLimit,
               },
               mappings: {

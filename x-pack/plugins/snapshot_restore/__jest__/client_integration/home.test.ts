@@ -755,13 +755,11 @@ describe('<SnapshotRestoreHome />', () => {
 
             describe('summary tab', () => {
               test('should set the correct summary values', () => {
-                const { version, versionId, uuid, indices } = snapshot1;
+                const { version, uuid, indices } = snapshot1;
 
                 const { find } = testBed;
 
-                expect(find('snapshotDetail.version.value').text()).toBe(
-                  `${version} / ${versionId}`
-                );
+                expect(find('snapshotDetail.version.value').text()).toBe(version);
                 expect(find('snapshotDetail.uuid.value').text()).toBe(uuid);
                 expect(find('snapshotDetail.state.value').text()).toBe('Snapshot complete');
                 expect(find('snapshotDetail.includeGlobalState.value').text()).toEqual('Yes');

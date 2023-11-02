@@ -39,13 +39,3 @@ If card needs to be hidden from the navigation you can specify that by using the
 ```
 
 More specifics about the `setupCardsNavigation` can be found in `packages/kbn-management/cards_navigation/readme.mdx`.
-
-## Landing page redirect
-
-If the consumer wants to have a separate landing page for the management section, they can use the `setLandingPageRedirect`
-method to specify the path to the landing page:
-
-
-```
-  management.setLandingPageRedirect('/app/security/management');
-```

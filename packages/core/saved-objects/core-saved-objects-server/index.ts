@@ -133,7 +133,6 @@ export type {
   SavedObjectModelTransformationDoc,
   SavedObjectModelTransformationContext,
   SavedObjectModelTransformationFn,
-  SavedObjectModelBidirectionalTransformation,
   SavedObjectModelTransformationResult,
   SavedObjectModelDataBackfillFn,
   SavedObjectModelDataBackfillResult,

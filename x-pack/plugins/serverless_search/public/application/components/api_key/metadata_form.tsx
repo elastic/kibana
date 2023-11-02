@@ -23,7 +23,7 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({
   error,
 }) => {
   return (
-    <>
+    <div data-test-subj="create-api-metadata-code-editor-container">
       <EuiLink href={docLinks.metadata} target="_blank">
         {i18n.translate('xpack.serverlessSearch.apiKey.metadataLinkLabel', {
           defaultMessage: 'Learn how to structure role metadata',
@@ -44,6 +44,6 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({
         onChange={(e) => onChangeMetadata(e)}
         value={metadata}
       />
-    </>
+    </div>
   );
 };

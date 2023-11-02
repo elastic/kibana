@@ -150,6 +150,7 @@ export function UptimeSection({ bucketSize }: Props) {
           showLegend={false}
           legendPosition={Position.Right}
           xDomain={{ min, max }}
+          locale={i18n.getLocale()}
         />
         <UptimeBarSeries
           id="down"

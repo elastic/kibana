@@ -11,6 +11,7 @@ import type { CategoryComponentProps } from './category_component';
 import { CategoryComponent } from './category_component';
 import { waitFor, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 
 const onChange = jest.fn();
 const defaultProps: CategoryComponentProps = {
@@ -60,8 +61,7 @@ describe('Category ', () => {
 
   it('renders current option list', async () => {
     render(<CategoryComponent {...defaultProps} />);
-
-    userEvent.click(screen.getByTestId('comboBoxToggleListButton'));
+    await showEuiComboBoxOptions();
 
     expect(screen.getByText('foo')).toBeInTheDocument();
     expect(screen.getByText('bar')).toBeInTheDocument();
@@ -69,8 +69,8 @@ describe('Category ', () => {
 
   it('should call onChange when changing an option', async () => {
     render(<CategoryComponent {...defaultProps} />);
+    await showEuiComboBoxOptions();
 
-    userEvent.click(screen.getByTestId('comboBoxToggleListButton'));
     userEvent.click(screen.getByText('foo'));
 
     expect(onChange).toHaveBeenCalledWith('foo');

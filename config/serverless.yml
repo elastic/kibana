@@ -42,6 +42,10 @@ xpack.index_management.enableIndexActions: false
 xpack.index_management.enableLegacyTemplates: false
 # Disable index stats information from Index Management UI
 xpack.index_management.enableIndexStats: false
+# Only limited index settings can be edited
+xpack.index_management.editableIndexSettings: limited
+# Disable Storage size column in the Data streams table from Index Management UI
+xpack.index_management.enableDataStreamsStorageColumn: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -136,3 +140,8 @@ xpack.task_manager.allow_reading_invalid_state: false
 
 ## TaskManager requeue invalid tasks, supports ZDT
 xpack.task_manager.requeue_invalid_tasks.enabled: true
+
+# Reporting feature
+xpack.screenshotting.enabled: false
+xpack.reporting.roles.enabled: false
+xpack.reporting.statefulSettings.enabled: false

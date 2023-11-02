@@ -6,6 +6,7 @@
  */
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { ExternalPageName } from '../links/constants';
 import type { ProjectPageName } from '../links/types';
 
 // We need to hide breadcrumbs for some pages (tabs) because they appear duplicated.
@@ -31,4 +32,5 @@ const HIDDEN_BREADCRUMBS = new Set<ProjectPageName>([
 
 export const isBreadcrumbHidden = (id: ProjectPageName): boolean =>
   HIDDEN_BREADCRUMBS.has(id) ||
-  id.startsWith('management:'); /* management sub-pages set their breadcrumbs themselves */
+  /* management sub-pages set their breadcrumbs themselves, the main Management breadcrumb is configured with our navigationTree definition */
+  (id.startsWith(ExternalPageName.management) && id !== ExternalPageName.management);

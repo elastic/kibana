@@ -1415,11 +1415,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/tabs/table_tab.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/tabs/table_tab.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
@@ -3977,11 +3977,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/tabs/table_tab.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/tabs/table_tab.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4329,31 +4329,27 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/shared/hooks/use_event_details.ts"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/shared/hooks/use_event_details.ts"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/left/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/left/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4361,11 +4357,15 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/shared/mocks/mock_browser_fields.ts"
+            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/shared/mocks/mock_browser_fields.ts"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
@@ -4419,7 +4419,7 @@
         "signature": [
           "{ type?: ",
           "DataProviderType",
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; name: string; enabled: boolean; kqlQuery: string; excluded: boolean; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",

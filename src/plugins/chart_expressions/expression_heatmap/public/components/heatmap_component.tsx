@@ -738,6 +738,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
               ariaLabel={args.ariaLabel}
               ariaUseDefaultSummary={!args.ariaLabel}
+              locale={i18n.getLocale()}
               {...settingsOverrides}
             />
             <Heatmap

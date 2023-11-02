@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
+  const config = getService('config');
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -29,6 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Reporting Management app', function () {
+    // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
+    this.tags('failsOnMKI');
     const savedObjectsArchive = 'test/functional/fixtures/kbn_archiver/discover';
 
     const job: JobParamsCsvFromSavedObject = {
@@ -45,8 +48,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ],
     };
 
-    const TEST_USERNAME = 'elastic_serverless';
-    const TEST_PASSWORD = 'changeme';
+    // Kibana CI and MKI use different users
+    const TEST_USERNAME = config.get('servers.kibana.username');
+    const TEST_PASSWORD = config.get('servers.kibana.password');
 
     before('initialize saved object archive', async () => {
       // add test saved search object

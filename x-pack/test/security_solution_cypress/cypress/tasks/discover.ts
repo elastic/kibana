@@ -18,6 +18,7 @@ import {
   DISCOVER_ESQL_EDITABLE_INPUT,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
+import { gotToEsqlTab } from './timeline';
 
 export const switchDataViewTo = (dataviewName: string) => {
   openDataViewSwitcher();
@@ -44,9 +45,12 @@ export const waitForDiscoverGridToLoad = () => {
   cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
 };
 
-export const selectCurrentDiscoverEsqlQuery = (discoverEsqlInput = DISCOVER_ESQL_INPUT) => {
-  cy.get(discoverEsqlInput).click();
-  cy.get(discoverEsqlInput).focused();
+export const selectCurrentDiscoverEsqlQuery = (
+  discoverEsqlInput = DISCOVER_ESQL_EDITABLE_INPUT
+) => {
+  gotToEsqlTab();
+  cy.get(discoverEsqlInput).should('be.visible').click();
+  cy.get(discoverEsqlInput).should('be.focused');
   cy.get(discoverEsqlInput).type(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
 };
 
