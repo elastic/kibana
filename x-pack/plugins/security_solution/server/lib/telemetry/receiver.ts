@@ -444,7 +444,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page: 1,
       perPage: 10_000,
-      filter: `exception-list-agnostic.attributes.created_at > ${moment
+      filter: `exception-list-agnostic.attributes.created_at >= ${moment
         .utc()
         .subtract(24, 'hours')
         .valueOf()}`,
@@ -473,7 +473,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       listId,
       page: 1,
       perPage: this.maxRecords,
-      filter: undefined,
+      filter: `exception-list-agnostic.attributes.created_at >= ${moment
+        .utc()
+        .subtract(24, 'hours')
+        .valueOf()}`,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -549,9 +552,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
+    const filter = `exception-list.single.attributes.created_at >= ${moment
+      .utc()
+      .subtract(24, 'hours')
+      .valueOf()}`;
+
     const results = await this.exceptionListClient?.findExceptionListsItem({
       listId: [listId],
-      filter: [],
+      filter: [filter],
       perPage: this.maxRecords,
       page: 1,
       sortField: 'exception-list.created_at',

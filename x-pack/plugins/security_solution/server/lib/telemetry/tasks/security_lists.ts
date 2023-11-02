@@ -26,7 +26,6 @@ import {
   formatValueListMetaData,
   createUsageCounterLabel,
 } from '../helpers';
-import { usageLabelPrefix } from '../sender';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -46,6 +45,8 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       const usageCollector = sender.getTelemetryUsageCluster();
+
+      const usageLabelPrefix: string[] = ['security_telemetry', 'lists'];
 
       const startTime = Date.now();
       const taskName = 'Security Solution Lists Telemetry';
@@ -82,7 +83,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
           trustedApplicationsCount = trustedAppsJson.length;
 
           usageCollector?.incrementCounter({
-            counterName: createUsageCounterLabel(usageLabelPrefix.concat(['security_lists'])),
+            counterName: createUsageCounterLabel(usageLabelPrefix),
             counterType: 'trusted_apps_count',
             incrementBy: trustedApplicationsCount,
           });
@@ -107,7 +108,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
           endpointExceptionsCount = epExceptionsJson.length;
 
           usageCollector?.incrementCounter({
-            counterName: createUsageCounterLabel(usageLabelPrefix.concat(['security_lists'])),
+            counterName: createUsageCounterLabel(usageLabelPrefix),
             counterType: 'endpoint_exceptions_count',
             incrementBy: endpointExceptionsCount,
           });
@@ -132,7 +133,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
           endpointEventFiltersCount = epFiltersJson.length;
 
           usageCollector?.incrementCounter({
-            counterName: createUsageCounterLabel(usageLabelPrefix.concat(['security_lists'])),
+            counterName: createUsageCounterLabel(usageLabelPrefix),
             counterType: 'endpoint_event_filters_count',
             incrementBy: endpointEventFiltersCount,
           });

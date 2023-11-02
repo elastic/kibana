@@ -18,7 +18,6 @@ import {
   createTaskMetric,
   createUsageCounterLabel,
 } from '../helpers';
-import { usageLabelPrefix } from '../sender';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
@@ -40,11 +39,11 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
     ) => {
       const usageCollector = sender.getTelemetryUsageCluster();
 
+      const usageLabelPrefix: string[] = ['security_telemetry', 'detection-rules'];
+
       const startTime = Date.now();
       const taskName = 'Security Solution Detection Rule Lists Telemetry';
       try {
-        let detectionRuleCount = 0;
-
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
           receiver.fetchLicenseInfo(),
@@ -110,11 +109,10 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         );
         tlog(logger, `Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
 
-        detectionRuleCount = detectionRuleExceptionsJson.length;
         usageCollector?.incrementCounter({
-          counterName: createUsageCounterLabel(usageLabelPrefix.concat(['detection_rule'])),
+          counterName: createUsageCounterLabel(usageLabelPrefix),
           counterType: 'detection_rule_count',
-          incrementBy: detectionRuleCount,
+          incrementBy: detectionRuleExceptionsJson.length,
         });
 
         const batches = batchTelemetryRecords(detectionRuleExceptionsJson, maxTelemetryBatch);
@@ -124,7 +122,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return detectionRuleCount;
+        return detectionRuleExceptionsJson.length;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),

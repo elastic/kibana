@@ -27,7 +27,7 @@ import type { SecurityTelemetryTaskConfig } from './task';
 import { SecurityTelemetryTask } from './task';
 import { telemetryConfiguration } from './configuration';
 
-export const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
+const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
 export interface ITelemetryEventsSender {
   setup(
