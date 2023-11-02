@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
@@ -15,12 +16,12 @@ import { batchTelemetryRecords, createTaskMetric, processK8sUsernames, tlog } fr
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
-  const taskVersion = '1.1.0';
+  const taskVersion = '1.2.0';
 
   return {
     type: 'security:telemetry-prebuilt-rule-alerts',
     title: 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry',
-    interval: '1h',
+    interval: '2m',
     timeout: '15m',
     version: taskVersion,
     runTask: async (
@@ -33,11 +34,13 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       const startTime = Date.now();
       const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
       try {
-        const [clusterInfoPromise, licenseInfoPromise, packageVersion] = await Promise.allSettled([
-          receiver.fetchClusterInfo(),
-          receiver.fetchLicenseInfo(),
-          receiver.fetchDetectionRulesPackageVersion(),
-        ]);
+        const [clusterInfoPromise, licenseInfoPromise, packageVersion, alertsIndex] =
+          await Promise.allSettled([
+            receiver.fetchClusterInfo(),
+            receiver.fetchLicenseInfo(),
+            receiver.fetchDetectionRulesPackageVersion(),
+            receiver.getAlertsIndex(),
+          ]);
 
         const clusterInfo =
           clusterInfoPromise.status === 'fulfilled'
@@ -49,16 +52,23 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             : ({} as ESLicense | undefined);
         const packageInfo =
           packageVersion.status === 'fulfilled' ? packageVersion.value : undefined;
+        const index = alertsIndex.status === 'fulfilled' ? alertsIndex.value : undefined;
+
+        if (index === undefined) {
+          tlog(logger, `alerts index is not ready yet, skipping telemetry task`);
+          return 0;
+        }
 
         let fetchMore = true;
-        let pitId = await receiver.openPointInTime('index-replace-me');
+        let searchAfterValue: SortResults | undefined;
+        let pitId = await receiver.openPointInTime(index);
 
         while (fetchMore) {
-          const { moreToFetch, newPitId, alerts } = await receiver.fetchPrebuiltRuleAlertsBatch(
-            pitId
-          );
+          const { moreToFetch, newPitId, searchAfter, alerts } =
+            await receiver.fetchPrebuiltRuleAlertsBatch(pitId, searchAfterValue);
 
           fetchMore = moreToFetch;
+          searchAfterValue = searchAfter;
           pitId = newPitId;
 
           const processedAlerts = alerts.map(

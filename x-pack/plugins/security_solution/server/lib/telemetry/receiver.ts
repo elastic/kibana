@@ -83,6 +83,14 @@ export interface ITelemetryReceiver {
 
   getClusterInfo(): ESClusterInfo | undefined;
 
+  fetchClusterInfo(): Promise<ESClusterInfo>;
+
+  fetchLicenseInfo(): Promise<ESLicense | undefined>;
+
+  openPointInTime(indexPattern: string): Promise<string>;
+
+  closePointInTime(pitId: string): Promise<void>;
+
   fetchDetectionRulesPackageVersion(): Promise<Installation | undefined>;
 
   fetchFleetAgents(): Promise<
@@ -149,19 +157,15 @@ export interface ITelemetryReceiver {
     per_page: number;
   }>;
 
-  fetchPrebuiltRuleAlertsBatch(pitId: string): Promise<{
+  fetchPrebuiltRuleAlertsBatch(
+    pitId: string,
+    searchAfterValue: SortResults | undefined
+  ): Promise<{
     moreToFetch: boolean;
     newPitId: string;
+    searchAfter: SortResults | undefined;
     alerts: TelemetryEvent[];
   }>;
-
-  fetchClusterInfo(): Promise<ESClusterInfo>;
-
-  fetchLicenseInfo(): Promise<ESLicense | undefined>;
-
-  openPointInTime(indexPattern: string): Promise<string>;
-
-  closePointInTime(pitId: string): Promise<void>;
 
   copyLicenseFields(lic: ESLicense): {
     issuer?: string | undefined;
@@ -185,6 +189,8 @@ export interface ITelemetryReceiver {
   ): Promise<SearchResponse<SafeEndpointEvent, Record<string, AggregationsAggregate>>>;
 
   fetchValueListMetaData(interval: number): Promise<ValueListResponse>;
+
+  getAlertsIndex(): string | undefined;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -230,6 +236,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getClusterInfo(): ESClusterInfo | undefined {
     return this.clusterInfo;
+  }
+
+  public getAlertsIndex(): string | undefined {
+    return this.alertsIndex;
   }
 
   public async fetchDetectionRulesPackageVersion(): Promise<Installation | undefined> {
@@ -571,14 +581,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
   }
 
-  public async fetchPrebuiltRuleAlertsBatch(pitId: string) {
+  public async fetchPrebuiltRuleAlertsBatch(
+    pitId: string,
+    searchAfterValue: SortResults | undefined
+  ) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
     }
 
     let newPitId = pitId;
     let fetchMore = true;
-    let searchAfter: SortResults | undefined;
+    let searchAfter: SortResults | undefined = searchAfterValue;
     const query: ESSearchRequest = {
       query: {
         bool: {
@@ -691,7 +704,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         searchAfter = lastHit?.sort;
       }
 
-      fetchMore = numOfHits > 0 && numOfHits < 1000;
+      fetchMore = numOfHits > 0 && numOfHits < 1_000;
     } catch (e) {
       tlog(this.logger, e);
       fetchMore = false;
@@ -701,6 +714,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       return {
         moreToFetch: false,
         newPitId: pitId,
+        searchAfter,
         alerts: [] as TelemetryEvent[],
       };
     }
@@ -718,6 +732,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return {
       moreToFetch: fetchMore,
       newPitId,
+      searchAfter,
       alerts,
     };
   }
@@ -727,11 +742,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       throw Error('es client is unavailable: cannot retrieve pre-built rule alert batches');
     }
 
-    // PiT set up
     const keepAlive = '5m';
     const pitId: OpenPointInTimeResponse['id'] = (
       await this.esClient.openPointInTime({
-        index: indexPattern,
+        index: `${indexPattern}*`,
         keep_alive: keepAlive,
       })
     ).id;
