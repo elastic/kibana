@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export const SLO_MODEL_VERSION = 2;
 export const SLO_RESOURCES_VERSION = 2;
 export const SLO_SUMMARY_TRANSFORMS_VERSION = 3;
 
