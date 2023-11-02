@@ -40,15 +40,7 @@ import {
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 
-import type {
-  Datasource,
-  DatasourceMap,
-  FrameDatasourceAPI,
-  UserMessageFilters,
-  UserMessagesDisplayLocationId,
-  Visualization,
-  VisualizationMap,
-} from '../../../types';
+import type { DatasourceMap, VisualizationMap } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensEmbeddableOutput } from '../../../embeddable';
 import type { LensInspector } from '../../../lens_inspector_service';
@@ -56,7 +48,7 @@ import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/c
 import { extractReferencesFromState } from '../../../utils';
 import type { Document } from '../../../persistence';
 import { createIndexPatternService } from '../../../data_views_service/service';
-import { filterAndSortUserMessages } from '../../get_application_user_messages';
+import { useGetUserMessages } from '../../get_application_user_messages';
 
 export interface EditConfigPanelProps {
   coreStart: CoreStart;
@@ -96,27 +88,27 @@ export interface EditConfigPanelProps {
   displayFlyoutHeader?: boolean;
 }
 
-const getUserMessages =
-  (
-    currentDataSource: Datasource | null,
-    currentDatasourceState: unknown,
-    currentVisualization: Visualization,
-    currentVisualizationState: unknown,
-    frame: FrameDatasourceAPI
-  ) =>
-  (
-    locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
-    filters?: UserMessageFilters
-  ) => {
-    const userMessages = [
-      ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
-        frame,
-        setState: () => {},
-      }) ?? []),
-      ...(currentVisualization?.getUserMessages?.(currentVisualizationState, { frame }) ?? []),
-    ];
-    return filterAndSortUserMessages([...userMessages], locationId, filters ?? {});
-  };
+// const getUserMessages =
+//   (
+//     currentDataSource: Datasource | null,
+//     currentDatasourceState: unknown,
+//     currentVisualization: Visualization,
+//     currentVisualizationState: unknown,
+//     frame: FrameDatasourceAPI
+//   ) =>
+//   (
+//     locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
+//     filters?: UserMessageFilters
+//   ) => {
+//     const userMessages = [
+//       ...(currentDataSource?.getUserMessages?.(currentDatasourceState, {
+//         frame,
+//         setState: () => {},
+//       }) ?? []),
+//       ...(currentVisualization?.getUserMessages?.(currentVisualizationState, { frame }) ?? []),
+//     ];
+//     return filterAndSortUserMessages([...userMessages], locationId, filters ?? {});
+//   };
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -303,44 +295,53 @@ export function LensEditConfigurationFlyout({
     };
     return selectFrameDatasourceAPI(newState, datasourceMap);
   });
-  if (isLoading) return null;
 
-  const layerPanelsProps = {
-    framePublicAPI: frameDatasourceAPI,
+  const { getUserMessages } = useGetUserMessages({
+    coreStart,
+    frameDatasourceAPI,
+    activeDatasourceId: datasourceId,
+    datasourceState: datasourceStates[datasourceId],
+    datasource: datasourceMap[datasourceId],
+    dispatch,
+    visualization: activeVisualization,
+    visualizationType: visualization.activeId,
+    visualizationState: visualization,
+  });
+
+  const isSaveable = useMemo(() => {
+    if (!attributesChanged) {
+      return false;
+    }
+    if (!visualization.state || !visualization.activeId) {
+      return false;
+    }
+
+    return buildExpression({
+      visualization: activeVisualization,
+      visualizationState: visualization.state,
+      datasourceMap,
+      datasourceStates,
+      datasourceLayers: frameDatasourceAPI.datasourceLayers,
+      indexPatterns: frameDatasourceAPI.dataViews.indexPatterns,
+      dateRange: frameDatasourceAPI.dateRange,
+      nowInstant: startDependencies.data.nowProvider.get(),
+      searchSessionId,
+    });
+  }, [
+    attributesChanged,
+    activeVisualization,
     datasourceMap,
-    visualizationMap,
-    core: coreStart,
-    dataViews: startDependencies.dataViews,
-    uiActions: startDependencies.uiActions,
-    hideLayerHeader: datasourceId === 'textBased',
-    indexPatternService,
-    setIsInlineFlyoutFooterVisible,
-    getUserMessages: getUserMessages(
-      datasourceMap[datasourceId],
-      datasourceStates[datasourceId].state,
-      activeVisualization,
-      visualization.state,
-      frameDatasourceAPI
-    ),
-  };
+    datasourceStates,
+    frameDatasourceAPI.dataViews.indexPatterns,
+    frameDatasourceAPI.dateRange,
+    frameDatasourceAPI.datasourceLayers,
+    searchSessionId,
+    startDependencies.data.nowProvider,
+    visualization.activeId,
+    visualization.state,
+  ]);
 
-  // building expression can be expensive, that is why it's a function to run only if attributes changed and has no errors
-  const getNewStateExpression = () =>
-    visualization.state && visualization.activeId
-      ? buildExpression({
-          visualization: activeVisualization,
-          visualizationState: visualization.state,
-          datasourceMap,
-          datasourceStates,
-          datasourceLayers: frameDatasourceAPI.datasourceLayers,
-          indexPatterns: frameDatasourceAPI.dataViews.indexPatterns,
-          dateRange: frameDatasourceAPI.dateRange,
-          nowInstant: startDependencies.data.nowProvider.get(),
-          searchSessionId,
-        })
-      : null;
-
-  const isSaveable = attributesChanged && !!getNewStateExpression();
+  if (isLoading) return null;
 
   return (
     <>
@@ -432,7 +433,16 @@ export function LensEditConfigurationFlyout({
             />
             <EuiSpacer size="m" />
             <ConfigPanelWrapper
-              {...layerPanelsProps}
+              framePublicAPI={frameDatasourceAPI}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+              core={coreStart}
+              dataViews={startDependencies.dataViews}
+              uiActions={startDependencies.uiActions}
+              hideLayerHeader={datasourceId === 'textBased'}
+              indexPatternService={indexPatternService}
+              setIsInlineFlyoutFooterVisible={setIsInlineFlyoutFooterVisible}
+              getUserMessages={getUserMessages}
               css={css`
                 padding: ${euiTheme.size.s};
               `}

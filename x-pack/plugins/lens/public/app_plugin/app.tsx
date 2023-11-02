@@ -17,7 +17,7 @@ import type { LensAppLocatorParams } from '../../common/locator/locator';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
-import { AddUserMessages, EditorFrameInstance, UserMessage, UserMessagesGetter } from '../types';
+import { AddUserMessages, EditorFrameInstance, UserMessagesGetter } from '../types';
 import { Document } from '../persistence/saved_object_store';
 
 import {
@@ -28,7 +28,6 @@ import {
   LensAppState,
   selectSavedObjectFormat,
   updateIndexPatterns,
-  updateDatasourceState,
   selectActiveDatasourceId,
   selectFrameDatasourceAPI,
 } from '../state_management';
@@ -41,10 +40,7 @@ import {
   createIndexPatternService,
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
-import {
-  filterAndSortUserMessages,
-  getApplicationUserMessages,
-} from './get_application_user_messages';
+import { useGetUserMessages } from './get_application_user_messages';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -513,95 +509,23 @@ export function App({
     selectFrameDatasourceAPI(state, datasourceMap)
   );
 
-  const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
-
-  useEffect(() => {
-    setUserMessages([
-      ...(activeDatasourceId
-        ? datasourceMap[activeDatasourceId].getUserMessages(
-            datasourceStates[activeDatasourceId].state,
-            {
-              frame: frameDatasourceAPI,
-              setState: (newStateOrUpdater) => {
-                dispatch(
-                  updateDatasourceState({
-                    newDatasourceState:
-                      typeof newStateOrUpdater === 'function'
-                        ? newStateOrUpdater(datasourceStates[activeDatasourceId].state)
-                        : newStateOrUpdater,
-                    datasourceId: activeDatasourceId,
-                  })
-                );
-              },
-            }
-          )
-        : []),
-      ...(visualization.activeId && visualization.state
-        ? visualizationMap[visualization.activeId]?.getUserMessages?.(visualization.state, {
-            frame: frameDatasourceAPI,
-          }) ?? []
-        : []),
-      ...getApplicationUserMessages({
-        visualizationType: persistedDoc?.visualizationType,
-        visualizationMap,
-        visualization,
-        activeDatasource: activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-        activeDatasourceState: activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
-        core: coreStart,
-        dataViews: frameDatasourceAPI.dataViews,
-      }),
-    ]);
-  }, [
-    activeDatasourceId,
+  const { getUserMessages, addUserMessages } = useGetUserMessages({
     coreStart,
-    datasourceMap,
-    datasourceStates,
-    dispatch,
     frameDatasourceAPI,
-    persistedDoc?.visualizationType,
-    visualization,
-    visualizationMap,
-  ]);
-
-  // these are messages managed from other parts of Lens
-  const [additionalUserMessages, setAdditionalUserMessages] = useState<Record<string, UserMessage>>(
-    {}
-  );
-
-  const getUserMessages: UserMessagesGetter = (locationId, filterArgs) =>
-    filterAndSortUserMessages(
-      [...userMessages, ...Object.values(additionalUserMessages)],
-      locationId,
-      filterArgs ?? {}
-    );
-
-  const addUserMessages: AddUserMessages = (messages) => {
-    const newMessageMap = {
-      ...additionalUserMessages,
-    };
-
-    const addedMessageIds: string[] = [];
-    messages.forEach((message) => {
-      if (!newMessageMap[message.uniqueId]) {
-        addedMessageIds.push(message.uniqueId);
-        newMessageMap[message.uniqueId] = message;
-      }
-    });
-
-    if (addedMessageIds.length) {
-      setAdditionalUserMessages(newMessageMap);
-    }
-
-    return () => {
-      const withMessagesRemoved = {
-        ...additionalUserMessages,
-      };
-
-      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
-
-      setAdditionalUserMessages(withMessagesRemoved);
-    };
-  };
+    activeDatasourceId,
+    datasourceState:
+      activeDatasourceId && datasourceStates[activeDatasourceId]
+        ? datasourceStates[activeDatasourceId]
+        : null,
+    datasource:
+      activeDatasourceId && datasourceMap[activeDatasourceId]
+        ? datasourceMap[activeDatasourceId]
+        : null,
+    dispatch,
+    visualization: visualization.activeId ? visualizationMap[visualization.activeId] : undefined,
+    visualizationType: visualization.activeId,
+    visualizationState: visualization,
+  });
 
   return (
     <>

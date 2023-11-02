@@ -166,6 +166,7 @@ describe('LensEditConfigurationFlyout', () => {
         },
       },
     };
+
     renderConfigFlyout(newProps);
     expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
   });
