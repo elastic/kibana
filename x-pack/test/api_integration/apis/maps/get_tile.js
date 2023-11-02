@@ -204,11 +204,11 @@ export default function ({ getService }) {
                   error_type: 'exception',
                   message: 'local shard failure message 123',
                   name: 'logstash-*',
-                }
-              ]
-            }
-          }
-        }
+                },
+              ],
+            },
+          },
+        },
       });
       const resp = await supertest
         .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)

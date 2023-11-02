@@ -147,7 +147,8 @@ export class TileStatusTracker extends Component<Props> {
         return;
       }
 
-      ajaxError.body.text()
+      ajaxError.body
+        .text()
         .then((body) => {
           if (this._tileErrorCache.hasTileError(layerId, tileKey)) {
             const parsedJson = JSON.parse(body) as { error?: ErrorCause };
