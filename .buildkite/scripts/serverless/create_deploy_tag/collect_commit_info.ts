@@ -29,18 +29,10 @@ async function main() {
   const previousSha = await getCurrentQARelease();
   const selectedSha = getSelectedCommitHash();
 
-  // Useful links
-  await addBuildkiteInfoSection(
-    getUsefulLinksHtml('Useful links:', {
-      previousCommitHash: previousSha,
-      selectedCommitHash: selectedSha,
-    })
-  );
-
   // Current commit info
   const previousCommit = await hashToCommit(previousSha);
   const previousCommitInfo = getCommitExtract(previousCommit);
-  await addBuildkiteInfoSection(toCommitInfoHtml('Current commit:', previousCommitInfo));
+  await addBuildkiteInfoSection(toCommitInfoHtml('Current commit on QA:', previousCommitInfo));
 
   // Target commit info
   const selectedCommit = await hashToCommit(selectedSha);
@@ -62,6 +54,14 @@ async function main() {
   // Save Object migration comparison
   const comparisonResult = compareSOSnapshots(previousSha, selectedSha);
   await addBuildkiteInfoSection(toSOComparisonBlockHtml(comparisonResult));
+
+  // Useful links
+  await addBuildkiteInfoSection(
+    getUsefulLinksHtml('Useful links:', {
+      previousCommitHash: previousSha,
+      selectedCommitHash: selectedSha,
+    })
+  );
 }
 
 async function addBuildkiteInfoSection(html: string) {
