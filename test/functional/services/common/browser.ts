@@ -6,18 +6,23 @@
  * Side Public License, v 1.
  */
 
+import Url from 'url';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { cloneDeepWith, isString } from 'lodash';
-import { Key, Origin, WebDriver } from 'selenium-webdriver';
+import { Key, Origin, type WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { modifyUrl } from '@kbn/std';
 
 import sharp from 'sharp';
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
-import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
+import { type FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
-import { NetworkOptions, NetworkProfile, NETWORK_PROFILES } from '../remote/network_profiles';
+import {
+  type NetworkOptions,
+  type NetworkProfile,
+  NETWORK_PROFILES,
+} from '../remote/network_profiles';
 
 export type Browser = BrowserService;
 
@@ -175,6 +180,28 @@ class BrowserService extends FtrService {
       return void 0;
     });
     return currentWithoutTime;
+  }
+
+  /**
+   * Uses the 'retry' service and waits for the current browser URL to match the provided path.
+   * NB the provided path can contain query params as well as hash anchors.
+   * Using retry logic makes URL assertions less flaky
+   * @param expectedPath The relative path that we are expecting the browser to be on
+   * @returns a Promise that will reject if the browser URL does not match the expected one
+   */
+  public async waitForUrlToBe(expectedPath: string) {
+    const retry = await this.ctx.getService('retry');
+    const log = this.ctx.getService('log');
+
+    return retry.waitFor(`URL to be ${expectedPath}`, async () => {
+      const currentUrl = await this.getCurrentUrl();
+      const { path, search, hash } = Url.parse(currentUrl);
+      const currentPath = `${path}${search}${hash}`;
+
+      if (currentPath !== expectedPath)
+        log.debug(`Expected URL to be ${expectedPath}, got ${currentPath}`);
+      return currentPath === expectedPath;
+    });
   }
 
   /**
