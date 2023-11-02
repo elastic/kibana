@@ -160,7 +160,9 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   }, [embeddable, input]);
 
   if (loading || !embeddable) {
-    return <EuiLoadingChart />;
+    // debugger;
+
+    return null;
   }
 
   return (

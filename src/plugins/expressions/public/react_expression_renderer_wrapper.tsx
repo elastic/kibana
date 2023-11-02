@@ -16,8 +16,12 @@ const ReactExpressionRendererComponent = lazy(async () => {
   return { default: ReactExpressionRenderer };
 });
 
-export const ReactExpressionRenderer = (props: ReactExpressionRendererProps) => (
-  <Suspense fallback={<EuiLoadingSpinner />}>
-    <ReactExpressionRendererComponent {...props} />
-  </Suspense>
-);
+export const ReactExpressionRenderer = (props: ReactExpressionRendererProps) => {
+  // debugger;
+
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <ReactExpressionRendererComponent {...props} />
+    </Suspense>
+  );
+};

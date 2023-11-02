@@ -17,7 +17,8 @@ import { EmbeddableLoadingIndicator } from './embeddable_loading_indicator';
  */
 export const EmbeddablePanel = (props: EmbeddablePanelProps) => {
   const result = useEmbeddablePanel({ embeddable: props.embeddable });
-  if (!result) return <EmbeddableLoadingIndicator />;
+  // debugger;
+  if (!result) return null;
   const { embeddable, ...passThroughProps } = props;
   return <result.Panel embeddable={result.unwrappedEmbeddable} {...passThroughProps} />;
 };
