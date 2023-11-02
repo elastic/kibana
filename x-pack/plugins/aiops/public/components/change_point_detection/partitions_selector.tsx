@@ -140,8 +140,8 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
 
   useEffect(
     function onSplitFieldChange() {
-      if (splitField !== prevSplitField) {
-        fetchResults('');
+      fetchResults('');
+      if (prevSplitField !== undefined && splitField !== prevSplitField) {
         onChange([]);
       }
     },
