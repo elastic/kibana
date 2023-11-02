@@ -50,8 +50,6 @@ interface Credentials {
 const DEFAULT_REGION = 'aws-eu-west-1';
 let log: ToolingLog;
 
-const encode = (str: string): string => Buffer.from(str, 'binary').toString('base64');
-
 const getApiKeyFromElasticCloudJsonFile = () => {
   const userHomeDir = os.homedir();
   try {
@@ -395,7 +393,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             const credentials = await resetCredentials(BASE_ENV_URL, environment.id, id, API_KEY);
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
-            const auth = encode(`${credentials.username}:${credentials.password}`);
+            const auth = btoa(`${credentials.username}:${credentials.password}`);
 
             // Wait for elasticsearch status to go green.
             await waitForEsStatusGreen(environment.es_url, auth, id);
