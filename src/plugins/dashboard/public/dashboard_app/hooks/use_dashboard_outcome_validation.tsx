@@ -25,7 +25,10 @@ export const useDashboardOutcomeValidation = () => {
   /**
    * Unpack dashboard services
    */
-  const { screenshotMode, spaces } = pluginServices.getServices();
+  const {
+    screenshotMode,
+    spaces: { spacesApi },
+  } = pluginServices.getServices();
 
   const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
     ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardReturn) => {
@@ -43,7 +46,7 @@ export const useDashboardOutcomeValidation = () => {
           if (screenshotMode.isScreenshotMode()) {
             scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
           } else {
-            spaces.redirectLegacyUrl?.({ path, aliasPurpose });
+            spacesApi?.ui.redirectLegacyUrl?.({ path, aliasPurpose });
           }
           return 'redirected'; // redirected. Stop loading dashboard.
         }
@@ -53,20 +56,20 @@ export const useDashboardOutcomeValidation = () => {
       }
       return 'valid';
     },
-    [scopedHistory, screenshotMode, spaces]
+    [scopedHistory, screenshotMode, spacesApi]
   );
 
   const getLegacyConflictWarning = useMemo(() => {
     if (savedObjectId && outcome === 'conflict' && aliasId) {
       return () =>
-        spaces.getLegacyUrlConflict?.({
+        spacesApi?.ui.components?.getLegacyUrlConflict?.({
           currentObjectId: savedObjectId,
           otherObjectId: aliasId,
           otherObjectPath: `#${createDashboardEditUrl(aliasId)}${scopedHistory.location.search}`,
         });
     }
     return null;
-  }, [aliasId, outcome, savedObjectId, scopedHistory, spaces]);
+  }, [aliasId, outcome, savedObjectId, scopedHistory, spacesApi]);
 
   return { validateOutcome, getLegacyConflictWarning };
 };

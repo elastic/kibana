@@ -16,21 +16,9 @@ export type SpacesServiceFactory = KibanaPluginServiceFactory<
 >;
 export const spacesServiceFactory: SpacesServiceFactory = ({ startPlugins }) => {
   const { spaces } = startPlugins;
-  if (!spaces || !spaces.ui) return {};
+  if (!spaces) return {};
 
-  const {
-    getActiveSpace$,
-    ui: {
-      components: { getLegacyUrlConflict, getSpacesContextProvider },
-      redirectLegacyUrl,
-      useSpaces,
-    },
-  } = spaces;
   return {
-    getActiveSpace$,
-    getLegacyUrlConflict,
-    getSpacesContextProvider,
-    redirectLegacyUrl,
-    useSpaces,
+    spacesApi: spaces,
   };
 };

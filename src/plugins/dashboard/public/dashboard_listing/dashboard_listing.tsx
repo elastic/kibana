@@ -42,6 +42,7 @@ export const DashboardListing = ({
     chrome: { theme },
     savedObjectsTagging,
     coreContext: { executionContext },
+    spaces: { spacesApi },
   } = pluginServices.getServices();
 
   useExecutionContext(executionContext, {
@@ -78,6 +79,7 @@ export const DashboardListing = ({
           },
           toMountPoint,
           savedObjectsTagging: savedObjectsTaggingFakePlugin,
+          spacesApi,
           FormattedRelative,
         }}
       >
