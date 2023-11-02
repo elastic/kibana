@@ -357,7 +357,7 @@ ${JSON.stringify(
             // Setup fleet if Cypress config requires it
             let fleetServer: void | StartedFleetServer;
             if (cypressConfigFile.env?.WITH_FLEET_SERVER) {
-              log.info(`Starting fleet-server`);
+              log.info(`Setting fleet-server for this Cypress config`);
 
               const kbnClient = createKbnClient({
                 url: baseUrl,
@@ -365,6 +365,8 @@ ${JSON.stringify(
                 password: config.get('servers.kibana.password'),
                 log,
               });
+
+              log.info(`is Kibana up?\n`, JSON.stringify(await kbnClient.status.get(), null, 2));
 
               fleetServer = await startFleetServerIfNecessary({
                 kbnClient,

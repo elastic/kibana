@@ -559,6 +559,7 @@ export const getFleetElasticsearchOutputHost = async (kbnClient: KbnClient): Pro
   }
 
   if (!host) {
+    log.error(`Outputs returned from Fleet:`, outputs);
     throw new Error(`An output for Elasticsearch was not found in Fleet settings`);
   }
 
