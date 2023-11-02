@@ -24,16 +24,13 @@ import os from 'os';
 import { renderSummaryTable } from './print_run';
 import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
+import type { SecurityProductTypes, SecurityProductType } from '../../../security_solution_serverless/common/config';
 
-interface ProductType {
-  product_line: string;
-  product_tier: string;
-}
 
 interface CreateEnvironmentRequestBody {
   name: string;
   region_id: string;
-  product_types: ProductType[];
+  product_types: SecurityProductTypes;
 }
 
 interface Environment {
@@ -101,9 +98,9 @@ async function createEnvironment(
     region_id: DEFAULT_REGION,
   } as CreateEnvironmentRequestBody;
 
-  const productTypes: ProductType[] = [];
+  const productTypes: SecurityProductTypes = [];
   ftrConfig?.productTypes?.forEach((t) => {
-    productTypes.push(t as ProductType);
+    productTypes.push(t as SecurityProductType);
   });
   if (productTypes.length > 0) body.product_types = productTypes;
 
