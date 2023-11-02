@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { CapabilitiesSwitcher, CapabilitiesProvider } from './src/capabilities';
-export type {
-  CapabilitiesSetup,
-  CapabilitiesStart,
-  ResolveCapabilitiesOptions,
-  CapabilitiesSwitcherOptions,
-} from './src/contracts';
+import { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
+
+export interface SwitcherWithOptions {
+  switcher: CapabilitiesSwitcher;
+  capabilityPath: string[];
+}

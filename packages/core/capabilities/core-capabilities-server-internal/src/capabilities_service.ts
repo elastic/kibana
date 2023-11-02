@@ -18,7 +18,9 @@ import type {
   CapabilitiesSwitcher,
   CapabilitiesStart,
   CapabilitiesSetup,
+  CapabilitiesSwitcherOptions,
 } from '@kbn/core-capabilities-server';
+import type { SwitcherWithOptions } from './types';
 import { mergeCapabilities } from './merge_capabilities';
 import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
 import { registerRoutes } from './routes';
@@ -41,7 +43,7 @@ const defaultCapabilities: Capabilities = {
 export class CapabilitiesService {
   private readonly logger: Logger;
   private readonly capabilitiesProviders: CapabilitiesProvider[] = [];
-  private readonly capabilitiesSwitchers: CapabilitiesSwitcher[] = [];
+  private readonly capabilitiesSwitchers: SwitcherWithOptions[] = [];
   private readonly resolveCapabilities: CapabilitiesResolver;
 
   constructor(core: CoreContext) {
@@ -75,8 +77,13 @@ export class CapabilitiesService {
       registerProvider: (provider: CapabilitiesProvider) => {
         this.capabilitiesProviders.push(provider);
       },
-      registerSwitcher: (switcher: CapabilitiesSwitcher) => {
-        this.capabilitiesSwitchers.push(switcher);
+      registerSwitcher: (switcher: CapabilitiesSwitcher, options: CapabilitiesSwitcherOptions) => {
+        this.capabilitiesSwitchers.push({
+          switcher,
+          capabilityPath: Array.isArray(options.capabilityPath)
+            ? options.capabilityPath
+            : [options.capabilityPath],
+        });
       },
     };
   }
@@ -84,7 +91,14 @@ export class CapabilitiesService {
   public start(): CapabilitiesStart {
     return {
       resolveCapabilities: (request, options) =>
-        this.resolveCapabilities(request, [], options?.useDefaultCapabilities ?? false),
+        this.resolveCapabilities({
+          request,
+          capabilityPath: Array.isArray(options.capabilityPath)
+            ? options.capabilityPath
+            : [options.capabilityPath],
+          useDefaultCapabilities: options.useDefaultCapabilities ?? false,
+          applications: [],
+        }),
     };
   }
 }

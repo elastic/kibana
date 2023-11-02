@@ -25,7 +25,15 @@ describe('resolveCapabilities', () => {
   });
 
   it('returns the initial capabilities if no switcher are used', async () => {
-    const result = await resolveCapabilities(defaultCaps, [], request, [], true);
+    // defaultCaps, [], request, [], true
+    const result = await resolveCapabilities({
+      capabilities: defaultCaps,
+      switchers: [],
+      request,
+      capabilityPath: ['*'],
+      applications: [],
+      useDefaultCapabilities: false,
+    });
     expect(result).toEqual(defaultCaps);
   });
 
@@ -44,7 +52,19 @@ describe('resolveCapabilities', () => {
         A: false,
       },
     });
-    const result = await resolveCapabilities(caps, [switcher], request, [], true);
+    const result = await resolveCapabilities({
+      capabilities: caps,
+      switchers: [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ],
+      request,
+      capabilityPath: ['*'],
+      applications: [],
+      useDefaultCapabilities: false,
+    });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "catalogue": Object {
@@ -72,7 +92,19 @@ describe('resolveCapabilities', () => {
         A: false,
       },
     });
-    await resolveCapabilities(caps, [switcher], request, [], true);
+    await resolveCapabilities({
+      capabilities: caps,
+      switchers: [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ],
+      request,
+      capabilityPath: ['*'],
+      applications: [],
+      useDefaultCapabilities: false,
+    });
     expect(caps.catalogue).toEqual({
       A: true,
       B: true,
@@ -94,7 +126,19 @@ describe('resolveCapabilities', () => {
         C: false,
       },
     });
-    const result = await resolveCapabilities(caps, [switcher], request, [], true);
+    const result = await resolveCapabilities({
+      capabilities: caps,
+      switchers: [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ],
+      request,
+      capabilityPath: ['*'],
+      applications: [],
+      useDefaultCapabilities: false,
+    });
     expect(result.catalogue).toEqual({
       A: true,
       B: true,
@@ -116,7 +160,19 @@ describe('resolveCapabilities', () => {
         .filter(([key]) => key !== 'B')
         .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
     });
-    const result = await resolveCapabilities(caps, [switcher], request, [], true);
+    const result = await resolveCapabilities({
+      capabilities: caps,
+      switchers: [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ],
+      request,
+      capabilityPath: ['*'],
+      applications: [],
+      useDefaultCapabilities: false,
+    });
     expect(result.catalogue).toEqual({
       A: true,
       B: true,
@@ -142,7 +198,19 @@ describe('resolveCapabilities', () => {
         record: false,
       },
     });
-    const result = await resolveCapabilities(caps, [switcher], request, [], true);
+    const result = await resolveCapabilities({
+      capabilities: caps,
+      switchers: [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ],
+      request,
+      capabilityPath: ['*'],
+      applications: [],
+      useDefaultCapabilities: false,
+    });
     expect(result.section).toEqual({
       boolean: true,
       record: {

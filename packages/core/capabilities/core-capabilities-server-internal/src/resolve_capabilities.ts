@@ -10,42 +10,58 @@ import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
+import type { SwitcherWithOptions } from './types';
 
-export type CapabilitiesResolver = (
-  request: KibanaRequest,
-  applications: string[],
-  useDefaultCapabilities: boolean
-) => Promise<Capabilities>;
+export type CapabilitiesResolver = ({
+  request,
+  capabilityPath,
+  applications,
+  useDefaultCapabilities,
+}: {
+  request: KibanaRequest;
+  capabilityPath: string[];
+  applications: string[];
+  useDefaultCapabilities: boolean;
+}) => Promise<Capabilities>;
 
 export const getCapabilitiesResolver =
   (
     capabilities: () => Capabilities,
-    switchers: () => CapabilitiesSwitcher[]
+    switchers: () => SwitcherWithOptions[]
   ): CapabilitiesResolver =>
-  async (
-    request: KibanaRequest,
-    applications: string[],
-    useDefaultCapabilities: boolean
-  ): Promise<Capabilities> => {
+  async ({
+    request,
+    capabilityPath,
+    applications,
+    useDefaultCapabilities,
+  }): Promise<Capabilities> => {
     return withSpan({ name: 'resolve capabilities', type: 'capabilities' }, () =>
-      resolveCapabilities(
-        capabilities(),
-        switchers(),
+      resolveCapabilities({
+        capabilities: capabilities(),
+        switchers: switchers(),
         request,
+        capabilityPath,
         applications,
-        useDefaultCapabilities
-      )
+        useDefaultCapabilities,
+      })
     );
   };
 
-export const resolveCapabilities = async (
-  capabilities: Capabilities,
-  switchers: CapabilitiesSwitcher[],
-  request: KibanaRequest,
-  applications: string[],
-  useDefaultCapabilities: boolean
-): Promise<Capabilities> => {
+export const resolveCapabilities = async ({
+  capabilities,
+  switchers,
+  request,
+  capabilityPath,
+  applications,
+  useDefaultCapabilities,
+}: {
+  capabilities: Capabilities;
+  switchers: SwitcherWithOptions[];
+  request: KibanaRequest;
+  applications: string[];
+  capabilityPath: string[];
+  useDefaultCapabilities: boolean;
+}): Promise<Capabilities> => {
   const mergedCaps: Capabilities = cloneDeep({
     ...capabilities,
     navLinks: applications.reduce((acc, app) => {
@@ -56,7 +72,7 @@ export const resolveCapabilities = async (
 
   return switchers.reduce(async (caps, switcher) => {
     const resolvedCaps = await caps;
-    const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
+    const changes = await switcher.switcher(request, resolvedCaps, useDefaultCapabilities);
     return recursiveApplyChanges(resolvedCaps, changes);
   }, Promise.resolve(mergedCaps));
 };
