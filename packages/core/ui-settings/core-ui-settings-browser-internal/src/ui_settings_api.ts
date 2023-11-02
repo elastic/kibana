@@ -94,6 +94,27 @@ export class UiSettingsApi {
     });
   }
 
+  public async validate(key: string, value: any, scope: UiSettingsScope) {
+    if (this.sendInProgress) {
+      return;
+    }
+
+    try {
+      this.sendInProgress = true;
+      const path =
+        scope === 'namespace'
+          ? `/internal/kibana/settings/${key}/validate`
+          : `/internal/kibana/global_settings/${key}/validate`;
+      return await this.sendRequest('POST', path, {
+        value,
+      });
+    } catch (error) {
+      return;
+    } finally {
+      this.sendInProgress = false;
+    }
+  }
+
   /**
    * Gets an observable that notifies subscribers of the current number of active requests
    */

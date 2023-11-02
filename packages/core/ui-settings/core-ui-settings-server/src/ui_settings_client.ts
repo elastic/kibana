@@ -57,4 +57,8 @@ export interface IUiSettingsClient {
    * Shows whether the uiSetting is a sensitive value. Used by telemetry to not send sensitive values.
    */
   isSensitive: (key: string) => boolean;
+  /**
+   * Returns the validation error message, if one is thrown, when validating the uiSettings value.
+   */
+  getValidationErrorMessage: (key: string, value: unknown) => string | null;
 }

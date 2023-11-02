@@ -38,7 +38,9 @@ export const FieldInputKibanaProvider: FC<FieldInputKibanaDependencies> = ({
     <FieldInputContext.Provider
       value={{
         showDanger: (message) => toasts.addDanger(message),
-        validateChange: (key, value) => client.validateValue(key, value),
+        validateChange: async (key, value) => {
+          return await client.validateValue(key, value);
+        },
       }}
     >
       {children}

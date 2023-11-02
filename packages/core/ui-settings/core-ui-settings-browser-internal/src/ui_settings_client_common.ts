@@ -16,14 +16,12 @@ import {
   UiSettingsState,
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-browser';
-import { schema } from '@kbn/config-schema';
 
-import { SchemaStructure } from '@kbn/core-ui-settings-browser/src/types';
 import { UiSettingsApi } from './ui_settings_api';
 
 export interface UiSettingsClientParams {
   api: UiSettingsApi;
-  defaults: Record<string, PublicUiSettingsParams & SchemaStructure>;
+  defaults: Record<string, PublicUiSettingsParams>;
   initialSettings?: UiSettingsState;
   done$: Observable<unknown>;
 }
@@ -33,7 +31,7 @@ export abstract class UiSettingsClientCommon implements IUiSettingsClient {
   protected readonly updateErrors$ = new Subject<Error>();
 
   protected readonly api: UiSettingsApi;
-  protected readonly defaults: Record<string, PublicUiSettingsParams & SchemaStructure>;
+  protected readonly defaults: Record<string, PublicUiSettingsParams>;
   protected cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
 
   constructor(params: UiSettingsClientParams) {
@@ -130,62 +128,10 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.updateErrors$.asObservable();
   }
 
-  validateValue(key: string, value: unknown) {
-    const schemaStructure = this.defaults[key].schemaStructure;
-    // Only perform validation if any rules are set
-    if (schemaStructure.rules) {
-      const type = schemaStructure.type;
-      const options = this.getSchemaOptions(schemaStructure.rules, type);
-      const validationSchema = this.getSchema(type, options);
-      try {
-        validationSchema.validate(value);
-      } catch (error) {
-        return error.message;
-      }
-    }
-    return null;
-  }
-
-  protected getSchemaOptions(rules: Array<{ [key: string]: any }>, type: string) {
-    const options: Record<string, any> = {};
-    for (const rule of rules) {
-      let ruleName: string = rule.name;
-      if (type === 'array') {
-        switch (rule.name) {
-          case 'max': {
-            ruleName = 'maxSize';
-            break;
-          }
-          case 'min': {
-            ruleName = 'minSize';
-            break;
-          }
-          default: {
-            ruleName = rule.name;
-          }
-        }
-      }
-      options[ruleName] = rule.args.limit;
-    }
-    return options;
-  }
-
-  protected getSchema(type: string, options: { [key: string]: any }) {
-    // Cover only the available UiSettingsType
-    switch (type) {
-      case 'number': {
-        return schema.number(options);
-      }
-      case 'array': {
-        return schema.arrayOf(schema.any(), options);
-      }
-      case 'string': {
-        return schema.string(options);
-      }
-      default: {
-        return schema.any(options);
-      }
-    }
+  async validateValue(key: string, value: unknown) {
+    const resp = await this.api.validate(key, value, this.defaults[key].scope || 'namespace');
+    const errorMessage = resp?.errorMessage;
+    return errorMessage ? errorMessage : null;
   }
 
   protected assertUpdateAllowed(key: string) {

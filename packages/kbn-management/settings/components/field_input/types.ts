@@ -24,7 +24,7 @@ export interface FieldInputServices {
    * @param value The message to display.
    */
   showDanger: (value: string) => void;
-  validateChange: (key: string, value: any) => string | null;
+  validateChange: (key: string, value: any) => Promise<string | null>;
 }
 
 /**

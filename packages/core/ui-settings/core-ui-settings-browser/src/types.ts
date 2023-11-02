@@ -9,10 +9,6 @@
 import type { Observable } from 'rxjs';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 
-export interface SchemaStructure {
-  schemaStructure: { type: string; rules: Array<{ [key: string]: any }> };
-}
-
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 /** @public */
@@ -108,7 +104,7 @@ export interface IUiSettingsClient {
   /**
    * Returns a validation error message if the uiSettings value is invalid.
    */
-  validateValue: (key: string, value: unknown) => string | null;
+  validateValue: (key: string, value: any) => Promise<string | null>;
 }
 
 /** @public */

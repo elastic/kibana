@@ -38,19 +38,9 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   getRegistered() {
-    const copiedDefaults: Record<
-      string,
-      Omit<UiSettingsParams, 'schema'> & {
-        schemaStructure: { type: unknown; rules: { [key: string]: any } };
-      }
-    > = {};
+    const copiedDefaults: Record<string, Omit<UiSettingsParams, 'schema'>> = {};
     for (const [key, value] of Object.entries(this.defaults)) {
-      const registeredValue = omit(value, 'schema');
-      const schemaStructure = {
-        type: value.schema.getSchema().describe().type,
-        rules: value.schema.getSchema().describe().rules,
-      };
-      copiedDefaults[key] = { ...registeredValue, schemaStructure };
+      copiedDefaults[key] = omit(value, 'schema');
     }
     return copiedDefaults;
   }
@@ -80,6 +70,19 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   isSensitive(key: string): boolean {
     const definition = this.defaults[key];
     return !!definition?.sensitive;
+  }
+
+  getValidationErrorMessage(key: string, value: unknown) {
+    const definition = this.defaults[key];
+    if (value === null || definition === undefined) return null;
+    if (definition.schema) {
+      try {
+        definition.schema.validate(value);
+      } catch (error) {
+        return error.message;
+      }
+    }
+    return null;
   }
 
   protected validateKey(key: string, value: unknown) {

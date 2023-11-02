@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
@@ -29,21 +29,32 @@ export const NumberInput = ({
   isSavingEnabled,
   onInputChange,
 }: NumberInputProps) => {
+  const [inputValue] = getFieldInputValue(field, unsavedChange) || undefined;
+  const [value, setValue] = useState(inputValue);
   const { validateChange } = useServices();
+
+  const onChange: EuiFieldNumberProps['onChange'] = async (event) => {
+    const newValue = Number(event.target.value);
+    setValue(newValue);
+  };
 
   const onUpdate = useUpdate({ onInputChange, field });
 
-  const onChange: EuiFieldNumberProps['onChange'] = (event) => {
-    const inputValue = Number(event.target.value);
-    const error = validateChange(field.id, inputValue);
-    onUpdate({ type: field.type, unsavedValue: inputValue, isInvalid: error !== null, error });
+  useEffect(() => {
+    setValue(inputValue);
+  }, [inputValue]);
+
+  // In the past, each keypress would invoke the `onChange` callback.  This
+  // is likely wasteful, so we've switched it to `onBlur` instead.
+  const onBlur = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const blurValue = Number(event.target.value);
+    const error = await validateChange(field.id, blurValue);
+    onUpdate({ type: field.type, unsavedValue: blurValue, isInvalid: !!error, error });
+    setValue(blurValue);
   };
 
   const { id, name, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;
-  const [rawValue] = getFieldInputValue(field, unsavedChange);
-
-  const value = rawValue === null ? undefined : rawValue;
 
   return (
     <EuiFieldNumber
@@ -52,7 +63,7 @@ export const NumberInput = ({
       data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
       fullWidth
       disabled={!isSavingEnabled}
-      {...{ name, value, onChange }}
+      {...{ name, value, onBlur, onChange }}
     />
   );
 };

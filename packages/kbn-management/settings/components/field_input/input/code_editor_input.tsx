@@ -49,7 +49,7 @@ export const CodeEditorInput = ({
   const { validateChange } = useServices();
   const onUpdate = useUpdate({ onInputChange, field });
 
-  const onChange: CodeEditorProps['onChange'] = (inputValue) => {
+  const onChange: CodeEditorProps['onChange'] = async (inputValue) => {
     let newUnsavedValue;
     let errorParams = {};
 
@@ -60,7 +60,7 @@ export const CodeEditorInput = ({
 
         try {
           const parsedUnsavedValue = JSON.parse(newUnsavedValue);
-          const validationError = validateChange(field.id, parsedUnsavedValue);
+          const validationError = await validateChange(field.id, parsedUnsavedValue);
           if (validationError) {
             errorParams = {
               error: validationError,

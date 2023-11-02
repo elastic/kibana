@@ -49,13 +49,13 @@ export const ArrayInput = ({
 
   // In the past, each keypress would invoke the `onChange` callback.  This
   // is likely wasteful, so we've switched it to `onBlur` instead.
-  const onBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onBlur = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const blurValue = event.target.value
       .replace(REGEX, ',')
       .split(',')
       .filter((v) => v !== '');
-    const error = validateChange(field.id, blurValue);
-    onUpdate({ type: field.type, unsavedValue: blurValue, isInvalid: error !== null, error });
+    const error = await validateChange(field.id, blurValue);
+    onUpdate({ type: field.type, unsavedValue: blurValue, isInvalid: !!error, error });
     setValue(blurValue.join(', '));
   };
 
