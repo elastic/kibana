@@ -62,7 +62,11 @@ export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
       : {};
 
     const sort = {
-      [TIMESTAMP_FIELD]: sortDirection,
+      [TIMESTAMP_FIELD]: {
+        order: sortDirection,
+        format: 'strict_date_optional_time_nanos',
+        numeric_type: 'date_nanos',
+      },
       [TIEBREAKER_FIELD]: sortDirection,
     };
 
