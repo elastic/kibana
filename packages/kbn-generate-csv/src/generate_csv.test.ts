@@ -1045,4 +1045,37 @@ describe('CsvGenerator', () => {
       `);
     });
   });
+
+  it('handles max concurrent shards settings set to a number', async () => {
+    const mockShardsConfig = {
+      ...mockConfig,
+      maxConcurrentShardRequests: 6,
+    };
+    const generateCsv = new CsvGenerator(
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      mockShardsConfig,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      mockLogger,
+      stream
+    );
+    await generateCsv.generateData();
+    await expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
+      {
+        ignore_unavailable: true,
+        ignore_throttled: undefined,
+        index: 'logstash-*',
+        keep_alive: '30s',
+      },
+      { maxConcurrentShardRequests: 6, maxRetries: 0, requestTimeout: '30s' }
+    );
+  });
 });
