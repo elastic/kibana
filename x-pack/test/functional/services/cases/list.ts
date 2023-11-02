@@ -151,14 +151,23 @@ export function CasesTableServiceProvider(
     },
 
     async filterByStatus(status: CaseStatuses) {
-      await common.clickAndValidate('case-status-filter', `case-status-filter-${status}`);
+      await common.clickAndValidate(
+        'options-filter-popover-button-status',
+        `options-filter-popover-item-${status}`
+      );
 
-      await testSubjects.click(`case-status-filter-${status}`);
+      await testSubjects.click(`options-filter-popover-item-${status}`);
     },
 
     async filterBySeverity(severity: CaseSeverityWithAll) {
-      await common.clickAndValidate('case-severity-filter', `case-severity-filter-${severity}`);
-      await testSubjects.click(`case-severity-filter-${severity}`);
+      await common.clickAndValidate(
+        'options-filter-popover-button-severity',
+        `options-filter-popover-item-${severity}`
+      );
+      await testSubjects.click(`options-filter-popover-item-${severity}`);
+
+      // to close the popup
+      await testSubjects.click('options-filter-popover-button-severity');
     },
 
     async filterByAssignee(assignee: string) {

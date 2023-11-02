@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { SeverityAll } from '@kbn/cases-plugin/common/ui';
 import { UserProfile } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -534,17 +533,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         // low
         await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
         await cases.casesTable.validateCasesTableHasNthRows(2);
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
 
         // high
         await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
         await cases.casesTable.validateCasesTableHasNthRows(2);
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
 
         // critical
         await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
         await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
 
         // back to all
-        await cases.casesTable.filterBySeverity(SeverityAll);
         await cases.casesTable.validateCasesTableHasNthRows(5);
       });
     });

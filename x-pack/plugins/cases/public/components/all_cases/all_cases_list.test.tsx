@@ -571,17 +571,6 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  // FIXME: This was checking for the button label, this does not exists anymore. Maybe we can get rid of this test
-  it.skip('renders the first available status when hiddenStatus is given', async () => {
-    appMockRenderer.render(
-      <AllCasesList hiddenStatuses={[CaseStatuses.open]} isSelectorView={true} />
-    );
-
-    await waitFor(() =>
-      expect(screen.getAllByTestId('case-status-badge-in-progress')[0]).toBeInTheDocument()
-    );
-  });
-
   it('shows Solution column if there are no set owners', async () => {
     render(
       <TestProviders owner={[]}>

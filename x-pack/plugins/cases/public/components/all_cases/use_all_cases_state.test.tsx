@@ -219,8 +219,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(useHistory().replace).toHaveBeenCalledWith({
-      search:
-        'foo=bar&page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=all&status=all',
+      search: 'foo=bar&page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=&status=',
     });
   });
 
@@ -288,7 +287,7 @@ describe('useAllCasesQueryParams', () => {
       });
 
       expect(useHistory().replace).toHaveBeenCalledWith({
-        search: 'perPage=100&page=1&sortField=createdAt&sortOrder=desc&severity=all&status=all',
+        search: 'perPage=100&page=1&sortField=createdAt&sortOrder=desc&severity=&status=',
       });
 
       mockLocation.search = '';
@@ -314,7 +313,7 @@ describe('useAllCasesQueryParams', () => {
       });
 
       expect(useHistory().replace).toHaveBeenCalledWith({
-        search: 'sortOrder=desc&page=1&perPage=10&sortField=createdAt&severity=all&status=all',
+        search: 'sortOrder=desc&page=1&perPage=10&sortField=createdAt&severity=&status=',
       });
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopoverTitle,
@@ -17,6 +17,7 @@ import {
   EuiTextColor,
   EuiSpacer,
 } from '@elastic/eui';
+import { isEqual } from 'lodash/fp';
 import type { FilterOptions } from '../../../common/ui/types';
 import * as i18n from './translations';
 
@@ -26,7 +27,9 @@ const fromRawOptionsToEuiSelectableOptions = (options: string[], selectedOptions
     if (selectedOptions.includes(option)) {
       selectableOption.checked = 'on';
     }
-    selectableOption['data-test-subj'] = `options-filter-popover-item-${option}`;
+    selectableOption['data-test-subj'] = `options-filter-popover-item-${option
+      .split(' ')
+      .join('-')}`;
     return selectableOption;
   });
 };
@@ -36,7 +39,7 @@ const fromEuiSelectableOptionToRawOption = (options: EuiSelectableOption[]) =>
 
 const getEuiSelectableCheckedOptions = (options: EuiSelectableOption[]) =>
   options.filter((option) => option.checked === 'on');
-const counter = 0;
+
 interface UseFilterParams {
   buttonLabel?: string;
   id: keyof FilterOptions;
@@ -59,12 +62,28 @@ export const MultiSelectFilterComponent = ({
 }: UseFilterParams) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen(!isPopoverOpen);
-
+  const isInvalid = Boolean(limit && limitReachedMessage && selectedOptions.length >= limit);
   const options = fromRawOptionsToEuiSelectableOptions(rawOptions, selectedOptions);
+
+  useEffect(() => {
+    const trimmedSelectedOptions = selectedOptions.filter((option) => rawOptions.includes(option));
+    if (!isEqual(trimmedSelectedOptions, selectedOptions)) {
+      onChange({
+        filterId: id,
+        options: trimmedSelectedOptions,
+      });
+    }
+  }, [selectedOptions, rawOptions, id, onChange]);
+
   const _onChange = (newOptions: EuiSelectableOption[]) => {
+    const newSelectedOptions = getEuiSelectableCheckedOptions(newOptions);
+    if (isInvalid && limit && newSelectedOptions.length >= limit) {
+      return;
+    }
+
     onChange({
       filterId: id,
-      options: fromEuiSelectableOptionToRawOption(getEuiSelectableCheckedOptions(newOptions)),
+      options: fromEuiSelectableOptionToRawOption(newSelectedOptions),
     });
   };
 
@@ -90,7 +109,7 @@ export const MultiSelectFilterComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
-      {limit && limitReachedMessage && selectedOptions.length >= limit ? (
+      {isInvalid ? (
         <>
           <EuiHorizontalRule margin="none" />
           <EuiCallOut
@@ -105,7 +124,7 @@ export const MultiSelectFilterComponent = ({
       <EuiSelectable
         options={options}
         searchable
-        searchProps={{ placeholder: id, compressed: false }}
+        searchProps={{ placeholder: id, compressed: false, isInvalid }}
         emptyMessage={i18n.EMPTY_FILTER_MESSAGE}
         onChange={_onChange}
         singleSelection={false}
