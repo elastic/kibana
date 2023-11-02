@@ -369,6 +369,9 @@ ${JSON.stringify(
               fleetServer = await startFleetServerIfNecessary({
                 kbnClient,
                 logger: log,
+                port: config.has('servers.fleetserver.port')
+                  ? (config.get('servers.fleetserver.port') as number)
+                  : undefined,
               });
             }
 
