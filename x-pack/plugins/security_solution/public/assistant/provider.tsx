@@ -7,6 +7,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assistant';
+import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
@@ -56,6 +57,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
       assistantTelemetry={assistantTelemetry}
+      dataQualityConversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
       defaultAllow={defaultAllow}
       defaultAllowReplacement={defaultAllowReplacement}
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}

@@ -13,7 +13,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { updatePromptContexts } from './helpers';
+import {
+  isLocalStorageConversationIdValid,
+  updatePromptContexts,
+  validateLocalStorageLastConversationId,
+} from './helpers';
 import type {
   PromptContext,
   RegisterPromptContext,
@@ -36,6 +40,7 @@ import {
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
+import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -55,6 +60,7 @@ export interface AssistantProviderProps {
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
   baseAllowReplacement: string[];
+  dataQualityConversationId: string;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   basePath: string;
@@ -141,6 +147,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   augmentMessageCodeBlocks,
   baseAllow,
   baseAllowReplacement,
+  dataQualityConversationId,
   defaultAllow,
   defaultAllowReplacement,
   docLinks,
@@ -300,7 +307,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       showAssistantOverlay,
       title,
       unRegisterPromptContext,
-      localStorageLastConversationId,
+      localStorageLastConversationId: validateLocalStorageLastConversationId({
+        conversationId: localStorageLastConversationId,
+        conversations,
+        dataQualityConversationId,
+      }),
       setLastConversationId: setLocalStorageLastConversationId,
     }),
     [
@@ -316,6 +327,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseSystemPrompts,
       conversationIds,
       conversations,
+      dataQualityConversationId,
       defaultAllow,
       defaultAllowReplacement,
       docLinks,
