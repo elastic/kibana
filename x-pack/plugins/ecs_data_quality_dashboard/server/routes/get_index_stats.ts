@@ -6,7 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { IRouter, Logger } from '@kbn/core/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { fetchStats, fetchAvailableIndices } from '../lib';
@@ -14,6 +13,7 @@ import { buildResponse } from '../lib/build_response';
 import { GET_INDEX_STATS, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetIndexStatsParams, GetIndexStatsQuery } from '../schemas/get_index_stats';
+import { API_DEFAULT_ERROR_MESSAGE } from '../translations';
 
 export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -87,12 +87,11 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
             });
           }
         } catch (err) {
-          const error = transformError(err);
-          logger.error(error.message);
+          logger.error(JSON.stringify(err));
 
           return resp.error({
-            body: error.message,
-            statusCode: error.statusCode,
+            body: err.message ?? API_DEFAULT_ERROR_MESSAGE,
+            statusCode: err.statusCode ?? 500,
           });
         }
       }

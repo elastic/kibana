@@ -166,6 +166,20 @@
           },
           {
             "parentPluginId": "@kbn/default-nav-analytics",
+            "id": "def-common.defaultNavigation.renderAs",
+            "type": "string",
+            "tags": [],
+            "label": "renderAs",
+            "description": [],
+            "signature": [
+              "\"accordion\""
+            ],
+            "path": "packages/default-nav/analytics/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-analytics",
             "id": "def-common.defaultNavigation.children",
             "type": "Array",
             "tags": [],
