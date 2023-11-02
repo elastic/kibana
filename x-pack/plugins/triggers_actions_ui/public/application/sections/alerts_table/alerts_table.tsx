@@ -16,8 +16,9 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
+import { isEqual } from 'lodash';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
-import { AlertsTableProps, FetchAlertData } from '../../../types';
+import { AlertsTableProps, FetchAlertData, PreFetchPageContext } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
 import './alerts_table.scss';
@@ -90,10 +91,16 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       options: props.alertsTableConfiguration.useActionsColumn,
     });
 
-  const renderCellContext = props.alertsTableConfiguration.useFetchPageContext?.({
+  const [renderCellContext, setRenderCellContext] = useState<object | undefined>(undefined);
+  const pageContext = props.alertsTableConfiguration.useFetchPageContext?.({
     alerts,
     columns: props.columns,
   });
+  useEffect(() => {
+    if (!isEqual(renderCellContext, pageContext)) {
+      setRenderCellContext(pageContext);
+    }
+  }, [renderCellContext, pageContext]);
 
   const {
     isBulkActionsColumnActive,

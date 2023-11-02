@@ -40,9 +40,9 @@ import type { RenderCellValueContext } from './fetch_page_context';
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<
-  EuiDataGridCellValueElementProps & CellValueElementProps & { context?: RenderCellValueContext }
-> = (props) => {
+export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> = (
+  props
+) => {
   const { columnId, rowIndex, scopeId } = props;
   const isTourAnchor = useMemo(
     () =>
