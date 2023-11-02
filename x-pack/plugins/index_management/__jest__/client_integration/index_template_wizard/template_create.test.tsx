@@ -532,6 +532,7 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
+        allowAutoCreate: true,
       });
       // Component templates
       await actions.completeStepTwo('test_component_template_1');
@@ -558,7 +559,7 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
-            allowAutoCreate: false,
+            allowAutoCreate: true,
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,

@@ -199,6 +199,7 @@ describe('<TemplateEdit />', () => {
         await actions.completeStepOne({
           indexPatterns: UPDATED_INDEX_PATTERN,
           priority: 3,
+          allowAutoCreate: true,
         });
         // Component templates
         await actions.completeStepTwo();
@@ -253,7 +254,7 @@ describe('<TemplateEdit />', () => {
               indexPatterns: UPDATED_INDEX_PATTERN,
               priority: 3,
               version: templateToEdit.version,
-              allowAutoCreate: false,
+              allowAutoCreate: true,
               _kbnMeta: {
                 type: 'default',
                 hasDatastream: false,
