@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  type FC,
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  CSSProperties,
+} from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -46,7 +54,8 @@ export const ChartsGrid: FC<{
   changePoints: SelectedChangePoint[];
   interval: string;
   onRenderComplete?: () => void;
-}> = ({ changePoints, interval, onRenderComplete }) => {
+  style?: CSSProperties;
+}> = ({ changePoints, interval, onRenderComplete, style }) => {
   // Render is complete when all chart components in the grid are ready
   const loadCounter = useRef<Record<number, boolean>>(
     Object.fromEntries(changePoints.map((v, i) => [i, true]))
@@ -76,7 +85,7 @@ export const ChartsGrid: FC<{
           v.timestamp
         }_${v.p_value}`;
         return (
-          <EuiFlexItem key={key}>
+          <EuiFlexItem key={key} style={style}>
             <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
               <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
                 <EuiFlexItem grow={false}>

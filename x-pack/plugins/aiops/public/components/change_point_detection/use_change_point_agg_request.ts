@@ -232,6 +232,7 @@ export function useChangePointResults(
               timestamp: timeAsString,
               label: changePointType,
               reason: v.change_point_request.type[changePointType].reason,
+              metricField: fieldConfig.metricField,
               id: isSingleMetric
                 ? 'single_metric'
                 : `${fieldConfig.splitField}_${v.key?.splitFieldTerm}`,
