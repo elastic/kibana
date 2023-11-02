@@ -80,9 +80,9 @@ export const findFormFieldByRowsLabelAndType = (label: string, text: string) => 
 };
 
 export const deleteAndConfirm = (type: string) => {
-  cy.react('EuiButton').contains(`Delete ${type}`).click();
+  cy.get('span').contains(`Delete ${type}`).click();
   cy.contains(`Are you sure you want to delete this ${type}?`);
-  cy.react('EuiButton').contains('Confirm').click();
+  cy.get('span').contains('Confirm').click();
   cy.get('[data-test-subj="globalToastList"]')
     .first()
     .contains('Successfully deleted')

@@ -6,6 +6,7 @@
  */
 
 import type { Exception } from '../objects/exception';
+import { TOASTER_CLOSE_ICON } from '../screens/alerts_detection_rules';
 import {
   FIELD_INPUT,
   OPERATOR_INPUT,
@@ -47,6 +48,7 @@ import {
   EXCEPTIONS_ITEM_ERROR_CALLOUT,
   EXCEPTIONS_ITEM_ERROR_DISMISS_BUTTON,
 } from '../screens/exceptions';
+import { closeErrorToast } from './alerts_detection_rules';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', numberOfItems);
@@ -185,6 +187,17 @@ export const validateEmptyExceptionConditionField = () => {
 };
 export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).should('exist');
+  /* Sometimes a toaster error message unrelated with the test performed is displayed.
+   The toaster is blocking the confirm button we have to click. Using force true would solve the issue, but should not be used.
+   There are some tests that use the closeErrorToast() method to close error toasters before continuing with the interactions with the page. 
+   In this case we check if a toaster is displayed and if so, close it to continue with the test.
+   */
+  cy.root().then(($page) => {
+    const element = $page.find(TOASTER_CLOSE_ICON);
+    if (element.length > 0) {
+      closeErrorToast();
+    }
+  });
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
 };
