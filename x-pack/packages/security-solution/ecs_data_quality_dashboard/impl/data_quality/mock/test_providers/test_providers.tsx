@@ -44,6 +44,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
     <I18nProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <AssistantProvider
+          assistantBaseConversations={{}}
           actionTypeRegistry={actionTypeRegistry}
           assistantAvailability={mockAssistantAvailability}
           augmentMessageCodeBlocks={jest.fn()}
@@ -58,6 +59,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
           }}
           getComments={mockGetComments}
           getInitialConversations={mockGetInitialConversations}
+          isValidConversationId={jest.fn(() => true)}
           setConversations={jest.fn()}
           setDefaultAllow={jest.fn()}
           setDefaultAllowReplacement={jest.fn()}

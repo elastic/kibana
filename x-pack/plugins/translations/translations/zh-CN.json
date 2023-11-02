@@ -29869,7 +29869,6 @@
     "xpack.securitySolution.assistant.content.prompts.system.youAreAHelpfulExpertAssistant": "您是一位可帮助回答 Elastic Security 相关问题的专家助手。",
     "xpack.securitySolution.assistant.content.prompts.user.finallySuggestInvestigationGuideAndFormatAsMarkdown": "添加描述、建议操作和带项目符号的分类步骤。使用提供的 MITRE ATT&CK 数据以从 MITRE 添加更多上下文和建议，以及指向 MITRE 网站上的相关页面的超链接。确保包括上下文中的用户和主机风险分数数据。您的响应应包含指向 Elastic Security 特定功能的步骤，包括终端响应操作、Elastic 代理 OSQuery 管理器集成（带示例 osquery 查询）、时间线和实体分析，以及所有相关 Elastic Security 文档的链接。",
     "xpack.securitySolution.assistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries": "评估来自上述上下文的事件，并以用于我的 Elastic Security 案例的 Markdown 语法对您的输出进行全面格式化。",
-    "xpack.securitySolution.assistant.conversations.timelineConversationTitle": "时间线",
     "xpack.securitySolution.assistant.getComments.assistant": "助手",
     "xpack.securitySolution.assistant.getComments.you": "您",
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationPrompt": "作为安全运营和事件响应领域的专家，提供附加告警的细目并简要说明它对我所在组织可能的影响。",
