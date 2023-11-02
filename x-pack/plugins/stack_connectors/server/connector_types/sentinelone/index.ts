@@ -11,7 +11,7 @@ import {
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { PRIVILEGE_API_TAGS } from '@kbn/security-solution-features/app_features';
+import { SECURITY_PRIVILEGE_API_TAGS } from '@kbn/security-solution-features/privileges';
 import {
   SENTINELONE_CONNECTOR_ID,
   SENTINELONE_TITLE,
@@ -48,17 +48,17 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
     switch (subActionName) {
       case SUB_ACTION.ISOLATE_AGENT:
       case SUB_ACTION.RELEASE_AGENT:
-        return PRIVILEGE_API_TAGS.hostIsolationAll.map(toApiTag);
+        return SECURITY_PRIVILEGE_API_TAGS.hostIsolationAll.map(toApiTag);
 
       case SUB_ACTION.KILL_PROCESS:
-        return PRIVILEGE_API_TAGS.processOperationsAll.map(toApiTag);
+        return SECURITY_PRIVILEGE_API_TAGS.processOperationsAll.map(toApiTag);
 
       case SUB_ACTION.GET_AGENTS:
-        return PRIVILEGE_API_TAGS.endpointListRead.map(toApiTag);
+        return SECURITY_PRIVILEGE_API_TAGS.endpointListRead.map(toApiTag);
 
       case SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS:
       case SUB_ACTION.GET_REMOTE_SCRIPT_STATUS:
-        return PRIVILEGE_API_TAGS.responseActionsHistoryLogRead.map(toApiTag);
+        return SECURITY_PRIVILEGE_API_TAGS.responseActionsHistoryLogRead.map(toApiTag);
     }
 
     // trigger authz to fail since we don't recognize the sub-action name

@@ -12,7 +12,7 @@ import {
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { Role } from '@kbn/security-plugin/common';
-import { PRIVILEGE_ID } from '@kbn/security-solution-features/src/security/kibana_sub_features';
+import { SECURITY_PRIVILEGE_ID } from '@kbn/security-solution-features/privileges';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
@@ -384,12 +384,16 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         // SentinelOne supported sub-actions and associated Security Solution kibana privilege needed
         const s1SubActions = {
-          [SUB_ACTION.KILL_PROCESS]: [PRIVILEGE_ID.processOperationsAll],
-          [SUB_ACTION.GET_AGENTS]: [PRIVILEGE_ID.endpointListRead],
-          [SUB_ACTION.ISOLATE_AGENT]: [PRIVILEGE_ID.hostIsolationAll],
-          [SUB_ACTION.RELEASE_AGENT]: [PRIVILEGE_ID.hostIsolationAll],
-          [SUB_ACTION.GET_REMOTE_SCRIPT_STATUS]: [PRIVILEGE_ID.responseActionsHistoryLogRead],
-          [SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS]: [PRIVILEGE_ID.responseActionsHistoryLogRead],
+          [SUB_ACTION.KILL_PROCESS]: [SECURITY_PRIVILEGE_ID.processOperationsAll],
+          [SUB_ACTION.GET_AGENTS]: [SECURITY_PRIVILEGE_ID.endpointListRead],
+          [SUB_ACTION.ISOLATE_AGENT]: [SECURITY_PRIVILEGE_ID.hostIsolationAll],
+          [SUB_ACTION.RELEASE_AGENT]: [SECURITY_PRIVILEGE_ID.hostIsolationAll],
+          [SUB_ACTION.GET_REMOTE_SCRIPT_STATUS]: [
+            SECURITY_PRIVILEGE_ID.responseActionsHistoryLogRead,
+          ],
+          [SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS]: [
+            SECURITY_PRIVILEGE_ID.responseActionsHistoryLogRead,
+          ],
         };
 
         let connectorId: string;

@@ -15,9 +15,9 @@ import { APP_ID } from '../constants';
 import type { SecurityFeatureParams } from './types';
 
 /**
- * List of Kibana tags defined for sub-feature privileges.
+ * List of Kibana Security Solution (SIEM) api tags defined for sub-feature privileges.
  */
-export const PRIVILEGE_API_TAGS = Object.freeze({
+export const SECURITY_PRIVILEGE_API_TAGS = Object.freeze({
   hostIsolationAll: Object.freeze([`${APP_ID}-writeHostIsolationRelease`]),
   processOperationsAll: Object.freeze([`${APP_ID}-writeProcessOperations`]),
   endpointListRead: Object.freeze([`${APP_ID}-readEndpointList`]),
@@ -25,9 +25,10 @@ export const PRIVILEGE_API_TAGS = Object.freeze({
 });
 
 /**
- * List of Kibana privilege IDs
+ * List of Kibana Security Solution (SIEM) privilege IDs
+ * (ex. those that can be used when creating kibana roles to authorize access to a feature)
  */
-export const PRIVILEGE_ID = Object.freeze({
+export const SECURITY_PRIVILEGE_ID = Object.freeze({
   hostIsolationAll: 'host_isolation_all',
   processOperationsAll: 'process_operations_all',
   endpointListRead: 'endpoint_list_read',
@@ -71,8 +72,8 @@ const endpointListSubFeature: SubFeatureConfig = {
           ui: ['writeEndpointList', 'readEndpointList'],
         },
         {
-          api: PRIVILEGE_API_TAGS.endpointListRead,
-          id: PRIVILEGE_ID.endpointListRead,
+          api: SECURITY_PRIVILEGE_API_TAGS.endpointListRead,
+          id: SECURITY_PRIVILEGE_ID.endpointListRead,
           includeIn: 'none',
           name: 'Read',
           savedObject: {
@@ -398,8 +399,8 @@ const responseActionsHistorySubFeature: SubFeatureConfig = {
           ui: ['writeActionsLogManagement', 'readActionsLogManagement'],
         },
         {
-          api: PRIVILEGE_API_TAGS.responseActionsHistoryLogRead,
-          id: PRIVILEGE_ID.responseActionsHistoryLogRead,
+          api: SECURITY_PRIVILEGE_API_TAGS.responseActionsHistoryLogRead,
+          id: SECURITY_PRIVILEGE_ID.responseActionsHistoryLogRead,
           includeIn: 'none',
           name: 'Read',
           savedObject: {
@@ -435,8 +436,8 @@ const hostIsolationSubFeature: SubFeatureConfig = {
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: PRIVILEGE_API_TAGS.hostIsolationAll,
-          id: PRIVILEGE_ID.hostIsolationAll,
+          api: SECURITY_PRIVILEGE_API_TAGS.hostIsolationAll,
+          id: SECURITY_PRIVILEGE_ID.hostIsolationAll,
           includeIn: 'none',
           name: 'All',
           savedObject: {
@@ -475,8 +476,8 @@ const processOperationsSubFeature: SubFeatureConfig = {
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: PRIVILEGE_API_TAGS.processOperationsAll,
-          id: PRIVILEGE_ID.processOperationsAll,
+          api: SECURITY_PRIVILEGE_API_TAGS.processOperationsAll,
+          id: SECURITY_PRIVILEGE_ID.processOperationsAll,
           includeIn: 'none',
           name: 'All',
           savedObject: {
