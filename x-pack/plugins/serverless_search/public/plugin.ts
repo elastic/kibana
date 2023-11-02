@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { appIds } from '@kbn/management-cards-navigation';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
 import {
@@ -34,25 +34,6 @@ export class ServerlessSearchPlugin
       ServerlessSearchPluginStartDependencies
     >
 {
-  private async findAndCreateDataView(data: DataPublicPluginStart) {
-    const dataViewExists =
-      (await data.dataViews.find('default:all-data'))
-        .find((dataView) => dataView.getIndexPattern() === '*')
-        ?.getName() === 'default:all-data' ?? false;
-
-    if (dataViewExists) {
-      return;
-    }
-    const defaultDataViewExists = await data.dataViews.defaultDataViewExists();
-    if (!dataViewExists && !defaultDataViewExists) {
-      await data.dataViews.createAndSave({
-        allowNoIndex: false,
-        name: `default:all-data`,
-        title: '*',
-      });
-    }
-  }
-
   public setup(
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     _setupDeps: ServerlessSearchPluginSetupDependencies
@@ -65,7 +46,6 @@ export class ServerlessSearchPlugin
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       appRoute: '/app/elasticsearch',
-
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
@@ -106,7 +86,7 @@ export class ServerlessSearchPlugin
 
   public start(
     core: CoreStart,
-    { serverless, management, cloud, data }: ServerlessSearchPluginStartDependencies
+    { serverless, management, cloud }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
@@ -115,7 +95,6 @@ export class ServerlessSearchPlugin
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
     });
-    this.findAndCreateDataView(data);
     return {};
   }
 
