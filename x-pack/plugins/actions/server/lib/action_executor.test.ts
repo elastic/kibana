@@ -836,7 +836,6 @@ test('successfully authorize system actions', async () => {
   expect(authorizationMock.ensureAuthorized).toBeCalledWith({
     operation: 'execute',
     additionalPrivileges: ['test/create'],
-    logger: loggerMock,
   });
 });
 
@@ -873,7 +872,6 @@ test('pass the params to the actionTypeRegistry when authorizing system actions'
   expect(authorizationMock.ensureAuthorized).toBeCalledWith({
     operation: 'execute',
     additionalPrivileges: ['test/create'],
-    logger: loggerMock,
   });
 });
 
