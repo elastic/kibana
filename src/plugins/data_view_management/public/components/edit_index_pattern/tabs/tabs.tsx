@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { uniq } from 'lodash';
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
@@ -138,7 +139,18 @@ const addFieldButtonLabel = i18n.translate(
   }
 );
 
-export function Tabs({
+const SCHEMA_ITEMS: FilterItems[] = [
+  {
+    value: 'runtime',
+    name: schemaOptionRuntime,
+  },
+  {
+    value: 'indexed',
+    name: schemaOptionIndexed,
+  },
+];
+
+export const Tabs: React.FC<TabsProps> = ({
   indexPattern,
   saveIndexPattern,
   fields,
@@ -147,7 +159,7 @@ export function Tabs({
   relationships,
   allowedTypes,
   compositeRuntimeFields,
-}: TabsProps) {
+}) => {
   const {
     uiSettings,
     docLinks,
@@ -161,11 +173,17 @@ export function Tabs({
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [syncingStateFunc, setSyncingStateFunc] = useState<{
-    getCurrentTab: () => string;
     setCurrentTab?: (newTab: string) => { tab: string };
-  }>({
-    getCurrentTab: () => TAB_INDEXED_FIELDS,
-  });
+    setCurrentFieldFilter?: (newFieldFilter: string | undefined) => {
+      fieldFilter: string | undefined;
+    };
+    setCurrentFieldTypes?: (newFieldTypes: string[] | undefined) => {
+      fieldTypes: string[] | undefined;
+    };
+    setCurrentSchemaFieldTypes?: (newSchemaFieldTypes: string[] | undefined) => {
+      schemaFieldTypes: string[] | undefined;
+    };
+  }>({});
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string[]>([]);
   const [isScriptedFieldFilterOpen, setIsScriptedFieldFilterOpen] = useState(false);
   const [scriptedFieldLanguages, setScriptedFieldLanguages] = useState<FilterItems[]>([]);
@@ -174,18 +192,52 @@ export function Tabs({
   const [indexedFieldTypes, setIndexedFieldTypes] = useState<FilterItems[]>([]);
   const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
   const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
-  const [schemaItems, setSchemaItems] = useState<FilterItems[]>([
-    {
-      value: 'runtime',
-      name: schemaOptionRuntime,
-    },
-    {
-      value: 'indexed',
-      name: schemaOptionIndexed,
-    },
-  ]);
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
+
+  const filteredIndexedFieldTypeFilter = useMemo(() => {
+    return uniq(
+      indexedFieldTypeFilter.filter((fieldType) =>
+        indexedFieldTypes.some((item) => item.value === fieldType)
+      )
+    );
+  }, [indexedFieldTypeFilter, indexedFieldTypes]);
+
+  const filteredSchemaFieldTypeFilter = useMemo(() => {
+    return uniq(
+      schemaFieldTypeFilter.filter((schemaFieldType) =>
+        SCHEMA_ITEMS.some((item) => item.value === schemaFieldType)
+      )
+    );
+  }, [schemaFieldTypeFilter]);
+
+  const updateTab = useCallback(
+    (tab: Pick<EuiTabbedContentTab, 'id'>) => {
+      syncingStateFunc.setCurrentTab?.(tab.id);
+    },
+    [syncingStateFunc]
+  );
+
+  const updateFieldTypeFilter = useCallback(
+    (newIndexedFieldTypeFilter: string[]) => {
+      syncingStateFunc?.setCurrentFieldTypes?.(newIndexedFieldTypeFilter);
+    },
+    [syncingStateFunc]
+  );
+
+  const updateSchemaFieldTypeFilter = useCallback(
+    (newSchemaFieldTypeFilter: string[]) => {
+      syncingStateFunc?.setCurrentSchemaFieldTypes?.(newSchemaFieldTypeFilter);
+    },
+    [syncingStateFunc]
+  );
+
+  const updateFieldFilter = useCallback(
+    (newFieldFilter: string) => {
+      syncingStateFunc?.setCurrentFieldFilter?.(newFieldFilter || undefined);
+    },
+    [syncingStateFunc]
+  );
 
   const updateFilterItem = (
     items: FilterItems[],
@@ -279,7 +331,7 @@ export function Tabs({
               fullWidth
               placeholder={filterPlaceholder}
               value={fieldFilter}
-              onChange={(e) => setFieldFilter(e.target.value)}
+              onChange={(e) => updateFieldFilter(e.target.value)}
               data-test-subj="indexPatternFieldFilter"
               aria-label={searchAriaLabel}
             />
@@ -299,10 +351,8 @@ export function Tabs({
                         onClick={() => setIsIndexedFilterOpen(!isIndexedFilterOpen)}
                         isSelected={isIndexedFilterOpen}
                         numFilters={indexedFieldTypes.length}
-                        hasActiveFilters={!!indexedFieldTypes.find((item) => item.checked === 'on')}
-                        numActiveFilters={
-                          indexedFieldTypes.filter((item) => item.checked === 'on').length
-                        }
+                        hasActiveFilters={filteredIndexedFieldTypeFilter.length > 0}
+                        numActiveFilters={filteredIndexedFieldTypeFilter.length}
                       >
                         {filterLabel}
                       </EuiFilterButton>
@@ -310,25 +360,27 @@ export function Tabs({
                     isOpen={isIndexedFilterOpen}
                     closePopover={() => setIsIndexedFilterOpen(false)}
                   >
-                    {indexedFieldTypes.map((item, index) => (
-                      <EuiFilterSelectItem
-                        checked={item.checked}
-                        key={item.value}
-                        onClick={() => {
-                          setIndexedFieldTypeFilter(
-                            item.checked
-                              ? indexedFieldTypeFilter.filter((f) => f !== item.value)
-                              : [...indexedFieldTypeFilter, item.value]
-                          );
-                          updateFilterItem(indexedFieldTypes, index, setIndexedFieldTypes);
-                        }}
-                        data-test-subj={`indexedFieldTypeFilterDropdown-option-${item.value}${
-                          item.checked ? '-checked' : ''
-                        }`}
-                      >
-                        {item.name}
-                      </EuiFilterSelectItem>
-                    ))}
+                    {indexedFieldTypes.map((item, index) => {
+                      const isSelected = filteredIndexedFieldTypeFilter.includes(item.value);
+                      return (
+                        <EuiFilterSelectItem
+                          checked={isSelected ? 'on' : undefined}
+                          key={item.value}
+                          onClick={() => {
+                            updateFieldTypeFilter(
+                              isSelected
+                                ? filteredIndexedFieldTypeFilter.filter((f) => f !== item.value)
+                                : [...filteredIndexedFieldTypeFilter, item.value]
+                            );
+                          }}
+                          data-test-subj={`indexedFieldTypeFilterDropdown-option-${item.value}${
+                            isSelected ? '-checked' : ''
+                          }`}
+                        >
+                          {item.name}
+                        </EuiFilterSelectItem>
+                      );
+                    })}
                   </EuiPopover>
                   <EuiPopover
                     anchorPosition="downCenter"
@@ -340,11 +392,9 @@ export function Tabs({
                         iconType="arrowDown"
                         onClick={() => setIsSchemaFilterOpen(!isSchemaFilterOpen)}
                         isSelected={isSchemaFilterOpen}
-                        numFilters={schemaItems.length}
-                        hasActiveFilters={!!schemaItems.find((item) => item.checked === 'on')}
-                        numActiveFilters={
-                          schemaItems.filter((item) => item.checked === 'on').length
-                        }
+                        numFilters={SCHEMA_ITEMS.length}
+                        hasActiveFilters={filteredSchemaFieldTypeFilter.length > 0}
+                        numActiveFilters={filteredSchemaFieldTypeFilter.length}
                       >
                         {schemaFilterLabel}
                       </EuiFilterButton>
@@ -352,25 +402,27 @@ export function Tabs({
                     isOpen={isSchemaFilterOpen}
                     closePopover={() => setIsSchemaFilterOpen(false)}
                   >
-                    {schemaItems.map((item, index) => (
-                      <EuiFilterSelectItem
-                        checked={item.checked}
-                        key={item.value}
-                        onClick={() => {
-                          setSchemaFieldTypeFilter(
-                            item.checked
-                              ? schemaFieldTypeFilter.filter((f) => f !== item.value)
-                              : [...schemaFieldTypeFilter, item.value]
-                          );
-                          updateFilterItem(schemaItems, index, setSchemaItems);
-                        }}
-                        data-test-subj={`schemaFieldTypeFilterDropdown-option-${item.value}${
-                          item.checked ? '-checked' : ''
-                        }`}
-                      >
-                        {item.name}
-                      </EuiFilterSelectItem>
-                    ))}
+                    {SCHEMA_ITEMS.map((item) => {
+                      const isSelected = filteredSchemaFieldTypeFilter.includes(item.value);
+                      return (
+                        <EuiFilterSelectItem
+                          checked={isSelected ? 'on' : undefined}
+                          key={item.value}
+                          onClick={() => {
+                            updateSchemaFieldTypeFilter(
+                              isSelected
+                                ? filteredSchemaFieldTypeFilter.filter((f) => f !== item.value)
+                                : [...filteredSchemaFieldTypeFilter, item.value]
+                            );
+                          }}
+                          data-test-subj={`schemaFieldTypeFilterDropdown-option-${item.value}${
+                            isSelected ? '-checked' : ''
+                          }`}
+                        >
+                          {item.name}
+                        </EuiFilterSelectItem>
+                      );
+                    })}
                   </EuiPopover>
                 </EuiFilterGroup>
               </EuiFlexItem>
@@ -438,17 +490,19 @@ export function Tabs({
     },
     [
       fieldFilter,
-      indexedFieldTypeFilter,
+      filteredSchemaFieldTypeFilter,
+      filteredIndexedFieldTypeFilter,
       indexedFieldTypes,
       isIndexedFilterOpen,
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
       isScriptedFieldFilterOpen,
-      schemaItems,
-      schemaFieldTypeFilter,
       isSchemaFilterOpen,
       openFieldEditor,
       userEditPermission,
+      updateFieldFilter,
+      updateFieldTypeFilter,
+      updateSchemaFieldTypeFilter,
     ]
   );
 
@@ -469,8 +523,8 @@ export function Tabs({
                     indexPattern={indexPattern}
                     fieldFilter={fieldFilter}
                     fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-                    indexedFieldTypeFilter={indexedFieldTypeFilter}
-                    schemaFieldTypeFilter={schemaFieldTypeFilter}
+                    indexedFieldTypeFilter={filteredIndexedFieldTypeFilter}
+                    schemaFieldTypeFilter={filteredSchemaFieldTypeFilter}
                     helpers={{
                       editField: openFieldEditor,
                       deleteField,
@@ -547,8 +601,8 @@ export function Tabs({
       getFilterSection,
       history,
       indexPattern,
-      indexedFieldTypeFilter,
-      schemaFieldTypeFilter,
+      filteredIndexedFieldTypeFilter,
+      filteredSchemaFieldTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
@@ -583,20 +637,41 @@ export function Tabs({
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
 
   useEffect(() => {
-    const { startSyncingState, stopSyncingState, setCurrentTab, getCurrentTab } =
-      createEditIndexPatternPageStateContainer({
-        useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
-        defaultTab: TAB_INDEXED_FIELDS,
-      });
+    const {
+      startSyncingState,
+      stopSyncingState,
+      setCurrentTab,
+      setCurrentFieldTypes,
+      setCurrentFieldFilter,
+      setCurrentSchemaFieldTypes,
+      stateContainer,
+    } = createEditIndexPatternPageStateContainer({
+      useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
+      defaultTab: TAB_INDEXED_FIELDS,
+    });
 
     startSyncingState();
     setSyncingStateFunc({
       setCurrentTab,
-      getCurrentTab,
+      setCurrentFieldTypes,
+      setCurrentFieldFilter,
+      setCurrentSchemaFieldTypes,
     });
-    setSelectedTabId(getCurrentTab());
+
+    setSelectedTabId(stateContainer.selectors.tab());
+    setIndexedFieldTypeFilter((currentValue) => stateContainer.selectors.fieldTypes() ?? []);
+    setSchemaFieldTypeFilter((currentValue) => stateContainer.selectors.schemaFieldTypes() ?? []);
+    setFieldFilter((currentValue) => stateContainer.selectors.fieldFilter() ?? '');
+
+    const stateSubscription = stateContainer.state$.subscribe(() => {
+      setSelectedTabId(stateContainer.selectors.tab());
+      setIndexedFieldTypeFilter((currentValue) => stateContainer.selectors.fieldTypes() ?? []);
+      setSchemaFieldTypeFilter((currentValue) => stateContainer.selectors.schemaFieldTypes() ?? []);
+      setFieldFilter((currentValue) => stateContainer.selectors.fieldFilter() ?? '');
+    });
 
     return () => {
+      stateSubscription.unsubscribe();
       stopSyncingState();
     };
   }, [uiSettings]);
@@ -605,10 +680,7 @@ export function Tabs({
     <EuiTabbedContent
       tabs={euiTabs}
       selectedTab={euiTabs.find((tab) => tab.id === selectedTabId)}
-      onTabClick={(tab) => {
-        setSelectedTabId(tab.id);
-        syncingStateFunc.setCurrentTab?.(tab.id);
-      }}
+      onTabClick={updateTab}
     />
   );
-}
+};

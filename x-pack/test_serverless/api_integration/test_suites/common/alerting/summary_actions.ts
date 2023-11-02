@@ -41,6 +41,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Summary actions', function () {
+    // flaky on MKI, see https://github.com/elastic/kibana/issues/169204
+    this.tags(['failsOnMKI']);
+
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
@@ -187,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: 'all',
           searchType: 'esQuery',
         },
-        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],
@@ -308,7 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: 'all',
           searchType: 'esQuery',
         },
-        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],
@@ -517,7 +520,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: 'all',
           searchType: 'esQuery',
         },
-        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_PRODUCER]: alertDocument[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],

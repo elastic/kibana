@@ -358,6 +358,7 @@ export interface DocLinks {
     readonly luceneQuerySyntax: string;
     readonly percolate: string;
     readonly queryDsl: string;
+    readonly queryESQL: string;
   };
   readonly date: {
     readonly dateMath: string;
