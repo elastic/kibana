@@ -163,8 +163,21 @@ describe('TileStatusTracker', () => {
   });
 
   describe('onError', () => {
+    const tileErrorsMap: Map<string, TileError[] | undefined> = new Map<string, TileError[] | undefined>();
+    const onTileStateChange = (
+      layerId: string,
+      areTilesLoaded: boolean,
+      tileMetaFeatures?: TileMetaFeature[],
+      tileErrors?: TileError[]
+    ) => {
+      tileErrorsMap.set(layerId, tileErrors);
+    }
+
+    beforeEach(() => {
+      tileErrorsMap.clear();
+    });
+
     test('should clear previous tile error when tile starts loading', async () => {
-      const tileErrorsMap: Map<string, TileError[] | undefined> = new Map<string, TileError[] | undefined>();
       const mockMbMap = new MockMbMap();
 
       mount(
@@ -174,14 +187,7 @@ describe('TileStatusTracker', () => {
             createMockLayer('layer1', 'layer1Source'),
             createMockLayer('layer2', 'layer2Source'),
           ]}
-          onTileStateChange={(
-            layerId: string,
-            areTilesLoaded: boolean,
-            tileMetaFeatures?: TileMetaFeature[],
-            tileErrors?: TileError[]
-          ) => {
-            tileErrorsMap.set(layerId, tileErrors);
-          }}
+          onTileStateChange={onTileStateChange}
         />
       );
 
@@ -214,7 +220,6 @@ describe('TileStatusTracker', () => {
     });
 
     test('should extract elasticsearch ErrorCause from response body', async () => {
-      const tileErrorsMap: Map<string, TileError[] | undefined> = new Map<string, TileError[] | undefined>();
       const mockMbMap = new MockMbMap();
       const mockESErrorCause = {
         type: 'failure',
@@ -227,14 +232,7 @@ describe('TileStatusTracker', () => {
           layerList={[
             createMockLayer('layer1', 'layer1Source'),
           ]}
-          onTileStateChange={(
-            layerId: string,
-            areTilesLoaded: boolean,
-            tileMetaFeatures?: TileMetaFeature[],
-            tileErrors?: TileError[]
-          ) => {
-            tileErrorsMap.set(layerId, tileErrors);
-          }}
+          onTileStateChange={onTileStateChange}
         />
       );
 
@@ -260,7 +258,6 @@ describe('TileStatusTracker', () => {
     });
 
     test('should safely handle non-json response body', async () => {
-      const tileErrorsMap: Map<string, TileError[] | undefined> = new Map<string, TileError[] | undefined>();
       const mockMbMap = new MockMbMap();
       
       mount(
@@ -269,14 +266,7 @@ describe('TileStatusTracker', () => {
           layerList={[
             createMockLayer('layer1', 'layer1Source'),
           ]}
-          onTileStateChange={(
-            layerId: string,
-            areTilesLoaded: boolean,
-            tileMetaFeatures?: TileMetaFeature[],
-            tileErrors?: TileError[]
-          ) => {
-            tileErrorsMap.set(layerId, tileErrors);
-          }}
+          onTileStateChange={onTileStateChange}
         />
       );
 
