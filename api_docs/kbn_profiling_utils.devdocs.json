@@ -1425,6 +1425,39 @@
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.BaseFlameGraph.TotalSamples",
+            "type": "number",
+            "tags": [],
+            "label": "TotalSamples",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.BaseFlameGraph.TotalCPU",
+            "type": "number",
+            "tags": [],
+            "label": "TotalCPU",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.BaseFlameGraph.SelfCPU",
+            "type": "number",
+            "tags": [],
+            "label": "SelfCPU",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1643,6 +1676,39 @@
             "signature": [
               "number[]"
             ],
+            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.CalleeTree.TotalSamples",
+            "type": "number",
+            "tags": [],
+            "label": "TotalSamples",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.CalleeTree.TotalCPU",
+            "type": "number",
+            "tags": [],
+            "label": "TotalCPU",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.CalleeTree.SelfCPU",
+            "type": "number",
+            "tags": [],
+            "label": "SelfCPU",
+            "description": [],
             "path": "packages/kbn-profiling-utils/common/callee.ts",
             "deprecated": false,
             "trackAdoption": false
