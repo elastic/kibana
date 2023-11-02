@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('signals index mapping tests', () => {
+    describe('signals index mapping tests', function () {
       // illegal_argument_exception: unknown setting [index.lifecycle.name] in before
       targetTags(this, ['@brokenInServerless']);
 
