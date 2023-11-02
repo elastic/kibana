@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FunctionComponent } from 'react';
 import { ApplicationStart } from '@kbn/core-application-browser';
+import { EuiBadgeProps } from '@elastic/eui';
 import type { IndexDetailsTab } from '../../common/constants';
 import { Index } from '..';
 
@@ -16,6 +17,13 @@ export interface IndexOverviewContent {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
   }) => ReturnType<FunctionComponent>;
+}
+
+export interface IndexBadge {
+  matchIndex: (index: Index) => boolean;
+  label: string;
+  filterExpression: string;
+  color: EuiBadgeProps['color'];
 }
 
 export interface ExtensionsSetup {
@@ -32,7 +40,7 @@ export class ExtensionsService {
   private _actions: any[] = [];
   private _banners: any[] = [];
   private _filters: any[] = [];
-  private _badges: any[] = [
+  private _badges: IndexBadge[] = [
     {
       matchIndex: (index: { isFrozen: boolean }) => {
         return index.isFrozen;
@@ -75,7 +83,7 @@ export class ExtensionsService {
     this._filters.push(filter);
   }
 
-  private addBadge(badge: any) {
+  private addBadge(badge: IndexBadge) {
     this._badges.push(badge);
   }
 
