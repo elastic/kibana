@@ -99,6 +99,15 @@ export interface StartedFleetServer extends StartedServer {
   policyId: string;
 }
 
+/**
+ * Starts Fleet Server and connectors it to the stack
+ * @param kbnClient
+ * @param logger
+ * @param policy
+ * @param version
+ * @param force
+ * @param port
+ */
 export const startFleetServer = async ({
   kbnClient,
   logger,
@@ -135,6 +144,18 @@ export const startFleetServer = async ({
       policyId,
     };
   });
+};
+
+/**
+ * Checks if fleet server is already running and if not, then it will attempt to start
+ * one and connect it to the stack
+ */
+export const startFleetServerIfNecessary = async (
+  options: StartFleetServerOptions
+): Promise<StartedFleetServer | void> => {
+  if (options.force || !(await isFleetServerRunning(options.kbnClient, options.logger))) {
+    return startFleetServer(options);
+  }
 };
 
 const getOrCreateFleetServerAgentPolicyId = async (
@@ -334,6 +355,9 @@ Kill container:       ${chalk.cyan(`docker kill ${containerId}`)}
       url: fleetServerUrl,
       info,
       stop: async () => {
+        log.info(
+          `Stopping (kill) fleet server. Container name [${containerName}] id [${containerId}]`
+        );
         await execa('docker', ['kill', containerId]);
       },
     };

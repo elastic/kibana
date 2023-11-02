@@ -11,8 +11,7 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { StartedFleetServer } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
-import { startFleetServer } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
+import { setupStackServicesUsingCypressConfig } from './common';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
 import type { EndpointSecurityRoleNames } from '../../../../scripts/endpoint/common/roles_users';
@@ -60,7 +59,6 @@ import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/
 import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
-import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   deleteIndexedFleetEndpointPolicies,
@@ -128,18 +126,7 @@ export const dataLoaders = (
 ): void => {
   // Env. variable is set by `cypress_serverless.config.ts`
   const isServerless = config.env.IS_SERVERLESS;
-
-  const stackServicesPromise = createRuntimeServices({
-    kibanaUrl: config.env.KIBANA_URL,
-    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.KIBANA_USERNAME,
-    password: config.env.KIBANA_PASSWORD,
-    esUsername: config.env.ELASTICSEARCH_USERNAME,
-    esPassword: config.env.ELASTICSEARCH_PASSWORD,
-    asSuperuser: true,
-  });
-
+  const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
   const roleAndUserLoaderPromise: Promise<TestRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
       return new TestRoleAndUserLoader(kbnClient, log, isServerless);
@@ -290,39 +277,7 @@ export const dataLoadersForRealEndpoints = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
-  let fleetSrv: StartedFleetServer | undefined;
-
-  const stackServicesPromise = createRuntimeServices({
-    kibanaUrl: config.env.KIBANA_URL,
-    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.KIBANA_USERNAME,
-    password: config.env.KIBANA_PASSWORD,
-    esUsername: config.env.ELASTICSEARCH_USERNAME,
-    esPassword: config.env.ELASTICSEARCH_PASSWORD,
-    asSuperuser: true,
-  });
-
-  on('before:run', async () => {
-    const { kbnClient, log } = await stackServicesPromise;
-
-    fleetSrv = await startFleetServer({
-      kbnClient,
-      logger: log,
-      force: true,
-    });
-  });
-
-  on('after:run', async () => {
-    const { log } = await stackServicesPromise;
-    if (fleetSrv) {
-      try {
-        await fleetSrv.stop();
-      } catch (error) {
-        log.error(error);
-      }
-    }
-  });
+  const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
 
   on('task', {
     createEndpointHost: async (

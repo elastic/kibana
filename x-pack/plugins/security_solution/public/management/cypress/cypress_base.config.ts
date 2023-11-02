@@ -6,6 +6,7 @@
  */
 
 import { merge } from 'lodash';
+import { setupFleetServerForCypressTestRun } from './support/fleet_server_setup';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
@@ -69,11 +70,14 @@ export const getCypressBaseConfig = (
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
-        setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+        setupNodeEvents: async (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
 
+          await setupFleetServerForCypressTestRun(on, config);
+
           dataLoaders(on, config);
+
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);
 
