@@ -18,7 +18,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const browser = getService('browser');
 
-  const timestamp = Date.now();
+  const date = new Date();
+  const timestamp = date.getTime();
   const startDate = new Date(timestamp - ONE_HOUR).toISOString();
   const endDate = new Date(timestamp + ONE_HOUR).toISOString();
 
@@ -52,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             `(query:(language:kuery,query:\'trace.id:${traceId}'),refreshInterval:(pause:!t,value:5000),timeRange:(from:'${startDate}',to:'${endDate}'))`
           );
           expect(parsedUrl.searchParams.get('logPosition')).to.be(
-            `(position:(tiebreaker:0,time:${timestamp}))`
+            `(position:(tiebreaker:0,time:${date.toISOString()}))`
           );
           expect(parsedUrl.searchParams.get('logView')).to.be(LOG_VIEW_REFERENCE);
           expect(documentTitle).to.contain('Stream - Logs - Observability - Elastic');
@@ -87,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             `(query:(language:kuery,query:\'(kubernetes.pod.uid: 1234) and (trace.id:${traceId})\'),refreshInterval:(pause:!t,value:5000),timeRange:(from:'${startDate}',to:'${endDate}'))`
           );
           expect(parsedUrl.searchParams.get('logPosition')).to.be(
-            `(position:(tiebreaker:0,time:${timestamp}))`
+            `(position:(tiebreaker:0,time:${date.toISOString()}))`
           );
           expect(parsedUrl.searchParams.get('logView')).to.be(LOG_VIEW_REFERENCE);
           expect(documentTitle).to.contain('Stream - Logs - Observability - Elastic');
