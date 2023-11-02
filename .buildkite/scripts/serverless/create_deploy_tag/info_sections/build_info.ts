@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildStateToEmoji, exec, octokit } from '../shared';
-import { BuildkiteClient } from '#pipeline-utils';
+import { buildkite, buildStateToEmoji, octokit } from '../shared';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';
 const KIBANA_PR_BUILD_SLUG = 'kibana-on-merge';
@@ -54,18 +53,15 @@ export async function getOnMergePRBuild(commitHash: string): Promise<BuildkiteBu
 }
 
 export async function getQAFTestBuilds(date: string): Promise<BuildkiteBuildExtract[]> {
-  const buildkite = new BuildkiteClient({ exec });
-  const pipelineSlug = QA_FTR_TEST_SLUG;
-
   // We'd get up to the last 3 builds, but the most recent first
-  const builds = await buildkite.getBuildsAfterDate(pipelineSlug, date, 3);
+  const builds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, 3);
 
   return builds
     .map((build) => ({
       success: build.state === 'passed',
       stateEmoji: build.state === 'passed' ? ':white_check_mark:' : ':x:',
       url: build.web_url,
-      slug: pipelineSlug,
+      slug: QA_FTR_TEST_SLUG,
       buildNumber: build.number,
     }))
     .reverse();

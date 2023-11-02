@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { buildkite, buildStateToEmoji, exec, SELECTED_COMMIT_META_KEY } from './shared';
-import { BuildkiteInputStep, getGithubClient } from '#pipeline-utils';
+import { buildkite, buildStateToEmoji, exec, octokit, SELECTED_COMMIT_META_KEY } from './shared';
+import { BuildkiteInputStep } from '#pipeline-utils';
+
+interface Commit {
+  message: string;
+  hash: string;
+}
 
 interface CommitData {
-  commits: Array<{
-    message: string;
-    hash: string;
-  }>;
+  commits: Commit[];
   currentKibanaCommit: string;
 }
 
-async function main() {
-  const [commitCount] = process.argv.slice(2);
-
+async function main(commitCount: string) {
   const commitData = await collectAvailableCommits(commitCount);
 
   await generateCommitSelectionInput(commitData);
@@ -46,16 +46,12 @@ async function collectAvailableCommits(commitCount: string): Promise<CommitData>
   };
 }
 
-async function enrichWithStatuses(
-  commits: Array<{ message: string; hash: string }>
-): Promise<Array<{ message: string; hash: string }>> {
+async function enrichWithStatuses(commits: Commit[]): Promise<Commit[]> {
   console.log('--- Enriching with build statuses');
-
-  const ghClient = getGithubClient();
 
   const commitsWithStatuses = await Promise.all(
     commits.map(async (commit) => {
-      const statusesResponse = await ghClient.request(
+      const statusesResponse = await octokit.request(
         `GET /repos/{owner}/{repo}/commits/{ref}/status`,
         {
           owner: 'elastic',
@@ -65,7 +61,7 @@ async function enrichWithStatuses(
       );
 
       const combinedState = statusesResponse.data.state;
-      const emoji = buildStateToEmoji(combinedState, true);
+      const emoji = buildStateToEmoji(combinedState);
 
       return {
         message: `${emoji} ${commit.message}`,
@@ -81,7 +77,6 @@ async function generateCommitSelectionInput(commitData: CommitData) {
   console.log('--- Generating select step');
 
   const commits = commitData.commits;
-
   const commitsWithStatuses = await enrichWithStatuses(commits);
 
   const inputStep: BuildkiteInputStep = {
@@ -103,7 +98,7 @@ async function generateCommitSelectionInput(commitData: CommitData) {
   buildkite.uploadSteps([inputStep]);
 }
 
-main()
+main(process.argv[2])
   .then(() => {
     console.log('Commit selector generated, added as a buildkite input step.');
   })

@@ -9,13 +9,6 @@
 import { buildkite, COMMIT_INFO_CTX } from './shared';
 
 /**
- * For debugging
- */
-export function getBuildkiteClient() {
-  return buildkite;
-}
-
-/**
  * We'd like to define the release steps, and define the pre-post actions for transitions.
  * For this we can create a basic state machine, and define the transitions.
  */
@@ -23,7 +16,6 @@ export function getBuildkiteClient() {
 const WIZARD_CTX_INSTRUCTION = 'wizard-instruction';
 const WIZARD_CTX_DEFAULT = 'wizard-main';
 
-type StateShape = any;
 type StateNames =
   | 'start'
   | 'initialize'
@@ -37,18 +29,17 @@ type StateNames =
   | 'error_generic'
   | string;
 
-const states: Record<
-  StateNames,
-  {
-    name: string;
-    description: string;
-    instruction?: string;
-    instructionStyle?: 'success' | 'warning' | 'error' | 'info';
-    display: boolean;
-    pre?: (state: StateShape) => Promise<void | boolean>;
-    post?: (state: StateShape) => Promise<void | boolean>;
-  }
-> = {
+interface StateShape {
+  name: string;
+  description: string;
+  instruction?: string;
+  instructionStyle?: 'success' | 'warning' | 'error' | 'info';
+  display: boolean;
+  pre?: (state: StateShape) => Promise<void | boolean>;
+  post?: (state: StateShape) => Promise<void | boolean>;
+}
+
+const states: Record<StateNames, StateShape> = {
   start: {
     name: 'Starting state',
     description: 'No description',
@@ -108,8 +99,7 @@ const states: Record<
       buildkite.setAnnotation(
         WIZARD_CTX_INSTRUCTION,
         'success',
-        `<h3>Deploy tag successfully created!</h3>
-<br/>
+        `<h3>Deploy tag successfully created!</h3><br/>
 Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${deployTag}'>here on buildkite.</a>`
       );
     },
@@ -129,6 +119,28 @@ Your deployment will appear <a href='https://buildkite.com/elastic/kibana-server
     display: false,
   },
 };
+
+/**
+ * Entrypoint for the CLI
+ */
+export async function main(args: string[]) {
+  if (!args.includes('--state')) {
+    throw new Error('Missing --state argument');
+  }
+  const targetState = args.slice(args.indexOf('--state') + 1)[0];
+
+  let data: any;
+  if (args.includes('--data')) {
+    data = args.slice(args.indexOf('--data') + 1)[0];
+  }
+
+  const resultingTargetState = await transition(targetState, data);
+  if (resultingTargetState === 'tag_created') {
+    return await transition('end');
+  } else {
+    return resultingTargetState;
+  }
+}
 
 export async function transition(targetStateName: StateNames, data?: any) {
   // use the buildkite agent to find what state we are in:
@@ -155,7 +167,6 @@ export async function transition(targetStateName: StateNames, data?: any) {
 
   if (currentStateIndex + 1 !== targetStateIndex) {
     await tryCall(currentState.post, stateData);
-    // TODO: it's an out-of-order transition, we need to handle this
     stateData[currentStateName] = 'nok';
   } else {
     const result = await tryCall(currentState.post, stateData);
@@ -163,7 +174,6 @@ export async function transition(targetStateName: StateNames, data?: any) {
   }
   stateData[targetStateName] = 'pending';
 
-  // TODO: what if  this fails?
   await tryCall(targetState.pre, stateData);
 
   buildkite.setMetadata('release_state', targetStateName);
@@ -227,37 +237,12 @@ async function tryCall(fn: any, ...args: any[]) {
   }
 }
 
-/**
- * Entrypoint for the CLI
- */
-export async function main(args: string[]) {
-  if (!args.includes('--state')) {
-    throw new Error('Missing --state argument');
+main(process.argv.slice(2)).then(
+  (targetState) => {
+    console.log('Transition completed to: ' + targetState);
+  },
+  (error) => {
+    console.error(error);
+    process.exit(1);
   }
-  const targetState = args.slice(args.indexOf('--state') + 1)[0];
-
-  let data: any;
-  if (args.includes('--data')) {
-    data = args.slice(args.indexOf('--data') + 1)[0];
-  }
-
-  const resultingTargetState = await transition(targetState, data);
-  if (resultingTargetState === 'tag_created') {
-    return await transition('end');
-  } else {
-    return resultingTargetState;
-  }
-}
-
-if (require.main === module) {
-  const args = process.argv.slice(2);
-  main(args).then(
-    (targetState) => {
-      console.log('Transition completed to: ' + targetState);
-    },
-    (error) => {
-      console.error(error);
-      process.exit(1);
-    }
-  );
-}
+);

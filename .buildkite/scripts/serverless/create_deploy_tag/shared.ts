@@ -6,36 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { getExec } from './prepared_exec';
+import { getExec } from './mock_exec';
 import { BuildkiteClient, getGithubClient } from '#pipeline-utils';
 
 const SELECTED_COMMIT_META_KEY = 'selected-commit-hash';
-
 const COMMIT_INFO_CTX = 'commit-info';
 
 const octokit = getGithubClient();
+
 const exec = getExec(!process.env.CI);
 
 const buildkite = new BuildkiteClient({ exec });
 
-const buildStateToEmoji = (state: string, useRealEmoji = false) => {
-  if (useRealEmoji) {
-    return (
-      {
-        failure: '❌',
-        pending: '⏳',
-        success: '✅',
-      }[state] || '❓'
-    );
-  } else {
-    return (
-      {
-        failure: ':x:',
-        pending: ':hourglass:',
-        success: ':white_check_mark:',
-      }[state] || ':question:'
-    );
-  }
+const buildStateToEmoji = (state: string) => {
+  return (
+    {
+      failure: '❌',
+      pending: '⏳',
+      success: '✅',
+    }[state] || '❓'
+  );
 };
 
 export { octokit, exec, buildkite, buildStateToEmoji, SELECTED_COMMIT_META_KEY, COMMIT_INFO_CTX };
