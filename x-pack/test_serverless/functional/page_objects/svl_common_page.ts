@@ -22,6 +22,23 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     });
 
   return {
+    async loginWithRole(roleName: string) {
+      log.debug(`Logging with cookie for '${roleName}' role`);
+      // get the Cookie using svlRoleManager
+      // await svlRoleManager.getCookieByRole(roleName);
+      await browser.setCookie('sid', '');
+      await browser.get(deployment.getHostPort());
+      // ensure welcome screen won't be shown. This is relevant for environments which don't allow
+      // to use the yml setting, e.g. cloud
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
+      if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
+        log.debug('userMenuButton is found, logged in passed');
+        return true;
+      } else {
+        throw new Error(`Failed to login with cookie for '${roleName}' role`);
+      }
+    },
+
     async navigateToLoginForm() {
       const url = deployment.getHostPort() + '/login';
       await browser.get(url);

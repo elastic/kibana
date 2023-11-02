@@ -205,6 +205,10 @@ class BrowserService extends FtrService {
     return await this.driver.get(url);
   }
 
+  public async setCookie(name: string, value: string) {
+    await this.driver.manage().addCookie({ name, value });
+  }
+
   /**
    * Retrieves the cookie with the given name. Returns null if there is no such cookie. The cookie will be returned as
    * a JSON object as described by the WebDriver wire protocol.
