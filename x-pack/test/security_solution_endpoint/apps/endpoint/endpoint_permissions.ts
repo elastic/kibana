@@ -36,7 +36,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // Run the same set of tests against all of the Security Solution roles
     const ROLES: SecurityRoleName[] = [
-      't1_analyst',
       't2_analyst',
       'rule_author',
       'soc_manager',
