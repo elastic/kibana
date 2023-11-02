@@ -265,6 +265,7 @@ describe('Task Runner Cancel', () => {
         },
         nextRun: '1970-01-01T00:00:10.000Z',
         running: false,
+        typeVersion: expect.any(Number),
       },
       { refresh: false, namespace: undefined }
     );

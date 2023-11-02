@@ -13,12 +13,8 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import {
-  ALERTING_CASES_SAVED_OBJECT_INDEX,
-  SavedObjectsModelVersion,
-  SavedObjectsModelVersionMap,
-} from '@kbn/core-saved-objects-server';
-import { rawRuleSchemaV1, rawRuleSchemaV2, rawRuleSchemaV3 } from './schemas/raw_rule';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { ruleModelVersions } from './rule_model_versions';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { maintenanceWindowMappings } from './maintenance_window_mapping';
@@ -29,6 +25,11 @@ import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateAlert } from './partially_update_alert';
+export {
+  ruleModelVersions,
+  latestRuleVersion,
+  getMinimumCompatibleVersion,
+} from './rule_model_versions';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -75,40 +76,6 @@ export type AlertAttributesExcludedFromAADType =
   | 'revision'
   | 'running';
 
-interface CustomSavedObjectsModelVersion extends SavedObjectsModelVersion {
-  minimumCompatibleVersion: (param: RawRule) => number;
-}
-
-interface CustomSavedObjectsModelVersionMap extends SavedObjectsModelVersionMap {
-  [modelVersion: string]: CustomSavedObjectsModelVersion;
-}
-
-export const modelVersions: CustomSavedObjectsModelVersionMap = {
-  '1': {
-    changes: [],
-    schemas: {
-      create: rawRuleSchemaV1,
-    },
-    minimumCompatibleVersion: (rawRule) => 1,
-  },
-  '2': {
-    changes: [],
-    schemas: {
-      create: rawRuleSchemaV2,
-    },
-    minimumCompatibleVersion: (rawRule) => 1,
-  },
-  '3': {
-    changes: [],
-    schemas: {
-      create: rawRuleSchemaV3,
-    },
-    minimumCompatibleVersion: (rawRule) => 1,
-  },
-};
-
-export const latestRuleVersion = Math.max(...Object.keys(modelVersions).map(Number));
-
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
@@ -146,7 +113,7 @@ export function setupSavedObjects(
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
-    modelVersions,
+    modelVersions: ruleModelVersions,
   });
 
   savedObjects.registerType({

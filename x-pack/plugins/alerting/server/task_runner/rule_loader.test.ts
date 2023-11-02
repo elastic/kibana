@@ -64,7 +64,7 @@ describe('rule_loader', () => {
       ? { error }
       : {
           data: {
-            indirectParams: mockedRawRuleSO.attributes,
+            indirectParams: mockedRawRuleSO.attributes.params,
             rule: { ...mockedRule, params, enabled: ruleEnabled },
             rulesClient,
             version: '1',
