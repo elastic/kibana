@@ -6,39 +6,25 @@ agents:
 # TODO: Replace inline buildkite-agent commands with a central script that manages contexts/banners better
 
 steps:
-  - label: "Set initial banner"
-    env:
-      SKIP_KIBANA_HOOKS: 1
-    commands:
-      - "buildkite-agent annotate --append --context banner --style info \"<h3>:kibana: Kibana Serverless deployment wizard :mage:</h3>\""
-      - "buildkite-agent annotate --append --context banner --style info \"<br/>:guide_dog: Please follow the steps in the build.\""
-      - "buildkite-agent annotate --append --context banner --style info \"<br/>:github: First, we're gathering info about recent commits...\""
-
   - label: "Select target commit to deploy"
-    command: ts-node .buildkite/scripts/serverless/create_deploy_tag/generate_commit_selector.ts 50
+    commands:
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state initialize
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state collect_commits
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/generate_commit_selector.ts 50
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state wait_for_selection
     key: select_commit
 
   - wait: ~
 
-  - label: "Update banner after selection"
-    env:
-      SKIP_KIBANA_HOOKS: 1
-    commands:
-      - "buildkite-agent annotate --append --context banner --style info \"<br/>:dizzy: Selected commit: <a href='https://github.com/elastic/kibana/commit/$$(buildkite-agent meta-data get selected-commit-hash)'>$$(buildkite-agent meta-data get selected-commit-hash)</a>.\""
-      - "buildkite-agent annotate --append --context banner --style info \"<br/>:hourglass: Please wait while we're collecting info about the commit.\""
-
   - label: "Collect commit info"
-    command: .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.sh
+    commands:
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state collect_commit_info
+      - .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.sh
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state wait_for_confirmation
     key: collect_data
     depends_on: select_commit
 
   - wait: ~
-
-  - label: "Update banner"
-    env:
-      SKIP_KIBANA_HOOKS: 1
-    commands:
-      - "buildkite-agent annotate --context top-banner --style warning \":mag: Review the information below, and unblock the build to proceed.\""
 
   - block: "Confirm deployment"
     prompt: "Are you sure you want to deploy to production?"
@@ -47,15 +33,9 @@ steps:
   - wait: ~
 
   - label: ":ship: Create Deploy Tag"
-    command: .buildkite/scripts/serverless/create_deploy_tag/create_deploy_tag.sh
+    commands:
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state create_deploy_tag
+      - .buildkite/scripts/serverless/create_deploy_tag/create_deploy_tag.sh
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state tag_created
     env:
       DRY_RUN: $DRY_RUN
-
-  - wait: ~
-
-  - label: "Update banner"
-    env:
-      SKIP_KIBANA_HOOKS: 1
-    commands:
-      - "buildkite-agent annotate --context lower-banner --style success \"<h3>Deploy tag successfully created</h3><br/>\""
-      - "buildkite-agent annotate --context lower-banner --style success --append \"Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=$$(buildkite-agent meta-data get deploy-tag)'>here on buildkite.</a>\""
