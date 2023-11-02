@@ -27,8 +27,12 @@ import {
   savedObjectWith500Error,
   disabledRuleForBulkDisable1,
   disabledRuleForBulkDisable2,
+  returnedRuleForBulkDisableWithActions1,
+  returnedRuleForBulkDisableWithActions2,
   enabledRuleForBulkOps1,
   enabledRuleForBulkOps2,
+  enabledRuleForBulkOpsWithActions1,
+  enabledRuleForBulkOpsWithActions2,
   returnedRuleForBulkDisable1,
   returnedRuleForBulkDisable2,
   siemRuleForBulkOps1,
@@ -36,6 +40,7 @@ import {
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 
 jest.mock('../../../../task_runner/alert_task_instance', () => ({
   taskInstanceToAlertTaskInstance: jest.fn(),
@@ -109,6 +114,8 @@ setGlobalDate();
 
 describe('bulkDisableRules', () => {
   let rulesClient: RulesClient;
+  let actionsClient: jest.Mocked<ActionsClient>;
+
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = { saved_objects: [enabledRule1, enabledRule2] }
   ) => {
@@ -144,6 +151,9 @@ describe('bulkDisableRules', () => {
 
   beforeEach(async () => {
     rulesClient = new RulesClient(rulesClientParams);
+    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
+
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
@@ -154,6 +164,7 @@ describe('bulkDisableRules', () => {
       resultedActions: [],
       resultedReferences: [],
     });
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
   });
 
   test('should disable two rule', async () => {
@@ -185,6 +196,39 @@ describe('bulkDisableRules', () => {
     expect(result).toStrictEqual({
       errors: [],
       rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable2],
+      total: 2,
+    });
+  });
+
+  test('should disable two rule and return right actions', async () => {
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+    });
+
+    const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+        expect.objectContaining({
+          id: 'id2',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+      ]),
+      { overwrite: true }
+    );
+
+    expect(result).toStrictEqual({
+      errors: [],
+      rules: [returnedRuleForBulkDisableWithActions1, returnedRuleForBulkDisableWithActions2],
       total: 2,
     });
   });
