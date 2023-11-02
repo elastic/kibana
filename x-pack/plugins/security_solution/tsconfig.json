@@ -178,5 +178,6 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/shared-ux-error-boundary",
     "@kbn/zod-helpers",
+    "@kbn/security-solution-serverless",
   ]
 }
