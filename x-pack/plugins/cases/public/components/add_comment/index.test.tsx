@@ -15,7 +15,7 @@ import { noCreateCasesPermissions, TestProviders, createAppMockRenderer } from '
 import { AttachmentType } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import type { AddCommentProps, AddCommentRefObject } from '.';
+import type { AddCommentProps } from '.';
 import { AddComment } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
