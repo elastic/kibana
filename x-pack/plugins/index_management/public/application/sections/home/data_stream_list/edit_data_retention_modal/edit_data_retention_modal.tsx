@@ -41,7 +41,7 @@ import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits, DataStream } from '../../../../../../common';
 import { isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
-import { UnitField } from './unit_field';
+import { UnitField } from '../../../../components/shared';
 import { updateDataRetention } from '../../../../services/api';
 
 interface Props {

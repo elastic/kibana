@@ -26,7 +26,9 @@ import {
   Field,
   Forms,
   JsonEditorField,
+  NumericField,
 } from '../../../../shared_imports';
+import { UnitField, timeUnits } from '../../../components/shared';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
 
@@ -112,6 +114,16 @@ function getFieldsMeta(esDocsBase: string) {
       }),
       testSubject: 'versionField',
     },
+    dataRetention: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.dataRetentionTitle', {
+        defaultMessage: 'Data retention',
+      }),
+      description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.dataRetentionDescription', {
+        defaultMessage: 'Data will be kept at least this long before being automatically deleted.',
+      }),
+      valueTestSubject: 'valueDataRetentionField',
+      unitTestSubject: 'unitDataRetentionField',
+    },
   };
 }
 
@@ -164,9 +176,9 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       getFormData,
     } = form;
 
-    const [{ addMeta }] = useFormData<{ addMeta: boolean }>({
+    const [{ addMeta, enableDataRetention, infiniteDataRetention }] = useFormData<{ addMeta: boolean, enableDataRetention: boolean, infiniteDataRetention: boolean }>({
       form,
-      watch: 'addMeta',
+      watch: ['addMeta', 'enableDataRetention', 'infiniteDataRetention'],
     });
 
     /**
@@ -185,7 +197,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
     }, [onChange, isFormValid, validate, getFormData]);
 
-    const { name, indexPatterns, createDataStream, order, priority, version } = getFieldsMeta(
+    const { name, indexPatterns, createDataStream, order, priority, version, dataRetention } = getFieldsMeta(
       documentationService.getEsDocsBase()
     );
 
@@ -292,6 +304,53 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 ['data-test-subj']: version.testSubject,
               }}
             />
+          </FormRow>
+
+          {/* Data retention */}
+          <FormRow
+            title={dataRetention.title}
+            description={
+              <>
+                {dataRetention.description}
+                <EuiSpacer size="m" />
+                <UseField path="enableDataRetention" data-test-subj="dataRetentionToggle" />
+              </>
+            }
+          >
+            {enableDataRetention && (
+              <UseField
+                path="dataRetentionValue"
+                component={NumericField}
+                labelAppend={(
+                  <UseField
+                    path="infiniteDataRetention"
+                    data-test-subj="infiniteDataRetentionToggle"
+                    componentProps={{
+                      euiFieldProps: {
+                        compressed: true
+                      }
+                    }}
+                  />
+                )}
+                componentProps={{
+                  euiFieldProps: {
+                    disabled: infiniteDataRetention,
+                    'data-test-subj': dataRetention.valueTestSubject,
+                    min: 1,
+                    append: (
+                      <UnitField
+                        path="dataRetentionUnit"
+                        options={timeUnits}
+                        disabled={infiniteDataRetention}
+                        euiFieldProps={{
+                          'data-test-subj': dataRetention.unitTestSubject,
+                        }}
+                      />
+                    ),
+                  },
+                }}
+              />
+            )}
           </FormRow>
 
           {/* _meta */}

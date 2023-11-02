@@ -158,6 +158,66 @@ export const schemas: Record<string, FormSchema> = {
       }),
       formatters: [toInt],
     },
+
+    enableDataRetention: {
+      type: FIELD_TYPES.TOGGLE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.enableDataRetentionLabel', {
+        defaultMessage: 'Enable data retention',
+      }),
+    },
+    infiniteDataRetention: {
+      type: FIELD_TYPES.TOGGLE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.enableDataRetentionLabel', {
+        defaultMessage: 'Keep data indefinitely',
+      }),
+    },
+    dataRetentionValue: {
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionValueLabel', {
+        defaultMessage: 'Data Retention',
+      }),
+      formatters: [toInt],
+      validations: [
+        {
+          validator: ({ value, formData }) => {
+            // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
+            if (formData.dataRetentionInfiniteRetentionPeriod) {
+              return undefined;
+            }
+
+            if (!value) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
+                  {
+                    defaultMessage: 'A data retention value is required.',
+                  }
+                ),
+              };
+            }
+
+            if (value <= 0) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldNonNegativeError',
+                  {
+                    defaultMessage: `A positive value is required.`,
+                  }
+                ),
+              };
+            }
+          },
+        },
+      ],
+    },
+    dataRetentionUnit: {
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionUnitLabel', {
+        defaultMessage: 'Time unit',
+      }),
+      defaultValue: 'd',
+    },
+
     _meta: {
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {
         defaultMessage: '_meta field data (optional)',

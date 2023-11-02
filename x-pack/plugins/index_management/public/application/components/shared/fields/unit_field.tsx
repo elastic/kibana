@@ -6,8 +6,9 @@
  */
 
 import React, { FunctionComponent, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFilterSelectItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
-import { UseField } from '../../../../../shared_imports';
+import { UseField } from '../../../../shared_imports';
 
 interface Props {
   path: string;
@@ -18,6 +19,45 @@ interface Props {
     text: string;
   }>;
 }
+
+export const timeUnits = [
+  {
+    value: 'd',
+    text: i18n.translate(
+      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.daysLabel',
+      {
+        defaultMessage: 'days',
+      }
+    ),
+  },
+  {
+    value: 'h',
+    text: i18n.translate(
+      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.hoursLabel',
+      {
+        defaultMessage: 'hours',
+      }
+    ),
+  },
+  {
+    value: 'm',
+    text: i18n.translate(
+      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.minutesLabel',
+      {
+        defaultMessage: 'minutes',
+      }
+    ),
+  },
+  {
+    value: 's',
+    text: i18n.translate(
+      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.secondsLabel',
+      {
+        defaultMessage: 'seconds',
+      }
+    ),
+  },
+];
 
 export const UnitField: FunctionComponent<Props> = ({ path, disabled, options, euiFieldProps }) => {
   const [open, setOpen] = useState(false);
