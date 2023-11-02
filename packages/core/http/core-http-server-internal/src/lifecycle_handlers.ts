@@ -100,11 +100,6 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
   };
 };
 
-/**
- * This should remain part of the logger prefix so that we can notify/track
- * when we see this logged for observability purposes.
- */
-
 const shouldLogBuildNumberMismatch = (
   serverBuild: { number: number; string: string },
   request: KibanaRequest,
@@ -122,6 +117,10 @@ const shouldLogBuildNumberMismatch = (
   return { log: false };
 };
 
+/**
+ * This should remain part of the logger prefix so that we can notify/track
+ * when we see this logged for observability purposes.
+ */
 const BUILD_NUMBER_MISMATCH_LOGGER_NAME = 'kbn-build-number-mismatch';
 export const createBuildNrMismatchLoggerPreResponseHandler = (
   serverBuildNumber: number,
