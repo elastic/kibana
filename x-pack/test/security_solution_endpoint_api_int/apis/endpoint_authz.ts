@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   describe('When attempting to call an endpoint api', function () {
-    targetTags(this, ['@ess']);
+    targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
     let actionId = '';
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_operations_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(403, {
@@ -271,7 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
           apiListItem.path
         }]`, async () => {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_operations_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
             .send(apiListItem.body)
             .expect(200);

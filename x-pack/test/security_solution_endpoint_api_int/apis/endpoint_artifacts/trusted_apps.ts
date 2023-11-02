@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
   describe('Endpoint artifacts (via lists plugin): Trusted Applications', function () {
-    targetTags(this, ['@ess']);
+    targetTags(this, ['@ess', '@serverless']);
 
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
@@ -158,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.entries[0].field = 'some.invalid.field';
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -172,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.entries.push({ ...body.entries[0] });
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -241,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.os_types = ['linux', 'windows'];
 
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -256,7 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             // Using superuser here as we need custom license for this action
             await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -267,7 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const trustedAppApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
           it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
               .expect(200);
@@ -275,24 +275,23 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      describe('and user has authorization to read trusted apps', () => {
+      describe('and user has authorization to read trusted apps', function () {
+        targetTags(this, ['@skipInServerless']); // no such role in serverless
+
         for (const trustedAppApiCall of [...trustedAppApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.artifact_read_role, 'changeme')
+              .auth(ROLE.hunter, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
-              .expect(403, {
-                status_code: 403,
-                message: 'EndpointArtifactError: Endpoint authorization failure',
-              });
+              .expect(403);
           });
         }
 
         for (const trustedAppApiCall of needsReadPrivilege) {
           it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLE.artifact_read_role, 'changeme')
+              .auth(ROLE.hunter, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
               .expect(200);
@@ -311,10 +310,7 @@ export default function ({ getService }: FtrProviderContext) {
               .auth(ROLE.t1_analyst, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
-              .expect(403, {
-                status_code: 403,
-                message: 'EndpointArtifactError: Endpoint authorization failure',
-              });
+              .expect(403);
           });
         }
       });

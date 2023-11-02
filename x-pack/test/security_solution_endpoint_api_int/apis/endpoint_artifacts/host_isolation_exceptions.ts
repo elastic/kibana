@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
   describe('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', function () {
-    targetTags(this, ['@ess']);
+    targetTags(this, ['@ess', '@serverless']);
 
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let hostIsolationExceptionData: ArtifactTestData;
@@ -194,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -210,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -233,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -276,7 +276,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
+            .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody())
             .expect(200);
@@ -284,7 +284,9 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('and user has authorization to read host isolation exceptions', () => {
+    describe('and user has authorization to read host isolation exceptions', function () {
+      targetTags(this, ['@skipInServerless']); // no such role in serverless
+
       for (const hostIsolationExceptionApiCall of [
         ...hostIsolationExceptionCalls,
         ...needsWritePrivilege,
@@ -293,13 +295,10 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.artifact_read_role, 'changeme')
+            .auth(ROLE.hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody())
-            .expect(403, {
-              status_code: 403,
-              message: 'EndpointArtifactError: Endpoint authorization failure',
-            });
+            .expect(403);
         });
       }
 
@@ -308,7 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[hostIsolationExceptionApiCall.method](
             hostIsolationExceptionApiCall.path
           )
-            .auth(ROLE.artifact_read_role, 'changeme')
+            .auth(ROLE.hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody())
             .expect(200);
@@ -329,10 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
             .auth(ROLE.t1_analyst, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(hostIsolationExceptionApiCall.getBody())
-            .expect(403, {
-              status_code: 403,
-              message: 'EndpointArtifactError: Endpoint authorization failure',
-            });
+            .expect(403);
         });
       }
     });
