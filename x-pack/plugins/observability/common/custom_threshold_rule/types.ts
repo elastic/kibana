@@ -10,15 +10,6 @@ import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { TimeUnitChar } from '../utils/formatters/duration';
 import { CUSTOM_AGGREGATOR } from './constants';
 
-type DeepPartialArray<T> = Array<DeepPartial<T>>;
-
-type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
-export type DeepPartial<T> = T extends any[]
-  ? DeepPartialArray<T[number]>
-  : T extends object
-  ? DeepPartialObject<T>
-  : T;
-
 export const ThresholdFormatterTypeRT = rt.keyof({
   abbreviatedNumber: null,
   bits: null,
@@ -28,47 +19,6 @@ export const ThresholdFormatterTypeRT = rt.keyof({
   highPrecision: null,
 });
 export type ThresholdFormatterType = rt.TypeOf<typeof ThresholdFormatterTypeRT>;
-
-/**
- * Properties specific to the Metrics Source Configuration.
- */
-export const SourceConfigurationTimestampColumnRuntimeType = rt.type({
-  timestampColumn: rt.type({
-    id: rt.string,
-  }),
-});
-export const SourceConfigurationMessageColumnRuntimeType = rt.type({
-  messageColumn: rt.type({
-    id: rt.string,
-  }),
-});
-
-export const SourceConfigurationFieldColumnRuntimeType = rt.type({
-  fieldColumn: rt.type({
-    id: rt.string,
-    field: rt.string,
-  }),
-});
-
-export const SourceConfigurationColumnRuntimeType = rt.union([
-  SourceConfigurationTimestampColumnRuntimeType,
-  SourceConfigurationMessageColumnRuntimeType,
-  SourceConfigurationFieldColumnRuntimeType,
-]);
-
-// Kibana data views
-export const logDataViewReferenceRT = rt.type({
-  type: rt.literal('data_view'),
-  dataViewId: rt.string,
-});
-
-// Index name
-export const logIndexNameReferenceRT = rt.type({
-  type: rt.literal('index_name'),
-  indexName: rt.string,
-});
-
-export const logIndexReferenceRT = rt.union([logDataViewReferenceRT, logIndexNameReferenceRT]);
 
 export enum Comparator {
   GT = '>',
