@@ -194,8 +194,8 @@ Discover::
 * Allow fetching more documents on Discover page ({kibana-pull}163784[#163784]).
 Elastic Security::
 For the Elastic Security 8.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-Enterprise Search::
-For the Elastic Enterprise Search 8.11.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
+Search::
+* Self-managed connector clients now show advanced configuration options in the UI ({kibana-pull}167770[#167770]).
 Fleet::
 * Adds sidebar navigation showing headings extracted from the readme ({kibana-pull}167216[#167216]).
 Inspector::
@@ -252,8 +252,15 @@ Dashboard::
 * Generate new panel IDs on Dashboard clone ({kibana-pull}166299[#166299]).
 Elastic Security::
 For the Elastic Security 8.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-Enterprise Search::
-For the Elastic Enterprise Search 8.11.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
+Search::
+* Native connector external documentation links are now rendered conditionally to avoid empty links ({kibana-pull}169121[#169121]).
+* Fixed an issue which caused Access Control Syncs to be scheduled when Document Level Security was disabled ({kibana-pull}168987[#168987]).
+* Restored access and admin checks for App Search and Workplace Search product cards ({kibana-pull}168890[#168890]).
+* The filter box in the *Browse documents* tab under *Search > Content > Indices* now escapes Lucene reserved characters instead of throwing errors ({kibana-pull}168092[#168092]).
+* Fixed an issue associated with changing the indices underlying a search application. When a user modifies the indices underlying a search application in Kibana, the associated search template is now reverted to the default template ({kibana-pull}167532[#167532]).
+* Fixed an issue where the Search plugin was inaccessible for unauthenticated users, eg. for Kibana in read-only demo setups ({kibana-pull}167171[#167171]).
+* Fixed an issue with the welcome banner in Search ({kibana-pull}166814[#166814]).
+* Self managed connector clients now show advanced configuration options in the UI ({kibana-pull}167770[#167770]).
 Fleet::
 * Vastly improve performance of Fleet final pipeline's date formatting logic for `event.ingested` ({kibana-pull}167318[#167318]).
 Lens & Visualizations::
