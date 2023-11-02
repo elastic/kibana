@@ -8,7 +8,7 @@
 // eslint-disable-next-line max-classes-per-file
 import React from 'react';
 import { mount } from 'enzyme';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
+import type { Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
 import { TileStatusTracker } from './tile_status_tracker';
 import { ILayer } from '../../../classes/layers/layer';
@@ -35,6 +35,10 @@ class MockMbMap {
     this.listeners = this.listeners.filter((listener) => {
       return !(listener.type === type && listener.callback === callback);
     });
+  }
+
+  getZoom() {
+    return 5;
   }
 }
 
@@ -70,7 +74,7 @@ function createMockLayer(id: string, mbSourceId: string): ILayer {
   return new MockLayer(id, mbSourceId) as unknown as ILayer;
 }
 
-function createMockMbDataEvent(mbSourceId: string, tileKey: string): unknown {
+function createSourceDataEvent(mbSourceId: string, tileKey: string) {
   return {
     sourceId: mbSourceId,
     dataType: 'source',
@@ -90,6 +94,15 @@ function createMockMbDataEvent(mbSourceId: string, tileKey: string): unknown {
   };
 }
 
+function createSourceDataErrorEvent(mbSourceId: string, tileKey: string) {
+  return {
+    ...createSourceDataEvent(mbSourceId, tileKey),
+    error: {
+      message: 'simulated error'
+    }
+  };
+}
+
 async function sleep(timeout: number) {
   return await new Promise((resolve) => {
     setTimeout(() => {
@@ -98,47 +111,36 @@ async function sleep(timeout: number) {
   });
 }
 
-const mockMbMap = new MockMbMap();
-const defaultProps = {
-  mbMap: mockMbMap as unknown as MbMap,
-  layerList: [],
-  setAreTilesLoaded: () => {},
-  updateMetaFromTiles: () => {},
-  clearTileLoadError: () => {},
-  setTileLoadError: () => {},
-};
-
 describe('TileStatusTracker', () => {
   test('should set tile load status', async () => {
-    const layerList = [
-      createMockLayer('foo', 'foosource'),
-      createMockLayer('bar', 'barsource'),
-      createMockLayer('foobar', 'foobarsource'),
-    ];
     const loadedMap: Map<string, boolean> = new Map<string, boolean>();
-    const onTileStateChange = (
-      layerId: string,
-      areTilesLoaded: boolean,
-      tileMetaFeatures?: TileMetaFeature[],
-      tileErrors?: TileError[]
-    ) => {
-      loadedMap.set(layerId, areTilesLoaded);
-    };
+    const mockMbMap = new MockMbMap();
 
     const component = mount(
       <TileStatusTracker
-        {...defaultProps}
-        layerList={layerList}
-        onTileStateChange={onTileStateChange}
+        mbMap={mockMbMap as unknown as MbMap}
+        layerList={[
+          createMockLayer('foo', 'foosource'),
+          createMockLayer('bar', 'barsource'),
+          createMockLayer('foobar', 'foobarsource'),
+        ]}
+        onTileStateChange={(
+          layerId: string,
+          areTilesLoaded: boolean,
+          tileMetaFeatures?: TileMetaFeature[],
+          tileErrors?: TileError[]
+        ) => {
+          loadedMap.set(layerId, areTilesLoaded);
+        }}
       />
     );
 
-    mockMbMap.emit('sourcedataloading', createMockMbDataEvent('foosource', 'aa11'));
+    mockMbMap.emit('sourcedataloading', createSourceDataEvent('foosource', 'aa11'));
 
-    const aa11BarTile = createMockMbDataEvent('barsource', 'aa11');
+    const aa11BarTile = createSourceDataEvent('barsource', 'aa11');
     mockMbMap.emit('sourcedataloading', aa11BarTile);
 
-    mockMbMap.emit('sourcedata', createMockMbDataEvent('foosource', 'aa11'));
+    mockMbMap.emit('sourcedata', createSourceDataEvent('foosource', 'aa11'));
 
     // simulate delay. Cache-checking is debounced.
     await sleep(300);
@@ -147,10 +149,10 @@ describe('TileStatusTracker', () => {
     expect(loadedMap.get('bar')).toBe(false); // still outstanding tile requests
     expect(loadedMap.has('foobar')).toBe(false); // never received tile requests, status should not have been reported for layer
 
-    (aa11BarTile as { tile: { aborted: boolean } })!.tile.aborted = true; // abort tile
-    mockMbMap.emit('sourcedataloading', createMockMbDataEvent('barsource', 'af1d'));
-    mockMbMap.emit('sourcedataloading', createMockMbDataEvent('foosource', 'af1d'));
-    mockMbMap.emit('error', createMockMbDataEvent('barsource', 'af1d'));
+    (aa11BarTile.tile as MapSourceDataEvent['tile'])!.aborted = true; // abort tile
+    mockMbMap.emit('sourcedataloading', createSourceDataEvent('barsource', 'af1d'));
+    mockMbMap.emit('sourcedataloading', createSourceDataEvent('foosource', 'af1d'));
+    mockMbMap.emit('error', createSourceDataErrorEvent('barsource', 'af1d'));
 
     // simulate delay. Cache-checking is debounced.
     await sleep(300);
@@ -162,5 +164,48 @@ describe('TileStatusTracker', () => {
     component.unmount();
 
     expect(mockMbMap.listeners.length).toBe(0);
+  });
+
+  describe('onError', () => {
+    test('should clear previous tile error when tile starts loading', async () => {
+      const tileErrorsMap: Map<string, TileError[] | undefined> = new Map<string, TileError[] | undefined>();
+      const mockMbMap = new MockMbMap();
+
+      mount(
+        <TileStatusTracker
+          mbMap={mockMbMap as unknown as MbMap}
+          layerList={[
+            createMockLayer('layer1', 'layer1Source'),
+            createMockLayer('layer2', 'layer2Source'),
+          ]}
+          onTileStateChange={(
+            layerId: string,
+            areTilesLoaded: boolean,
+            tileMetaFeatures?: TileMetaFeature[],
+            tileErrors?: TileError[]
+          ) => {
+            tileErrorsMap.set(layerId, tileErrors);
+          }}
+        />
+      );
+
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer2Source', 'aa11'));
+      mockMbMap.emit('error', createSourceDataErrorEvent('layer1Source', 'aa11'));
+
+      // simulate delay. Cache-checking is debounced.
+      await sleep(300);
+
+      expect(tileErrorsMap.get('layer1')?.length).toBe(1);
+      expect(tileErrorsMap.get('layer2')).toBeUndefined();
+      
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
+
+      // simulate delay. Cache-checking is debounced.
+      await sleep(300);
+
+      expect(tileErrorsMap.get('layer1')).toBeUndefined();
+      expect(tileErrorsMap.get('layer2')).toBeUndefined();
+    });
   });
 });

@@ -42,6 +42,11 @@ export class TileErrorCache {
   }
 
   public getTileErrors(layerId: string) {
-    return this._cache[layerId] ? Object.values(this._cache[layerId]) : undefined;
+    const tileErrors = this._cache[layerId];
+    if (!tileErrors) {
+      return;
+    }
+    const tileErrorsArray = Object.values(tileErrors);
+    return tileErrorsArray.length ? tileErrorsArray : undefined;
   }
 }
