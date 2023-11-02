@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-  LEFT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiToolTip, RIGHT_ALIGNMENT, LEFT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo } from 'react';
@@ -24,7 +19,7 @@ import {
   getTimeSeriesColor,
 } from '../../../../shared/charts/helper/get_timeseries_color';
 import { SparkPlot } from '../../../../shared/charts/spark_plot';
-import { ErrorDetailLink } from '../../../../shared/links/apm/error_detail_link';
+import { CrashDetailLink } from '../../../../shared/links/apm/mobile/crash_detail_link';
 import { ErrorOverviewLink } from '../../../../shared/links/apm/error_overview_link';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
@@ -38,7 +33,7 @@ const ErrorLink = euiStyled(ErrorOverviewLink)`
   ${truncate('100%')};
 `;
 
-const MessageLink = euiStyled(ErrorDetailLink)`
+const MessageLink = euiStyled(CrashDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
   font-size: ${({ theme }) => theme.eui.euiFontSizeM};
   ${truncate('100%')};
@@ -60,7 +55,7 @@ interface Props {
   isLoading: boolean;
 }
 
-function MobileErrorGroupList({
+function MobileCrashGroupList({
   mainStatistics,
   serviceName,
   detailedStatisticsLoading,
@@ -97,9 +92,9 @@ function MobileErrorGroupList({
       },
       {
         name: i18n.translate(
-          'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
+          'xpack.apm.crashTable.crashMessageAndCulpritColumnLabel',
           {
-            defaultMessage: 'Error message and culprit',
+            defaultMessage: 'crash message',
           }
         ),
         field: 'message',
@@ -122,20 +117,6 @@ function MobileErrorGroupList({
             </MessageAndCulpritCell>
           );
         },
-      },
-      {
-        name: '',
-        field: 'handled',
-        sortable: false,
-        align: RIGHT_ALIGNMENT,
-        render: (_, { handled }) =>
-          handled === false && (
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
-                defaultMessage: 'Unhandled',
-              })}
-            </EuiBadge>
-          ),
       },
       {
         field: 'lastSeen',
@@ -208,8 +189,8 @@ function MobileErrorGroupList({
           ? i18n.translate('xpack.apm.errorsTable.loading', {
               defaultMessage: 'Loading...',
             })
-          : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-              defaultMessage: 'No errors found',
+          : i18n.translate('xpack.apm.crashTable.noCrashesLabel', {
+              defaultMessage: 'No crashes found',
             })
       }
       items={mainStatistics}
@@ -223,4 +204,4 @@ function MobileErrorGroupList({
   );
 }
 
-export { MobileErrorGroupList };
+export { MobileCrashGroupList };

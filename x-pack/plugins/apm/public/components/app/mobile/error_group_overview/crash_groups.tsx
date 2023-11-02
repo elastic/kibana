@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
 import { MobileCrashesTreemap } from '../charts/mobile_crashes_treemap';
-import { MobileErrorGroupList } from './error_group_list';
+import { MobileCrashGroupList } from './crash_group_list';
 import {
   FETCH_STATUS,
   isPending,
@@ -227,7 +227,7 @@ export function MobileCrashGroupOverview() {
           </EuiTitle>
           <EuiSpacer size="s" />
 
-          <MobileErrorGroupList
+          <MobileCrashGroupList
             mainStatistics={mobileCrashGroupMainStatistics}
             serviceName={serviceName}
             detailedStatisticsLoading={isPending(

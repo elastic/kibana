@@ -23,6 +23,7 @@ import { TransactionDetails } from '../../app/transaction_details';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { ErrorGroupDetails } from '../../app/mobile/error_group_details';
+import { CrashGroupDetails } from '../../app/mobile/crash_group_details';
 import { MobileErrorCrashesOverview } from '../../app/mobile/error_group_overview';
 
 export function page({
@@ -217,6 +218,15 @@ export const mobileServiceDetailRoute = {
           },
           '/mobile-services/{serviceName}/errors': {
             element: <MobileErrorCrashesOverview />,
+          },
+          '/mobile-services/{serviceName}/crashes/{groupId}': {
+            element: <CrashGroupDetails />,
+            params: t.type({
+              path: t.type({
+                groupId: t.string,
+              }),
+              query: t.partial({ errorId: t.string }),
+            }),
           },
         },
       },
