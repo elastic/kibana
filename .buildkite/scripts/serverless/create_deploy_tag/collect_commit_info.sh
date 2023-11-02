@@ -6,3 +6,10 @@ set -euo pipefail
 
 echo "--- Collecting commit info"
 ts-node .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.ts
+
+cat << EOF | buildkite-agent pipeline upload
+  steps:
+    - block: "Confirm deployment"
+      prompt: "Are you sure you want to deploy to production?"
+      depends_on: collect_data
+EOF
