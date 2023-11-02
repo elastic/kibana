@@ -306,6 +306,21 @@ export class BuildkiteClient {
     });
   };
 
+  getMetadata(key: string, defaultValue: string | null = null): string | null {
+    try {
+      const stdout = this.exec(`buildkite-agent meta-data get '${key}'`, {
+        stdio: ['pipe'],
+      });
+      return stdout?.toString().trim() || defaultValue;
+    } catch (e) {
+      if (e.message.includes('404 Not Found')) {
+        return defaultValue;
+      } else {
+        throw e;
+      }
+    }
+  }
+
   setAnnotation = (
     context: string,
     style: 'info' | 'success' | 'warning' | 'error',

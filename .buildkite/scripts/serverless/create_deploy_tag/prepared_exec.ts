@@ -83,10 +83,15 @@ const makePreparedExec = (id: string) => {
     const responses = loadFakeResponses();
     calls.push({ command, opts });
 
-    if (responses[command]) {
+    if (typeof responses[command] !== 'undefined') {
       return responses[command];
     } else {
       console.warn(`No response for command: ${command}`);
+      responses[command] = '<missing>';
+      fs.writeFileSync(
+        path.resolve(getKibanaDir(), PREPARED_RESPONSES_PATH),
+        JSON.stringify(responses, null, 2)
+      );
       return exec(command, opts);
     }
   };
