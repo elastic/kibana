@@ -357,6 +357,8 @@ ${JSON.stringify(
             // Setup fleet if Cypress config requires it
             let fleetServer: void | StartedFleetServer;
             if (cypressConfigFile.env?.WITH_FLEET_SERVER) {
+              log.info(`Starting fleet-server`);
+
               const kbnClient = createKbnClient({
                 url: baseUrl,
                 username: config.get('servers.kibana.username'),
