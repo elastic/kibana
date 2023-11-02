@@ -6,6 +6,8 @@
  */
 
 import { get } from 'lodash';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   InfraMetadataAggregationBucket,
@@ -13,8 +15,6 @@ import {
 } from '../../../lib/adapters/framework';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { findInventoryFields } from '../../../../common/inventory_models';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export interface InfraMetricsAdapterResponse {

@@ -15,6 +15,7 @@ import type {
   NewElasticsearchOutput,
   NewLogstashOutput,
   NewOutput,
+  NewRemoteElasticsearchOutput,
 } from '../../../../../../../common/types/models';
 
 import {
@@ -53,6 +54,7 @@ import {
   validateLogstashHosts,
   validateYamlConfig,
   validateCATrustedFingerPrint,
+  validateServiceToken,
   validateSSLCertificate,
   validateSSLKey,
   validateSSLKeySecret,
@@ -85,6 +87,7 @@ export interface OutputFormInputsType {
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
   defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
+  serviceTokenInput: ReturnType<typeof useInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
@@ -165,7 +168,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const isPreconfigured = output?.is_preconfigured ?? false;
   const allowEdit = output?.allow_edit ?? [];
 
-  function isDisabled(field: keyof Output | keyof KafkaOutput) {
+  function isDisabled(
+    field: keyof Output | keyof KafkaOutput | keyof NewRemoteElasticsearchOutput
+  ) {
     if (!isPreconfigured) {
       return false;
     }
@@ -202,6 +207,13 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     output?.hosts ?? [],
     validateESHosts,
     isDisabled('hosts')
+  );
+
+  // Remtote ES inputs
+  const serviceTokenInput = useInput(
+    (output as NewRemoteElasticsearchOutput)?.service_token ?? '',
+    validateServiceToken,
+    isDisabled('service_token')
   );
   /*
   Shipper feature flag - currently depends on the content of the yaml
@@ -473,6 +485,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
   const isLogstash = typeInput.value === outputType.Logstash;
   const isKafka = typeInput.value === outputType.Kafka;
+  const isRemoteElasticsearch = typeInput.value === outputType.RemoteElasticsearch;
 
   const inputs: OutputFormInputsType = {
     nameInput,
@@ -489,6 +502,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
+    serviceTokenInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -547,6 +561,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
+    const serviceTokenValid = serviceTokenInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -589,6 +604,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         partitioningRandomGroupEventsValid &&
         partitioningRoundRobinGroupEventsValid
       );
+    }
+    if (isRemoteElasticsearch) {
+      return (
+        elasticsearchUrlsValid && additionalYamlConfigValid && nameInputValid && serviceTokenValid
+      );
     } else {
       // validate ES
       return (
@@ -616,6 +636,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     logstashHostsInput,
     additionalYamlConfigInput,
     caTrustedFingerprintInput,
+    serviceTokenInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -624,6 +645,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaPartitionTypeRoundRobinInput,
     isLogstash,
     isKafka,
+    isRemoteElasticsearch,
   ]);
 
   const submit = useCallback(async () => {
@@ -821,6 +843,18 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               proxy_id: proxyIdValue,
               ...shipperParams,
             } as NewLogstashOutput;
+          case outputType.RemoteElasticsearch:
+            return {
+              name: nameInput.value,
+              type: outputType.RemoteElasticsearch,
+              hosts: elasticsearchUrlInput.value,
+              is_default: false,
+              is_default_monitoring: defaultMonitoringOutputInput.value,
+              config_yaml: additionalYamlConfigInput.value,
+              service_token: serviceTokenInput.value,
+              proxy_id: proxyIdValue,
+              ...shipperParams,
+            } as NewRemoteElasticsearchOutput;
           case outputType.Elasticsearch:
           default:
             return {
@@ -923,6 +957,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslCertificateAuthoritiesInput.value,
     elasticsearchUrlInput.value,
     caTrustedFingerprintInput.value,
+    serviceTokenInput.value,
     confirm,
     notifications.toasts,
   ]);
