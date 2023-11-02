@@ -26,9 +26,9 @@ export const PolicyStatusContextProvider: FunctionComponent = ({ children }) => 
   );
 };
 
-export type DoNotUseIlmPolicyStatusReturn = ReturnType<typeof DoNotUseIlmPolicyStatus>;
+export type UseDefaultPolicyStatusReturn = ReturnType<typeof useDefaultPolicyStatus>;
 
-export const DoNotUseIlmPolicyStatus = (): ContextValue => {
+export const useDefaultPolicyStatus = (): ContextValue => {
   const ctx = useContext(PolicyStatusContext);
   if (!ctx) {
     throw new Error('"PolicyStatus" can only be used inside of "PolicyStatusContext"');

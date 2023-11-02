@@ -568,7 +568,6 @@ export const ReportListing = (
       {...props}
       apiClient={apiClient}
       capabilities={capabilities}
-      policyContextValue={DoNotUseIlmPolicyStatus()}
     />
   );
 };

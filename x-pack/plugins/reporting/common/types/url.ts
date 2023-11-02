@@ -34,8 +34,8 @@ export interface IlmPolicyStatusResponse {
   status: IlmPolicyMigrationStatus;
 }
 
-export interface NoPolicyStatusResponse {
-  status?: undefined;
+export interface DefaultPolicyStatusResponse {
+  status: undefined;
 }
 
 type Url = string;
