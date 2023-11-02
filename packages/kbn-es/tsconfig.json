@@ -3,19 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.js"
-  ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "include": ["**/*.ts", "**/*.js", "**/*.json"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/tooling-log",
     "@kbn/dev-utils",
     "@kbn/dev-proc-runner",
     "@kbn/ci-stats-reporter",
     "@kbn/jest-serializers",
-    "@kbn/repo-info",
+    "@kbn/repo-info"
   ]
 }

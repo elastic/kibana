@@ -24,8 +24,8 @@ import {
 import { ruleDetailsUrl } from '../../../urls/rule_details';
 
 const loadPageAsReadOnlyUser = (url: string) => {
-  login(ROLES.reader);
-  visit(url, { role: ROLES.reader });
+  login(ROLES.t1_analyst);
+  visit(url, { role: ROLES.t1_analyst });
   waitForPageTitleToBeShown();
 };
 
@@ -44,8 +44,7 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Detections > Callouts', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe('Detections > Callouts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
