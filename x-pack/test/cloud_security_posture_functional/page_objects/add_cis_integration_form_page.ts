@@ -114,7 +114,6 @@ export function AddCisIntegrationFormPageProvider({
 
   const isRadioButtonChecked = async (selector: string) => {
     const page = await testSubjects.find('dataCollectionSetupStep');
-    // const findCheckedButton = await page.findAllByCssSelector(`input[id="${selector}"}]`);
     const findCheckedButton = await page.findAllByCssSelector(`input[id="${selector}"]:checked`);
     if (findCheckedButton.length === 0) return false;
     return true;

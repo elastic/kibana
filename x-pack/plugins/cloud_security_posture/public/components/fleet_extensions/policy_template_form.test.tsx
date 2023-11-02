@@ -551,12 +551,12 @@ describe('<CspPolicyTemplateForm />', () => {
     it('K8S or KSPM Vanilla should not render any Setup Access option', () => {
       const policy = getMockPolicyK8s();
 
-      const { queryByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+      const { queryByTestId } = render(<WrappedComponent newPolicy={policy} />);
 
-      expect(queryByLabelText('Assume role')).not.toBeInTheDocument();
-      expect(queryByLabelText('Direct access keys')).not.toBeInTheDocument();
-      expect(queryByLabelText('Temporary keys')).not.toBeInTheDocument();
-      expect(queryByLabelText('Shared credentials')).not.toBeInTheDocument();
+      expect(queryByTestId('assumeRoleTestId')).not.toBeInTheDocument();
+      expect(queryByTestId('directAccessKeyTestId')).not.toBeInTheDocument();
+      expect(queryByTestId('temporaryKeyTestId')).not.toBeInTheDocument();
+      expect(queryByTestId('sharedCredentialsTestId')).not.toBeInTheDocument();
     });
   });
 
