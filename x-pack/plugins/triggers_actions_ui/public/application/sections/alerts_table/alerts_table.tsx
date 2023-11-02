@@ -18,7 +18,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { isEqual } from 'lodash';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
-import { AlertsTableProps, FetchAlertData, PreFetchPageContext } from '../../../types';
+import { AlertsTableProps, FetchAlertData } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
 import './alerts_table.scss';
