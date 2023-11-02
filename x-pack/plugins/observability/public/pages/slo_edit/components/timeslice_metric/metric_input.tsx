@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -14,12 +13,13 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { createOptionsFromFields, Option } from '../../helpers/create_options';
-import { QueryBuilder } from '../common/query_builder';
-import { CreateSLOForm } from '../../types';
-import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../helpers/aggregation_options';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../helpers/aggregation_options';
+import { createOptionsFromFields, Option } from '../../helpers/create_options';
+import { CreateSLOForm } from '../../types';
+import { QueryBuilder } from '../common/query_builder';
 
 const fieldLabel = i18n.translate(
   'xpack.observability.slo.sloEdit.sliType.timesliceMetric.fieldLabel',
