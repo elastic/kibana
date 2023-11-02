@@ -91,15 +91,18 @@ export const renderApp = ({
                 <Router history={history}>
                   <EuiThemeProvider darkMode={isDarkMode}>
                     <i18nCore.Context>
-                      <RedirectAppLinks
-                        coreStart={{
-                          application: core.application,
-                        }}
+                      <div
                         className={APP_WRAPPER_CLASS}
                         data-test-subj="exploratoryViewMainContainer"
                       >
-                        <App />
-                      </RedirectAppLinks>
+                        <RedirectAppLinks
+                          coreStart={{
+                            application: core.application,
+                          }}
+                        >
+                          <App />
+                        </RedirectAppLinks>
+                      </div>
                     </i18nCore.Context>
                   </EuiThemeProvider>
                 </Router>

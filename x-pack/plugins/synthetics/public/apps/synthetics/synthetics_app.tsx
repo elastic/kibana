@@ -107,7 +107,6 @@ const Application = (props: SyntheticsAppProps) => {
                             <SyntheticsStartupPluginsContextProvider {...startPlugins}>
                               <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
                                 <RedirectAppLinks
-                                  className={APP_WRAPPER_CLASS}
                                   coreStart={{
                                     application: core.application,
                                   }}

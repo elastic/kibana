@@ -133,15 +133,15 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
 export const ViewApiRequestFlyout = (props: ViewApiRequestFlyoutProps) => {
   if (props.application) {
     return (
-      <RedirectAppLinks
-        coreStart={{
-          application: props.application,
-        }}
-        className={APP_WRAPPER_CLASS}
-        data-test-subj="apiRequestFlyoutRedirectWrapper"
-      >
-        <ApiRequestFlyout {...props} />
-      </RedirectAppLinks>
+      <div className={APP_WRAPPER_CLASS} data-test-subj="apiRequestFlyoutRedirectWrapper">
+        <RedirectAppLinks
+          coreStart={{
+            application: props.application,
+          }}
+        >
+          <ApiRequestFlyout {...props} />
+        </RedirectAppLinks>
+      </div>
     );
   }
 

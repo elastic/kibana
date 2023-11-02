@@ -137,7 +137,6 @@ const Application = (props: UptimeAppProps) => {
                             <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
                               <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
                                 <RedirectAppLinks
-                                  className={APP_WRAPPER_CLASS}
                                   coreStart={{
                                     application: core.application,
                                   }}

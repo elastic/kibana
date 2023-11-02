@@ -29,14 +29,15 @@ export const mount =
     const reactElement = (
       <KibanaContextProvider services={{ ...coreSetup, ...core, ...plugins }}>
         <i18nCore.Context>
-          <RedirectAppLinks
-            coreStart={{
-              application: core.application,
-            }}
-            className={APP_WRAPPER_CLASS}
-          >
-            <App {...deps} defaultIndexPattern={defaultIndexPattern} />
-          </RedirectAppLinks>
+          <div className={APP_WRAPPER_CLASS}>
+            <RedirectAppLinks
+              coreStart={{
+                application: core.application,
+              }}
+            >
+              <App {...deps} defaultIndexPattern={defaultIndexPattern} />
+            </RedirectAppLinks>
+          </div>
         </i18nCore.Context>
       </KibanaContextProvider>
     );

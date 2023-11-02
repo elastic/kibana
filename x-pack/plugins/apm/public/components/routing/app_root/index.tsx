@@ -60,65 +60,68 @@ export function ApmAppRoot({
   const i18nCore = core.i18n;
 
   return (
-    <RedirectAppLinks
-      coreStart={{
-        application: core.application,
-      }}
+    <div
       className={APP_WRAPPER_CLASS}
       data-test-subj="apmMainContainer"
       role="main"
     >
-      <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider
-          services={{ ...core, ...pluginsStart, storage, ...apmServices }}
-        >
-          <i18nCore.Context>
-            <ObservabilityAIAssistantProvider
-              value={apmPluginContextValue.observabilityAIAssistant}
-            >
-              <TimeRangeIdContextProvider>
-                <RouterProvider history={history} router={apmRouter as any}>
-                  <ApmErrorBoundary>
-                    <RedirectDependenciesToDependenciesInventory>
-                      <RedirectWithDefaultEnvironment>
-                        <RedirectWithDefaultDateRange>
-                          <RedirectWithOffset>
-                            <TrackPageview>
-                              <UpdateExecutionContextOnRouteChange>
-                                <BreadcrumbsContextProvider>
-                                  <UrlParamsProvider>
-                                    <LicenseProvider>
-                                      <AnomalyDetectionJobsContextProvider>
-                                        <InspectorContextProvider>
-                                          <ApmThemeProvider>
-                                            <MountApmHeaderActionMenu />
+      <RedirectAppLinks
+        coreStart={{
+          application: core.application,
+        }}
+      >
+        <ApmPluginContext.Provider value={apmPluginContextValue}>
+          <KibanaContextProvider
+            services={{ ...core, ...pluginsStart, storage, ...apmServices }}
+          >
+            <i18nCore.Context>
+              <ObservabilityAIAssistantProvider
+                value={apmPluginContextValue.observabilityAIAssistant}
+              >
+                <TimeRangeIdContextProvider>
+                  <RouterProvider history={history} router={apmRouter as any}>
+                    <ApmErrorBoundary>
+                      <RedirectDependenciesToDependenciesInventory>
+                        <RedirectWithDefaultEnvironment>
+                          <RedirectWithDefaultDateRange>
+                            <RedirectWithOffset>
+                              <TrackPageview>
+                                <UpdateExecutionContextOnRouteChange>
+                                  <BreadcrumbsContextProvider>
+                                    <UrlParamsProvider>
+                                      <LicenseProvider>
+                                        <AnomalyDetectionJobsContextProvider>
+                                          <InspectorContextProvider>
+                                            <ApmThemeProvider>
+                                              <MountApmHeaderActionMenu />
 
-                                            <Route
-                                              component={
-                                                ScrollToTopOnPathChange
-                                              }
-                                            />
-                                            <RouteRenderer />
-                                          </ApmThemeProvider>
-                                        </InspectorContextProvider>
-                                      </AnomalyDetectionJobsContextProvider>
-                                    </LicenseProvider>
-                                  </UrlParamsProvider>
-                                </BreadcrumbsContextProvider>
-                              </UpdateExecutionContextOnRouteChange>
-                            </TrackPageview>
-                          </RedirectWithOffset>
-                        </RedirectWithDefaultDateRange>
-                      </RedirectWithDefaultEnvironment>
-                    </RedirectDependenciesToDependenciesInventory>
-                  </ApmErrorBoundary>
-                </RouterProvider>
-              </TimeRangeIdContextProvider>
-            </ObservabilityAIAssistantProvider>
-          </i18nCore.Context>
-        </KibanaContextProvider>
-      </ApmPluginContext.Provider>
-    </RedirectAppLinks>
+                                              <Route
+                                                component={
+                                                  ScrollToTopOnPathChange
+                                                }
+                                              />
+                                              <RouteRenderer />
+                                            </ApmThemeProvider>
+                                          </InspectorContextProvider>
+                                        </AnomalyDetectionJobsContextProvider>
+                                      </LicenseProvider>
+                                    </UrlParamsProvider>
+                                  </BreadcrumbsContextProvider>
+                                </UpdateExecutionContextOnRouteChange>
+                              </TrackPageview>
+                            </RedirectWithOffset>
+                          </RedirectWithDefaultDateRange>
+                        </RedirectWithDefaultEnvironment>
+                      </RedirectDependenciesToDependenciesInventory>
+                    </ApmErrorBoundary>
+                  </RouterProvider>
+                </TimeRangeIdContextProvider>
+              </ObservabilityAIAssistantProvider>
+            </i18nCore.Context>
+          </KibanaContextProvider>
+        </ApmPluginContext.Provider>
+      </RedirectAppLinks>
+    </div>
   );
 }
 
