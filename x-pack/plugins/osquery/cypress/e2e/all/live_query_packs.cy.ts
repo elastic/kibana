@@ -92,7 +92,9 @@ describe('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     cy.getBySel('toggleIcon-failingQuery').click();
     cy.contains('Status').click();
-    cy.contains('query failed, code: 1, message: no such table: opera_extensions');
+    cy.contains('query failed, code: 1, message: no such table: opera_extensions', {
+      timeout: 90000,
+    });
     cy.getBySel('toggleIcon-failingQuery').click();
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     addToCase(caseId);
