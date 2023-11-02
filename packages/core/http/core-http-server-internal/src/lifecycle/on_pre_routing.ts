@@ -73,10 +73,9 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
         const { url } = result;
         request.setUrl(url);
 
-        // We should update raw request as well since it can be proxied to the old platform
-        request.raw.req.url = url;
         return responseToolkit.continue;
       }
+
       throw new Error(
         `Unexpected result from OnPreRouting. Expected OnPreRoutingResult or KibanaResponse, but given: ${result}.`
       );
