@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
+import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
 
 export interface SwitcherWithOptions {
   switcher: CapabilitiesSwitcher;

@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, memoize, uniqueId } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
 import type { SwitcherWithOptions } from './types';
 
 export type CapabilitiesResolver = ({
@@ -24,43 +25,80 @@ export type CapabilitiesResolver = ({
   useDefaultCapabilities: boolean;
 }) => Promise<Capabilities>;
 
-export const getCapabilitiesResolver =
-  (
-    capabilities: () => Capabilities,
-    switchers: () => SwitcherWithOptions[]
-  ): CapabilitiesResolver =>
-  async ({
+interface SwitcherWithId extends SwitcherWithOptions {
+  id: string;
+}
+
+interface SwitcherBucket {
+  switchers: SwitcherWithId[];
+  bucketPaths: Set<string>;
+}
+
+type ForPathSwitcherResolver = (path: string, switchers: SwitcherWithId[]) => string[];
+
+export const getCapabilitiesResolver = (
+  getCapabilities: () => Capabilities,
+  getSwitchers: () => SwitcherWithOptions[]
+): CapabilitiesResolver => {
+  let initialized = false;
+  let capabilities: Capabilities;
+  let switchers: Map<string, SwitcherWithId>;
+  // memoize is on the first argument only by default, which is what we want here
+  const getSwitcherForPath: ForPathSwitcherResolver = memoize(getSwitchersToUseForPath);
+
+  // memoize is on the first argument only by default, which is what we want here
+  // getSwitchersToUseForPath
+  // (path: string, switchers: SwitcherWithId[]): string[]
+
+  return async ({
     request,
     capabilityPath,
     applications,
     useDefaultCapabilities,
   }): Promise<Capabilities> => {
+    if (!initialized) {
+      capabilities = getCapabilities();
+      switchers = new Map();
+      getSwitchers().forEach((switcher) => {
+        const switcherId = uniqueId('s-');
+        switchers.set(switcherId, {
+          id: switcherId,
+          ...switcher,
+        });
+      });
+      initialized = true;
+    }
+
     return withSpan({ name: 'resolve capabilities', type: 'capabilities' }, () =>
       resolveCapabilities({
-        capabilities: capabilities(),
-        switchers: switchers(),
+        capabilities,
+        switchers,
         request,
         capabilityPath,
         applications,
         useDefaultCapabilities,
+        getSwitcherForPath,
       })
     );
   };
+};
 
-export const resolveCapabilities = async ({
+const resolveCapabilities = async ({
   capabilities,
   switchers,
   request,
   capabilityPath,
   applications,
   useDefaultCapabilities,
+  getSwitcherForPath,
 }: {
   capabilities: Capabilities;
-  switchers: SwitcherWithOptions[];
+  switchers: Map<string, SwitcherWithId>;
   request: KibanaRequest;
   applications: string[];
-  capabilityPath: string[];
+  capabilityPath: string[]; // TODO: rename to plural
   useDefaultCapabilities: boolean;
+  getSwitcherForPath: ForPathSwitcherResolver;
 }): Promise<Capabilities> => {
   const mergedCaps: Capabilities = cloneDeep({
     ...capabilities,
@@ -70,9 +108,28 @@ export const resolveCapabilities = async ({
     }, capabilities.navLinks),
   });
 
-  return switchers.reduce(async (caps, switcher) => {
+  // find switchers that should be applied for the provided capabilityPaths
+  const allSwitchers = [...switchers.values()];
+  const switcherIdsToApply = new Set<string>();
+  capabilityPath.forEach((path) => {
+    getSwitcherForPath(path, allSwitchers).forEach((switcherId) =>
+      switcherIdsToApply.add(switcherId)
+    );
+  });
+  const switchersToApply = [...switcherIdsToApply].reduce((list, switcherId) => {
+    list.push(switchers.get(switcherId)!);
+    return list;
+  }, [] as SwitcherWithId[]);
+
+  // split the switchers into buckets for parallel execution
+  const switcherBuckets = splitIntoBuckets(switchersToApply);
+
+  // convert the multi-switcher buckets into switchers
+  const convertedSwitchers = switcherBuckets.map(convertBucketToSwitcher);
+
+  return convertedSwitchers.reduce(async (caps, switcher) => {
     const resolvedCaps = await caps;
-    const changes = await switcher.switcher(request, resolvedCaps, useDefaultCapabilities);
+    const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
     return recursiveApplyChanges(resolvedCaps, changes);
   }, Promise.resolve(mergedCaps));
 };
@@ -98,3 +155,98 @@ function recursiveApplyChanges<
       return acc;
     }, {} as TDestination);
 }
+
+const getSwitchersToUseForPath = (path: string, switchers: SwitcherWithId[]): string[] => {
+  const switcherIds: string[] = [];
+  switchers.forEach((switcher) => {
+    if (
+      switcher.capabilityPath.some((switcherPath) => {
+        return pathsIntersect(path, switcherPath);
+      })
+    ) {
+      switcherIds.push(switcher.id);
+    }
+  });
+  return switcherIds;
+};
+// TODO: memoize should be done in getCapabilitiesResolver
+// (pathA: string, pathB: string) => `${pathA}|${pathB}`
+const pathsIntersect = (pathA: string, pathB: string): boolean => {
+  const splitA = pathA.split('.');
+  const splitB = pathB.split('.');
+  const minLength = Math.min(splitA.length, splitB.length);
+
+  for (let i = 0; i < minLength; i++) {
+    const segA = splitA[i];
+    const segB = splitB[i];
+    if (segA === '*' || segB === '*') {
+      return true;
+    }
+    if (segA !== segB) {
+      return false;
+    }
+  }
+  return false;
+};
+
+const splitIntoBuckets = (switchers: SwitcherWithId[]): SwitcherBucket[] => {
+  const buckets: SwitcherBucket[] = [];
+
+  const canBeAddedToBucket = (switcher: SwitcherWithId, bucket: SwitcherBucket): boolean => {
+    const bucketPaths = [...bucket.bucketPaths];
+    for (const switcherPath of switcher.capabilityPath) {
+      for (const bucketPath of bucketPaths) {
+        if (pathsIntersect(switcherPath, bucketPath)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  const addIntoBucket = (switcher: SwitcherWithId, bucket: SwitcherBucket) => {
+    bucket.switchers.push(switcher);
+    switcher.capabilityPath.forEach((path) => {
+      bucket.bucketPaths.add(path);
+    });
+  };
+
+  for (const switcher of switchers) {
+    let added = false;
+    for (const bucket of buckets) {
+      // switcher can be added -> we do and we break
+      if (canBeAddedToBucket(switcher, bucket)) {
+        addIntoBucket(switcher, bucket);
+        added = true;
+        break;
+      }
+    }
+    // could not find a bucket to add the switch to -> creating a new one
+    if (!added) {
+      buckets.push({
+        switchers: [switcher],
+        bucketPaths: new Set(switcher.capabilityPath),
+      });
+    }
+  }
+
+  return buckets;
+};
+
+const convertBucketToSwitcher = (bucket: SwitcherBucket): CapabilitiesSwitcher => {
+  // only one switcher in the bucket -> no need to wrap
+  if (bucket.switchers.length === 1) {
+    return bucket.switchers[0].switcher;
+  }
+
+  const switchers = bucket.switchers.map((switcher) => switcher.switcher);
+
+  return async (request, uiCapabilities, useDefaultCapabilities) => {
+    const allChanges = await Promise.all(
+      switchers.map((switcher) => {
+        return switcher(request, uiCapabilities, useDefaultCapabilities);
+      })
+    );
+    return Object.assign({}, ...allChanges);
+  };
+};

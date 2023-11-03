@@ -45,6 +45,7 @@ export class CapabilitiesService {
   private readonly capabilitiesProviders: CapabilitiesProvider[] = [];
   private readonly capabilitiesSwitchers: SwitcherWithOptions[] = [];
   private readonly resolveCapabilities: CapabilitiesResolver;
+  private started = false;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('capabilities-service');
@@ -75,9 +76,15 @@ export class CapabilitiesService {
 
     return {
       registerProvider: (provider: CapabilitiesProvider) => {
+        if (this.started) {
+          throw new Error('registerProvider cannot be called after #start');
+        }
         this.capabilitiesProviders.push(provider);
       },
       registerSwitcher: (switcher: CapabilitiesSwitcher, options: CapabilitiesSwitcherOptions) => {
+        if (this.started) {
+          throw new Error('registerSwitcher cannot be called after #start');
+        }
         this.capabilitiesSwitchers.push({
           switcher,
           capabilityPath: Array.isArray(options.capabilityPath)
@@ -89,6 +96,8 @@ export class CapabilitiesService {
   }
 
   public start(): CapabilitiesStart {
+    this.started = true;
+
     return {
       resolveCapabilities: (request, options) =>
         this.resolveCapabilities({

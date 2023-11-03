@@ -9,7 +9,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import { resolveCapabilities } from './resolve_capabilities';
+import { getCapabilitiesResolver } from './resolve_capabilities';
 
 describe('resolveCapabilities', () => {
   let defaultCaps: Capabilities;
@@ -25,15 +25,16 @@ describe('resolveCapabilities', () => {
   });
 
   it('returns the initial capabilities if no switcher are used', async () => {
-    // defaultCaps, [], request, [], true
-    const result = await resolveCapabilities({
-      capabilities: defaultCaps,
-      switchers: [],
+    const result = await getCapabilitiesResolver(
+      () => defaultCaps,
+      () => []
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
       useDefaultCapabilities: false,
     });
+
     expect(result).toEqual(defaultCaps);
   });
 
@@ -52,19 +53,22 @@ describe('resolveCapabilities', () => {
         A: false,
       },
     });
-    const result = await resolveCapabilities({
-      capabilities: caps,
-      switchers: [
+
+    const result = await getCapabilitiesResolver(
+      () => caps,
+      () => [
         {
           switcher,
           capabilityPath: ['*'],
         },
-      ],
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
       useDefaultCapabilities: false,
     });
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "catalogue": Object {
@@ -92,19 +96,22 @@ describe('resolveCapabilities', () => {
         A: false,
       },
     });
-    await resolveCapabilities({
-      capabilities: caps,
-      switchers: [
+
+    await getCapabilitiesResolver(
+      () => caps,
+      () => [
         {
           switcher,
           capabilityPath: ['*'],
         },
-      ],
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
       useDefaultCapabilities: false,
     });
+
     expect(caps.catalogue).toEqual({
       A: true,
       B: true,
@@ -126,19 +133,22 @@ describe('resolveCapabilities', () => {
         C: false,
       },
     });
-    const result = await resolveCapabilities({
-      capabilities: caps,
-      switchers: [
+
+    const result = await getCapabilitiesResolver(
+      () => caps,
+      () => [
         {
           switcher,
           capabilityPath: ['*'],
         },
-      ],
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
       useDefaultCapabilities: false,
     });
+
     expect(result.catalogue).toEqual({
       A: true,
       B: true,
@@ -160,14 +170,15 @@ describe('resolveCapabilities', () => {
         .filter(([key]) => key !== 'B')
         .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
     });
-    const result = await resolveCapabilities({
-      capabilities: caps,
-      switchers: [
+    const result = await getCapabilitiesResolver(
+      () => caps,
+      () => [
         {
           switcher,
           capabilityPath: ['*'],
         },
-      ],
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
@@ -198,14 +209,15 @@ describe('resolveCapabilities', () => {
         record: false,
       },
     });
-    const result = await resolveCapabilities({
-      capabilities: caps,
-      switchers: [
+    const result = await getCapabilitiesResolver(
+      () => caps,
+      () => [
         {
           switcher,
           capabilityPath: ['*'],
         },
-      ],
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
