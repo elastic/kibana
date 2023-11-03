@@ -10,12 +10,12 @@ import {
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
+  transparentize,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React from 'react';
-import { transparentize } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import type { Node } from 'unist';
