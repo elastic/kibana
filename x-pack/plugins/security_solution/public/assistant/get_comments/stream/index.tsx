@@ -47,11 +47,12 @@ export const StreamComment = ({
 
   useEffect(
     () => () => {
+      // if the component is unmounted while streaming, amend the message with the pending message
       if (currentState.current.isStreaming && currentState.current.pendingMessage.length > 0) {
         currentState.current.amendMessage(currentState.current.pendingMessage ?? '');
       }
     },
-    // store values in current state to detect true unmount
+    // store values in currentState to detect true unmount
     []
   );
 
