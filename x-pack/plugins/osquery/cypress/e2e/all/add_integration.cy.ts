@@ -16,7 +16,7 @@ import {
   createOldOsqueryPath,
   FLEET_AGENT_POLICIES,
   NAV_SEARCH_INPUT_OSQUERY_RESULTS,
-  navigateTo,
+  navigateToWithoutWaitForReact,
   OSQUERY,
 } from '../../tasks/navigation';
 import {
@@ -28,7 +28,6 @@ import {
   interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
-import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
@@ -170,14 +169,12 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
 
-      navigateTo('app/osquery/packs');
-      findAndClickButton('Add pack');
-      findFormFieldByRowsLabelAndType('Name', packName);
-      findFormFieldByRowsLabelAndType(
-        'Scheduled agent policies (optional)',
-        `${policyName} {downArrow}{enter}{esc}`
-      );
-      findAndClickButton('Add query');
+      navigateToWithoutWaitForReact('app/osquery/packs');
+      cy.getBySel('addPackButton').click();
+      cy.get('input[name="name"]').type(`${packName}{downArrow}{enter}`);
+      cy.getBySel('policyIdsComboBox').type(`${policyName} {downArrow}{enter}`);
+
+      cy.get('span').contains('Add query').click();
       cy.getBySel('savedQuerySelect').click().type('{downArrow}{enter}');
       cy.contains(/^Save$/).click();
       cy.contains(/^Save pack$/).click();
@@ -202,8 +199,8 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       integrationExistsWithinPolicyDetails(integrationName);
 
       // test list of prebuilt queries
-      navigateTo('/app/osquery/saved_queries');
-      cy.react('EuiTableRow').should('have.length.above', 5);
+      navigateToWithoutWaitForReact('/app/osquery/saved_queries');
+      cy.get('tbody > tr').should('have.length.above', 5);
     });
   });
 });
