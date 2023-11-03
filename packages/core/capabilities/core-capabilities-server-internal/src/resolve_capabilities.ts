@@ -52,10 +52,6 @@ export const getCapabilitiesResolver = (
     }
   );
 
-  // memoize is on the first argument only by default, which is what we want here
-  // getSwitchersToUseForPath
-  // (path: string, switchers: SwitcherWithId[]): string[]
-
   return async ({
     request,
     capabilityPath,
