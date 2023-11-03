@@ -30,27 +30,19 @@ type ForPathSwitcherResolver = (path: string, switchers: SwitcherWithId[]) => st
 type AggregatedSwitchersResolver = (capabilityPaths: string[]) => CapabilitiesSwitcher[];
 
 export const getCapabilitiesResolver = (
-  capabilities: Capabilities,
-  switchers: SwitcherWithOptions[]
+  getCapabilities: () => Capabilities,
+  getSwitchers: () => SwitcherWithOptions[]
 ): CapabilitiesResolver => {
-  const switcherMap: Map<string, SwitcherWithId> = new Map();
-  switchers.forEach((switcher) => {
-    const switcherId = uniqueId('s-');
-    switcherMap.set(switcherId, {
-      id: switcherId,
-      ...switcher,
-    });
-  });
+  let initialized = false;
+  let capabilities: Capabilities;
+  let switchers: Map<string, SwitcherWithId>;
   // memoize is on the first argument only by default, which is what we want here
   const getSwitcherForPath: ForPathSwitcherResolver = memoize(getSwitchersToUseForPath);
-  // memoize on the joined list of capability paths.
-  // given our usages of the resolver, less than 10 entries will be cached
-  const getAggregatedSwitchers: AggregatedSwitchersResolver = memoize(
-    buildGetAggregatedSwitchers(getSwitcherForPath, switcherMap),
-    (capabilityPaths: string[]) => {
-      return capabilityPaths.join('|');
-    }
-  );
+  let getAggregatedSwitchers: AggregatedSwitchersResolver;
+
+  // memoize is on the first argument only by default, which is what we want here
+  // getSwitchersToUseForPath
+  // (path: string, switchers: SwitcherWithId[]): string[]
 
   return async ({
     request,
@@ -58,6 +50,23 @@ export const getCapabilitiesResolver = (
     applications,
     useDefaultCapabilities,
   }): Promise<Capabilities> => {
+    if (!initialized) {
+      capabilities = getCapabilities();
+      switchers = new Map();
+      getSwitchers().forEach((switcher) => {
+        const switcherId = uniqueId('s-');
+        switchers.set(switcherId, {
+          id: switcherId,
+          ...switcher,
+        });
+      });
+      getAggregatedSwitchers = memoize(
+        buildGetAggregatedSwitchers(getSwitcherForPath, switchers),
+        (capabilityPaths: string[]) => capabilityPaths.join('|')
+      );
+      initialized = true;
+    }
+
     return withSpan({ name: 'resolve capabilities', type: 'capabilities' }, () =>
       resolveCapabilities({
         capabilities,

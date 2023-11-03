@@ -26,8 +26,8 @@ describe('resolveCapabilities', () => {
 
   it('returns the initial capabilities if no switcher are used', async () => {
     const result = await getCapabilitiesResolver(
-      defaultCaps,
-      []
+      () => defaultCaps,
+      () => []
     )({
       request,
       capabilityPath: ['*'],
@@ -54,12 +54,15 @@ describe('resolveCapabilities', () => {
       },
     });
 
-    const result = await getCapabilitiesResolver(caps, [
-      {
-        switcher,
-        capabilityPath: ['*'],
-      },
-    ])({
+    const result = await getCapabilitiesResolver(
+      () => caps,
+      () => [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
@@ -94,12 +97,15 @@ describe('resolveCapabilities', () => {
       },
     });
 
-    await getCapabilitiesResolver(caps, [
-      {
-        switcher,
-        capabilityPath: ['*'],
-      },
-    ])({
+    await getCapabilitiesResolver(
+      () => caps,
+      () => [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
@@ -128,12 +134,15 @@ describe('resolveCapabilities', () => {
       },
     });
 
-    const result = await getCapabilitiesResolver(caps, [
-      {
-        switcher,
-        capabilityPath: ['*'],
-      },
-    ])({
+    const result = await getCapabilitiesResolver(
+      () => caps,
+      () => [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
@@ -161,12 +170,15 @@ describe('resolveCapabilities', () => {
         .filter(([key]) => key !== 'B')
         .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
     });
-    const result = await getCapabilitiesResolver(caps, [
-      {
-        switcher,
-        capabilityPath: ['*'],
-      },
-    ])({
+    const result = await getCapabilitiesResolver(
+      () => caps,
+      () => [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],
@@ -197,12 +209,15 @@ describe('resolveCapabilities', () => {
         record: false,
       },
     });
-    const result = await getCapabilitiesResolver(caps, [
-      {
-        switcher,
-        capabilityPath: ['*'],
-      },
-    ])({
+    const result = await getCapabilitiesResolver(
+      () => caps,
+      () => [
+        {
+          switcher,
+          capabilityPath: ['*'],
+        },
+      ]
+    )({
       request,
       capabilityPath: ['*'],
       applications: [],

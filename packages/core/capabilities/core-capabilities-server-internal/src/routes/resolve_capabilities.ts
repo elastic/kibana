@@ -12,10 +12,7 @@ import type { CapabilitiesResolver } from '../resolve_capabilities';
 
 const applicationIdRegexp = /^[a-zA-Z0-9_:-]+$/;
 
-export function registerCapabilitiesRoutes(
-  router: IRouter,
-  getResolver: () => CapabilitiesResolver
-) {
+export function registerCapabilitiesRoutes(router: IRouter, resolver: CapabilitiesResolver) {
   router.post(
     {
       path: '/api/core/capabilities',
@@ -42,7 +39,6 @@ export function registerCapabilitiesRoutes(
     async (ctx, req, res) => {
       const { useDefaultCapabilities } = req.query;
       const { applications } = req.body;
-      const resolver = getResolver();
       const capabilities = await resolver({
         request: req,
         applications,
