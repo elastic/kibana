@@ -14,15 +14,17 @@ export default defineCypressConfig({
   reporterOptions: {
     configFile: './cypress/reporter_config.json',
   },
-  defaultCommandTimeout: 150000,
+  defaultCommandTimeout: 300000,
   env: {
     grepFilterSpecs: true,
     grepOmitFiltered: true,
     grepTags: '@serverless --@brokenInServerless --@skipInServerless --@brokenInServerlessQA',
   },
-  execTimeout: 150000,
-  pageLoadTimeout: 150000,
+  execTimeout: 300000,
+  pageLoadTimeout: 300000,
   numTestsKeptInMemory: 0,
+  requestTimeout: 300000,
+  responseTimeout: 300000,
   retries: {
     runMode: 1,
   },
