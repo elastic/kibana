@@ -16,6 +16,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
+import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { i18n } from '@kbn/i18n';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
@@ -109,6 +110,7 @@ import { AppFeaturesService } from './lib/app_features_service/app_features_serv
 import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
+import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -604,13 +606,23 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    plugins.fleet?.fleetSetupCompleted().then(() => {
-      if (plugins.taskManager) {
-        this.checkMetadataTransformsTask?.start({
-          taskManager: plugins.taskManager,
-        });
+    const endpointPkgInstallationPromise = this.endpointContext.service
+      .getInternalFleetServices()
+      .packages.getInstallation(FLEET_ENDPOINT_PACKAGE);
+    Promise.all([endpointPkgInstallationPromise, plugins.fleet?.fleetSetupCompleted()]).then(
+      ([endpointPkgInstallation]) => {
+        if (plugins.taskManager) {
+          if (
+            endpointPkgInstallation?.version &&
+            isEndpointPackageV2(endpointPkgInstallation.version)
+          ) {
+            return;
+          }
+
+          this.checkMetadataTransformsTask?.start({ taskManager: plugins.taskManager });
+        }
       }
-    });
+    );
 
     return {};
   }
