@@ -36,18 +36,22 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
     [setAlertTags]
   );
 
-  const alertTagsItems = hasIndexWrite
-    ? [
-        {
-          key: 'manage-alert-tags',
-          'data-test-subj': 'alert-tags-context-menu-item',
-          name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-          panel: 1,
-          label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-          disableOnQuery: true,
-        },
-      ]
-    : [];
+  const alertTagsItems = useMemo(
+    () =>
+      hasIndexWrite
+        ? [
+            {
+              key: 'manage-alert-tags',
+              'data-test-subj': 'alert-tags-context-menu-item',
+              name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+              panel: 1,
+              label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+              disableOnQuery: true,
+            },
+          ]
+        : [],
+    [hasIndexWrite]
+  );
 
   const TitleContent = useMemo(
     () => (
