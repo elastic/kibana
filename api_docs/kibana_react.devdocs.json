@@ -1224,6 +1224,18 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
           },
           {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
             "plugin": "licenseManagement",
             "path": "x-pack/plugins/license_management/public/shared_imports.ts"
           },
@@ -1358,18 +1370,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "profiling",
@@ -1562,6 +1562,18 @@
           {
             "plugin": "indexLifecycleManagement",
             "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "ingestPipelines",
