@@ -10,5 +10,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rule creation API', function () {
     loadTestFile(require.resolve('./create_rules'));
     loadTestFile(require.resolve('./create_new_terms'));
+    loadTestFile(require.resolve('./preview_rules'));
   });
 }

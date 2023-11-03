@@ -15,7 +15,7 @@ import {
   findFormFieldByRowsLabelAndType,
   inputQuery,
 } from '../../tasks/live_query';
-import { activatePack, deactivatePack, preparePack } from '../../tasks/packs';
+import { changePackActiveStatus, preparePack } from '../../tasks/packs';
 import {
   closeModalIfVisible,
   closeToastIfVisible,
@@ -513,8 +513,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
     it('', () => {
       cy.contains('Packs').click();
-      deactivatePack(packName);
-      activatePack(packName);
+      changePackActiveStatus(packName);
+      changePackActiveStatus(packName);
     });
   });
 

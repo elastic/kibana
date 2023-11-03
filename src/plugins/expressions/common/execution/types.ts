@@ -84,6 +84,8 @@ export interface ExecutionContext<
    * Logs datatable.
    */
   logDatatable?(name: string, datatable: Datatable): void;
+
+  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 /**
