@@ -15,8 +15,7 @@ export default function (providerContext: FtrProviderContext) {
    * There are a few features that are only currently supported for the Endpoint
    * package due to security concerns.
    */
-  // Failing: See https://github.com/elastic/kibana/issues/156941
-  describe.skip('Install endpoint package', () => {
+  describe('Install endpoint package', () => {
     const { getService } = providerContext;
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
