@@ -223,8 +223,7 @@ export const CloudSecurityDataTable = ({
     height: `calc(100vh - ${filters.length > 0 ? 443 : 403}px)`,
   };
 
-  const rowHeightState =
-    uiSettings.get(ROW_HEIGHT_OPTION) === -1 ? 0 : uiSettings.get(ROW_HEIGHT_OPTION);
+  const rowHeightState = 0;
 
   const loadingStyle = {
     opacity: isLoading ? 1 : 0,
