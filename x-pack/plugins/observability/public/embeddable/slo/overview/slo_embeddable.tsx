@@ -50,8 +50,19 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     this.updateInput({ title });
   }
 
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
+  public onRenderComplete() {
+    this.renderComplete.dispatchComplete();
+  }
+
   public render(node: HTMLElement) {
+    super.render(node);
     this.node = node;
+    // required for the export feature to work
+    this.node.setAttribute('data-shared-item', '');
     this.setTitle(
       this.input.title ||
         i18n.translate('xpack.observability.sloEmbeddable.displayTitle', {
@@ -69,6 +80,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
         <KibanaContextProvider services={this.deps}>
           <QueryClientProvider client={queryClient}>
             <SloOverview
+              onRenderComplete={() => this.onRenderComplete()}
               sloId={sloId}
               sloInstanceId={sloInstanceId}
               lastReloadRequestTime={this.input.lastReloadRequestTime}
