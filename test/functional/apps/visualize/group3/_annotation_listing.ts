@@ -121,7 +121,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.expectItemsCount('eventAnnotation', 1);
       });
 
-      describe('individual annotations', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/170568
+      describe.skip('individual annotations', () => {
         it('edits an existing annotation', async function () {
           await listingTable.clickItemLink('eventAnnotation', 'edited title');
           expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(1);
