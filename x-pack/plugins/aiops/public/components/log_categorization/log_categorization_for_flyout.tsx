@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -22,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
+import moment from 'moment';
 import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
@@ -69,6 +71,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       query: { getState, filterManager },
     },
     uiSettings,
+    uiActions,
   } = useAiopsAppContext();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
@@ -236,6 +239,17 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     randomSampler,
   ]);
 
+  const createADJob = () => {
+    const triggerOptions = {
+      dataView,
+      field: selectedField,
+      query: searchQuery,
+      timeRange: { from: moment(earliest).toISOString(), to: moment(latest).toISOString() },
+      // originatingApp,
+    };
+    uiActions.getTrigger('CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER').exec(triggerOptions);
+  };
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -261,6 +275,12 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
+        <EuiButtonEmpty
+          data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
+          onClick={() => createADJob()}
+        >
+          AD job
+        </EuiButtonEmpty>
         <FieldValidationCallout validationResults={fieldValidationResult} />
 
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}

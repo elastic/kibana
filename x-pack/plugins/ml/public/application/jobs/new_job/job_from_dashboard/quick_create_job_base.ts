@@ -79,7 +79,7 @@ export class QuickJobCreatorBase {
     datafeedConfig: Datafeed;
     jobConfig: Job;
     createdByLabel: CREATED_BY_LABEL;
-    dashboard: Dashboard;
+    dashboard: Dashboard | undefined;
     start: number | undefined;
     end: number | undefined;
     startJob: boolean;
@@ -93,7 +93,7 @@ export class QuickJobCreatorBase {
       job_id: jobId,
       custom_settings: {
         created_by: createdByLabel,
-        ...(await this.getCustomUrls(dashboard, datafeed)),
+        ...(dashboard ? await this.getCustomUrls(dashboard, datafeed) : {}),
       },
     };
 

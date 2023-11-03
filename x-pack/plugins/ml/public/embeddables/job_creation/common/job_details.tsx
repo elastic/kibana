@@ -40,7 +40,7 @@ import { basicJobValidation } from '../../../../common/util/job_utils';
 import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
 import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-import { useMlFromLensKibanaContext } from '../lens/context';
+import { useMlFromLensKibanaContext } from './context';
 
 export interface CreateADJobParams {
   jobId: string;
