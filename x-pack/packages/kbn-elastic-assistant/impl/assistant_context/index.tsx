@@ -36,6 +36,7 @@ import {
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
+import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -55,7 +56,6 @@ export interface AssistantProviderProps {
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
   baseAllowReplacement: string[];
-  dataQualityDashboardConversationId: string;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   basePath: string;
@@ -142,7 +142,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   augmentMessageCodeBlocks,
   baseAllow,
   baseAllowReplacement,
-  dataQualityDashboardConversationId,
   defaultAllow,
   defaultAllowReplacement,
   docLinks,
@@ -305,8 +304,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       localStorageLastConversationId: validateLocalStorageLastConversationId({
         conversationId: localStorageLastConversationId,
         conversations,
-        dataQualityDashboardConversationId,
-      }),
+      })
+        ? localStorageLastConversationId
+        : WELCOME_CONVERSATION_TITLE,
       setLastConversationId: setLocalStorageLastConversationId,
     }),
     [
@@ -322,7 +322,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseSystemPrompts,
       conversationIds,
       conversations,
-      dataQualityDashboardConversationId,
       defaultAllow,
       defaultAllowReplacement,
       docLinks,

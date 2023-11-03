@@ -8,7 +8,6 @@
 import { v4 } from 'uuid';
 
 import type { PromptContext } from '../assistant/prompt_context/types';
-import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { Conversation } from './types';
 
 export const getUniquePromptContextId = (): string => v4();
@@ -26,37 +25,10 @@ export const updatePromptContexts = ({
   },
 });
 
-const dataQualityPageExists = (
-  conversations: Record<string, Conversation>,
-  dataQualityDashboardConversationId: string
-) => conversations[dataQualityDashboardConversationId] != null;
-
-const isLocalStorageConversationIdValid = ({
-  conversationId,
-  conversations,
-  dataQualityDashboardConversationId,
-}: {
-  conversationId: string | null | undefined;
-  conversations: Record<string, Conversation>;
-  dataQualityDashboardConversationId: string;
-}) =>
-  dataQualityPageExists(conversations, dataQualityDashboardConversationId)
-    ? true
-    : conversationId !== dataQualityDashboardConversationId;
-
 export const validateLocalStorageLastConversationId = ({
   conversationId,
   conversations,
-  dataQualityDashboardConversationId,
 }: {
   conversationId: string | undefined;
   conversations: Record<string, Conversation>;
-  dataQualityDashboardConversationId: string;
-}) =>
-  isLocalStorageConversationIdValid({
-    conversationId,
-    conversations,
-    dataQualityDashboardConversationId,
-  })
-    ? conversationId
-    : WELCOME_CONVERSATION_TITLE;
+}) => conversationId == null || conversations[conversationId];

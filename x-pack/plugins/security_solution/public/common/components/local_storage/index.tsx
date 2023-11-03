@@ -33,7 +33,6 @@ export const useLocalStorage = <T,>({
     const value = storage.get(`${plugin}.${key}`);
     const valueAndDefaultTypesAreDifferent = typeof value !== typeof defaultValue;
     const valueIsInvalid = isInvalidDefault != null && isInvalidDefault(value);
-
     _setValue(valueAndDefaultTypesAreDifferent || valueIsInvalid ? defaultValue : value);
   }, [defaultValue, isInvalidDefault, key, plugin, storage]);
 

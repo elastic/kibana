@@ -8,15 +8,15 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useConversationStore } from '.';
 import { useLinkAuthorized } from '../../common/links';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
-import {
-  ALERT_SUMMARY_CONVERSATION_ID,
-  EVENT_SUMMARY_CONVERSATION_ID,
-} from '../../common/components/event_details/translations';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
-import { DETECTION_RULES_CONVERSATION_ID } from '../../detections/pages/detection_engine/rules/translations';
-import { TIMELINE_CONVERSATION_TITLE } from '../content/conversations/translations';
-import { ELASTIC_AI_ASSISTANT_TITLE, WELCOME_CONVERSATION_TITLE } from '@kbn/elastic-assistant';
-import { ELASTIC_AI_ASSISTANT } from '../comment_actions/translations';
+import { useKibana } from '../../common/lib/kibana';
+import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
+import { unset } from 'lodash/fp';
+
+const BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY = unset(
+  DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
+  BASE_SECURITY_CONVERSATIONS
+);
 
 jest.mock('../../common/links', () => ({
   useLinkAuthorized: jest.fn(),
@@ -36,13 +36,15 @@ const mockedUseKibana = {
 
 jest.mock('../../common/lib/kibana', () => {
   return {
-    useKibana: () => mockedUseKibana,
+    useKibana: jest.fn(),
   };
 });
 
 describe('useConversationStore', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
   });
 
   it('should return conversations with "Data Quality dashboard" conversation', () => {
@@ -50,57 +52,7 @@ describe('useConversationStore', () => {
     const { result } = renderHook(() => useConversationStore());
 
     expect(result.current.conversations).toEqual(
-      expect.objectContaining({
-        [ALERT_SUMMARY_CONVERSATION_ID]: {
-          id: ALERT_SUMMARY_CONVERSATION_ID,
-          isDefault: true,
-          messages: [],
-          apiConfig: {},
-        },
-        [DATA_QUALITY_DASHBOARD_CONVERSATION_ID]: {
-          id: DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
-          isDefault: true,
-          messages: [],
-          apiConfig: {},
-        },
-        [DETECTION_RULES_CONVERSATION_ID]: {
-          id: DETECTION_RULES_CONVERSATION_ID,
-          isDefault: true,
-          messages: [],
-          apiConfig: {},
-        },
-        [EVENT_SUMMARY_CONVERSATION_ID]: {
-          id: EVENT_SUMMARY_CONVERSATION_ID,
-          isDefault: true,
-          messages: [],
-          apiConfig: {},
-        },
-        [TIMELINE_CONVERSATION_TITLE]: {
-          excludeFromLastConversationStorage: true,
-          id: TIMELINE_CONVERSATION_TITLE,
-          isDefault: true,
-          messages: [],
-          apiConfig: {},
-        },
-        [WELCOME_CONVERSATION_TITLE]: {
-          id: WELCOME_CONVERSATION_TITLE,
-          isDefault: true,
-          theme: {
-            title: ELASTIC_AI_ASSISTANT_TITLE,
-            titleIcon: 'logoSecurity',
-            assistant: {
-              name: ELASTIC_AI_ASSISTANT,
-              icon: 'logoSecurity',
-            },
-            system: {
-              icon: 'logoElastic',
-            },
-            user: {},
-          },
-          messages: [],
-          apiConfig: {},
-        },
-      })
+      expect.objectContaining(BASE_SECURITY_CONVERSATIONS)
     );
   });
 
@@ -109,51 +61,99 @@ describe('useConversationStore', () => {
     const { result } = renderHook(() => useConversationStore());
 
     expect(result.current.conversations).toEqual(
-      expect.objectContaining({
-        [ALERT_SUMMARY_CONVERSATION_ID]: {
-          id: ALERT_SUMMARY_CONVERSATION_ID,
-          isDefault: true,
-          messages: [],
-          apiConfig: {},
+      expect.objectContaining(BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY)
+    );
+  });
+
+  it('should reset local storage conversation when invalid conversation key added', () => {
+    const mock = {
+      ...mockUseKibana(),
+      services: {
+        ...mockUseKibana().services,
+        storage: {
+          ...mockUseKibana().services.storage,
+          get: jest.fn().mockReturnValue(BASE_SECURITY_CONVERSATIONS),
+          set: jest.fn(),
         },
-        [DETECTION_RULES_CONVERSATION_ID]: {
-          id: DETECTION_RULES_CONVERSATION_ID,
-          isDefault: true,
-          messages: [],
-          apiConfig: {},
+      },
+    };
+    (useKibana as jest.Mock).mockReturnValue(mock);
+    (useLinkAuthorized as jest.Mock).mockReturnValue(false);
+
+    const { result } = renderHook(() => useConversationStore());
+
+    expect(result.current.conversations).toEqual(
+      expect.objectContaining(BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY)
+    );
+  });
+
+  it('should include custom conversation ids if provided', () => {
+    const customConversation = { xxx: { id: 'xxx', messages: [] } };
+    const mock = {
+      ...mockUseKibana(),
+      services: {
+        ...mockUseKibana().services,
+        storage: {
+          ...mockUseKibana().services.storage,
+          get: jest.fn().mockReturnValue({ ...BASE_SECURITY_CONVERSATIONS, ...customConversation }),
+          set: jest.fn(),
         },
-        [EVENT_SUMMARY_CONVERSATION_ID]: {
-          id: EVENT_SUMMARY_CONVERSATION_ID,
-          isDefault: true,
-          messages: [],
-          apiConfig: {},
+      },
+    };
+    (useKibana as jest.Mock).mockReturnValue(mock);
+    (useLinkAuthorized as jest.Mock).mockReturnValue(true);
+
+    const { result } = renderHook(() => useConversationStore());
+
+    expect(result.current.conversations).toEqual(
+      expect.objectContaining({ ...BASE_SECURITY_CONVERSATIONS, ...customConversation })
+    );
+  });
+
+  it('should reset local storage conversation when conversation key missing', () => {
+    const mock = {
+      ...mockUseKibana(),
+      services: {
+        ...mockUseKibana().services,
+        storage: {
+          ...mockUseKibana().services.storage,
+          get: jest.fn().mockReturnValue(BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY),
+          set: jest.fn(),
         },
-        [TIMELINE_CONVERSATION_TITLE]: {
-          excludeFromLastConversationStorage: true,
-          id: TIMELINE_CONVERSATION_TITLE,
-          isDefault: true,
-          messages: [],
-          apiConfig: {},
+      },
+    };
+    (useKibana as jest.Mock).mockReturnValue(mock);
+    (useLinkAuthorized as jest.Mock).mockReturnValue(true);
+
+    const { result } = renderHook(() => useConversationStore());
+
+    expect(result.current.conversations).toEqual(
+      expect.objectContaining(BASE_SECURITY_CONVERSATIONS)
+    );
+  });
+
+  it('should reset local storage conversation when existing conversation is invalid', () => {
+    const mock = {
+      ...mockUseKibana(),
+      services: {
+        ...mockUseKibana().services,
+        storage: {
+          ...mockUseKibana().services.storage,
+          get: jest.fn().mockReturnValue({
+            ...BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY,
+            xxx: { id: 'xxx', messages: [] },
+          }),
+          set: jest.fn(),
         },
-        [WELCOME_CONVERSATION_TITLE]: {
-          id: WELCOME_CONVERSATION_TITLE,
-          isDefault: true,
-          theme: {
-            title: ELASTIC_AI_ASSISTANT_TITLE,
-            titleIcon: 'logoSecurity',
-            assistant: {
-              name: ELASTIC_AI_ASSISTANT,
-              icon: 'logoSecurity',
-            },
-            system: {
-              icon: 'logoElastic',
-            },
-            user: {},
-          },
-          messages: [],
-          apiConfig: {},
-        },
-      })
+      },
+    };
+    (useKibana as jest.Mock).mockReturnValue(mock);
+    (useLinkAuthorized as jest.Mock).mockReturnValue(true);
+
+    const { result } = renderHook(() => useConversationStore());
+
+    expect(result.current.conversations).toEqual(
+      expect.objectContaining(BASE_SECURITY_CONVERSATIONS)
     );
   });
 });
