@@ -7,7 +7,8 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiFlyout, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { take } from 'lodash';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { TopNSubchart } from '../../common/topn';
 import { SubChart } from './subchart';
 
@@ -17,44 +18,52 @@ export interface ChartGridProps {
   showFrames: boolean;
 }
 
-export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames }) => {
+export function ChartGrid({ limit, charts, showFrames }: ChartGridProps) {
   const maximum = Math.min(limit, charts.length ?? 0);
-
   const ncharts = Math.min(maximum, charts.length);
 
   const [selectedSubchart, setSelectedSubchart] = useState<TopNSubchart | undefined>(undefined);
+
+  const subCharts = useMemo(() => {
+    return take(charts, ncharts).map((subchart, i) => (
+      <EuiFlexItem key={subchart.Category}>
+        <EuiPanel paddingSize="none">
+          <SubChart
+            index={subchart.Index}
+            color={subchart.Color}
+            category={subchart.Category}
+            label={subchart.Label}
+            percentage={subchart.Percentage}
+            metadata={subchart.Metadata}
+            height={200}
+            data={subchart.Series}
+            sample={null}
+            showAxes
+            onShowMoreClick={() => {
+              setSelectedSubchart(subchart);
+            }}
+            showFrames={showFrames}
+            padTitle
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    ));
+  }, [charts, ncharts, showFrames]);
 
   return (
     <>
       <EuiSpacer />
       <EuiTitle size="s">
-        <h1>Top {charts.length}</h1>
+        <h1>
+          {i18n.translate('xpack.profiling.chartGrid.h1.topLabel', {
+            defaultMessage: 'Top {size}',
+            values: { size: charts.length },
+          })}
+        </h1>
       </EuiTitle>
       <EuiSpacer />
       <EuiFlexGrid columns={2} gutterSize="m">
-        {take(charts, ncharts).map((subchart, i) => (
-          <EuiFlexItem key={i}>
-            <EuiPanel paddingSize="none">
-              <SubChart
-                index={subchart.Index}
-                color={subchart.Color}
-                category={subchart.Category}
-                label={subchart.Label}
-                percentage={subchart.Percentage}
-                metadata={subchart.Metadata}
-                height={200}
-                data={subchart.Series}
-                sample={null}
-                showAxes
-                onShowMoreClick={() => {
-                  setSelectedSubchart(subchart);
-                }}
-                showFrames={showFrames}
-                padTitle
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
+        {subCharts}
       </EuiFlexGrid>
       {selectedSubchart && (
         <EuiFlyout
@@ -74,7 +83,6 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames 
             data={selectedSubchart.Series}
             sample={null}
             showAxes
-            onShowMoreClick={null}
             showFrames={showFrames}
             padTitle
           />
@@ -82,4 +90,4 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames 
       )}
     </>
   );
-};
+}

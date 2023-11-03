@@ -43,6 +43,7 @@
       "usageCollection",
       "cloud",
       "spaces",
+      "serverless",
       "guidedOnboarding"
     ],
     "requiredBundles": [
