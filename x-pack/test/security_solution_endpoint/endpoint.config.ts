@@ -51,6 +51,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.version=latest`,
         // this will be removed in 8.7 when the file upload feature is released
         `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
+        `--xpack.securitySolition.offeringSettings=${JSON.stringify({
+          disableTimelineSaveTour: true,
+        })}`,
       ],
     },
     layout: {
