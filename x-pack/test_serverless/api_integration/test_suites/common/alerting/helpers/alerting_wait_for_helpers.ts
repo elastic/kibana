@@ -19,17 +19,19 @@ export async function waitForDocumentInIndex({
   indexName,
   ruleId,
   num = 1,
+  sort = 'desc',
 }: {
   esClient: Client;
   indexName: string;
   ruleId: string;
   num?: number;
+  sort?: 'asc' | 'desc';
 }): Promise<SearchResponse> {
   return await pRetry(
     async () => {
       const response = await esClient.search({
         index: indexName,
-        sort: 'date:desc',
+        sort: `date:${sort}`,
         body: {
           query: {
             bool: {

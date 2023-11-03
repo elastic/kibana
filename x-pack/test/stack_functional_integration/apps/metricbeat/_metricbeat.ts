@@ -12,12 +12,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const appsMenu = getService('appsMenu');
 
   describe('check metricbeat', function () {
     it('metricbeat- should have hit count GT 0', async function () {
       const url = await browser.getCurrentUrl();
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults': `{ "from": "now-5y", "to": "now"}`,
+      });
       log.debug(url);
       if (!url.includes('kibana')) {
         await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
@@ -26,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
 
       await PageObjects.discover.selectIndexPattern('metricbeat-*');
-      await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
       await retry.try(async function () {
         const hitCount = await PageObjects.discover.getHitCountInt();
         expect(hitCount).to.be.greaterThan(0);
