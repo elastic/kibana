@@ -5596,15 +5596,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen-mocks@link:packages/shared-ux/button/exit_full_screen/mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-button-exit-full-screen-types@link:packages/shared-ux/button/exit_full_screen/types":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-button-exit-full-screen@link:packages/shared-ux/button/exit_full_screen/impl":
+"@kbn/shared-ux-button-exit-full-screen@link:packages/shared-ux/button/exit_full_screen":
   version "0.0.0"
   uid ""
 

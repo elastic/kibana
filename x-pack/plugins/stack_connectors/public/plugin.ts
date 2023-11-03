@@ -35,13 +35,13 @@ export class StackConnectorsPublicPlugin
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }
   public setup(core: CoreSetup, { triggersActionsUi, actions }: StackConnectorsPublicSetupDeps) {
+    ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     registerConnectorTypes({
       connectorTypeRegistry: triggersActionsUi.actionTypeRegistry,
       services: {
         validateEmailAddresses: actions.validateEmailAddresses,
       },
     });
-    ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
   }
 
   public start() {}
