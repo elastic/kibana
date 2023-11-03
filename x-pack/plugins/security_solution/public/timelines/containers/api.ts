@@ -179,7 +179,6 @@ export const cloneTimeline = async ({
     return Promise.resolve(decodeTimelineErrorResponse(err.body));
   }
   return decodeTimelineResponse(response);
-  return Promise.resolve();
 };
 
 export const persistTimeline = async ({
