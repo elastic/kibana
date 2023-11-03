@@ -14,6 +14,14 @@ import { EntitiesDetails } from './entities_details';
 import { ENTITIES_DETAILS_TEST_ID, HOST_DETAILS_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
 import { mockContextValue } from '../mocks/mock_context';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import type { Anomalies } from '../../../../common/components/ml/types';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { useRiskScore } from '../../../../explore/containers/risk_score';
+import { mockAnomalies } from '../../../../common/components/ml/mock';
+import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -32,6 +40,61 @@ jest.mock('react-redux', () => {
   };
 });
 
+const from = '2022-07-28T08:20:18.966Z';
+const to = '2022-07-28T08:20:18.966Z';
+jest.mock('../../../../common/containers/use_global_time', () => {
+  const actual = jest.requireActual('../../../../common/containers/use_global_time');
+  return {
+    ...actual,
+    useGlobalTime: jest
+      .fn()
+      .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() }),
+  };
+});
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('uuid'),
+}));
+
+jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
+const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
+
+const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
+jest.mock('../../../../helper_hooks', () => ({
+  useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+}));
+
+jest.mock('../../../../common/containers/sourcerer', () => ({
+  useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
+}));
+
+jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
+  AnomalyTableProvider: ({
+    children,
+  }: {
+    children: (args: {
+      anomaliesData: Anomalies;
+      isLoadingAnomaliesData: boolean;
+      jobNameById: Record<string, string | undefined>;
+    }) => React.ReactNode;
+  }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
+}));
+
+jest.mock('../../../../explore/hosts/containers/hosts/details');
+const mockUseHostDetails = useHostDetails as jest.Mock;
+
+jest.mock('../../../../common/containers/related_entities/related_users');
+const mockUseHostsRelatedUsers = useHostRelatedUsers as jest.Mock;
+
+jest.mock('../../../../explore/containers/risk_score');
+const mockUseRiskScore = useRiskScore as jest.Mock;
+
+jest.mock('../../../../explore/users/containers/users/observed_details');
+const mockUseObservedUserDetails = useObservedUserDetails as jest.Mock;
+
+jest.mock('../../../../common/containers/related_entities/related_hosts');
+const mockUseUsersRelatedHosts = useUserRelatedHosts as jest.Mock;
+
 const USER_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID);
 const HOST_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID);
 
@@ -47,6 +110,26 @@ const renderEntitiesDetails = (contextValue: LeftPanelContext) =>
   );
 
 describe('<EntitiesDetails />', () => {
+  beforeEach(() => {
+    mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
+    mockUseHasSecurityCapability.mockReturnValue(false);
+    mockUseHostDetails.mockReturnValue([false, {}]);
+    mockUseRiskScore.mockReturnValue({ data: [], isAuthorized: false });
+    mockUseHostsRelatedUsers.mockReturnValue({
+      inspect: jest.fn(),
+      refetch: jest.fn(),
+      relatedUsers: [],
+      loading: false,
+    });
+    mockUseObservedUserDetails.mockReturnValue([false, {}]);
+    mockUseUsersRelatedHosts.mockReturnValue({
+      inspect: jest.fn(),
+      refetch: jest.fn(),
+      relatedHosts: [],
+      loading: false,
+    });
+  });
+
   it('renders entities details correctly', () => {
     const { getByTestId, queryByText } = renderEntitiesDetails(mockContextValue);
     expect(getByTestId(ENTITIES_DETAILS_TEST_ID)).toBeInTheDocument();
