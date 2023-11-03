@@ -28,7 +28,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     login();
   });
 
-  describe('Processes operations: list, kill and suspend process', () => {
+  describe('Processes operations:', () => {
     let cronPID: string;
     let newCronPID: string;
 
