@@ -507,7 +507,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             } else {
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
-                message: `Bulk Indexing of alerts failed: ${truncateList(result.errors).join()}`,
+                message: `Rule execution failed: ${truncateList(result.errors).join()}`,
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
