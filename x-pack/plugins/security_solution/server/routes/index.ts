@@ -133,7 +133,7 @@ export const initRoutes = (
   cleanDraftTimelinesRoute(router, config, security);
   deleteTimelinesRoute(router, config, security);
   persistFavoriteRoute(router, config, security);
-  cloneTimelineRoute(router, config, security);
+  cloneTimelineRoute(router, getStartServices, config, security);
 
   installPrepackedTimelinesRoute(router, config, security);
 

@@ -13,6 +13,8 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { getSavedSearch, plugin } from '@kbn/saved-search-plugin/server';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
@@ -589,15 +591,22 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
 export const cloneTimeline = async (
   request: FrameworkRequest,
   timeline: SavedTimeline,
-  timelineId: string
+  timelineId: string,
+  searchSource: ISearchStartSearchSource
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   // Fetch all objects that need to be cloned
   // TODO: How to clone saved search?
-  const [notes, pinnedEvents] = await Promise.all([
+  const [notes, pinnedEvents, savedSearch] = await Promise.all([
     note.getNotesByTimelineId(request, timelineId),
     pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
+    timeline.savedSearchId
+      ? getSavedSearch(timeline.savedSearchId, {
+          searchSourceStart: searchSource,
+          savedObjects: savedObjectsClient,
+        })
+      : Promise.resolve(undefined),
   ]);
 
   const isImmutable = timeline.status === TimelineStatus.immutable;

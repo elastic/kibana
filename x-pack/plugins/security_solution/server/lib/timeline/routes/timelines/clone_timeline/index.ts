@@ -6,23 +6,27 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 import { cloneTimelineSchema } from '../../../../../../common/api/timeline';
 import type { CloneTimelinesResponse } from '../../../../../../common/api/timeline';
 import { cloneTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { SetupPlugins } from '../../../../../plugin';
+import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_CLONE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 
-export const cloneTimelineRoute = (
+export const cloneTimelineRoute = async (
   router: SecuritySolutionPluginRouter,
+  startServices: StartServicesAccessor<StartPlugins>,
   _: ConfigType,
   security: SetupPlugins['security']
 ) => {
+  const [, { data }] = await startServices();
+
   router.versioned
     .post({
       path: TIMELINE_CLONE_URL,
@@ -42,10 +46,16 @@ export const cloneTimelineRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          const searchSourceClient = await data.search.searchSource.asScoped(request);
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
           const { timeline, savedObjectId } = request.body;
 
-          const clonedTimeline = await cloneTimeline(frameworkRequest, timeline, savedObjectId);
+          const clonedTimeline = await cloneTimeline(
+            frameworkRequest,
+            timeline,
+            savedObjectId,
+            searchSourceClient
+          );
           return response.ok<CloneTimelinesResponse>({ body: { data: { clonedTimeline } } });
         } catch (err) {
           const error = transformError(err);
