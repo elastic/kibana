@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { LogDocument, log } from '@kbn/apm-synthtrace-client';
-import { v4 as uuidv4 } from 'uuid';
+import { LogDocument, log, generateShortId } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 
 const scenario: Scenario<LogDocument> = async () => {
@@ -22,9 +21,9 @@ const scenario: Scenario<LogDocument> = async () => {
       const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
 
       const CLUSTER = [
-        { clusterId: uuidv4(), clusterName: 'synth-cluster-1' },
-        { clusterId: uuidv4(), clusterName: 'synth-cluster-2' },
-        { clusterId: uuidv4(), clusterName: 'synth-cluster-3' },
+        { clusterId: generateShortId(), clusterName: 'synth-cluster-1' },
+        { clusterId: generateShortId(), clusterName: 'synth-cluster-2' },
+        { clusterId: generateShortId(), clusterName: 'synth-cluster-3' },
       ];
 
       return range
@@ -41,17 +40,17 @@ const scenario: Scenario<LogDocument> = async () => {
                 .logLevel(MESSAGE_LOG_LEVELS[index].level)
                 .service(`service-${index}`)
                 .defaults({
-                  'trace.id': uuidv4().substring(0, 8),
+                  'trace.id': generateShortId(),
                   'agent.name': 'synth-agent',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
-                  'orchestrator.resource.id': uuidv4(),
+                  'orchestrator.resource.id': generateShortId(),
                   'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
                   'cloud.region': CLOUD_REGION[index],
                   'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
-                  'cloud.project.id': uuidv4().substring(0, 8),
-                  'cloud.instance.id': uuidv4().substring(0, 8),
-                  'log.file.path': `/logs/${uuidv4().substring(0, 4)}.txt`,
+                  'cloud.project.id': generateShortId(),
+                  'cloud.instance.id': generateShortId(),
+                  'log.file.path': `/logs/${generateShortId()}.txt`,
                 })
                 .timestamp(timestamp);
             });
