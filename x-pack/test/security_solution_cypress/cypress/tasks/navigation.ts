@@ -9,7 +9,7 @@ import { encode } from '@kbn/rison';
 
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import { hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
+import { GET_STARTED_URL, hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
 import { constructUrlWithUser, getUrlWithRoute, User } from './login';
 
 export const visit = (
@@ -85,6 +85,11 @@ export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
   visitWithTimeRange(hostDetailsUrl(hostName));
   cy.get('[data-test-subj="loading-spinner"]').should('exist');
   cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
+};
+
+export const visitGetStartedPage = () => {
+  visit(GET_STARTED_URL);
+  cy.get('#security-solution-app').should('exist');
 };
 
 export const visitUserDetailsPage = (userName = 'test') => {
