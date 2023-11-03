@@ -30,13 +30,8 @@ export function useFetchSloDefinitions({ name = '' }: Params): UseFetchSloDefini
     queryFn: async ({ signal }) => {
       try {
         const response = await http.get<FindSLODefinitionsResponse>(
-          '/internal/observability/slos/_definitions',
-          {
-            query: {
-              search,
-            },
-            signal,
-          }
+          '/api/observability/slos/_definitions',
+          { query: { search }, signal }
         );
 
         return response;

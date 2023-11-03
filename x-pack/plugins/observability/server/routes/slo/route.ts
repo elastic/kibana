@@ -278,10 +278,9 @@ const deleteSloInstancesRoute = createObservabilityServerRoute({
 });
 
 const findSloDefinitionsRoute = createObservabilityServerRoute({
-  endpoint: 'GET /internal/observability/slos/_definitions',
+  endpoint: 'GET /api/observability/slos/_definitions 2023-10-31',
   options: {
     tags: ['access:slo_read'],
-    access: 'internal',
   },
   params: findSloDefinitionsParamsSchema,
   handler: async ({ context, params }) => {
