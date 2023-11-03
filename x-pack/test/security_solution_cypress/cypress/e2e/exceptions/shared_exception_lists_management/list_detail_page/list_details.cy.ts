@@ -97,7 +97,8 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
   });
 
-  it('Should create a new list and link it to two rules', () => {
+  // TODO: Flaky in ESS and Serverless: https://github.com/elastic/kibana/pull/169182#issuecomment-1792597980
+  it.skip('Should create a new list and link it to two rules', () => {
     createSharedExceptionList(
       { name: 'Newly created list', description: 'This is my list.' },
       true
