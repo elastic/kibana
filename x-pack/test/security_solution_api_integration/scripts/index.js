@@ -7,17 +7,7 @@
 
 const { spawn } = require('child_process');
 
-const [
-  ,
-  ,
-  type,
-  area = 'detections_response',
-  licenseFolder = 'default_license',
-  folder,
-  projectType,
-  environment,
-  ...args
-] = process.argv;
+const [, , type, area, licenseFolder, folder, projectType, environment, ...args] = process.argv;
 
 const configPath = `./test_suites/${area}/${licenseFolder}/${folder}/configs/${projectType}.config.ts`;
 
