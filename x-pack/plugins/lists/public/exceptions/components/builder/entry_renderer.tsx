@@ -30,6 +30,7 @@ import {
   EXCEPTION_OPERATORS_ONLY_LISTS,
   FormattedBuilderEntry,
   OperatorOption,
+  fieldSupportsMatches,
   getEntryOnFieldChange,
   getEntryOnListChange,
   getEntryOnMatchAnyChange,
@@ -310,11 +311,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
     // for event filters forms
-    // show extra operators for wildcards when field is `file.path.text`
-    const isFilePathTextField = entry.field !== undefined && entry.field.name === 'file.path.text';
+    // show extra operators for wildcards when field supports matches
+    const doesFieldSupportMatches = entry.field !== undefined && fieldSupportsMatches(entry.field);
     const isEventFilterList = listType === 'endpoint_events';
     const augmentedOperatorsList =
-      operatorsList && isFilePathTextField && isEventFilterList
+      operatorsList && doesFieldSupportMatches && isEventFilterList
         ? operatorsList
         : operatorsList?.filter((operator) => operator.type !== OperatorTypeEnum.WILDCARD);
 
