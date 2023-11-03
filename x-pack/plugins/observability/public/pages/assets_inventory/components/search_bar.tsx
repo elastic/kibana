@@ -7,7 +7,7 @@
 
 import { EuiFieldSearch } from '@elastic/eui';
 import type { AssetFilters } from '@kbn/assetManager-plugin/common/types_api';
-import { isAssetFilters } from '@kbn/assetManager-plugin/public';
+import { assetFiltersRT } from '@kbn/assetManager-plugin/public';
 import React, { ChangeEventHandler, KeyboardEventHandler, useCallback, useState } from 'react';
 
 export interface SearchBarOptions {
@@ -75,7 +75,7 @@ export class InvalidSearchError extends Error {
 
 export function parseQueryString(queryString: string) {
   console.log('parsing query string', queryString);
-  const noSpacesRegex = new RegExp(/([^\s]*)\s*:\s*([^\s]*)/g);
+  const noSpacesRegex = new RegExp(/([^\:\s]*)\s*:\s*([^\s]*)/g);
   const matches = [...queryString.matchAll(noSpacesRegex)];
 
   console.log('Inspect matches', matches);
@@ -96,7 +96,7 @@ export function parseQueryString(queryString: string) {
   // }
 
   console.log('Validating filter hash', filters);
-  const validated = isAssetFilters(filters);
+  const validated = assetFiltersRT.is(filters);
   console.log('Validation result:', validated);
 
   if (!validated) {

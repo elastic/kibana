@@ -23,6 +23,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { SearchBar } from './components/search_bar';
+import { SearchError } from './components/search_error';
 
 const TestBox: React.FC = ({ children }) => (
   <div style={{ padding: 20, border: '1px solid magenta' }}>{children}</div>
@@ -36,17 +37,26 @@ export function AssetsInventoryPage() {
   const [filters, setFilters] = useState<AssetFilters>({});
   const [start, setStart] = useState<string>('now-1h');
   const [end, setEnd] = useState<string>('now');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function retrieve() {
       setIsLoading(true);
-      const result = await services.assetManager.publicAssetsClient.getHosts({
-        from: start,
-        to: end,
-        filters,
-      });
-      setHosts(result.hosts);
-      setIsLoading(false);
+      setError(null);
+      try {
+        const result = await services.assetManager.publicAssetsClient.getHosts({
+          from: start,
+          to: end,
+          filters,
+        });
+        setHosts(result.hosts);
+        setIsLoading(false);
+      } catch (error: any) {
+        setIsLoading(false);
+        console.log(error);
+        const message = typeof error.message === 'string' ? error.message : `${error}`;
+        setError(message);
+      }
     }
     retrieve();
   }, [services, filters, start, end]);
@@ -71,14 +81,23 @@ export function AssetsInventoryPage() {
     >
       <EuiFlexGroup>
         <EuiFlexItem>
+          <SearchError error={error} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
           <SearchBar
             onSubmit={(submittedFilters) => {
+              setError(null);
               setFilters(submittedFilters);
             }}
           />
         </EuiFlexItem>
         {/* <EuiFlexItem>
-          Show filters:{' '}
+          <FormattedMessage
+            id="app_not_found_in_i18nrc.assetsInventoryPage.showFilters:FlexItemLabel"
+            defaultMessage="Show filters:"
+          />{' '}
           <pre>
             <code>{JSON.stringify(filters, null, 2)}</code>
           </pre>
@@ -96,7 +115,11 @@ export function AssetsInventoryPage() {
       <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem grow={false}>
           <TestBox>
-            <div style={{ width: '100px' }}>Sidebar area</div>
+            <div style={{ width: '100px' }}>
+              {i18n.translate('app_not_found_in_i18nrc.assetsInventoryPage.div.sidebarAreaLabel', {
+                defaultMessage: 'Sidebar area',
+              })}
+            </div>
           </TestBox>
         </EuiFlexItem>
         <EuiFlexItem style={{ height: '75vh' }}>
