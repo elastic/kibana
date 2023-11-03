@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { InventoryCloudAccount } from '../../../../common/http_api/inventory_meta_api';
 import {
@@ -13,8 +15,6 @@ import {
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
-import { findInventoryModel } from '../../../../common/inventory_models';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 export interface CloudMetaData {
