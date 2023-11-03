@@ -15,7 +15,7 @@ import { noCreateCasesPermissions, TestProviders, createAppMockRenderer } from '
 import { AttachmentType } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import type { AddCommentProps } from '.';
+import type { AddCommentProps, AddCommentRefObject } from '.';
 import { AddComment } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
@@ -51,8 +51,7 @@ const sampleData: CaseAttachmentWithoutOwner = {
 const appId = 'testAppId';
 const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
-// FLAKY: https://github.com/elastic/kibana/issues/168509
-describe.skip('AddComment ', () => {
+describe('AddComment ', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -119,6 +118,23 @@ describe.skip('AddComment ', () => {
     });
   });
 
+  it('should insert a quote', async () => {
+    const sampleQuote = 'what a cool quote \n with new lines';
+    const ref = React.createRef<AddCommentRefObject>();
+
+    appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
+
+    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
+
+    await act(async () => {
+      ref.current!.addQuote(sampleQuote);
+    });
+
+    expect((await screen.findByTestId('euiMarkdownEditorTextArea')).textContent).toContain(
+      `${sampleData.comment}\n\n> what a cool quote \n>  with new lines \n\n`
+    );
+  });
+
   it('it should insert a timeline', async () => {
     const useInsertTimelineMock = jest.fn();
     let attachTimeline = noop;
@@ -135,13 +151,13 @@ describe.skip('AddComment ', () => {
       </CasesTimelineIntegrationProvider>
     );
 
-    act(() => {
+    await act(async () => {
       attachTimeline('[title](url)');
     });
 
-    await waitFor(() => {
-      expect(screen.getByTestId('euiMarkdownEditorTextArea')).toHaveTextContent('[title](url)');
-    });
+    expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(
+      '[title](url)'
+    );
   });
 
   describe('errors', () => {

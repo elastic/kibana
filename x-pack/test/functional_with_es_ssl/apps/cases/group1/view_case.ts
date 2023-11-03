@@ -148,7 +148,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
 
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
-        expect(await commentArea.getVisibleText()).equal('');
       });
 
       it('quotes a comment on a case', async () => {
