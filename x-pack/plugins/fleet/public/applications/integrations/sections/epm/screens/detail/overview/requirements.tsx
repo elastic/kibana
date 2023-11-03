@@ -48,7 +48,7 @@ export const Requirements: React.FC = memo(() => {
                       'xpack.fleet.epm.requirements.permissionRequireRootTooltip',
                       {
                         defaultMessage:
-                          'Elastic agent need to be run with root or administor privaleges',
+                          'Elastic agent need to be run with root or administor privileges',
                       }
                     )}
                   >
