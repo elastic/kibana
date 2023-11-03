@@ -6,6 +6,7 @@
  */
 
 import { merge } from 'lodash';
+import { getFailedSpecVideos } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
@@ -36,7 +37,7 @@ export const getCypressBaseConfig = (
         '../../../target/kibana-security-solution/public/management/cypress/screenshots',
       trashAssetsBeforeRuns: false,
       video: true,
-      videoCompression: true,
+      videoCompression: 15,
       videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
       viewportHeight: 900,
       viewportWidth: 1440,
@@ -86,7 +87,8 @@ export const getCypressBaseConfig = (
           // eslint-disable-next-line @typescript-eslint/no-var-requires
           require('@cypress/grep/src/plugin')(config);
 
-          on('after:spec', () => {
+          on('after:spec', (_, results) => {
+            getFailedSpecVideos(results);
             createToolingLogger().info(
               'Tooling Usage Tracking summary:\n',
               usageTracker.toSummaryTable()
