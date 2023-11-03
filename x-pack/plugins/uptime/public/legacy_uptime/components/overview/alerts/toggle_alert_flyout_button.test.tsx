@@ -18,7 +18,7 @@ import { ToggleFlyoutTranslations } from './translations';
 
 describe('ToggleAlertFlyoutButtonComponent', () => {
   describe('when users have write access to uptime', () => {
-    it('enables the button to create a rule', () => {
+    it('enables the button to create a rule', async () => {
       const { getByText } = render(
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: true }) }
@@ -45,7 +45,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
   });
 
   describe("when users don't have write access to uptime", () => {
-    it('disables the button to create a rule', () => {
+    it('disables the button to create a rule', async () => {
       const { getByText } = render(
         <ToggleAlertFlyoutButtonComponent setAlertFlyoutVisible={jest.fn()} />,
         { core: makeUptimePermissionsCore({ save: false }) }

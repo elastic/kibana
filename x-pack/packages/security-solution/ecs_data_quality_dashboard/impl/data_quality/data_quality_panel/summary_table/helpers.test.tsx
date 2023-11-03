@@ -240,7 +240,7 @@ describe('helpers', () => {
         expect(screen.getByLabelText(COLLAPSE)).toBeInTheDocument();
       });
 
-      test('it invokes the `toggleExpanded` with the index name when the button is clicked', () => {
+      test('it invokes the `toggleExpanded` with the index name when the button is clicked', async () => {
         const toggleExpanded = jest.fn();
 
         const columns = getSummaryTableColumns({

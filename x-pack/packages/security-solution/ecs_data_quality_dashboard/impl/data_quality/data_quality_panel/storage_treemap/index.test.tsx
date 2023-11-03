@@ -115,7 +115,7 @@ describe('StorageTreemap', () => {
             ).toHaveTextContent(`${index}${formatBytes(sizeInBytes)}`);
           });
 
-          test(`it invokes onIndexSelected() with the expected values for ilmPhase ${ilmPhase} pattern ${pattern} index ${index}`, () => {
+          test(`it invokes onIndexSelected() with the expected values for ilmPhase ${ilmPhase} pattern ${pattern} index ${index}`, async () => {
             const legendItem = screen.getByTestId(
               `chart-legend-item-${ilmPhase}${pattern}${index}`
             );

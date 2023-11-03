@@ -26,7 +26,7 @@ describe('Manage ML Job', () => {
   };
 
   describe('when users have write access to uptime', () => {
-    it('enables the button to create alerts', () => {
+    it('enables the button to create alerts', async () => {
       const { getByText } = render(
         <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
         {
@@ -64,7 +64,7 @@ describe('Manage ML Job', () => {
   });
 
   describe("when users don't have write access to uptime", () => {
-    it('disables the button to create alerts', () => {
+    it('disables the button to create alerts', async () => {
       const { getByText } = render(
         <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
         {

@@ -45,7 +45,7 @@ describe('Actions', () => {
       );
     });
 
-    test('it invokes openCreateCaseFlyout when the add to new case button is clicked', () => {
+    test('it invokes openCreateCaseFlyout when the add to new case button is clicked', async () => {
       const button = screen.getByTestId('addToNewCase');
 
       await userEvent.click(button);
@@ -53,7 +53,7 @@ describe('Actions', () => {
       expect(defaultProps.openCreateCaseFlyout).toBeCalled();
     });
 
-    test('it invokes addSuccessToast when the copy to clipboard button is clicked', () => {
+    test('it invokes addSuccessToast when the copy to clipboard button is clicked', async () => {
       const button = screen.getByTestId('copyToClipboard');
 
       await userEvent.click(button);

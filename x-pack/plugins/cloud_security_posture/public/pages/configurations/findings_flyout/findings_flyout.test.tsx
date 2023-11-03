@@ -51,7 +51,7 @@ describe('<FindingsFlyout/>', () => {
   });
 
   describe('Rule Tab', () => {
-    it('displays rule text details', () => {
+    it('displays rule text details', async () => {
       const { getByText, getAllByText } = render(<TestComponent />);
 
       await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
@@ -66,7 +66,7 @@ describe('<FindingsFlyout/>', () => {
   });
 
   describe('Table Tab', () => {
-    it('displays resource name and id', () => {
+    it('displays resource name and id', async () => {
       const { getAllByText } = render(<TestComponent />);
 
       await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));

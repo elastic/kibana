@@ -41,7 +41,7 @@ describe('<KeyValuePairsField />', () => {
     expect(getByText('Add pair')).toBeInTheDocument();
   });
 
-  it('calls onBlur', () => {
+  it('calls onBlur', async () => {
     const { getByText, getByTestId } = render(<WrappedComponent />);
     const addPair = getByText('Add pair');
     fireEvent.click(addPair);

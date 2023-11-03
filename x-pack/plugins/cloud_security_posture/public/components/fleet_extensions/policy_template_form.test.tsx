@@ -141,7 +141,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
-  it('renders and updates name field', () => {
+  it('renders and updates name field', async () => {
     const policy = getMockPolicyK8s();
     const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
     const name = getByLabelText('Name');
@@ -157,7 +157,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
-  it('renders and updates description field', () => {
+  it('renders and updates description field', async () => {
     const policy = getMockPolicyK8s();
     const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
     const description = getByLabelText('Description');
@@ -186,7 +186,7 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option1).toBeChecked();
   });
 
-  it('updates selected KSPM input', () => {
+  it('updates selected KSPM input', async () => {
     const k8sPolicy = getMockPolicyK8s();
     const eksPolicy = getMockPolicyEKS();
 
@@ -590,7 +590,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Role ARN')).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_EKS} Assume Role fields`, () => {
+    it(`updates ${CLOUDBEAT_EKS} Assume Role fields`, async () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'assume_role' },
@@ -624,7 +624,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Secret Access Key')).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`, () => {
+    it(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`, async () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -669,7 +669,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Session Token')).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`, () => {
+    it(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`, async () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'temporary_keys' },
@@ -721,7 +721,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Credential Profile Name')).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_EKS} Shared Credentials fields`, () => {
+    it(`updates ${CLOUDBEAT_EKS} Shared Credentials fields`, async () => {
       let policy = getMockPolicyEKS();
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         'aws.credentials.type': { value: 'shared_credentials' },
@@ -872,7 +872,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Role ARN')).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_AWS} Assume Role fields`, () => {
+    it(`updates ${CLOUDBEAT_AWS} Assume Role fields`, async () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'assume_role' },
@@ -907,7 +907,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Secret Access Key')).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`, () => {
+    it(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`, async () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -950,7 +950,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Session Token')).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`, () => {
+    it(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`, async () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'temporary_keys' },
@@ -1003,7 +1003,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('Credential Profile Name')).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_AWS} Shared Credentials fields`, () => {
+    it(`updates ${CLOUDBEAT_AWS} Shared Credentials fields`, async () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'shared_credentials' },
@@ -1149,7 +1149,7 @@ describe('<CspPolicyTemplateForm />', () => {
       ).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_GCP} Credentials File fields`, () => {
+    it(`updates ${CLOUDBEAT_GCP} Credentials File fields`, async () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.project_id': { value: 'a' },
@@ -1191,7 +1191,7 @@ describe('<CspPolicyTemplateForm />', () => {
       ).toBeInTheDocument();
     });
 
-    it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`, () => {
+    it(`updates ${CLOUDBEAT_GCP} Credentials JSON fields`, async () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.project_id': { value: 'a' },
@@ -1282,7 +1282,7 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(queryByLabelText('Organization ID')).toBeNull();
     });
 
-    it(`updates ${CLOUDBEAT_GCP} organization id`, () => {
+    it(`updates ${CLOUDBEAT_GCP} organization id`, async () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },

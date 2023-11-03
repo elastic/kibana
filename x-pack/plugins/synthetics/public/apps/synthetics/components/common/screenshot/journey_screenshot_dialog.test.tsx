@@ -63,7 +63,7 @@ describe('JourneyScreenshotDialog', () => {
     await userEvent.click(getByTestId('screenshotImageNextButton'));
   });
 
-  it('respects maxSteps', () => {
+  it('respects maxSteps', async () => {
     const { getByTestId, queryByTestId } = render(<JourneyScreenshotDialog {...testProps} />);
 
     expect(queryByTestId('screenshotImageLoadingProgress')).not.toBeInTheDocument();

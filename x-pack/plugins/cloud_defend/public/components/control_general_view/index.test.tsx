@@ -59,7 +59,7 @@ describe('<ControlGeneralView />', () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
-    await waitFor(() => await userEvent.click(getByTestId('cloud-defend-btnAddFileSelector')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddFileSelector'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -81,7 +81,7 @@ describe('<ControlGeneralView />', () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
-    await waitFor(() => await userEvent.click(getByTestId('cloud-defend-btnAddFileResponse')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddFileResponse'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -103,7 +103,7 @@ describe('<ControlGeneralView />', () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
-    await waitFor(() => await userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 

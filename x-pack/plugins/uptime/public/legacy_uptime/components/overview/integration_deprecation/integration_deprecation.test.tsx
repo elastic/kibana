@@ -43,7 +43,7 @@ describe('IntegrationDeprecation', () => {
     expect(screen.queryByText(DEPRECATION_TITLE)).not.toBeInTheDocument();
   });
 
-  it('dismisses notification', () => {
+  it('dismisses notification', async () => {
     jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
       data: { hasIntegrationMonitors: true },

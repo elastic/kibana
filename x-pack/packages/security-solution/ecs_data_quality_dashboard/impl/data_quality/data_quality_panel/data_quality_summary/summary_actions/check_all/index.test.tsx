@@ -181,7 +181,7 @@ describe('CheckAll', () => {
     expect(screen.getByTestId('checkAll').hasAttribute('disabled')).toBeFalsy();
   });
 
-  test('it renders the expected button text when a check is running', () => {
+  test('it renders the expected button text when a check is running', async () => {
     render(
       <TestProviders>
         <CheckAll
@@ -310,7 +310,7 @@ describe('CheckAll', () => {
     const setCheckAllIndiciesChecked = jest.fn();
     const setCheckAllTotalIndiciesToCheck = jest.fn();
 
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.clearAllMocks();
 
       render(

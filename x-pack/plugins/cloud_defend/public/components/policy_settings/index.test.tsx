@@ -28,7 +28,7 @@ describe('<PolicySettings />', () => {
     onChange.mockClear();
   });
 
-  it('allows user to set name of integration', () => {
+  it('allows user to set name of integration', async () => {
     const { getByTestId } = render(<WrappedComponent />);
     const input = getByTestId('cloud-defend-policy-name');
 
@@ -43,7 +43,7 @@ describe('<PolicySettings />', () => {
     expect(updatedPolicy.name).toEqual('some-cloud_defend-policy1');
   });
 
-  it('allows user to set description of integration', () => {
+  it('allows user to set description of integration', async () => {
     const { getByTestId } = render(<WrappedComponent />);
     const input = getByTestId('cloud-defend-policy-description');
 
