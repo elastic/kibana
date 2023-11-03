@@ -263,6 +263,10 @@ export const createStore = (
     actionsBlacklist: ['USER_MOVED_POINTER', 'USER_SET_RASTER_SIZE'],
     actionSanitizer: actionSanitizer as EnhancerOptions['actionSanitizer'],
     stateSanitizer: stateSanitizer as EnhancerOptions['stateSanitizer'],
+    // uncomment the following to enable redux action tracing
+    // https://github.com/zalmoxisus/redux-devtools-extension/commit/64717bb9b3534ff616d9db56c2be680627c7b09d#diff-182cb140f8a0fd8bc37bbdcdad07bbadb9aebeb2d1b8ed026acd6132f2c88ce8R10
+    // trace: true,
+    // traceLimit: 100,
   };
 
   const composeEnhancers = composeWithDevTools(enhancerOptions);
