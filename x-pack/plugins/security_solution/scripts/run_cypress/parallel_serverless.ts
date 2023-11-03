@@ -333,7 +333,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         return process.exit(0);
       }
 
-      await pMap(
+      const results = await pMap(
         files,
         async (filePath) => {
           let result:
@@ -353,11 +353,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
             log.info(`${id}: Creating environment ${PROJECT_NAME}...`);
             // Creating environment for the test to run
-            const environment = await createEnvironment(
-              PROJECT_NAME,
-              API_KEY,
-              specFileFTRConfig
-            );
+            const environment = await createEnvironment(PROJECT_NAME, API_KEY, specFileFTRConfig);
 
             if (!environment) {
               log.info('Failed to create environment.');
@@ -451,7 +447,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         {
           concurrency: PARALLEL_COUNT,
         }
-      ).then((results) => {
+      );
+
+      if (results) {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
           results,
@@ -462,7 +460,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         if (hasFailedTests) {
           throw createFailError('Not all tests passed');
         }
-      });
+      }
     },
     {
       flags: {
