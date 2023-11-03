@@ -12,13 +12,8 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../../attachment_framework/mocks';
 import { AttachmentGetter } from './get';
-import {
-  createAlertAttachment,
-  createErrorSO,
-  createFileAttachment,
-  createUserAttachment,
-} from '../test_utils';
-import { mockPointInTimeFinder, createSOFindResponse } from '../../test_utils';
+import { createAlertAttachment, createFileAttachment, createUserAttachment } from '../test_utils';
+import { mockPointInTimeFinder, createSOFindResponse, createErrorSO } from '../../test_utils';
 
 describe('AttachmentService getter', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -50,12 +45,15 @@ describe('AttachmentService getter', () => {
 
       it('does not modified the error saved objects', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
-          saved_objects: [createUserAttachment(), createErrorSO()],
+          // @ts-expect-error: SO client types are not correct
+          saved_objects: [createUserAttachment(), createErrorSO('cases-comments')],
         });
 
         const res = await attachmentGetter.bulkGet(['1', '2']);
 
-        expect(res).toStrictEqual({ saved_objects: [createUserAttachment(), createErrorSO()] });
+        expect(res).toStrictEqual({
+          saved_objects: [createUserAttachment(), createErrorSO('cases-comments')],
+        });
       });
 
       it('strips excess fields', async () => {
