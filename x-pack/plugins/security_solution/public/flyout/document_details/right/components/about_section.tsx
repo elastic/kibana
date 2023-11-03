@@ -14,6 +14,7 @@ import { ABOUT_SECTION_TEST_ID } from './test_ids';
 import { Description } from './description';
 import { Reason } from './reason';
 import { MitreAttack } from './mitre_attack';
+import { AlertStatus } from './alert_status';
 
 export interface AboutSectionProps {
   /**
@@ -42,6 +43,7 @@ export const AboutSection: VFC<AboutSectionProps> = ({ expanded = true }) => {
       <Reason />
       <EuiSpacer size="m" />
       <MitreAttack />
+      <AlertStatus />
     </ExpandableSection>
   );
 };
