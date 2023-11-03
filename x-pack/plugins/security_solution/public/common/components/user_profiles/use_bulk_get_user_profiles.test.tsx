@@ -19,7 +19,7 @@ import { TestProviders } from '../../mock';
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_app_toasts');
 
-describe('useGetUserProfiles hook', () => {
+describe('useBulkGetUserProfiles hook', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
   beforeEach(() => {
     jest.clearAllMocks();
