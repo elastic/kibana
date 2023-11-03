@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EuiTab } from '@elastic/eui';
-import { FlyoutTabs } from './flyout_tabs';
+import { FlyoutHeaderTabs } from './flyout_header_tabs';
 
 const tab = 'tab name';
 const dataTestSubj = 'flyout tabs';
@@ -16,7 +16,9 @@ const dataTestSubj = 'flyout tabs';
 describe('<FlyoutTabs />', () => {
   it('should render tabs', () => {
     const { getByTestId } = render(
-      <FlyoutTabs data-test-subj={dataTestSubj}>{[<EuiTab key={1}>{tab}</EuiTab>]}</FlyoutTabs>
+      <FlyoutHeaderTabs data-test-subj={dataTestSubj}>
+        {[<EuiTab key={1}>{tab}</EuiTab>]}
+      </FlyoutHeaderTabs>
     );
     expect(getByTestId(dataTestSubj)).toBeInTheDocument();
     expect(getByTestId(dataTestSubj)).toHaveTextContent(tab);

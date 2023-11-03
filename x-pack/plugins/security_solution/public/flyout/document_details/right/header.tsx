@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { css } from '@emotion/react';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabsType } from './tabs';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
 import { HeaderTitle } from './components/header_title';
 
 export interface PanelHeaderProps {
@@ -48,15 +48,7 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
       <FlyoutHeader>
         <HeaderTitle />
         <EuiSpacer size="m" />
-        <EuiTabs
-          size="l"
-          expand
-          css={css`
-            margin-bottom: -17px;
-          `}
-        >
-          {renderTabs}
-        </EuiTabs>
+        <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>
       </FlyoutHeader>
     );
   }

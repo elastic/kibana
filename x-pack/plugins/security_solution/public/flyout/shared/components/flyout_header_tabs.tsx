@@ -10,26 +10,28 @@ import React, { memo } from 'react';
 import { EuiTabs } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-interface FlyoutTabsProps extends React.ComponentProps<typeof EuiTabs> {
+interface FlyoutHeaderTabsProps extends React.ComponentProps<typeof EuiTabs> {
   children: React.ReactNode;
 }
 
 /**
  * Wrapper of `EuiTabs`, setting bottom margin to align with the flyout header divider
  */
-export const FlyoutTabs: FC<FlyoutTabsProps> = memo(({ children, ...flyoutTabsProps }) => {
-  return (
-    <EuiTabs
-      size="l"
-      expand
-      css={css`
-        margin-bottom: -17px;
-      `}
-      {...flyoutTabsProps}
-    >
-      {children}
-    </EuiTabs>
-  );
-});
+export const FlyoutHeaderTabs: FC<FlyoutHeaderTabsProps> = memo(
+  ({ children, ...flyoutTabsProps }) => {
+    return (
+      <EuiTabs
+        size="l"
+        expand
+        css={css`
+          margin-bottom: -17px;
+        `}
+        {...flyoutTabsProps}
+      >
+        {children}
+      </EuiTabs>
+    );
+  }
+);
 
-FlyoutTabs.displayName = 'FlyoutTabs';
+FlyoutHeaderTabs.displayName = 'FlyoutHeaderTabs';
