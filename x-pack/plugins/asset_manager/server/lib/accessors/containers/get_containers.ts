@@ -7,19 +7,22 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Asset } from '../../../../common/types_api';
-import { collectHosts } from '../../collectors/hosts';
-import { GetHostsOptionsPublic } from '../../../../common/types_client';
+import { GetContainersOptionsPublic } from '../../../../common/types_client';
 import {
   AssetClientDependencies,
   AssetClientOptionsWithInjectedValues,
 } from '../../asset_client_types';
 import { parseEan } from '../../parse_ean';
+import { collectContainers } from '../../collectors';
 import { validateStringDateRange } from '../../validators/validate_date_range';
 
-export type GetHostsOptions = GetHostsOptionsPublic & AssetClientDependencies;
-export type GetHostsOptionsInjected = AssetClientOptionsWithInjectedValues<GetHostsOptions>;
+export type GetContainersOptions = GetContainersOptionsPublic & AssetClientDependencies;
+export type GetContainersOptionsInjected =
+  AssetClientOptionsWithInjectedValues<GetContainersOptions>;
 
-export async function getHosts(options: GetHostsOptionsInjected): Promise<{ hosts: Asset[] }> {
+export async function getContainers(
+  options: GetContainersOptionsInjected
+): Promise<{ containers: Asset[] }> {
   validateStringDateRange(options.from, options.to);
 
   const metricsIndices = await options.metricsClient.getMetricIndices({
@@ -32,16 +35,16 @@ export async function getHosts(options: GetHostsOptionsInjected): Promise<{ host
     const ean = Array.isArray(options.filters.ean) ? options.filters.ean[0] : options.filters.ean;
     const { kind, id } = parseEan(ean);
 
-    // if EAN filter isn't targeting a host asset, we don't need to do this query
-    if (kind !== 'host') {
+    // if EAN filter isn't targeting a container asset, we don't need to do this query
+    if (kind !== 'container') {
       return {
-        hosts: [],
+        containers: [],
       };
     }
 
     filters.push({
       term: {
-        'host.hostname': id,
+        'container.id': id,
       },
     });
   }
@@ -50,7 +53,7 @@ export async function getHosts(options: GetHostsOptionsInjected): Promise<{ host
     const fn = options.filters.id.includes('*') ? 'wildcard' : 'term';
     filters.push({
       [fn]: {
-        'host.hostname': options.filters.id,
+        'container.id': options.filters.id,
       },
     });
   }
@@ -71,7 +74,7 @@ export async function getHosts(options: GetHostsOptionsInjected): Promise<{ host
     });
   }
 
-  const { assets } = await collectHosts({
+  const { assets } = await collectContainers({
     client: options.elasticsearchClient,
     from: options.from,
     to: options.to || 'now',
@@ -83,6 +86,6 @@ export async function getHosts(options: GetHostsOptionsInjected): Promise<{ host
   });
 
   return {
-    hosts: assets,
+    containers: assets,
   };
 }
