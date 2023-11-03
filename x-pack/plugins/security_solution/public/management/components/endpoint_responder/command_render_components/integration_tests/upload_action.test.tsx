@@ -100,7 +100,7 @@ describe('When using `upload` response action', () => {
 
   it('should require `--file` argument', async () => {
     await render();
-    console.enterCommand('upload');
+    await console.enterCommand('upload');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
@@ -111,7 +111,7 @@ describe('When using `upload` response action', () => {
 
   it('should error if `--file` argument is not set (no file selected)', async () => {
     await render();
-    console.enterCommand('upload --file');
+    await console.enterCommand('upload --file');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
@@ -122,11 +122,9 @@ describe('When using `upload` response action', () => {
 
   it('should call upload api with expected payload', async () => {
     const { getByTestId } = await render();
-    console.enterCommand('upload --file', { inputOnly: true });
+    await console.enterCommand('upload --file', { inputOnly: true });
 
-    await waitFor(() => {
-      await userEvent.upload(getByTestId('console-arg-file-picker'), file);
-    });
+    await userEvent.upload(getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 
@@ -154,9 +152,7 @@ describe('When using `upload` response action', () => {
     const { getByTestId } = await render();
     console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
-    await waitFor(() => {
-      await userEvent.upload(getByTestId('console-arg-file-picker'), file);
-    });
+    await userEvent.upload(getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 
@@ -176,9 +172,7 @@ describe('When using `upload` response action', () => {
     const { getByTestId } = await render();
     console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
-    await waitFor(() => {
-      await userEvent.upload(getByTestId('console-arg-file-picker'), file);
-    });
+    await userEvent.upload(getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 
@@ -194,9 +188,7 @@ describe('When using `upload` response action', () => {
     const { getByTestId } = await render();
     console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
-    await waitFor(() => {
-      await userEvent.upload(getByTestId('console-arg-file-picker'), file);
-    });
+    await userEvent.upload(getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 
@@ -234,9 +226,7 @@ describe('When using `upload` response action', () => {
     await render();
 
     console.enterCommand('upload --file', { inputOnly: true });
-    await waitFor(() => {
-      await userEvent.upload(renderResult.getByTestId('console-arg-file-picker'), file);
-    });
+    await userEvent.upload(renderResult.getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 

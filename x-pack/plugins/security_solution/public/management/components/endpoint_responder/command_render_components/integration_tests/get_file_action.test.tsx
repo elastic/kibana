@@ -78,7 +78,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show an error if the `get_file` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
@@ -88,7 +88,7 @@ describe('When using get-file action from response actions console', () => {
   it('should show an error if the `get-file` is not authorized', async () => {
     endpointPrivileges.canWriteFileOperations = false;
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       INSUFFICIENT_PRIVILEGES_FOR_COMMAND
@@ -97,7 +97,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show an error if `get-file` is entered without `--path` argument', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'get-file');
+    await enterConsoleCommand(renderResult, 'get-file');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Missing required arguments: --path'
@@ -106,7 +106,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show error if `--path` is empty string', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path=""');
+    await enterConsoleCommand(renderResult, 'get-file --path=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --path. Argument cannot be empty'
@@ -115,7 +115,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should call the `get_file` api with the expected payload', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, 'get-file --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
@@ -128,7 +128,10 @@ describe('When using get-file action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two" --comment "one" --comment "two"');
+    await enterConsoleCommand(
+      renderResult,
+      'get-file --path="one/two" --comment "one" --comment "two"'
+    );
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
@@ -150,7 +153,7 @@ describe('When using get-file action from response actions console', () => {
     apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
 
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, 'get-file --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -191,7 +194,7 @@ describe('When using get-file action from response actions console', () => {
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path one');
+    await enterConsoleCommand(renderResult, 'get-file --path one');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getFile-actionFailure').textContent).toMatch(
