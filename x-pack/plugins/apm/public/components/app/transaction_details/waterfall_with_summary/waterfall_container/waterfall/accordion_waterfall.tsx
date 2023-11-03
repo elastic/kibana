@@ -19,6 +19,7 @@ import { groupBy } from 'lodash';
 import { transparentize } from 'polished';
 import React, { useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { Margins } from '../../../../../shared/charts/timeline';
@@ -150,7 +151,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
             <ToggleAccordionButton
               show={hasToggle}
               isOpen={isOpen}
-              childrenCount={children.length}
+              childrenCount={100425}
               onClick={toggleAccordion}
               maxWidth={timelineMargins.left}
             />
@@ -241,7 +242,7 @@ function ToggleAccordionButton({
         <EuiFlexItem grow={false} style={{ position: 'relative' }}>
           <div
             style={{
-              height: `calc(${euiTheme.size.s} * 2)`,
+              // height: `calc(${euiTheme.size.s} * 2)`,
               position: 'absolute',
               top: '50%',
               transform: 'translate(0, -50%)',
@@ -256,16 +257,7 @@ function ToggleAccordionButton({
                 },
               }}
             >
-              <EuiText
-                size="xs"
-                style={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {childrenCount}
-              </EuiText>
+              <EuiText size="xs">{asBigNumber(childrenCount)}</EuiText>
             </EuiToolTip>
           </div>
         </EuiFlexItem>
