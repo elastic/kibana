@@ -38,7 +38,7 @@ For example:
     "query":{
       "match_all" : {}
     }
-  }
+ }
 --------------------------------------------------
 
 If you use {kibana-ref}/kuery-query.html[KQL] or {kibana-ref}/lucene-query.html[Lucene], you must specify a data view then define a text-based query.
