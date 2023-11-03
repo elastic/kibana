@@ -94,25 +94,41 @@ export class UiSettingsApi {
     });
   }
 
-  public async validate(key: string, value: any, scope: UiSettingsScope) {
-    if (this.sendInProgress) {
-      return;
-    }
-
-    try {
-      this.sendInProgress = true;
-      const path =
-        scope === 'namespace'
-          ? `/internal/kibana/settings/${key}/validate`
-          : `/internal/kibana/global_settings/${key}/validate`;
-      return await this.sendRequest('POST', path, {
-        value,
-      });
-    } catch (error) {
-      return;
-    } finally {
-      this.sendInProgress = false;
-    }
+  /**
+   * Sends a validation request to the server for the provided key+value pair.
+   */
+  public validate(key: string, value: any, scope: UiSettingsScope | undefined) {
+    return new Promise<UiSettingsApiResponse>((resolve, reject) => {
+      if (this.sendInProgress) {
+        return;
+      }
+      if (!scope) {
+        return;
+      }
+      try {
+        this.sendInProgress = true;
+        const path =
+          scope === 'namespace'
+            ? `/internal/kibana/settings/${key}/validate`
+            : `/internal/kibana/global_settings/${key}/validate`;
+        const resp = this.sendRequest('POST', path, {
+          value,
+        });
+        resolve(resp);
+      } catch (error) {
+        if (error.response) {
+          if (error.response.status === 400) {
+            throw new Error(error.body.message);
+          }
+          if (error.response.status > 400) {
+            throw new Error(`Request failed with status code: ${error.response.status}`);
+          }
+        }
+        reject(error);
+      } finally {
+        this.sendInProgress = false;
+      }
+    });
   }
 
   /**

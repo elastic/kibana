@@ -13,8 +13,8 @@ const configSchema = schema.object({
   enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
 });
 
-export type DiscoverConfig = TypeOf<typeof configSchema>;
+export type ConfigSchema = TypeOf<typeof configSchema>;
 
-export const config: PluginConfigDescriptor<DiscoverConfig> = {
+export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };

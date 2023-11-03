@@ -27,6 +27,7 @@ const createClientMock = () => {
     removeMany: jest.fn(),
     isOverridden: jest.fn(),
     isSensitive: jest.fn(),
+    getValidationErrorMessage: jest.fn(),
   };
   mocked.get.mockResolvedValue(false);
   mocked.getAll.mockResolvedValue({});

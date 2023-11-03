@@ -13,7 +13,6 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema } from '@kbn/data-plugin/config';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DiscoverAppLocatorDefinition } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -21,12 +20,12 @@ import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
-import { DiscoverConfig } from './config';
+import { ConfigSchema } from './config';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
 {
-  private readonly config: DiscoverConfig;
+  private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = initializerContext.config.get();

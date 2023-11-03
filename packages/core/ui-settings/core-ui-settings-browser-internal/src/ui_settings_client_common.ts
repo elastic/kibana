@@ -129,7 +129,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   }
 
   async validateValue(key: string, value: unknown) {
-    const resp = await this.api.validate(key, value, this.defaults[key].scope || 'namespace');
+    const resp = await this.api.validate(key, value, this.defaults[key].scope);
     const errorMessage = resp?.errorMessage;
     return errorMessage ? errorMessage : null;
   }
