@@ -732,6 +732,32 @@ describe('ui settings', () => {
     });
   });
 
+  describe('#getValidationErrorMessage()', () => {
+    it('returns a correct validation error message for an existing setting key and unvalid value', () => {
+      const defaults = { foo: { schema: schema.number() } };
+      const { uiSettings } = setup({ defaults });
+
+      expect(uiSettings.getValidationErrorMessage('foo', 'testValue')).toBe(
+        'expected value of type [number] but got [string]'
+      );
+    });
+
+    it('returns null for an existing setting key and valid value', () => {
+      const defaults = { foo: { schema: schema.number() } };
+      const { uiSettings } = setup({ defaults });
+
+      expect(uiSettings.getValidationErrorMessage('foo', 5)).toBe(null);
+    });
+
+    it('returns null for a non-existing setting key or null value', () => {
+      const defaults = { foo: { schema: schema.number() } };
+      const { uiSettings } = setup({ defaults });
+
+      expect(uiSettings.getValidationErrorMessage('bar', 5)).toBe(null);
+      expect(uiSettings.getValidationErrorMessage('foo', null)).toBe(null);
+    });
+  });
+
   describe('caching', () => {
     describe('read operations cache user config', () => {
       beforeEach(() => {

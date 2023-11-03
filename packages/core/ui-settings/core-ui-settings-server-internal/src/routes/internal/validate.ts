@@ -68,15 +68,4 @@ export function registerInternalValidateRoute(router: InternalUiSettingsRouter) 
       return await validateFromRequest(uiSettingsClient, context, request, response);
     }
   );
-  router.post(
-    {
-      path: '/internal/kibana/global_settings/{key}/validate',
-      validate,
-      options: { access: 'internal' },
-    },
-    async (context, request, response) => {
-      const uiSettingsClient = (await context.core).uiSettings.globalClient;
-      return await validateFromRequest(uiSettingsClient, context, request, response);
-    }
-  );
 }

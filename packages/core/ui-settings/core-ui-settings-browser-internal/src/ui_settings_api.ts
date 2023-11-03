@@ -16,6 +16,10 @@ export interface UiSettingsApiResponse {
   settings: UiSettingsState;
 }
 
+export interface ValidationApiResponse {
+  errorMessage?: string;
+}
+
 interface Changes {
   values: {
     [key: string]: any;
@@ -97,20 +101,10 @@ export class UiSettingsApi {
   /**
    * Sends a validation request to the server for the provided key+value pair.
    */
-  public validate(key: string, value: any, scope: UiSettingsScope | undefined) {
-    return new Promise<UiSettingsApiResponse>((resolve, reject) => {
-      if (this.sendInProgress) {
-        return;
-      }
-      if (!scope) {
-        return;
-      }
+  public validate(key: string, value: any) {
+    return new Promise<ValidationApiResponse>((resolve, reject) => {
       try {
-        this.sendInProgress = true;
-        const path =
-          scope === 'namespace'
-            ? `/internal/kibana/settings/${key}/validate`
-            : `/internal/kibana/global_settings/${key}/validate`;
+        const path = `/internal/kibana/settings/${key}/validate`;
         const resp = this.sendRequest('POST', path, {
           value,
         });
@@ -125,8 +119,6 @@ export class UiSettingsApi {
           }
         }
         reject(error);
-      } finally {
-        this.sendInProgress = false;
       }
     });
   }

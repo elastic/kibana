@@ -156,6 +156,37 @@ describe('ui settings service', () => {
       });
     });
 
+    describe('validate', () => {
+      it('returns correct validation error message for invalid value', async () => {
+        const response = await request
+          .post(root, '/internal/kibana/settings/custom/validate')
+          .send({ value: 100 })
+          .expect(200);
+
+        expect(response.body).toMatchObject({
+          errorMessage: 'expected value of type [string] but got [number]',
+        });
+      });
+
+      it('returns no response body for valid value', async () => {
+        const response = await request
+          .post(root, '/internal/kibana/settings/custom/validate')
+          .send({ value: 'test' })
+          .expect(200);
+
+        expect(response.body).toMatchObject({});
+      });
+
+      it('returns no response body for non-existing key', async () => {
+        const response = await request
+          .post(root, '/internal/kibana/settings/test/validate')
+          .send({ value: 'test' })
+          .expect(200);
+
+        expect(response.body).toMatchObject({});
+      });
+    });
+
     describe('global', () => {
       describe('set', () => {
         it('validates value', async () => {
