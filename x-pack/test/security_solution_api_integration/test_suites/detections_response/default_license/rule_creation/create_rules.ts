@@ -420,7 +420,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('threshold validation', () => {
-        it('returns HTTP 400 error when there is threshold field provided', async () => {
+        it('returns HTTP 400 error when NO threshold field is provided', async () => {
           const ruleParams = getThresholdRuleParams();
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
