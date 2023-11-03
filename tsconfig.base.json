@@ -1346,14 +1346,8 @@
       "@kbn/shared-svg/*": ["packages/kbn-shared-svg/*"],
       "@kbn/shared-ux-avatar-solution": ["packages/shared-ux/avatar/solution"],
       "@kbn/shared-ux-avatar-solution/*": ["packages/shared-ux/avatar/solution/*"],
-      "@kbn/shared-ux-avatar-user-profile-components": ["packages/shared-ux/avatar/user_profile/impl"],
-      "@kbn/shared-ux-avatar-user-profile-components/*": ["packages/shared-ux/avatar/user_profile/impl/*"],
-      "@kbn/shared-ux-button-exit-full-screen": ["packages/shared-ux/button/exit_full_screen/impl"],
-      "@kbn/shared-ux-button-exit-full-screen/*": ["packages/shared-ux/button/exit_full_screen/impl/*"],
-      "@kbn/shared-ux-button-exit-full-screen-mocks": ["packages/shared-ux/button/exit_full_screen/mocks"],
-      "@kbn/shared-ux-button-exit-full-screen-mocks/*": ["packages/shared-ux/button/exit_full_screen/mocks/*"],
-      "@kbn/shared-ux-button-exit-full-screen-types": ["packages/shared-ux/button/exit_full_screen/types"],
-      "@kbn/shared-ux-button-exit-full-screen-types/*": ["packages/shared-ux/button/exit_full_screen/types/*"],
+      "@kbn/shared-ux-button-exit-full-screen": ["packages/shared-ux/button/exit_full_screen"],
+      "@kbn/shared-ux-button-exit-full-screen/*": ["packages/shared-ux/button/exit_full_screen/*"],
       "@kbn/shared-ux-button-toolbar": ["packages/shared-ux/button_toolbar"],
       "@kbn/shared-ux-button-toolbar/*": ["packages/shared-ux/button_toolbar/*"],
       "@kbn/shared-ux-card-no-data": ["packages/shared-ux/card/no_data/impl"],
@@ -1652,6 +1646,8 @@
       "@kbn/xstate-utils/*": ["packages/kbn-xstate-utils/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
+      "@kbn/zod-helpers": ["packages/kbn-zod-helpers"],
+      "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": [
@@ -1727,6 +1723,6 @@
       "@kbn/ambient-ui-types",
       "@kbn/ambient-common-types",
       "@kbn/ambient-storybook-types"
-    ]
+    ],
   }
 }

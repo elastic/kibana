@@ -28,9 +28,13 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { FieldIcon } from '@kbn/react-field';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
-import type { Threshold as ThresholdType } from '../../../../../common/api/detection_engine/model/rule_schema/specific_attributes/threshold_attributes';
-import type { RequiredFieldArray } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+import type {
+  AlertSuppressionMissingFieldsStrategy,
+  RequiredFieldArray,
+  RuleResponse,
+  Threshold as ThresholdType,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../../detections/components/rules/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
@@ -38,7 +42,6 @@ import { AlertSuppressionTechnicalPreviewBadge } from '../../../../detections/co
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { useLicense } from '../../../../common/hooks/use_license';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema/specific_attributes/query_attributes';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
@@ -348,7 +351,7 @@ interface MissingFieldsStrategyProps {
 
 const MissingFieldsStrategy = ({ missingFieldsStrategy }: MissingFieldsStrategyProps) => {
   const missingFieldsDescription =
-    missingFieldsStrategy === AlertSuppressionMissingFieldsStrategy.Suppress
+    missingFieldsStrategy === AlertSuppressionMissingFieldsStrategyEnum.suppress
       ? descriptionStepI18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : descriptionStepI18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
@@ -579,7 +582,8 @@ const prepareDefinitionSectionListItems = (
   return definitionSectionListItems;
 };
 
-export interface RuleDefinitionSectionProps {
+export interface RuleDefinitionSectionProps
+  extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
   isInteractive?: boolean;
   dataTestSubj?: string;
@@ -589,6 +593,7 @@ export const RuleDefinitionSection = ({
   rule,
   isInteractive = false,
   dataTestSubj,
+  ...descriptionListProps
 }: RuleDefinitionSectionProps) => {
   const { savedQuery } = useGetSavedQuery({
     savedQueryId: rule.type === 'saved_query' ? rule.saved_id : '',
@@ -604,11 +609,12 @@ export const RuleDefinitionSection = ({
   return (
     <div data-test-subj={dataTestSubj}>
       <EuiDescriptionList
-        type="column"
+        type={descriptionListProps.type ?? 'column'}
+        rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={definitionSectionListItems}
         columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
-        rowGutterSize="m"
         data-test-subj="listItemColumnStepRuleDescription"
+        {...descriptionListProps}
       />
     </div>
   );

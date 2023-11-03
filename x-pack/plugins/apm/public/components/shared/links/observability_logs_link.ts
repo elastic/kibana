@@ -6,9 +6,9 @@
  */
 
 import type {
-  NodeLogsLocator,
-  LogsLocator,
-} from '@kbn/infra-plugin/common/locators';
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import moment from 'moment';
@@ -27,7 +27,7 @@ export const getNodeLogsHref = (
   id: string,
   time: number | undefined,
   allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>,
-  infraNodeLocator?: NodeLogsLocator
+  infraNodeLocator?: LocatorPublic<NodeLogsLocatorParams>
 ): string => {
   if (infraNodeLocator)
     return infraNodeLocator?.getRedirectUrl({
@@ -53,7 +53,7 @@ export const getTraceLogsHref = (
   traceId: string,
   time: number | undefined,
   allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>,
-  infraLogsLocator?: LogsLocator
+  infraLogsLocator: LocatorPublic<LogsLocatorParams>
 ): string => {
   const query = `trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}")`;
 

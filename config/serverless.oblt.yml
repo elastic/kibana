@@ -25,6 +25,11 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
 
+## Enable the capability for the observability feature ID in the serverless environment to take ownership of the rules.
+## The value need to be a featureId observability Or stackAlerts Or siem
+xpack.alerting.rules.overwriteProducer: 'observability'
+xpack.observability.createO11yGenericFeatureId: true
+
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
 
@@ -39,6 +44,9 @@ xpack.fleet.internal.registry.excludePackages: [
     'endpoint',
     'beaconing',
     'osquery_manager',
+    # synthetics is not enabled yet
+    'synthetics',
+    'synthetics_dashboards',
     # Removed in 8.11 integrations
     'cisco',
     'microsoft',
@@ -52,7 +60,7 @@ xpack.fleet.packages:
     version: latest
 # fleet_server package installed to publish agent metrics
   - name: fleet_server
-    version: latest  
+    version: latest
 ## Disable APM UI components and API calls
 xpack.apm.featureFlags.agentConfigurationAvailable: false
 xpack.apm.featureFlags.configurableIndicesAvailable: false
@@ -68,3 +76,4 @@ telemetry.labels.serverless: observability
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: false
+xpack.ml.compatibleModuleType: 'observability'
