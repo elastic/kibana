@@ -56,6 +56,10 @@ const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
 const BASE_ENV_URL = 'https://global.qa.cld.elstc.co';
 let log: ToolingLog;
 
+const delay = async (timeout: number) => {
+  await new Promise((r) => setTimeout(r, timeout));
+};
+
 const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   const userHomeDir = os.homedir();
   try {
@@ -198,7 +202,6 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
       } else {
         log.info(`${runnerId}: ${error}`);
       }
-      throw new Error(`${runnerId} - ${error}`);
     },
     retries: 50,
     factor: 2,
@@ -364,6 +367,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               // eslint-disable-next-line no-process-exit
               return process.exit(1);
             }
+
+            // Wait for 4 minutes in order for the environment to be ready
+            delay(240000);
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = btoa(`${credentials.username}:${credentials.password}`);
