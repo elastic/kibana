@@ -307,12 +307,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                             id="xpack.security.accountManagement.apiKeyFlyout.setup.description"
                             defaultMessage="Basic configuration details to create your API key."
                           />
-                          {i18n.translate(
-                            'xpack.security.accountManagement.apiKeyFlyout.setup.description',
-                            {
-                              defaultMessage: 'Basic configuration details to create your API key.',
-                            }
-                          )}
                         </p>
                       </EuiText>
                     </div>
