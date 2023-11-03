@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, useEffect } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { FillStyle, OperationType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -48,7 +48,7 @@ function PreviewChart({
   const {
     services: { lens },
   } = useKibana();
-
+  const { euiTheme } = useEuiTheme();
   const { metrics, timeSize, timeUnit, threshold, comparator, equation } = metricExpression;
   const [attributes, setAttributes] = useState<LensAttributes>();
   const [aggMap, setAggMap] = useState<AggMap>();
@@ -112,7 +112,7 @@ function PreviewChart({
         data: [
           {
             value: (threshold[1] || 0).toString(),
-            color: '#FF0000',
+            color: euiTheme.colors.danger,
             fill: comparator === Comparator.OUTSIDE_RANGE ? 'above' : 'below',
             format: {
               id: 'number',
@@ -134,7 +134,7 @@ function PreviewChart({
         data: [
           {
             value: (threshold[0] || 0).toString(),
-            color: '#FF0000',
+            color: euiTheme.colors.danger,
             fill,
             format: {
               id: 'number',
@@ -148,7 +148,7 @@ function PreviewChart({
       refLayers.push(refLine);
     }
     setThresholdReferenceLine(refLayers);
-  }, [threshold, comparator]);
+  }, [threshold, comparator, euiTheme.colors.danger]);
 
   // Build the aggregation map from the metrics
   useEffect(() => {
