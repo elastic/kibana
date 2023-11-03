@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
+
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
+import { NonEmptyString, UUID } from '@kbn/securitysolution-io-ts-types';
 import type { FindRulesSortFieldOrUndefined } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type {
@@ -20,6 +23,15 @@ import type { RuleParams } from '../../../rule_schema';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 import { transformSortField } from './transform_sort_field';
 
+type HasReferences = t.TypeOf<typeof HasReferences>;
+const HasReferences = t.type({
+  type: NonEmptyString,
+  id: UUID,
+});
+
+type HasReferencesOrUndefined = t.TypeOf<typeof HasReferencesOrUndefined>;
+const HasReferencesOrUndefined = t.union([HasReferences, t.undefined]);
+
 export interface FindRuleOptions {
   rulesClient: RulesClient;
   filter: QueryFilterOrUndefined;
@@ -28,6 +40,7 @@ export interface FindRuleOptions {
   sortOrder: SortOrderOrUndefined;
   page: PageOrUndefined;
   perPage: PerPageOrUndefined;
+  hasReference?: HasReferencesOrUndefined;
 }
 
 export const findRules = ({
@@ -38,6 +51,7 @@ export const findRules = ({
   filter,
   sortField,
   sortOrder,
+  hasReference,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
@@ -47,6 +61,7 @@ export const findRules = ({
       filter: enrichFilterWithRuleTypeMapping(filter),
       sortOrder,
       sortField: transformSortField(sortField),
+      hasReference,
     },
   });
 };

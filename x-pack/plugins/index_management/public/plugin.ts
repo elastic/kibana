@@ -42,6 +42,7 @@ export class IndexMgmtUIPlugin {
       enableLegacyTemplates,
       enableIndexStats,
       editableIndexSettings,
+      enableDataStreamsStorageColumn,
     } = this.ctx.config.get<ClientConfigType>();
 
     if (isIndexManagementUiEnabled) {
@@ -52,6 +53,7 @@ export class IndexMgmtUIPlugin {
         enableLegacyTemplates: enableLegacyTemplates ?? true,
         enableIndexStats: enableIndexStats ?? true,
         editableIndexSettings: editableIndexSettings ?? 'all',
+        enableDataStreamsStorageColumn: enableDataStreamsStorageColumn ?? true,
       };
       management.sections.section.data.registerApp({
         id: PLUGIN.id,

@@ -132,6 +132,23 @@ describe('Alerting Plugin', () => {
           expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
         });
 
+        it('should not initialize AlertsService if node.roles.migrator is true', async () => {
+          const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+            ...generateAlertingConfig(),
+            enableFrameworkAlerts: true,
+          });
+          context.node.roles.migrator = true;
+          plugin = new AlertingPlugin(context);
+
+          // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
+          const setupContract = plugin.setup(setupMocks, mockPlugins);
+          await waitForSetupComplete(setupMocks);
+
+          expect(AlertsService).not.toHaveBeenCalled();
+
+          expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
+        });
+
         it(`exposes configured minimumScheduleInterval()`, async () => {
           const context = coreMock.createPluginInitializerContext<AlertingConfig>(
             generateAlertingConfig()

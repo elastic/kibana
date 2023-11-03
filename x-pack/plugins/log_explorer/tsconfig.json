@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*", ".storybook/**/*.tsx"],
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    ".storybook/**/*.tsx"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/discover-plugin",
@@ -25,9 +31,12 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/discover-utils",
     "@kbn/deeplinks-observability",
+    "@kbn/field-formats-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/kibana-utils-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
