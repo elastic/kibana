@@ -259,8 +259,6 @@ export async function pickTestGroupRunOrder() {
   const trackedBranch = getTrackedBranch();
   const ownBranch = process.env.BUILDKITE_BRANCH as string;
   const pipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG as string;
-  const pipelineSource = process.env.BUILDKITE_SOURCE as string;
-
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
 
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
@@ -275,9 +273,12 @@ export async function pickTestGroupRunOrder() {
           ]
         : []),
       // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
-      // also skipping triggered jobs that can be running tests against older commits
-      // which may reflect out of date build times when running against the branch head
-      ...(!prNumber && pipelineSlug !== 'kibana-on-merge' && pipelineSource !== 'trigger_job'
+      // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
+      // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
+      // of too many ftr groups instead of potential timeouts.
+      ...(!prNumber &&
+      pipelineSlug !== 'kibana-on-merge' &&
+      pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
         ? [
             {
               branch: ownBranch,
