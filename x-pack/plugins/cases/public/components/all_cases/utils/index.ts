@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ParsedUrlQueryParams, PartialQueryParams } from '../../../common/ui/types';
+import type { ParsedUrlQueryParams, PartialQueryParams } from '../../../../common/ui/types';
 
 export const parseUrlQueryParams = (parsedUrlParams: ParsedUrlQueryParams): PartialQueryParams => {
   const urlParams: PartialQueryParams = {

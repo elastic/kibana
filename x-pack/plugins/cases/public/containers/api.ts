@@ -33,6 +33,7 @@ import type {
   CaseUsers,
   CasesFindResponseUI,
   CasesUI,
+  FilterOptions,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
 import {
@@ -234,14 +235,27 @@ export const getCaseUserActionsStats = async (
   return convertToCamelCase(decodeCaseUserActionStatsResponse(response));
 };
 
+const removeOptionFromFilter = ({
+  filterKey,
+  filterOptions,
+  optionToBeRemoved,
+}: {
+  filterKey: keyof FilterOptions;
+  filterOptions: string[];
+  optionToBeRemoved: string;
+}) => {
+  const resultingFilterOptions = filterOptions.filter((option) => option !== optionToBeRemoved);
+  return resultingFilterOptions.length === 0 ? {} : { [filterKey]: resultingFilterOptions };
+};
+
 export const getCases = async ({
   filterOptions = {
     search: '',
     searchFields: [],
-    severity: SeverityAll,
+    severity: [SeverityAll],
     assignees: [],
     reporters: [],
-    status: StatusAll,
+    status: [StatusAll],
     tags: [],
     owner: [],
     category: [],
@@ -255,8 +269,16 @@ export const getCases = async ({
   signal,
 }: FetchCasesProps): Promise<CasesFindResponseUI> => {
   const query = {
-    ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
-    ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
+    ...removeOptionFromFilter({
+      filterKey: 'status',
+      filterOptions: filterOptions.status,
+      optionToBeRemoved: StatusAll,
+    }),
+    ...removeOptionFromFilter({
+      filterKey: 'severity',
+      filterOptions: filterOptions.severity,
+      optionToBeRemoved: SeverityAll,
+    }),
     ...constructAssigneesFilter(filterOptions.assignees),
     ...constructReportersFilter(filterOptions.reporters),
     ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),

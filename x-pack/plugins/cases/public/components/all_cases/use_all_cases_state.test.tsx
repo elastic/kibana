@@ -15,8 +15,12 @@ import {
   getQueryParamsLocalStorageKey,
   getFilterOptionsLocalStorageKey,
 } from './use_all_cases_state';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
-import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
+import {
+  DEFAULT_FILTER_OPTIONS,
+  DEFAULT_QUERY_PARAMS,
+  DEFAULT_TABLE_ACTIVE_PAGE,
+  DEFAULT_TABLE_LIMIT,
+} from '../../containers/constants';
 import { CaseStatuses } from '../../../common/types/domain';
 import { SortFieldCase } from '../../containers/types';
 import { stringifyToURL } from '../utils';
@@ -91,7 +95,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('takes into account input filter options', () => {
-    const existingLocalStorageValues = { owner: ['foobar'], status: CaseStatuses.open };
+    const existingLocalStorageValues = { owner: ['foobar'], status: [CaseStatuses.open] };
 
     const { result } = renderHook(() => useAllCasesState(false, existingLocalStorageValues), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -139,7 +143,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('takes into account existing localStorage filter options values on first run', () => {
-    const existingLocalStorageValues = { severity: 'critical', status: 'open' };
+    const existingLocalStorageValues = { severity: ['critical'], status: ['open'] };
 
     localStorage.setItem(
       LOCALSTORAGE_FILTER_OPTIONS_KEY,
@@ -151,6 +155,24 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(result.current.filterOptions).toMatchObject(existingLocalStorageValues);
+  });
+
+  it('takes into account legacy localStorage filter values', () => {
+    const existingLocalStorageValues = { severity: 'critical', status: 'open' };
+
+    localStorage.setItem(
+      LOCALSTORAGE_FILTER_OPTIONS_KEY,
+      JSON.stringify(existingLocalStorageValues)
+    );
+
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.filterOptions).toMatchObject({
+      severity: ['critical'],
+      status: ['open'],
+    });
   });
 
   it('takes into account existing url query params on first run', () => {
@@ -234,14 +256,14 @@ describe('useAllCasesQueryParams', () => {
 
     localStorage.setItem(
       LOCALSTORAGE_FILTER_OPTIONS_KEY,
-      JSON.stringify({ severity: 'low', status: 'closed' })
+      JSON.stringify({ severity: ['low'], status: ['closed'] })
     );
 
     const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(result.current.filterOptions).toMatchObject(nonDefaultUrlParams);
+    expect(result.current.filterOptions).toMatchObject({ severity: ['high'], status: ['open'] });
   });
 
   describe('validation', () => {
