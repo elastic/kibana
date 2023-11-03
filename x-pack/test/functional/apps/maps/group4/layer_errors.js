@@ -75,7 +75,7 @@ export default function ({ getPageObjects }) {
       const LAYER_NAME = 'EMS_tiles';
 
       it('should diplay error icon in legend', async () => {
-        const msg = await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
+        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
@@ -89,7 +89,7 @@ export default function ({ getPageObjects }) {
       const LAYER_NAME = 'Custom_TMS';
 
       it('should diplay error icon in legend', async () => {
-        const msg = await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
+        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
