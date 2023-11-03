@@ -8,9 +8,6 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-// TODO: Why do i get this error here? its imported in other places without issue
-// eslint-disable-next-line import/no-nodejs-modules
-import { IncomingMessage } from 'http';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
@@ -62,7 +59,7 @@ export const fetchConnectorExecuteAction = async ({
   // My "Feature Flag", turn to false before merging
   // In part 2 I will make enhancements to invokeAI to make it work with both openA, but to keep it to a Security Soltuion only review on this PR,
   // I'm calling the stream action directly
-  const isStream = false;
+  const isStream = !assistantLangChain && false;
   const requestBody = isStream
     ? {
         params: {
@@ -81,7 +78,7 @@ export const fetchConnectorExecuteAction = async ({
 
   try {
     if (isStream) {
-      const response = await http.fetch<IncomingMessage>(
+      const response = await http.fetch(
         `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
         {
           method: 'POST',

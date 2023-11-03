@@ -15,6 +15,9 @@ import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React from 'react';
+import { transparentize } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
@@ -44,7 +47,7 @@ const cursorCss = css`
   height: 16px;
   vertical-align: middle;
   display: inline-block;
-  background: rgba(0, 0, 0, 0.25);
+  background: ${transparentize(euiThemeVars.euiColorDarkShade, 0.25)};
 `;
 
 const Cursor = () => (

@@ -109,4 +109,4 @@ function getMessageFromChunks(chunks: Chunk[]) {
   return chunks.map((chunk) => chunk.choices[0]?.delta.content ?? '').join('');
 }
 
-export const getDumbObservable = () => new Observable<PromptObservableState>();
+export const getPlaceholderObservable = () => new Observable<PromptObservableState>();

@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { share } from 'rxjs';
-import { getDumbObservable, getStreamObservable } from './stream_observable';
+import { getPlaceholderObservable, getStreamObservable } from './stream_observable';
 
 interface UseStreamProps {
   amendMessage: (message: string) => void;
@@ -43,7 +43,7 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
     () =>
       content == null && reader != null
         ? getStreamObservable(reader, setLoading)
-        : getDumbObservable(),
+        : getPlaceholderObservable(),
     [content, reader]
   );
   const onCompleteStream = useCallback(() => {

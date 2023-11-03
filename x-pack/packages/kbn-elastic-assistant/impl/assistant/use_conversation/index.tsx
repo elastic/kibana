@@ -31,7 +31,7 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
   },
 };
 
-export interface AppendMessageProps {
+interface AppendMessageProps {
   conversationId: string;
   message: Message;
 }
@@ -114,11 +114,14 @@ export const useConversation = (): UseConversation => {
         const prevConversation: Conversation | undefined = prev[conversationId];
 
         if (prevConversation != null) {
-          const message = prevConversation.messages.pop() as unknown as Message;
-          const messages = [...prevConversation.messages, { ...message, content }];
+          const { messages, ...rest } = prevConversation;
+          const message = messages[messages.length - 1];
+          const updatedMessages = message
+            ? [...messages.slice(0, -1), { ...message, content }]
+            : [...messages];
           const newConversation = {
-            ...prevConversation,
-            messages,
+            ...rest,
+            messages: updatedMessages,
           };
           return {
             ...prev,
