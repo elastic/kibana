@@ -74,12 +74,10 @@ export class TOCEntryButton extends Component<Props, State> {
       return {
         icon: (
           <EuiIcon
-            aria-label={i18n.translate('xpack.maps.layer.loadWarningAriaLabel', {
-              defaultMessage: 'Load warning',
-            })}
             size="m"
             type="error"
             color="danger"
+            data-test-subj={`layerTocErrorIcon${this.props.escapedDisplayName}`}
           />
         ),
         tooltipContent: this.props.layer
