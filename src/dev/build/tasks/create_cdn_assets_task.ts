@@ -27,13 +27,12 @@ export const CreateCdnAssets: Task = {
     const buildVersion = config.getBuildVersion();
     const assets = config.resolveFromRepo('build', 'cdn-assets');
     const bundles = resolve(assets, String(buildNum), 'bundles');
-    const plugin = resolve(bundles, 'plugin');
 
     await del(assets);
     await mkdirp(assets);
 
     // Plugins
-    await mkdirp(plugin);
+
     const plugins = globby.sync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
     await asyncForEach(plugins, async (path) => {
       const manifest = Jsonc.parse(readFileSync(path, 'utf8')) as any;
@@ -41,9 +40,11 @@ export const CreateCdnAssets: Task = {
         const pluginRoot = resolve(dirname(path));
 
         try {
+          // packages/core/plugins/core-plugins-server-internal/src/plugins_service.ts
           const assetsSource = resolve(pluginRoot, 'assets');
-          const assetsDest = resolve(plugin, manifest.plugin.id, 'assets');
+          const assetsDest = resolve('plugins', manifest.plugin.id, 'assets');
           await access(assetsSource);
+          await mkdirp(assetsDest);
           await copyAll(assetsSource, assetsDest);
         } catch (e) {
           // assets are optional
@@ -51,9 +52,11 @@ export const CreateCdnAssets: Task = {
         }
 
         try {
+          // packages/core/apps/core-apps-server-internal/src/bundle_routes/register_bundle_routes.ts
           const bundlesSource = resolve(pluginRoot, 'target', 'public');
-          const bundlesDest = resolve(plugin, manifest.plugin.id, '1.0.0');
+          const bundlesDest = resolve(bundles, 'plugin', manifest.plugin.id, '1.0.0');
           await access(bundlesSource);
+          await mkdirp(bundlesDest);
           await copyAll(bundlesSource, bundlesDest);
         } catch (e) {
           // bundles are optional
@@ -62,7 +65,7 @@ export const CreateCdnAssets: Task = {
       }
     });
 
-    // See packages/core/apps/core-apps-server-internal/src/bundle_routes/register_bundle_routes.ts
+    // packages/core/apps/core-apps-server-internal/src/bundle_routes/register_bundle_routes.ts
     await copyAll(
       resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-npm/shared_built_assets'),
       resolve(bundles, 'kbn-ui-shared-deps-npm')
@@ -80,7 +83,7 @@ export const CreateCdnAssets: Task = {
       resolve(bundles, 'kbn-monaco')
     );
 
-    // See packages/core/apps/core-apps-server-internal/src/core_app.ts
+    // packages/core/apps/core-apps-server-internal/src/core_app.ts
     await copyAll(
       resolve(buildSource, 'node_modules/@kbn/core-apps-server-internal/assets'),
       resolve(assets, 'ui')
