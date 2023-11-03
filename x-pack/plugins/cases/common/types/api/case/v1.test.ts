@@ -25,7 +25,7 @@ import type { Case } from '../../domain/case/v1';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CasesStatusRequestRt, CasesStatusResponseRt } from '../stats/v1';
-import type { CasePostRequest } from './v1';
+import { CasePostRequest, CasesSearchRequestRt } from './v1';
 import {
   AllReportersFindRequestRt,
   CasePatchRequestRt,
@@ -406,6 +406,106 @@ describe('CasesFindRequestRt', () => {
     ).toContain('No errors!');
   });
 
+  describe('errors', () => {
+    it('throws error when invalid searchField passed', () => {
+      expect(
+        PathReporter.report(
+          CasesFindRequestRt.decode({ ...defaultRequest, searchFields: 'foobar' })
+        )
+      ).not.toContain('No errors!');
+    });
+
+    it('throws error when invalid sortField passed', () => {
+      expect(
+        PathReporter.report(CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'foobar' }))
+      ).not.toContain('No errors!');
+    });
+
+    it('succeeds when valid parameters passed', () => {
+      expect(PathReporter.report(CasesFindRequestRt.decode(defaultRequest))).toContain(
+        'No errors!'
+      );
+    });
+
+    it(`throws an error when the category array has ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
+      const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
+
+      expect(PathReporter.report(CasesFindRequestRt.decode({ category }))).toContain(
+        'The length of the field category is too long. Array must be of length <= 100.'
+      );
+    });
+
+    it(`throws an error when the tags array has ${MAX_TAGS_FILTER_LENGTH} items`, async () => {
+      const tags = Array(MAX_TAGS_FILTER_LENGTH + 1).fill('foobar');
+
+      expect(PathReporter.report(CasesFindRequestRt.decode({ tags }))).toContain(
+        'The length of the field tags is too long. Array must be of length <= 100.'
+      );
+    });
+
+    it(`throws an error when the assignees array has ${MAX_ASSIGNEES_FILTER_LENGTH} items`, async () => {
+      const assignees = Array(MAX_ASSIGNEES_FILTER_LENGTH + 1).fill('foobar');
+
+      expect(PathReporter.report(CasesFindRequestRt.decode({ assignees }))).toContain(
+        'The length of the field assignees is too long. Array must be of length <= 100.'
+      );
+    });
+
+    it(`throws an error when the reporters array has ${MAX_REPORTERS_FILTER_LENGTH} items`, async () => {
+      const reporters = Array(MAX_REPORTERS_FILTER_LENGTH + 1).fill('foobar');
+
+      expect(PathReporter.report(CasesFindRequestRt.decode({ reporters }))).toContain(
+        'The length of the field reporters is too long. Array must be of length <= 100.'
+      );
+    });
+  });
+});
+
+describe('CasesSearchRequestRt', () => {
+  const defaultRequest = {
+    tags: ['new', 'case'],
+    status: CaseStatuses.open,
+    severity: CaseSeverity.LOW,
+    assignees: ['damaged_racoon'],
+    reporters: ['damaged_racoon'],
+    defaultSearchOperator: 'AND',
+    from: 'now',
+    page: '1',
+    perPage: '10',
+    search: 'search text',
+    searchFields: ['title', 'description'],
+    to: '1w',
+    sortOrder: 'desc',
+    sortField: 'createdAt',
+    owner: 'cases',
+    customFields: {
+      "toggle_custom_filed_key": {
+        "value": [true]
+      },
+      "another_custom_field": {
+        "value": [false]
+      }
+    }
+  };
+
+  it('has expected attributes in request', () => {
+    const query = CasesSearchRequestRt.decode(defaultRequest);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { ...defaultRequest, page: 1, perPage: 10 },
+    });
+  });
+
+  it('removes foo:bar attributes from request', () => {
+    const query = CasesSearchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { ...defaultRequest, page: 1, perPage: 10 },
+    });
+  });
+  
   describe('errors', () => {
     it('throws error when invalid searchField passed', () => {
       expect(

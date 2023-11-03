@@ -169,7 +169,9 @@ const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
   return temp;
 };
 
-const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNode | undefined => {
+const buildCategoryFilter = (
+  categories: CasesSearchParams['category']
+): KueryNode | undefined => {
   if (categories === undefined) {
     return;
   }
@@ -351,30 +353,20 @@ export const buildCustomFieldsFilter = ({
     return;
   }
 
-  const customFieldsAsArray = Array.isArray(customFields) ? customFields : [customFields];
-
-  if (customFieldsAsArray.length === 0) {
+  if(customFields === null) {
     return;
   }
 
-  const customFieldsFilter = customFieldsAsArray.map((filter) => {
-    const filterKey = Object.keys(filter)[0];
+  const customFieldsFilter = Object.entries(customFields).map((filter) => {
+    const filterKey = filter[0];
 
-    const customFieldKeyFilter = fromKueryExpression(
-      `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${filterKey}}`
-    );
-
-    const customFieldValueFilter = Object.values(filter[filterKey].value).map((filterValue) => {
+    const customFieldValueFilter = Object.values(filter[1].value).map((filterValue) => {
       return fromKueryExpression(
-        `${CASE_SAVED_OBJECT}.attributes.customFields:{value.boolean: ${filterValue}}`
+        `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${filterKey}} AND ${CASE_SAVED_OBJECT}.attributes.customFields:{value.boolean: ${filterValue}}`
       );
     });
 
-    const customFieldFilter = customFieldValueFilter.map((item) =>
-      nodeBuilder.and([customFieldKeyFilter, item])
-    );
-
-    return nodeBuilder.or([...customFieldFilter]);
+    return nodeBuilder.or(customFieldValueFilter);
   });
 
   const finalFilter = nodeBuilder.and([...customFieldsFilter]);
