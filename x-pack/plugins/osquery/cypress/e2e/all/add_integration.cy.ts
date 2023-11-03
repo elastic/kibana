@@ -6,6 +6,12 @@
  */
 
 import {
+  ADD_PACK_HEADER_BUTTON,
+  ADD_QUERY_BUTTON,
+  formFieldInputSelector,
+  TABLE_ROWS,
+} from '../../screens/packs';
+import {
   cleanupPack,
   cleanupAgentPolicy,
   cleanupSavedQuery,
@@ -170,11 +176,11 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('euiFlyoutCloseButton').click();
 
       navigateToWithoutWaitForReact('app/osquery/packs');
-      cy.getBySel('addPackButton').click();
-      cy.get('input[name="name"]').type(`${packName}{downArrow}{enter}`);
+      cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+      cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
       cy.getBySel('policyIdsComboBox').type(`${policyName} {downArrow}{enter}`);
 
-      cy.get('span').contains('Add query').click();
+      cy.getBySel(ADD_QUERY_BUTTON).click();
       cy.getBySel('savedQuerySelect').click().type('{downArrow}{enter}');
       cy.contains(/^Save$/).click();
       cy.contains(/^Save pack$/).click();
@@ -200,7 +206,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
 
       // test list of prebuilt queries
       navigateToWithoutWaitForReact('/app/osquery/saved_queries');
-      cy.get('tbody > tr').should('have.length.above', 5);
+      cy.get(TABLE_ROWS).should('have.length.above', 5);
     });
   });
 });

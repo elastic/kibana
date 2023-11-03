@@ -7,6 +7,20 @@
 
 import { recurse } from 'cypress-recurse';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  ADD_PACK_HEADER_BUTTON,
+  ADD_QUERY_BUTTON,
+  SAVE_PACK_BUTTON,
+  FLYOUT_SAVED_QUERY_SAVE_BUTTON,
+  customActionEditSavedQuerySelector,
+  POLICY_SELECT_COMBOBOX,
+  EDIT_PACK_HEADER_BUTTON,
+  SAVED_QUERY_DROPDOWN_SELECT,
+  UPDATE_PACK_BUTTON,
+  TABLE_ROWS,
+  formFieldInputSelector,
+  FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
+} from '../../screens/packs';
 import { API_VERSIONS } from '../../../common/constants';
 import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
 import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
@@ -109,18 +123,18 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       const packName = 'ResultType' + generateRandomStringName(1)[0];
 
       cy.contains('Packs').click();
-      cy.getBySel('addPackButton').click();
-      cy.get('input[name="name"]').type(`${packName}{downArrow}{enter}`);
+      cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+      cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
 
-      cy.getBySel('add-query-button').click();
+      cy.getBySel(ADD_QUERY_BUTTON).click();
 
       cy.contains('Attach next query');
       getIdFormField().type('Query1');
       inputQuery('select * from uptime;');
       cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
-      cy.getBySel('query-flyout-save-button').click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
-      cy.getBySel('add-query-button').click();
+      cy.getBySel(ADD_QUERY_BUTTON).click();
 
       cy.contains('Attach next query');
       getIdFormField().type('Query2');
@@ -129,9 +143,9 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential').click();
       cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
-      cy.getBySel('query-flyout-save-button').click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
-      cy.getBySel('add-query-button').click();
+      cy.getBySel(ADD_QUERY_BUTTON).click();
 
       cy.contains('Attach next query');
       getIdFormField().type('Query3');
@@ -139,9 +153,9 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential (Ignore removals)').click();
       cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
-      cy.getBySel('query-flyout-save-button').click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
-      cy.getBySel('savePackButton').click();
+      cy.getBySel(SAVE_PACK_BUTTON).click();
 
       cy.getBySel('tablePaginationPopoverButton').click();
       cy.getBySel('tablePagination-50-rows').click();
@@ -152,28 +166,28 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('Query1');
       cy.contains('Query2');
       cy.contains('Query3');
-      cy.get(`[aria-label="Edit Query1"]`).click();
+      cy.get(customActionEditSavedQuerySelector('Query1')).click();
 
       cy.getBySel('resultsTypeField').contains('Snapshot').click();
       cy.contains('Differential').click();
 
-      cy.getBySel('query-flyout-save-button').click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
-      cy.get(`[aria-label="Edit Query2"]`).click();
+      cy.get(customActionEditSavedQuerySelector('Query2')).click();
 
       cy.getBySel('resultsTypeField').contains('Differential').click();
       cy.contains('Differential (Ignore removals)').click();
-      cy.getBySel('query-flyout-save-button').click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
-      cy.get(`[aria-label="Edit Query3"]`).click();
+      cy.get(customActionEditSavedQuerySelector('Query3')).click();
 
       cy.getBySel('resultsTypeField').contains('(Ignore removals)').click();
       cy.contains('Snapshot').click();
-      cy.getBySel('query-flyout-save-button').click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
-      cy.getBySel('policyIdsComboBox').type(`${DEFAULT_POLICY} {downArrow}{enter}`);
+      cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${DEFAULT_POLICY} {downArrow}{enter}`);
 
-      cy.getBySel('updatePackButton').click();
+      cy.getBySel(UPDATE_PACK_BUTTON).click();
       closeModalIfVisible();
 
       cy.contains(
@@ -232,19 +246,19 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
     it('should add a pack from a saved query', () => {
       cy.contains('Packs').click();
 
-      cy.getBySel('addPackButton').click();
-      cy.get('input[name="name"]').type(`${packName}{downArrow}{enter}`);
-      cy.get('input[name="description"]').type(`Pack description{downArrow}{enter}`);
-      cy.getBySel('policyIdsComboBox').type(`${DEFAULT_POLICY} {downArrow}{enter}`);
-      cy.getBySel('add-query-button').click();
+      cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+      cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
+      cy.get(formFieldInputSelector('description')).type(`Pack description{downArrow}{enter}`);
+      cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${DEFAULT_POLICY} {downArrow}{enter}`);
+      cy.getBySel(ADD_QUERY_BUTTON).click();
 
       cy.contains('Attach next query');
-      cy.getBySel('savedQuerySelect').type(`${savedQueryName}{downArrow}{enter}`);
+      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
       cy.getBySel('osquery-interval-field').click().clear().type('5');
-      cy.getBySel('query-flyout-save-button').click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
-      cy.get('tbody > tr').contains(savedQueryName);
-      cy.getBySel('savePackButton').click();
+      cy.get(TABLE_ROWS).contains(savedQueryName);
+      cy.getBySel(SAVE_PACK_BUTTON).click();
       closeModalIfVisible();
       cy.getBySel('tablePaginationPopoverButton').click();
       cy.getBySel('tablePagination-50-rows').click();
@@ -290,19 +304,19 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('edit-pack-button').click();
 
       cy.contains(`Edit ${packName}`);
-      cy.getBySel('add-query-button').click();
+      cy.getBySel(ADD_QUERY_BUTTON).click();
 
       cy.contains('Attach next query');
       inputQuery('select * from uptime');
-      cy.get('input[name="id"]').type(`${savedQueryName}{downArrow}{enter}`);
+      cy.get(formFieldInputSelector('id')).type(`${savedQueryName}{downArrow}{enter}`);
 
-      cy.getBySel('query-flyout-save-button').click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
       cy.contains('ID must be unique').should('exist');
-      cy.get('input[name="id"]').type(`${newQueryName}{downArrow}{enter}`);
+      cy.get(formFieldInputSelector('id')).type(`${newQueryName}{downArrow}{enter}`);
       cy.contains('ID must be unique').should('not.exist');
-      cy.getBySel('query-flyout-save-button').click();
-      cy.get('tbody > tr').contains(newQueryName);
-      cy.getBySel('updatePackButton').click();
+      cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
+      cy.get(TABLE_ROWS).contains(newQueryName);
+      cy.getBySel(UPDATE_PACK_BUTTON).click();
       closeModalIfVisible();
       cy.contains(`Successfully updated "${packName}" pack`);
       closeToastIfVisible();
@@ -347,17 +361,17 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
       it('', () => {
         preparePack(packName);
-        cy.getBySel('edit-pack-button').click();
+        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
 
-        cy.getBySel('add-query-button').click();
+        cy.getBySel(ADD_QUERY_BUTTON).click();
 
         cy.contains('Attach next query');
         cy.contains('ID must be unique').should('not.exist');
-        cy.getBySel('savedQuerySelect').type(`${savedQueryName}{downArrow}{enter}`);
-        cy.getBySel('query-flyout-save-button').click();
+        cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
+        cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
         cy.contains('ID must be unique').should('exist');
-        cy.getBySel('query-flyout-cancel-button').click();
+        cy.getBySel(FLYOUT_SAVED_QUERY_CANCEL_BUTTON).click();
       });
     }
   );
@@ -607,9 +621,6 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
       cy.contains(/^Delete \d+ quer(y|ies)/).click();
       cy.contains(/^Update pack$/).click();
-      // cy.react('EuiButtonDisplay')
-      //   .contains(/^Save and deploy changes$/)
-      //   .click();
 
       closeModalIfVisible();
 
@@ -659,9 +670,9 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         preparePack(packName);
         cy.contains(/^Edit$/).click();
 
-        cy.getBySel('add-query-button').click();
+        cy.getBySel(ADD_QUERY_BUTTON).click();
 
-        cy.getBySel('savedQuerySelect').type(
+        cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(
           `${multipleMappingsSavedQueryName} {downArrow} {enter}`
         );
         cy.contains('Custom key/value pairs').should('exist');
@@ -672,7 +683,9 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains('Total uptime seconds').should('exist');
         cy.getBySel('ECSMappingEditorForm').should('have.length', 4);
 
-        cy.getBySel('savedQuerySelect').type(`${nomappingSavedQueryName} {downArrow} {enter}`);
+        cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(
+          `${nomappingSavedQueryName} {downArrow} {enter}`
+        );
         cy.contains('Custom key/value pairs').should('not.exist');
         cy.contains('Days of uptime').should('not.exist');
         cy.contains('List of keywords used to tag each').should('not.exist');
@@ -681,13 +694,15 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains('Total uptime seconds').should('not.exist');
         cy.getBySel('ECSMappingEditorForm').should('have.length', 1);
 
-        cy.getBySel('savedQuerySelect').type(`${oneMappingSavedQueryName} {downArrow} {enter}`);
+        cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(
+          `${oneMappingSavedQueryName} {downArrow} {enter}`
+        );
         cy.contains('Name of the continent').should('exist');
         cy.contains('Seconds of uptime').should('exist');
         cy.getBySel('ECSMappingEditorForm').should('have.length', 2);
 
-        cy.getBySel('query-flyout-save-button').click();
-        cy.get(`[aria-label="Edit ${oneMappingSavedQueryName}"]`).click();
+        cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
+        cy.get(customActionEditSavedQuerySelector(oneMappingSavedQueryName)).click();
 
         cy.contains('Name of the continent').should('exist');
         cy.contains('Seconds of uptime').should('exist');
@@ -726,7 +741,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
     it('', { tags: ['@ess', '@serverless'] }, () => {
       preparePack(packName);
 
-      cy.getBySel('edit-pack-button').click();
+      cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
       deleteAndConfirm('pack');
     });
   });
