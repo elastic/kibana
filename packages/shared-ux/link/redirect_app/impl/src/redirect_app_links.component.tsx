@@ -45,7 +45,12 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <div onClick={handleClick} ref={containerRef} css={redirectAppLinksStyles}>
+    <div
+      onClick={handleClick}
+      ref={containerRef}
+      css={redirectAppLinksStyles}
+      data-test-subj="kbnRedirectAppLink"
+    >
       {children}
     </div>
   );
