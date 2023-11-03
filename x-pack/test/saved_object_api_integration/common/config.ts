@@ -35,7 +35,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/apis/`)],
+      testFiles: [require.resolve(`../${name}/apis/bulk_create.ts`)],
       servers: config.xpack.api.get('servers'),
       services,
       junit: {
