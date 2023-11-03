@@ -254,7 +254,7 @@ describe('TileStatusTracker', () => {
       const OUT_OF_ZOOM_CANONICAL_TILE = {
         ...IN_VIEW_CANONICAL_TILE,
         z: 4, // out of view because zoom is not 5
-      }; // canonical key 'au55'
+      };
       mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', OUT_OF_ZOOM_CANONICAL_TILE));
       mockMbMap.emit('error', {
         ...createSourceDataEvent('layer1Source', OUT_OF_ZOOM_CANONICAL_TILE),
@@ -283,7 +283,7 @@ describe('TileStatusTracker', () => {
       const OUT_OF_VIEW_CANONICAL_TILE = {
         ...IN_VIEW_CANONICAL_TILE,
         y: 13, // out of view because tile is out side of view bounds to the south
-      }; // canonical key 'au55'
+      };
       mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', OUT_OF_VIEW_CANONICAL_TILE));
       mockMbMap.emit('error', {
         ...createSourceDataEvent('layer1Source', OUT_OF_VIEW_CANONICAL_TILE),
