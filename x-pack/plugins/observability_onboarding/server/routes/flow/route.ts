@@ -11,7 +11,10 @@ import {
   getObservabilityOnboardingFlow,
   saveObservabilityOnboardingFlow,
 } from '../../lib/state';
-import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
+import {
+  ElasticAgentStepPayload,
+  ObservabilityOnboardingFlow,
+} from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 
@@ -63,16 +66,18 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         status: t.string,
       }),
       t.partial({ message: t.string }),
+      t.partial({ payload: t.record(t.string, t.unknown) }),
     ]),
   }),
   async handler(resources) {
     const {
       params: {
         path: { id, name },
-        body: { status, message },
+        body: { status, message, payload },
       },
       core,
     } = resources;
+
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
@@ -102,11 +107,15 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         ...observabilityOnboardingState,
         progress: {
           ...observabilityOnboardingState.progress,
-          [name]: { status, message },
+          [name]: {
+            status,
+            message,
+            payload: payload as unknown as ElasticAgentStepPayload,
+          },
         },
       },
     });
-    return { name, status, message };
+    return { name, status, message, payload };
   },
 });
 
@@ -156,6 +165,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
           type,
           state: savedObservabilityOnboardingState.state,
           esClient,
+          payload: progress['ea-status']?.payload,
         });
         if (hasLogs) {
           progress['logs-ingest'] = { status: 'complete' };
