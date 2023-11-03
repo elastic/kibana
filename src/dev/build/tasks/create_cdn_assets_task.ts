@@ -62,17 +62,7 @@ export const CreateCdnAssets: Task = {
       }
     });
 
-    // Core
-    await copyAll(
-      resolve(buildSource, 'node_modules/@kbn/core/target/public'),
-      resolve(bundles, 'core')
-    );
-    await copyAll(
-      resolve(buildSource, 'node_modules/@kbn/core-apps-server-internal/assets'),
-      resolve(assets, 'ui')
-    );
-
-    // Shared dependencies
+    // See packages/core/apps/core-apps-server-internal/src/bundle_routes/register_bundle_routes.ts
     await copyAll(
       resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-npm/shared_built_assets'),
       resolve(bundles, 'kbn-ui-shared-deps-npm')
@@ -80,6 +70,20 @@ export const CreateCdnAssets: Task = {
     await copyAll(
       resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-src/shared_built_assets'),
       resolve(bundles, 'kbn-ui-shared-deps-src')
+    );
+    await copyAll(
+      resolve(buildSource, 'node_modules/@kbn/core/target/public'),
+      resolve(bundles, 'core')
+    );
+    await copyAll(
+      resolve(buildSource, 'node_modules/@kbn/monaco/target_workers'),
+      resolve(bundles, 'kbn-monaco')
+    );
+
+    // See packages/core/apps/core-apps-server-internal/src/core_app.ts
+    await copyAll(
+      resolve(buildSource, 'node_modules/@kbn/core-apps-server-internal/assets'),
+      resolve(assets, 'ui')
     );
 
     await compressTar({
