@@ -15,14 +15,14 @@ import { Index } from '../..';
 export const renderBadges = (
   index: Index,
   extensionsService: ExtensionsService,
-  filterChanged?: (query: Query) => void
+  onFilterChange?: (query: Query) => void
 ) => {
   const badgeLabels: ReactNode[] = [];
   extensionsService.badges.forEach(({ matchIndex, label, color, filterExpression }) => {
     if (matchIndex(index)) {
       const clickHandler = () => {
-        if (filterChanged && filterExpression) {
-          filterChanged(Query.parse(filterExpression));
+        if (onFilterChange && filterExpression) {
+          onFilterChange(Query.parse(filterExpression));
         }
       };
       const ariaLabel = i18n.translate('xpack.idxMgmt.badgeAriaLabel', {
@@ -30,7 +30,7 @@ export const renderBadges = (
         values: { label },
       });
       const badge =
-        filterChanged && filterExpression ? (
+        onFilterChange && filterExpression ? (
           <EuiBadge color={color} onClick={clickHandler} onClickAriaLabel={ariaLabel}>
             {label}
           </EuiBadge>
