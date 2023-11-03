@@ -293,7 +293,7 @@ export const getUiSettings: (
     name: i18n.translate('discover.advancedSettings.params.rowHeightTitle', {
       defaultMessage: 'Row height in the Document Explorer',
     }),
-    value: -1,
+    value: 3,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
       defaultMessage:

@@ -76,3 +76,42 @@ export const getLifecycleValue = (
 
   return lifecycle?.data_retention;
 };
+
+export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
+  return (
+    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management' &&
+    dataStream?.indices?.every(
+      (index) => index.managedBy.toLowerCase() === 'index lifecycle management'
+    )
+  );
+};
+
+export const isDataStreamFullyManagedByDSL = (dataStream?: DataStream | null) => {
+  return (
+    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle' &&
+    dataStream?.indices?.every((index) => index.managedBy.toLowerCase() === 'data stream lifecycle')
+  );
+};
+
+export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {
+  if (dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle') {
+    const ilmIndices = dataStream?.indices?.filter(
+      (index) => index.managedBy.toLowerCase() === 'index lifecycle management'
+    );
+    const dslIndices = dataStream?.indices?.filter(
+      (index) => index.managedBy.toLowerCase() === 'data stream lifecycle'
+    );
+
+    // When there arent any ILM indices, there's no need to show anything.
+    if (!ilmIndices?.length) {
+      return;
+    }
+
+    return {
+      ilmIndices,
+      dslIndices,
+    };
+  }
+
+  return;
+};
