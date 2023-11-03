@@ -318,7 +318,7 @@ describe('Cases API', () => {
       });
     });
 
-    it('should not send the severity field if empty', async () => {
+    it('should not send the status field if empty', async () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,

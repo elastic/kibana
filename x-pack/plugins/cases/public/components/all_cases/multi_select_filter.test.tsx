@@ -12,11 +12,6 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { FilterOptions } from '../../../common/ui/types';
 
 describe('multi select filter', () => {
-  const openFilter = async (filterName: string) => {
-    userEvent.click(screen.getByRole('button', { name: filterName }));
-    return waitForEuiPopoverOpen();
-  };
-
   it('should render the amount of options available', async () => {
     const onChange = jest.fn();
     const props = {
@@ -28,7 +23,8 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
 
-    await openFilter('Tags');
+    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    await waitForEuiPopoverOpen();
 
     expect(screen.getByText('4 options')).toBeInTheDocument();
   });
@@ -47,7 +43,8 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    await openFilter('Tags');
+    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    await waitForEuiPopoverOpen();
 
     expect(screen.getByText('Limit reached')).toBeInTheDocument();
 
@@ -73,7 +70,8 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    await openFilter('Tags');
+    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('Limit reached')).not.toBeInTheDocument();
 
@@ -98,5 +96,23 @@ describe('multi select filter', () => {
     const { rerender } = render(<MultiSelectFilter {...props} />);
     rerender(<MultiSelectFilter {...props} options={['tag a']} />);
     expect(onChange).toHaveBeenCalledWith({ filterId: 'tags', options: [] });
+  });
+
+  it('activates custom renderOption when set', async () => {
+    const TEST_ID = 'test-render-option-id';
+    const onChange = jest.fn();
+    const renderOption = () => <div data-test-subj={TEST_ID} />;
+    const props = {
+      id: 'tags' as keyof FilterOptions,
+      buttonLabel: 'Tags',
+      options: ['tag a', 'tag b'],
+      onChange,
+      renderOption,
+    };
+
+    render(<MultiSelectFilter {...props} />);
+    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    await waitForEuiPopoverOpen();
+    expect(screen.getAllByTestId(TEST_ID).length).toBe(2);
   });
 });
