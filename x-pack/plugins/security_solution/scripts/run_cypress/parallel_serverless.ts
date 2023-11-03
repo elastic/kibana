@@ -177,37 +177,34 @@ function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Pr
 }
 
 // Wait until Kibana is available
-async function waitForKibanaAvailable(
-  kbUrl: string,
-  auth: string,
-  runnerId: string
-): Promise<void> {
-  await pRetry(
-    async (num) => {
-      log.info(`Retry number ${num} to check if kibana is available.`);
-      try {
-        const response = await axios.get(`${kbUrl}/api/status`, {
-          headers: {
-            Authorization: `Basic ${auth}`,
-          },
-        });
-        if (response.data.status.overall.level !== 'available') {
-          log.info(`${runnerId}: Kibana is not available. Retrying in 20s...`);
-          throw new Error(`${runnerId}: Kibana is not available. Retrying in 20s...`);
-        } else {
-          return true;
-        }
-      } catch (error) {
-        if (error.code === 'ENOTFOUND') {
-          log.info(`${runnerId}: The kibana url is not yet reachable. Retrying in 20s...`);
-        }
-        throw new Error(`${runnerId} - ${error.code}:${error.data}`);
-      }
-    },
-    {
-      retries: 50,
+function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): Promise<void> {
+  const fetchKibanaStatusAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if kibana is available.`);
+    const response = await axios.get(`${kbUrl}/api/status`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+    if (response.data.status.overall.level !== 'available') {
+      throw new Error(`${runnerId}: Kibana is not available. Retrying in 20s...`);
+    } else {
+      log.info(`${runnerId}: Kibana status overall is ${response.data.status.overall.level}.`);
     }
-  );
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info(`${runnerId}: The kibana url is not yet reachable. Retrying in 20s...`);
+      } else {
+        log.info(`${runnerId}: ${error}`);
+      }
+      throw new Error(`${runnerId} - ${error}`);
+    },
+    retries: 50,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+  return pRetry(fetchKibanaStatusAttempt, retryOptions);
 }
 
 export const cli = () => {
