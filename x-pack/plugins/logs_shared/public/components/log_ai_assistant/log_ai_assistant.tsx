@@ -13,12 +13,16 @@ import {
   ObservabilityAIAssistantPluginStart,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { LogEntry } from '../../../common/search_strategies/log_entries/log_entry';
+import { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
+
+export interface LogAIAssistantDocument {
+  fields: LogEntryField[];
+}
 
 export interface LogAIAssistantProps {
   aiAssistant: ObservabilityAIAssistantPluginStart;
-  doc: LogEntry | undefined;
+  doc: LogAIAssistantDocument | undefined;
 }
 
 export function LogAIAssistant({ aiAssistant, doc }: LogAIAssistantProps) {
