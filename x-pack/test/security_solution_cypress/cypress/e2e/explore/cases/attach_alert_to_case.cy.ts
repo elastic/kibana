@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES, SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 
 import { getNewRule } from '../../../objects/rule';
 
@@ -19,7 +19,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../../screens/alerts';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 
-const loadDetectionsPage = (role: ROLES) => {
+const loadDetectionsPage = (role: SecurityRoleName) => {
   login(role);
   visit(ALERTS_URL, { role });
   waitForAlertsToPopulate();
