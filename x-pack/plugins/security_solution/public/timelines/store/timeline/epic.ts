@@ -35,7 +35,7 @@ import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';
 
-import { persistTimeline } from '../../containers/api';
+import { cloneTimeline, persistTimeline } from '../../containers/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import * as i18n from '../../pages/translations';
 
@@ -160,16 +160,31 @@ export const createTimelineEpic =
               allTimelineQuery$
             );
           } else if (action.type === saveTimeline.type) {
+            // the type of `action` is completely wrong above.
+            // so we're casting to the correct type here.
+            // TODO: fix the ActionTimeline type above
+            const saveAsNew = (action as unknown as ReturnType<typeof saveTimeline>).payload
+              .saveAsNew;
             return from(
-              persistTimeline({
-                timelineId,
-                version,
-                timeline: {
-                  ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
-                  templateTimelineId,
-                  templateTimelineVersion,
-                },
-              })
+              saveAsNew
+                ? cloneTimeline({
+                    timelineId,
+                    version,
+                    timeline: {
+                      ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+                      templateTimelineId,
+                      templateTimelineVersion,
+                    },
+                  })
+                : persistTimeline({
+                    timelineId,
+                    version,
+                    timeline: {
+                      ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+                      templateTimelineId,
+                      templateTimelineVersion,
+                    },
+                  })
             ).pipe(
               withLatestFrom(timeline$, allTimelineQuery$, kibana$),
               mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {

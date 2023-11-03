@@ -41,6 +41,7 @@ import {
   TIMELINE_PREPACKAGED_URL,
   TIMELINE_RESOLVE_URL,
   TIMELINES_URL,
+  TIMELINE_CLONE_URL,
   TIMELINE_FAVORITE_URL,
 } from '../../../common/constants';
 
@@ -151,6 +152,34 @@ const patchTimeline = async ({
     return Promise.resolve(decodeTimelineErrorResponse(err.body));
   }
   return decodeTimelineResponse(response);
+};
+
+export const cloneTimeline = async ({
+  timelineId,
+  timeline,
+  version,
+}: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+  let response = null;
+  let requestBody = null;
+  try {
+    requestBody = JSON.stringify({ timeline, timelineId, version });
+  } catch (err) {
+    return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
+  }
+  try {
+    response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_CLONE_URL, {
+      method: 'POST',
+      body: requestBody,
+      version: '2023-10-31',
+    });
+  } catch (err) {
+    // For Future developer
+    // We are not rejecting our promise here because we had issue with our RXJS epic
+    // the issue we were not able to pass the right object to it so we did manage the error in the success
+    return Promise.resolve(decodeTimelineErrorResponse(err.body));
+  }
+  return decodeTimelineResponse(response);
+  return Promise.resolve();
 };
 
 export const persistTimeline = async ({
