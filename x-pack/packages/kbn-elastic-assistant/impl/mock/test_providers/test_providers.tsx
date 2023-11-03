@@ -76,6 +76,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
             baseAllow={[]}
             baseAllowReplacement={[]}
             basePath={'https://localhost:5601/kbn'}
+            dataQualityConversationId={'Data quality dashboard'}
             defaultAllow={[]}
             defaultAllowReplacement={[]}
             docLinks={{
