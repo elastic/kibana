@@ -66,8 +66,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169702
-  describe.skip('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
+  describe('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
