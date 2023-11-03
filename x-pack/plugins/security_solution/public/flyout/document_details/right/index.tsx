@@ -71,7 +71,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
         setSelectedTabId={setSelectedTabId}
       />
       <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
-      <PanelFooter isReadOnly={isPreview} />
+      <PanelFooter isPreview={isPreview} />
     </>
   );
 });

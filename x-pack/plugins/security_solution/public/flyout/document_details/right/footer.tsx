@@ -14,15 +14,15 @@ import { useHostIsolationTools } from '../../../timelines/components/side_panel/
 
 interface PanelFooterProps {
   /**
-   * Boolean that indicates whether footer is read only and action should be hidden
+   * Boolean that indicates whether flyout is in preview and action should be hidden
    */
-  isReadOnly: boolean;
+  isPreview: boolean;
 }
 
 /**
  *
  */
-export const PanelFooter: FC<PanelFooterProps> = ({ isReadOnly }) => {
+export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
   const { closeFlyout, openRightPanel } = useExpandableFlyoutContext();
   const {
     eventId,
@@ -57,7 +57,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isReadOnly }) => {
       detailsEcsData={dataAsNestedObject}
       handleOnEventClosed={closeFlyout}
       isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-      isReadOnly={isReadOnly}
+      isReadOnly={isPreview}
       loadingEventDetails={false}
       onAddIsolationStatusClick={showHostIsolationPanelCallback}
       scopeId={scopeId}

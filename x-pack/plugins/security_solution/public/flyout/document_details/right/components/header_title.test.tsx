@@ -16,6 +16,7 @@ import {
   SEVERITY_TITLE_TEST_ID,
   SHARE_BUTTON_TEST_ID,
   FLYOUT_HEADER_TITLE_TEST_ID,
+  STATUS_BUTTON_TEST_ID,
 } from './test_ids';
 import { HeaderTitle } from './header_title';
 import moment from 'moment-timezone';
@@ -75,6 +76,7 @@ describe('<HeaderTitle />', () => {
     expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RISK_SCORE_VALUE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(SEVERITY_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(STATUS_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render rule name in the title if document is an alert', () => {
@@ -144,5 +146,33 @@ describe('<HeaderTitle />', () => {
     const { getByTestId } = renderHeader(contextValue);
 
     expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Event details');
+  });
+
+  it('should not render document status if document is not an alert', () => {
+    const contextValue = {
+      ...mockContextValue,
+      dataFormattedForFieldBrowser: [
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.name',
+          values: [],
+          originalValue: [],
+          isObjectArray: false,
+        },
+      ],
+    } as unknown as RightPanelContext;
+
+    const { queryByTestId } = renderHeader(contextValue);
+    expect(queryByTestId(STATUS_BUTTON_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render document status if flyout is open in preview', () => {
+    const contextValue = {
+      ...mockContextValue,
+      isPreview: true,
+    } as unknown as RightPanelContext;
+
+    const { queryByTestId } = renderHeader(contextValue);
+    expect(queryByTestId(STATUS_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });

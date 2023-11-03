@@ -53,10 +53,10 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
-const renderAnalyzerPreview = () =>
+const renderAnalyzerPreview = (context = panelContextValue) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={panelContextValue}>
+      <RightPanelContext.Provider value={context}>
         <AnalyzerPreviewContainer />
       </RightPanelContext.Provider>
     </TestProviders>
@@ -117,7 +117,7 @@ describe('AnalyzerPreviewContainer', () => {
     ).toHaveTextContent(NO_ANALYZER_MESSAGE);
   });
 
-  it('should navigate to left section Visualize tab when clicking on title', () => {
+  it('should navigate to analyzer in timeline when clicking on title', () => {
     (isInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
       loading: false,
@@ -135,5 +135,25 @@ describe('AnalyzerPreviewContainer', () => {
 
     getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID)).click();
     expect(investigateInTimelineAlertClick).toHaveBeenCalled();
+  });
+
+  it('should not navigate to analyzer when in preview and clicking on title', () => {
+    (isInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: ['alertid'],
+      statsNodes: mock.mockStatsNodes,
+    });
+    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      investigateInTimelineAlertClick: jest.fn(),
+    });
+
+    const { queryByTestId } = renderAnalyzerPreview({ ...panelContextValue, isPreview: true });
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
+    const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
+    expect(investigateInTimelineAlertClick).not.toHaveBeenCalled();
   });
 });

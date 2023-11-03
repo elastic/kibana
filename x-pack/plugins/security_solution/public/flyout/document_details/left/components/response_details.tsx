@@ -38,26 +38,30 @@ export const ResponseDetails: React.FC = () => {
     ecsData: dataAsNestedObject,
   });
 
-  return isPreview ? (
-    <FormattedMessage
-      id="xpack.securitySolution.flyout.left.response.previewMessage"
-      defaultMessage="Response is not available in alert preview."
-    />
-  ) : (
+  return (
     <div data-test-subj={RESPONSE_DETAILS_TEST_ID}>
-      <EuiTitle size="xxxs">
-        <h5>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.response.responseTitle"
-            defaultMessage="Responses"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+      {isPreview ? (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.response.previewMessage"
+          defaultMessage="Response is not available in alert preview."
+        />
+      ) : (
+        <>
+          <EuiTitle size="xxxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.response.responseTitle"
+                defaultMessage="Responses"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
 
-      <ExtendedFlyoutWrapper>
-        {endpointResponseActionsEnabled ? responseActionsView?.content : osqueryView?.content}
-      </ExtendedFlyoutWrapper>
+          <ExtendedFlyoutWrapper>
+            {endpointResponseActionsEnabled ? responseActionsView?.content : osqueryView?.content}
+          </ExtendedFlyoutWrapper>
+        </>
+      )}
     </div>
   );
 };

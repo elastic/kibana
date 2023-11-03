@@ -11,7 +11,7 @@ import {
 } from './highlighted_fields_helpers';
 
 const scopeId = 'scopeId';
-const isReadOnly = false;
+const isPreview = false;
 
 describe('convertHighlightedFieldsToTableRow', () => {
   it('should convert highlighted fields to a table row', () => {
@@ -20,14 +20,14 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isReadOnly)).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
       {
         field: 'host.name',
         description: {
           field: 'host.name',
           values: ['host-1'],
           scopeId: 'scopeId',
-          isReadOnly,
+          isPreview,
         },
       },
     ]);
@@ -40,14 +40,14 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isReadOnly)).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
       {
         field: 'host.name-override',
         description: {
           field: 'host.name-override',
           values: ['host-1'],
           scopeId: 'scopeId',
-          isReadOnly,
+          isPreview,
         },
       },
     ]);

@@ -44,9 +44,9 @@ export interface HighlightedFieldsTableRow {
      */
     scopeId: string;
     /**
-     * Boolean to indicate this field is read only
+     * Boolean to indicate this field is shown in a preview
      */
-    isReadOnly: boolean;
+    isPreview: boolean;
   };
 }
 
@@ -76,7 +76,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       field: string;
       values: string[] | null | undefined;
       scopeId: string;
-      isReadOnly: boolean;
+      isPreview: boolean;
     }) => (
       <SecurityCellActions
         data={{
@@ -89,7 +89,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
         sourcererScopeId={getSourcererScopeId(description.scopeId)}
         metadata={{ scopeId: description.scopeId }}
         disabledActionTypes={
-          description.isReadOnly
+          description.isPreview
             ? [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN]
             : []
         }
