@@ -169,9 +169,7 @@ const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
   return temp;
 };
 
-const buildCategoryFilter = (
-  categories: CasesSearchParams['category']
-): KueryNode | undefined => {
+const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNode | undefined => {
   if (categories === undefined) {
     return;
   }
@@ -353,7 +351,7 @@ export const buildCustomFieldsFilter = ({
     return;
   }
 
-  if(customFields === null) {
+  if (customFields === null) {
     return;
   }
 

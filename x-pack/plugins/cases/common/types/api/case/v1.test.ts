@@ -25,7 +25,8 @@ import type { Case } from '../../domain/case/v1';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CasesStatusRequestRt, CasesStatusResponseRt } from '../stats/v1';
-import { CasePostRequest, CasesSearchRequestRt } from './v1';
+import type { CasePostRequest } from './v1';
+import { CasesSearchRequestRt } from './v1';
 import {
   AllReportersFindRequestRt,
   CasePatchRequestRt,
@@ -479,13 +480,13 @@ describe('CasesSearchRequestRt', () => {
     sortField: 'createdAt',
     owner: 'cases',
     customFields: {
-      "toggle_custom_filed_key": {
-        "value": [true]
+      toggle_custom_filed_key: {
+        value: [true],
       },
-      "another_custom_field": {
-        "value": [false]
-      }
-    }
+      another_custom_field: {
+        value: [false],
+      },
+    },
   };
 
   it('has expected attributes in request', () => {
@@ -505,7 +506,7 @@ describe('CasesSearchRequestRt', () => {
       right: { ...defaultRequest, page: 1, perPage: 10 },
     });
   });
-  
+
   describe('errors', () => {
     it('throws error when invalid searchField passed', () => {
       expect(
