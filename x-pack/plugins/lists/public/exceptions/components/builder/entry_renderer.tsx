@@ -431,7 +431,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];
           }
-          const warning = validateFilePathInput({ os, value: wildcardValue });
+          const warning =
+            entry.field?.name === 'file.path.text'
+              ? validateFilePathInput({ os, value: wildcardValue })
+              : undefined;
           actualWarning =
             warning === FILENAME_WILDCARD_WARNING
               ? warning && getWildcardWarning(warning)
