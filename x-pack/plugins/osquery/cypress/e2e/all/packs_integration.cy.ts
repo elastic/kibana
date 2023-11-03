@@ -116,7 +116,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         navigateToWithoutWaitForReact('/app/osquery/packs');
       });
       it('should load prebuilt packs', () => {
-        // cy.contains('Load Elastic prebuilt packs').click();
+        cy.contains('Load Elastic prebuilt packs').click();
         cy.contains('Load Elastic prebuilt packs').should('not.exist');
         cy.wait(1000);
         cy.get(TABLE_ROWS).should('have.length.above', 5);
