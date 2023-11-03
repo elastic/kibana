@@ -10,9 +10,8 @@ import { cloneDeep, memoize, uniqueId } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
-import type { SwitcherWithOptions } from './types';
-import { pathsIntersect } from './resolve_helpers';
+import type { SwitcherWithOptions, SwitcherWithId } from './types';
+import { pathsIntersect, splitIntoBuckets, convertBucketToSwitcher } from './resolve_helpers';
 
 export type CapabilitiesResolver = ({
   request,
@@ -25,15 +24,6 @@ export type CapabilitiesResolver = ({
   applications: string[];
   useDefaultCapabilities: boolean;
 }) => Promise<Capabilities>;
-
-interface SwitcherWithId extends SwitcherWithOptions {
-  id: string;
-}
-
-interface SwitcherBucket {
-  switchers: SwitcherWithId[];
-  bucketPaths: Set<string>;
-}
 
 type ForPathSwitcherResolver = (path: string, switchers: SwitcherWithId[]) => string[];
 
@@ -169,66 +159,4 @@ const getSwitchersToUseForPath = (path: string, switchers: SwitcherWithId[]): st
     }
   });
   return switcherIds;
-};
-
-const splitIntoBuckets = (switchers: SwitcherWithId[]): SwitcherBucket[] => {
-  const buckets: SwitcherBucket[] = [];
-
-  const canBeAddedToBucket = (switcher: SwitcherWithId, bucket: SwitcherBucket): boolean => {
-    const bucketPaths = [...bucket.bucketPaths];
-    for (const switcherPath of switcher.capabilityPath) {
-      for (const bucketPath of bucketPaths) {
-        if (pathsIntersect(switcherPath, bucketPath)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  };
-
-  const addIntoBucket = (switcher: SwitcherWithId, bucket: SwitcherBucket) => {
-    bucket.switchers.push(switcher);
-    switcher.capabilityPath.forEach((path) => {
-      bucket.bucketPaths.add(path);
-    });
-  };
-
-  for (const switcher of switchers) {
-    let added = false;
-    for (const bucket of buckets) {
-      // switcher can be added -> we do and we break
-      if (canBeAddedToBucket(switcher, bucket)) {
-        addIntoBucket(switcher, bucket);
-        added = true;
-        break;
-      }
-    }
-    // could not find a bucket to add the switch to -> creating a new one
-    if (!added) {
-      buckets.push({
-        switchers: [switcher],
-        bucketPaths: new Set(switcher.capabilityPath),
-      });
-    }
-  }
-
-  return buckets;
-};
-
-const convertBucketToSwitcher = (bucket: SwitcherBucket): CapabilitiesSwitcher => {
-  // only one switcher in the bucket -> no need to wrap
-  if (bucket.switchers.length === 1) {
-    return bucket.switchers[0].switcher;
-  }
-
-  const switchers = bucket.switchers.map((switcher) => switcher.switcher);
-
-  return async (request, uiCapabilities, useDefaultCapabilities) => {
-    const allChanges = await Promise.all(
-      switchers.map((switcher) => {
-        return switcher(request, uiCapabilities, useDefaultCapabilities);
-      })
-    );
-    return Object.assign({}, ...allChanges);
-  };
 };
