@@ -25,6 +25,7 @@ import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range
 import { ErrorGroupDetails } from '../../app/mobile/error_group_details';
 import { CrashGroupDetails } from '../../app/mobile/crash_group_details';
 import { MobileErrorCrashesOverview } from '../../app/mobile/error_group_overview';
+import { ServiceDependencies } from '../../app/service_dependencies';
 
 export function page({
   title,
@@ -219,7 +220,7 @@ export const mobileServiceDetailRoute = {
           '/mobile-services/{serviceName}/errors': {
             element: <MobileErrorCrashesOverview />,
           },
-          '/mobile-services/{serviceName}/crashes/{groupId}': {
+          '/mobile-services/{serviceName}/errors/crashes/{groupId}': {
             element: <CrashGroupDetails />,
             params: t.type({
               path: t.type({
@@ -230,6 +231,16 @@ export const mobileServiceDetailRoute = {
           },
         },
       },
+      '/mobile-services/{serviceName}/dependencies': page({
+        element: <ServiceDependencies />,
+        tabKey: 'dependencies',
+        title: i18n.translate('xpack.apm.views.dependencies.title', {
+          defaultMessage: 'Dependencies',
+        }),
+        searchBarOptions: {
+          showTimeComparison: true,
+        },
+      }),
       '/mobile-services/{serviceName}/service-map': page({
         tabKey: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {

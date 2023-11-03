@@ -30,7 +30,13 @@ import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from '../apm_service_template/analyze_data_button';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key: 'overview' | 'transactions' | 'errors' | 'service-map' | 'alerts';
+  key:
+    | 'overview'
+    | 'transactions'
+    | 'dependencies'
+    | 'errors'
+    | 'service-map'
+    | 'alerts';
   hidden?: boolean;
 };
 
@@ -189,6 +195,16 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
           defaultMessage: 'Transactions',
         }
       ),
+    },
+    {
+      key: 'dependencies',
+      href: router.link('/services/{serviceName}/dependencies', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
+        defaultMessage: 'Dependencies',
+      }),
     },
     {
       key: 'errors',
