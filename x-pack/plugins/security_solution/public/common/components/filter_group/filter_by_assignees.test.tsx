@@ -13,6 +13,14 @@ import { TEST_IDS } from './constants';
 import { TestProviders } from '../../mock';
 import type { AssigneesIdsSelection } from '../assignees/types';
 
+import { useGetCurrentUser } from '../user_profiles/use_get_current_user';
+import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
+import { useSuggestUsers } from '../user_profiles/use_suggest_users';
+
+jest.mock('../user_profiles/use_get_current_user');
+jest.mock('../user_profiles/use_bulk_get_user_profiles');
+jest.mock('../user_profiles/use_suggest_users');
+
 const mockUserProfiles = [
   {
     uid: 'user-id-1',
@@ -33,14 +41,6 @@ const mockUserProfiles = [
     data: {},
   },
 ];
-jest.mock('../user_profiles/use_suggest_users', () => {
-  return {
-    useSuggestUsers: () => ({
-      loading: false,
-      userProfiles: mockUserProfiles,
-    }),
-  };
-});
 
 const renderFilterByAssigneesPopover = (
   alertAssignees: AssigneesIdsSelection[] = [],
@@ -58,6 +58,18 @@ const renderFilterByAssigneesPopover = (
 describe('<FilterByAssigneesPopover />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useGetCurrentUser as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles[0],
+    });
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
+    (useSuggestUsers as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles,
+    });
   });
 
   it('should render closed popover component', () => {
@@ -88,7 +100,7 @@ describe('<FilterByAssigneesPopover />', () => {
     expect(assigneesList).toHaveTextContent('user3@test.com');
   });
 
-  it('should call onUsersChange on clsing the popover', () => {
+  it('should call onUsersChange on closing the popover', () => {
     const onUsersChangeMock = jest.fn();
     const { getByTestId, getByText } = renderFilterByAssigneesPopover([], onUsersChangeMock);
 
