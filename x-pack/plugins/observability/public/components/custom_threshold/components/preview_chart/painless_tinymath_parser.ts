@@ -26,10 +26,10 @@ export class PainlessTinyMathParser {
   private OR = '|';
   private NOT_EQUAL = '!=';
   private NOT = '!';
-  private openParenthesesRegex = /^\(*/g; // Matches a string that starts with "("
-  private notRegex = /^\!/g; // Matches a string that starts with "("
-  private closeParenthesesRegex = /\)*$/g; // Matches a string that ends with ")"
-  private logicalConditionRegex = /(\s*[|&]{2})/g; // Matches a string that contains "||" or "&&"
+  private openParenthesesRegex = /^\(*/g;
+  private notRegex = /^\!/g;
+  private closeParenthesesRegex = /\)*$/g;
+  private logicalConditionRegex = /(\s*[|&]{2})/g;
 
   private aggMap = {};
   private equation = '';
@@ -52,7 +52,7 @@ export class PainlessTinyMathParser {
     levelDownChar: string,
     levelUpChar: string
   ): number | undefined {
-    // SEARCH FOR THE FIRST ? AND THEN START TO COUNT THE DEPTH
+    // Search for the first ? and then start count the depth of the nest IFs
     const expressionLength = expression.length;
     let currentDepth = 0;
     for (let i = expression.indexOf(levelDownChar); i < expressionLength; i++) {
