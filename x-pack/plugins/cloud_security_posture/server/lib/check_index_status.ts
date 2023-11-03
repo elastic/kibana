@@ -30,8 +30,7 @@ export const checkIndexStatus = async (
             },
           },
         }
-      : // ? undefined
-        {
+      : {
           bool: {
             filter: [
               {
@@ -39,15 +38,15 @@ export const checkIndexStatus = async (
                   safe_posture_type: postureType,
                 },
               },
-            ],
-            must: {
-              range: {
-                '@timestamp': {
-                  gte: `now-${retentionTime}h/h`,
-                  lte: 'now/h',
+              {
+                range: {
+                  '@timestamp': {
+                    gte: `now-${retentionTime}h/h`,
+                    lte: 'now/h',
+                  },
                 },
               },
-            },
+            ],
           },
         };
   try {
@@ -59,7 +58,6 @@ export const checkIndexStatus = async (
       query,
       size: 1,
     });
-    // if(isScore){console.log(queryResult)}
     return queryResult.hits.hits.length ? 'not-empty' : 'empty';
   } catch (e) {
     logger.debug(e);
