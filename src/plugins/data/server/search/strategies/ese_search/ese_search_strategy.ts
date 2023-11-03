@@ -80,8 +80,12 @@ export const enhancedEsSearchStrategyProvider = (
 
     const cancel = () => {
       if (!id || options.isStored) return;
-      cancelAsyncSearch(id, esClient).catch(() => {
-        // Swallow errors from cancellation
+      cancelAsyncSearch(id, esClient).catch((e) => {
+        // A 404 means either this search request does not exist, or that it is already cancelled
+        if (e.meta?.statusCode === 404) return;
+
+        // Log all other (unexpected) error messages
+        logger.error(`cancelAsyncSearch error: ${e.message}`);
       });
     };
 

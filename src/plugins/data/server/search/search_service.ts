@@ -471,9 +471,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           isStored: true,
         };
 
-        return this.cancel(deps, searchId, searchOptions).catch(() => {
-          // Some strategies don't support cancellation - swallow these errors
-        });
+        try {
+          await this.cancel(deps, searchId, searchOptions);
+        } catch (e) {
+          // A 404 means either this search request does not exist, or that it is already cancelled
+          if (e.meta?.statusCode === 404) return;
+
+          // Log all other (unexpected) error messages
+          this.logger.error(`cancelSessionSearches error: ${e.message}`);
+        }
       })
     );
   };
