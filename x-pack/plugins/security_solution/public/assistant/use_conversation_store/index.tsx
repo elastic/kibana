@@ -10,6 +10,7 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import { isEqual, unset } from 'lodash/fp';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
 import { difference } from 'lodash';
+import { useMemo } from 'react';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { LOCAL_STORAGE_KEY } from '../helpers';
 import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
@@ -40,9 +41,13 @@ const isValidateStorageValue = (
 
 export const useConversationStore = (): UseConversationStore => {
   const isDataQualityDashboardPageExists = useLinkAuthorized(SecurityPageName.dataQuality);
-  const baseConversations = isDataQualityDashboardPageExists
-    ? BASE_SECURITY_CONVERSATIONS
-    : unset(DATA_QUALITY_DASHBOARD_CONVERSATION_ID, BASE_SECURITY_CONVERSATIONS);
+  const baseConversations = useMemo(
+    () =>
+      isDataQualityDashboardPageExists
+        ? BASE_SECURITY_CONVERSATIONS
+        : unset(DATA_QUALITY_DASHBOARD_CONVERSATION_ID, BASE_SECURITY_CONVERSATIONS),
+    [isDataQualityDashboardPageExists]
+  );
   const [conversations, setConversations] = useLocalStorage<Record<string, Conversation>>({
     defaultValue: baseConversations,
     key: LOCAL_STORAGE_KEY,
