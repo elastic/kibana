@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { LangModuleType } from '@kbn/monaco';
-import { languageConfiguration, lexerRules } from './language';
 
-export const Lang: LangModuleType = { ID: 'yaml', languageConfiguration, lexerRules };
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/shared-ux/code_editor'],
+};

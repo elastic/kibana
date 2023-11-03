@@ -133,16 +133,20 @@ describe('<CodeEditor />', () => {
 
     test('should be tabable', () => {
       const DOMnode = getHint().getDOMNode();
-      expect(getHint().find('[data-test-subj="codeEditorHint"]').exists()).toBeTruthy();
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').exists()).toBeTruthy();
       expect(DOMnode.getAttribute('tabindex')).toBe('0');
       expect(DOMnode).toMatchSnapshot();
     });
 
     test('should be disabled when the ui monaco editor gains focus', async () => {
       // Initially it is visible and active
-      expect(getHint().find('[data-test-subj="codeEditorHint"]').exists()).toBeTruthy();
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--active`
+      );
       getHint().simulate('keydown', { key: keys.ENTER });
-      expect(getHint().find('[data-test-subj="codeEditorHint"]').exists()).toBeFalsy();
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--inactive`
+      );
     });
 
     test('should be enabled when hitting the ESC key', () => {
@@ -152,7 +156,9 @@ describe('<CodeEditor />', () => {
         keyCode: monaco.KeyCode.Escape,
       });
 
-      // expect((getHint().props() as any).className).not.toContain('isInactive');
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--active`
+      );
     });
 
     test('should detect that the suggestion menu is open and not show the hint on ESC', async () => {
