@@ -119,7 +119,9 @@ describe('Jira Fields', () => {
     const issueTypeSelect = await screen.findByTestId('issueTypeSelect');
     expect(issueTypeSelect).toBeInTheDocument();
 
-    userEvent.selectOptions(issueTypeSelect, 'Task');
+    fireEvent.change(issueTypeSelect, {
+      target: { value: 'Task' },
+    });
 
     expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
     expect(await screen.findByTestId('search-parent-issues')).toBeInTheDocument();
