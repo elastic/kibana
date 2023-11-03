@@ -18,6 +18,11 @@ export interface ConfigSettings {
    * ESQL queries enabled.
    */
   ESQLEnabled: boolean;
+  /**
+   * For internal use only! Disables the timeline save tour.
+   * This flag is used to disable the tour in cypress tests.
+   */
+  disableTimelineSaveTour: boolean;
 }
 
 /**
@@ -28,6 +33,7 @@ export const defaultSettings: ConfigSettings = Object.freeze({
   sideNavEnabled: true,
   ILMEnabled: true,
   ESQLEnabled: true,
+  disableTimelineSaveTour: false,
 });
 
 type ConfigSettingsKey = keyof ConfigSettings;
