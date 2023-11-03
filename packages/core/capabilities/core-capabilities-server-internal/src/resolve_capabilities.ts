@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
 import type { SwitcherWithOptions } from './types';
+import { pathsIntersect } from './resolve_helpers';
 
 export type CapabilitiesResolver = ({
   request,
@@ -168,25 +169,6 @@ const getSwitchersToUseForPath = (path: string, switchers: SwitcherWithId[]): st
     }
   });
   return switcherIds;
-};
-// TODO: memoize should be done in getCapabilitiesResolver
-// (pathA: string, pathB: string) => `${pathA}|${pathB}`
-const pathsIntersect = (pathA: string, pathB: string): boolean => {
-  const splitA = pathA.split('.');
-  const splitB = pathB.split('.');
-  const minLength = Math.min(splitA.length, splitB.length);
-
-  for (let i = 0; i < minLength; i++) {
-    const segA = splitA[i];
-    const segB = splitB[i];
-    if (segA === '*' || segB === '*') {
-      return true;
-    }
-    if (segA !== segB) {
-      return false;
-    }
-  }
-  return false;
 };
 
 const splitIntoBuckets = (switchers: SwitcherWithId[]): SwitcherBucket[] => {
