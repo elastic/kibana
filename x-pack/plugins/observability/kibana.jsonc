@@ -43,7 +43,8 @@
       "licensing",
       "usageCollection",
       "cloud",
-      "spaces"
+      "spaces",
+      "serverless"
     ],
     "requiredBundles": [
       "data",
