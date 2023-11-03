@@ -7,10 +7,11 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { NumberInput, NumberInputProps } from './number_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { wrap } from '../mocks';
+import userEvent from '@testing-library/user-event';
 
 const name = 'Some number field';
 const id = 'some:number:field';
@@ -65,13 +66,26 @@ describe('NumberInput', () => {
     expect(input).toHaveValue(4321);
   });
 
-  it('calls the onInputChange prop when the value changes', () => {
+  it('only calls onInputChange when blurred', async () => {
     const { getByTestId } = render(wrap(<NumberInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    fireEvent.change(input, { target: { value: '54321' } });
+
+    fireEvent.focus(input);
+    userEvent.clear(input);
+    userEvent.type(input, '54321');
+
+    expect(input).toHaveValue(54321);
+    expect(defaultProps.onInputChange).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await input.blur();
+    });
+
     expect(defaultProps.onInputChange).toHaveBeenCalledWith({
       type: 'number',
       unsavedValue: 54321,
+      isInvalid: false,
+      error: null,
     });
   });
 

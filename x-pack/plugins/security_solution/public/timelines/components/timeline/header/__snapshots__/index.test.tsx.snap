@@ -33,6 +33,7 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
           "isOverridden": [MockFunction],
           "remove": [MockFunction],
           "set": [MockFunction],
+          "validateValue": [MockFunction],
         },
         "updated$": Subject {
           "closed": false,
