@@ -34,7 +34,6 @@ const getDefaultRules = (response: any) => ({
   actions: [],
   params: {},
   running: false,
-  runtimeVersion: 1,
   snooze_schedule: [],
   updated_at: response.body.rules[0].updated_at,
   created_at: response.body.rules[0].created_at,

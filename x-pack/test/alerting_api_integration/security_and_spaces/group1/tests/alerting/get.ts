@@ -65,7 +65,6 @@ const getTestUtils = (
                 tags: ['foo'],
                 rule_type_id: 'test.noop',
                 running: false,
-                runtimeVersion: 1,
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
