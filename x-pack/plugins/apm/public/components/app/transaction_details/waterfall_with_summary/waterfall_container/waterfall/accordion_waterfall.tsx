@@ -18,7 +18,6 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { groupBy } from 'lodash';
 import { transparentize } from 'polished';
 import React, { useState } from 'react';
-import { useEuiTheme } from '@elastic/eui';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
 import { useTheme } from '../../../../../../hooks/use_theme';
@@ -153,7 +152,6 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
               isOpen={isOpen}
               childrenCount={children.length}
               onClick={toggleAccordion}
-              maxWidth={timelineMargins.left}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -205,17 +203,13 @@ function ToggleAccordionButton({
   show,
   isOpen,
   childrenCount,
-  maxWidth,
   onClick,
 }: {
   show: boolean;
   isOpen: boolean;
   childrenCount: number;
-  maxWidth: number;
   onClick: () => void;
 }) {
-  const { euiTheme } = useEuiTheme();
-
   if (!show) {
     return null;
   }
@@ -247,15 +241,7 @@ function ToggleAccordionButton({
               transform: 'translate(0, -50%)',
             }}
           >
-            <EuiToolTip
-              content={childrenCount}
-              delay="long"
-              anchorProps={{
-                style: {
-                  maxWidth: `calc(${maxWidth}px - ${euiTheme.size.l} * 2`,
-                },
-              }}
-            >
+            <EuiToolTip content={childrenCount} delay="long">
               <EuiText size="xs">{asBigNumber(childrenCount)}</EuiText>
             </EuiToolTip>
           </div>
