@@ -227,7 +227,7 @@ export const cli = () => {
           'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the api key.'
         );
         // eslint-disable-next-line no-process-exit
-        return process.exit(0);
+        return process.exit(1);
       }
 
       const API_KEY = process.env.CLOUD_QA_API_KEY
@@ -341,11 +341,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             | CypressCommandLine.CypressFailedRunResult
             | undefined;
           await withProcRunner(log, async (procs) => {
-            const abortCtrl = new AbortController();
-            const onEarlyExit = (msg: string) => {
-              log.error(msg);
-              abortCtrl.abort();
-            };
             const id = crypto.randomBytes(8).toString('hex');
             const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
             const specFileFTRConfig = parseTestFileConfig(filePath);
@@ -353,7 +348,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             if (!API_KEY) {
               log.info('API KEY to create environment could not be retrieved.');
               // eslint-disable-next-line no-process-exit
-              return process.exit(0);
+              return process.exit(1);
             }
 
             log.info(`${id}: Creating environment ${PROJECT_NAME}...`);
@@ -367,7 +362,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             if (!environment) {
               log.info('Failed to create environment.');
               // eslint-disable-next-line no-process-exit
-              return process.exit(0);
+              return process.exit(1);
             }
 
             // Reset credentials for elastic user
@@ -376,7 +371,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             if (!credentials) {
               log.info('Credentials could not be reset.');
               // eslint-disable-next-line no-process-exit
-              return process.exit(0);
+              return process.exit(1);
             }
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
