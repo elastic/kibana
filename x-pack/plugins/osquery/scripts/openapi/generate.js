@@ -6,13 +6,15 @@
  */
 
 require('../../../../../src/setup_node_env');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { generate } = require('@kbn/openapi-generator');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { resolve } = require('path');
 
-const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
+const OSQUERY_ROOT = resolve(__dirname, '../..');
 
 generate({
-  rootDir: SECURITY_SOLUTION_ROOT,
+  rootDir: OSQUERY_ROOT,
   sourceGlob: './**/*.schema.yaml',
   templateName: 'zod_operation_schema',
 });
