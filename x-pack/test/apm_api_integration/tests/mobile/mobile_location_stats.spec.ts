@@ -19,6 +19,10 @@ type MobileLocationStats =
 // timerange 15min, interval 5m, rate 1
 // generate 3 http spans for galaxy10 device
 
+interface GeneratedData {
+  timestamps: number[];
+}
+
 async function generateData({
   start,
   end,
@@ -27,7 +31,7 @@ async function generateData({
   start: number;
   end: number;
   synthtraceEsClient: ApmSynthtraceEsClient;
-}) {
+}): Promise<GeneratedData> {
   const galaxy10 = apm
     .mobileApp({
       name: 'synth-android',
@@ -130,7 +134,7 @@ async function generateData({
       carrierMCC: '440',
     });
 
-  const timestamps = [];
+  const timestamps: number[] = [];
 
   await synthtraceEsClient.index([
     timerange(start, end)
@@ -177,7 +181,7 @@ async function generateData({
         ];
       }),
   ]);
-  return { timestamps };
+  return { timestamps } as GeneratedData;
 }
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -237,9 +241,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('Location stats', { config: 'basic', archives: [] }, () => {
-    let dataGenerated = {};
+    let generatedData: GeneratedData;
     before(async () => {
-      dataGenerated = await generateData({
+      generatedData = await generateData({
         synthtraceEsClient,
         start,
         end,
@@ -313,7 +317,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"1.1"`,
         });
 
-        const timestamps = dataGenerated.timestamps;
+        const timestamps = generatedData.timestamps;
         expect(
           response.currentPeriod.mostSessions.timeseries.every((item) =>
             timestamps.includes(item.x) ? item.y === 1 : item.y === 0
@@ -347,7 +351,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"1.1" and service.environment: "production"`,
         });
 
-        const timestamps = dataGenerated.timestamps;
+        const timestamps = generatedData.timestamps;
         expect(
           response.currentPeriod.mostSessions.timeseries.every((item) =>
             timestamps.includes(item.x) ? item.y === 1 : item.y === 0
