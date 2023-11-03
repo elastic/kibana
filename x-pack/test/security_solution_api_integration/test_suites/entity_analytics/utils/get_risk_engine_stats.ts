@@ -14,11 +14,11 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { getStatsUrl } from './get_stats_url';
+import { getStatsUrl } from '../../../../detection_engine_api_integration/utils/get_stats_url';
 import {
   getDetectionMetricsFromBody,
   getRiskEngineMetricsFromBody,
-} from './get_detection_metrics_from_body';
+} from '../../../../detection_engine_api_integration/utils/get_detection_metrics_from_body';
 
 /**
  * Gets the stats from the stats endpoint.

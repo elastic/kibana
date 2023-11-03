@@ -21,13 +21,13 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import {
   createRule,
-  waitForSignalsToBePresent,
+  waitForAlertsToBePresent,
   waitForRuleSuccess,
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
   countDownTest,
   waitFor,
   routeWithNamespace,
-} from '../../../utils';
+} from '../../detections_response/utils';
 
 const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
   delete score['@timestamp'];
@@ -79,7 +79,7 @@ export const createAndSyncRuleAndAlertsFactory =
     query: string;
     riskScoreOverride?: string;
   }): Promise<void> => {
-    const rule = getRuleForSignalTesting(['ecs_compliant']);
+    const rule = getRuleForAlertTesting(['ecs_compliant']);
     const { id } = await createRule(
       supertest,
       log,
@@ -99,7 +99,7 @@ export const createAndSyncRuleAndAlertsFactory =
       namespace
     );
     await waitForRuleSuccess({ supertest, log, id, namespace });
-    await waitForSignalsToBePresent(supertest, log, alerts, [id], namespace);
+    await waitForAlertsToBePresent(supertest, log, alerts, [id], namespace);
   };
 
 export const deleteRiskScoreIndices = async ({

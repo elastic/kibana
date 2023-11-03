@@ -11,11 +11,11 @@ const [
   ,
   ,
   type,
+  area = 'detections_response',
+  licenseFolder = 'default_license',
   folder,
   projectType,
   environment,
-  area = 'detections_response',
-  licenseFolder = 'default_license',
   ...args
 ] = process.argv;
 

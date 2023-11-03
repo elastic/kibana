@@ -10,17 +10,21 @@ import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllAlerts, deleteAllRules } from '../../../utils';
-import { dataGeneratorFactory } from '../../../utils/data_generator';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+  dataGeneratorFactory,
+} from '../../../detections_response/utils';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
   deleteAllRiskScores,
   sanitizeScores,
-} from './utils';
+} from '../../utils';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -56,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return await previewRiskScores({ body: {} });
   };
 
-  describe('Risk Engine - Risk Scoring Preview API', () => {
+  describe('@ess @serverless @brokenInServerless Risk Scoring Preview API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -78,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllAlerts(supertest, log, es);
 
         await deleteAllRules(supertest, log);
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {

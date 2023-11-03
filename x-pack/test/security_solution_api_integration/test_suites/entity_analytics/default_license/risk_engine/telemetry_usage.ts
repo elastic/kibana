@@ -7,8 +7,11 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { deleteAllRules, deleteAllAlerts, getRiskEngineStats } from '../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  dataGeneratorFactory,
+} from '../../../detections_response/utils';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -18,10 +21,10 @@ import {
   riskEngineRouteHelpersFactory,
   cleanRiskEngineConfig,
   clearTransforms,
-} from './utils';
-import { dataGeneratorFactory } from '../../../utils/data_generator';
+  getRiskEngineStats,
+} from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -32,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('Risk engine telemetry', async () => {
+  describe('@ess @serverless @brokenInServerless telemetry', async () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',

@@ -7,9 +7,11 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { deleteAllAlerts, deleteAllRules } from '../../../utils';
-import { dataGeneratorFactory } from '../../../utils/data_generator';
+import {
+  deleteAllAlerts,
+  deleteAllRules,
+  dataGeneratorFactory,
+} from '../../../detections_response/utils';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -25,9 +27,10 @@ import {
   waitForRiskEngineTaskToBeGone,
   deleteRiskScoreIndices,
   clearTransforms,
-} from './utils';
+} from '../../utils';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -38,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('Risk Engine - Risk Scoring Task', () => {
+  describe('@ess @serverless @brokenInServerless Risk Scoring Task', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,

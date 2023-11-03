@@ -5,8 +5,10 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "initialize-server": "node ./scripts/index.js server",
-    "run-tests": "node ./scripts/index.js runner",
+    "initialize-server": "node ./scripts/index.js server detections_response default_license",
+    "run-tests": "node ./scripts/index.js runner detections_response default_license",
+    "initialize-server:entity_analytics": "node ./scripts/index.js server entity_analytics default_license",
+    "run-tests:entity_analytics": "node ./scripts/index.js runner entity_analytics default_license",
     "exception_workflows:server:serverless": "npm run initialize-server exceptions/workflows serverless",
     "exception_workflows:runner:serverless": "npm run run-tests exceptions/workflows serverless serverlessEnv",
     "exception_workflows:qa:serverless": "npm run run-tests exceptions/workflows serverless qaEnv",
@@ -36,6 +38,11 @@
     "actions:runner:serverless": "npm run run-tests actions serverless serverlessEnv",
     "actions:qa:serverless": "npm run run-tests actions serverless qaEnv",
     "actions:server:ess": "npm run initialize-server actions ess",
-    "actions:runner:ess": "npm run run-tests actions ess essEnv"
+    "actions:runner:ess": "npm run run-tests actions ess essEnv",
+    "entity_analytics:server:serverless": "npm run initialize-server:entity_analytics risk_engine serverless",
+    "entity_analytics:runner:serverless": "npm run run-tests:entity_analytics risk_engine serverless serverlessEnv",
+    "entity_analytics:qa:serverless": "npm run run-tests:entity_analytics risk_engine serverless qaEnv",
+    "entity_analytics:server:ess": "npm run initialize-server:entity_analytics risk_engine ess",
+    "entity_analytics:runner:ess": "npm run run-tests:entity_analytics risk_engine ess essEnv"
   }
 }
