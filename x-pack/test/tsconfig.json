@@ -145,5 +145,6 @@
     "@kbn/ecs",
     "@kbn/coloring",
     "@kbn/es",
+    "@kbn/metrics-data-access-plugin",
   ]
 }
