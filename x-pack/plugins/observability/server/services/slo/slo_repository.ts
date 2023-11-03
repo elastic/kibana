@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { sloSchema } from '@kbn/slo-schema';
+import { Paginated, Pagination, sloSchema } from '@kbn/slo-schema';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
@@ -20,7 +20,7 @@ export interface SLORepository {
   findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
-  search(search: string): Promise<SLO[]>;
+  search(search: string, pagination: Pagination): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -99,19 +99,21 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     }
   }
 
-  async search(search: string): Promise<SLO[]> {
-    try {
-      const response = await this.soClient.find<StoredSLO>({
-        type: SO_SLO_TYPE,
-        page: 1,
-        perPage: 25,
-        search,
-        searchFields: ['name'],
-      });
-      return response.saved_objects.map((slo) => toSLO(slo.attributes));
-    } catch (err) {
-      throw err;
-    }
+  async search(search: string, pagination: Pagination): Promise<Paginated<SLO>> {
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: pagination.page,
+      perPage: pagination.perPage,
+      search,
+      searchFields: ['name'],
+    });
+
+    return {
+      total: response.total,
+      perPage: response.per_page,
+      page: response.page,
+      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
+    };
   }
 }
 

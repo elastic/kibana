@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import { FindSloDefinitionsResponse, SLOResponse } from '@kbn/slo-schema';
-import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-  useQuery,
-} from '@tanstack/react-query';
+import { FindSLODefinitionsResponse } from '@kbn/slo-schema';
+import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
 export interface UseFetchSloDefinitionsResponse {
+  data: FindSLODefinitionsResponse | undefined;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  data: SLOResponse[] | undefined;
-  refetch: <TPageData>(
-    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<SLOResponse[], unknown>>;
 }
 
 interface Params {
@@ -33,11 +25,11 @@ export function useFetchSloDefinitions({ name = '' }: Params): UseFetchSloDefini
   const { http } = useKibana().services;
   const search = name.endsWith('*') ? name : `${name}*`;
 
-  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
+  const { isLoading, isError, isSuccess, data } = useQuery({
     queryKey: sloKeys.definitions(search),
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.get<FindSloDefinitionsResponse>(
+        const response = await http.get<FindSLODefinitionsResponse>(
           '/internal/observability/slos/_definitions',
           {
             query: {
@@ -56,5 +48,5 @@ export function useFetchSloDefinitions({ name = '' }: Params): UseFetchSloDefini
     refetchOnWindowFocus: false,
   });
 
-  return { isLoading, isError, isSuccess, data, refetch };
+  return { isLoading, isError, isSuccess, data };
 }

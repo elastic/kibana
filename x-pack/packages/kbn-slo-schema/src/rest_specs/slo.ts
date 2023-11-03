@@ -185,23 +185,20 @@ const fetchHistoricalSummaryResponseSchema = t.array(
   })
 );
 
-/**
- * The query params schema for /internal/observability/slo/_definitions
- *
- * @private
- */
-const findSloDefinitionsParamsSchema = t.type({
-  query: t.type({
+const findSloDefinitionsParamsSchema = t.partial({
+  query: t.partial({
     search: t.string,
+    page: t.string,
+    perPage: t.string,
   }),
 });
 
-/**
- * The response schema for /internal/observability/slo/_definitions
- *
- * @private
- */
-const findSloDefinitionsResponseSchema = t.array(sloResponseSchema);
+const findSloDefinitionsResponseSchema = t.type({
+  page: t.number,
+  perPage: t.number,
+  total: t.number,
+  results: t.array(sloResponseSchema),
+});
 
 const getSLOBurnRatesResponseSchema = t.type({
   burnRates: t.array(
@@ -264,12 +261,8 @@ type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParams
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
-/**
- * The response type for /internal/observability/slo/_definitions
- *
- * @private
- */
-type FindSloDefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
+type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.props.query>;
+type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
@@ -333,7 +326,8 @@ export type {
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
-  FindSloDefinitionsResponse,
+  FindSLODefinitionsParams,
+  FindSLODefinitionsResponse,
   ManageSLOParams,
   ResetSLOParams,
   ResetSLOResponse,

@@ -168,13 +168,13 @@ describe('KibanaSavedObjectsSLORepository', () => {
     const repository = new KibanaSavedObjectsSLORepository(soClientMock);
     soClientMock.find.mockResolvedValueOnce(soFindResponse([SOME_SLO, ANOTHER_SLO]));
 
-    const results = await repository.search(SOME_SLO.name);
+    const results = await repository.search(SOME_SLO.name, { page: 1, perPage: 100 });
 
-    expect(results).toEqual([SOME_SLO, ANOTHER_SLO]);
+    expect(results.results).toEqual([SOME_SLO, ANOTHER_SLO]);
     expect(soClientMock.find).toHaveBeenCalledWith({
       type: SO_SLO_TYPE,
       page: 1,
-      perPage: 25,
+      perPage: 100,
       search: SOME_SLO.name,
       searchFields: ['name'],
     });

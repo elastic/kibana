@@ -50,8 +50,8 @@ import {
   HistogramTransformGenerator,
   KQLCustomTransformGenerator,
   MetricCustomTransformGenerator,
-  TransformGenerator,
   TimesliceMetricTransformGenerator,
+  TransformGenerator,
 } from '../../services/slo/transform_generators';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
@@ -291,7 +291,7 @@ const findSloDefinitionsRoute = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const findSloDefinitions = new FindSLODefinitions(repository);
 
-    const response = await findSloDefinitions.execute(params.query.search);
+    const response = await findSloDefinitions.execute(params?.query ?? {});
 
     return response;
   },
