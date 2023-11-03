@@ -7,13 +7,10 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 import type { Conversation, Message } from '@kbn/elastic-assistant';
-import { EuiAvatar, EuiLoadingSpinner, tint } from '@elastic/eui';
+import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
 import { getMessageContentWithReplacements } from '../helpers';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
@@ -99,18 +96,6 @@ export const getComments = ({
       const isLastComment = index === currentConversation.messages.length - 1;
       const isUser = message.role === 'user';
       const replacements = currentConversation.replacements;
-      const errorStyles = {
-        eventColor: 'danger' as EuiPanelProps['color'],
-        css: css`
-          .euiCommentEvent {
-            border: 1px solid ${tint(euiThemeVars.euiColorDanger, 0.75)};
-          }
-          .euiCommentEvent__header {
-            padding: 0 !important;
-            border-block-end: 1px solid ${tint(euiThemeVars.euiColorDanger, 0.75)};
-          }
-        `,
-      };
 
       const messageProps = {
         timelineAvatar: isUser ? (
@@ -122,7 +107,7 @@ export const getComments = ({
           message.timestamp.length === 0 ? new Date().toLocaleString() : message.timestamp
         ),
         username: isUser ? i18n.YOU : i18n.ASSISTANT,
-        ...(message.isError ? errorStyles : {}),
+        eventColor: message.isError ? 'danger' : undefined,
       };
 
       const transformMessage = (content: string) =>
