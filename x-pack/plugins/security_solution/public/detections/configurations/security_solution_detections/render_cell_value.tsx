@@ -13,7 +13,6 @@ import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import { AssigneesAvatarsPanel } from '../../../common/components/assignees/assignees_avatars_panel';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -24,10 +23,7 @@ import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
-import {
-  SIGNAL_ASSIGNEE_IDS_FIELD_NAME,
-  SIGNAL_RULE_NAME_FIELD_NAME,
-} from '../../../timelines/components/timeline/body/renderers/constants';
+import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -44,9 +40,9 @@ import type { RenderCellValueContext } from './fetch_page_context';
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<
-  EuiDataGridCellValueElementProps & CellValueElementProps & { context?: RenderCellValueContext }
-> = (props) => {
+export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> = (
+  props
+) => {
   const { columnId, rowIndex, scopeId } = props;
   const isTourAnchor = useMemo(
     () =>
@@ -66,21 +62,6 @@ export const RenderCellValue: React.FC<
   const actualSuppressionCount = ecsSuppressionCount
     ? parseInt(ecsSuppressionCount, 10)
     : dataSuppressionCount;
-
-  const actualAssignees = useMemo(() => {
-    const ecsAssignees = props.ecsData?.kibana?.alert.workflow_assignee_ids;
-    const dataAssignees = find({ field: 'kibana.alert.workflow_assignee_ids' }, props.data) as
-      | string[]
-      | undefined;
-    return ecsAssignees ?? dataAssignees ?? [];
-  }, [props.data, props.ecsData?.kibana?.alert.workflow_assignee_ids]);
-  if (columnId === SIGNAL_ASSIGNEE_IDS_FIELD_NAME && actualAssignees.length) {
-    return (
-      <span>
-        <AssigneesAvatarsPanel assignedUserIds={actualAssignees} maxVisibleAvatars={4} />
-      </span>
-    );
-  }
 
   const component = (
     <GuidedOnboardingTourStep

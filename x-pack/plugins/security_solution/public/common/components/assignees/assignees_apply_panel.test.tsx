@@ -32,8 +32,13 @@ const renderAssigneesApplyPanel = (
     onSelectionChange?: () => void;
     onAssigneesApply?: () => void;
   } = { assignedUserIds: [] }
-) =>
-  render(
+) => {
+  const assignedProfiles = mockUserProfiles.filter((user) => assignedUserIds.includes(user.uid));
+  (useGetUserProfiles as jest.Mock).mockReturnValue({
+    loading: false,
+    userProfiles: assignedProfiles,
+  });
+  return render(
     <TestProviders>
       <AssigneesApplyPanel
         assignedUserIds={assignedUserIds}
@@ -43,14 +48,11 @@ const renderAssigneesApplyPanel = (
       />
     </TestProviders>
   );
+};
 
 describe('<AssigneesApplyPanel />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useGetUserProfiles as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: mockUserProfiles,
-    });
     (useSuggestUsers as jest.Mock).mockReturnValue({
       loading: false,
       userProfiles: mockUserProfiles,
@@ -86,15 +88,9 @@ describe('<AssigneesApplyPanel />', () => {
   });
 
   it('should call `onAssigneesApply` on apply button click', () => {
-    const mockAssignedProfile = mockUserProfiles[0];
-    (useGetUserProfiles as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: [mockAssignedProfile],
-    });
-
     const onAssigneesApplyMock = jest.fn();
     const { getByText, getByTestId } = renderAssigneesApplyPanel({
-      assignedUserIds: [mockAssignedProfile.uid],
+      assignedUserIds: ['user-id-1'],
       onAssigneesApply: onAssigneesApplyMock,
     });
 
