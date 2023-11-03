@@ -76,8 +76,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
       if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
         discoverStateContainer.current?.appState.update({
           query: {
-            query: dataProviders[0].kqlQuery,
-            language: 'esql',
+            esql: dataProviders[0].kqlQuery,
           },
         });
 
