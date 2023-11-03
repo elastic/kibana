@@ -7,9 +7,8 @@
 
 import type { Conversation } from '@kbn/elastic-assistant';
 
-import { isEqual, unset } from 'lodash/fp';
+import { unset } from 'lodash/fp';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
-import { difference } from 'lodash';
 import { useMemo } from 'react';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { LOCAL_STORAGE_KEY } from '../helpers';
@@ -21,23 +20,6 @@ export interface UseConversationStore {
   conversations: Record<string, Conversation>;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
 }
-
-const isValidateStorageValue = (
-  baseConversations: Record<string, Conversation>,
-  valueFromStorage: Record<string, Conversation>
-) => {
-  const baseConversationsKeys = Object.keys(baseConversations);
-  const valueFromStorageKeys = Object.keys(valueFromStorage);
-  if (baseConversationsKeys.length > valueFromStorageKeys.length) {
-    return false;
-  } else if (baseConversationsKeys.length < valueFromStorageKeys.length) {
-    return difference(valueFromStorageKeys, baseConversationsKeys).every(
-      (diffKey) => diffKey !== DATA_QUALITY_DASHBOARD_CONVERSATION_ID
-    );
-  } else {
-    return isEqual(baseConversationsKeys, valueFromStorageKeys);
-  }
-};
 
 export const useConversationStore = (): UseConversationStore => {
   const isDataQualityDashboardPageExists = useLinkAuthorized(SecurityPageName.dataQuality);
@@ -52,7 +34,7 @@ export const useConversationStore = (): UseConversationStore => {
     defaultValue: baseConversations,
     key: LOCAL_STORAGE_KEY,
     isInvalidDefault: (valueFromStorage) => {
-      return !valueFromStorage || !isValidateStorageValue(baseConversations, valueFromStorage);
+      return !valueFromStorage;
     },
   });
 

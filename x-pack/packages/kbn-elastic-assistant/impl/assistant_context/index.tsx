@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { updatePromptContexts, validateLocalStorageLastConversationId } from './helpers';
+import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
   RegisterPromptContext,
@@ -36,7 +36,6 @@ import {
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
-import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -301,12 +300,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       showAssistantOverlay,
       title,
       unRegisterPromptContext,
-      localStorageLastConversationId: validateLocalStorageLastConversationId({
-        conversationId: localStorageLastConversationId,
-        conversations,
-      })
-        ? localStorageLastConversationId
-        : WELCOME_CONVERSATION_TITLE,
+      localStorageLastConversationId,
       setLastConversationId: setLocalStorageLastConversationId,
     }),
     [

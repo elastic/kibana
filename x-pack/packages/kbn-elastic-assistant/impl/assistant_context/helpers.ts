@@ -8,7 +8,6 @@
 import { v4 } from 'uuid';
 
 import type { PromptContext } from '../assistant/prompt_context/types';
-import { Conversation } from './types';
 
 export const getUniquePromptContextId = (): string => v4();
 
@@ -24,11 +23,3 @@ export const updatePromptContexts = ({
     ...promptContext,
   },
 });
-
-export const validateLocalStorageLastConversationId = ({
-  conversationId,
-  conversations,
-}: {
-  conversationId: string | undefined;
-  conversations: Record<string, Conversation>;
-}) => conversationId == null || conversations[conversationId];
