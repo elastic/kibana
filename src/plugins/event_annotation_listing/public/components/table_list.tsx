@@ -31,6 +31,17 @@ import { GroupEditorFlyout } from './group_editor_flyout';
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 export const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
+const disableDeleteForSharedItem = ({ namespaces }: EventAnnotationGroupContent) => {
+  if (namespaces && (namespaces.length > 1 || namespaces.includes('*'))) {
+    return {
+      delete: {
+        enabled: false,
+        reason: 'Annotation groups shared to other Spaces can not be deleted.',
+      },
+    };
+  }
+};
+
 const getCustomColumn = (dataViews: DataView[]) => {
   const dataViewNameMap = Object.fromEntries(
     dataViews.map((dataView) => [dataView.id, dataView.name ?? dataView.title])
@@ -201,6 +212,7 @@ export const EventAnnotationGroupTableList = ({
         initialPageSize={initialPageSize}
         initialFilter={''}
         customTableColumn={getCustomColumn(dataViews)}
+        rowItemActions={disableDeleteForSharedItem}
         emptyPrompt={
           <EuiEmptyPrompt
             color="transparent"

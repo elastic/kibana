@@ -53,6 +53,17 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
   };
 };
 
+const disableDeleteForSharedItem = ({ namespaces }: DashboardSavedObjectUserContent) => {
+  if (namespaces && (namespaces.length > 1 || namespaces.includes('*'))) {
+    return {
+      delete: {
+        enabled: false,
+        reason: 'Dashboards shared to other Spaces can not be deleted.',
+      },
+    };
+  }
+};
+
 type DashboardListingViewTableProps = Omit<
   TableListViewTableProps<DashboardSavedObjectUserContent>,
   'tableCaption'
@@ -296,6 +307,7 @@ export const useDashboardListingTable = ({
       initialPageSize,
       listingLimit,
       onFetchSuccess,
+      rowItemActions: disableDeleteForSharedItem,
       setPageDataTestSubject,
       title,
       urlStateEnabled,
