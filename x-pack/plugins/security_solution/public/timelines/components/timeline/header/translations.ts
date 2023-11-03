@@ -106,3 +106,17 @@ export const OPTIONAL = i18n.translate(
     defaultMessage: 'Optional',
   }
 );
+
+export const SAVE_TOUR_CLOSE = i18n.translate(
+  'xpack.securitySolution.timeline.flyout.saveTour.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const SAVE_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.flyout.saveTour.title',
+  {
+    defaultMessage: 'Timeline changes now require manual saves',
+  }
+);

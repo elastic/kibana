@@ -81,17 +81,3 @@ export const TIMELINE_TOGGLE_BUTTON_ARIA_LABEL = ({
     values: { isOpen, title },
     defaultMessage: '{isOpen, select, false {Open} true {Close} other {Toggle}} timeline {title}',
   });
-
-export const SAVE_TOUR_CLOSE = i18n.translate(
-  'xpack.securitySolution.timeline.flyout.saveTour.closeButton',
-  {
-    defaultMessage: 'Close',
-  }
-);
-
-export const SAVE_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.flyout.saveTour.title',
-  {
-    defaultMessage: 'Timeline changes now require manual saves',
-  }
-);

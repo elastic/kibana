@@ -15,10 +15,8 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
   EuiTextColor,
-  EuiTourStep,
-  EuiCode,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelative } from '@kbn/i18n-react';
 import type { MouseEventHandler } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
@@ -52,15 +50,12 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
-import { SAVE } from '../../timeline/header/translations';
 import { TimelineKPIs } from './kpis';
 
 import { setActiveTabTimeline } from '../../../store/timeline/actions';
 import { useIsOverflow } from '../../../../common/hooks/use_is_overflow';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 import { TimelineSavePrompt } from '../../timeline/header/timeline_save_prompt';
-import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
-import { useLocalStorage } from '../../../../common/components/local_storage';
 
 interface FlyoutHeaderProps {
   timelineId: string;
@@ -343,9 +338,6 @@ const TimelineStatusInfoComponent = React.memo<{
 });
 TimelineStatusInfoComponent.displayName = 'TimelineStatusInfoComponent';
 
-const SAVE_BUTTON_ELEMENT_ID = 'SAVE_BUTTON_ELEMENT_ID';
-const LOCAL_STORAGE_KEY = 'security.timelineFlyoutHeader.saveTimelineTourSeen';
-
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const { selectedPatterns, indexPattern, browserFields } = useSourcererDataView(
     SourcererScopeName.timeline
@@ -417,27 +409,6 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   });
 
   const userCasesPermissions = useGetUserCasesPermissions();
-  const isSaveButtonMounted = useIsElementMounted(SAVE_BUTTON_ELEMENT_ID);
-  const [hasSeenTimelineSaveTour, setHasSeenTimelineSaveTour] = useLocalStorage({
-    defaultValue: false,
-    key: LOCAL_STORAGE_KEY,
-  });
-  // Why are we checking for so many flags here?
-  // The tour popup should only show when timeline is fully populated and all necessary
-  // elements are visible on screen. If we would not check for all these flags, the tour
-  // popup would show too early and in the wrong place in the DOM.
-  // The last flag, checks if the tour has been dismissed before.
-  const showTimelineSaveTour =
-    timeline.show &&
-    !loading &&
-    !timeline.isLoading &&
-    isSaveButtonMounted &&
-    !hasSeenTimelineSaveTour;
-
-  const markTimelineSaveTourAsSeen = useCallback(() => {
-    setHasSeenTimelineSaveTour(true);
-  }, [setHasSeenTimelineSaveTour]);
-
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="s">
       <EuiFlexItem>
@@ -478,38 +449,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            {showTimelineSaveTour && (
-              <EuiTourStep
-                anchor={`#${SAVE_BUTTON_ELEMENT_ID}`}
-                content={
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.securitySolution.timeline.flyout.saveTour.description"
-                      defaultMessage="Click {saveButton} to manually save changes."
-                      values={{
-                        saveButton: <EuiCode>{SAVE}</EuiCode>,
-                      }}
-                    />
-                  </EuiText>
-                }
-                isStepOpen={true}
-                minWidth={300}
-                step={1}
-                stepsTotal={1}
-                onFinish={markTimelineSaveTourAsSeen}
-                footerAction={
-                  <EuiButtonEmpty onClick={markTimelineSaveTourAsSeen}>
-                    {i18n.SAVE_TOUR_CLOSE}
-                  </EuiButtonEmpty>
-                }
-                title={i18n.SAVE_TOUR_TITLE}
-                anchorPosition="downCenter"
-              />
-            )}
-
-            <span id={SAVE_BUTTON_ELEMENT_ID}>
-              <SaveTimelineButton timelineId={timelineId} />
-            </span>
+            <SaveTimelineButton timelineId={timelineId} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
