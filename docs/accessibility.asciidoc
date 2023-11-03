@@ -39,7 +39,7 @@ Accessibility of Kibana relies on the following technologies to work with your w
 [float]
 [[accessibility-limitations-and-alternatives]]
 == Limitations and alternatives
-Despite our best efforts to ensure accessibility of Kibana, there are some limitations. Please https://github.com/elastic/kibana/issues/new?labels=Project%3AAccessibility&template=Accessibility.md&title=%28Accessibility%29[open an issue on GitHub] if you observe an issue not in this list.
+Despite our efforts to ensure accessibility of Kibana, there are some limitations. Please https://github.com/elastic/kibana/issues/new?labels=Project%3AAccessibility&template=Accessibility.md&title=%28Accessibility%29[open an issue on GitHub] if you observe an issue not in this list.
 
 Known limitations are in the following areas:
 
