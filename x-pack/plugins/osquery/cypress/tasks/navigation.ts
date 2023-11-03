@@ -24,6 +24,19 @@ export const navigateTo = (page: string, opts?: Partial<Cypress.VisitOptions>) =
   waitForReact();
 };
 
+// We're moving away from using react-cypress-selector, I'll be adjusting this on file by file approach
+export const navigateToWithoutWaitForReact = (
+  page: string,
+  opts?: Partial<Cypress.VisitOptions>
+) => {
+  cy.visit(page, opts);
+  cy.contains('Loading Elastic').should('exist');
+  cy.contains('Loading Elastic').should('not.exist');
+
+  // There's a security warning toast that seemingly makes ui elements in the bottom right unavailable, so we close it
+  closeToastIfVisible();
+};
+
 export const waitForReact = () => {
   cy.waitForReact(
     10000,

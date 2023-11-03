@@ -7,19 +7,22 @@
  */
 
 import { Readable } from 'stream';
+import { encode } from 'cbor-x';
 import { promisify } from 'util';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { Semaphore } from '@kbn/std';
+import { errors } from '@elastic/elasticsearch';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchBlobStorageClient } from './es';
-import { errors } from '@elastic/elasticsearch';
 
 const setImmediate = promisify(global.setImmediate);
 
 describe('ElasticsearchBlobStorageClient', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let semaphore: Semaphore;
+  let uploadSemaphore: Semaphore;
+  let downloadSemaphore: Semaphore;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   // Exposed `clearCache()` which resets the cache for the memoized `createIndexIfNotExists()` method
@@ -38,20 +41,24 @@ describe('ElasticsearchBlobStorageClient', () => {
       index,
       undefined,
       logger,
-      semaphore,
+      uploadSemaphore,
+      downloadSemaphore,
       indexIsAlias
     );
   };
 
   beforeEach(() => {
-    semaphore = new Semaphore(1);
+    uploadSemaphore = new Semaphore(1);
+    downloadSemaphore = new Semaphore(1);
     logger = loggingSystemMock.createLogger();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    jest.clearAllMocks();
   });
 
   test('limits max concurrent uploads', async () => {
     const blobStoreClient = createBlobStoreClient();
-    const acquireSpy = jest.spyOn(semaphore, 'acquire');
+    const uploadAcquireSpy = jest.spyOn(uploadSemaphore, 'acquire');
     esClient.index.mockImplementation(() => {
       return new Promise((res, rej) => setTimeout(() => rej('failed'), 100));
     });
@@ -62,13 +69,103 @@ describe('ElasticsearchBlobStorageClient', () => {
       blobStoreClient.upload(Readable.from(['test'])).catch(() => {}),
     ];
     await setImmediate();
-    expect(acquireSpy).toHaveBeenCalledTimes(4);
+    expect(uploadAcquireSpy).toHaveBeenCalledTimes(4);
     await p1;
     expect(esClient.index).toHaveBeenCalledTimes(1);
     await p2;
     expect(esClient.index).toHaveBeenCalledTimes(2);
     await Promise.all(rest);
     expect(esClient.index).toHaveBeenCalledTimes(4);
+  });
+
+  test('limits max concurrent downloads', async () => {
+    const index = 'someplace';
+
+    const blobStoreClient = createBlobStoreClient(index);
+    const downloadAcquireSpy = jest.spyOn(downloadSemaphore, 'acquire');
+
+    const downloadsToQueueCount = 4;
+    const documentsChunkCount = 2;
+
+    const createDownloadContent = (documentId: number, chunkId: number) => {
+      return Buffer.concat([
+        Buffer.from(`download content ${documentId}.${chunkId}`, 'utf8'),
+        Buffer.alloc(10 * 1028, `chunk ${chunkId}`),
+      ]);
+    };
+
+    const downloadContentMap = Array.from(new Array(downloadsToQueueCount)).map(
+      (_, documentIdx) => ({
+        fileContent: Array.from(new Array(documentsChunkCount)).map((__, chunkIdx) =>
+          createDownloadContent(documentIdx, chunkIdx)
+        ),
+      })
+    );
+
+    esClient.get.mockImplementation(({ id: headChunkId }) => {
+      const [documentId, chunkId] = headChunkId.split(/\./);
+
+      return new Promise(function (resolve) {
+        setTimeout(
+          () =>
+            resolve(
+              Readable.from([
+                encode({
+                  found: true,
+                  _source: {
+                    data: downloadContentMap[Number(documentId)].fileContent[Number(chunkId)],
+                  },
+                }),
+              ]) as unknown as GetResponse
+            ),
+          100
+        );
+      });
+    });
+
+    const getDownloadStreamContent = async (stream: Readable) => {
+      const chunks: Buffer[] = [];
+
+      for await (const chunk of stream) {
+        chunks.push(chunk);
+      }
+
+      /**
+       * we are guaranteed that the chunks for the complete document
+       * will equal the document chunk count specified within this test suite.
+       * See {@link ContentStream#isRead}
+       */
+      expect(chunks.length).toBe(documentsChunkCount);
+
+      return Buffer.concat(chunks).toString();
+    };
+
+    const [p1, p2, ...rest] = downloadContentMap.map(({ fileContent }, idx) => {
+      // expected document size will be our returned mock file content
+      // will be the sum of the lengths of chunks the entire document is split into
+      const documentSize = fileContent.reduce((total, chunk) => total + chunk.length, 0);
+
+      return blobStoreClient.download({
+        id: String(idx),
+        size: documentSize,
+      });
+    });
+
+    await setImmediate();
+    expect(downloadAcquireSpy).toHaveBeenCalledTimes(downloadsToQueueCount);
+
+    const p1DownloadStream = await p1;
+    const p1DownloadContent = await getDownloadStreamContent(p1DownloadStream);
+    expect(esClient.get).toHaveBeenCalledTimes(1 * documentsChunkCount);
+    expect(p1DownloadContent).toEqual(expect.stringMatching(/^download\scontent\s0.*/));
+
+    const p2DownloadStream = await p2;
+    const p2DownloadContent = await getDownloadStreamContent(p2DownloadStream);
+    expect(esClient.get).toHaveBeenCalledTimes(2 * documentsChunkCount);
+    expect(p2DownloadContent).toEqual(expect.stringMatching(/^download\scontent\s1.*/));
+
+    await Promise.all(rest.map((dp) => dp.then((ds) => getDownloadStreamContent(ds))));
+    expect(esClient.get).toHaveBeenCalledTimes(downloadsToQueueCount * documentsChunkCount);
   });
 
   describe('.createIndexIfNotExists()', () => {
