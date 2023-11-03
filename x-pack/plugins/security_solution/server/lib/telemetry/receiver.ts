@@ -552,7 +552,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
-    const filter = `exception-list.single.attributes.created_at >= ${moment
+    const filter = `exception-list-single.attributes.created_at >= ${moment
       .utc()
       .subtract(24, 'hours')
       .valueOf()}`;
