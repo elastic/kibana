@@ -23,7 +23,6 @@
       "exploratoryView",
       "features",
       "files",
-      "guidedOnboarding",
       "inspector",
       "lens",
       "observabilityShared",
@@ -44,7 +43,8 @@
       "usageCollection",
       "cloud",
       "spaces",
-      "serverless"
+      "serverless",
+      "guidedOnboarding"
     ],
     "requiredBundles": [
       "data",
