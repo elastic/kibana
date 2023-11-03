@@ -28,7 +28,7 @@ image::user/alerting/images/rule-types-es-query-conditions.png[Define the condit
 1. Define your query
 +
 --
-If you use {ref}/query-dsl.html[query DSL], you must also specify indices to query and a time field that is used for the time window.
+If you use {ref}/query-dsl.html[query DSL], you must select an index and time field then provide your query.
 Only the `query`, `fields`, `_source` and `runtime_mappings` fields are used, other DSL fields are not considered.
 For example:
 
@@ -44,56 +44,41 @@ For example:
 If you use {kibana-ref}/kuery-query.html[KQL] or {kibana-ref}/lucene-query.html[Lucene], you must specify a data view then define a text-based query.
 For example, `http.request.referrer: "https://example.com"`.
 
-preview:[] If you use {ref}/esql.html[ES|QL], you must provide a source command followed by an optional series of processing commands, separated by pipe characters (|). There is an embedded ES|QL reference to look up supported commands, functions, and operators. If you don't select a time field, the rule uses `@timefield` by default.
+preview:[] If you use {ref}/esql.html[ES|QL], you must provide a source command followed by an optional series of processing commands, separated by pipe characters (|).
 For example:
 
 [source,sh]
 --------------------------------------------------
 FROM kibana_sample_data_logs
-| STATS total_bytes = SUM(bytes) BY geo.dest
+| STATS total_bytes = SUM(bytes) BY host
+| WHERE total_bytes > 200000
 | SORT total_bytes DESC
 | LIMIT 10
 --------------------------------------------------
 --
 
-2. Set the group, theshold, and time window.
+2. If you use query DSL, KQL, or Lucene, set the group and theshold.
 +
 --
-If you use query DSL, KQL, or Lucene, you must specify:
-
-When::: Specify how to calculate the value that is compared to the threshold. The value is calculated by aggregating a numeric field within the time window. The aggregation options are: `count`, `average`, `sum`, `min`, and `max`. When using `count` the document count is used and an aggregation field is not necessary. 
+When::: Specify how to calculate the value that is compared to the threshold. The value is calculated by aggregating a numeric field within the time window. The aggregation options are: `count`, `average`, `sum`, `min`, and `max`. When using `count` the document count is used and an aggregation field is not necessary.
 Over or Grouped Over::: Specify whether the aggregation is applied over all documents or split into groups using a grouping field. If grouping is used, an alert will be created for each group when it meets the condition. To limit the number of alerts on high cardinality fields, you must specify the number of groups to check against the threshold. Only the top groups are checked.
 Threshold::: Defines a threshold value and a comparison operator  (`is above`, 
 `is above or equals`, `is below`, `is below or equals`, or `is between`). The value
 calculated by the aggregation is compared to this threshold.
-Time window::: Defines how far back to search for documents, using the 
-time field set in the index clause. Generally this value should be set to a 
-value higher than the check interval, to avoid gaps in 
+--
+
+3. Set the time window, which defines how far back to search for documents.
+
+4. If you use query DSL, KQL, or Lucene, set the number of documents to send to the configured actions when the threshold condition is met.
+
+5. If you use query DSL, KQL, or Lucene, choose whether to avoid alert duplication by excluding matches from the previous run.
+This option is not available when you use a grouping field.
+
+6. Set the check interval, which defines how often to evaluate the rule conditions.
+Generally this value should be set to a value that is smaller than the time window, to avoid gaps in 
 detection.
 
-If you use ES|QL, only the time window is required.
---
-
-3. Set the number of documents to send.
-+
---
-If you use query DSL, KQL, or Lucene, you must specify the number of documents to pass to the configured actions when the threshold condition is met.
-
-If you use ES|QL, this option does not exist; the query produces a table instead of document set.
-You can, however, use the {es-ref}/esql-commands.html#esql-limit[LIMIT processing command] to limit the number of rows in the table.
---
-
-4. Exclude matches from the previous run.
-+
---
-If you use query DSL, KQL, or Lucene, you can optionally avoid alert duplication by excluding documents that have already been detected by the previous rule run.
-
-This option is not available when a grouping field is specified or when you use ES|QL.
---
-
-5. Set the check interval, which defines how often to evaluate the rule conditions.
-
-6. Select a scope value, which affects the <<kibana-feature-privileges,{kib} feature privileges>> that are required to access the rule.
+7. Select a scope value, which affects the <<kibana-feature-privileges,{kib} feature privileges>> that are required to access the rule.
 For example when it's set to `Stack Rules`, you must have the appropriate *Management > {stack-rules-feature}* feature privileges to view or edit the rule.
 
 [float]
@@ -109,9 +94,12 @@ For example:
 image::user/alerting/images/rule-types-es-query-valid.png[Test {es} query returns number of matches when valid]
 // NOTE: This is an autogenerated screenshot. Do not edit it directly.
 
-// TO-DO: When you test an ES|QL query, a table is displayed. For example...
+preview:[] If you use an ES|QL query, a table is displayed. For example:
 
-An error message is shown if the query is invalid.
+[role="screenshot"]
+image::user/alerting/images/rule-types-esql-query-valid.png[Test ES|QL query returns a table when valid]
+
+If the query is not valid, an error occurs.
 
 [float]
 === Add actions
