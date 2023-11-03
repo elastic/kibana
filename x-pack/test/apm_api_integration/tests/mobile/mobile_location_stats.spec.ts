@@ -347,6 +347,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"1.1" and service.environment: "production"`,
         });
 
+        const timestamps = dataGenerated.timestamps;
+        expect(
+          response.currentPeriod.mostSessions.timeseries.every((item) =>
+            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
+          )
+        ).to.eql(true);
+        expect(
+          response.currentPeriod.mostRequests.timeseries.every((item) =>
+            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
+          )
+        ).to.eql(true);
+        expect(
+          response.currentPeriod.mostCrashes.timeseries.every((item) =>
+            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
+          )
+        ).to.eql(true);
+        expect(
+          response.currentPeriod.mostLaunches.timeseries.every((item) =>
+            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
+          )
+        ).to.eql(true);
+
         expect(response.currentPeriod.mostSessions.value).to.eql(3);
         expect(response.currentPeriod.mostRequests.value).to.eql(3);
         expect(response.currentPeriod.mostCrashes.value).to.eql(3);
