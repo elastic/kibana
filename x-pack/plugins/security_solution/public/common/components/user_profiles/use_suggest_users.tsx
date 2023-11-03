@@ -5,45 +5,40 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useEffect, useState } from 'react';
 
 import { suggestUsers } from './api';
 import { USER_PROFILES_FAILURE } from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
-interface SuggestUsersReturn {
-  loading: boolean;
-  userProfiles: UserProfileWithAvatar[];
+export interface SuggestUserProfilesArgs {
+  searchTerm: string;
 }
 
-export const useSuggestUsers = (searchTerm: string): SuggestUsersReturn => {
-  const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState<UserProfileWithAvatar[]>([]);
+export const bulkGetUserProfiles = async ({
+  searchTerm,
+}: {
+  searchTerm: string;
+}): Promise<UserProfileWithAvatar[]> => {
+  return suggestUsers({ searchTerm });
+};
+
+export const useSuggestUsers = ({ searchTerm }: { searchTerm: string }) => {
   const { addError } = useAppToasts();
 
-  useEffect(() => {
-    // isMounted tracks if a component is mounted before changing state
-    let isMounted = true;
-    setLoading(true);
-    const fetchData = async () => {
-      try {
-        const usersResponse = await suggestUsers({ searchTerm });
-        if (isMounted) {
-          setUsers(usersResponse);
-        }
-      } catch (error) {
-        addError(error.message, { title: USER_PROFILES_FAILURE });
-      }
-      if (isMounted) {
-        setLoading(false);
-      }
-    };
-    fetchData();
-    return () => {
-      // updates to show component is unmounted
-      isMounted = false;
-    };
-  }, [addError, searchTerm]);
-  return { loading, userProfiles: users };
+  return useQuery<UserProfileWithAvatar[]>(
+    ['useSuggestUsers', searchTerm],
+    async () => {
+      return bulkGetUserProfiles({ searchTerm });
+    },
+    {
+      retry: false,
+      staleTime: Infinity,
+      onError: (e) => {
+        addError(e, { title: USER_PROFILES_FAILURE });
+      },
+    }
+  );
 };

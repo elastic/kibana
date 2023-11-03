@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { PreFetchPageContext } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useBulkGetUserProfiles } from '../../../common/hooks/use_bulk_get_user_profiles';
+import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
 export interface RenderCellValueContext {
   profiles: UserProfileWithAvatar[] | undefined;

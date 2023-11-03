@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockUserProfiles } from './mock';
-import { useGetUserProfiles } from './use_get_user_profiles';
+import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
@@ -37,8 +37,10 @@ describe('useGetUserProfiles hook', () => {
   it('returns an array of userProfiles', async () => {
     const userProfiles = useKibana().services.security.userProfiles;
     const spyOnUserProfiles = jest.spyOn(userProfiles, 'bulkGet');
-    const assigneesIds = ['user1'];
-    const { result, waitForNextUpdate } = renderHook(() => useGetUserProfiles(assigneesIds));
+    const assigneesIds = new Set(['user1']);
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useBulkGetUserProfiles({ uids: assigneesIds })
+    );
     await waitForNextUpdate();
 
     expect(spyOnUserProfiles).toHaveBeenCalledTimes(1);

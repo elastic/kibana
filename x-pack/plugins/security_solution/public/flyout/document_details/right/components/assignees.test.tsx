@@ -11,7 +11,8 @@ import { render } from '@testing-library/react';
 import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_TITLE_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 
-import { useGetUserProfiles } from '../../../../common/components/user_profiles/use_get_user_profiles';
+import { useGetCurrentUser } from '../../../../common/components/user_profiles/use_get_current_user';
+import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
 import type { SetAlertAssigneesFunc } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
@@ -23,7 +24,8 @@ import {
   USER_AVATAR_ITEM_TEST_ID,
 } from '../../../../common/components/user_profiles/test_ids';
 
-jest.mock('../../../../common/components/user_profiles/use_get_user_profiles');
+jest.mock('../../../../common/components/user_profiles/use_get_current_user');
+jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
 
@@ -39,9 +41,9 @@ const renderAssignees = (
   onAssigneesUpdated = jest.fn()
 ) => {
   const assignedProfiles = mockUserProfiles.filter((user) => alertAssignees.includes(user.uid));
-  (useGetUserProfiles as jest.Mock).mockReturnValue({
-    loading: false,
-    userProfiles: assignedProfiles,
+  (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    isLoading: false,
+    data: assignedProfiles,
   });
   return render(
     <TestProviders>
@@ -59,9 +61,13 @@ describe('<Assignees />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useGetCurrentUser as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles[0],
+    });
     (useSuggestUsers as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: mockUserProfiles,
+      isLoading: false,
+      data: mockUserProfiles,
     });
 
     setAlertAssigneesMock = jest.fn().mockReturnValue(Promise.resolve());
@@ -101,9 +107,9 @@ describe('<Assignees />', () => {
 
   it('should call assignees update functionality with the right arguments', () => {
     const assignedProfiles = [mockUserProfiles[0], mockUserProfiles[1]];
-    (useGetUserProfiles as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: assignedProfiles,
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: assignedProfiles,
     });
 
     const assignees = assignedProfiles.map((assignee) => assignee.uid);

@@ -26,7 +26,7 @@ describe('useSuggestUsers hook', () => {
 
   it('returns an array of userProfiles', async () => {
     const spyOnUserProfiles = jest.spyOn(api, 'suggestUsers');
-    const { result, waitForNextUpdate } = renderHook(() => useSuggestUsers(''));
+    const { result, waitForNextUpdate } = renderHook(() => useSuggestUsers({ searchTerm: '' }));
     await waitForNextUpdate();
     expect(spyOnUserProfiles).toHaveBeenCalledTimes(1);
     expect(result.current).toEqual({

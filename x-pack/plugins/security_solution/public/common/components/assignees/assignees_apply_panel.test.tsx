@@ -11,13 +11,15 @@ import { render } from '@testing-library/react';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
 import { AssigneesApplyPanel } from './assignees_apply_panel';
 
-import { useGetUserProfiles } from '../user_profiles/use_get_user_profiles';
+import { useGetCurrentUser } from '../user_profiles/use_get_current_user';
+import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../user_profiles/use_suggest_users';
 import { TestProviders } from '../../mock';
 import * as i18n from './translations';
 import { mockUserProfiles } from './mocks';
 
-jest.mock('../user_profiles/use_get_user_profiles');
+jest.mock('../user_profiles/use_get_current_user');
+jest.mock('../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../user_profiles/use_suggest_users');
 
 const renderAssigneesApplyPanel = (
@@ -34,9 +36,9 @@ const renderAssigneesApplyPanel = (
   } = { assignedUserIds: [] }
 ) => {
   const assignedProfiles = mockUserProfiles.filter((user) => assignedUserIds.includes(user.uid));
-  (useGetUserProfiles as jest.Mock).mockReturnValue({
-    loading: false,
-    userProfiles: assignedProfiles,
+  (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+    isLoading: false,
+    data: assignedProfiles,
   });
   return render(
     <TestProviders>
@@ -53,9 +55,13 @@ const renderAssigneesApplyPanel = (
 describe('<AssigneesApplyPanel />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useGetCurrentUser as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles[0],
+    });
     (useSuggestUsers as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: mockUserProfiles,
+      isLoading: false,
+      data: mockUserProfiles,
     });
   });
 
@@ -102,9 +108,9 @@ describe('<AssigneesApplyPanel />', () => {
   });
 
   it('should call `onSelectionChange` on user selection', () => {
-    (useGetUserProfiles as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: [],
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: [],
     });
 
     const onSelectionChangeMock = jest.fn();

@@ -7,13 +7,13 @@
 
 import { noop } from 'lodash';
 import type { FC } from 'react';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useGetUserProfiles } from '../../../../common/components/user_profiles/use_get_user_profiles';
+import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { removeNoAssigneesSelection } from '../../../../common/components/assignees/utils';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 import { AssigneesPopover } from '../../../../common/components/assignees/assignees_popover';
@@ -64,7 +64,9 @@ export interface AssigneesProps {
 export const Assignees: FC<AssigneesProps> = memo(
   ({ eventId, assignedUserIds, onAssigneesUpdated }) => {
     const setAlertAssignees = useSetAlertAssignees();
-    const { userProfiles: assignedUsers } = useGetUserProfiles(assignedUserIds);
+
+    const uids = useMemo(() => new Set(assignedUserIds), [assignedUserIds]);
+    const { data: assignedUsers } = useBulkGetUserProfiles({ uids });
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -107,9 +109,11 @@ export const Assignees: FC<AssigneesProps> = memo(
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
-        </EuiFlexItem>
+        {assignedUsers && (
+          <EuiFlexItem grow={false}>
+            <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <AssigneesPopover
             assignedUserIds={assignedUserIds}

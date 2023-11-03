@@ -5,46 +5,38 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useEffect, useState } from 'react';
 
 import { CURRENT_USER_PROFILE_FAILURE } from './translations';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
-interface GetCurrentUserReturn {
-  loading: boolean;
-  userProfile?: UserProfileWithAvatar;
-}
+export const getCurrentUser = async ({
+  security,
+}: {
+  security: SecurityPluginStart;
+}): Promise<UserProfileWithAvatar> => {
+  return security.userProfiles.getCurrent({ dataPath: 'avatar' });
+};
 
-export const useGetCurrentUser = (): GetCurrentUserReturn => {
-  const [loading, setLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState<UserProfileWithAvatar | undefined>(undefined);
+export const useGetCurrentUser = () => {
+  const { security } = useKibana().services;
   const { addError } = useAppToasts();
-  const userProfiles = useKibana().services.security.userProfiles;
 
-  useEffect(() => {
-    // isMounted tracks if a component is mounted before changing state
-    let isMounted = true;
-    setLoading(true);
-    const fetchData = async () => {
-      try {
-        const profile = await userProfiles.getCurrent({ dataPath: 'avatar' });
-        if (isMounted) {
-          setCurrentUser(profile);
-        }
-      } catch (error) {
-        addError(error.message, { title: CURRENT_USER_PROFILE_FAILURE });
-      }
-      if (isMounted) {
-        setLoading(false);
-      }
-    };
-    fetchData();
-    return () => {
-      // updates to show component is unmounted
-      isMounted = false;
-    };
-  }, [addError, userProfiles]);
-  return { loading, userProfile: currentUser };
+  return useQuery<UserProfileWithAvatar>(
+    ['useGetCurrentUser'],
+    async () => {
+      return getCurrentUser({ security });
+    },
+    {
+      retry: false,
+      staleTime: Infinity,
+      onError: (e) => {
+        addError(e, { title: CURRENT_USER_PROFILE_FAILURE });
+      },
+    }
+  );
 };
