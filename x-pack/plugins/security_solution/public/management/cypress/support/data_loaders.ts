@@ -423,11 +423,13 @@ export const dataLoadersForRealEndpoints = (
     },
 
     stopEndpointHost: async (hostName) => {
-      return stopEndpointHost(hostName);
+      await stopEndpointHost(hostName);
+      return null;
     },
 
     startEndpointHost: async (hostName) => {
-      return startEndpointHost(hostName);
+      await startEndpointHost(hostName);
+      return null;
     },
   });
 };
