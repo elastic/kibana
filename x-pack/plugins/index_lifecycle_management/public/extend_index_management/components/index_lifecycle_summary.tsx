@@ -251,7 +251,7 @@ export const indexLifecycleTab: IndexDetailsTab = {
   id: 'ilm',
   name: (
     <FormattedMessage
-      defaultMessage="Index Lifecycle"
+      defaultMessage="Index lifecycle"
       id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.tabHeaderLabel"
     />
   ),
