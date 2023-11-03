@@ -9,12 +9,9 @@ import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/li
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-} from '../../../../../common/inventory_models/types';
 import { LogQueryFields } from '../../../metrics/types';
 import { InfraSource } from '../../../sources';
 import { createRequest } from './create_request';

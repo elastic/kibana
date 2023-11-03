@@ -222,7 +222,7 @@ describe('Policy Event Collection Card common component', () => {
       expect(renderResult.getByTestId('test-selectedCount')).toHaveTextContent(
         exactMatchText('0 / 2 event collections enabled')
       );
-      expect(renderResult.getByTestId('test-options')).toHaveTextContent(exactMatchText('—'));
+      expect(renderResult.queryByTestId('test-options')).toBeNull();
     });
 
     describe('and supplemental options are used', () => {
