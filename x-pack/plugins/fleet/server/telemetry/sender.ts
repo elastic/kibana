@@ -17,6 +17,7 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { TelemetryQueue } from './queue';
 
 import type { FleetTelemetryChannel, FleetTelemetryChannelEvents } from './types';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 
 /**
  * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/telemetry/sender.ts
@@ -36,12 +37,15 @@ export class TelemetryEventsSender {
   private esClient?: ElasticsearchClient;
   private clusterInfo?: InfoResponse;
 
+  private serverlessProjectType?: string; //
+
   constructor(logger: Logger) {
     this.logger = logger;
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup) {
+  public setup(telemetrySetup?: TelemetryPluginSetup, cloud?: CloudSetup) {
     this.telemetrySetup = telemetrySetup;
+    this.serverlessProjectType = cloud?.serverless.projectType;
   }
 
   public async start(telemetryStart?: TelemetryPluginStart, core?: CoreStart) {
@@ -184,12 +188,18 @@ export class TelemetryEventsSender {
     }
   }
 
-  private transformDataToNdjson = (data: unknown[]): string => {
+  private transformDataToNdjson(data: any[]): string {
     if (data.length !== 0) {
-      const dataString = data.map((dataItem) => JSON.stringify(dataItem)).join('\n');
+      const dataString = data
+        .map((dataItem) => {
+          // Mutate data with serverless project type
+          dataItem.serverless = this.serverlessProjectType;
+          return JSON.stringify(dataItem);
+        })
+        .join('\n');
       return `${dataString}\n`;
     } else {
       return '';
     }
-  };
+  }
 }

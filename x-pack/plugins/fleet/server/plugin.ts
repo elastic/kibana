@@ -462,7 +462,7 @@ export class FleetPlugin
 
     registerRoutes(fleetAuthzRouter, config);
 
-    this.telemetryEventsSender.setup(deps.telemetry);
+    this.telemetryEventsSender.setup(deps.telemetry, this.cloud);
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
       core,
