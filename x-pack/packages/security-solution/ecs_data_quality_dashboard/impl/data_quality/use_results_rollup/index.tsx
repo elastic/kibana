@@ -136,11 +136,11 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
             numberOfIndices: 1,
             numberOfIndicesChecked: 1,
             numberOfSameFamily: getTotalPatternSameFamily(updated[pattern].results),
-            sameFamilyFields: getSameFamilyFields(partitionedFieldMetadata.incompatible),
+            sameFamilyFields: getSameFamilyFields(partitionedFieldMetadata.sameFamily),
             sizeInBytes: getSizeInBytes({ stats: updated[pattern].stats, indexName }),
             timeConsumedMs: requestTime,
             unallowedMappingFields: getIncompatibleMappingsFields(
-              partitionedFieldMetadata.sameFamily
+              partitionedFieldMetadata.incompatible
             ),
             unallowedValueFields: getIncompatibleValuesFields(
               partitionedFieldMetadata.incompatible
