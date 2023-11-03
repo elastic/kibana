@@ -32,7 +32,7 @@ const ContextWrapper: React.FC = ({ children }) => (
     baseAllow={[]}
     baseAllowReplacement={[]}
     basePath={'https://localhost:5601/kbn'}
-    dataQualityConversationId={'Data quality dashboard'}
+    dataQualityDashboardConversationId={'Data quality dashboard'}
     defaultAllow={[]}
     defaultAllowReplacement={[]}
     docLinks={{

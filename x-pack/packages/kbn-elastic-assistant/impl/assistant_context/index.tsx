@@ -55,7 +55,7 @@ export interface AssistantProviderProps {
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
   baseAllowReplacement: string[];
-  dataQualityConversationId: string;
+  dataQualityDashboardConversationId: string;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   basePath: string;
@@ -142,7 +142,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   augmentMessageCodeBlocks,
   baseAllow,
   baseAllowReplacement,
-  dataQualityConversationId,
+  dataQualityDashboardConversationId,
   defaultAllow,
   defaultAllowReplacement,
   docLinks,
@@ -305,7 +305,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       localStorageLastConversationId: validateLocalStorageLastConversationId({
         conversationId: localStorageLastConversationId,
         conversations,
-        dataQualityConversationId,
+        dataQualityDashboardConversationId,
       }),
       setLastConversationId: setLocalStorageLastConversationId,
     }),
@@ -322,7 +322,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseSystemPrompts,
       conversationIds,
       conversations,
-      dataQualityConversationId,
+      dataQualityDashboardConversationId,
       defaultAllow,
       defaultAllowReplacement,
       docLinks,

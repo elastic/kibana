@@ -57,7 +57,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
       assistantTelemetry={assistantTelemetry}
-      dataQualityConversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
+      dataQualityDashboardConversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
       defaultAllow={defaultAllow}
       defaultAllowReplacement={defaultAllowReplacement}
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}

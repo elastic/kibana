@@ -28,31 +28,35 @@ export const updatePromptContexts = ({
 
 const dataQualityPageExists = (
   conversations: Record<string, Conversation>,
-  dataQualityConversationId: string
-) => conversations[dataQualityConversationId] != null;
+  dataQualityDashboardConversationId: string
+) => conversations[dataQualityDashboardConversationId] != null;
 
-export const isLocalStorageConversationIdValid = ({
+const isLocalStorageConversationIdValid = ({
   conversationId,
   conversations,
-  dataQualityConversationId,
+  dataQualityDashboardConversationId,
 }: {
   conversationId: string | null | undefined;
   conversations: Record<string, Conversation>;
-  dataQualityConversationId: string;
+  dataQualityDashboardConversationId: string;
 }) =>
-  dataQualityPageExists(conversations, dataQualityConversationId)
+  dataQualityPageExists(conversations, dataQualityDashboardConversationId)
     ? true
-    : conversationId !== dataQualityConversationId;
+    : conversationId !== dataQualityDashboardConversationId;
 
 export const validateLocalStorageLastConversationId = ({
   conversationId,
   conversations,
-  dataQualityConversationId,
+  dataQualityDashboardConversationId,
 }: {
   conversationId: string | undefined;
   conversations: Record<string, Conversation>;
-  dataQualityConversationId: string;
+  dataQualityDashboardConversationId: string;
 }) =>
-  isLocalStorageConversationIdValid({ conversationId, conversations, dataQualityConversationId })
+  isLocalStorageConversationIdValid({
+    conversationId,
+    conversations,
+    dataQualityDashboardConversationId,
+  })
     ? conversationId
     : WELCOME_CONVERSATION_TITLE;
