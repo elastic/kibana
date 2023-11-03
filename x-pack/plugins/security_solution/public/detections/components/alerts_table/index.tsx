@@ -197,14 +197,11 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [isEventRenderedView]
   );
 
-  const rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined = useMemo(() => {
-    if (isEventRenderedView) {
-      return {
-        defaultHeight: 'auto',
-      };
-    }
-    return undefined;
-  }, [isEventRenderedView]);
+  const rowHeightsOptions: EuiDataGridRowHeightsOptions = useMemo(() => {
+    return {
+      defaultHeight: 'auto',
+    };
+  }, []);
 
   const alertColumns = useMemo(
     () => (columns.length ? columns : getColumns(license)),
