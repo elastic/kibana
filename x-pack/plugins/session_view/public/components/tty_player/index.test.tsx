@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import {
   TEST_PROCESS_INDEX,
   TEST_SESSION_START_TIME,
@@ -99,9 +99,7 @@ describe('TTYPlayer component', () => {
 
       const seekToEndBtn = renderResult.getByTestId('sessionView:TTYPlayerControlsEnd');
 
-      act(() => {
-        await userEvent.click(seekToEndBtn);
-      });
+      await userEvent.click(seekToEndBtn);
 
       waitFor(() => expect(renderResult.queryAllByText('Data limit reached')).toHaveLength(1));
       expect(renderResult.queryByText('[ VIEW POLICIES ]')).toBeFalsy();
@@ -115,9 +113,7 @@ describe('TTYPlayer component', () => {
 
       const seekToEndBtn = renderResult.getByTestId('sessionView:TTYPlayerControlsEnd');
 
-      act(() => {
-        await userEvent.click(seekToEndBtn);
-      });
+      await userEvent.click(seekToEndBtn);
 
       waitFor(() => expect(renderResult.queryAllByText('[ VIEW POLICIES ]')).toHaveLength(1));
     });

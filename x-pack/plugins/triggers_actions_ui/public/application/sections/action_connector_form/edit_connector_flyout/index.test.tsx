@@ -125,7 +125,7 @@ describe('EditConnectorFlyout', () => {
       });
     });
 
-    act(() => {
+    await act(async () => {
       await userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
     });
 
@@ -241,13 +241,13 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
     });
 
-    act(() => {
+    await act(async () => {
       /**
        * Clear the name so the form can be invalid
        */
       await userEvent.clear(getByTestId('nameInput'));
     });
-    act(() => {
+    await act(async () => {
       await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
     });
 
@@ -368,7 +368,7 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
       expect(getByTestId('testConnectorTab')).toBeInTheDocument();
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('testConnectorTab'));
       });
 
@@ -582,7 +582,7 @@ describe('EditConnectorFlyout', () => {
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('executeActionButton'));
       });
 
@@ -613,7 +613,7 @@ describe('EditConnectorFlyout', () => {
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('executeActionButton'));
       });
 
@@ -621,7 +621,7 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('configureConnectorTab'));
       });
 
@@ -629,7 +629,7 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('nameInput')).toBeInTheDocument();
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('testConnectorTab'));
       });
 
@@ -659,7 +659,7 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('executeActionButton'));
       });
 
@@ -683,7 +683,7 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('executeActionButton'));
       });
 
@@ -691,7 +691,7 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('configureConnectorTab'));
       });
 
@@ -706,7 +706,7 @@ describe('EditConnectorFlyout', () => {
         });
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('testConnectorTab'));
       });
 

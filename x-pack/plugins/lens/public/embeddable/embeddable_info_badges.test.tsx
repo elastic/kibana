@@ -12,7 +12,7 @@ import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { UserMessage } from '../types';
 
 describe('EmbeddableFeatureBadge', () => {
-  function renderPopup(messages: UserMessage[], count: number = messages.length) {
+  async function renderPopup(messages: UserMessage[], count: number = messages.length) {
     render(<EmbeddableFeatureBadge messages={messages} />);
     await userEvent.click(screen.getByText(`${count}`));
   }
@@ -42,7 +42,7 @@ describe('EmbeddableFeatureBadge', () => {
   });
 
   it('should render a description of the badge in a tooltip on hover', async () => {
-    renderPopup([
+    await renderPopup([
       {
         shortMessage: 'Short message',
         longMessage: 'Long text',
@@ -55,7 +55,7 @@ describe('EmbeddableFeatureBadge', () => {
   });
 
   it('should render a separate section for each unique-id', async () => {
-    renderPopup([
+    await renderPopup([
       {
         uniqueId: '1',
         shortMessage: 'Section1',
@@ -78,7 +78,7 @@ describe('EmbeddableFeatureBadge', () => {
   });
 
   it('should group multiple messages with same id', async () => {
-    renderPopup(
+    await renderPopup(
       [
         {
           uniqueId: '1',
@@ -105,7 +105,7 @@ describe('EmbeddableFeatureBadge', () => {
   });
 
   it('should render messages without id first, then grouped messages', async () => {
-    renderPopup(
+    await renderPopup(
       [
         {
           shortMessage: 'Section2',
@@ -142,7 +142,7 @@ describe('EmbeddableFeatureBadge', () => {
 
   describe('Horizontal rules', () => {
     it('should render no rule for single message', async () => {
-      renderPopup([
+      await renderPopup([
         {
           shortMessage: `Section1`,
           longMessage: <div>hello</div>,
@@ -163,7 +163,7 @@ describe('EmbeddableFeatureBadge', () => {
         fixableInEditor: false,
         displayLocations: [],
       }));
-      renderPopup(messages);
+      await renderPopup(messages);
       expect(await screen.getAllByTestId('lns-feature-badges-horizontal-rule')).toHaveLength(
         messages.length - 1
       );
@@ -187,7 +187,7 @@ describe('EmbeddableFeatureBadge', () => {
           displayLocations: [],
         },
       ];
-      renderPopup(messages);
+      await renderPopup(messages);
       expect(await screen.getAllByTestId('lns-feature-badges-horizontal-rule')).toHaveLength(1);
     });
 
@@ -227,8 +227,8 @@ describe('EmbeddableFeatureBadge', () => {
           displayLocations: [],
         },
       ];
-      renderPopup(messages, 3);
-      expect(await screen.getAllByTestId('lns-feature-badges-horizontal-rule')).toHaveLength(2);
+      await renderPopup(messages, 3);
+      expect(screen.getAllByTestId('lns-feature-badges-horizontal-rule')).toHaveLength(2);
     });
   });
 });

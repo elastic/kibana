@@ -126,7 +126,7 @@ describe('CreateConnectorFlyout', () => {
     );
     await act(() => Promise.resolve());
 
-    act(() => {
+    await act(async () => {
       await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
     });
 
@@ -180,7 +180,7 @@ describe('CreateConnectorFlyout', () => {
     );
     await act(() => Promise.resolve());
 
-    act(() => {
+    await act(async () => {
       await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
     });
 
@@ -188,7 +188,7 @@ describe('CreateConnectorFlyout', () => {
       expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
     });
 
-    act(() => {
+    await act(async () => {
       await userEvent.click(getByTestId('create-connector-flyout-save-btn'));
     });
 
@@ -355,7 +355,7 @@ describe('CreateConnectorFlyout', () => {
 
       await act(() => Promise.resolve());
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
       });
 
@@ -379,7 +379,7 @@ describe('CreateConnectorFlyout', () => {
 
       await act(() => Promise.resolve());
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
       });
 
@@ -447,7 +447,7 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
       });
 
@@ -464,7 +464,7 @@ describe('CreateConnectorFlyout', () => {
         });
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('create-connector-flyout-save-btn'));
       });
 
@@ -515,7 +515,7 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId(`${errorActionTypeModel.id}-card`));
       });
 
@@ -536,7 +536,7 @@ describe('CreateConnectorFlyout', () => {
         );
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('create-connector-flyout-save-btn'));
       });
 
@@ -558,7 +558,7 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
       });
 
@@ -575,7 +575,7 @@ describe('CreateConnectorFlyout', () => {
         });
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('create-connector-flyout-save-test-btn'));
       });
 
@@ -621,7 +621,7 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
       });
 
@@ -630,7 +630,7 @@ describe('CreateConnectorFlyout', () => {
         expect(getByTestId('nameInput')).toBeInTheDocument();
       });
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('create-connector-flyout-back-btn'));
       });
 
@@ -650,7 +650,7 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
 
-      act(() => {
+      await act(async () => {
         await userEvent.click(getByTestId('create-connector-flyout-close-btn'));
       });
 
