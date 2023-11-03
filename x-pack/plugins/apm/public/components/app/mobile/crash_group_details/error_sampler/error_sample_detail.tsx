@@ -102,7 +102,7 @@ export function ErrorSampleDetails({
   const {
     path: { groupId },
     query,
-  } = useApmParams('/mobile-services/{serviceName}/errors/{groupId}');
+  } = useApmParams('/mobile-services/{serviceName}/errors/crashes/{groupId}');
 
   const { kuery } = query;
 
@@ -142,8 +142,8 @@ export function ErrorSampleDetails({
       <EuiEmptyPrompt
         title={
           <div>
-            {i18n.translate('xpack.apm.errorSampleDetails.sampleNotFound', {
-              defaultMessage: 'The selected error cannot be found',
+            {i18n.translate('xpack.apm.crashSampleDetails.sampleNotFound', {
+              defaultMessage: 'The selected crash cannot be found',
             })}
           </div>
         }
@@ -182,9 +182,9 @@ export function ErrorSampleDetails({
           <EuiTitle size="s">
             <h3>
               {i18n.translate(
-                'xpack.apm.errorSampleDetails.errorOccurrenceTitle',
+                'xpack.apm.crashSampleDetails.crashOccurrenceTitle',
                 {
-                  defaultMessage: 'Error sample',
+                  defaultMessage: 'Crash sample',
                 }
               )}
             </h3>
@@ -212,9 +212,9 @@ export function ErrorSampleDetails({
                 </EuiFlexItem>
                 <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
                   {i18n.translate(
-                    'xpack.apm.errorSampleDetails.viewOccurrencesInTraceExplorer',
+                    'xpack.apm.crashSampleDetails.viewOccurrencesInTraceExplorer',
                     {
-                      defaultMessage: 'Explore traces with this error',
+                      defaultMessage: 'Explore traces with this crash',
                     }
                   )}
                 </EuiFlexItem>

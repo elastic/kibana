@@ -23,7 +23,6 @@ interface Props {
 export function SampleSummary({ error }: Props) {
   const logMessage = error.error.log?.message;
   const excMessage = error.error.exception?.[0].message;
-  const culprit = error.error.culprit;
 
   return (
     <>
@@ -52,16 +51,6 @@ export function SampleSummary({ error }: Props) {
       <EuiCodeBlock isCopyable>
         {excMessage || NOT_AVAILABLE_LABEL}
       </EuiCodeBlock>
-      <EuiSpacer />
-      <EuiText size="s">
-        <Label>
-          {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
-            defaultMessage: 'Culprit',
-          })}
-        </Label>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiCodeBlock isCopyable>{culprit || NOT_AVAILABLE_LABEL}</EuiCodeBlock>
       <EuiSpacer />
     </>
   );

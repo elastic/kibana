@@ -22,14 +22,14 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useErrorGroupDistributionFetcher } from '../../../../hooks/use_error_group_distribution_fetcher';
+import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorSampler } from './error_sampler';
 import { ErrorDistribution } from './distribution';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
+import { MobileCrashesTreemap } from '../charts/mobile_crashes_treemap';
 import { maybe } from '../../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 
@@ -49,7 +49,7 @@ function getShortGroupId(errorGroupId?: string) {
   return errorGroupId.slice(0, 5);
 }
 
-function ErrorGroupHeader({
+function CrashGroupHeader({
   groupId,
   occurrencesCount,
 }: {
@@ -61,8 +61,8 @@ function ErrorGroupHeader({
       <EuiFlexItem grow={false}>
         <EuiTitle>
           <h2>
-            {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
-              defaultMessage: 'Error group {errorGroupId}',
+            {i18n.translate('xpack.apm.CrashGroupDetails.CrashGroupTitle', {
+              defaultMessage: 'Crash group {errorGroupId}',
               values: {
                 errorGroupId: getShortGroupId(groupId),
               },
@@ -99,14 +99,14 @@ export function CrashGroupDetails() {
       comparisonEnabled,
       errorId,
     },
-  } = useApmParams('/mobile-services/{serviceName}/crashes/{groupId}');
+  } = useApmParams('/mobile-services/{serviceName}/errors/crashes/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   useBreadcrumb(
     () => ({
       title: groupId,
-      href: apmRouter.link('/mobile-services/{serviceName}/crashes/{groupId}', {
+      href: apmRouter.link('/mobile-services/{serviceName}/errors/{groupId}', {
         path: {
           serviceName,
           groupId,
@@ -162,8 +162,8 @@ export function CrashGroupDetails() {
     [environment, kuery, serviceName, start, end, groupId]
   );
 
-  const { errorDistributionData, status: errorDistributionStatus } =
-    useErrorGroupDistributionFetcher({
+  const { crashDistributionData, status: crashDistributionStatus } =
+    useCrashGroupDistributionFetcher({
       serviceName,
       groupId,
       environment,
@@ -196,7 +196,7 @@ export function CrashGroupDetails() {
     <>
       <EuiSpacer size={'s'} />
 
-      <ErrorGroupHeader
+      <CrashGroupHeader
         groupId={groupId}
         occurrencesCount={errorSamplesData?.occurrencesCount}
       />
@@ -207,19 +207,17 @@ export function CrashGroupDetails() {
           <EuiFlexItem grow={3}>
             <EuiPanel hasBorder={true}>
               <ErrorDistribution
-                fetchStatus={errorDistributionStatus}
-                distribution={errorDistributionData}
+                fetchStatus={crashDistributionStatus}
+                distribution={crashDistributionData}
                 title={i18n.translate(
-                  'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-                  {
-                    defaultMessage: 'Error occurrences',
-                  }
+                  'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
+                  { defaultMessage: 'Crash occurrences' }
                 )}
                 height={300}
                 tip={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.errorRateChart.tip',
+                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
                   {
-                    defaultMessage: `Error rate is measured in transactions per minute.`,
+                    defaultMessage: `Crash occurrence is measured in crashes per minute.`,
                   }
                 )}
               />
@@ -228,7 +226,7 @@ export function CrashGroupDetails() {
         </ChartPointerEventContextProvider>
         <EuiFlexItem grow={2}>
           <EuiPanel hasBorder={true}>
-            <MobileErrorTreemap
+            <MobileCrashesTreemap
               serviceName={serviceName}
               kuery={kuery}
               environment={environment}

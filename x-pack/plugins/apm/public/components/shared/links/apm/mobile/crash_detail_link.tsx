@@ -16,7 +16,7 @@ interface Props extends APMLinkExtendProps {
 function CrashDetailLink({ serviceName, errorGroupId, ...rest }: Props) {
   return (
     <LegacyAPMLink
-      path={`/mobile-services/${serviceName}/crashes/${errorGroupId}`}
+      path={`/mobile-services/${serviceName}/errors/crashes/${errorGroupId}`}
       {...rest}
     />
   );

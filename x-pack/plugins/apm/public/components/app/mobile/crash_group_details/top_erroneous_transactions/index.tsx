@@ -48,7 +48,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
   const {
     query,
     path: { groupId },
-  } = useApmParams('/mobile-services/{serviceName}/errors/{groupId}');
+  } = useApmParams('/mobile-services/{serviceName}/errors/crashes/{groupId}');
 
   const { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled } =
     query;
