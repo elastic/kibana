@@ -34,7 +34,7 @@ export class TileErrorCache {
   }
 
   public hasAny() {
-    return Object.keys(this._cache).some(layerId => {
+    return Object.keys(this._cache).some((layerId) => {
       return Object.keys(this._cache[layerId]).length;
     });
   }
@@ -60,7 +60,7 @@ export class TileErrorCache {
     }
 
     const inViewTileKeys = getTilesForExtent(zoom, extent).map(getErrorCacheTileKey);
-    const inViewTileErrors = tileErrorsArray.filter(tileError => {
+    const inViewTileErrors = tileErrorsArray.filter((tileError) => {
       return inViewTileKeys.includes(tileError.tileKey);
     });
     return inViewTileErrors.length ? inViewTileErrors : undefined;

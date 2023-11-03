@@ -16,5 +16,5 @@ export function boundsToExtent(bounds: LngLatBounds): MapExtent {
     minLat: round(bounds.getSouth(), DECIMAL_DEGREES_PRECISION),
     maxLon: round(bounds.getEast(), DECIMAL_DEGREES_PRECISION),
     maxLat: round(bounds.getNorth(), DECIMAL_DEGREES_PRECISION),
-  }
+  };
 }

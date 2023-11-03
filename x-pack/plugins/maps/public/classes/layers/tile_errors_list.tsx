@@ -48,7 +48,7 @@ export function TileErrorsList(props: Props) {
           },
         };
       }),
-    }
+    },
   ];
 
   return (
@@ -58,8 +58,8 @@ export function TileErrorsList(props: Props) {
         button={
           <EuiButtonEmpty
             flush="left"
-            iconType="arrowDown" 
-            iconSide="right" 
+            iconType="arrowDown"
+            iconSide="right"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
             }}
@@ -75,9 +75,7 @@ export function TileErrorsList(props: Props) {
       >
         <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
       </EuiPopover>
-      <p>
-        {getDescription(selectedTileError)}
-      </p>
+      <p>{getDescription(selectedTileError)}</p>
     </>
   );
 }
@@ -85,8 +83,8 @@ export function TileErrorsList(props: Props) {
 function getTitle(tileKey: string) {
   return i18n.translate('xpack.maps.tileError.title', {
     defaultMessage: `tile {tileKey}`,
-    values: { tileKey }
-  })
+    values: { tileKey },
+  });
 }
 
 function getDescription(tileError: TileError) {

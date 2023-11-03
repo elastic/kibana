@@ -90,7 +90,8 @@ export class TileStatusTracker extends Component<Props> {
       this._tileErrorCache.clearTileError(
         layerId,
         getErrorCacheTileKey(e.tile.tileID.canonical),
-        this._updateTileStatusForAllLayers);
+        this._updateTileStatusForAllLayers
+      );
 
       const tracked = this._tileCache.find((tile) => {
         return (
@@ -227,7 +228,8 @@ export class TileStatusTracker extends Component<Props> {
         this._tileErrorCache.getInViewTileErrors(
           layer.getId(),
           this.props.mbMap.getZoom(),
-          boundsToExtent(this.props.mbMap.getBounds()))
+          boundsToExtent(this.props.mbMap.getBounds())
+        )
       );
     }
   }, 100);

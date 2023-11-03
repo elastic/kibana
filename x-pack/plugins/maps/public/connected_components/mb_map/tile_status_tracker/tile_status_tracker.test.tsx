@@ -54,8 +54,8 @@ class MockMbMap {
       },
       getNorth: () => {
         return 44;
-      }
-    }
+      },
+    };
   }
 }
 
@@ -91,14 +91,14 @@ function createMockLayer(id: string, mbSourceId: string): ILayer {
   return new MockLayer(id, mbSourceId) as unknown as ILayer;
 }
 
-function createSourceDataEvent(mbSourceId: string, canonical: { x: number; y: number; z: number; }) {
+function createSourceDataEvent(mbSourceId: string, canonical: { x: number; y: number; z: number }) {
   return {
     sourceId: mbSourceId,
     dataType: 'source',
     tile: {
       tileID: {
         canonical: {
-          ...canonical
+          ...canonical,
         },
         key: `uniqueTileKey${Object.values(canonical).join(',')}`, // not shape of actual key returned from maplibre
       },
@@ -212,8 +212,14 @@ describe('TileStatusTracker', () => {
         />
       );
 
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE));
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer2Source', IN_VIEW_CANONICAL_TILE));
+      mockMbMap.emit(
+        'sourcedataloading',
+        createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE)
+      );
+      mockMbMap.emit(
+        'sourcedataloading',
+        createSourceDataEvent('layer2Source', IN_VIEW_CANONICAL_TILE)
+      );
       mockMbMap.emit('error', {
         ...createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE),
         error: {
@@ -231,7 +237,10 @@ describe('TileStatusTracker', () => {
       });
       expect(tileErrorsMap.get('layer2')).toBeUndefined();
 
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE));
+      mockMbMap.emit(
+        'sourcedataloading',
+        createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE)
+      );
 
       // simulate delay. Cache-checking is debounced.
       await sleep(300);
@@ -255,7 +264,10 @@ describe('TileStatusTracker', () => {
         ...IN_VIEW_CANONICAL_TILE,
         z: 4, // out of view because zoom is not 5
       };
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', OUT_OF_ZOOM_CANONICAL_TILE));
+      mockMbMap.emit(
+        'sourcedataloading',
+        createSourceDataEvent('layer1Source', OUT_OF_ZOOM_CANONICAL_TILE)
+      );
       mockMbMap.emit('error', {
         ...createSourceDataEvent('layer1Source', OUT_OF_ZOOM_CANONICAL_TILE),
         error: {
@@ -284,7 +296,10 @@ describe('TileStatusTracker', () => {
         ...IN_VIEW_CANONICAL_TILE,
         y: 13, // out of view because tile is out side of view bounds to the south
       };
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', OUT_OF_VIEW_CANONICAL_TILE));
+      mockMbMap.emit(
+        'sourcedataloading',
+        createSourceDataEvent('layer1Source', OUT_OF_VIEW_CANONICAL_TILE)
+      );
       mockMbMap.emit('error', {
         ...createSourceDataEvent('layer1Source', OUT_OF_VIEW_CANONICAL_TILE),
         error: {
@@ -313,7 +328,10 @@ describe('TileStatusTracker', () => {
         />
       );
 
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE));
+      mockMbMap.emit(
+        'sourcedataloading',
+        createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE)
+      );
       mockMbMap.emit('error', {
         ...createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE),
         error: {
@@ -345,7 +363,10 @@ describe('TileStatusTracker', () => {
         />
       );
 
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE));
+      mockMbMap.emit(
+        'sourcedataloading',
+        createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE)
+      );
       mockMbMap.emit('error', {
         ...createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE),
         error: {
