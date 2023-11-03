@@ -63,7 +63,7 @@ describe('NewChatById', () => {
     expect(newChatButton.querySelector('.euiButtonContent__icon')).not.toBeInTheDocument();
   });
 
-  it('calls showAssistantOverlay on click', () => {
+  it('calls showAssistantOverlay on click', async () => {
     const conversationId = 'test-conversation-id';
     const promptContextId = 'test-prompt-context-id';
 

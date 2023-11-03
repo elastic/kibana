@@ -39,13 +39,13 @@ describe('ContextEditor', () => {
     expect(screen.getByTestId('selectAllFields')).toHaveTextContent('Select all 2 fields');
   });
 
-  it('updates the table selection when "Select all n fields" is clicked', () => {
+  it('updates the table selection when "Select all n fields" is clicked', async () => {
     await userEvent.click(screen.getByTestId('selectAllFields'));
 
     expect(screen.getByTestId('selectedFields')).toHaveTextContent('Selected 2 fields');
   });
 
-  it('calls onListUpdated with the expected values when the update button is clicked', () => {
+  it('calls onListUpdated with the expected values when the update button is clicked', async () => {
     await userEvent.click(screen.getAllByTestId('allowed')[0]);
 
     expect(onListUpdated).toHaveBeenCalledWith([

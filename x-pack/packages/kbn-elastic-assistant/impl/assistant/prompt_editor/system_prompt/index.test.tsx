@@ -461,7 +461,7 @@ describe('SystemPrompt', () => {
     });
   });
 
-  it('shows the system prompt select when the edit button is clicked', () => {
+  it('shows the system prompt select when the edit button is clicked', async () => {
     render(
       <TestProviders>
         <SystemPrompt

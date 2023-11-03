@@ -94,7 +94,7 @@ describe('DataAnonymizationEditor', () => {
       expect(screen.queryByTestId('readOnlyContextViewer')).not.toBeInTheDocument();
     });
 
-    it('calls setSelectedPromptContexts when a field is toggled', () => {
+    it('calls setSelectedPromptContexts when a field is toggled', async () => {
       await userEvent.click(screen.getAllByTestId('allowed')[0]); // toggle the first field
 
       expect(setSelectedPromptContexts).toBeCalled();

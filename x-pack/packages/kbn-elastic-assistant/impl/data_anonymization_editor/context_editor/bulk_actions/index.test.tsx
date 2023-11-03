@@ -39,7 +39,7 @@ const defaultProps = {
 describe('BulkActions', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('calls onListUpdated with the expected updates when Allow is clicked', () => {
+  it('calls onListUpdated with the expected updates when Allow is clicked', async () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
     await userEvent.click(getByTestId('bulkActionsButton'));
@@ -51,7 +51,7 @@ describe('BulkActions', () => {
     ]);
   });
 
-  it('calls onListUpdated with the expected updates when Deny is clicked', () => {
+  it('calls onListUpdated with the expected updates when Deny is clicked', async () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
     await userEvent.click(getByTestId('bulkActionsButton'));
@@ -63,7 +63,7 @@ describe('BulkActions', () => {
     ]);
   });
 
-  it('calls onListUpdated with the expected updates when Anonymize is clicked', () => {
+  it('calls onListUpdated with the expected updates when Anonymize is clicked', async () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
     await userEvent.click(getByTestId('bulkActionsButton'));
@@ -75,7 +75,7 @@ describe('BulkActions', () => {
     ]);
   });
 
-  it('calls onListUpdated with the expected updates when Unanonymize is clicked', () => {
+  it('calls onListUpdated with the expected updates when Unanonymize is clicked', async () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
     await userEvent.click(getByTestId('bulkActionsButton'));
@@ -87,7 +87,7 @@ describe('BulkActions', () => {
     ]);
   });
 
-  it('calls onListUpdated with the expected updates when Deny by default is clicked', () => {
+  it('calls onListUpdated with the expected updates when Deny by default is clicked', async () => {
     const { getByTestId, getByText } = render(
       <BulkActions {...defaultProps} onlyDefaults={true} />
     );
@@ -103,7 +103,7 @@ describe('BulkActions', () => {
     ]);
   });
 
-  it('calls onListUpdated with the expected updates when Anonymize by default is clicked', () => {
+  it('calls onListUpdated with the expected updates when Anonymize by default is clicked', async () => {
     const { getByTestId, getByText } = render(
       <BulkActions {...defaultProps} onlyDefaults={true} />
     );
@@ -120,7 +120,7 @@ describe('BulkActions', () => {
     ]);
   });
 
-  it('calls onListUpdated with the expected updates when Unanonymize by default is clicked', () => {
+  it('calls onListUpdated with the expected updates when Unanonymize by default is clicked', async () => {
     const { getByTestId, getByText } = render(
       <BulkActions {...defaultProps} onlyDefaults={true} />
     );
