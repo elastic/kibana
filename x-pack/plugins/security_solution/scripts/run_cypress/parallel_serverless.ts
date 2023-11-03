@@ -103,7 +103,11 @@ async function createEnvironment(
       product: response.data.type,
     };
   } catch (error) {
-    log.error(`${error}`);
+    if (error instanceof AxiosError) {
+      log.error(`${error.response?.status}:${error.response?.data}`);
+    } else {
+      log.error(`${error.message}`);
+    }
   }
 }
 
@@ -121,7 +125,11 @@ async function deleteEnvironment(
     });
     log.info(`Environment ${projectName} was successfully deleted!`);
   } catch (error) {
-    log.error(`${error}`);
+    if (error instanceof AxiosError) {
+      log.error(`${error.response?.status}:${error.response?.data}`);
+    } else {
+      log.error(`${error.message}`);
+    }
   }
 }
 
@@ -147,7 +155,7 @@ async function resetCredentials(
       username: response.data.username,
     };
   } catch (error) {
-    throw new Error(`${error}`);
+    throw new Error(`${error.message}`);
   }
 }
 
