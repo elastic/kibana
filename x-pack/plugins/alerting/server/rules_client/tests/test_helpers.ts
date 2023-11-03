@@ -361,7 +361,7 @@ export const returnedRule2 = {
   snoozeSchedule: [],
 };
 
-export const returnedRuleForBulkDelete1 = {
+export const returnedRuleForBulkOps1 = {
   actions: [],
   alertTypeId: 'fakeType',
   consumer: 'fakeConsumer',
@@ -386,7 +386,7 @@ export const returnedRuleForBulkDelete1 = {
   revision: 1,
 };
 
-export const returnedRuleForBulkDelete2 = {
+export const returnedRuleForBulkOps2 = {
   actions: [],
   alertTypeId: 'fakeType',
   consumer: 'fakeConsumer',
@@ -411,7 +411,7 @@ export const returnedRuleForBulkDelete2 = {
   revision: 1,
 };
 
-export const returnedRuleForBulkDelete3 = {
+export const returnedRuleForBulkOps3 = {
   actions: [],
   alertTypeId: 'fakeType',
   apiKeyCreatedByUser: true,
@@ -438,12 +438,12 @@ export const returnedRuleForBulkDelete3 = {
 };
 
 export const returnedRuleForBulkDisable1 = {
-  ...returnedRuleForBulkDelete1,
+  ...returnedRuleForBulkOps1,
   enabled: false,
 };
 
 export const returnedRuleForBulkDisable2 = {
-  ...returnedRuleForBulkDelete2,
+  ...returnedRuleForBulkOps2,
   enabled: false,
 };
 

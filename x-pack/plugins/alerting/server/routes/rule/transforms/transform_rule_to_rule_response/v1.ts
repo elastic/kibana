@@ -40,7 +40,6 @@ const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
 };
 
 const transformRuleActions = (actions: Rule['actions']): RuleResponseV1['actions'] => {
-  console.log('HERE');
   return actions.map((action) => {
     if (action.type === RuleActionTypes.SYSTEM) {
       const { id, actionTypeId, params, uuid } = action;

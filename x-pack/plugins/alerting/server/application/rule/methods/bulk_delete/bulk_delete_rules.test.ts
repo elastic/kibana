@@ -24,9 +24,9 @@ import {
   enabledRuleForBulkOps1,
   enabledRuleForBulkOps2,
   enabledRuleForBulkOps3,
-  returnedRuleForBulkDelete1,
-  returnedRuleForBulkDelete2,
-  returnedRuleForBulkDelete3,
+  returnedRuleForBulkOps1,
+  returnedRuleForBulkOps2,
+  returnedRuleForBulkOps3,
   siemRuleForBulkOps1,
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
@@ -81,6 +81,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
 };
@@ -192,7 +193,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkDelete1, returnedRuleForBulkDelete3],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps3],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -256,7 +257,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkDelete1],
+      rules: [returnedRuleForBulkOps1],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -314,7 +315,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkDelete1, returnedRuleForBulkDelete2],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
       errors: [],
       total: 2,
       taskIdsFailedToBeDeleted: [],
