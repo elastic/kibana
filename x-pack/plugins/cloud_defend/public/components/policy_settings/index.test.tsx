@@ -33,7 +33,7 @@ describe('<PolicySettings />', () => {
     const input = getByTestId('cloud-defend-policy-name');
 
     if (input) {
-      userEvent.type(input, '1');
+      await userEvent.type(input, '1');
     } else {
       throw new Error("Can't find input");
     }
@@ -48,7 +48,7 @@ describe('<PolicySettings />', () => {
     const input = getByTestId('cloud-defend-policy-description');
 
     if (input) {
-      userEvent.type(input, '1');
+      await userEvent.type(input, '1');
     } else {
       throw new Error("Can't find input");
     }
@@ -68,7 +68,7 @@ describe('<PolicySettings />', () => {
   it('User can disable control features', async () => {
     const { getByTestId } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-controltoggle'));
+    await userEvent.click(getByTestId('cloud-defend-controltoggle'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
     const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);

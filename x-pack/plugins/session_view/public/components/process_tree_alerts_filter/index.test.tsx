@@ -64,7 +64,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       const filterButton = renderResult.getByTestId(
         'sessionView:sessionViewAlertDetailsEmptyFilterButton'
       );
-      userEvent.click(filterButton);
+      await userEvent.click(filterButton);
 
       renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network').click();
 
@@ -105,7 +105,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenu = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterSelectorContainerMenu'
@@ -123,7 +123,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-network'
@@ -140,7 +140,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-process'
@@ -157,7 +157,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-file'
@@ -183,7 +183,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-network'
@@ -198,7 +198,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-process'
@@ -213,7 +213,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-file'
@@ -246,7 +246,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-file').click();
 
@@ -257,7 +257,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-default').click();
 
@@ -268,7 +268,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-process').click();
 
@@ -279,7 +279,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network').click();
 

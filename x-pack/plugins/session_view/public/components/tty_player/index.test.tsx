@@ -100,7 +100,7 @@ describe('TTYPlayer component', () => {
       const seekToEndBtn = renderResult.getByTestId('sessionView:TTYPlayerControlsEnd');
 
       act(() => {
-        userEvent.click(seekToEndBtn);
+        await userEvent.click(seekToEndBtn);
       });
 
       waitFor(() => expect(renderResult.queryAllByText('Data limit reached')).toHaveLength(1));
@@ -116,7 +116,7 @@ describe('TTYPlayer component', () => {
       const seekToEndBtn = renderResult.getByTestId('sessionView:TTYPlayerControlsEnd');
 
       act(() => {
-        userEvent.click(seekToEndBtn);
+        await userEvent.click(seekToEndBtn);
       });
 
       waitFor(() => expect(renderResult.queryAllByText('[ VIEW POLICIES ]')).toHaveLength(1));

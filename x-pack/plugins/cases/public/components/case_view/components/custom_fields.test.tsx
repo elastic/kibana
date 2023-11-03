@@ -117,7 +117,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
@@ -141,7 +141,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
@@ -172,7 +172,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
@@ -191,7 +191,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([

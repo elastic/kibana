@@ -26,9 +26,9 @@ test('Loading state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Search session loading'));
+  await await userEvent.click(screen.getByLabelText('Search session loading'));
   await waitForEuiPopoverOpen();
-  await userEvent.click(screen.getByText('Stop session'));
+  await await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();
 });
@@ -41,9 +41,9 @@ test('Completed state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Search session complete'));
+  await await userEvent.click(screen.getByLabelText('Search session complete'));
   await waitForEuiPopoverOpen();
-  await userEvent.click(screen.getByText('Save session'));
+  await await userEvent.click(screen.getByText('Save session'));
 
   expect(onSave).toBeCalled();
 });
@@ -56,9 +56,9 @@ test('Loading in the background state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText(/Saved session in progress/));
+  await await userEvent.click(screen.getByLabelText(/Saved session in progress/));
   await waitForEuiPopoverOpen();
-  await userEvent.click(screen.getByText('Stop session'));
+  await await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();
 });
@@ -73,7 +73,7 @@ test('BackgroundCompleted state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText(/Saved session complete/));
+  await await userEvent.click(screen.getByLabelText(/Saved session complete/));
   expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
     '__link__'
   );
@@ -89,7 +89,7 @@ test('Restored state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText(/Saved session restored/));
+  await await userEvent.click(screen.getByLabelText(/Saved session restored/));
 
   expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
     '__link__'
@@ -106,7 +106,7 @@ test('Canceled state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText(/Search session stopped/));
+  await await userEvent.click(screen.getByLabelText(/Search session stopped/));
   expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
     '__link__'
   );
@@ -119,7 +119,7 @@ test('Disabled state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Search session loading'));
+  await await userEvent.click(screen.getByLabelText('Search session loading'));
 
   expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
 

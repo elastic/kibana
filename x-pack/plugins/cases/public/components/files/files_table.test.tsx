@@ -65,7 +65,7 @@ describe('FilesTable', () => {
 
     expect(addFileButton).toBeInTheDocument();
 
-    userEvent.click(addFileButton);
+    await userEvent.click(addFileButton);
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
   });
@@ -84,7 +84,7 @@ describe('FilesTable', () => {
 
     appMockRender.render(<FilesTable {...defaultProps} items={[nonImageFileMock]} />);
 
-    userEvent.click(
+    await userEvent.click(
       await within(await screen.findByTestId('cases-files-table-filename')).findByTitle(
         'No preview available'
       )
@@ -96,7 +96,7 @@ describe('FilesTable', () => {
   it('image rows open file preview', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByRole('button', {
         name: `${basicFileMock.name}.${basicFileMock.extension}`,
       })
@@ -166,7 +166,7 @@ describe('FilesTable', () => {
 
     expect(deleteButton).toBeInTheDocument();
 
-    userEvent.click(deleteButton);
+    await userEvent.click(deleteButton);
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
   });
@@ -182,7 +182,7 @@ describe('FilesTable', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('pagination-button-next'));
+    await userEvent.click(await screen.findByTestId('pagination-button-next'));
 
     await waitFor(() =>
       expect(onTableChange).toHaveBeenCalledWith({
@@ -202,7 +202,7 @@ describe('FilesTable', () => {
       />
     );
 
-    userEvent.click(await screen.findByTestId('pagination-button-previous'));
+    await userEvent.click(await screen.findByTestId('pagination-button-previous'));
 
     await waitFor(() =>
       expect(onTableChange).toHaveBeenCalledWith({
@@ -216,13 +216,13 @@ describe('FilesTable', () => {
       <FilesTable {...defaultProps} items={[{ ...basicFileMock }, { ...basicFileMock }]} />
     );
 
-    userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+    await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
 
     const pageSizeOption = screen.getByTestId('tablePagination-50-rows');
 
     pageSizeOption.style.pointerEvents = 'all';
 
-    userEvent.click(pageSizeOption);
+    await userEvent.click(pageSizeOption);
 
     await waitFor(() =>
       expect(onTableChange).toHaveBeenCalledWith({

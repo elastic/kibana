@@ -86,7 +86,7 @@ describe('Onboarding Component new section', () => {
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
       );
-      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(renderResult.getByText('Interactive only')).toBeVisible();
       expect(renderResult.getByText('All events')).toBeVisible();
     });
@@ -97,7 +97,7 @@ describe('Onboarding Component new section', () => {
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={mockedOnChange} />
       );
       expect(mockedOnChange).toHaveBeenCalledTimes(1);
-      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(mockedOnChange).toHaveBeenCalledTimes(2);
     });
 
@@ -115,7 +115,7 @@ describe('Onboarding Component new section', () => {
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
       );
-      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
       expect(renderResult.getByDisplayValue('ALL_EVENTS')).not.toBeChecked();
       expect(renderResult.getByDisplayValue('INTERACTIVE_ONLY')).toBeChecked();
     });
@@ -146,7 +146,7 @@ describe('Onboarding Component new section', () => {
         renderResult = mockedContext.render(
           <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
         );
-        userEvent.click(screen.getByDisplayValue(preset));
+        await userEvent.click(screen.getByDisplayValue(preset));
         expect(renderResult.getByDisplayValue(preset)).toBeChecked();
 
         if (result === 'should see') {
@@ -223,7 +223,7 @@ describe('Onboarding Component new section', () => {
 
     it('should still be able to select cloud configuration', () => {
       render();
-      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+      await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
 
       expect(onChange).toHaveBeenLastCalledWith({
         isValid: true,

@@ -48,7 +48,7 @@ describe('Use cases toast hook', () => {
     const el = document.createElement('div');
     mockParams.text(el);
     const button = getByTestId(el, 'toaster-content-case-view-link');
-    userEvent.click(button);
+    await userEvent.click(button);
   }
 
   useToastsMock.mockImplementation(() => {
@@ -213,7 +213,7 @@ describe('Use cases toast hook', () => {
         const result = appMockRender.render(
           <CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />
         );
-        userEvent.click(result.getByTestId('toaster-content-case-view-link'));
+        await userEvent.click(result.getByTestId('toaster-content-case-view-link'));
         expect(onViewCaseClick).toHaveBeenCalled();
       });
     });

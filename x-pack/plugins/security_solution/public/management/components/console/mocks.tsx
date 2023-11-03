@@ -133,14 +133,14 @@ export const enterConsoleCommand = (
 
   act(() => {
     if (useKeyboard) {
-      userEvent.click(keyCaptureInput);
-      userEvent.keyboard(cmd);
+      await userEvent.click(keyCaptureInput);
+      await userEvent.keyboard(cmd);
     } else {
-      userEvent.type(keyCaptureInput, cmd);
+      await userEvent.type(keyCaptureInput, cmd);
     }
 
     if (!inputOnly) {
-      userEvent.keyboard('{enter}');
+      await userEvent.keyboard('{enter}');
     }
   });
 };

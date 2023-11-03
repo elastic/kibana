@@ -117,7 +117,7 @@ describe('SelectSystemPrompt', () => {
       />
     );
 
-    userEvent.click(getByTestId('clearSystemPrompt'));
+    await userEvent.click(getByTestId('clearSystemPrompt'));
 
     expect(clearSelectedSystemPrompt).toHaveBeenCalledTimes(1);
   });
@@ -134,7 +134,7 @@ describe('SelectSystemPrompt', () => {
       />
     );
 
-    userEvent.click(getByTestId('clearSystemPrompt'));
+    await userEvent.click(getByTestId('clearSystemPrompt'));
 
     expect(setIsEditing).toHaveBeenCalledWith(false);
   });
@@ -146,7 +146,7 @@ describe('SelectSystemPrompt', () => {
       <SelectSystemPrompt {...props} setIsEditing={setIsEditing} isEditing={false} />
     );
 
-    userEvent.click(getByTestId('addSystemPrompt'));
+    await userEvent.click(getByTestId('addSystemPrompt'));
 
     expect(setIsEditing).toHaveBeenCalledWith(true);
   });

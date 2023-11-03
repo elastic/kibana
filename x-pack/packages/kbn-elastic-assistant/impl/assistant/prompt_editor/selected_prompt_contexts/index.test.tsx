@@ -145,7 +145,7 @@ describe('SelectedPromptContexts', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId(`removePromptContext-${promptContextId}`));
+    await userEvent.click(screen.getByTestId(`removePromptContext-${promptContextId}`));
 
     await waitFor(() => {
       expect(setSelectedPromptContexts).toHaveBeenCalled();
@@ -164,7 +164,7 @@ describe('SelectedPromptContexts', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByText(mockAlertPromptContext.description));
+    await userEvent.click(screen.getByText(mockAlertPromptContext.description));
 
     const codeBlock = screen.getByTestId('readOnlyContextViewer');
 

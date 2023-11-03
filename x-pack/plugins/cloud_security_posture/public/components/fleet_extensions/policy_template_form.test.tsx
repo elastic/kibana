@@ -147,7 +147,7 @@ describe('<CspPolicyTemplateForm />', () => {
     const name = getByLabelText('Name');
     expect(name).toBeInTheDocument();
 
-    userEvent.type(name, '1');
+    await userEvent.type(name, '1');
 
     // Listen to the 2nd triggered by the test.
     // The 1st is done on mount to ensure initial state is valid.
@@ -163,7 +163,7 @@ describe('<CspPolicyTemplateForm />', () => {
     const description = getByLabelText('Description');
     expect(description).toBeInTheDocument();
 
-    userEvent.type(description, '1');
+    await userEvent.type(description, '1');
 
     // Listen to the 2nd triggered by the test.
     // The 1st is done on mount to ensure initial state is valid.
@@ -192,7 +192,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     const { getByLabelText } = render(<WrappedComponent newPolicy={k8sPolicy} />);
     const option = getByLabelText('EKS');
-    userEvent.click(option);
+    await userEvent.click(option);
 
     // Listen to the 2nd triggered by the test.
     // The 1st is done on mount to ensure initial state is valid.
@@ -598,7 +598,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
       const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Role ARN'), 'a');
+      await userEvent.type(getByLabelText('Role ARN'), 'a');
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { role_arn: { value: 'a' } });
 
       // Ignore 1st call triggered on mount to ensure initial state is valid
@@ -632,7 +632,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
       const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Access Key ID'), 'a');
+      await userEvent.type(getByLabelText('Access Key ID'), 'a');
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { access_key_id: { value: 'a' } });
 
       // Ignore 1st call triggered on mount to ensure initial state is valid
@@ -643,7 +643,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       rerender(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Secret Access Key'), 'b');
+      await userEvent.type(getByLabelText('Secret Access Key'), 'b');
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { secret_access_key: { value: 'b' } });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -677,7 +677,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
       const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Access Key ID'), 'a');
+      await userEvent.type(getByLabelText('Access Key ID'), 'a');
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { access_key_id: { value: 'a' } });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -687,7 +687,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       rerender(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Secret Access Key'), 'b');
+      await userEvent.type(getByLabelText('Secret Access Key'), 'b');
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { secret_access_key: { value: 'b' } });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -697,7 +697,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       rerender(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Session Token'), 'a');
+      await userEvent.type(getByLabelText('Session Token'), 'a');
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { session_token: { value: 'a' } });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -729,7 +729,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
       const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Shared Credential File'), 'a');
+      await userEvent.type(getByLabelText('Shared Credential File'), 'a');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         shared_credential_file: { value: 'a' },
@@ -742,7 +742,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       rerender(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Credential Profile Name'), 'b');
+      await userEvent.type(getByLabelText('Credential Profile Name'), 'b');
       policy = getPosturePolicy(policy, CLOUDBEAT_EKS, {
         credential_profile_name: { value: 'b' },
       });
@@ -880,7 +880,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
       const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Role ARN'), 'a');
+      await userEvent.type(getByLabelText('Role ARN'), 'a');
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { role_arn: { value: 'a' } });
 
       // Ignore 1st call triggered on mount to ensure initial state is valid
@@ -915,7 +915,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
       const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Access Key ID'), 'a');
+      await userEvent.type(getByLabelText('Access Key ID'), 'a');
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { access_key_id: { value: 'a' } });
 
       // Ignore 1st call triggered on mount to ensure initial state is valid
@@ -926,7 +926,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       rerender(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Secret Access Key'), 'b');
+      await userEvent.type(getByLabelText('Secret Access Key'), 'b');
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { secret_access_key: { value: 'b' } });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -958,7 +958,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
       const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Access Key ID'), 'a');
+      await userEvent.type(getByLabelText('Access Key ID'), 'a');
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { access_key_id: { value: 'a' } });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -968,7 +968,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       rerender(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Secret Access Key'), 'b');
+      await userEvent.type(getByLabelText('Secret Access Key'), 'b');
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { secret_access_key: { value: 'b' } });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -978,7 +978,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       rerender(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Session Token'), 'a');
+      await userEvent.type(getByLabelText('Session Token'), 'a');
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, { session_token: { value: 'a' } });
 
       expect(onChange).toHaveBeenCalledWith({
@@ -1011,7 +1011,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
       const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Shared Credential File'), 'a');
+      await userEvent.type(getByLabelText('Shared Credential File'), 'a');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         shared_credential_file: { value: 'a' },
@@ -1024,7 +1024,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       rerender(<WrappedComponent newPolicy={policy} />);
 
-      userEvent.type(getByLabelText('Credential Profile Name'), 'b');
+      await userEvent.type(getByLabelText('Credential Profile Name'), 'b');
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         credential_profile_name: { value: 'b' },
       });
@@ -1161,7 +1161,7 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE), 'b');
+      await userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE), 'b');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.credentials.file': { value: 'b' },
@@ -1203,7 +1203,7 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON), 'b');
+      await userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON), 'b');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.credentials.json': { value: 'b' },
@@ -1293,7 +1293,7 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'c');
+      await userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'c');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.organization_id': { value: 'c' },

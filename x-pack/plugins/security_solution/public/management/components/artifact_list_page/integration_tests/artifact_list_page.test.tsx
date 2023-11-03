@@ -106,7 +106,7 @@ describe('When using the ArtifactListPage component', () => {
     it('should persist pagination `page` changes to the URL', async () => {
       const { getByTestId } = await renderWithListData();
       act(() => {
-        userEvent.click(getByTestId('pagination-button-1'));
+        await userEvent.click(getByTestId('pagination-button-1'));
       });
 
       await waitFor(() => {
@@ -117,7 +117,7 @@ describe('When using the ArtifactListPage component', () => {
     it('should persist pagination `pageSize` changes to the URL', async () => {
       const { getByTestId } = await renderWithListData();
       act(() => {
-        userEvent.click(getByTestId('tablePaginationPopoverButton'));
+        await userEvent.click(getByTestId('tablePaginationPopoverButton'));
       });
       await act(async () => {
         await waitFor(() => {
@@ -125,7 +125,7 @@ describe('When using the ArtifactListPage component', () => {
         });
       });
 
-      userEvent.click(getByTestId('tablePagination-20-rows'), undefined, {
+      await userEvent.click(getByTestId('tablePagination-20-rows'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -140,7 +140,7 @@ describe('When using the ArtifactListPage component', () => {
         act(() => {
           switch (action) {
             case 'delete':
-              userEvent.click(
+              await userEvent.click(
                 renderResult.getByTestId('testPage-card-cardDeleteAction'),
                 undefined,
                 { skipPointerEventsCheck: true }
@@ -148,9 +148,13 @@ describe('When using the ArtifactListPage component', () => {
               break;
 
             case 'edit':
-              userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'), undefined, {
-                skipPointerEventsCheck: true,
-              });
+              await userEvent.click(
+                renderResult.getByTestId('testPage-card-cardEditAction'),
+                undefined,
+                {
+                  skipPointerEventsCheck: true,
+                }
+              );
               break;
           }
         });
@@ -215,7 +219,7 @@ describe('When using the ArtifactListPage component', () => {
 
       it('should persist filter to the URL params', async () => {
         act(() => {
-          userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
+          await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
         });
         clickSearchButton();
 
@@ -245,7 +249,7 @@ describe('When using the ArtifactListPage component', () => {
         });
 
         act(() => {
-          userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
+          await userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
         });
 
         await act(async () => {
@@ -254,7 +258,7 @@ describe('When using the ArtifactListPage component', () => {
           });
         });
 
-        userEvent.click(renderResult.getByTestId(firstPolicyTestId));
+        await userEvent.click(renderResult.getByTestId(firstPolicyTestId));
 
         await waitFor(() => {
           expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));
@@ -287,7 +291,7 @@ describe('When using the ArtifactListPage component', () => {
         });
 
         act(() => {
-          userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
+          await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
         });
 
         clickSearchButton();

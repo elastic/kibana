@@ -56,8 +56,8 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    userEvent.type(searchInput, 'usernameX');
-    userEvent.type(searchInput, '{enter}');
+    await userEvent.type(searchInput, 'usernameX');
+    await userEvent.type(searchInput, '{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
 
@@ -65,8 +65,8 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    userEvent.type(searchInput, 'usernameX,usernameY,usernameZ');
-    userEvent.type(searchInput, '{enter}');
+    await userEvent.type(searchInput, 'usernameX,usernameY,usernameZ');
+    await userEvent.type(searchInput, '{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY', 'usernameZ']);
   });
 
@@ -74,8 +74,8 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    userEvent.type(searchInput, '   usernameX   ');
-    userEvent.type(searchInput, '{enter}');
+    await userEvent.type(searchInput, '   usernameX   ');
+    await userEvent.type(searchInput, '{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']);
   });
 
@@ -83,8 +83,8 @@ describe('Users filter', () => {
     render();
 
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
-    userEvent.type(searchInput, '   , usernameX ,usernameY    ,       ');
-    userEvent.type(searchInput, '{enter}');
+    await userEvent.type(searchInput, '   , usernameX ,usernameY    ,       ');
+    await userEvent.type(searchInput, '{enter}');
     expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY']);
   });
 });

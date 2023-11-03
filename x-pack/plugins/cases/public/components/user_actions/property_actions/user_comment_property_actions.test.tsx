@@ -37,7 +37,7 @@ describe('UserCommentPropertyActions', () => {
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(3);
@@ -51,12 +51,12 @@ describe('UserCommentPropertyActions', () => {
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(result.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-pencil'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-pencil'));
 
     expect(props.onEdit).toHaveBeenCalled();
   });
@@ -66,12 +66,12 @@ describe('UserCommentPropertyActions', () => {
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(result.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-quote'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-quote'));
 
     expect(props.onQuote).toHaveBeenCalled();
   });
@@ -81,18 +81,18 @@ describe('UserCommentPropertyActions', () => {
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(result.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-trash'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-trash'));
 
     await waitFor(() => {
       expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
 
-    userEvent.click(result.getByText('Delete'));
+    await userEvent.click(result.getByText('Delete'));
     expect(props.onDelete).toHaveBeenCalled();
   });
 

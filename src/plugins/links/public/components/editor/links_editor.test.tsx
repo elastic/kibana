@@ -80,7 +80,7 @@ describe('LinksEditor', () => {
     expect(screen.getByTestId('links--panelEditor--emptyPrompt')).toBeInTheDocument();
     expect(screen.getByTestId('links--panelEditor--saveBtn')).toBeDisabled();
 
-    await userEvent.click(screen.getByTestId('links--panelEditor--closeBtn'));
+    await await userEvent.click(screen.getByTestId('links--panelEditor--closeBtn'));
     expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -104,7 +104,7 @@ describe('LinksEditor', () => {
     render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference />);
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(2));
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
-    await userEvent.click(saveButton);
+    await await userEvent.click(saveButton);
     await waitFor(() => expect(defaultProps.onSaveToLibrary).toHaveBeenCalledTimes(1));
     expect(defaultProps.onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });
@@ -114,7 +114,7 @@ describe('LinksEditor', () => {
     render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference={false} />);
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(2));
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
-    await userEvent.click(saveButton);
+    await await userEvent.click(saveButton);
     expect(defaultProps.onAddToDashboard).toHaveBeenCalledTimes(1);
     expect(defaultProps.onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });

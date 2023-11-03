@@ -43,7 +43,7 @@ describe('RiskScoreRestartButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
+        await await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
       });
       expect(mockRestartRiskScoreTransforms).toHaveBeenCalled();
       expect(mockRestartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(
@@ -58,7 +58,7 @@ describe('RiskScoreRestartButton', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
+      await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
 
       await waitFor(() => {
         expect(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`)).toHaveProperty(

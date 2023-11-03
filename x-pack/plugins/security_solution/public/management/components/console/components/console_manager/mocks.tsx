@@ -46,7 +46,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
     clickOnRegisterNewConsole: async () => {
       const currentRunningCount = renderResult.queryAllByTestId('showRunningConsole').length;
 
-      userEvent.click(renderResult.getByTestId('registerNewConsole'));
+      await userEvent.click(renderResult.getByTestId('registerNewConsole'));
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('showRunningConsole')).toHaveLength(
@@ -66,7 +66,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
         throw new Error(`No registered console found at index [${atIndex}]`);
       }
 
-      userEvent.click(runningConsoleShowButton);
+      await userEvent.click(runningConsoleShowButton);
 
       await waitFor(() => {
         expect(renderResult.getByTestId('consolePageOverlay'));
@@ -74,7 +74,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
     },
 
     hideOpenedConsole: async () => {
-      userEvent.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
+      await userEvent.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
 
       await waitFor(() => {
         expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();

@@ -123,13 +123,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+        await await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
           delay: 10,
         });
       });
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
@@ -147,13 +147,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+        await await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
           delay: 10,
         });
       });
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });

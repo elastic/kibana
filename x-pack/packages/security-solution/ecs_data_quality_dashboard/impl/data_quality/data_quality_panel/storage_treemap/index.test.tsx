@@ -120,7 +120,7 @@ describe('StorageTreemap', () => {
               `chart-legend-item-${ilmPhase}${pattern}${index}`
             );
 
-            userEvent.click(legendItem);
+            await userEvent.click(legendItem);
 
             expect(onIndexSelected).toBeCalledWith({ indexName: index, pattern });
           });

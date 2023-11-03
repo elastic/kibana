@@ -37,9 +37,9 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
+    await userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

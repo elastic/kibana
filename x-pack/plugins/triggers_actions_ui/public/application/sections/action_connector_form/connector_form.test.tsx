@@ -79,7 +79,7 @@ describe('ConnectorForm', () => {
 
     expect(result.getByTestId('nameInput')).toBeInTheDocument();
     await act(async () => {
-      await userEvent.type(result.getByRole('textbox'), 'My connector', { delay: 100 });
+      await await userEvent.type(result.getByRole('textbox'), 'My connector', { delay: 100 });
     });
 
     await waitFor(() => {

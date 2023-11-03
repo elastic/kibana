@@ -114,7 +114,7 @@ describe('DetectionRuleCounter', () => {
 
     // Trigger createDetectionRuleOnClick
     const createRuleLink = getByTestId('csp:findings-flyout-create-detection-rule-link');
-    userEvent.click(createRuleLink);
+    await userEvent.click(createRuleLink);
 
     const loadingSpinner = getByTestId('csp:findings-flyout-detection-rule-counter-loading');
     expect(loadingSpinner).toBeInTheDocument();

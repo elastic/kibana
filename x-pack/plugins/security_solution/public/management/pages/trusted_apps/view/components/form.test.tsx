@@ -218,7 +218,7 @@ describe('Trusted apps form', () => {
 
     it('should allow user to select between 3 OSs', () => {
       const osField = getOsField();
-      userEvent.click(osField, { button: 1 });
+      await userEvent.click(osField, { button: 1 });
       const options = Array.from(
         renderResult.baseElement.querySelectorAll(
           '.euiSuperSelect__listbox button.euiSuperSelect__item'
@@ -261,9 +261,9 @@ describe('Trusted apps form', () => {
     });
 
     it('should correctly change OS', async () => {
-      userEvent.click(getOsField());
+      await userEvent.click(getOsField());
       await waitForEuiPopoverOpen();
-      userEvent.click(screen.getByRole('option', { name: 'Linux' }));
+      await userEvent.click(screen.getByRole('option', { name: 'Linux' }));
       const expected = createOnChangeArgs({
         item: createItem({ os_types: [OperatingSystem.LINUX] }),
       });
@@ -290,7 +290,7 @@ describe('Trusted apps form', () => {
 
     it('should display 3 options for Field for Windows', () => {
       const conditionFieldSelect = getConditionFieldSelect(getCondition());
-      userEvent.click(conditionFieldSelect, { button: 1 });
+      await userEvent.click(conditionFieldSelect, { button: 1 });
       const options = Array.from(
         renderResult.baseElement.querySelectorAll(
           '.euiSuperSelect__listbox button.euiSuperSelect__item'
@@ -346,7 +346,7 @@ describe('Trusted apps form', () => {
     describe('and when the AND button is clicked', () => {
       beforeEach(() => {
         const andButton = getConditionBuilderAndButton();
-        userEvent.click(andButton, { button: 1 });
+        await userEvent.click(andButton, { button: 1 });
         // re-render with updated `newTrustedApp`
         formProps.item = formProps.onChange.mock.calls[0][0].item;
         rerender();
@@ -497,7 +497,7 @@ describe('Trusted apps form', () => {
 
     it('should validate all condition values (when multiples exist) have non empty space value', () => {
       const andButton = getConditionBuilderAndButton();
-      userEvent.click(andButton, { button: 1 });
+      await userEvent.click(andButton, { button: 1 });
       rerenderWithLatestProps();
 
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
@@ -508,7 +508,7 @@ describe('Trusted apps form', () => {
 
     it('should validate duplicated conditions', () => {
       const andButton = getConditionBuilderAndButton();
-      userEvent.click(andButton, { button: 1 });
+      await userEvent.click(andButton, { button: 1 });
 
       setTextFieldValue(getConditionValue(getCondition()), '');
       rerenderWithLatestProps();
@@ -519,7 +519,7 @@ describe('Trusted apps form', () => {
     it('should validate multiple errors in form', () => {
       const andButton = getConditionBuilderAndButton();
 
-      userEvent.click(andButton, { button: 1 });
+      await userEvent.click(andButton, { button: 1 });
       rerenderWithLatestProps();
 
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');

@@ -86,7 +86,7 @@ describe('Assignees', () => {
     });
 
     act(() => {
-      userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
+      await userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
     });
 
     await waitFor(() => {
@@ -109,7 +109,7 @@ describe('Assignees', () => {
     });
 
     act(() => {
-      userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
+      await userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
     });
 
     await waitFor(() => {
@@ -131,7 +131,7 @@ describe('Assignees', () => {
     });
 
     await act(async () => {
-      await userEvent.type(result.getByTestId('comboBoxSearchInput'), 'dr', { delay: 1 });
+      await await userEvent.type(result.getByTestId('comboBoxSearchInput'), 'dr', { delay: 1 });
     });
 
     await waitFor(() => {
@@ -145,7 +145,7 @@ describe('Assignees', () => {
     });
 
     act(() => {
-      userEvent.click(result.getByText(`${currentUserProfile.user.full_name}`));
+      await userEvent.click(result.getByText(`${currentUserProfile.user.full_name}`));
     });
 
     await waitFor(() => {
@@ -189,7 +189,7 @@ describe('Assignees', () => {
     });
 
     act(() => {
-      userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+      await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
     });
 
     await waitFor(() => {
@@ -198,7 +198,7 @@ describe('Assignees', () => {
     });
 
     act(() => {
-      userEvent.click(screen.getByText('Turtle'));
+      await userEvent.click(screen.getByText('Turtle'));
     });
 
     // ensure that the similar user is still available for selection

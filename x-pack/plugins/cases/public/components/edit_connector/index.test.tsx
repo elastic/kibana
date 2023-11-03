@@ -55,7 +55,7 @@ describe('EditConnector ', () => {
       )
     ).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
+    await userEvent.click(screen.getByTestId('connector-edit-button'));
 
     await waitFor(() => {
       expect(screen.getAllByTestId('dropdown-connector-no-connector').length).toBeGreaterThan(0);
@@ -69,20 +69,20 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await userEvent.click(screen.getByTestId('connector-edit-button'));
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
       skipPointerEventsCheck: true,
     });
 
     expect(screen.getByTestId('edit-connectors-submit')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await userEvent.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith({
@@ -115,18 +115,18 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await userEvent.click(screen.getByTestId('connector-edit-button'));
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
       skipPointerEventsCheck: true,
     });
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await userEvent.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('edit-connectors-submit')).not.toBeInTheDocument();
@@ -166,15 +166,15 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await userEvent.click(screen.getByTestId('connector-edit-button'));
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
-    userEvent.click(screen.getByTestId('edit-connectors-cancel'));
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await userEvent.click(screen.getByTestId('edit-connectors-cancel'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('edit-connectors-submit')).not.toBeInTheDocument();

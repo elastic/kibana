@@ -104,7 +104,7 @@ describe('ResilientParamsFields renders', () => {
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Denial of Service{enter}');
+    await userEvent.type(checkbox, 'Denial of Service{enter}');
 
     expect(screen.getByText('Denial of Service')).toBeInTheDocument();
   });
@@ -116,7 +116,7 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(screen.getByTestId('severitySelect'), 'Low');
+    await userEvent.selectOptions(screen.getByTestId('severitySelect'), 'Low');
     expect(screen.getByText('Low')).toBeInTheDocument();
   });
 
@@ -136,9 +136,9 @@ describe('ResilientParamsFields renders', () => {
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Denial of Service{enter}');
+    await userEvent.type(checkbox, 'Denial of Service{enter}');
 
-    userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
+    await userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
 
     expect(screen.getByText('Denial of Service')).toBeInTheDocument();
     expect(screen.getByText('Low')).toBeInTheDocument();

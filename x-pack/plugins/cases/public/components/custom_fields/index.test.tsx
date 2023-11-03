@@ -65,7 +65,7 @@ describe('CustomFields', () => {
   it('calls onChange on add option click', async () => {
     appMockRender.render(<CustomFields {...props} />);
 
-    userEvent.click(screen.getByTestId('add-custom-field'));
+    await userEvent.click(screen.getByTestId('add-custom-field'));
 
     expect(props.handleAddCustomField).toBeCalled();
   });
@@ -75,7 +75,7 @@ describe('CustomFields', () => {
       <CustomFields {...{ ...props, customFields: customFieldsConfigurationMock }} />
     );
 
-    userEvent.click(
+    await userEvent.click(
       screen.getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
     );
 
@@ -103,7 +103,7 @@ describe('CustomFields', () => {
 
     appMockRender.render(<CustomFields {...{ ...props, customFields }} />);
 
-    userEvent.click(screen.getByTestId('add-custom-field'));
+    await userEvent.click(screen.getByTestId('add-custom-field'));
 
     await waitFor(() => {
       expect(screen.getByText(i18n.MAX_CUSTOM_FIELD_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)));

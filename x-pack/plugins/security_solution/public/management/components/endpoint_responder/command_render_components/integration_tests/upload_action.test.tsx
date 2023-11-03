@@ -125,7 +125,7 @@ describe('When using `upload` response action', () => {
     console.enterCommand('upload --file', { inputOnly: true });
 
     await waitFor(() => {
-      userEvent.upload(getByTestId('console-arg-file-picker'), file);
+      await userEvent.upload(getByTestId('console-arg-file-picker'), file);
     });
 
     console.submitCommand();
@@ -155,7 +155,7 @@ describe('When using `upload` response action', () => {
     console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
     await waitFor(() => {
-      userEvent.upload(getByTestId('console-arg-file-picker'), file);
+      await userEvent.upload(getByTestId('console-arg-file-picker'), file);
     });
 
     console.submitCommand();
@@ -177,7 +177,7 @@ describe('When using `upload` response action', () => {
     console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
     await waitFor(() => {
-      userEvent.upload(getByTestId('console-arg-file-picker'), file);
+      await userEvent.upload(getByTestId('console-arg-file-picker'), file);
     });
 
     console.submitCommand();
@@ -195,7 +195,7 @@ describe('When using `upload` response action', () => {
     console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
     await waitFor(() => {
-      userEvent.upload(getByTestId('console-arg-file-picker'), file);
+      await userEvent.upload(getByTestId('console-arg-file-picker'), file);
     });
 
     console.submitCommand();
@@ -235,7 +235,7 @@ describe('When using `upload` response action', () => {
 
     console.enterCommand('upload --file', { inputOnly: true });
     await waitFor(() => {
-      userEvent.upload(renderResult.getByTestId('console-arg-file-picker'), file);
+      await userEvent.upload(renderResult.getByTestId('console-arg-file-picker'), file);
     });
 
     console.submitCommand();

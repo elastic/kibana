@@ -75,9 +75,9 @@ describe('CasesTableFilters ', () => {
 
   it('should call onFilterChange when the severity filter changes', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
-    userEvent.click(screen.getByTestId('case-severity-filter'));
+    await userEvent.click(screen.getByTestId('case-severity-filter'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-severity-filter-high'));
+    await userEvent.click(screen.getByTestId('case-severity-filter-high'));
 
     expect(onFilterChanged).toBeCalledWith({ severity: 'high' });
   });
@@ -85,9 +85,9 @@ describe('CasesTableFilters ', () => {
   it('should call onFilterChange when selected tags change', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('options-filter-popover-item-coke'));
+    await userEvent.click(screen.getByTestId('options-filter-popover-item-coke'));
 
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
@@ -95,9 +95,9 @@ describe('CasesTableFilters ', () => {
   it('should call onFilterChange when selected category changes', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('options-filter-popover-item-twix'));
+    await userEvent.click(screen.getByTestId('options-filter-popover-item-twix'));
 
     expect(onFilterChanged).toBeCalledWith({ category: ['twix'] });
   });
@@ -110,10 +110,10 @@ describe('CasesTableFilters ', () => {
     appMockRender = createAppMockRenderer({ license });
 
     const { getByTestId, getByText } = appMockRender.render(<CasesTableFilters {...props} />);
-    userEvent.click(getByTestId('options-filter-popover-button-assignees'));
+    await userEvent.click(getByTestId('options-filter-popover-button-assignees'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(getByText('Physical Dinosaur'));
+    await userEvent.click(getByText('Physical Dinosaur'));
 
     expect(onFilterChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
@@ -127,7 +127,7 @@ describe('CasesTableFilters ', () => {
   it('should call onFilterChange when search changes', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    await userEvent.type(screen.getByTestId('search-cases'), 'My search{enter}');
+    await await userEvent.type(screen.getByTestId('search-cases'), 'My search{enter}');
 
     expect(onFilterChanged).toBeCalledWith({ search: 'My search' });
   });
@@ -135,9 +135,9 @@ describe('CasesTableFilters ', () => {
   it('should call onFilterChange when changing status', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    userEvent.click(screen.getByTestId('case-status-filter'));
+    await userEvent.click(screen.getByTestId('case-status-filter'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-closed'));
+    await userEvent.click(screen.getByTestId('case-status-filter-closed'));
 
     expect(onFilterChanged).toBeCalledWith({ status: CaseStatuses.closed });
   });
@@ -169,7 +169,7 @@ describe('CasesTableFilters ', () => {
 
     appMockRender.render(<CasesTableFilters {...ourProps} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
@@ -191,11 +191,13 @@ describe('CasesTableFilters ', () => {
 
     appMockRender.render(<CasesTableFilters {...ourProps} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByTestId(`options-filter-popover-item-${tags[tags.length - 1]}`));
+    await userEvent.click(
+      screen.getByTestId(`options-filter-popover-item-${tags[tags.length - 1]}`)
+    );
 
     expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
   });
@@ -214,13 +216,13 @@ describe('CasesTableFilters ', () => {
 
     appMockRender.render(<CasesTableFilters {...ourProps} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
     expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
 
-    userEvent.click(screen.getAllByTestId(`options-filter-popover-item-${newTags[0]}`)[0]);
+    await userEvent.click(screen.getAllByTestId(`options-filter-popover-item-${newTags[0]}`)[0]);
 
     expect(screen.queryByTestId('maximum-length-warning')).not.toBeInTheDocument();
   });
@@ -239,7 +241,7 @@ describe('CasesTableFilters ', () => {
 
     appMockRender.render(<CasesTableFilters {...ourProps} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
 
     await waitForEuiPopoverOpen();
 
@@ -266,10 +268,10 @@ describe('CasesTableFilters ', () => {
     appMockRender = createAppMockRenderer({ license });
 
     appMockRender.render(<CasesTableFilters {...overrideProps} />);
-    userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByText('Physical Dinosaur'));
+    await userEvent.click(screen.getByText('Physical Dinosaur'));
 
     expect(onFilterChanged.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
@@ -324,11 +326,11 @@ describe('CasesTableFilters ', () => {
           availableSolutions={[securitySolution, observabilitySolution]}
         />
       );
-      userEvent.click(screen.getByTestId('solution-filter-popover-button'));
+      await userEvent.click(screen.getByTestId('solution-filter-popover-button'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(
+      await userEvent.click(
         screen.getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`)
       );
 
@@ -343,17 +345,17 @@ describe('CasesTableFilters ', () => {
         />
       );
 
-      userEvent.click(screen.getByTestId('solution-filter-popover-button'));
+      await userEvent.click(screen.getByTestId('solution-filter-popover-button'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(
+      await userEvent.click(
         screen.getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`)
       );
 
       expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
 
-      userEvent.click(
+      await userEvent.click(
         screen.getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`)
       );
 
@@ -421,7 +423,7 @@ describe('CasesTableFilters ', () => {
         />
       );
 
-      userEvent.click(screen.getByTestId('cases-table-add-case-filter-bar'));
+      await userEvent.click(screen.getByTestId('cases-table-add-case-filter-bar'));
 
       await waitForComponentToUpdate();
       // NOTE: intentionally checking no arguments are passed

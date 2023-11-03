@@ -349,7 +349,7 @@ describe('AlertsTable', () => {
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-      userEvent.click(
+      await userEvent.click(
         renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
         undefined,
         {
@@ -359,7 +359,7 @@ describe('AlertsTable', () => {
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(
+      await userEvent.click(
         renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
         undefined,
         {
@@ -367,7 +367,7 @@ describe('AlertsTable', () => {
         }
       );
 
-      userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
+      await userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -379,7 +379,7 @@ describe('AlertsTable', () => {
     it('should support pagination', async () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
 
-      userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
+      await userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -702,7 +702,7 @@ describe('AlertsTable', () => {
         render(<AlertsTableWithProviders {...props} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
 
-        userEvent.hover(screen.getByText('Test case'));
+        await userEvent.hover(screen.getByText('Test case'));
 
         expect(await screen.findByTestId('cases-components-tooltip')).toBeInTheDocument();
       });

@@ -113,7 +113,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     await waitForComponentToUpdate();
     expect(getByTestId('hasAuthToggle')).toHaveAttribute('aria-checked', 'true');
     await act(async () => {
-      userEvent.click(getByTestId('hasAuthToggle'));
+      await userEvent.click(getByTestId('hasAuthToggle'));
     });
     expect(getByTestId('hasAuthToggle')).toHaveAttribute('aria-checked', 'false');
     expect(queryByTestId('webhookUserInput')).not.toBeInTheDocument();
@@ -121,7 +121,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
     expect(getByTestId('webhookViewHeadersSwitch')).toHaveAttribute('aria-checked', 'true');
     await act(async () => {
-      userEvent.click(getByTestId('webhookViewHeadersSwitch'));
+      await userEvent.click(getByTestId('webhookViewHeadersSwitch'));
     });
     expect(getByTestId('webhookViewHeadersSwitch')).toHaveAttribute('aria-checked', 'false');
     expect(queryByTestId('webhookHeadersKeyInput')).not.toBeInTheDocument();
@@ -149,7 +149,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(getByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
       expect(queryByTestId('casesWebhookBack')).not.toBeInTheDocument();
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       expect(getByTestId('horizontalStep1-complete')).toBeInTheDocument();
       expect(getByTestId('horizontalStep2-current')).toBeInTheDocument();
@@ -160,7 +160,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(getByTestId('getStep')).toHaveAttribute('style', 'display: none;');
       expect(getByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       expect(getByTestId('horizontalStep1-complete')).toBeInTheDocument();
       expect(getByTestId('horizontalStep2-complete')).toBeInTheDocument();
@@ -171,7 +171,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(getByTestId('getStep')).toHaveAttribute('style', 'display: block;');
       expect(getByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       expect(getByTestId('horizontalStep1-complete')).toBeInTheDocument();
       expect(getByTestId('horizontalStep2-complete')).toBeInTheDocument();
@@ -205,18 +205,18 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(getByTestId('horizontalStep1-current')).toBeInTheDocument();
 
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       await waitForComponentToUpdate();
 
       expect(getByTestId('horizontalStep1-danger')).toBeInTheDocument();
 
       await act(async () => {
-        userEvent.click(getByTestId('hasAuthToggle'));
-        userEvent.click(getByTestId('webhookViewHeadersSwitch'));
+        await userEvent.click(getByTestId('hasAuthToggle'));
+        await userEvent.click(getByTestId('webhookViewHeadersSwitch'));
       });
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
 
       expect(getByTestId('horizontalStep1-complete')).toBeInTheDocument();
@@ -242,15 +242,15 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       await waitForComponentToUpdate();
       expect(getByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       getByText(i18n.CREATE_URL_REQUIRED);
       expect(getByTestId('horizontalStep2-danger')).toBeInTheDocument();
       await act(async () => {
-        await userEvent.type(
+        await await userEvent.type(
           getByTestId('webhookCreateUrlText'),
           `{selectall}{backspace}${config.createIncidentUrl}`,
           {
@@ -259,12 +259,12 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         );
       });
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       expect(getByTestId('horizontalStep2-complete')).toBeInTheDocument();
       expect(getByTestId('horizontalStep3-current')).toBeInTheDocument();
       await act(async () => {
-        userEvent.click(getByTestId('horizontalStep2-complete'));
+        await userEvent.click(getByTestId('horizontalStep2-complete'));
       });
       expect(getByTestId('horizontalStep2-current')).toBeInTheDocument();
       expect(getByTestId('horizontalStep3-incomplete')).toBeInTheDocument();
@@ -289,18 +289,18 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       await waitForComponentToUpdate();
       expect(getByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       getByText(i18n.GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED);
       expect(getByTestId('horizontalStep3-danger')).toBeInTheDocument();
       await act(async () => {
-        await userEvent.type(
+        await await userEvent.type(
           getByTestId('getIncidentResponseExternalTitleKeyText'),
           `{selectall}{backspace}${config.getIncidentResponseExternalTitleKey}`,
           {
@@ -309,12 +309,12 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         );
       });
       await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
+        await userEvent.click(getByTestId('casesWebhookNext'));
       });
       expect(getByTestId('horizontalStep3-complete')).toBeInTheDocument();
       expect(getByTestId('horizontalStep4-current')).toBeInTheDocument();
       await act(async () => {
-        userEvent.click(getByTestId('horizontalStep3-complete'));
+        await userEvent.click(getByTestId('horizontalStep3-complete'));
       });
       expect(getByTestId('horizontalStep3-current')).toBeInTheDocument();
       expect(getByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
@@ -369,7 +369,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
       const { isPreconfigured, ...rest } = actionConnector;
 
@@ -404,7 +404,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       const { isPreconfigured, secrets, ...rest } = actionConnector;
@@ -443,7 +443,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       const { isPreconfigured, ...rest } = actionConnector;
@@ -480,7 +480,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
@@ -506,13 +506,13 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+        await await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
           delay: 10,
         });
       });
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
@@ -541,7 +541,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         );
 
         await act(async () => {
-          userEvent.click(res.getByTestId('form-test-provide-submit'));
+          await userEvent.click(res.getByTestId('form-test-provide-submit'));
         });
 
         expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });

@@ -208,7 +208,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
+    await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
     expect(queryByText('Delete case')).not.toBeInTheDocument();
     expect(queryByTestId('property-actions-case-trash')).not.toBeInTheDocument();
     expect(queryByTestId('property-actions-case-copyClipboard')).toBeInTheDocument();
@@ -221,7 +221,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
+    await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
     expect(queryByText('Delete case')).toBeInTheDocument();
   });
 
@@ -240,7 +240,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
+    await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
 
     await waitFor(() => {
       expect(screen.getByTestId('property-actions-case-popout')).toBeInTheDocument();
@@ -254,7 +254,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
+    await userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
 
     expect(screen.queryByTestId('property-actions-case-popout')).not.toBeInTheDocument();
   });

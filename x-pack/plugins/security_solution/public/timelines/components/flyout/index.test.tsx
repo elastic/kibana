@@ -69,7 +69,7 @@ describe('Flyout', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('flyoutOverlay'));
+      await userEvent.click(screen.getByTestId('flyoutOverlay'));
 
       expect(mockDispatch).toBeCalledWith(
         timelineActions.showTimeline({ id: TimelineId.test, show: true })

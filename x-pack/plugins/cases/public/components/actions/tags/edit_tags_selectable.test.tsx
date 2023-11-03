@@ -92,7 +92,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
     for (const tag of props.tags) {
-      userEvent.click(result.getByText(tag));
+      await userEvent.click(result.getByText(tag));
     }
 
     expect(props.onChangeTags).toBeCalledTimes(props.tags.length);
@@ -106,7 +106,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     for (const tag of propsMultipleCases.tags) {
-      userEvent.click(result.getByText(tag));
+      await userEvent.click(result.getByText(tag));
     }
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
@@ -120,7 +120,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     for (const tag of propsMultipleCases.tags) {
-      userEvent.click(result.getByText(tag));
+      await userEvent.click(result.getByText(tag));
     }
 
     for (const [tag, icon] of [
@@ -144,7 +144,7 @@ describe('EditTagsSelectable', () => {
   it('adds a new tag correctly', async () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
-    await userEvent.type(result.getByPlaceholderText('Search'), 'not-exist', { delay: 1 });
+    await await userEvent.type(result.getByPlaceholderText('Search'), 'not-exist', { delay: 1 });
 
     await waitFor(() => {
       expect(
@@ -154,7 +154,7 @@ describe('EditTagsSelectable', () => {
 
     const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
 
-    userEvent.click(addNewTagButton);
+    await userEvent.click(addNewTagButton);
 
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {
@@ -167,7 +167,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     expect(result.getByText('Select all')).toBeInTheDocument();
-    userEvent.click(result.getByText('Select all'));
+    await userEvent.click(result.getByText('Select all'));
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
@@ -180,7 +180,7 @@ describe('EditTagsSelectable', () => {
     const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     expect(result.getByText('Select all')).toBeInTheDocument();
-    userEvent.click(result.getByText('Select none'));
+    await userEvent.click(result.getByText('Select none'));
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
@@ -196,7 +196,7 @@ describe('EditTagsSelectable', () => {
      * Tag with label "one" exist. Searching for "on" will show both the
      * "add new tag" item and the "one" tag
      */
-    await userEvent.type(result.getByPlaceholderText('Search'), 'on', { delay: 1 });
+    await await userEvent.type(result.getByPlaceholderText('Search'), 'on', { delay: 1 });
 
     await waitFor(() => {
       expect(
@@ -207,7 +207,7 @@ describe('EditTagsSelectable', () => {
     const iconDataTestSubj = 'cases-actions-tags-edit-selectable-tag-one-icon-check';
     expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId(iconDataTestSubj));
+    await userEvent.click(result.getByTestId(iconDataTestSubj));
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
@@ -223,7 +223,7 @@ describe('EditTagsSelectable', () => {
      * Tag with label "one" exist. Searching for "on" will show both the
      * "add new tag" item and the "one" tag
      */
-    await userEvent.type(result.getByPlaceholderText('Search'), 'on', { delay: 1 });
+    await await userEvent.type(result.getByPlaceholderText('Search'), 'on', { delay: 1 });
 
     await waitFor(() => {
       expect(
@@ -237,7 +237,7 @@ describe('EditTagsSelectable', () => {
 
     const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
 
-    userEvent.click(addNewTagButton);
+    await userEvent.click(addNewTagButton);
 
     expect(props.onChangeTags).toBeCalledTimes(1);
     expect(props.onChangeTags).nthCalledWith(1, {
@@ -249,7 +249,7 @@ describe('EditTagsSelectable', () => {
   it('do not show the new item option on exact match', async () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
-    await userEvent.type(result.getByPlaceholderText('Search'), 'one', { delay: 1 });
+    await await userEvent.type(result.getByPlaceholderText('Search'), 'one', { delay: 1 });
 
     expect(
       result.queryByTestId('cases-actions-tags-edit-selectable-add-new-tag')
@@ -267,7 +267,7 @@ describe('EditTagsSelectable', () => {
   it('shows the no match label when there is no match', async () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
-    await userEvent.type(result.getByPlaceholderText('Search'), 'not-exist', { delay: 1 });
+    await await userEvent.type(result.getByPlaceholderText('Search'), 'not-exist', { delay: 1 });
 
     expect(
       result.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
@@ -277,7 +277,7 @@ describe('EditTagsSelectable', () => {
   it('shows the no match label and the add new item when there is space in the search term', async () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
-    await userEvent.type(result.getByPlaceholderText('Search'), 'test tag', { delay: 1 });
+    await await userEvent.type(result.getByPlaceholderText('Search'), 'test tag', { delay: 1 });
 
     await waitFor(() => {
       expect(

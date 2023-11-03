@@ -42,7 +42,7 @@ describe('BulkActions', () => {
   it('calls onListUpdated with the expected updates when Allow is clicked', () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Allow$/));
 
     expect(defaultProps.onListUpdated).toBeCalledWith([
@@ -54,7 +54,7 @@ describe('BulkActions', () => {
   it('calls onListUpdated with the expected updates when Deny is clicked', () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Deny$/));
 
     expect(defaultProps.onListUpdated).toBeCalledWith([
@@ -66,7 +66,7 @@ describe('BulkActions', () => {
   it('calls onListUpdated with the expected updates when Anonymize is clicked', () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Anonymize$/));
 
     expect(defaultProps.onListUpdated).toBeCalledWith([
@@ -78,7 +78,7 @@ describe('BulkActions', () => {
   it('calls onListUpdated with the expected updates when Unanonymize is clicked', () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Unanonymize$/));
 
     expect(defaultProps.onListUpdated).toBeCalledWith([
@@ -92,7 +92,7 @@ describe('BulkActions', () => {
       <BulkActions {...defaultProps} onlyDefaults={true} />
     );
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Deny by default$/));
 
     expect(defaultProps.onListUpdated).toBeCalledWith([
@@ -108,7 +108,7 @@ describe('BulkActions', () => {
       <BulkActions {...defaultProps} onlyDefaults={true} />
     );
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Defaults$/));
     fireEvent.click(getByText(/^Anonymize by default$/));
 
@@ -125,7 +125,7 @@ describe('BulkActions', () => {
       <BulkActions {...defaultProps} onlyDefaults={true} />
     );
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Defaults$/));
     fireEvent.click(getByText(/^Unanonymize by default$/));
 

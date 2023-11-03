@@ -48,7 +48,7 @@ describe('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(getByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(getByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
@@ -65,7 +65,7 @@ describe('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(getByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(getByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
@@ -83,11 +83,11 @@ describe('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(getByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(getByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(getByTestId(`options-filter-popover-item-${tags[0]}`));
+    await userEvent.click(getByTestId(`options-filter-popover-item-${tags[0]}`));
 
     expect(onSelectedOptionsChanged).toHaveBeenCalledWith([tags[0]]);
   });
@@ -102,11 +102,11 @@ describe('FilterPopover ', () => {
       />
     );
 
-    userEvent.click(getByTestId('options-filter-popover-button-Tags'));
+    await userEvent.click(getByTestId('options-filter-popover-button-Tags'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(getByTestId(`options-filter-popover-item-${tags[0]}`));
+    await userEvent.click(getByTestId(`options-filter-popover-item-${tags[0]}`));
 
     expect(onSelectedOptionsChanged).toHaveBeenCalledWith([]);
   });
@@ -128,7 +128,7 @@ describe('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(getByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
@@ -149,7 +149,7 @@ describe('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(getByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
@@ -169,7 +169,7 @@ describe('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(getByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
@@ -190,11 +190,11 @@ describe('FilterPopover ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-Tags'));
+      await userEvent.click(getByTestId('options-filter-popover-button-Tags'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(getByTestId(`options-filter-popover-item-${newTags[1]}`));
+      await userEvent.click(getByTestId(`options-filter-popover-item-${newTags[1]}`));
 
       expect(onSelectedOptionsChanged).toHaveBeenCalledWith([newTags[0], newTags[2], newTags[1]]);
     });

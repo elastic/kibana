@@ -94,7 +94,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
     set(expectedUpdatedPolicy, 'mac.popup.malware.enabled', false);
     set(expectedUpdatedPolicy, 'linux.popup.malware.enabled', false);
     render();
-    userEvent.click(renderResult.getByTestId('test-checkbox'));
+    await userEvent.click(renderResult.getByTestId('test-checkbox'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -109,7 +109,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
     set(expectedUpdatedPolicy, 'mac.popup.malware.enabled', true);
     set(expectedUpdatedPolicy, 'linux.popup.malware.enabled', true);
     render();
-    userEvent.click(renderResult.getByTestId('test-checkbox'));
+    await userEvent.click(renderResult.getByTestId('test-checkbox'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -124,7 +124,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
     set(expectedUpdatedPolicy, 'mac.popup.malware.message', msg);
     set(expectedUpdatedPolicy, 'linux.popup.malware.message', msg);
     render();
-    userEvent.type(renderResult.getByTestId('test-customMessage'), msg);
+    await userEvent.type(renderResult.getByTestId('test-customMessage'), msg);
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

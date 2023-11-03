@@ -78,7 +78,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
       renderResult = mockedContext.render(<ActionsMenu hostMetadata={endpointHost?.metadata} />);
       const endpointDetailsActionsButton = renderResult.getByTestId('endpointDetailsActionsButton');
       endpointDetailsActionsButton.style.pointerEvents = 'all';
-      userEvent.click(endpointDetailsActionsButton);
+      await userEvent.click(endpointDetailsActionsButton);
 
       return renderResult;
     };
@@ -123,7 +123,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
 
         const takeActionMenuItem = renderResult.getByTestId(dataTestSubj);
         takeActionMenuItem.style.pointerEvents = 'all';
-        userEvent.click(takeActionMenuItem);
+        await userEvent.click(takeActionMenuItem);
 
         expect(coreStart.application.navigateToApp).toHaveBeenCalled();
       }
@@ -143,7 +143,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
         await render();
         const isolateButton = renderResult.getByTestId('unIsolateLink');
         isolateButton.style.pointerEvents = 'all';
-        userEvent.click(isolateButton);
+        await userEvent.click(isolateButton);
 
         expect(coreStart.application.navigateToApp).toHaveBeenCalled();
       });

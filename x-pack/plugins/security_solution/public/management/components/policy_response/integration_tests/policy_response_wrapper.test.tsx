@@ -125,16 +125,16 @@ describe('when on the policy response', () => {
       mockedContext.render(<PolicyResponseWrapper endpointId="id" {...props} />);
     renderOpenedTree = async () => {
       const component = render();
-      userEvent.click(component.getByTestId('endpointPolicyResponseTitle'));
+      await userEvent.click(component.getByTestId('endpointPolicyResponseTitle'));
 
       const configs = component.queryAllByTestId('endpointPolicyResponseConfig');
       for (const config of configs) {
-        userEvent.click(config);
+        await userEvent.click(config);
       }
 
       const actions = component.queryAllByTestId('endpointPolicyResponseAction');
       for (const action of actions) {
-        userEvent.click(action);
+        await userEvent.click(action);
       }
       return component;
     };

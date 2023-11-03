@@ -65,12 +65,12 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(
+    await userEvent.type(
       screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       'this is a sample text!'
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -94,12 +94,12 @@ describe('Create ', () => {
 
     const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
 
-    userEvent.paste(
+    await userEvent.paste(
       screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       sampleText
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(
@@ -123,12 +123,12 @@ describe('Create ', () => {
 
     const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
 
-    userEvent.paste(
+    await userEvent.paste(
       screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       sampleText
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(
@@ -150,12 +150,12 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.paste(
+    await userEvent.paste(
       screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       ''
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(
@@ -175,7 +175,7 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({}, true);

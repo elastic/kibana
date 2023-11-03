@@ -22,7 +22,7 @@ describe('SelectInterval', () => {
       <SelectInterval interval={'day'} onChange={onChangeCb} />
     );
 
-    userEvent.selectOptions(getByTestId('selectInterval'), getByText('1 hour'));
+    await userEvent.selectOptions(getByTestId('selectInterval'), getByText('1 hour'));
     expect(onChangeCb).toBeCalledWith('hour');
   });
 });

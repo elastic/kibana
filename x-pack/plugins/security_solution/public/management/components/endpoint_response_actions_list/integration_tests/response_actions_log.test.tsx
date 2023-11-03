@@ -178,14 +178,14 @@ describe('Response actions history', () => {
     const { getByTestId, getAllByTestId } = renderResult;
     const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
 
-    userEvent.click(popoverButton);
+    await userEvent.click(popoverButton);
 
     if (selectedOptionIndexes.length) {
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
 
       allFilterOptions.forEach((option, i) => {
         if (selectedOptionIndexes.includes(i)) {
-          userEvent.click(option, undefined, { skipPointerEventsCheck: true });
+          await userEvent.click(option, undefined, { skipPointerEventsCheck: true });
         }
       });
     }
@@ -421,7 +421,7 @@ describe('Response actions history', () => {
       );
 
       const page2 = getByTestId('pagination-button-1');
-      userEvent.click(page2);
+      await userEvent.click(page2);
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 11-13 of 13 response actions'
       );
@@ -445,10 +445,10 @@ describe('Response actions history', () => {
       expect(getByTestId('pagination-button-0')).toHaveAttribute('aria-label', 'Page 1 of 4');
 
       // toggle page size popover
-      userEvent.click(getByTestId('tablePaginationPopoverButton'));
+      await userEvent.click(getByTestId('tablePaginationPopoverButton'));
       await waitForEuiPopoverOpen();
       // click size 20
-      userEvent.click(getByTestId('tablePagination-20-rows'));
+      await userEvent.click(getByTestId('tablePagination-20-rows'));
 
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-20 of 33 response actions'
@@ -475,12 +475,16 @@ describe('Response actions history', () => {
       const { getAllByTestId, queryAllByTestId } = renderResult;
 
       const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
-      expandButtons.map((button) => userEvent.click(button));
+      for (const button of expandButtons) {
+        await userEvent.click(button);
+      }
       const trays = getAllByTestId(`${testPrefix}-details-tray`);
       expect(trays).toBeTruthy();
       expect(trays.length).toEqual(13);
 
-      expandButtons.map((button) => userEvent.click(button));
+      for (const button of expandButtons) {
+        await userEvent.click(button);
+      }
       const noTrays = queryAllByTestId(`${testPrefix}-details-tray`);
       expect(noTrays).toEqual([]);
     });
@@ -503,7 +507,7 @@ describe('Response actions history', () => {
       // expand 2nd, 4th, 6th rows
       expandButtonsOnPage1.forEach((button, i) => {
         if ([1, 3, 5].includes(i)) {
-          userEvent.click(button);
+          await userEvent.click(button);
         }
       });
       // verify 3 rows are expanded
@@ -513,7 +517,7 @@ describe('Response actions history', () => {
 
       // go to 2nd page
       const page2 = getByTestId('pagination-button-1');
-      userEvent.click(page2);
+      await userEvent.click(page2);
 
       // verify on page 2
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
@@ -521,7 +525,7 @@ describe('Response actions history', () => {
       );
 
       // go back to 1st page
-      userEvent.click(getByTestId('pagination-button-0'));
+      await userEvent.click(getByTestId('pagination-button-0'));
       // verify on page 1
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 13 response actions'
@@ -549,7 +553,9 @@ describe('Response actions history', () => {
       const { getAllByTestId } = renderResult;
 
       const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
-      expandButtons.map((button) => userEvent.click(button));
+      for (const button of expandButtons) {
+        await userEvent.click(button);
+      }
       const trays = getAllByTestId(`${testPrefix}-details-tray`);
       expect(trays).toBeTruthy();
       expect(Array.from(trays[0].querySelectorAll('dt')).map((title) => title.textContent)).toEqual(
@@ -573,13 +579,13 @@ describe('Response actions history', () => {
       const { getByTestId } = renderResult;
 
       const quickMenuButton = getByTestId('superDatePickerToggleQuickMenuButton');
-      userEvent.click(quickMenuButton);
+      await userEvent.click(quickMenuButton);
       await waitForEuiPopoverOpen();
 
       const toggle = getByTestId('superDatePickerToggleRefreshButton');
       const intervalInput = getByTestId('superDatePickerRefreshIntervalInput');
 
-      userEvent.click(toggle);
+      await userEvent.click(toggle);
       reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
 
       await reactTestingLibrary.waitFor(() => {
@@ -593,7 +599,7 @@ describe('Response actions history', () => {
       render();
 
       const superRefreshButton = renderResult.getByTestId(`${testPrefix}-super-refresh-button`);
-      userEvent.click(superRefreshButton);
+      await userEvent.click(superRefreshButton);
       await waitFor(() => {
         expect(listHookResponse.refetch).toHaveBeenCalled();
       });
@@ -610,9 +616,9 @@ describe('Response actions history', () => {
       expect(startDatePopoverButton).toHaveTextContent('Last 24 hours');
 
       // pick another relative date
-      userEvent.click(quickMenuButton);
+      await userEvent.click(quickMenuButton);
       await waitForEuiPopoverOpen();
-      userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
+      await userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
       expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
     });
 
@@ -638,7 +644,7 @@ describe('Response actions history', () => {
 
         const { getByTestId } = renderResult;
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        userEvent.click(expandButton);
+        await userEvent.click(expandButton);
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
@@ -667,7 +673,7 @@ describe('Response actions history', () => {
         const { getByTestId, queryByTestId } = renderResult;
 
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        userEvent.click(expandButton);
+        await userEvent.click(expandButton);
         const output = getByTestId(`${testPrefix}-details-tray-output`);
         expect(output).toBeTruthy();
         expect(output.textContent).toEqual('get-file completed successfully');
@@ -721,7 +727,7 @@ describe('Response actions history', () => {
 
         const { getByTestId } = renderResult;
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        userEvent.click(expandButton);
+        await userEvent.click(expandButton);
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
@@ -764,7 +770,7 @@ describe('Response actions history', () => {
 
         const { getByTestId } = renderResult;
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        userEvent.click(expandButton);
+        await userEvent.click(expandButton);
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
@@ -802,7 +808,7 @@ describe('Response actions history', () => {
 
         const { getByTestId } = renderResult;
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        userEvent.click(expandButton);
+        await userEvent.click(expandButton);
 
         expect(getByTestId(`${testPrefix}-actionsLogTray-executeResponseOutput-output`));
       });
@@ -824,7 +830,7 @@ describe('Response actions history', () => {
         const { getByTestId, queryByTestId } = renderResult;
 
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
-        userEvent.click(expandButton);
+        await userEvent.click(expandButton);
         expect(queryByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`)).toBeNull();
 
         const output = getByTestId(`${testPrefix}-details-tray-output`);
@@ -861,7 +867,7 @@ describe('Response actions history', () => {
           const { getByTestId } = renderResult;
 
           const expandButton = getByTestId(`${testPrefix}-expand-button`);
-          userEvent.click(expandButton);
+          await userEvent.click(expandButton);
 
           const output = getByTestId(`${testPrefix}-actionsLogTray-getExecuteLink`);
           expect(output).toBeTruthy();
@@ -956,11 +962,13 @@ describe('Response actions history', () => {
       apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     });
 
-    const expandRows = () => {
+    const expandRows = async () => {
       const { getAllByTestId } = renderResult;
 
       const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
-      expandButtons.map((button) => userEvent.click(button));
+      for (const button of expandButtons) {
+        await userEvent.click(button);
+      }
       return getAllByTestId(`${testPrefix}-details-tray-output`);
     };
 
@@ -981,7 +989,7 @@ describe('Response actions history', () => {
 
         render();
 
-        const outputs = expandRows();
+        const outputs = await expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
           expect.stringContaining(`${command} completed successfully`),
           expect.stringContaining(`${command} completed successfully`),
@@ -1006,7 +1014,7 @@ describe('Response actions history', () => {
         });
         render();
 
-        const outputs = expandRows();
+        const outputs = await expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
           `${command} failed`,
           `${command} failed`,
@@ -1032,7 +1040,7 @@ describe('Response actions history', () => {
         });
         render();
 
-        const outputs = expandRows();
+        const outputs = await expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
           `${command} failed: action expired`,
           `${command} failed: action expired`,
@@ -1050,7 +1058,7 @@ describe('Response actions history', () => {
       });
       render();
 
-      const outputs = expandRows();
+      const outputs = await expandRows();
       expect(outputs.map((n) => n.textContent)).toEqual([
         'isolate is pending',
         'isolate is pending',
@@ -1068,7 +1076,7 @@ describe('Response actions history', () => {
       render();
 
       const { getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const searchBar = getByTestId(`${testPrefix}-${filterPrefix}-search`);
       expect(searchBar).toBeTruthy();
       expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual(
@@ -1081,7 +1089,7 @@ describe('Response actions history', () => {
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
       expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
@@ -1103,7 +1111,7 @@ describe('Response actions history', () => {
       render();
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
@@ -1116,7 +1124,7 @@ describe('Response actions history', () => {
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
       expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(3);
@@ -1132,7 +1140,7 @@ describe('Response actions history', () => {
 
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
@@ -1141,14 +1149,14 @@ describe('Response actions history', () => {
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const statusOptions = getAllByTestId(`${filterPrefix}-option`);
 
       statusOptions[0].style.pointerEvents = 'all';
-      userEvent.click(statusOptions[0]);
+      await userEvent.click(statusOptions[0]);
 
       statusOptions[1].style.pointerEvents = 'all';
-      userEvent.click(statusOptions[1]);
+      await userEvent.click(statusOptions[1]);
 
       expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
         {
@@ -1196,7 +1204,7 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`));
       const searchBar = getByTestId(`${testPrefix}-${hostsFilterPrefix}-search`);
       expect(searchBar).toBeTruthy();
       expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual('Search hosts');
@@ -1207,7 +1215,7 @@ describe('Response actions history', () => {
       const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
-      userEvent.click(popoverButton);
+      await userEvent.click(popoverButton);
       const filterList = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
       expect(getAllByTestId(`${hostsFilterPrefix}-option`).length).toEqual(9);
@@ -1223,13 +1231,13 @@ describe('Response actions history', () => {
       const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
-      userEvent.click(popoverButton);
+      await userEvent.click(popoverButton);
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([1, 3, 5].includes(i)) {
           option.style.pointerEvents = 'all';
-          userEvent.click(option);
+          await userEvent.click(option);
         }
       });
 
@@ -1251,21 +1259,21 @@ describe('Response actions history', () => {
       const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
-      userEvent.click(popoverButton);
+      await userEvent.click(popoverButton);
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([1, 3, 5].includes(i)) {
           option.style.pointerEvents = 'all';
-          userEvent.click(option);
+          await userEvent.click(option);
         }
       });
 
       // close
-      userEvent.click(popoverButton);
+      await userEvent.click(popoverButton);
 
       // re-open
-      userEvent.click(popoverButton);
+      await userEvent.click(popoverButton);
 
       const selectedFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`).reduce<number[]>(
         (acc, curr, i) => {
@@ -1285,28 +1293,28 @@ describe('Response actions history', () => {
       const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
-      userEvent.click(popoverButton);
+      await userEvent.click(popoverButton);
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([1, 3, 5].includes(i)) {
           option.style.pointerEvents = 'all';
-          userEvent.click(option);
+          await userEvent.click(option);
         }
       });
 
       // close
-      userEvent.click(popoverButton);
+      await userEvent.click(popoverButton);
 
       // re-open
-      userEvent.click(popoverButton);
+      await userEvent.click(popoverButton);
 
       const newSetAllFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click new options
       newSetAllFilterOptions.forEach((option, i) => {
         if ([4, 6, 8].includes(i)) {
           option.style.pointerEvents = 'all';
-          userEvent.click(option);
+          await userEvent.click(option);
         }
       });
 
@@ -1335,13 +1343,13 @@ describe('Response actions history', () => {
       const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
-      userEvent.click(popoverButton);
+      await userEvent.click(popoverButton);
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([0, 2, 4, 6].includes(i)) {
           option.style.pointerEvents = 'all';
-          userEvent.click(option);
+          await userEvent.click(option);
         }
       });
 

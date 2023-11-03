@@ -48,8 +48,8 @@ describe('ImageInput', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`) as HTMLInputElement;
     const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
 
-    act(() => {
-      userEvent.upload(input, [file]);
+    act(async () => {
+      await userEvent.upload(input, [file]);
     });
 
     expect(input.files?.length).toBe(1);

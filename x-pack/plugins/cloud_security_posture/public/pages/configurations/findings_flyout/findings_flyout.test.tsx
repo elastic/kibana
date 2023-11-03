@@ -54,7 +54,7 @@ describe('<FindingsFlyout/>', () => {
     it('displays rule text details', () => {
       const { getByText, getAllByText } = render(<TestComponent />);
 
-      userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
       getAllByText(mockFindingsHit.rule.name);
       getByText(mockFindingsHit.rule.benchmark.name);
@@ -69,7 +69,7 @@ describe('<FindingsFlyout/>', () => {
     it('displays resource name and id', () => {
       const { getAllByText } = render(<TestComponent />);
 
-      userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
 
       getAllByText(mockFindingsHit.resource.name);
       getAllByText(mockFindingsHit.resource.id);
@@ -79,7 +79,7 @@ describe('<FindingsFlyout/>', () => {
   it('should allow pagination with next', async () => {
     const { getByTestId } = render(<TestComponent />);
 
-    userEvent.click(getByTestId('pagination-button-next'));
+    await userEvent.click(getByTestId('pagination-button-next'));
 
     expect(onPaginate).toHaveBeenCalledWith(1);
   });
@@ -87,7 +87,7 @@ describe('<FindingsFlyout/>', () => {
   it('should allow pagination with previous', async () => {
     const { getByTestId } = render(<TestComponent flyoutIndex={1} />);
 
-    userEvent.click(getByTestId('pagination-button-previous'));
+    await userEvent.click(getByTestId('pagination-button-previous'));
 
     expect(onPaginate).toHaveBeenCalledWith(0);
   });

@@ -49,7 +49,7 @@ class EuiSuperDatePickerTestHarness {
   }
 
   static togglePopover() {
-    userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
   }
 
   static async selectCommonlyUsedRange(label: string) {
@@ -63,7 +63,7 @@ class EuiSuperDatePickerTestHarness {
   }
 
   static refresh() {
-    userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
   }
 }
 
@@ -184,7 +184,7 @@ describe('group editor preview', () => {
     expect(getEmbeddableTimeRange()).toEqual({ from: 'now/d', to: 'now/d' });
 
     // from chart brush
-    userEvent.click(screen.getByTestId('brushEnd'));
+    await userEvent.click(screen.getByTestId('brushEnd'));
 
     const format = 'MMM D, YYYY @ HH:mm:ss.SSS'; // from https://github.com/elastic/eui/blob/6a30eba7c2a154691c96a1d17c8b2f3506d351a3/src/components/date_picker/super_date_picker/super_date_picker.tsx#L222;
     expect(EuiSuperDatePickerTestHarness.currentRange).toEqual({
@@ -205,7 +205,7 @@ describe('group editor preview', () => {
     expect(select).toHaveValue('@timestamp');
     expect(getCurrentTimeField(getLensAttributes())).toBe('@timestamp');
 
-    userEvent.selectOptions(select, 'other-time-field');
+    await userEvent.selectOptions(select, 'other-time-field');
 
     expect(select).toHaveValue('other-time-field');
 

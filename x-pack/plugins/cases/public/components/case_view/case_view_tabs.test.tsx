@@ -154,7 +154,7 @@ describe('CaseViewTabs', () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     appMockRenderer.render(<CaseViewTabs {...caseProps} />);
 
-    userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
 
     await waitFor(() => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
@@ -168,7 +168,7 @@ describe('CaseViewTabs', () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     appMockRenderer.render(<CaseViewTabs {...caseProps} />);
 
-    userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
 
     await waitFor(() => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
@@ -182,7 +182,7 @@ describe('CaseViewTabs', () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     appMockRenderer.render(<CaseViewTabs {...caseProps} />);
 
-    userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
 
     await waitFor(() => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({

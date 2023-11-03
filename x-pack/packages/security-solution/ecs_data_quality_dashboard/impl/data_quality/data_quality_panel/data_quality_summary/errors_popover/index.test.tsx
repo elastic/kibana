@@ -69,7 +69,7 @@ describe('ErrorsPopover', () => {
       const viewErrorsButton = screen.getByTestId('viewErrors');
 
       act(() => {
-        userEvent.click(viewErrorsButton);
+        await userEvent.click(viewErrorsButton);
       });
     });
 
@@ -82,7 +82,7 @@ describe('ErrorsPopover', () => {
     test('it invokes `addSuccessToast` when the copy button is clicked', () => {
       const copyToClipboardButton = screen.getByTestId('copyToClipboard');
       act(() => {
-        userEvent.click(copyToClipboardButton, undefined, { skipPointerEventsCheck: true });
+        await userEvent.click(copyToClipboardButton, undefined, { skipPointerEventsCheck: true });
       });
 
       expect(addSuccessToast).toBeCalledWith({ title: 'Copied errors to the clipboard' });

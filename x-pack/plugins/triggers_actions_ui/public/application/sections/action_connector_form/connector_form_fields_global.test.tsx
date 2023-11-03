@@ -33,7 +33,7 @@ describe('ConnectorFormFieldsGlobal', () => {
 
     expect(screen.getByTestId('nameInput')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('form-test-provide-submit'));
+    await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
@@ -61,7 +61,7 @@ describe('ConnectorFormFieldsGlobal', () => {
       </FormTestProvider>
     );
 
-    userEvent.click(screen.getByTestId('form-test-provide-submit'));
+    await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
     expect(await screen.findByText('Name is required.')).toBeInTheDocument();
 

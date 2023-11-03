@@ -170,7 +170,7 @@ describe('ServiceNowSIR Fields', () => {
         );
 
         const checkbox = screen.getByTestId(`${subj}Checkbox`);
-        userEvent.click(checkbox);
+        await userEvent.click(checkbox);
 
         expect(checkbox).not.toBeChecked();
       })
@@ -187,7 +187,7 @@ describe('ServiceNowSIR Fields', () => {
         );
 
         const select = screen.getByTestId(`${subj}Select`);
-        userEvent.selectOptions(select, '4 - Low');
+        await userEvent.selectOptions(select, '4 - Low');
 
         expect(select).toHaveValue('4');
       })
@@ -201,15 +201,15 @@ describe('ServiceNowSIR Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.click(screen.getByTestId('destIpCheckbox'));
-    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
-    userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
+    await userEvent.click(screen.getByTestId('destIpCheckbox'));
+    await userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
+    await userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
 
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
     });
 
-    userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
+    await userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
 
     expect(screen.getByTestId('destIpCheckbox')).not.toBeChecked();
     expect(screen.getByTestId('sourceIpCheckbox')).toBeChecked();
@@ -230,14 +230,14 @@ describe('ServiceNowSIR Fields', () => {
     const categorySelect = screen.getByTestId('categorySelect');
     const subcategorySelect = screen.getByTestId('subcategorySelect');
 
-    userEvent.selectOptions(categorySelect, ['Denial of Service']);
+    await userEvent.selectOptions(categorySelect, ['Denial of Service']);
 
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
     });
 
-    userEvent.selectOptions(subcategorySelect, ['26']);
-    userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
+    await userEvent.selectOptions(subcategorySelect, ['26']);
+    await userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
 
     await waitFor(() => {
       expect(subcategorySelect).not.toHaveValue();

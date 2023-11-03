@@ -51,7 +51,7 @@ test('should call onCancel when "Close" clicked', async () => {
   const onCancel = jest.fn();
   const { getByText } = render(<ImageEditor onCancel={onCancel} />);
   expect(getByText('Close')).toBeVisible();
-  await userEvent.click(getByText('Close'));
+  await await userEvent.click(getByText('Close'));
   expect(onCancel).toBeCalled();
 });
 
@@ -59,12 +59,15 @@ test('should call onSave when "Save" clicked (url)', async () => {
   const onSave = jest.fn();
   const { getByText, getByTestId } = render(<ImageEditor onSave={onSave} />);
 
-  await userEvent.click(getByText('Use link'));
-  await userEvent.type(getByTestId(`imageEmbeddableEditorUrlInput`), `https://elastic.co/image`);
-  await userEvent.type(getByTestId(`imageEmbeddableEditorAltInput`), `alt text`);
+  await await userEvent.click(getByText('Use link'));
+  await await userEvent.type(
+    getByTestId(`imageEmbeddableEditorUrlInput`),
+    `https://elastic.co/image`
+  );
+  await await userEvent.type(getByTestId(`imageEmbeddableEditorAltInput`), `alt text`);
 
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
-  await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
+  await await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
   expect(onSave).toBeCalledWith({
     altText: 'alt text',
     backgroundColor: '',
@@ -97,11 +100,11 @@ test('should be able to edit', async () => {
 
   expect(getByTestId(`imageEmbeddableEditorUrlInput`)).toHaveValue('https://elastic.co/image');
 
-  await userEvent.type(getByTestId(`imageEmbeddableEditorUrlInput`), `-changed`);
-  await userEvent.type(getByTestId(`imageEmbeddableEditorAltInput`), ` changed`);
+  await await userEvent.type(getByTestId(`imageEmbeddableEditorUrlInput`), `-changed`);
+  await await userEvent.type(getByTestId(`imageEmbeddableEditorAltInput`), ` changed`);
 
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
-  await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
+  await await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
   expect(onSave).toBeCalledWith({
     altText: 'alt text changed',
     backgroundColor: '',

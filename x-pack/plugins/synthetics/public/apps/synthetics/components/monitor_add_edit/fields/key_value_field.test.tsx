@@ -49,8 +49,8 @@ describe('<KeyValuePairsField />', () => {
     const keyInput = getByTestId('keyValuePairsKey0') as HTMLInputElement;
     const valueInput = getByTestId('keyValuePairsValue0') as HTMLInputElement;
 
-    userEvent.type(keyInput, 'some-key');
-    userEvent.type(valueInput, 'some-value');
+    await userEvent.type(keyInput, 'some-key');
+    await userEvent.type(valueInput, 'some-value');
     fireEvent.blur(valueInput);
 
     expect(onBlur).toHaveBeenCalledTimes(2);

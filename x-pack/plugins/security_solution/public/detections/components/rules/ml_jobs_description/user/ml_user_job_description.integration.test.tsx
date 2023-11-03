@@ -27,7 +27,7 @@ describe('MlUserJobDescription', () => {
   it('should render toast that shows admin permissions required', async () => {
     render(<MlUserJobDescription job={mockOpenedJob} />, { wrapper: TestProviders });
 
-    userEvent.hover(screen.getByTestId('mlUserJobSwitch').parentNode as Element);
+    await userEvent.hover(screen.getByTestId('mlUserJobSwitch').parentNode as Element);
 
     await waitFor(() => {
       expect(

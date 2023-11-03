@@ -58,13 +58,13 @@ describe('<BenchmarksSection />', () => {
     it('toggles sort order when clicking Posture Score', () => {
       const { getAllByTestId, getByTestId } = renderBenchmarks(mockDashboardDataCopy);
 
-      userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
+      await userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
 
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('95');
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('45');
 
-      userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
+      await userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
 
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('45');
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');

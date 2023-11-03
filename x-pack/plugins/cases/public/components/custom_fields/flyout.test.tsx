@@ -43,11 +43,11 @@ describe('CustomFieldFlyout ', () => {
   it('calls onSaveField on save field', async () => {
     appMockRender.render(<CustomFieldFlyout {...props} />);
 
-    userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+    await userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-    userEvent.click(screen.getByTestId('text-custom-field-options'));
+    await userEvent.click(screen.getByTestId('text-custom-field-options'));
 
-    userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+    await userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
     await waitFor(() => {
       expect(props.onSaveField).toBeCalledWith({
@@ -64,7 +64,7 @@ describe('CustomFieldFlyout ', () => {
 
     const message = 'z'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1);
 
-    userEvent.type(screen.getByTestId('custom-field-label-input'), message);
+    await userEvent.type(screen.getByTestId('custom-field-label-input'), message);
 
     await waitFor(() => {
       expect(
@@ -76,9 +76,9 @@ describe('CustomFieldFlyout ', () => {
   it('calls onSaveField with serialized data', async () => {
     appMockRender.render(<CustomFieldFlyout {...props} />);
 
-    userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+    await userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-    userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+    await userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
     await waitFor(() => {
       expect(props.onSaveField).toBeCalledWith({
@@ -93,7 +93,7 @@ describe('CustomFieldFlyout ', () => {
   it('does not call onSaveField when error', async () => {
     appMockRender.render(<CustomFieldFlyout {...props} />);
 
-    userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+    await userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
     await waitFor(() => {
       expect(screen.getByText(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL))).toBeInTheDocument();
@@ -105,7 +105,7 @@ describe('CustomFieldFlyout ', () => {
   it('calls onCloseFlyout on cancel', async () => {
     appMockRender.render(<CustomFieldFlyout {...props} />);
 
-    userEvent.click(screen.getByTestId('custom-field-flyout-cancel'));
+    await userEvent.click(screen.getByTestId('custom-field-flyout-cancel'));
 
     await waitFor(() => {
       expect(props.onCloseFlyout).toBeCalled();
@@ -115,7 +115,7 @@ describe('CustomFieldFlyout ', () => {
   it('calls onCloseFlyout on close', async () => {
     appMockRender.render(<CustomFieldFlyout {...props} />);
 
-    userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
     await waitFor(() => {
       expect(props.onCloseFlyout).toBeCalled();

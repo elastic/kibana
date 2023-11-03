@@ -46,7 +46,7 @@ describe('UserActionPropertyActions', () => {
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(1);

@@ -116,7 +116,7 @@ describe('AssigneesColumn', () => {
     expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
     expect(screen.getByText('+1 more')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
 
     await waitFor(() => {
       expect(screen.getByText('show less')).toBeInTheDocument();
@@ -137,14 +137,14 @@ describe('AssigneesColumn', () => {
     expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
     expect(screen.getByText('+1 more')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
 
     await waitFor(() => {
       expect(screen.getByText('show less')).toBeInTheDocument();
       expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
 
     await waitFor(() => {
       expect(screen.getByText('+1 more')).toBeInTheDocument();

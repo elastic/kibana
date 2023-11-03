@@ -130,7 +130,7 @@ describe(`UserActionsList`, () => {
         ?.classList.contains('outlined')
     ).toBe(false);
 
-    userEvent.click(screen.getByTestId(`comment-update-action-${ourActions[1].id}`));
+    await userEvent.click(screen.getByTestId(`comment-update-action-${ourActions[1].id}`));
 
     expect(
       await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)

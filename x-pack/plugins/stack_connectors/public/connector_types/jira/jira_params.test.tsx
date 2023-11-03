@@ -361,7 +361,7 @@ describe('JiraParamsFields renders', () => {
       );
 
       act(() => {
-        userEvent.selectOptions(
+        await userEvent.selectOptions(
           results.getByTestId('issueTypeSelect'),
           results.getByRole('option', { name: 'Task' })
         );
@@ -382,7 +382,7 @@ describe('JiraParamsFields renders', () => {
       });
 
       act(() => {
-        userEvent.selectOptions(
+        await userEvent.selectOptions(
           results.getByTestId('prioritySelect'),
           results.getByRole('option', { name: 'Medium' })
         );
@@ -409,7 +409,7 @@ describe('JiraParamsFields renders', () => {
       const parentField = within(results.getByTestId('search-parent-issues'));
 
       await act(async () => {
-        await userEvent.type(parentField.getByTestId('comboBoxSearchInput'), 'p{enter}', {
+        await await userEvent.type(parentField.getByTestId('comboBoxSearchInput'), 'p{enter}', {
           delay: 1,
         });
       });
@@ -428,7 +428,7 @@ describe('JiraParamsFields renders', () => {
       const labels = within(results.getByTestId('labelsComboBox'));
 
       await act(async () => {
-        await userEvent.type(labels.getByTestId('comboBoxSearchInput'), 'l{enter}', {
+        await await userEvent.type(labels.getByTestId('comboBoxSearchInput'), 'l{enter}', {
           delay: 1,
         });
       });

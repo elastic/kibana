@@ -262,7 +262,7 @@ describe('helpers', () => {
         );
 
         const button = screen.getByLabelText(EXPAND);
-        userEvent.click(button);
+        await userEvent.click(button);
 
         expect(toggleExpanded).toBeCalledWith(indexName);
       });

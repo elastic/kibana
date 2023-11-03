@@ -118,7 +118,7 @@ describe('Jira Fields', () => {
     const issueTypeSelect = screen.getByTestId('issueTypeSelect');
     expect(issueTypeSelect).toBeInTheDocument();
 
-    userEvent.selectOptions(issueTypeSelect, 'Task');
+    await userEvent.selectOptions(issueTypeSelect, 'Task');
 
     await waitFor(() => {
       expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
@@ -150,7 +150,7 @@ describe('Jira Fields', () => {
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Person Task{enter}');
+    await userEvent.type(checkbox, 'Person Task{enter}');
     expect(checkbox).toHaveValue('Person Task');
   });
 
@@ -217,7 +217,7 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), '10007');
+    await userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), '10007');
     expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
   });
 
@@ -228,7 +228,7 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(screen.getByTestId('prioritySelect'), 'Low');
+    await userEvent.selectOptions(screen.getByTestId('prioritySelect'), 'Low');
 
     expect(screen.getByTestId('prioritySelect')).toHaveValue('Low');
   });
@@ -243,7 +243,7 @@ describe('Jira Fields', () => {
     const issueTypeSelect = screen.getByTestId('issueTypeSelect');
     expect(issueTypeSelect).toBeInTheDocument();
 
-    userEvent.selectOptions(issueTypeSelect, 'Bug');
+    await userEvent.selectOptions(issueTypeSelect, 'Bug');
 
     await waitFor(() => {
       expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
@@ -254,8 +254,8 @@ describe('Jira Fields', () => {
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Person Task{enter}');
-    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['Low']);
+    await userEvent.type(checkbox, 'Person Task{enter}');
+    await userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['Low']);
 
     expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
     expect(screen.getByTestId('prioritySelect')).toHaveValue('Low');
@@ -275,7 +275,7 @@ describe('Jira Fields', () => {
       expect(screen.queryByTestId('search-parent-issues')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('submit-form'));
+    await userEvent.click(screen.getByTestId('submit-form'));
 
     await waitFor(() => {
       expect(screen.getByText('Issue type is required')).toBeInTheDocument();

@@ -75,7 +75,7 @@ describe('NewChat', () => {
 
     const newChatButton = screen.getByTestId('newChat');
 
-    userEvent.click(newChatButton);
+    await userEvent.click(newChatButton);
 
     expect(mockUseAssistantOverlay.showAssistantOverlay).toHaveBeenCalledWith(true);
   });

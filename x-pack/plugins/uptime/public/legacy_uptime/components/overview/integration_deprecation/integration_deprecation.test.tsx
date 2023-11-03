@@ -53,7 +53,7 @@ describe('IntegrationDeprecation', () => {
 
     render(<IntegrationDeprecation />);
     expect(screen.getByText(DEPRECATION_TITLE)).toBeInTheDocument();
-    userEvent.click(screen.getByText('Dismiss'));
+    await userEvent.click(screen.getByText('Dismiss'));
     expect(screen.queryByText(DEPRECATION_TITLE)).not.toBeInTheDocument();
   });
 

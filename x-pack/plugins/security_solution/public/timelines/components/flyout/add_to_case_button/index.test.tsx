@@ -68,10 +68,10 @@ describe('AddToCaseButton', () => {
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
-    userEvent.click(screen.getByTestId('attach-timeline-case-button'));
+    await userEvent.click(screen.getByTestId('attach-timeline-case-button'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
+    await userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/create',
@@ -92,10 +92,10 @@ describe('AddToCaseButton', () => {
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
-    userEvent.click(screen.getByTestId('attach-timeline-case-button'));
+    await userEvent.click(screen.getByTestId('attach-timeline-case-button'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
+    await userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/case-id',

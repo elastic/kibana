@@ -80,7 +80,7 @@ describe('Policy Event Collection Card common component', () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.events.file', false);
     render();
-    userEvent.click(renderResult.getByTestId('test-file'));
+    await userEvent.click(renderResult.getByTestId('test-file'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -102,7 +102,7 @@ describe('Policy Event Collection Card common component', () => {
     );
     expect(isChecked('test-file')).toBe(false);
 
-    userEvent.click(getByTestId('test-file'));
+    await userEvent.click(getByTestId('test-file'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

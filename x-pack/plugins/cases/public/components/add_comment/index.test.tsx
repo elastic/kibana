@@ -106,9 +106,9 @@ describe.skip('AddComment ', () => {
 
     const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.type(markdown, sampleData.comment);
+    await userEvent.type(markdown, sampleData.comment);
 
-    userEvent.click(screen.getByTestId('submit-comment'));
+    await userEvent.click(screen.getByTestId('submit-comment'));
 
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
@@ -137,7 +137,7 @@ describe.skip('AddComment ', () => {
 
     appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
 
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
+    await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
 
     await act(async () => {
       ref.current!.addQuote(sampleQuote);
@@ -206,8 +206,8 @@ describe.skip('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.type(markdown, 'test');
-      userEvent.clear(markdown);
+      await userEvent.type(markdown, 'test');
+      await userEvent.clear(markdown);
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -220,8 +220,8 @@ describe.skip('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.clear(markdown);
-      userEvent.type(markdown, '  ');
+      await userEvent.clear(markdown);
+      await userEvent.type(markdown, '  ');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -236,7 +236,7 @@ describe.skip('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.paste(markdown, longComment);
+      await userEvent.paste(markdown, longComment);
 
       await waitFor(() => {
         expect(

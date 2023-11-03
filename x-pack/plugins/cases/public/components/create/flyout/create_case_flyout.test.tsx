@@ -40,7 +40,7 @@ describe('CreateCaseFlyout', () => {
   it('should call onCloseCaseModal when closing the flyout', async () => {
     const { getByTestId } = mockedContext.render(<CreateCaseFlyout {...defaultProps} />);
     await act(async () => {
-      userEvent.click(getByTestId('euiFlyoutCloseButton'));
+      await userEvent.click(getByTestId('euiFlyoutCloseButton'));
     });
     expect(onClose).toBeCalled();
   });

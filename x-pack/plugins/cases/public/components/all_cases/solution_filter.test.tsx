@@ -63,7 +63,7 @@ describe('SolutionFilter ', () => {
       />
     );
 
-    userEvent.click(getByTestId('solution-filter-popover-button'));
+    await userEvent.click(getByTestId('solution-filter-popover-button'));
 
     await waitForEuiPopoverOpen();
 
@@ -81,7 +81,7 @@ describe('SolutionFilter ', () => {
 
     expect(getByTestId('solution-filter-popover-button')).toBeInTheDocument();
 
-    userEvent.click(getByTestId('solution-filter-popover-button'));
+    await userEvent.click(getByTestId('solution-filter-popover-button'));
 
     await waitForEuiPopoverOpen();
 
@@ -98,11 +98,11 @@ describe('SolutionFilter ', () => {
       />
     );
 
-    userEvent.click(getByTestId('solution-filter-popover-button'));
+    await userEvent.click(getByTestId('solution-filter-popover-button'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(getByTestId(`solution-filter-popover-item-${solutions[0].id}`));
+    await userEvent.click(getByTestId(`solution-filter-popover-item-${solutions[0].id}`));
 
     expect(onSelectedOptionsChanged).toHaveBeenCalledWith([solutions[0].id]);
   });
@@ -116,11 +116,11 @@ describe('SolutionFilter ', () => {
       />
     );
 
-    userEvent.click(getByTestId('solution-filter-popover-button'));
+    await userEvent.click(getByTestId('solution-filter-popover-button'));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(getByTestId(`solution-filter-popover-item-${solutions[1].id}`));
+    await userEvent.click(getByTestId(`solution-filter-popover-item-${solutions[1].id}`));
 
     expect(onSelectedOptionsChanged).toHaveBeenCalledWith([]);
   });

@@ -53,7 +53,7 @@ describe('Category ', () => {
   it('renders allow to add new category option', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'new{enter}');
 
     expect(onChange).toBeCalledWith('new');
     expect(screen.getByText('new')).toBeInTheDocument();
@@ -71,7 +71,7 @@ describe('Category ', () => {
     render(<CategoryComponent {...defaultProps} />);
     await showEuiComboBoxOptions();
 
-    userEvent.click(screen.getByText('foo'));
+    await userEvent.click(screen.getByText('foo'));
 
     expect(onChange).toHaveBeenCalledWith('foo');
     expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('foo');
@@ -80,7 +80,7 @@ describe('Category ', () => {
   it('should call onChange when adding new category', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('hi');
@@ -91,13 +91,13 @@ describe('Category ', () => {
   it('should add case sensitive text', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('hi');
     });
 
-    userEvent.type(screen.getByRole('combobox'), 'Hi{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'Hi{enter}');
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('Hi');

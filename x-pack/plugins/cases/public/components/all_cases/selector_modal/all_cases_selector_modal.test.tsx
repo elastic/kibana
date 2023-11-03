@@ -39,7 +39,7 @@ describe('AllCasesSelectorModal', () => {
     const res = appMockRenderer.render(<AllCasesSelectorModal {...defaultProps} />);
 
     act(() => {
-      userEvent.click(res.getByLabelText('Closes this modal window'));
+      await userEvent.click(res.getByLabelText('Closes this modal window'));
     });
 
     expect(res.queryByTestId('all-cases-modal')).toBeFalsy();
@@ -49,7 +49,7 @@ describe('AllCasesSelectorModal', () => {
     const res = appMockRenderer.render(<AllCasesSelectorModal {...defaultProps} />);
 
     act(() => {
-      userEvent.click(res.getByTestId('all-cases-modal-cancel-button'));
+      await userEvent.click(res.getByTestId('all-cases-modal-cancel-button'));
     });
 
     expect(res.queryByTestId('all-cases-modal')).toBeFalsy();

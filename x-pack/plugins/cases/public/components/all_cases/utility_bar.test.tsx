@@ -96,7 +96,7 @@ describe('Severity form field', () => {
   it('opens the bulk actions correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
+    await userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
 
     await waitFor(() => {
       expect(screen.getByTestId('case-table-bulk-actions-context-menu'));
@@ -106,13 +106,13 @@ describe('Severity form field', () => {
   it('closes the bulk actions correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
+    await userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
 
     await waitFor(() => {
       expect(screen.getByTestId('case-table-bulk-actions-context-menu'));
     });
 
-    userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
+    await userEvent.click(screen.getByTestId('case-table-bulk-actions-link-icon'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('case-table-bulk-actions-context-menu')).toBeFalsy();
@@ -123,7 +123,7 @@ describe('Severity form field', () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    userEvent.click(screen.getByTestId('all-cases-refresh-link-icon'));
+    await userEvent.click(screen.getByTestId('all-cases-refresh-link-icon'));
 
     await waitFor(() => {
       expect(deselectCases).toHaveBeenCalled();
@@ -266,7 +266,7 @@ describe('Severity form field', () => {
       expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
       expect(screen.getByTestId('dismiss-warning')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('dismiss-warning'));
+      await userEvent.click(screen.getByTestId('dismiss-warning'));
 
       expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     });
@@ -318,7 +318,7 @@ describe('Severity form field', () => {
         expect(screen.getByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
         expect(screen.getByTestId('do-not-show-warning')).toBeInTheDocument();
 
-        userEvent.click(screen.getByTestId('do-not-show-warning'));
+        await userEvent.click(screen.getByTestId('do-not-show-warning'));
 
         act(() => {
           jest.advanceTimersByTime(1000);

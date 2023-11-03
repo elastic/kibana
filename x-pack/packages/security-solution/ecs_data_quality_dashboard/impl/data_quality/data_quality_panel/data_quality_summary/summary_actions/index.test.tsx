@@ -119,7 +119,7 @@ describe('SummaryActions', () => {
   test('it invokes addSuccessToast when the copy to clipboard button is clicked', () => {
     const button = screen.getByTestId('copyToClipboard');
 
-    userEvent.click(button);
+    await userEvent.click(button);
 
     expect(defaultProps.addSuccessToast).toBeCalledWith({
       title: 'Copied results to the clipboard',

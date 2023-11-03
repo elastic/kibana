@@ -64,7 +64,7 @@ describe('Description', () => {
 
     const description = screen.getByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.type(
+    await userEvent.type(
       description,
       `${specialChars.selectAll}${specialChars.delete}My new description`
     );
@@ -83,8 +83,8 @@ describe('Description', () => {
 
     const description = screen.getByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.clear(description);
-    userEvent.type(description, '  ');
+    await userEvent.clear(description);
+    await userEvent.type(description, '  ');
 
     await waitFor(() => {
       expect(screen.getByText('A description is required.')).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe('Description', () => {
 
     const description = screen.getByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.paste(description, longDescription);
+    await userEvent.paste(description, longDescription);
 
     await waitFor(() => {
       expect(

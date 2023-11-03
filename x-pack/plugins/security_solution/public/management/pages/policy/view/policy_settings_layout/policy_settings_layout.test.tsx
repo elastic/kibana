@@ -60,13 +60,13 @@ describe('When rendering PolicySettingsLayout', () => {
     const clickSave = async (andConfirm: boolean = true, ensureApiIsCalled: boolean = true) => {
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId('policyDetailsSaveButton'));
+      await userEvent.click(getByTestId('policyDetailsSaveButton'));
       await waitFor(() => {
         expect(getByTestId('confirmModalConfirmButton'));
       });
 
       if (andConfirm) {
-        userEvent.click(getByTestId('confirmModalConfirmButton'));
+        await userEvent.click(getByTestId('confirmModalConfirmButton'));
 
         if (ensureApiIsCalled) {
           await waitFor(() => {
@@ -86,7 +86,7 @@ describe('When rendering PolicySettingsLayout', () => {
       const policySettings = expectedUpdates.inputs[0].config.policy.value;
 
       // Turn off malware
-      userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
+      await userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
       set(policySettings, 'windows.malware.mode', ProtectionModes.off);
       set(policySettings, 'mac.malware.mode', ProtectionModes.off);
       set(policySettings, 'linux.malware.mode', ProtectionModes.off);
@@ -98,7 +98,7 @@ describe('When rendering PolicySettingsLayout', () => {
       set(policySettings, 'linux.popup.malware.enabled', false);
 
       // Turn off Behaviour Protection
-      userEvent.click(getByTestId(testSubj.behaviour.enableDisableSwitch));
+      await userEvent.click(getByTestId(testSubj.behaviour.enableDisableSwitch));
       set(policySettings, 'windows.behavior_protection.mode', ProtectionModes.off);
       set(policySettings, 'mac.behavior_protection.mode', ProtectionModes.off);
       set(policySettings, 'linux.behavior_protection.mode', ProtectionModes.off);
@@ -107,11 +107,11 @@ describe('When rendering PolicySettingsLayout', () => {
       set(policySettings, 'linux.popup.behavior_protection.enabled', false);
 
       // Set Ransomware User Notification message
-      userEvent.type(getByTestId(testSubj.ransomware.notifyCustomMessage), 'foo message');
+      await userEvent.type(getByTestId(testSubj.ransomware.notifyCustomMessage), 'foo message');
       set(policySettings, 'windows.popup.ransomware.message', 'foo message');
 
-      userEvent.click(getByTestId(testSubj.advancedSection.showHideButton));
-      userEvent.type(getByTestId('linux.advanced.agent.connection_delay'), '1000');
+      await userEvent.click(getByTestId(testSubj.advancedSection.showHideButton));
+      await userEvent.type(getByTestId('linux.advanced.agent.connection_delay'), '1000');
       set(policySettings, 'linux.advanced.agent.connection_delay', '1000');
 
       return expectedUpdates;

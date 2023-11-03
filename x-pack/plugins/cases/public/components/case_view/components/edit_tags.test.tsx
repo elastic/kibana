@@ -46,7 +46,7 @@ describe('EditTags ', () => {
 
     expect(screen.getByTestId('no-tags')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+    await userEvent.click(screen.getByTestId('tag-list-edit-button'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('no-tags')).not.toBeInTheDocument();
@@ -57,11 +57,11 @@ describe('EditTags ', () => {
   it('edit tag from options on submit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+    await userEvent.click(screen.getByTestId('tag-list-edit-button'));
 
-    userEvent.type(screen.getByRole('combobox'), `${sampleTags[0]}{enter}`);
+    await userEvent.type(screen.getByRole('combobox'), `${sampleTags[0]}{enter}`);
 
-    userEvent.click(screen.getByTestId('edit-tags-submit'));
+    await userEvent.click(screen.getByTestId('edit-tags-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith([sampleTags[0]]));
   });
@@ -69,15 +69,15 @@ describe('EditTags ', () => {
   it('add new tags on submit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+    await userEvent.click(screen.getByTestId('tag-list-edit-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
     });
 
-    userEvent.type(screen.getByRole('combobox'), 'dude{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'dude{enter}');
 
-    userEvent.click(screen.getByTestId('edit-tags-submit'));
+    await userEvent.click(screen.getByTestId('edit-tags-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
@@ -85,15 +85,15 @@ describe('EditTags ', () => {
   it('trims the tags on submit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+    await userEvent.click(screen.getByTestId('tag-list-edit-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
     });
 
-    userEvent.type(screen.getByRole('combobox'), 'dude      {enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'dude      {enter}');
 
-    userEvent.click(screen.getByTestId('edit-tags-submit'));
+    await userEvent.click(screen.getByTestId('edit-tags-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
@@ -101,15 +101,15 @@ describe('EditTags ', () => {
   it('cancels on cancel', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+    await userEvent.click(screen.getByTestId('tag-list-edit-button'));
 
-    userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'new{enter}');
 
     await waitFor(() => {
       expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('new');
     });
 
-    userEvent.click(screen.getByTestId('edit-tags-cancel'));
+    await userEvent.click(screen.getByTestId('edit-tags-cancel'));
 
     await waitFor(() => {
       expect(onSubmit).not.toBeCalled();
@@ -120,13 +120,13 @@ describe('EditTags ', () => {
   it('shows error when tag is empty', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+    await userEvent.click(screen.getByTestId('tag-list-edit-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
     });
 
-    userEvent.type(screen.getByRole('combobox'), ' {enter}');
+    await userEvent.type(screen.getByRole('combobox'), ' {enter}');
 
     await waitFor(() => {
       expect(screen.getByText('A tag must contain at least one non-space character.'));
@@ -138,14 +138,14 @@ describe('EditTags ', () => {
 
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('tag-list-edit-button'));
+    await userEvent.click(screen.getByTestId('tag-list-edit-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
     });
 
-    userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
-    userEvent.keyboard('{enter}');
+    await userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
+    await userEvent.keyboard('{enter}');
 
     await waitFor(() => {
       expect(

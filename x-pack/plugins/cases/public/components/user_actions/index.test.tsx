@@ -151,7 +151,7 @@ describe(`UserActions`, () => {
 
     appMockRender.render(<UserActions {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
       ).getByTestId('property-actions-user-action-ellipses')
@@ -159,9 +159,9 @@ describe(`UserActions`, () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
+    await userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
 
-    userEvent.click(
+    await userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
       ).getByTestId('editable-cancel-markdown')
@@ -186,7 +186,7 @@ describe(`UserActions`, () => {
 
     appMockRender.render(<UserActions {...defaultProps} />);
 
-    userEvent.click(
+    await userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
       ).getByTestId('property-actions-user-action-ellipses')
@@ -194,7 +194,7 @@ describe(`UserActions`, () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
+    await userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
 
     await waitForComponentToUpdate();
 
@@ -202,7 +202,7 @@ describe(`UserActions`, () => {
       target: { value: sampleData.content },
     });
 
-    userEvent.click(
+    await userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
       ).getByTestId('editable-save-markdown')
@@ -242,7 +242,7 @@ describe(`UserActions`, () => {
       quoteableText
     );
 
-    userEvent.click(
+    await userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
       ).getByTestId('property-actions-user-action-ellipses')
@@ -250,7 +250,7 @@ describe(`UserActions`, () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
+    await userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
 
     await waitFor(() => {
       expect(screen.getAllByTestId('add-comment')[0].textContent).toContain(quoteableText);

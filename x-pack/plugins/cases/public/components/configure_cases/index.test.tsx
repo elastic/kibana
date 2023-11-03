@@ -684,13 +684,13 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('Delete'));
+      await userEvent.click(screen.getByText('Delete'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -721,17 +721,17 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
+      await userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
 
-      userEvent.click(screen.getByTestId('text-custom-field-options'));
+      await userEvent.click(screen.getByTestId('text-custom-field-options'));
 
-      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+      await userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -759,7 +759,7 @@ describe('ConfigureCases', () => {
     it('opens fly out for when click on add field', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
     });
@@ -767,11 +767,11 @@ describe('ConfigureCases', () => {
     it('closes fly out for when click on cancel', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('custom-field-flyout-cancel'));
+      await userEvent.click(screen.getByTestId('custom-field-flyout-cancel'));
 
       expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
@@ -780,13 +780,13 @@ describe('ConfigureCases', () => {
     it('closes fly out for when click on save field', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+      await userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+      await userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({

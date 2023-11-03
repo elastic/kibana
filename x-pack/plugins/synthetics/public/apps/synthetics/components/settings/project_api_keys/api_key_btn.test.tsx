@@ -18,7 +18,7 @@ describe('<APIKeyButton />', () => {
     render(<ApiKeyBtn setLoadAPIKey={setLoadAPIKey} apiKey="" loading={false} />);
 
     expect(screen.getByText('Generate Project API key')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('uptimeMonitorManagementApiKeyGenerate'));
+    await userEvent.click(screen.getByTestId('uptimeMonitorManagementApiKeyGenerate'));
     expect(setLoadAPIKey).toHaveBeenCalled();
   });
 

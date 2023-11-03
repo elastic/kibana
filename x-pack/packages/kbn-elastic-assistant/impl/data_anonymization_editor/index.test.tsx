@@ -95,7 +95,7 @@ describe('DataAnonymizationEditor', () => {
     });
 
     it('calls setSelectedPromptContexts when a field is toggled', () => {
-      userEvent.click(screen.getAllByTestId('allowed')[0]); // toggle the first field
+      await userEvent.click(screen.getAllByTestId('allowed')[0]); // toggle the first field
 
       expect(setSelectedPromptContexts).toBeCalled();
     });
