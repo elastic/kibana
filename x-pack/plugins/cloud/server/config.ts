@@ -35,7 +35,7 @@ const configSchema = schema.object({
   serverless: schema.maybe(
     schema.object(
       {
-        project_id: schema.string(),
+        project_id: schema.maybe(schema.string()),
         project_name: schema.maybe(schema.string()),
         project_type: schema.maybe(schema.string()),
       },
