@@ -196,7 +196,7 @@ class BrowserService extends FtrService {
     return retry.waitFor(`URL to be ${expectedPath}`, async () => {
       const currentUrl = await this.getCurrentUrl();
       const { path, search, hash } = Url.parse(currentUrl);
-      const currentPath = `${path}${search}${hash}`;
+      const currentPath = `${path}${search ?? ''}${hash ?? ''}`;
 
       if (currentPath !== expectedPath)
         log.debug(`Expected URL to be ${expectedPath}, got ${currentPath}`);
