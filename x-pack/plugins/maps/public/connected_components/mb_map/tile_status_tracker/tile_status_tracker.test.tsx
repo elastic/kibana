@@ -40,6 +40,23 @@ class MockMbMap {
   getZoom() {
     return 5;
   }
+
+  getBounds() {
+    return {
+      getWest: () => {
+        return -115.5;
+      },
+      getSouth: () => {
+        return 34.5;
+      },
+      getEast: () => {
+        return -98;
+      },
+      getNorth: () => {
+        return 44;
+      }
+    }
+  }
 }
 
 class MockLayer {
@@ -74,18 +91,16 @@ function createMockLayer(id: string, mbSourceId: string): ILayer {
   return new MockLayer(id, mbSourceId) as unknown as ILayer;
 }
 
-function createSourceDataEvent(mbSourceId: string, tileKey: string) {
+function createSourceDataEvent(mbSourceId: string, canonical: { x: number; y: number; z: number; }) {
   return {
     sourceId: mbSourceId,
     dataType: 'source',
     tile: {
       tileID: {
         canonical: {
-          x: 80,
-          y: 10,
-          z: 5,
+          ...canonical
         },
-        key: tileKey,
+        key: `uniqueTileKey${Object.values(canonical).join(',')}`, // not shape of actual key returned from maplibre
       },
     },
     source: {
@@ -103,6 +118,8 @@ async function sleep(timeout: number) {
 }
 
 describe('TileStatusTracker', () => {
+  const AU55_CANONICAL_TILE = { x: 6, y: 12, z: 5 };
+  const AV55_CANONICAL_TILE = { x: 7, y: 12, z: 5 };
   test('should set tile load status', async () => {
     const loadedMap: Map<string, boolean> = new Map<string, boolean>();
     const mockMbMap = new MockMbMap();
@@ -126,12 +143,12 @@ describe('TileStatusTracker', () => {
       />
     );
 
-    mockMbMap.emit('sourcedataloading', createSourceDataEvent('foosource', 'aa11'));
+    mockMbMap.emit('sourcedataloading', createSourceDataEvent('foosource', AU55_CANONICAL_TILE));
 
-    const aa11BarTile = createSourceDataEvent('barsource', 'aa11');
-    mockMbMap.emit('sourcedataloading', aa11BarTile);
+    const au55BarTile = createSourceDataEvent('barsource', AU55_CANONICAL_TILE);
+    mockMbMap.emit('sourcedataloading', au55BarTile);
 
-    mockMbMap.emit('sourcedata', createSourceDataEvent('foosource', 'aa11'));
+    mockMbMap.emit('sourcedata', createSourceDataEvent('foosource', AU55_CANONICAL_TILE));
 
     // simulate delay. Cache-checking is debounced.
     await sleep(300);
@@ -140,11 +157,11 @@ describe('TileStatusTracker', () => {
     expect(loadedMap.get('bar')).toBe(false); // still outstanding tile requests
     expect(loadedMap.has('foobar')).toBe(false); // never received tile requests, status should not have been reported for layer
 
-    (aa11BarTile.tile as MapSourceDataEvent['tile'])!.aborted = true; // abort tile
-    mockMbMap.emit('sourcedataloading', createSourceDataEvent('barsource', 'af1d'));
-    mockMbMap.emit('sourcedataloading', createSourceDataEvent('foosource', 'af1d'));
+    (au55BarTile.tile as MapSourceDataEvent['tile'])!.aborted = true; // abort tile
+    mockMbMap.emit('sourcedataloading', createSourceDataEvent('barsource', AV55_CANONICAL_TILE));
+    mockMbMap.emit('sourcedataloading', createSourceDataEvent('foosource', AV55_CANONICAL_TILE));
     mockMbMap.emit('error', {
-      ...createSourceDataEvent('barsource', 'af1d'),
+      ...createSourceDataEvent('barsource', AV55_CANONICAL_TILE),
       error: {
         message: 'simulated error',
       },
@@ -175,6 +192,7 @@ describe('TileStatusTracker', () => {
     ) => {
       tileErrorsMap.set(layerId, tileErrors);
     };
+    const IN_VIEW_CANONICAL_TILE = { x: 6, y: 12, z: 5 }; // canonical key 'au55'
 
     beforeEach(() => {
       tileErrorsMap.clear();
@@ -194,10 +212,10 @@ describe('TileStatusTracker', () => {
         />
       );
 
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer2Source', 'aa11'));
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE));
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer2Source', IN_VIEW_CANONICAL_TILE));
       mockMbMap.emit('error', {
-        ...createSourceDataEvent('layer1Source', 'aa11'),
+        ...createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE),
         error: {
           message: 'simulated error',
         },
@@ -209,17 +227,75 @@ describe('TileStatusTracker', () => {
       expect(tileErrorsMap.get('layer1')?.length).toBe(1);
       expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
         message: 'simulated error',
-        tileKey: '5/80/10',
+        tileKey: '5/6/12',
       });
       expect(tileErrorsMap.get('layer2')).toBeUndefined();
 
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE));
 
       // simulate delay. Cache-checking is debounced.
       await sleep(300);
 
       expect(tileErrorsMap.get('layer1')).toBeUndefined();
       expect(tileErrorsMap.get('layer2')).toBeUndefined();
+    });
+
+    test('should only return tile errors within map zoom', async () => {
+      const mockMbMap = new MockMbMap();
+
+      mount(
+        <TileStatusTracker
+          mbMap={mockMbMap as unknown as MbMap}
+          layerList={[createMockLayer('layer1', 'layer1Source')]}
+          onTileStateChange={onTileStateChange}
+        />
+      );
+
+      const OUT_OF_ZOOM_CANONICAL_TILE = {
+        ...IN_VIEW_CANONICAL_TILE,
+        z: 4, // out of view because zoom is not 5
+      }; // canonical key 'au55'
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', OUT_OF_ZOOM_CANONICAL_TILE));
+      mockMbMap.emit('error', {
+        ...createSourceDataEvent('layer1Source', OUT_OF_ZOOM_CANONICAL_TILE),
+        error: {
+          message: 'simulated error',
+        },
+      });
+
+      // simulate delay. Cache-checking is debounced.
+      await sleep(300);
+
+      expect(tileErrorsMap.get('layer1')).toBeUndefined();
+    });
+
+    test('should only return tile errors within map bounds', async () => {
+      const mockMbMap = new MockMbMap();
+
+      mount(
+        <TileStatusTracker
+          mbMap={mockMbMap as unknown as MbMap}
+          layerList={[createMockLayer('layer1', 'layer1Source')]}
+          onTileStateChange={onTileStateChange}
+        />
+      );
+
+      const OUT_OF_VIEW_CANONICAL_TILE = {
+        ...IN_VIEW_CANONICAL_TILE,
+        y: 13, // out of view because tile is out side of view bounds to the south
+      }; // canonical key 'au55'
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', OUT_OF_VIEW_CANONICAL_TILE));
+      mockMbMap.emit('error', {
+        ...createSourceDataEvent('layer1Source', OUT_OF_VIEW_CANONICAL_TILE),
+        error: {
+          message: 'simulated error',
+        },
+      });
+
+      // simulate delay. Cache-checking is debounced.
+      await sleep(300);
+
+      expect(tileErrorsMap.get('layer1')).toBeUndefined();
     });
 
     test('should extract elasticsearch ErrorCause from response body', async () => {
@@ -237,9 +313,9 @@ describe('TileStatusTracker', () => {
         />
       );
 
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE));
       mockMbMap.emit('error', {
-        ...createSourceDataEvent('layer1Source', 'aa11'),
+        ...createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE),
         error: {
           message: 'simulated error',
           status: 400,
@@ -253,7 +329,7 @@ describe('TileStatusTracker', () => {
 
       expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
         message: 'simulated error',
-        tileKey: '5/80/10',
+        tileKey: '5/6/12',
         error: mockESErrorCause,
       });
     });
@@ -269,9 +345,9 @@ describe('TileStatusTracker', () => {
         />
       );
 
-      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', 'aa11'));
+      mockMbMap.emit('sourcedataloading', createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE));
       mockMbMap.emit('error', {
-        ...createSourceDataEvent('layer1Source', 'aa11'),
+        ...createSourceDataEvent('layer1Source', IN_VIEW_CANONICAL_TILE),
         error: {
           message: 'simulated error',
           status: 400,
@@ -285,7 +361,7 @@ describe('TileStatusTracker', () => {
 
       expect(tileErrorsMap.get('layer1')?.[0]).toEqual({
         message: 'simulated error',
-        tileKey: '5/80/10',
+        tileKey: '5/6/12',
       });
     });
   });

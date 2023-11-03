@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import type { TileError } from '../../../../common/descriptor_types';
+import type { MapExtent, TileError } from '../../../../common/descriptor_types';
+import { getTilesForExtent } from '../../../classes/util/geo_tile_utils';
 
 type LayerId = string;
 type TileKey = string;
 
+export function getErrorCacheTileKey(canonical: { x: number; y: number; z: number }) {
+  return `${canonical.z}/${canonical.x}/${canonical.y}`;
+}
+
 export class TileErrorCache {
   private _cache: Record<LayerId, Record<TileKey, TileError>> = {};
 
-  public clear() {
-    this._cache = {};
-  }
-
-  public clearTileError(layerId: string, tileKey: string) {
-    if (!(layerId in this._cache)) {
+  public clearTileError(layerId: string | undefined, tileKey: string, onClear: () => void) {
+    if (!layerId || !(layerId in this._cache)) {
       return;
     }
 
@@ -29,6 +30,13 @@ export class TileErrorCache {
 
     delete tileErrors[tileKey];
     this._cache[layerId] = tileErrors;
+    onClear();
+  }
+
+  public hasAny() {
+    return Object.keys(this._cache).some(layerId => {
+      return Object.keys(this._cache[layerId]).length;
+    });
   }
 
   public hasTileError(layerId: string, tileKey: string) {
@@ -41,12 +49,20 @@ export class TileErrorCache {
     this._cache[layerId] = tileErrors;
   }
 
-  public getTileErrors(layerId: string) {
+  public getInViewTileErrors(layerId: string, zoom: number, extent: MapExtent) {
     const tileErrors = this._cache[layerId];
     if (!tileErrors) {
       return;
     }
     const tileErrorsArray = Object.values(tileErrors);
-    return tileErrorsArray.length ? tileErrorsArray : undefined;
+    if (!tileErrorsArray.length) {
+      return;
+    }
+
+    const inViewTileKeys = getTilesForExtent(zoom, extent).map(getErrorCacheTileKey);
+    const inViewTileErrors = tileErrorsArray.filter(tileError => {
+      return inViewTileKeys.includes(tileError.tileKey);
+    });
+    return inViewTileErrors.length ? inViewTileErrors : undefined;
   }
 }

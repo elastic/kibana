@@ -14,8 +14,9 @@ import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import { ILayer } from '../../../classes/layers/layer';
 import { IVectorSource } from '../../../classes/sources/vector_source';
 import { getTileKey as getCenterTileKey } from '../../../classes/util/geo_tile_utils';
+import { boundsToExtent } from '../../../classes/util/maplibre_utils';
 import { ES_MVT_META_LAYER_NAME } from '../../../classes/util/tile_meta_feature_utils';
-import { TileErrorCache } from './tile_error_cache';
+import { getErrorCacheTileKey, TileErrorCache } from './tile_error_cache';
 
 interface MbTile {
   // references internal object from mapbox
@@ -58,7 +59,7 @@ export class TileStatusTracker extends Component<Props> {
     this.props.mbMap.on('sourcedataloading', this._onSourceDataLoading);
     this.props.mbMap.on('error', this._onError);
     this.props.mbMap.on('sourcedata', this._onSourceData);
-    this.props.mbMap.on('move', this._onMove);
+    this.props.mbMap.on('moveend', this._onMoveEnd);
   }
 
   componentWillUnmount() {
@@ -66,7 +67,7 @@ export class TileStatusTracker extends Component<Props> {
     this.props.mbMap.off('error', this._onError);
     this.props.mbMap.off('sourcedata', this._onSourceData);
     this.props.mbMap.off('sourcedataloading', this._onSourceDataLoading);
-    this.props.mbMap.off('move', this._onMove);
+    this.props.mbMap.off('moveend', this._onMoveEnd);
     this._tileCache.length = 0;
   }
 
@@ -86,11 +87,10 @@ export class TileStatusTracker extends Component<Props> {
         this._layerCache.set(layerId, true);
       }
 
-      const tileKey = getTileKey(e.tile.tileID.canonical);
-      if (layerId && this._tileErrorCache.hasTileError(layerId, tileKey)) {
-        this._tileErrorCache.clearTileError(layerId, tileKey);
-        this._updateTileStatusForAllLayers();
-      }
+      this._tileErrorCache.clearTileError(
+        layerId,
+        getErrorCacheTileKey(e.tile.tileID.canonical),
+        this._updateTileStatusForAllLayers);
 
       const tracked = this._tileCache.find((tile) => {
         return (
@@ -126,7 +126,7 @@ export class TileStatusTracker extends Component<Props> {
       }
 
       const layerId = targetLayer.getId();
-      const tileKey = getTileKey(e.tile.tileID.canonical);
+      const tileKey = getErrorCacheTileKey(e.tile.tileID.canonical);
       const tileError = {
         message: e.error.message,
         tileKey,
@@ -174,11 +174,7 @@ export class TileStatusTracker extends Component<Props> {
     }
   };
 
-  /*
-   * Clear errors when center tile changes.
-   * Tracking center tile provides the cleanest way to know when a new data fetching cycle is beginning
-   */
-  _onMove = () => {
+  _onMoveEnd = () => {
     const center = this.props.mbMap.getCenter();
     // Maplibre rounds zoom when 'source.roundZoom' is true and floors zoom when 'source.roundZoom' is false
     // 'source.roundZoom' is true for raster and video layers
@@ -192,7 +188,9 @@ export class TileStatusTracker extends Component<Props> {
     );
     if (this._prevCenterTileKey !== centerTileKey) {
       this._prevCenterTileKey = centerTileKey;
-      this._tileErrorCache.clear();
+      if (this._tileErrorCache.hasAny()) {
+        this._updateTileStatusForAllLayers();
+      }
     }
   };
 
@@ -226,7 +224,10 @@ export class TileStatusTracker extends Component<Props> {
         layer.getId(),
         !atLeastOnePendingTile,
         this._getTileMetaFeatures(layer),
-        this._tileErrorCache.getTileErrors(layer.getId())
+        this._tileErrorCache.getInViewTileErrors(
+          layer.getId(),
+          this.props.mbMap.getZoom(),
+          boundsToExtent(this.props.mbMap.getBounds()))
       );
     }
   }, 100);
@@ -273,8 +274,4 @@ export class TileStatusTracker extends Component<Props> {
   render() {
     return null;
   }
-}
-
-function getTileKey(canonical: { x: number; y: number; z: number }) {
-  return `${canonical.z}/${canonical.x}/${canonical.y}`;
 }
