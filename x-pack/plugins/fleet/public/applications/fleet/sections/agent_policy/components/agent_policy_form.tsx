@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import {
   EuiAccordion,
   EuiDescribedFormGroup,
@@ -17,6 +17,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
+
+import { AGENT_POLICY_SETTINGS, ConfiguredSettings } from '../../../settings';
 
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyGeneralFields } from './agent_policy_general_fields';
@@ -30,13 +32,25 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 interface Props {
-  agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
+  agentPolicy: Partial<NewAgentPolicy | AgentPolicy> & { [key: string]: unknown };
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   withSysMonitoring: boolean;
   updateSysMonitoring: (newValue: boolean) => void;
   validation: ValidationResults;
   isEditing?: boolean;
 }
+
+const AgentPolicyFormContext = createContext<
+  | {
+      agentPolicy: Partial<NewAgentPolicy | AgentPolicy> & { [key: string]: any };
+      updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
+    }
+  | undefined
+>(undefined);
+
+export const useAgentPolicyFormContext = () => {
+  return useContext(AgentPolicyFormContext);
+};
 
 export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   agentPolicy,
@@ -68,59 +82,69 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <EuiForm>
-      {!isEditing ? (
-        <AgentPolicyGeneralFields
-          agentPolicy={agentPolicy}
-          updateAgentPolicy={updateAgentPolicy}
-          validation={validation}
-        />
-      ) : (
-        generalSettingsWrapper([
+    <AgentPolicyFormContext.Provider value={{ agentPolicy, updateAgentPolicy }}>
+      <EuiForm>
+        {!isEditing ? (
           <AgentPolicyGeneralFields
             agentPolicy={agentPolicy}
             updateAgentPolicy={updateAgentPolicy}
             validation={validation}
-          />,
-        ])
-      )}
-      {!isEditing ? (
-        <AgentPolicyFormSystemMonitoringCheckbox
-          withSysMonitoring={withSysMonitoring}
-          updateSysMonitoring={updateSysMonitoring}
-        />
-      ) : null}
-      {!isEditing ? (
-        <>
-          <EuiHorizontalRule />
-          <EuiSpacer size="xs" />
-          <StyledEuiAccordion
-            id="advancedOptions"
-            buttonContent={
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
-                defaultMessage="Advanced options"
-              />
-            }
-            buttonClassName="ingest-active-button"
-          >
-            <EuiSpacer size="l" />
-            <AgentPolicyAdvancedOptionsContent
+          />
+        ) : (
+          generalSettingsWrapper([
+            <AgentPolicyGeneralFields
               agentPolicy={agentPolicy}
               updateAgentPolicy={updateAgentPolicy}
               validation={validation}
-              isEditing={isEditing}
-            />
-          </StyledEuiAccordion>
-        </>
-      ) : (
-        <AgentPolicyAdvancedOptionsContent
-          agentPolicy={agentPolicy}
-          updateAgentPolicy={updateAgentPolicy}
-          validation={validation}
-          isEditing={isEditing}
-        />
-      )}
-    </EuiForm>
+            />,
+          ])
+        )}
+        {!isEditing ? (
+          <AgentPolicyFormSystemMonitoringCheckbox
+            withSysMonitoring={withSysMonitoring}
+            updateSysMonitoring={updateSysMonitoring}
+          />
+        ) : null}
+        {!isEditing ? (
+          <>
+            <EuiHorizontalRule />
+            <EuiSpacer size="xs" />
+            <StyledEuiAccordion
+              id="advancedOptions"
+              buttonContent={
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.advancedOptionsToggleLabel"
+                  defaultMessage="Advanced options"
+                />
+              }
+              buttonClassName="ingest-active-button"
+            >
+              <EuiSpacer size="l" />
+              <AgentPolicyAdvancedOptionsContent
+                agentPolicy={agentPolicy}
+                updateAgentPolicy={updateAgentPolicy}
+                validation={validation}
+                isEditing={isEditing}
+              />
+            </StyledEuiAccordion>
+          </>
+        ) : (
+          <AgentPolicyAdvancedOptionsContent
+            agentPolicy={agentPolicy}
+            updateAgentPolicy={updateAgentPolicy}
+            validation={validation}
+            isEditing={isEditing}
+          />
+        )}
+
+        <EuiSpacer size="xl" />
+
+        <ConfiguredSettings configuredSettings={AGENT_POLICY_SETTINGS} />
+      </EuiForm>
+
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
+    </AgentPolicyFormContext.Provider>
   );
 };
