@@ -57,6 +57,7 @@ export function TileErrorsList(props: Props) {
         id="tileErrorsPopover"
         button={
           <EuiButtonEmpty
+            flush="left"
             iconType="arrowDown" 
             iconSide="right" 
             onClick={() => {
