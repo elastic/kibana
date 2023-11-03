@@ -8,6 +8,7 @@
 
 import { cloneDeep, memoize, uniqueId } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
+import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { SwitcherWithOptions, SwitcherWithId } from './types';
@@ -26,16 +27,27 @@ export type CapabilitiesResolver = ({
 }) => Promise<Capabilities>;
 
 type ForPathSwitcherResolver = (path: string, switchers: SwitcherWithId[]) => string[];
+type AggregatedSwitchersResolver = (capabilityPaths: string[]) => CapabilitiesSwitcher[];
 
 export const getCapabilitiesResolver = (
-  getCapabilities: () => Capabilities,
-  getSwitchers: () => SwitcherWithOptions[]
+  capabilities: Capabilities,
+  switchers: SwitcherWithOptions[]
 ): CapabilitiesResolver => {
-  let initialized = false;
-  let capabilities: Capabilities;
-  let switchers: Map<string, SwitcherWithId>;
+  const switcherMap: Map<string, SwitcherWithId> = new Map();
+  switchers.forEach((switcher) => {
+    const switcherId = uniqueId('s-');
+    switcherMap.set(switcherId, {
+      id: switcherId,
+      ...switcher,
+    });
+  });
   // memoize is on the first argument only by default, which is what we want here
   const getSwitcherForPath: ForPathSwitcherResolver = memoize(getSwitchersToUseForPath);
+  // TODO: memoize
+  const getAggregatedSwitchers: AggregatedSwitchersResolver = buildGetAggregatedSwitchers(
+    getSwitcherForPath,
+    switcherMap
+  );
 
   // memoize is on the first argument only by default, which is what we want here
   // getSwitchersToUseForPath
@@ -47,28 +59,14 @@ export const getCapabilitiesResolver = (
     applications,
     useDefaultCapabilities,
   }): Promise<Capabilities> => {
-    if (!initialized) {
-      capabilities = getCapabilities();
-      switchers = new Map();
-      getSwitchers().forEach((switcher) => {
-        const switcherId = uniqueId('s-');
-        switchers.set(switcherId, {
-          id: switcherId,
-          ...switcher,
-        });
-      });
-      initialized = true;
-    }
-
     return withSpan({ name: 'resolve capabilities', type: 'capabilities' }, () =>
       resolveCapabilities({
         capabilities,
-        switchers,
         request,
         capabilityPath,
         applications,
         useDefaultCapabilities,
-        getSwitcherForPath,
+        getAggregatedSwitchers,
       })
     );
   };
@@ -76,20 +74,18 @@ export const getCapabilitiesResolver = (
 
 const resolveCapabilities = async ({
   capabilities,
-  switchers,
   request,
   capabilityPath,
   applications,
   useDefaultCapabilities,
-  getSwitcherForPath,
+  getAggregatedSwitchers,
 }: {
   capabilities: Capabilities;
-  switchers: Map<string, SwitcherWithId>;
   request: KibanaRequest;
   applications: string[];
-  capabilityPath: string[]; // TODO: rename to plural
+  capabilityPath: string[];
   useDefaultCapabilities: boolean;
-  getSwitcherForPath: ForPathSwitcherResolver;
+  getAggregatedSwitchers: AggregatedSwitchersResolver;
 }): Promise<Capabilities> => {
   const mergedCaps: Capabilities = cloneDeep({
     ...capabilities,
@@ -99,26 +95,9 @@ const resolveCapabilities = async ({
     }, capabilities.navLinks),
   });
 
-  // find switchers that should be applied for the provided capabilityPaths
-  const allSwitchers = [...switchers.values()];
-  const switcherIdsToApply = new Set<string>();
-  capabilityPath.forEach((path) => {
-    getSwitcherForPath(path, allSwitchers).forEach((switcherId) =>
-      switcherIdsToApply.add(switcherId)
-    );
-  });
-  const switchersToApply = [...switcherIdsToApply].reduce((list, switcherId) => {
-    list.push(switchers.get(switcherId)!);
-    return list;
-  }, [] as SwitcherWithId[]);
+  const switchers = getAggregatedSwitchers(capabilityPath);
 
-  // split the switchers into buckets for parallel execution
-  const switcherBuckets = splitIntoBuckets(switchersToApply);
-
-  // convert the multi-switcher buckets into switchers
-  const convertedSwitchers = switcherBuckets.map(convertBucketToSwitcher);
-
-  return convertedSwitchers.reduce(async (caps, switcher) => {
+  return switchers.reduce(async (caps, switcher) => {
     const resolvedCaps = await caps;
     const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
     return recursiveApplyChanges(resolvedCaps, changes);
@@ -150,13 +129,35 @@ function recursiveApplyChanges<
 const getSwitchersToUseForPath = (path: string, switchers: SwitcherWithId[]): string[] => {
   const switcherIds: string[] = [];
   switchers.forEach((switcher) => {
-    if (
-      switcher.capabilityPath.some((switcherPath) => {
-        return pathsIntersect(path, switcherPath);
-      })
-    ) {
+    if (switcher.capabilityPath.some((switcherPath) => pathsIntersect(path, switcherPath))) {
       switcherIds.push(switcher.id);
     }
   });
   return switcherIds;
 };
+
+const buildGetAggregatedSwitchers =
+  (
+    getSwitcherForPath: ForPathSwitcherResolver,
+    switcherMap: Map<string, SwitcherWithId>
+  ): AggregatedSwitchersResolver =>
+  (capabilityPaths: string[]): CapabilitiesSwitcher[] => {
+    // find switchers that should be applied for the provided capabilityPaths
+    const allSwitchers = [...switcherMap.values()];
+    const switcherIdsToApply = new Set<string>();
+    capabilityPaths.forEach((path) => {
+      getSwitcherForPath(path, allSwitchers).forEach((switcherId) =>
+        switcherIdsToApply.add(switcherId)
+      );
+    });
+    const switchersToApply = [...switcherIdsToApply].reduce((list, switcherId) => {
+      list.push(switcherMap.get(switcherId)!);
+      return list;
+    }, [] as SwitcherWithId[]);
+
+    // split the switchers into buckets for parallel execution
+    const switcherBuckets = splitIntoBuckets(switchersToApply);
+
+    // convert the multi-switcher buckets into switchers
+    return switcherBuckets.map(convertBucketToSwitcher);
+  };

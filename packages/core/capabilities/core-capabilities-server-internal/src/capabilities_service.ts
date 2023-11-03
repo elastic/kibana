@@ -44,19 +44,11 @@ export class CapabilitiesService {
   private readonly logger: Logger;
   private readonly capabilitiesProviders: CapabilitiesProvider[] = [];
   private readonly capabilitiesSwitchers: SwitcherWithOptions[] = [];
-  private readonly resolveCapabilities: CapabilitiesResolver;
+  private resolveCapabilities?: CapabilitiesResolver;
   private started = false;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('capabilities-service');
-    this.resolveCapabilities = getCapabilitiesResolver(
-      () =>
-        mergeCapabilities(
-          defaultCapabilities,
-          ...this.capabilitiesProviders.map((provider) => provider())
-        ),
-      () => this.capabilitiesSwitchers
-    );
   }
 
   public preboot(prebootDeps: PrebootSetupDeps) {
@@ -65,14 +57,19 @@ export class CapabilitiesService {
     // The preboot server has no need for real capabilities.
     // Returning the un-augmented defaults is sufficient.
     prebootDeps.http.registerRoutes('', (router) => {
-      registerRoutes(router, async () => defaultCapabilities);
+      registerRoutes(router, () => async () => defaultCapabilities);
     });
   }
 
   public setup(setupDeps: SetupDeps): CapabilitiesSetup {
     this.logger.debug('Setting up capabilities service');
 
-    registerRoutes(setupDeps.http.createRouter(''), this.resolveCapabilities);
+    registerRoutes(setupDeps.http.createRouter(''), () => {
+      if (!this.resolveCapabilities) {
+        throw new Error('Cannot serve capabilities route before #start is called');
+      }
+      return this.resolveCapabilities;
+    });
 
     return {
       registerProvider: (provider: CapabilitiesProvider) => {
@@ -98,9 +95,17 @@ export class CapabilitiesService {
   public start(): CapabilitiesStart {
     this.started = true;
 
+    this.resolveCapabilities = getCapabilitiesResolver(
+      mergeCapabilities(
+        defaultCapabilities,
+        ...this.capabilitiesProviders.map((provider) => provider())
+      ),
+      [...this.capabilitiesSwitchers]
+    );
+
     return {
       resolveCapabilities: (request, options) =>
-        this.resolveCapabilities({
+        this.resolveCapabilities!({
           request,
           capabilityPath: Array.isArray(options.capabilityPath)
             ? options.capabilityPath
