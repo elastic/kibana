@@ -130,7 +130,6 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   return (
     <>
-      {' '}
       <EuiPageSection paddingSize="none">
         <EuiButton
           data-test-subj="indexDetailsBackToIndicesButton"

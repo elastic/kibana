@@ -27,10 +27,10 @@ import {
 import { ApplicationStart } from '@kbn/core/public';
 import { Index } from '@kbn/index-management-plugin/common';
 import { IndexDetailsTab } from '@kbn/index-management-plugin/common/constants';
+import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
-import { IndexLifecyclePolicy } from '../../../common/types';
 
-const getHeaders = (): Array<[keyof IndexLifecyclePolicy, string]> => {
+const getHeaders = (): Array<[keyof IlmExplainLifecycleLifecycleExplainManaged, string]> => {
   return [
     [
       'policy',
@@ -87,7 +87,9 @@ interface Props {
 
 export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
   const [showPhaseExecutionPopover, setShowPhaseExecutionPopover] = useState<boolean>(false);
-  const { ilm } = index;
+  const { ilm: ilmData } = index;
+  // only ILM managed indices render the ILM tab
+  const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;
 
   const togglePhaseExecutionPopover = () => {
     setShowPhaseExecutionPopover(!showPhaseExecutionPopover);
@@ -129,7 +131,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
               />
             </EuiPopoverTitle>
             <EuiCodeBlock language="json">
-              {JSON.stringify(ilm?.managed ? ilm.phase_execution : {}, null, 2)}
+              {JSON.stringify(ilm.phase_execution, null, 2)}
             </EuiCodeBlock>
           </EuiPopover>
         </EuiDescriptionListDescription>
@@ -146,16 +148,15 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
       right: [],
     };
     headers.forEach(([fieldName, label], arrayIndex) => {
-      // @ts-ignore
-      const value: any = ilm?.[fieldName];
+      const value = ilm[fieldName];
       let content;
       if (fieldName === 'action_time_millis') {
-        content = moment(value).format('YYYY-MM-DD HH:mm:ss');
+        content = moment(value as string).format('YYYY-MM-DD HH:mm:ss');
       } else if (fieldName === 'policy') {
         content = (
           <EuiLink
             href={getUrlForApp('management', {
-              path: `data/index_lifecycle_management/${getPolicyEditPath(value)}`,
+              path: `data/index_lifecycle_management/${getPolicyEditPath(value as string)}`,
             })}
           >
             {value}
@@ -181,15 +182,12 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
         rows.right.push(cell);
       }
     });
-    if (ilm?.managed && ilm?.phase_execution) {
+    if (ilm.phase_execution) {
       rows.right.push(renderPhaseExecutionPopoverButton());
     }
     return rows;
   };
 
-  if (!ilm?.managed) {
-    return null;
-  }
   const { left, right } = buildRows();
   return (
     <>

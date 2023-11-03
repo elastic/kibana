@@ -45,6 +45,13 @@ interface Props {
   reloadIndexDetails: () => Promise<void>;
   navigateToAllIndices: () => void;
 }
+
+/**
+ * This component is a wrapper for the underlying "index actions context menu" that is currently used
+ * in the indices list and works with redux. That is why all request helpers from the services are expecting
+ * an array of indices, for example "deleteIndices(indexNames)".
+ *
+ */
 export const ManageIndexButton: FunctionComponent<Props> = ({
   index,
   reloadIndexDetails,
@@ -52,7 +59,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  // the variables are created to write the index actions in a way to later re-use for indices list without redux
+  // the "index actions context menu" component is expecting an array of indices, the same as on the indices list
   const indexNames = useMemo(() => [index.name], [index]);
 
   const reloadIndices = useCallback(async () => {
@@ -61,6 +68,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     setIsLoading(false);
   }, [reloadIndexDetails]);
 
+  // the "index actions context menu" component is expecting an array of indices, the same as on the indices list
   const indices = [index];
   const indexStatusByName = getIndexStatusByName(indexNames, indices);
 
