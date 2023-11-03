@@ -253,7 +253,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       });
     });
 
-    describe.only('add proper shard to policies packs config', () => {
+    describe('add proper shard to policies packs config', () => {
       let shardPackId: string;
 
       beforeEach(() => {
