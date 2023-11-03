@@ -33,216 +33,218 @@ describe('FilesTable', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders correctly', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
+  for (let index = 0; index < 50; index++) {
+    it('renders correctly', async () => {
+      appMockRender.render(<FilesTable {...defaultProps} />);
 
-    expect(await screen.findByTestId('cases-files-table-results-count')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-table-filename')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-table-filetype')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-table-date-added')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
-  });
-
-  it('renders loading state', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} isLoading={true} />);
-
-    expect(await screen.findByTestId('cases-files-table-loading')).toBeInTheDocument();
-  });
-
-  it('renders empty table', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} items={[]} />);
-
-    expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
-  });
-
-  it('FileAdd in empty table is clickable', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} items={[]} />);
-
-    expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
-
-    const addFileButton = await screen.findByTestId('cases-files-add');
-
-    expect(addFileButton).toBeInTheDocument();
-
-    userEvent.click(addFileButton);
-
-    expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
-  });
-
-  it('renders single result count properly', async () => {
-    const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 1 };
-    appMockRender.render(<FilesTable {...defaultProps} pagination={mockPagination} />);
-
-    expect(await screen.findByTestId('cases-files-table-results-count')).toHaveTextContent(
-      `Showing ${defaultProps.items.length} file`
-    );
-  });
-
-  it('non image rows dont open file preview', async () => {
-    const nonImageFileMock = { ...basicFileMock, mimeType: 'something/else' };
-
-    appMockRender.render(<FilesTable {...defaultProps} items={[nonImageFileMock]} />);
-
-    userEvent.click(
-      await within(await screen.findByTestId('cases-files-table-filename')).findByTitle(
-        'No preview available'
-      )
-    );
-
-    expect(screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
-  });
-
-  it('image rows open file preview', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
-
-    userEvent.click(
-      await screen.findByRole('button', {
-        name: `${basicFileMock.name}.${basicFileMock.extension}`,
-      })
-    );
-
-    expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
-  });
-
-  it('different mimeTypes are displayed correctly', async () => {
-    const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 7 };
-    appMockRender.render(
-      <FilesTable
-        {...defaultProps}
-        pagination={mockPagination}
-        items={[
-          { ...basicFileMock, mimeType: '' },
-          { ...basicFileMock, mimeType: 'no-slash' },
-          { ...basicFileMock, mimeType: '/slash-in-the-beginning' },
-          { ...basicFileMock, mimeType: undefined },
-          { ...basicFileMock, mimeType: 'application/gzip' },
-          { ...basicFileMock, mimeType: 'text/csv' },
-          { ...basicFileMock, mimeType: 'image/tiff' },
-        ]}
-      />
-    );
-
-    expect((await screen.findAllByText('Unknown')).length).toBe(4);
-    expect(await screen.findByText('Compressed')).toBeInTheDocument();
-    expect(await screen.findByText('Text')).toBeInTheDocument();
-    expect(await screen.findByText('Image')).toBeInTheDocument();
-  });
-
-  it('download button renders correctly', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
-
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
+      expect(await screen.findByTestId('cases-files-table-results-count')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-files-table-filename')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-files-table-filetype')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-files-table-date-added')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
     });
 
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-        id: basicFileMock.id,
+    it('renders loading state', async () => {
+      appMockRender.render(<FilesTable {...defaultProps} isLoading={true} />);
+
+      expect(await screen.findByTestId('cases-files-table-loading')).toBeInTheDocument();
+    });
+
+    it('renders empty table', async () => {
+      appMockRender.render(<FilesTable {...defaultProps} items={[]} />);
+
+      expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
+    });
+
+    it('FileAdd in empty table is clickable', async () => {
+      appMockRender.render(<FilesTable {...defaultProps} items={[]} />);
+
+      expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
+
+      const addFileButton = await screen.findByTestId('cases-files-add');
+
+      expect(addFileButton).toBeInTheDocument();
+
+      userEvent.click(addFileButton);
+
+      expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
+    });
+
+    it('renders single result count properly', async () => {
+      const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 1 };
+      appMockRender.render(<FilesTable {...defaultProps} pagination={mockPagination} />);
+
+      expect(await screen.findByTestId('cases-files-table-results-count')).toHaveTextContent(
+        `Showing ${defaultProps.items.length} file`
+      );
+    });
+
+    it('non image rows dont open file preview', async () => {
+      const nonImageFileMock = { ...basicFileMock, mimeType: 'something/else' };
+
+      appMockRender.render(<FilesTable {...defaultProps} items={[nonImageFileMock]} />);
+
+      userEvent.click(
+        await within(await screen.findByTestId('cases-files-table-filename')).findByTitle(
+          'No preview available'
+        )
+      );
+
+      expect(screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
+    });
+
+    it('image rows open file preview', async () => {
+      appMockRender.render(<FilesTable {...defaultProps} />);
+
+      userEvent.click(
+        await screen.findByRole('button', {
+          name: `${basicFileMock.name}.${basicFileMock.extension}`,
+        })
+      );
+
+      expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
+    });
+
+    it('different mimeTypes are displayed correctly', async () => {
+      const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 7 };
+      appMockRender.render(
+        <FilesTable
+          {...defaultProps}
+          pagination={mockPagination}
+          items={[
+            { ...basicFileMock, mimeType: '' },
+            { ...basicFileMock, mimeType: 'no-slash' },
+            { ...basicFileMock, mimeType: '/slash-in-the-beginning' },
+            { ...basicFileMock, mimeType: undefined },
+            { ...basicFileMock, mimeType: 'application/gzip' },
+            { ...basicFileMock, mimeType: 'text/csv' },
+            { ...basicFileMock, mimeType: 'image/tiff' },
+          ]}
+        />
+      );
+
+      expect((await screen.findAllByText('Unknown')).length).toBe(4);
+      expect(await screen.findByText('Compressed')).toBeInTheDocument();
+      expect(await screen.findByText('Text')).toBeInTheDocument();
+      expect(await screen.findByText('Image')).toBeInTheDocument();
+    });
+
+    it('download button renders correctly', async () => {
+      appMockRender.render(<FilesTable {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
       });
-    });
 
-    expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
-  });
-
-  it('delete button renders correctly', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
-
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
-    });
-
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-        id: basicFileMock.id,
+      await waitFor(() => {
+        expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+          fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+          id: basicFileMock.id,
+        });
       });
+
+      expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
     });
 
-    expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
-  });
+    it('delete button renders correctly', async () => {
+      appMockRender.render(<FilesTable {...defaultProps} />);
 
-  it('clicking delete button opens deletion modal', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
-
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
-    });
-
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-        id: basicFileMock.id,
+      await waitFor(() => {
+        expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
       });
+
+      await waitFor(() => {
+        expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+          fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+          id: basicFileMock.id,
+        });
+      });
+
+      expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
     });
 
-    const deleteButton = await screen.findByTestId('cases-files-delete-button');
+    it('clicking delete button opens deletion modal', async () => {
+      appMockRender.render(<FilesTable {...defaultProps} />);
 
-    expect(deleteButton).toBeInTheDocument();
+      await waitFor(() => {
+        expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
+      });
 
-    userEvent.click(deleteButton);
+      await waitFor(() => {
+        expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+          fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+          id: basicFileMock.id,
+        });
+      });
 
-    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-  });
+      const deleteButton = await screen.findByTestId('cases-files-delete-button');
 
-  it('go to next page calls onTableChange with correct values', async () => {
-    const mockPagination = { pageIndex: 0, pageSize: 1, totalItemCount: 2 };
+      expect(deleteButton).toBeInTheDocument();
 
-    appMockRender.render(
-      <FilesTable
-        {...defaultProps}
-        pagination={mockPagination}
-        items={[{ ...basicFileMock }, { ...basicFileMock }]}
-      />
-    );
+      userEvent.click(deleteButton);
 
-    userEvent.click(await screen.findByTestId('pagination-button-next'));
+      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+    });
 
-    await waitFor(() =>
-      expect(onTableChange).toHaveBeenCalledWith({
-        page: { index: mockPagination.pageIndex + 1, size: mockPagination.pageSize },
-      })
-    );
-  });
+    it('go to next page calls onTableChange with correct values', async () => {
+      const mockPagination = { pageIndex: 0, pageSize: 1, totalItemCount: 2 };
 
-  it('go to previous page calls onTableChange with correct values', async () => {
-    const mockPagination = { pageIndex: 1, pageSize: 1, totalItemCount: 2 };
+      appMockRender.render(
+        <FilesTable
+          {...defaultProps}
+          pagination={mockPagination}
+          items={[{ ...basicFileMock }, { ...basicFileMock }]}
+        />
+      );
 
-    appMockRender.render(
-      <FilesTable
-        {...defaultProps}
-        pagination={mockPagination}
-        items={[{ ...basicFileMock }, { ...basicFileMock }]}
-      />
-    );
+      userEvent.click(await screen.findByTestId('pagination-button-next'));
 
-    userEvent.click(await screen.findByTestId('pagination-button-previous'));
+      await waitFor(() =>
+        expect(onTableChange).toHaveBeenCalledWith({
+          page: { index: mockPagination.pageIndex + 1, size: mockPagination.pageSize },
+        })
+      );
+    });
 
-    await waitFor(() =>
-      expect(onTableChange).toHaveBeenCalledWith({
-        page: { index: mockPagination.pageIndex - 1, size: mockPagination.pageSize },
-      })
-    );
-  });
+    it('go to previous page calls onTableChange with correct values', async () => {
+      const mockPagination = { pageIndex: 1, pageSize: 1, totalItemCount: 2 };
 
-  it('changing perPage calls onTableChange with correct values', async () => {
-    appMockRender.render(
-      <FilesTable {...defaultProps} items={[{ ...basicFileMock }, { ...basicFileMock }]} />
-    );
+      appMockRender.render(
+        <FilesTable
+          {...defaultProps}
+          pagination={mockPagination}
+          items={[{ ...basicFileMock }, { ...basicFileMock }]}
+        />
+      );
 
-    userEvent.click(await screen.findByTestId('tablePaginationPopoverButton'));
+      userEvent.click(await screen.findByTestId('pagination-button-previous'));
 
-    const pageSizeOption = await screen.findByTestId('tablePagination-50-rows');
+      await waitFor(() =>
+        expect(onTableChange).toHaveBeenCalledWith({
+          page: { index: mockPagination.pageIndex - 1, size: mockPagination.pageSize },
+        })
+      );
+    });
 
-    pageSizeOption.style.pointerEvents = 'all';
+    it('changing perPage calls onTableChange with correct values', async () => {
+      appMockRender.render(
+        <FilesTable {...defaultProps} items={[{ ...basicFileMock }, { ...basicFileMock }]} />
+      );
 
-    userEvent.click(pageSizeOption);
+      userEvent.click(await screen.findByTestId('tablePaginationPopoverButton'));
 
-    await waitFor(() =>
-      expect(onTableChange).toHaveBeenCalledWith({
-        page: { index: 0, size: 50 },
-      })
-    );
-  });
+      const pageSizeOption = await screen.findByTestId('tablePagination-50-rows');
+
+      pageSizeOption.style.pointerEvents = 'all';
+
+      userEvent.click(pageSizeOption);
+
+      await waitFor(() =>
+        expect(onTableChange).toHaveBeenCalledWith({
+          page: { index: 0, size: 50 },
+        })
+      );
+    });
+  }
 });
