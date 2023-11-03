@@ -16,7 +16,8 @@ import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import type { EuiBasicTableOnChange, Solution } from './types';
 
 import { SortFieldCase } from '../../../common/ui/types';
-import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
+import type { CaseStatuses } from '../../../common/types/domain';
+import { caseStatuses } from '../../../common/types/domain';
 import { OWNER_INFO } from '../../../common/constants';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
@@ -155,21 +156,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
-        // FIXME: how should this work with multiple options?
-        if (newFilterOptions?.status) {
-          if (
-            newFilterOptions.status[0] === CaseStatuses.closed &&
-            queryParams.sortField === SortFieldCase.createdAt
-          ) {
-            setQueryParams({ sortField: SortFieldCase.closedAt });
-          } else if (
-            [CaseStatuses.open, CaseStatuses['in-progress']].includes(newFilterOptions.status[0]) &&
-            queryParams.sortField === SortFieldCase.closedAt
-          ) {
-            setQueryParams({ sortField: SortFieldCase.createdAt });
-          }
-        }
-
         deselectCases();
         setFilterOptions({
           ...newFilterOptions,
@@ -193,15 +179,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             : {}),
         });
       },
-      [
-        queryParams.sortField,
-        deselectCases,
-        setFilterOptions,
-        hasOwner,
-        availableSolutions,
-        owner,
-        setQueryParams,
-      ]
+      [deselectCases, setFilterOptions, hasOwner, availableSolutions, owner]
     );
 
     const { columns } = useCasesColumns({
