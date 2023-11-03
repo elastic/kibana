@@ -242,7 +242,6 @@ function ToggleAccordionButton({
         <EuiFlexItem grow={false} style={{ position: 'relative' }}>
           <div
             style={{
-              // height: `calc(${euiTheme.size.s} * 2)`,
               position: 'absolute',
               top: '50%',
               transform: 'translate(0, -50%)',
