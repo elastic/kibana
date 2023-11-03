@@ -36,6 +36,32 @@ export function injectActionParams({
     };
   }
 
+  if (actionTypeId === '.pagerduty') {
+    /**
+     * TODO: Remove and use connector adapters
+     */
+    const path = ruleUrl?.absoluteUrl ?? '';
+
+    if (path.length === 0) {
+      return actionParams;
+    }
+
+    const links = (actionParams.links ?? []) as Array<{ href: string; text: string }>;
+
+    return {
+      ...actionParams,
+      links: [
+        {
+          href: path,
+          text: i18n.translate('xpack.alerting.injectActionParams.pagerduty.kibanaLinkText', {
+            defaultMessage: 'Elastic Rule',
+          }),
+        },
+        ...links,
+      ],
+    };
+  }
+
   // Fallback, return action params unchanged
   return actionParams;
 }
