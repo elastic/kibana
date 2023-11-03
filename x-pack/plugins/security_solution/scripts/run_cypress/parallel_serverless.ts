@@ -17,7 +17,7 @@ import grep from '@cypress/grep/src/plugin';
 import crypto from 'crypto';
 import fs from 'fs';
 import { createFailError } from '@kbn/dev-cli-errors';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import path from 'path';
 import os from 'os';
 import pRetry from 'p-retry';
@@ -148,34 +148,32 @@ async function resetCredentials(
 }
 
 // Wait until elasticsearch status goes green
-async function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
-  await pRetry(
-    async (num) => {
-      log.info(`Retry number ${num} to check if es is green.`);
-      try {
-        const response = await axios.get(
-          `${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`,
-          {
-            headers: {
-              Authorization: `Basic ${auth}`,
-            },
-          }
+function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
+  const fetchHealthStatusAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if es is green.`);
+
+    const response = await axios.get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+
+    log.info(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info(
+          `${runnerId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
         );
-        log.info(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
-        return true;
-      } catch (error) {
-        if (error.code === 'ENOTFOUND') {
-          log.info(
-            `${runnerId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
-          );
-        }
-        throw new Error(`${runnerId} - ${error.code}:${error.data}`);
       }
     },
-    {
-      retries: 50,
-    }
-  );
+    retries: 50,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+
+  return pRetry(fetchHealthStatusAttempt, retryOptions);
 }
 
 // Wait until Kibana is available
