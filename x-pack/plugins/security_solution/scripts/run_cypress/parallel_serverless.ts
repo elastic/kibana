@@ -34,7 +34,7 @@ interface ProductType {
 interface CreateEnvironmentRequestBody {
   name: string;
   region_id: string;
-  product_types: ProductType[];
+  product_types?: ProductType[];
 }
 
 interface Environment {
@@ -70,17 +70,13 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
 // Method to invoke the create environment API for serverless.
 async function createEnvironment(
   projectName: string,
-  runnerId: string,
   apiKey: string,
-  ftrConfig: SecuritySolutionDescribeBlockFtrConfig,
-  onEarlyExit: (msg: string) => void
-): Promise<Environment> {
-  log.info(`${runnerId}: Creating environment ${projectName}...`);
-  const environment = {} as Environment;
-  const body = {
+  ftrConfig: SecuritySolutionDescribeBlockFtrConfig
+): Promise<Environment | undefined> {
+  const body: CreateEnvironmentRequestBody = {
     name: projectName,
     region_id: DEFAULT_REGION,
-  } as CreateEnvironmentRequestBody;
+  };
 
   const productTypes: ProductType[] = [];
   ftrConfig?.productTypes?.forEach((t) => {
@@ -88,47 +84,41 @@ async function createEnvironment(
   });
   if (productTypes.length > 0) body.product_types = productTypes;
 
-  await axios
-    .post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
+  try {
+    const response = await axios.post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
       headers: {
         Authorization: `ApiKey ${apiKey}`,
-        'Content-Type': 'application/json',
       },
-    })
-    .then((response) => {
-      environment.name = response.data.name;
-      environment.id = response.data.id;
-      environment.region = response.data.region_id;
-      environment.es_url = `${response.data.endpoints.elasticsearch}:443`;
-      environment.kb_url = `${response.data.endpoints.kibana}:443`;
-      environment.product = response.data.type;
-    })
-    .catch((error) => {
-      onEarlyExit(`${error.code}:${error.data}`);
     });
-  return environment;
+    return {
+      name: response.data.name,
+      id: response.data.id,
+      region: response.data.region_id,
+      es_url: `${response.data.endpoints.elasticsearch}:443`,
+      kb_url: `${response.data.endpoints.kibana}:443`,
+      product: response.data.type,
+    };
+  } catch (error) {
+    log.error(`${error}`);
+  }
 }
 
 // Method to invoke the delete environment API for serverless.
 async function deleteEnvironment(
   projectId: string,
   projectName: string,
-  runnerId: string,
-  apiKey: string,
-  onEarlyExit: (msg: string) => void
+  apiKey: string
 ): Promise<void> {
-  await axios
-    .delete(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}`, {
+  try {
+    await axios.delete(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}`, {
       headers: {
         Authorization: `ApiKey ${apiKey}`,
       },
-    })
-    .then((response) => {
-      log.info(`${runnerId} : Environment ${projectName} was successfully deleted...`);
-    })
-    .catch((error) => {
-      onEarlyExit(`${error.code}:${error.data}`);
     });
+    log.info(`Environment ${projectName} was successfully deleted!`);
+  } catch (error) {
+    log.error(`${error}`);
+  }
 }
 
 // Method to reset the credentials for the created environment.
@@ -136,12 +126,10 @@ async function resetCredentials(
   environmentId: string,
   runnerId: string,
   apiKey: string
-): Promise<Credentials> {
+): Promise<Credentials | undefined> {
   log.info(`${runnerId} : Reseting credentials`);
-  const credentials = {} as Credentials;
-
-  await axios
-    .post(
+  try {
+    const response = await axios.post(
       `${BASE_ENV_URL}/api/v1/serverless/projects/security/${environmentId}/_reset-credentials`,
       {},
       {
@@ -149,15 +137,14 @@ async function resetCredentials(
           Authorization: `ApiKey ${apiKey}`,
         },
       }
-    )
-    .then((response) => {
-      credentials.password = response.data.password;
-      credentials.username = response.data.username;
-    })
-    .catch((error) => {
-      throw new Error(`${error.code}:${error.data}`);
-    });
-  return credentials;
+    );
+    return {
+      password: response.data.password,
+      username: response.data.username,
+    };
+  } catch (error) {
+    throw new Error(`${error}`);
+  }
 }
 
 // Wait until elasticsearch status goes green
@@ -369,17 +356,28 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               return process.exit(0);
             }
 
+            log.info(`${id}: Creating environment ${PROJECT_NAME}...`);
             // Creating environment for the test to run
             const environment = await createEnvironment(
               PROJECT_NAME,
-              id,
               API_KEY,
-              specFileFTRConfig,
-              onEarlyExit
+              specFileFTRConfig
             );
+
+            if (!environment) {
+              log.info('Failed to create environment.');
+              // eslint-disable-next-line no-process-exit
+              return process.exit(0);
+            }
 
             // Reset credentials for elastic user
             const credentials = await resetCredentials(environment.id, id, API_KEY);
+
+            if (!credentials) {
+              log.info('Credentials could not be reset.');
+              // eslint-disable-next-line no-process-exit
+              return process.exit(0);
+            }
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = btoa(`${credentials.username}:${credentials.password}`);
@@ -448,7 +446,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             }
 
             // Delete serverless environment
-            await deleteEnvironment(environment.id, PROJECT_NAME, id, API_KEY, onEarlyExit);
+            log.info(`${id} : Deleting Environment ${PROJECT_NAME}...`);
+            await deleteEnvironment(environment.id, PROJECT_NAME, API_KEY);
 
             return result;
           });
