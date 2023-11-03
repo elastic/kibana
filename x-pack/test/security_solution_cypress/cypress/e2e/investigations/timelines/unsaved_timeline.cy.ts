@@ -25,7 +25,7 @@ import {
 } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
-import { closeTimelineUsingToggle } from '../../../tasks/security_main';
+import { closeTimelineUsingToggle, openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   addNameAndDescriptionToTimeline,
   createNewTimeline,
@@ -54,6 +54,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServ
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
+    openTimelineUsingToggle();
     createNewTimeline();
   });
 

@@ -22,13 +22,14 @@ import {
 } from '../../mock';
 import { createStore } from '../../store';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
-import { waitFor } from '@testing-library/dom';
+import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { render } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 
@@ -526,7 +527,7 @@ describe('Sourcerer component', () => {
     wrapper.find('[data-test-subj="comboBoxClearButton"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="sourcerer-save"]').first().prop('disabled')).toBeTruthy();
   });
-  it('Does display signals index on timeline sourcerer', () => {
+  it('Does display signals index on timeline sourcerer', async () => {
     const state2 = {
       ...mockGlobalState,
       sourcerer: {
@@ -559,16 +560,21 @@ describe('Sourcerer component', () => {
     };
 
     store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="comboBoxToggleListButton"]`).first().simulate('click');
-    expect(wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).at(0).text()).toEqual(
-      mockGlobalState.sourcerer.signalIndexName
-    );
+
+    fireEvent.click(wrapper.getByTestId('timeline-sourcerer-trigger'));
+    fireEvent.click(wrapper.getByTestId('comboBoxToggleListButton'));
+
+    screen.debug(undefined, 10000000);
+    await waitFor(() => {
+      expect(screen.queryAllByTestId('sourcerer-combo-option')[0].textContent).toBe(
+        mockGlobalState.sourcerer.signalIndexName
+      );
+    });
   });
   it('Does not display signals index on default sourcerer', () => {
     const state2 = {
@@ -1003,8 +1009,6 @@ describe('Update available', () => {
     },
   };
 
-  let wrapper: ReactWrapper;
-
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
@@ -1012,7 +1016,7 @@ describe('Update available', () => {
     });
     store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-    wrapper = mount(
+    render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
@@ -1023,67 +1027,108 @@ describe('Update available', () => {
   });
 
   test('Show Update available label', () => {
-    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-badge"]`).exists()).toBeTruthy();
+    expect(screen.getByTestId('sourcerer-deprecated-badge')).toBeInTheDocument();
   });
 
   test('Show correct tooltip', () => {
-    expect(wrapper.find(`[data-test-subj="sourcerer-tooltip"]`).prop('content')).toEqual(
-      'myFakebeat-*'
-    );
+    expect(screen.getByTestId('sourcerer-tooltip').textContent).toBe('myFakebeat-*');
   });
 
   test('Show UpdateDefaultDataViewModal', () => {
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    fireEvent.click(screen.queryAllByTestId('timeline-sourcerer-trigger')[0]);
 
-    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+    fireEvent.click(screen.queryAllByTestId('sourcerer-deprecated-update')[0]);
 
-    expect(wrapper.find(`UpdateDefaultDataViewModal`).prop('isShowing')).toEqual(true);
+    expect(screen.getByTestId('sourcerer-update-data-view-modal')).toBeVisible();
+
+    // expect(wrapper.find(`UpdateDefaultDataViewModal`).prop('isShowing')).toEqual(true);
   });
 
   test('Show UpdateDefaultDataViewModal Callout', () => {
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    fireEvent.click(screen.queryAllByTestId('timeline-sourcerer-trigger')[0]);
 
-    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+    fireEvent.click(screen.queryAllByTestId('sourcerer-deprecated-update')[0]);
 
-    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
+    expect(screen.queryAllByTestId('sourcerer-deprecated-callout')[0].textContent).toBe(
       'This timeline uses a legacy data view selector'
     );
 
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
-    ).toEqual('The active index patterns in this timeline are: myFakebeat-*');
+    expect(screen.queryAllByTestId('sourcerer-current-patterns-message')[0].textContent).toBe(
+      'The active index patterns in this timeline are: myFakebeat-*'
+    );
 
-    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-message"]`).first().text()).toEqual(
+    expect(screen.queryAllByTestId('sourcerer-deprecated-message')[0].textContent).toBe(
       "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view here."
     );
+
+    // wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    //
+    // wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+    //
+    // expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
+    //   'This timeline uses a legacy data view selector'
+    // );
+    //
+    // expect(
+    //   wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
+    // ).toEqual('The active index patterns in this timeline are: myFakebeat-*');
+    //
+    // expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-message"]`).first().text()).toEqual(
+    //   "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view here."
+    // );
   });
 
   test('Show Add index pattern in UpdateDefaultDataViewModal', () => {
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    fireEvent.click(screen.queryAllByTestId('timeline-sourcerer-trigger')[0]);
 
-    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+    fireEvent.click(screen.queryAllByTestId('sourcerer-deprecated-update')[0]);
 
-    expect(wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).text()).toEqual(
+    expect(screen.queryAllByTestId('sourcerer-update-data-view')[0].textContent).toBe(
       'Add index pattern'
     );
+
+    // wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    //
+    // wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+    //
+    // expect(wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).text()).toEqual(
+    //   'Add index pattern'
+    // );
   });
 
   test('Set all the index patterns from legacy timeline to sourcerer, after clicking on "Add index pattern"', async () => {
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    fireEvent.click(screen.queryAllByTestId('timeline-sourcerer-trigger')[0]);
 
-    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+    fireEvent.click(screen.queryAllByTestId('sourcerer-deprecated-update')[0]);
 
-    wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).simulate('click');
+    fireEvent.click(screen.queryAllByTestId('sourcerer-update-data-view')[0]);
 
-    await waitFor(() => wrapper.update());
-    expect(mockDispatch).toHaveBeenCalledWith(
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.timeline,
-        selectedDataViewId: 'security-solution',
-        selectedPatterns: ['myFakebeat-*'],
-        shouldValidateSelectedPatterns: false,
-      })
-    );
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.timeline,
+          selectedDataViewId: 'security-solution',
+          selectedPatterns: ['myFakebeat-*'],
+          shouldValidateSelectedPatterns: false,
+        })
+      );
+    });
+
+    // wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    //
+    // wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+    //
+    // wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).simulate('click');
+    //
+    // await waitFor(() => wrapper.update());
+    // expect(mockDispatch).toHaveBeenCalledWith(
+    //   sourcererActions.setSelectedDataView({
+    //     id: SourcererScopeName.timeline,
+    //     selectedDataViewId: 'security-solution',
+    //     selectedPatterns: ['myFakebeat-*'],
+    //     shouldValidateSelectedPatterns: false,
+    //   })
+    // );
   });
 });
 
@@ -1212,12 +1257,19 @@ describe('Missing index patterns', () => {
   };
 
   let wrapper: ReactWrapper;
+  beforeEach(() => {
+    const pollForSignalIndexMock = jest.fn();
+    (useSignalHelpers as jest.Mock).mockReturnValue({
+      pollForSignalIndex: pollForSignalIndexMock,
+      signalIndexNeedsInit: false,
+    });
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  test('Show UpdateDefaultDataViewModal CallOut for timeline', () => {
+  test('Show UpdateDefaultDataViewModal CallOut for timeline', async () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
@@ -1226,36 +1278,33 @@ describe('Missing index patterns', () => {
     state3.timeline.timelineById[TimelineId.active].timelineType = TimelineType.default;
     store = createStore(state3, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-    wrapper = mount(
+    render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
     );
 
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    fireEvent.click(screen.getByTestId('timeline-sourcerer-trigger'));
 
-    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+    fireEvent.click(screen.getByTestId('sourcerer-deprecated-update'));
 
-    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
-      'This timeline is out of date with the Security Data View'
-    );
-
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
-    ).toEqual('The active index patterns in this timeline are: myFakebeat-*');
-
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-callout"]`).first().text()
-    ).toEqual('Security Data View is missing the following index patterns: myFakebeat-*');
-
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-message"]`).first().text()
-    ).toEqual(
-      "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
-    );
+    await waitFor(() => {
+      expect(screen.queryAllByTestId('sourcerer-deprecated-callout')[0].textContent).toBe(
+        'This timeline is out of date with the Security Data View'
+      );
+      expect(screen.queryAllByTestId('sourcerer-current-patterns-message')[0].textContent).toBe(
+        'The active index patterns in this timeline are: myFakebeat-*'
+      );
+      expect(screen.queryAllByTestId('sourcerer-missing-patterns-callout')[0].textContent).toBe(
+        'security data view is missing the following index patterns: myfakebeat-*'
+      );
+      expect(screen.queryAllByTestId('sourcerer-missing-patterns-message')[0].textContent).toBe(
+        "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
+      );
+    });
   });
 
-  test('Show UpdateDefaultDataViewModal CallOut for timeline template', () => {
+  test('Show UpdateDefaultDataViewModal CallOut for timeline template', async () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
@@ -1268,26 +1317,26 @@ describe('Missing index patterns', () => {
       </TestProviders>
     );
 
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+    fireEvent.click(screen.getByTestId('timeline-sourcerer-trigger'));
 
-    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+    fireEvent.click(screen.getByTestId('sourcerer-deprecated-update'));
 
-    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
-      'This timeline template is out of date with the Security Data View'
-    );
+    await waitFor(() => {
+      expect(screen.queryAllByTestId('sourcerer-deprecated-callout')[0].textContent).toBe(
+        'This timeline template is out of date with the Security Data View'
+      );
 
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
-    ).toEqual('The active index patterns in this timeline template are: myFakebeat-*');
+      expect(screen.queryAllByTestId('sourcerer-current-patterns-message')[0].textContent).toBe(
+        'The active index patterns in this timeline template are: myFakebeat-*'
+      );
 
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-callout"]`).first().text()
-    ).toEqual('Security Data View is missing the following index patterns: myFakebeat-*');
+      expect(screen.queryAllByTestId('sourcerer-missing-patterns-callout')[0].textContent).toBe(
+        'Security Data View is missing the following index patterns: myFakebeat-*'
+      );
 
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-message"]`).first().text()
-    ).toEqual(
-      "We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
-    );
+      expect(screen.queryAllByTestId('sourcerer-missing-patterns-message')[0].textContent).toBe(
+        "We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
+      );
+    });
   });
 });

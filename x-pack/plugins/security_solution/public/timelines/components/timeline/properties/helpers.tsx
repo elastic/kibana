@@ -82,18 +82,18 @@ AddToFavoritesButtonComponent.displayName = 'AddToFavoritesButtonComponent';
 export const AddToFavoritesButton = React.memo(AddToFavoritesButtonComponent);
 
 export interface NewTimelineProps {
-  closeGearMenu?: () => void;
+  onClick?: () => void;
   outline?: boolean;
   timelineId: string;
   title?: string;
 }
 
 export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
+  ({ onClick, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
     const { getButton } = useCreateTimelineButton({
       timelineId,
       timelineType: TimelineType.default,
-      closeGearMenu,
+      onClick,
     });
     const button = getButton({ outline, title });
 

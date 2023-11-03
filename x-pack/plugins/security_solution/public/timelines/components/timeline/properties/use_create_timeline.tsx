@@ -27,11 +27,11 @@ import { useDiscoverInTimelineContext } from '../../../../common/components/disc
 interface Props {
   timelineId?: string;
   timelineType: TimelineTypeLiteral;
-  closeGearMenu?: () => void;
+  onClick?: () => void;
   timeRange?: TimeRange;
 }
 
-export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
+export const useCreateTimeline = ({ timelineId, timelineType, onClick }: Props) => {
   const dispatch = useDispatch();
   const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
   const { id: dataViewId, patternList: selectedPatterns } =
@@ -110,12 +110,12 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
   const handleCreateNewTimeline = useCallback(
     (options?: CreateNewTimelineOptions) => {
       createTimeline({ id: timelineId, show: true, timelineType, timeRange: options?.timeRange });
-      if (typeof closeGearMenu === 'function') {
-        closeGearMenu();
+      if (typeof onClick === 'function') {
+        onClick();
       }
       resetDiscoverAppState();
     },
-    [createTimeline, timelineId, timelineType, closeGearMenu, resetDiscoverAppState]
+    [createTimeline, timelineId, timelineType, onClick, resetDiscoverAppState]
   );
 
   return handleCreateNewTimeline;
@@ -125,11 +125,11 @@ interface CreateNewTimelineOptions {
   timeRange?: TimeRange;
 }
 
-export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMenu }: Props) => {
+export const useCreateTimelineButton = ({ timelineId, timelineType, onClick }: Props) => {
   const handleCreateNewTimeline = useCreateTimeline({
     timelineId,
     timelineType,
-    closeGearMenu,
+    onClick,
   });
 
   const getButton = useCallback(

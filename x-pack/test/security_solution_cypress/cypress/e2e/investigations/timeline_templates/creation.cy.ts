@@ -113,7 +113,6 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.wait('@timeline', { timeout: 100000 });
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
     cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
   });
 });

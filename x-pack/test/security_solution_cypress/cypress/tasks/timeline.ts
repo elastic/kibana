@@ -87,6 +87,9 @@ import {
   OPEN_TIMELINE_MODAL_TIMELINE_NAMES,
   OPEN_TIMELINE_MODAL_SEARCH_BAR,
   OPEN_TIMELINE_MODAL,
+  NEW_TIMELINE_ACTION,
+  SAVE_TIMELINE_ACTION,
+  TOGGLE_DATA_PROVIDER_BTN,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -123,7 +126,7 @@ export const addNameAndDescriptionToTimeline = (
   modalAlreadyOpen: boolean = false
 ) => {
   if (!modalAlreadyOpen) {
-    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+    cy.get(SAVE_TIMELINE_ACTION).click();
   }
   cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
@@ -195,7 +198,7 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
   cy.get(ADD_FILTER).click();
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
   cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
-  cy.get(COMBO_BOX).contains(filter.operator).click();
+  cy.get(COMBO_BOX).contains(filter.operator).trigger('click');
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
@@ -311,15 +314,12 @@ export const removeDataProvider = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
-  cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
-  // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(1000);
+  cy.get(NEW_TIMELINE_ACTION).should('be.visible').trigger('click');
   cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click({ force: true });
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
+  cy.get(NEW_TIMELINE_ACTION).filter(':visible').should('be.visible').click();
 };
 
 export const closeCreateTimelineOptionsPopover = () => {
@@ -366,7 +366,6 @@ export const openTimelineInspectButton = () => {
 };
 
 export const openTimelineFromSettings = () => {
-  openCreateTimelineOptionsPopover();
   cy.get(OPEN_TIMELINE_ICON).should('be.visible');
   cy.get(OPEN_TIMELINE_ICON).click();
 };
@@ -504,4 +503,10 @@ export const openTimelineFromOpenTimelineModal = (timelineName: string) => {
   cy.get(OPEN_TIMELINE_MODAL_TIMELINE_NAMES).should('have.lengthOf', 1);
   cy.get(OPEN_TIMELINE_MODAL).should('contain.text', timelineName);
   cy.get(OPEN_TIMELINE_MODAL_TIMELINE_NAMES).first().click();
+};
+
+export const showDataProviderQueryBuilder = () => {
+  cy.get(TOGGLE_DATA_PROVIDER_BTN).should('have.attr', 'aria-pressed', 'false');
+  cy.get(TOGGLE_DATA_PROVIDER_BTN).trigger('click');
+  cy.get(TOGGLE_DATA_PROVIDER_BTN).should('have.attr', 'aria-pressed', 'true');
 };

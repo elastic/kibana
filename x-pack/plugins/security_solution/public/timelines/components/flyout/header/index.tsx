@@ -19,21 +19,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineTabs } from '../../../../../common/types/timeline';
 import type { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
-import { AddTimelineButton } from '../add_timeline_button';
 import { useKibana } from '../../../../common/lib/kibana';
-import { InspectButton } from '../../../../common/components/inspect';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { focusActiveTimelineButton } from '../../timeline/helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
+import { TimelineActionMenu } from '../action_menu';
+import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 
 interface FlyoutHeaderPanelProps {
   timelineId: string;
@@ -123,35 +121,44 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
       paddingSize="s"
       hasShadow={false}
       data-test-subj="timeline-flyout-header-panel"
+      data-show={show}
       style={{ backgroundColor: euiTheme.colors.emptyShade, color: euiTheme.colors.text }}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <AddTimelineButton timelineId={timelineId} />
-        <ActiveTimelinesContainer grow={false}>
-          <ActiveTimelines
-            timelineId={timelineId}
-            timelineType={timelineType}
-            timelineTitle={title}
-            timelineStatus={timelineStatus}
-            isOpen={show}
-            updated={updated}
-          />
-        </ActiveTimelinesContainer>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <ActiveTimelinesContainer grow={false}>
+                <ActiveTimelines
+                  timelineId={timelineId}
+                  timelineType={timelineType}
+                  timelineTitle={title}
+                  timelineStatus={timelineStatus}
+                  isOpen={show}
+                  updated={updated}
+                />
+              </ActiveTimelinesContainer>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AddToFavoritesButton timelineId={timelineId} compact />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         {show && (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-              {(activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql) && (
-                <EuiFlexItem grow={false}>
-                  <InspectButton
-                    compact
-                    queryId={`${timelineId}-${activeTab}`}
-                    inputId={InputsModelId.timeline}
-                    inspectIndex={0}
-                    isDisabled={!isDataInTimeline || combinedQueries?.filterQuery === undefined}
-                    title={i18n.INSPECT_TIMELINE_TITLE}
-                  />
-                </EuiFlexItem>
-              )}
+              <TimelineActionMenu
+                timelineId={timelineId}
+                activeTab={activeTab}
+                isInspectButtonDisabled={
+                  !isDataInTimeline || combinedQueries?.filterQuery === undefined
+                }
+              />
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}>
                   <EuiButtonIcon

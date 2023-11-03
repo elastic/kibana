@@ -154,6 +154,7 @@ export const SearchOrFilter = React.memo<Props>(
                     }
                     isSelected={isDataProviderVisible}
                     iconType={'timeline'}
+                    data-test-subj="toggle-data-provider"
                     size="m"
                     display="base"
                     aria-label={

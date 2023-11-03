@@ -53,7 +53,11 @@ export const createTimeline = (timeline: CompleteTimeline) =>
           : {}),
       },
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '2023-10-31',
+    },
   });
 
 export const createTimelineTemplate = (timeline: CompleteTimeline) =>
@@ -99,14 +103,23 @@ export const createTimelineTemplate = (timeline: CompleteTimeline) =>
         savedQueryId: null,
       },
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '2023-10-31',
+    },
   });
 
 export const loadPrepackagedTimelineTemplates = () =>
   rootRequest({
     method: 'POST',
     url: 'api/timeline/_prepackaged',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+
+      'elastic-api-version': '2023-10-31',
+    },
   });
 
 export const favoriteTimeline = ({

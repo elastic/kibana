@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { TimelineTabs } from '@kbn/securitysolution-data-table';
 import React from 'react';
+import type { TimelineTabs } from '../../../../../common/types';
 import { InspectButton } from '../../../../common/components/inspect';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { AddToCaseButton } from '../add_to_case_button';
@@ -18,7 +18,6 @@ import { SaveTimelineAction } from './save_timeline';
 interface TimelineActionMenuProps {
   mode?: 'compact' | 'normal';
   timelineId: string;
-  showInspectButton: boolean;
   isInspectButtonDisabled: boolean;
   activeTab: TimelineTabs;
 }
@@ -26,7 +25,6 @@ interface TimelineActionMenuProps {
 export const TimelineActionMenu = ({
   mode = 'normal',
   timelineId,
-  showInspectButton,
   activeTab,
   isInspectButtonDisabled,
 }: TimelineActionMenuProps) => {

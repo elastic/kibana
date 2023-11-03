@@ -47,10 +47,14 @@ export const NewTimelineAction = ({ timelineId }: NewTimelineActionProps) => {
     >
       <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
         <EuiFlexItem>
-          <NewTimeline timelineId={timelineId} title={i18n.NEW_TIMELINE} />
+          <NewTimeline timelineId={timelineId} title={i18n.NEW_TIMELINE} onClick={closePopover} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <NewTemplateTimeline timelineId={timelineId} title={i18n.NEW_TEMPLATE_TIMELINE} />
+          <NewTemplateTimeline
+            timelineId={timelineId}
+            title={i18n.NEW_TEMPLATE_TIMELINE}
+            onClick={closePopover}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopover>

@@ -181,7 +181,13 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         </EuiFlexItem>
         {filters && filters.length > 0 ? (
           <EuiFlexItem>
-            <FilterItemsContainer direction="row" gutterSize="xs" wrap={true} responsive={false}>
+            <FilterItemsContainer
+              data-test-subj="timeline-filters-container"
+              direction="row"
+              gutterSize="xs"
+              wrap={true}
+              responsive={false}
+            >
               <FilterItems
                 filters={filters}
                 onFiltersUpdated={onFiltersUpdated}

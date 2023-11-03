@@ -100,7 +100,9 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
         justifyContent="flexStart"
         responsive={false}
       >
-        <TitleConatiner grow={false}>{title}</TitleConatiner>
+        <TitleConatiner data-test-subj="timeline-title" grow={false}>
+          {title}
+        </TitleConatiner>
         {!isOpen && (
           <EuiFlexItem grow={false}>
             <TimelineEventsCountBadge />

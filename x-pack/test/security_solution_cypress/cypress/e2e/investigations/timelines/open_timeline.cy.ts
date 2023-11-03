@@ -7,11 +7,7 @@
 
 import { getTimeline } from '../../../objects/timeline';
 
-import {
-  TIMELINE_DESCRIPTION,
-  TIMELINE_TITLE,
-  OPEN_TIMELINE_MODAL,
-} from '../../../screens/timeline';
+import { TIMELINE_TITLE, OPEN_TIMELINE_MODAL } from '../../../screens/timeline';
 import {
   TIMELINES_DESCRIPTION,
   TIMELINES_PINNED_EVENT_COUNT,
@@ -26,6 +22,7 @@ import { cleanKibana } from '../../../tasks/common';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
+import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   markAsFavorite,
   openTimelineById,
@@ -66,6 +63,7 @@ describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
     beforeEach(function () {
       login();
       visit(TIMELINES_URL);
+      openTimelineUsingToggle();
       openTimelineFromSettings();
       openTimelineById(this.timelineId);
     });
@@ -78,7 +76,6 @@ describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
       cy.get(TIMELINES_NOTES_COUNT).last().should('have.text', '1');
       cy.get(TIMELINES_FAVORITE).last().should('exist');
       cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
     });
   });
 });
