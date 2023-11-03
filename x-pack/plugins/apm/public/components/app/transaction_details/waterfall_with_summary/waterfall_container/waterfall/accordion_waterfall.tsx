@@ -151,7 +151,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
             <ToggleAccordionButton
               show={hasToggle}
               isOpen={isOpen}
-              childrenCount={100425}
+              childrenCount={children.length}
               onClick={toggleAccordion}
               maxWidth={timelineMargins.left}
             />
