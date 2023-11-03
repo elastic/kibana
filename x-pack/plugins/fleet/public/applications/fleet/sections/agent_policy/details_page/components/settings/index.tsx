@@ -38,8 +38,6 @@ import { DevtoolsRequestFlyoutButton } from '../../../../../components';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import { generateUpdateAgentPolicyDevToolsRequest } from '../../../services';
 
-import { AGENT_POLICY_SETTINGS } from '../../../../settings';
-
 const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
   pick(agentPolicy, [
     'name',
