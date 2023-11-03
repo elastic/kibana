@@ -21,6 +21,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_SEVERITY,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -43,7 +44,7 @@ import {
 } from '../../../../../common/environment_filter_values';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
-  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
   formatAnomalyReason,
   RULE_TYPES_CONFIG,
 } from '../../../../../common/rules/apm_rule_types';
@@ -94,7 +95,7 @@ export function registerAnomalyRuleType({
         ],
       },
       category: DEFAULT_APP_CATEGORIES.observability.id,
-      producer: 'apm',
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({
