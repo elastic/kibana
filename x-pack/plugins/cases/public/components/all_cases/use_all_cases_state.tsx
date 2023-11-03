@@ -32,6 +32,7 @@ import { SORT_ORDER_VALUES } from '../../../common/ui/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CASES_TABLE_PERPAGE_VALUES } from './types';
 import { parseURLWithFilterOptions } from './utils/parse_url_with_filter_options';
+import { serializeUrlParams } from './utils/serialize_url_params';
 
 export const getQueryParamsLocalStorageKey = (appId: string) => {
   const filteringKey = LOCAL_STORAGE_KEYS.casesQueryParams;
@@ -213,12 +214,14 @@ export function useAllCasesState(
 
     if (!isEqual(parsedUrlParams, stateUrlParams)) {
       try {
+        const urlParams = serializeUrlParams({
+          ...parsedUrlParams,
+          ...stateUrlParams,
+        });
+
         const newHistory = {
           ...location,
-          search: stringifyToURL({ ...parsedUrlParams, ...stateUrlParams } as unknown as Record<
-            string,
-            string
-          >),
+          search: stringifyToURL(urlParams),
         };
         history.replace(newHistory);
       } catch {

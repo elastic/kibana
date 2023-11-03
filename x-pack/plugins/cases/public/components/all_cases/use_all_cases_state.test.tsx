@@ -157,7 +157,7 @@ describe('useAllCasesQueryParams', () => {
     expect(result.current.filterOptions).toMatchObject(existingLocalStorageValues);
   });
 
-  it('takes into account legacy localStorage filter values', () => {
+  it('takes into account legacy localStorage filter values as string', () => {
     const existingLocalStorageValues = { severity: 'critical', status: 'open' };
 
     localStorage.setItem(
@@ -172,6 +172,24 @@ describe('useAllCasesQueryParams', () => {
     expect(result.current.filterOptions).toMatchObject({
       severity: ['critical'],
       status: ['open'],
+    });
+  });
+
+  it('takes into account legacy localStorage filter value all', () => {
+    const existingLocalStorageValues = { severity: ['all'], status: ['all'] };
+
+    localStorage.setItem(
+      LOCALSTORAGE_FILTER_OPTIONS_KEY,
+      JSON.stringify(existingLocalStorageValues)
+    );
+
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.filterOptions).toMatchObject({
+      severity: [],
+      status: [],
     });
   });
 
@@ -204,6 +222,24 @@ describe('useAllCasesQueryParams', () => {
 
     expect(useHistory().replace).toHaveBeenCalledWith({
       search: 'severity=critical&status=open&page=1&perPage=10&sortField=createdAt&sortOrder=desc',
+    });
+  });
+
+  it('takes into account legacy url filter option "all"', () => {
+    const nonDefaultUrlParams = new URLSearchParams();
+    nonDefaultUrlParams.append('severity', 'all');
+    nonDefaultUrlParams.append('status', 'all');
+    nonDefaultUrlParams.append('status', 'open');
+    nonDefaultUrlParams.append('severity', 'low');
+
+    mockLocation.search = stringifyToURL(nonDefaultUrlParams);
+
+    renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(useHistory().replace).toHaveBeenCalledWith({
+      search: 'severity=low&status=open&page=1&perPage=10&sortField=createdAt&sortOrder=desc',
     });
   });
 

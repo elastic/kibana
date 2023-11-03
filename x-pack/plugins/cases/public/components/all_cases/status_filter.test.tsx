@@ -35,9 +35,9 @@ describe('StatusFilter', () => {
     userEvent.click(screen.getByRole('button', { name: 'Status' }));
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByRole('option', { name: 'open' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'in-progress' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'closed' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: CaseStatuses.open })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: CaseStatuses['in-progress'] })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: CaseStatuses.closed })).toBeInTheDocument();
     expect(screen.getAllByRole('option').length).toBe(3);
   });
 
@@ -46,10 +46,10 @@ describe('StatusFilter', () => {
 
     userEvent.click(screen.getByRole('button', { name: 'Status' }));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByRole('option', { name: 'open' }));
+    userEvent.click(screen.getByRole('option', { name: CaseStatuses.open }));
 
     await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith({ filterId: 'status', options: ['open'] });
+      expect(onChange).toHaveBeenCalledWith({ filterId: 'status', options: [CaseStatuses.open] });
     });
   });
 
@@ -60,7 +60,7 @@ describe('StatusFilter', () => {
     await waitForEuiPopoverOpen();
 
     expect(screen.getAllByRole('option')).toHaveLength(2);
-    expect(screen.getByRole('option', { name: 'open' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'in-progress' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: CaseStatuses.open })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: CaseStatuses['in-progress'] })).toBeInTheDocument();
   });
 });

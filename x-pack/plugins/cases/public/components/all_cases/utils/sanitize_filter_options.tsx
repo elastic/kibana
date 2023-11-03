@@ -19,12 +19,12 @@ export const removeLegacyValuesFromOptions = ({
   status: legacyStatus,
   severity: legacySeverity,
 }: {
-  status: CaseStatuses[];
-  severity: CaseSeverity[];
-}) => {
+  status: Array<CaseStatuses | 'all'>;
+  severity: Array<CaseSeverity | 'all'>;
+}): { status: CaseStatuses[]; severity: CaseSeverity[] } => {
   return {
-    status: legacyStatus?.filter(notAll).filter(Boolean),
-    severity: legacySeverity?.filter(notAll).filter(Boolean),
+    status: legacyStatus?.filter(notAll).filter(Boolean) as CaseStatuses[],
+    severity: legacySeverity?.filter(notAll).filter(Boolean) as CaseSeverity[],
   };
 };
 

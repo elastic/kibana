@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -135,7 +134,7 @@ export function CasesTableServiceProvider(
 
     async filterByTag(tag: string) {
       await common.clickAndValidate(
-        'options-filter-popover-button-Tags',
+        'options-filter-popover-button-tags',
         `options-filter-popover-item-${tag}`
       );
 
@@ -158,15 +157,16 @@ export function CasesTableServiceProvider(
       );
 
       await testSubjects.click(`options-filter-popover-item-${status}`);
+      // to close the popup
+      await testSubjects.click('options-filter-popover-button-status');
     },
 
-    async filterBySeverity(severity: CaseSeverityWithAll) {
+    async filterBySeverity(severity: CaseSeverity) {
       await common.clickAndValidate(
         'options-filter-popover-button-severity',
         `options-filter-popover-item-${severity}`
       );
       await testSubjects.click(`options-filter-popover-item-${severity}`);
-
       // to close the popup
       await testSubjects.click('options-filter-popover-button-severity');
     },
