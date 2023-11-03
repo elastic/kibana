@@ -17,7 +17,8 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { TelemetryQueue } from './queue';
 
 import type { FleetTelemetryChannel, FleetTelemetryChannelEvents } from './types';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import {} from '@kbn/cloud-plugin/server';
 
 /**
  * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/lib/telemetry/sender.ts
