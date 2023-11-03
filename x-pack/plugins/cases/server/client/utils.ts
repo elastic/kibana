@@ -31,7 +31,7 @@ import {
   UserCommentAttachmentPayloadRt,
 } from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
-import type { CasesFindQueryParams } from './types';
+import type { CasesSearchParams } from './types';
 
 import { decodeWithExcessOrThrow } from '../../common/api';
 import {
@@ -169,9 +169,7 @@ const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
   return temp;
 };
 
-const buildCategoryFilter = (
-  categories: CasesFindQueryParams['category']
-): KueryNode | undefined => {
+const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNode | undefined => {
   if (categories === undefined) {
     return;
   }
@@ -310,7 +308,7 @@ export const buildRangeFilter = ({
 export const buildAssigneesFilter = ({
   assignees,
 }: {
-  assignees: CasesFindQueryParams['assignees'];
+  assignees: CasesSearchParams['assignees'];
 }): KueryNode | undefined => {
   if (assignees === undefined) {
     return;
@@ -347,7 +345,7 @@ export const buildAssigneesFilter = ({
 export const buildCustomFieldsFilter = ({
   customFields,
 }: {
-  customFields: CasesFindQueryParams['customFields'];
+  customFields: CasesSearchParams['customFields'];
 }): KueryNode | undefined => {
   if (customFields === undefined) {
     return;
@@ -399,7 +397,7 @@ export const constructQueryOptions = ({
   assignees,
   category,
   customFields,
-}: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
+}: CasesSearchParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
   const sortByField = convertSortField(sortField);

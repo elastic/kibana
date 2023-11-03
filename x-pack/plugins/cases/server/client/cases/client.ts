@@ -8,7 +8,6 @@
 import type { Case, Cases, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
-  CasesFindRequest,
   CasesFindResponse,
   CaseResolveResponse,
   CasesBulkGetRequest,
@@ -18,6 +17,7 @@ import type {
   AllReportersFindRequest,
   GetRelatedCasesByAlertResponse,
   CasesBulkGetResponse,
+  CasesSearchRequest,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -25,7 +25,7 @@ import type { CasesClientArgs } from '../types';
 import { bulkGet } from './bulk_get';
 import { create } from './create';
 import { deleteCases } from './delete';
-import { find } from './find';
+import { search } from './search';
 import type { CasesByAlertIDParams, GetParams } from './get';
 import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
 import type { PushParams } from './push';
@@ -45,7 +45,7 @@ export interface CasesSubClient {
    *
    * If the `owner` field is left empty then all the cases that the user has access to will be returned.
    */
-  find(params: CasesFindRequest): Promise<CasesFindResponse>;
+  search(params: CasesSearchRequest): Promise<CasesFindResponse>;
   /**
    * Retrieves a single case with the specified ID.
    */
@@ -103,7 +103,7 @@ export const createCasesSubClient = (
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
     create: (data: CasePostRequest) => create(data, clientArgs, casesClient),
-    find: (params: CasesFindRequest) => find(params, clientArgs, casesClient),
+    search: (params: CasesSearchRequest) => search(params, clientArgs, casesClient),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
     bulkGet: (params) => bulkGet(params, clientArgs),

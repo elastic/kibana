@@ -9,8 +9,8 @@ import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import type { CasesFindRequest, CasesFindResponse } from '../../../common/types/api';
-import { CasesFindRequestRt, CasesFindResponseRt } from '../../../common/types/api';
+import type { CasesSearchRequest, CasesFindResponse } from '../../../common/types/api';
+import { CasesSearchRequestRt, CasesFindResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
@@ -19,7 +19,7 @@ import { constructQueryOptions, constructSearch } from '../utils';
 import { Operations } from '../../authorization';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import type { CasesFindQueryParams } from '../types';
+import type { CasesSearchParams } from '../types';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { casesCustomFields } from '../../custom_fields';
 
@@ -28,8 +28,8 @@ import { casesCustomFields } from '../../custom_fields';
  *
  * @ignore
  */
-export const find = async (
-  params: CasesFindRequest,
+export const search = async (
+  params: CasesSearchRequest,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<CasesFindResponse> => {
@@ -42,7 +42,7 @@ export const find = async (
   } = clientArgs;
 
   try {
-    const paramArgs = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrow(CasesSearchRequestRt)(params);
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
     let customFieldsMapping = null;
@@ -97,7 +97,7 @@ export const find = async (
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
 
-    const options: CasesFindQueryParams = {
+    const options: CasesSearchParams = {
       tags: paramArgs.tags,
       reporters: paramArgs.reporters,
       sortField: paramArgs.sortField,

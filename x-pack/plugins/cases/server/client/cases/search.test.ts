@@ -18,10 +18,17 @@ import {
 } from '../../../common/constants';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { mockCases } from '../../mocks';
-import { createCasesClientMockArgs, createCasesClientMockFindRequest } from '../mocks';
-import { find } from './find';
+import {
+  createCasesClientMock,
+  createCasesClientMockArgs,
+  createCasesClientMockFindRequest,
+} from '../mocks';
+import { search } from './search';
 
-describe('find', () => {
+describe('search', () => {
+  const casesClientMock = createCasesClientMock();
+  casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
   describe('constructSearch', () => {
     const clientArgs = createCasesClientMockArgs();
     const casesMap = new Map<string, Case>(
@@ -46,10 +53,10 @@ describe('find', () => {
     });
 
     it('search by uuid updates search term and adds rootSearchFields', async () => {
-      const search = uuidv1();
-      const findRequest = createCasesClientMockFindRequest({ search });
+      const searchId = uuidv1();
+      const findRequest = createCasesClientMockFindRequest({ search: searchId });
 
-      await find(findRequest, clientArgs);
+      await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
 
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
@@ -59,9 +66,9 @@ describe('find', () => {
     });
 
     it('regular search term does not cause rootSearchFields to be appended', async () => {
-      const search = 'foobar';
-      const findRequest = createCasesClientMockFindRequest({ search });
-      await find(findRequest, clientArgs);
+      const searchTerm = 'foobar';
+      const findRequest = createCasesClientMockFindRequest({ search: searchTerm });
+      await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
 
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
@@ -83,9 +90,9 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ search });
       await expect(
         // @ts-expect-error foo is an invalid field
-        find({ ...findRequest, foo: 'bar' }, clientArgs)
+        search({ ...findRequest, foo: 'bar' }, clientArgs)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
+        `"Failed to search cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
       );
     });
 
@@ -95,7 +102,7 @@ describe('find', () => {
       // @ts-expect-error
       const findRequest = createCasesClientMockFindRequest({ searchFields });
 
-      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "searchFields"'
       );
     });
@@ -106,7 +113,7 @@ describe('find', () => {
       // @ts-expect-error
       const findRequest = createCasesClientMockFindRequest({ searchFields });
 
-      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "searchFields"'
       );
     });
@@ -117,7 +124,7 @@ describe('find', () => {
       // @ts-expect-error
       const findRequest = createCasesClientMockFindRequest({ sortField });
 
-      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "sortField"'
       );
     });
@@ -127,7 +134,7 @@ describe('find', () => {
 
       const findRequest = createCasesClientMockFindRequest({ category });
 
-      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
       );
     });
@@ -137,7 +144,7 @@ describe('find', () => {
 
       const findRequest = createCasesClientMockFindRequest({ tags });
 
-      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
       );
     });
@@ -147,7 +154,7 @@ describe('find', () => {
 
       const findRequest = createCasesClientMockFindRequest({ assignees });
 
-      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
       );
     });
@@ -157,7 +164,7 @@ describe('find', () => {
 
       const findRequest = createCasesClientMockFindRequest({ reporters });
 
-      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
       );
     });
@@ -165,7 +172,7 @@ describe('find', () => {
     it('Invalid total items results in error', async () => {
       const findRequest = createCasesClientMockFindRequest({ page: 209, perPage: 100 });
 
-      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
       );
     });
@@ -176,7 +183,7 @@ describe('find', () => {
         perPage: MAX_CASES_PER_PAGE + 1,
       });
 
-      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
       );
     });
