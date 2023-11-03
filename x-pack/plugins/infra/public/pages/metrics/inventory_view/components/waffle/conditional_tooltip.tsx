@@ -48,7 +48,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const query = JSON.stringify({
     bool: {
       filter: {
-        term: { [model.fields.id]: node.id },
+        match_phrase: { [model.fields.id]: node.id },
       },
     },
   });
