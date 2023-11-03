@@ -34,10 +34,10 @@ describe('Severity form field', () => {
     userEvent.click(screen.getByRole('button', { name: 'Severity' }));
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByRole('option', { name: 'low' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'medium' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'high' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'critical' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: CaseSeverity.LOW })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: CaseSeverity.MEDIUM })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: CaseSeverity.HIGH })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: CaseSeverity.CRITICAL })).toBeInTheDocument();
     expect(screen.getAllByRole('option').length).toBe(4);
   });
 

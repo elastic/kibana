@@ -178,14 +178,14 @@ export const NO_ATTACHMENTS_ADDED = i18n.translate(
 );
 
 export const EMPTY_FILTER_MESSAGE = i18n.translate(
-  'xpack.cases.table_filters.useFilters.emptyMessage',
+  'xpack.cases.tableFilters.useFilters.emptyMessage',
   {
     defaultMessage: 'No options',
   }
 );
 
 export const OPTIONS = (totalCount: number) => {
-  return i18n.translate('x-pack.cases.table_filters.useFilters.options', {
+  return i18n.translate('x-pack.cases.tableFilters.useFilters.options', {
     values: { totalCount },
     defaultMessage: `${totalCount} {totalCount, plural, =1 {option} other {options}}`,
   });
