@@ -39,7 +39,7 @@ import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getIndexListUri } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits, DataStream } from '../../../../../../common';
-import { timeUnits } from '../../../../constants/data_streams';
+import { timeUnits } from '../../../../constants/time_units';
 import { isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { UnitField } from './unit_field';

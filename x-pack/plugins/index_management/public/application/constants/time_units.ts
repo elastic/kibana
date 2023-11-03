@@ -34,6 +34,7 @@ export const timeUnits = [
   },
 ];
 
+// These are the time units that are not supported by the UI, but are supported by the ES API.
 export const extraTimeUnits = [
   {
     value: 'ms',
