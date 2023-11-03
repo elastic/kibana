@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { splitIntoBucketsMock } from './resolve_capabilities.test.mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Capabilities } from '@kbn/core-capabilities-common';
@@ -16,6 +17,8 @@ describe('resolveCapabilities', () => {
   let request: KibanaRequest;
 
   beforeEach(() => {
+    splitIntoBucketsMock.mockClear();
+
     defaultCaps = {
       navLinks: {},
       catalogue: {},
@@ -228,6 +231,137 @@ describe('resolveCapabilities', () => {
       record: {
         entry: true,
       },
+    });
+  });
+
+  describe('caching behavior', () => {
+    it('caches results between calls for the same capability path', async () => {
+      const resolver = getCapabilitiesResolver(
+        () => defaultCaps,
+        () => []
+      );
+
+      await resolver({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(1);
+
+      await resolver({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not cache results between calls for different capability path', async () => {
+      const resolver = getCapabilitiesResolver(
+        () => defaultCaps,
+        () => []
+      );
+
+      await resolver({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(1);
+
+      await resolver({
+        request,
+        capabilityPath: ['ml.*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('caches results between calls for the same capability paths', async () => {
+      const resolver = getCapabilitiesResolver(
+        () => defaultCaps,
+        () => []
+      );
+
+      await resolver({
+        request,
+        capabilityPath: ['ml.*', 'file.*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(1);
+
+      await resolver({
+        request,
+        capabilityPath: ['ml.*', 'file.*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not cache results between calls for the same capability paths', async () => {
+      const resolver = getCapabilitiesResolver(
+        () => defaultCaps,
+        () => []
+      );
+
+      await resolver({
+        request,
+        capabilityPath: ['ml.*', 'file.*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(1);
+
+      await resolver({
+        request,
+        capabilityPath: ['ml.*', 'not-file.*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not cache results between calls from different resolvers', async () => {
+      const resolverA = getCapabilitiesResolver(
+        () => defaultCaps,
+        () => []
+      );
+      const resolverB = getCapabilitiesResolver(
+        () => defaultCaps,
+        () => []
+      );
+
+      await resolverA({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(1);
+
+      await resolverB({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(splitIntoBucketsMock).toHaveBeenCalledTimes(2);
     });
   });
 });
