@@ -43,10 +43,13 @@ export const getCapabilitiesResolver = (
   });
   // memoize is on the first argument only by default, which is what we want here
   const getSwitcherForPath: ForPathSwitcherResolver = memoize(getSwitchersToUseForPath);
-  // TODO: memoize
-  const getAggregatedSwitchers: AggregatedSwitchersResolver = buildGetAggregatedSwitchers(
-    getSwitcherForPath,
-    switcherMap
+  // memoize on the joined list of capability paths.
+  // given our usages of the resolver, less than 10 entries will be cached
+  const getAggregatedSwitchers: AggregatedSwitchersResolver = memoize(
+    buildGetAggregatedSwitchers(getSwitcherForPath, switcherMap),
+    (capabilityPaths: string[]) => {
+      return capabilityPaths.join('|');
+    }
   );
 
   // memoize is on the first argument only by default, which is what we want here
