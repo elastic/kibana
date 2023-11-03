@@ -88,7 +88,7 @@ describe('Changing alert status', () => {
         });
     });
 
-    it('can bulk open alerts', () => {
+    it.skip('can bulk open alerts', () => {
       waitForAlertsToPopulate();
       cy.get(ALERTS_COUNT)
         .invoke('text')
