@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
   allOrAnyString,
   apmTransactionDurationIndicatorSchema,
@@ -188,6 +189,7 @@ const fetchHistoricalSummaryResponseSchema = t.array(
 const findSloDefinitionsParamsSchema = t.partial({
   query: t.partial({
     search: t.string,
+    includeOutdatedOnly: toBooleanRt,
     page: t.string,
     perPage: t.string,
   }),
