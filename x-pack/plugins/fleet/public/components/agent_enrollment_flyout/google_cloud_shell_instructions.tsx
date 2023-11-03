@@ -27,6 +27,7 @@ export const GoogleCloudShellInstructions: React.FunctionComponent<Props> = ({
       <GoogleCloudShellGuide commandText={cloudShellCommand} hasProjectId={!!projectId} />
       <EuiSpacer size="m" />
       <EuiButton
+        data-test-subj="launchGoogleCloudShellButtonAgentFlyoutTestId"
         color="primary"
         fill
         target="_blank"

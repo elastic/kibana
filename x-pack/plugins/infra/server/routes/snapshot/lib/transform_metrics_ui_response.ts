@@ -6,7 +6,7 @@
  */
 
 import { get, max, sum, last, isNumber } from 'lodash';
-import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import {
   MetricsAPIResponse,
   SnapshotNodeResponse,
