@@ -39,7 +39,7 @@ export const StreamComment = ({
     reader,
   });
 
-  const currentState = useRef({ isStreaming, pendingMessage, setComplete });
+  const currentState = useRef({ isStreaming, pendingMessage, amendMessage });
 
   useEffect(() => {
     currentState.current = { isStreaming, pendingMessage, amendMessage };
