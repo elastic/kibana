@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/response_actions';
 import {
@@ -25,7 +26,9 @@ describe(
   () => {
     let ruleId: string;
     let ruleName: string;
-
+    before(() => {
+      initializeDataViews();
+    });
     beforeEach(() => {
       loadRule().then((data) => {
         ruleId = data.id;
