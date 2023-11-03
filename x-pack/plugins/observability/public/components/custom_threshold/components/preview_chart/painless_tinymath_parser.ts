@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-// THIS IS A PARSER FOR A SUB operations/expression/statement of TinyMath  A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =
+// This is a parser of a subset operations/expression/statement of Painless  A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, = to be used in Lens formula editor that uses TinyMath
+// The goal is to parse painless expressions to a format that can be used in Lens formula editor
+// The parser will also replace the characters A-Z with the values from aggMap
+// Example: "A > 0 ? 10 : 20" will be parsed to "ifelse(average(system.cpu.system.pct) > 0, 10, 20)"
+// Technically, this parser is NOT following the normal rules of parsing, means building AST, grammar file, tokenizer, and handling function, because it is a subset of Painless
+// This parser is using a simple recursive function to parse the expression and replace the characters with the values from aggMap
 
 export interface AggMap {
   [key: string]: any;
