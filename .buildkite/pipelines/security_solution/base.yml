@@ -1,0 +1,11 @@
+steps:
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/mki_security_solution_cypress.sh
+    label: 'Serverless Security Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    # timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
