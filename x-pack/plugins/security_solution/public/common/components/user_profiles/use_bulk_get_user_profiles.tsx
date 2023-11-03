@@ -9,7 +9,9 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../lib/kibana';
+import { useKibana } from '../../lib/kibana';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { USER_PROFILES_FAILURE } from './translations';
 
 export interface BulkGetUserProfilesArgs {
   security: SecurityPluginStart;
@@ -28,6 +30,7 @@ export const bulkGetUserProfiles = async ({
 
 export const useBulkGetUserProfiles = ({ uids }: { uids: Set<string> }) => {
   const { security } = useKibana().services;
+  const { addError } = useAppToasts();
 
   return useQuery<UserProfileWithAvatar[]>(
     ['useBulkGetUserProfiles', ...uids],
@@ -37,6 +40,9 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: Set<string> }) => {
     {
       retry: false,
       staleTime: Infinity,
+      onError: (e) => {
+        addError(e, { title: USER_PROFILES_FAILURE });
+      },
     }
   );
 };

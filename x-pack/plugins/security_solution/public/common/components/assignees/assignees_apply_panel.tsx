@@ -18,7 +18,7 @@ import * as i18n from './translations';
 import type { AssigneesIdsSelection, AssigneesProfilesSelection } from './types';
 import { NO_ASSIGNEES_VALUE } from './constants';
 import { useSuggestUsers } from '../user_profiles/use_suggest_users';
-import { useGetUserProfiles } from '../user_profiles/use_get_user_profiles';
+import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { bringCurrentUserToFrontAndSort, removeNoAssigneesSelection } from './utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
 
@@ -60,16 +60,19 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
     onSelectionChange,
     onAssigneesApply,
   }) => {
-    const { userProfile: currentUserProfile } = useGetCurrentUser();
+    const { data: currentUserProfile } = useGetCurrentUser();
     const existingIds = useMemo(
-      () => removeNoAssigneesSelection(assignedUserIds),
+      () => new Set(removeNoAssigneesSelection(assignedUserIds)),
       [assignedUserIds]
     );
-    const { loading: isLoadingAssignedUsers, userProfiles: assignedUsers } =
-      useGetUserProfiles(existingIds);
+    const { isLoading: isLoadingAssignedUsers, data: assignedUsers } = useBulkGetUserProfiles({
+      uids: existingIds,
+    });
 
     const [searchTerm, setSearchTerm] = useState('');
-    const { loading: isLoadingSuggestedUsers, userProfiles } = useSuggestUsers(searchTerm);
+    const { isLoading: isLoadingSuggestedUsers, data: userProfiles } = useSuggestUsers({
+      searchTerm,
+    });
 
     const searchResultProfiles = useMemo(() => {
       const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
@@ -83,7 +86,7 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
 
     const [selectedAssignees, setSelectedAssignees] = useState<AssigneesProfilesSelection[]>([]);
     useEffect(() => {
-      if (isLoadingAssignedUsers) {
+      if (isLoadingAssignedUsers || !assignedUsers) {
         return;
       }
       const hasNoAssigneesSelection = assignedUserIds.find((uid) => uid === NO_ASSIGNEES_VALUE);

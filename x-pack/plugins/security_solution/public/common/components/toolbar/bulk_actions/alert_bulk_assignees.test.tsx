@@ -9,14 +9,16 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../mock';
-import { useGetUserProfiles } from '../../user_profiles/use_get_user_profiles';
+import { useGetCurrentUser } from '../../user_profiles/use_get_current_user';
+import { useBulkGetUserProfiles } from '../../user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 
-jest.mock('../../user_profiles/use_get_user_profiles');
+jest.mock('../../user_profiles/use_get_current_user');
+jest.mock('../../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../user_profiles/use_suggest_users');
 
 const mockUserProfiles = [
@@ -53,13 +55,17 @@ const mockAlertsWithAssignees = [
   },
 ];
 
-(useGetUserProfiles as jest.Mock).mockReturnValue({
-  loading: false,
-  userProfiles: mockUserProfiles,
+(useGetCurrentUser as jest.Mock).mockReturnValue({
+  isLoading: false,
+  data: mockUserProfiles[0],
+});
+(useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+  isLoading: false,
+  data: mockUserProfiles,
 });
 (useSuggestUsers as jest.Mock).mockReturnValue({
-  loading: false,
-  userProfiles: mockSuggestedUserProfiles,
+  isLoading: false,
+  data: mockSuggestedUserProfiles,
 });
 
 const renderAssigneesMenu = (

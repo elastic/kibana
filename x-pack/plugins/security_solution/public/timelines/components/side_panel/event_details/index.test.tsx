@@ -73,15 +73,15 @@ jest.mock(
   }
 );
 
-jest.mock('../../../../common/components/user_profiles/use_get_user_profiles', () => {
+jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
   return {
-    useGetUserProfiles: jest.fn().mockReturnValue({ loading: false, userProfiles: [] }),
+    useBulkGetUserProfiles: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
   };
 });
 
 jest.mock('../../../../common/components/user_profiles/use_suggest_users', () => {
   return {
-    useSuggestUsers: jest.fn().mockReturnValue({ loading: false, userProfiles: [] }),
+    useSuggestUsers: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
   };
 });
 

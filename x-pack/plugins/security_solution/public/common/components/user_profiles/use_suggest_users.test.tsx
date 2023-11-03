@@ -12,6 +12,7 @@ import * as api from './api';
 import { mockUserProfiles } from './mock';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
+import { TestProviders } from '../../mock';
 
 jest.mock('./api');
 jest.mock('../../hooks/use_app_toasts');
@@ -26,12 +27,12 @@ describe('useSuggestUsers hook', () => {
 
   it('returns an array of userProfiles', async () => {
     const spyOnUserProfiles = jest.spyOn(api, 'suggestUsers');
-    const { result, waitForNextUpdate } = renderHook(() => useSuggestUsers(''));
+    const { result, waitForNextUpdate } = renderHook(() => useSuggestUsers({ searchTerm: '' }), {
+      wrapper: TestProviders,
+    });
     await waitForNextUpdate();
     expect(spyOnUserProfiles).toHaveBeenCalledTimes(1);
-    expect(result.current).toEqual({
-      loading: false,
-      userProfiles: mockUserProfiles,
-    });
+    expect(result.current.isLoading).toEqual(false);
+    expect(result.current.data).toEqual(mockUserProfiles);
   });
 });

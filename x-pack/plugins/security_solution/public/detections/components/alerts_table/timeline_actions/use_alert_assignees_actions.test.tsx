@@ -17,13 +17,13 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useGetCurrentUser } from '../../../../common/components/user_profiles/use_get_current_user';
-import { useGetUserProfiles } from '../../../../common/components/user_profiles/use_get_user_profiles';
+import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
 jest.mock('../../../../common/components/user_profiles/use_get_current_user');
-jest.mock('../../../../common/components/user_profiles/use_get_user_profiles');
+jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
 
 const mockUserProfiles = [
@@ -164,16 +164,16 @@ describe('useAlertAssigneesActions', () => {
   it('should render the nested panel', async () => {
     (useSetAlertAssignees as jest.Mock).mockReturnValue(jest.fn());
     (useGetCurrentUser as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfile: mockUserProfiles[0],
+      isLoading: false,
+      data: mockUserProfiles[0],
     });
-    (useGetUserProfiles as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: mockUserProfiles,
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles,
     });
     (useSuggestUsers as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: mockUserProfiles,
+      isLoading: false,
+      data: mockUserProfiles,
     });
 
     const { result } = renderHook(() => useAlertAssigneesActions(defaultProps), {

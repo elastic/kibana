@@ -16,13 +16,13 @@ import type {
 import { useBulkAlertAssigneesItems } from './use_bulk_alert_assignees_items';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
 import { useGetCurrentUser } from '../../user_profiles/use_get_current_user';
-import { useGetUserProfiles } from '../../user_profiles/use_get_user_profiles';
+import { useBulkGetUserProfiles } from '../../user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 
 jest.mock('./use_set_alert_assignees');
 jest.mock('../../user_profiles/use_get_current_user');
-jest.mock('../../user_profiles/use_get_user_profiles');
+jest.mock('../../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../user_profiles/use_suggest_users');
 
 const mockUserProfiles = [
@@ -55,16 +55,16 @@ describe('useBulkAlertAssigneesItems', () => {
   beforeEach(() => {
     (useSetAlertAssignees as jest.Mock).mockReturnValue(jest.fn());
     (useGetCurrentUser as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfile: mockUserProfiles[0],
+      isLoading: false,
+      data: mockUserProfiles[0],
     });
-    (useGetUserProfiles as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: mockUserProfiles,
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles,
     });
     (useSuggestUsers as jest.Mock).mockReturnValue({
-      loading: false,
-      userProfiles: mockUserProfiles,
+      isLoading: false,
+      data: mockUserProfiles,
     });
   });
 
