@@ -130,11 +130,14 @@ async function generateData({
       carrierMCC: '440',
     });
 
-  return await synthtraceEsClient.index([
+  const timestamps = [];
+
+  await synthtraceEsClient.index([
     timerange(start, end)
       .interval('5m')
       .rate(1)
       .generator((timestamp) => {
+        timestamps.push(timestamp);
         galaxy10.startNewSession();
         galaxy7.startNewSession();
         huaweiP2.startNewSession();
@@ -174,6 +177,7 @@ async function generateData({
         ];
       }),
   ]);
+  return { timestamps };
 }
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -233,8 +237,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('Location stats', { config: 'basic', archives: [] }, () => {
+    let dataGenerated = {};
     before(async () => {
-      await generateData({
+      dataGenerated = await generateData({
         synthtraceEsClient,
         start,
         end,
@@ -307,6 +312,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: 'production',
           kuery: `service.version:"1.1"`,
         });
+
+        const timestamps = dataGenerated.timestamps;
+        expect(
+          response.currentPeriod.mostSessions.timeseries.every((item) =>
+            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
+          )
+        ).to.eql(true);
+        expect(
+          response.currentPeriod.mostRequests.timeseries.every((item) =>
+            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
+          )
+        ).to.eql(true);
+        expect(
+          response.currentPeriod.mostCrashes.timeseries.every((item) =>
+            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
+          )
+        ).to.eql(true);
+        expect(
+          response.currentPeriod.mostLaunches.timeseries.every((item) =>
+            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
+          )
+        ).to.eql(true);
 
         expect(response.currentPeriod.mostSessions.value).to.eql(3);
         expect(response.currentPeriod.mostRequests.value).to.eql(3);
