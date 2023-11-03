@@ -12,16 +12,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiNotificationBadge,
   EuiPopover,
   EuiPopoverTitle,
+  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START } from '@kbn/rule-data-utils';
 import { pick } from 'lodash';
-import React, { useMemo, useRef, type FC } from 'react';
+import React, { type FC, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import { PanelHeaderItems } from '../../components/collapsible_panel';
 import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
@@ -37,6 +40,7 @@ import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import type { AppStateSelectedCells, SwimlaneData } from '../explorer_utils';
 import { Y_AXIS_LABEL_WIDTH } from '../swimlane_annotation_container';
 import { CELL_HEIGHT } from '../swimlane_container';
+import { statusNameMap } from './const';
 
 export interface SwimLaneWrapperProps {
   selection?: AppStateSelectedCells | null;
@@ -122,24 +126,49 @@ export const SwimLaneWrapper: FC<SwimLaneWrapperProps> = ({
             <EuiFlexGroup gutterSize={'none'} justifyContent={'spaceBetween'} alignItems={'center'}>
               <EuiFlexItem grow={false}>
                 <FormattedMessage
-                  id="xpack.ml.explorer.totalSelectedAlerts"
-                  defaultMessage="Total alerts: {total}"
-                  values={{ total: selectedAlerts?.length ?? 0 }}
+                  id="xpack.ml.explorer.alertsPanel.header"
+                  defaultMessage="Alerts"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  size="s"
-                  color={'text'}
-                  iconType={'cross'}
-                  onClick={() => anomalyTimelineStateService.setSelectedCells()}
-                  aria-label={i18n.translate(
-                    'xpack.ml.explorer.cellSelectionPopover.closeButtonAriaLabel',
-                    {
-                      defaultMessage: 'Close popover',
-                    }
-                  )}
-                />
+                <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
+                  <EuiFlexItem>
+                    <PanelHeaderItems
+                      compressed
+                      headerItems={Object.entries(
+                        anomalyDetectionAlertsStateService.countAlertsByStatus(
+                          selectedAlerts ?? []
+                        ) ?? {}
+                      ).map(([status, count]) => {
+                        return (
+                          <EuiText size={'xs'}>
+                            {statusNameMap[status]}{' '}
+                            <EuiNotificationBadge
+                              size="s"
+                              color={status === 'active' ? 'accent' : 'subdued'}
+                            >
+                              {count}
+                            </EuiNotificationBadge>
+                          </EuiText>
+                        );
+                      })}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      size="s"
+                      color={'text'}
+                      iconType={'cross'}
+                      onClick={() => anomalyTimelineStateService.setSelectedCells()}
+                      aria-label={i18n.translate(
+                        'xpack.ml.explorer.cellSelectionPopover.closeButtonAriaLabel',
+                        {
+                          defaultMessage: 'Close popover',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPopoverTitle>
@@ -235,8 +264,7 @@ export const MiniAlertTable: FC<MiniAlertTableProps> = ({ data }) => {
           ? {
               compressed: true,
               initialPageSize: ALERT_PER_PAGE,
-              pageSizeOptions: [ALERT_PER_PAGE],
-              pageSize: ALERT_PER_PAGE,
+              pageSizeOptions: [3, 5, 10],
             }
           : false
       }

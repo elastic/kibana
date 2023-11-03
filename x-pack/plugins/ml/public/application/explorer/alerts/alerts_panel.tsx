@@ -26,18 +26,7 @@ import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_
 import { CollapsiblePanel } from '../../components/collapsible_panel';
 import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
-
-const statusNameMap: Record<string, string> = {
-  active: i18n.translate('xpack.ml.explorer.alertsPanel.statusNameMap.active', {
-    defaultMessage: 'Active',
-  }),
-  recovered: i18n.translate('xpack.ml.explorer.alertsPanel.statusNameMap.recovered', {
-    defaultMessage: 'Recovered',
-  }),
-  untracked: i18n.translate('xpack.ml.explorer.alertsPanel.statusNameMap.untracked', {
-    defaultMessage: 'Untracked',
-  }),
-};
+import { statusNameMap } from './const';
 
 export const AlertsPanel: FC = () => {
   const {

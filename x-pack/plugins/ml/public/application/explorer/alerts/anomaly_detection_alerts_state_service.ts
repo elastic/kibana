@@ -120,6 +120,20 @@ export class AnomalyDetectionAlertsStateService extends StateService {
     this._init();
   }
 
+  public countAlertsByStatus(alerts: AnomalyDetectionAlert[]): Record<string, number> {
+    return alerts.reduce(
+      (acc, alert) => {
+        if (!isDefined(acc[alert[ALERT_STATUS]])) {
+          acc[alert[ALERT_STATUS]] = 0;
+        } else {
+          acc[alert[ALERT_STATUS]]++;
+        }
+        return acc;
+      },
+      { active: 0, recovered: 0 } as Record<string, number>
+    );
+  }
+
   public readonly anomalyDetectionAlerts$: Observable<AnomalyDetectionAlert[]> =
     this._aadAlerts$.asObservable();
 
@@ -129,17 +143,7 @@ export class AnomalyDetectionAlertsStateService extends StateService {
 
   public readonly countByStatus$: Observable<Record<string, number>> = this._aadAlerts$.pipe(
     map((alerts) => {
-      return alerts.reduce(
-        (acc, alert) => {
-          if (!isDefined(acc[alert[ALERT_STATUS]])) {
-            acc[alert[ALERT_STATUS]] = 0;
-          } else {
-            acc[alert[ALERT_STATUS]]++;
-          }
-          return acc;
-        },
-        { active: 0, recovered: 0 } as Record<string, number>
-      );
+      return this.countAlertsByStatus(alerts);
     })
   );
 
