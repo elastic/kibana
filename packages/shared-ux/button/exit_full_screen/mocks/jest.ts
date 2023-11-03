@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
+import { of } from 'rxjs';
+import type {
   ExitFullScreenButtonKibanaDependencies,
   ExitFullScreenButtonServices,
-} from '@kbn/shared-ux-button-exit-full-screen-types';
-import { of } from 'rxjs';
+} from '../types';
 
 /**
  * Return a Jest mock of the services for the `ExitFullScreenButton` component.

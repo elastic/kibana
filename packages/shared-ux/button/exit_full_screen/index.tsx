@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { ExitFullScreenButtonProps } from './exit_full_screen_button';
-export { ExitFullScreenButton } from './exit_full_screen_button';
+export { ExitFullScreenButtonKibanaProvider } from './src/services';
+export { ExitFullScreenButton } from './src/exit_full_screen_button';
+export type { ExitFullScreenButtonProps, ExitFullScreenButtonKibanaDependencies } from './types';
