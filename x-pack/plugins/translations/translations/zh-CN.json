@@ -21714,7 +21714,6 @@
     "xpack.maps.layer.isUsingSearchMsg": "全局搜索缩减的结果",
     "xpack.maps.layer.isUsingTimeFilter": "全局时间缩减的结果",
     "xpack.maps.layer.layerHiddenTooltip": "图层已隐藏。",
-    "xpack.maps.layer.loadWarningAriaLabel": "加载警告",
     "xpack.maps.layerControl.addLayerButtonLabel": "添加图层",
     "xpack.maps.layerControl.closeLayerTOCButtonAriaLabel": "折叠图层面板",
     "xpack.maps.layerControl.hideAllLayersButton": "隐藏所有图层",
