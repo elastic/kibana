@@ -76,9 +76,7 @@ describe('EditConnector ', () => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     expect(screen.getByTestId('edit-connectors-submit')).toBeInTheDocument();
 
@@ -122,9 +120,7 @@ describe('EditConnector ', () => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await userEvent.click(screen.getByTestId('edit-connectors-submit'));
 

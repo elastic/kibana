@@ -59,7 +59,7 @@ describe('CloseAlert', () => {
     expect(within(screen.getByTestId('noteTextArea')).getByText('a note')).toBeInTheDocument();
   });
 
-  it('renders the additional form fields with the subActionParam values', () => {
+  it('renders the additional form fields with the subActionParam values', async () => {
     render(
       <CloseAlert
         {...{
@@ -89,7 +89,7 @@ describe('CloseAlert', () => {
     ['user', 'userInput', 'a user', editOptionalSubAction],
   ])(
     'calls the callback for field %s data-test-subj %s with input %s',
-    (field, dataTestSubj, input, callback) => {
+    async (field, dataTestSubj, input, callback) => {
       render(<CloseAlert {...options} />);
 
       await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
@@ -100,7 +100,7 @@ describe('CloseAlert', () => {
     }
   );
 
-  it('shows the additional options when clicking the more options button', () => {
+  it('shows the additional options when clicking the more options button', async () => {
     render(<CloseAlert {...options} />);
 
     await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));

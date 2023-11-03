@@ -210,7 +210,7 @@ describe('Jira Fields', () => {
     expect(screen.queryByTestId('search-parent-issues')).not.toBeVisible();
   });
 
-  it('sets issue type correctly', () => {
+  it('sets issue type correctly', async () => {
     appMockRenderer.render(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
@@ -221,7 +221,7 @@ describe('Jira Fields', () => {
     expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
   });
 
-  it('sets priority correctly', () => {
+  it('sets priority correctly', async () => {
     appMockRenderer.render(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />

@@ -727,7 +727,8 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
-      await userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
+      screen.getByTestId('custom-field-label-input').focus();
+      await userEvent.paste('!!');
 
       await userEvent.click(screen.getByTestId('text-custom-field-options'));
 
@@ -784,7 +785,8 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
-      await userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+      screen.getByTestId('custom-field-label-input').focus();
+      await userEvent.paste('Summary');
 
       await userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 

@@ -253,7 +253,7 @@ describe('Severity form field', () => {
       expect(screen.getByTestId('do-not-show-warning')).toBeInTheDocument();
     });
 
-    it('should dismiss warning correctly', () => {
+    it('should dismiss warning correctly', async () => {
       appMockRender.render(
         <CasesTableUtilityBar
           {...{
@@ -305,7 +305,7 @@ describe('Severity form field', () => {
         expect(localStorage.getItem(localStorageKey)).toBe(null);
       });
 
-      it('should hide warning correctly when do not show button clicked', () => {
+      it('should hide warning correctly when do not show button clicked', async () => {
         appMockRender.render(
           <CasesTableUtilityBar
             {...{

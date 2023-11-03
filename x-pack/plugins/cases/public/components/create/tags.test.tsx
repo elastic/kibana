@@ -99,7 +99,8 @@ describe('Tags', () => {
       </MockHookWrapperComponent>
     );
 
-    await userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
+    screen.getByRole('combobox').focus();
+    await userEvent.paste(`${longTag}`);
     await userEvent.keyboard('{enter}');
 
     await waitFor(() => {

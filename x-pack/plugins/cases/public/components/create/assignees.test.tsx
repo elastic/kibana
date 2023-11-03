@@ -85,9 +85,7 @@ describe('Assignees', () => {
       expect(result.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    act(() => {
-      await userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
-    });
+    await userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
@@ -108,9 +106,7 @@ describe('Assignees', () => {
       expect(result.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    act(() => {
-      await userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
-    });
+    await userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
@@ -144,9 +140,7 @@ describe('Assignees', () => {
       expect(result.getByText(`${currentUserProfile.user.full_name}`)).toBeInTheDocument();
     });
 
-    act(() => {
-      await userEvent.click(result.getByText(`${currentUserProfile.user.full_name}`));
-    });
+    await userEvent.click(result.getByText(`${currentUserProfile.user.full_name}`));
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
@@ -188,18 +182,14 @@ describe('Assignees', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    act(() => {
-      await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
-    });
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     await waitFor(() => {
       expect(screen.getByText('Turtle')).toBeInTheDocument();
       expect(screen.getByText('turtle')).toBeInTheDocument();
     });
 
-    act(() => {
-      await userEvent.click(screen.getByText('Turtle'));
-    });
+    await userEvent.click(screen.getByText('Turtle'));
 
     // ensure that the similar user is still available for selection
     await waitFor(() => {

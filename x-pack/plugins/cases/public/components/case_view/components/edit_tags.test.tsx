@@ -144,7 +144,8 @@ describe('EditTags ', () => {
       expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
     });
 
-    await userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
+    screen.getByRole('combobox').focus();
+    await userEvent.paste(`${longTag}`);
     await userEvent.keyboard('{enter}');
 
     await waitFor(() => {

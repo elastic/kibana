@@ -65,8 +65,6 @@ describe('UserActionMarkdown ', () => {
 
       await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
-      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
-
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
         expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
@@ -87,13 +85,12 @@ describe('UserActionMarkdown ', () => {
     });
 
     it('Shows error message and save button disabled if current text is too long', async () => {
-      const longComment = 'b'.repeat(MAX_COMMENT_LENGTH + 1);
+      const longComment = 'c'.repeat(MAX_COMMENT_LENGTH + 1);
 
       appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
-
-      await userEvent.paste(markdown, longComment);
+      screen.getByTestId('euiMarkdownEditorTextArea').focus();
+      await userEvent.paste(longComment);
 
       await waitFor(() => {
         expect(

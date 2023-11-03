@@ -93,9 +93,7 @@ describe('useActions', () => {
       expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
     });
 
-    await userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`));
 
     await waitFor(() => {
       expect(res.getByTestId('cases-bulk-action-status-open')).toBeInTheDocument();
@@ -126,13 +124,7 @@ describe('useActions', () => {
       expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
     });
 
-    await userEvent.click(
-      res.getByTestId(`case-action-severity-panel-${basicCase.id}`),
-      undefined,
-      {
-        skipPointerEventsCheck: true,
-      }
-    );
+    await userEvent.click(res.getByTestId(`case-action-severity-panel-${basicCase.id}`));
 
     await waitFor(() => {
       expect(res.getByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
@@ -171,9 +163,7 @@ describe('useActions', () => {
       expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
     });
 
-    await userEvent.click(res.getByTestId('cases-action-copy-id'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await userEvent.click(res.getByTestId('cases-action-copy-id'));
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
 
@@ -199,9 +189,7 @@ describe('useActions', () => {
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
       });
 
-      await userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
       await waitFor(() => {
         expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
@@ -228,17 +216,13 @@ describe('useActions', () => {
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
       });
 
-      await userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
       await waitFor(() => {
         expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
       });
 
-      await userEvent.click(res.getByTestId('confirmModalCancelButton'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(res.getByTestId('confirmModalCancelButton'));
 
       expect(res.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
     });
@@ -261,9 +245,7 @@ describe('useActions', () => {
         expect(res.getByTestId('cases-bulk-action-tags')).toBeInTheDocument();
       });
 
-      await userEvent.click(res.getByTestId('cases-bulk-action-tags'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(res.getByTestId('cases-bulk-action-tags'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
@@ -301,9 +283,7 @@ describe('useActions', () => {
         expect(res.getByTestId('cases-bulk-action-assignees')).toBeInTheDocument();
       });
 
-      await userEvent.click(res.getByTestId('cases-bulk-action-assignees'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();

@@ -94,10 +94,8 @@ describe('Create ', () => {
 
     const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
 
-    await userEvent.paste(
-      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
-      sampleText
-    );
+    screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`).focus();
+    await userEvent.paste(sampleText);
 
     await userEvent.click(screen.getByText('Submit'));
 
@@ -123,10 +121,8 @@ describe('Create ', () => {
 
     const sampleText = 'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1);
 
-    await userEvent.paste(
-      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
-      sampleText
-    );
+    screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`).focus();
+    await userEvent.paste(sampleText);
 
     await userEvent.click(screen.getByText('Submit'));
 
@@ -150,10 +146,8 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    await userEvent.paste(
-      screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
-      ''
-    );
+    screen.getByTestId(`${customFieldConfiguration.key}-text-create-custom-field`).focus();
+    await userEvent.paste('');
 
     await userEvent.click(screen.getByText('Submit'));
 

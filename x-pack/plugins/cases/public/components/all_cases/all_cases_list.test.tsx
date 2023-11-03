@@ -710,13 +710,7 @@ describe('AllCasesListGeneric', () => {
 
       await waitForEuiPopoverOpen();
 
-      await userEvent.click(
-        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
-      );
+      await userEvent.click(getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`));
 
       expect(useGetCasesMock).toBeCalledWith({
         filterOptions: {
@@ -733,13 +727,7 @@ describe('AllCasesListGeneric', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
       });
 
-      await userEvent.click(
-        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
-      );
+      await userEvent.click(getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`));
 
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
         filterOptions: {
@@ -826,9 +814,7 @@ describe('AllCasesListGeneric', () => {
 
           await userEvent.click(screen.getByText('Bulk actions'));
 
-          await userEvent.click(screen.getByTestId('case-bulk-action-status'), undefined, {
-            skipPointerEventsCheck: true,
-          });
+          await userEvent.click(screen.getByTestId('case-bulk-action-status'));
 
           await waitFor(() => {
             expect(screen.getByTestId(`cases-bulk-action-status-${status}`)).toBeInTheDocument();
@@ -866,9 +852,7 @@ describe('AllCasesListGeneric', () => {
 
         await userEvent.click(screen.getByText('Bulk actions'));
 
-        await userEvent.click(screen.getByTestId('case-bulk-action-severity'), undefined, {
-          skipPointerEventsCheck: true,
-        });
+        await userEvent.click(screen.getByTestId('case-bulk-action-severity'));
 
         await waitFor(() => {
           expect(screen.getByTestId(`cases-bulk-action-severity-${severity}`)).toBeInTheDocument();
@@ -900,9 +884,7 @@ describe('AllCasesListGeneric', () => {
 
         await userEvent.click(screen.getByText('Bulk actions'));
 
-        await userEvent.click(screen.getByTestId('cases-bulk-action-delete'), undefined, {
-          skipPointerEventsCheck: true,
-        });
+        await userEvent.click(screen.getByTestId('cases-bulk-action-delete'));
 
         expect(screen.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
 
@@ -976,13 +958,7 @@ describe('AllCasesListGeneric', () => {
 
         expect(screen.getByTestId(`case-action-status-panel-${theCase.id}`)).toBeInTheDocument();
 
-        await userEvent.click(
-          screen.getByTestId(`case-action-status-panel-${theCase.id}`),
-          undefined,
-          {
-            skipPointerEventsCheck: true,
-          }
-        );
+        await userEvent.click(screen.getByTestId(`case-action-status-panel-${theCase.id}`));
 
         await waitFor(() => {
           expect(screen.getByTestId(`cases-bulk-action-status-${status}`)).toBeInTheDocument();
@@ -1009,13 +985,7 @@ describe('AllCasesListGeneric', () => {
 
         expect(screen.getByTestId(`case-action-severity-panel-${theCase.id}`)).toBeInTheDocument();
 
-        await userEvent.click(
-          screen.getByTestId(`case-action-severity-panel-${theCase.id}`),
-          undefined,
-          {
-            skipPointerEventsCheck: true,
-          }
-        );
+        await userEvent.click(screen.getByTestId(`case-action-severity-panel-${theCase.id}`));
 
         await waitFor(() => {
           expect(screen.getByTestId(`cases-bulk-action-severity-${severity}`)).toBeInTheDocument();
@@ -1040,9 +1010,7 @@ describe('AllCasesListGeneric', () => {
 
         expect(screen.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
 
-        await userEvent.click(screen.getByTestId('cases-bulk-action-delete'), undefined, {
-          skipPointerEventsCheck: true,
-        });
+        await userEvent.click(screen.getByTestId('cases-bulk-action-delete'));
 
         expect(screen.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
 

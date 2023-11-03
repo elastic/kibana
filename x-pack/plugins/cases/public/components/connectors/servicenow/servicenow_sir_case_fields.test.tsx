@@ -162,7 +162,7 @@ describe('ServiceNowSIR Fields', () => {
     const checkboxes = ['destIp', 'sourceIp', 'malwareHash', 'malwareUrl'];
 
     checkboxes.forEach((subj) =>
-      it(`${subj.toUpperCase()}`, () => {
+      it(`${subj.toUpperCase()}`, async () => {
         appMockRenderer.render(
           <MockFormWrapperComponent fields={fields}>
             <Fields connector={connector} />

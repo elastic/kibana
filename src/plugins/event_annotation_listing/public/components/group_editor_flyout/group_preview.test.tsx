@@ -21,7 +21,7 @@ import {
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -48,21 +48,17 @@ class EuiSuperDatePickerTestHarness {
     };
   }
 
-  static togglePopover() {
+  static async togglePopover() {
     await userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
   }
 
   static async selectCommonlyUsedRange(label: string) {
-    if (!screen.queryByText('Commonly used')) this.togglePopover();
+    if (!screen.queryByText('Commonly used')) await this.togglePopover();
 
-    // Using fireEvent here because userEvent erroneously claims that
-    // pointer-events is set to 'none'.
-    //
-    // I have verified that this fixed on the latest version of the @testing-library/user-event package
-    fireEvent.click(await screen.findByText(label));
+    await userEvent.click(await screen.findByText(label));
   }
 
-  static refresh() {
+  static async refresh() {
     await userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
   }
 }
@@ -198,7 +194,7 @@ describe('group editor preview', () => {
   });
 
   it('updates the time field', async () => {
-    EuiSuperDatePickerTestHarness.togglePopover();
+    await EuiSuperDatePickerTestHarness.togglePopover();
 
     const select = screen.getByRole('combobox', { name: 'Time field' });
 
@@ -214,11 +210,11 @@ describe('group editor preview', () => {
     });
   });
 
-  it('refreshes the chart data', () => {
+  it('refreshes the chart data', async () => {
     expect(defaultProps.refreshSearchSession).not.toHaveBeenCalled();
     expect(getEmbeddableSearchSessionId()).toBe(defaultProps.searchSessionId);
 
-    EuiSuperDatePickerTestHarness.refresh();
+    await EuiSuperDatePickerTestHarness.refresh();
 
     expect(defaultProps.refreshSearchSession).toHaveBeenCalled();
 

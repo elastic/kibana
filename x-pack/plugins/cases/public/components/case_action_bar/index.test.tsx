@@ -201,7 +201,7 @@ describe('CaseActionBar', () => {
     expect(queryByText('Sync alerts')).not.toBeInTheDocument();
   });
 
-  it('should not show the delete item in the menu when the user does not have delete privileges', () => {
+  it('should not show the delete item in the menu when the user does not have delete privileges', async () => {
     const { queryByText, queryByTestId } = render(
       <TestProviders permissions={noDeleteCasesPermissions()}>
         <CaseActionBar {...defaultProps} />
@@ -214,7 +214,7 @@ describe('CaseActionBar', () => {
     expect(queryByTestId('property-actions-case-copyClipboard')).toBeInTheDocument();
   });
 
-  it('should show the the delete item in the menu when the user does have delete privileges', () => {
+  it('should show the the delete item in the menu when the user does have delete privileges', async () => {
     const { queryByText } = render(
       <TestProviders permissions={allCasesPermissions()}>
         <CaseActionBar {...defaultProps} />

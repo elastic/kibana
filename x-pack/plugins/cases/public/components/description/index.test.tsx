@@ -99,7 +99,8 @@ describe('Description', () => {
     await userEvent.click(res.getByTestId('description-edit-icon'));
 
     await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    await userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    screen.getByTestId('euiMarkdownEditorTextArea').focus();
+    await userEvent.paste(editedDescription);
 
     expect(screen.getByText(editedDescription)).toBeInTheDocument();
 
@@ -122,7 +123,8 @@ describe('Description', () => {
     await userEvent.click(res.getByTestId('description-edit-icon'));
 
     await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    await userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), longDescription);
+    screen.getByTestId('euiMarkdownEditorTextArea').focus();
+    await userEvent.paste(longDescription);
 
     expect(
       await screen.findByText(

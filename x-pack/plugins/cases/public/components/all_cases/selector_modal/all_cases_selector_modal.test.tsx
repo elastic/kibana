@@ -11,7 +11,7 @@ import { AllCasesSelectorModal } from '.';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import userEvent from '@testing-library/user-event';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../containers/api');
 jest.mock('../../../containers/user_profiles/api');
@@ -35,22 +35,18 @@ describe('AllCasesSelectorModal', () => {
     expect(res.getByTestId('all-cases-modal')).toBeInTheDocument();
   });
 
-  it('Closing modal when pressing the x icon', () => {
+  it('Closing modal when pressing the x icon', async () => {
     const res = appMockRenderer.render(<AllCasesSelectorModal {...defaultProps} />);
 
-    act(() => {
-      await userEvent.click(res.getByLabelText('Closes this modal window'));
-    });
+    await userEvent.click(res.getByLabelText('Closes this modal window'));
 
     expect(res.queryByTestId('all-cases-modal')).toBeFalsy();
   });
 
-  it('Closing modal when pressing the cancel button', () => {
+  it('Closing modal when pressing the cancel button', async () => {
     const res = appMockRenderer.render(<AllCasesSelectorModal {...defaultProps} />);
 
-    act(() => {
-      await userEvent.click(res.getByTestId('all-cases-modal-cancel-button'));
-    });
+    await userEvent.click(res.getByTestId('all-cases-modal-cancel-button'));
 
     expect(res.queryByTestId('all-cases-modal')).toBeFalsy();
   });

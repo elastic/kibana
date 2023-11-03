@@ -196,10 +196,8 @@ describe('Edit ', () => {
     );
 
     await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
-    await userEvent.paste(
-      screen.getByTestId('case-text-custom-field-form-field-test_key_1'),
-      '!!!'
-    );
+    screen.getByTestId('case-text-custom-field-form-field-test_key_1').focus();
+    await userEvent.paste('!!!');
 
     await waitFor(() => {
       expect(
@@ -287,10 +285,8 @@ describe('Edit ', () => {
     );
 
     await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
-    await userEvent.paste(
-      screen.getByTestId('case-text-custom-field-form-field-test_key_1'),
-      '!!!'
-    );
+    screen.getByTestId('case-text-custom-field-form-field-test_key_1').focus();
+    await userEvent.paste('!!!');
 
     await waitFor(() => {
       expect(
@@ -371,10 +367,8 @@ describe('Edit ', () => {
 
     await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
     await userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
-    await userEvent.paste(
-      screen.getByTestId('case-text-custom-field-form-field-test_key_1'),
-      'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)
-    );
+    screen.getByTestId('case-text-custom-field-form-field-test_key_1').focus();
+    await userEvent.paste('a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1));
 
     await waitFor(() => {
       expect(

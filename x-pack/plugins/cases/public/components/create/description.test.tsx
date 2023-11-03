@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
-import userEvent, { specialChars } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -64,10 +64,8 @@ describe('Description', () => {
 
     const description = screen.getByTestId('euiMarkdownEditorTextArea');
 
-    await userEvent.type(
-      description,
-      `${specialChars.selectAll}${specialChars.delete}My new description`
-    );
+    userEvent.tripleClick(description);
+    await userEvent.type(description, `My new description`);
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
@@ -100,9 +98,9 @@ describe('Description', () => {
       </MockHookWrapperComponent>
     );
 
-    const description = screen.getByTestId('euiMarkdownEditorTextArea');
+    screen.getByTestId('euiMarkdownEditorTextArea').focus();
 
-    await userEvent.paste(description, longDescription);
+    await userEvent.paste(longDescription);
 
     await waitFor(() => {
       expect(

@@ -159,7 +159,7 @@ describe('ServiceNowITSM Fields', () => {
   describe('changing selectables', () => {
     const testers = ['severity', 'urgency', 'impact'];
     testers.forEach((subj) =>
-      it(`${subj.toUpperCase()}`, () => {
+      it(`${subj.toUpperCase()}`, async () => {
         appMockRenderer.render(
           <MockFormWrapperComponent fields={fields}>
             <Fields connector={connector} />
@@ -191,9 +191,9 @@ describe('ServiceNowITSM Fields', () => {
       [impactSelect, 'impact'],
     ];
 
-    selectables.forEach(([element]) => {
+    for (const [element] of selectables) {
       await userEvent.selectOptions(element, ['2']);
-    });
+    }
 
     const categorySelect = screen.getByTestId('categorySelect');
 

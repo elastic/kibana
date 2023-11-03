@@ -180,9 +180,8 @@ describe('EditableMarkdown', () => {
         </MockHookWrapperComponent>
       );
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
-
-      await userEvent.paste(markdown, longComment);
+      screen.getByTestId('euiMarkdownEditorTextArea').focus();
+      await userEvent.keyboard(longComment);
 
       await waitFor(() => {
         expect(

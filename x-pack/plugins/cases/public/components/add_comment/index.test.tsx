@@ -229,9 +229,8 @@ describe('AddComment ', () => {
 
       appMockRender.render(<AddComment {...addCommentProps} />);
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
-
-      await userEvent.paste(markdown, longComment);
+      screen.getByTestId('euiMarkdownEditorTextArea').focus();
+      await userEvent.paste(longComment);
 
       await waitFor(() => {
         expect(

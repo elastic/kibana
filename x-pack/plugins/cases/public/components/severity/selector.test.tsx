@@ -28,7 +28,7 @@ describe('Severity field selector', () => {
     expect(result.getAllByTestId('case-severity-selection-medium').length).toBeTruthy();
   });
 
-  it('renders a list of severity options when clicked', () => {
+  it('renders a list of severity options when clicked', async () => {
     const result = render(
       <SeveritySelector
         selectedSeverity={CaseSeverity.MEDIUM}
