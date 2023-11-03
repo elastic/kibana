@@ -93,6 +93,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     actions,
     snoozeSchedule,
     lastRun,
+    typeVersion,
     ...partialRawRule
   }: Partial<RawRule>,
   references: SavedObjectReference[] | undefined,

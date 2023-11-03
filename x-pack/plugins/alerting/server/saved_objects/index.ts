@@ -74,7 +74,8 @@ export type AlertAttributesExcludedFromAADType =
   | 'lastRun'
   | 'nextRun'
   | 'revision'
-  | 'running';
+  | 'running'
+  | 'typeVersion';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

@@ -267,4 +267,5 @@ export const rawRuleSchema = schema.object({
     })
   ),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any())),
+  typeVersion: schema.maybe(schema.number()),
 });

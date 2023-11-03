@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
+import { latestRuleVersion } from '../../saved_objects';
 import {
   PartialRule,
   RawRule,
@@ -267,6 +268,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     revision,
     updatedBy: username,
     updatedAt: new Date().toISOString(),
+    typeVersion: latestRuleVersion,
   });
 
   const mappedParams = getMappedParams(updatedParams);
