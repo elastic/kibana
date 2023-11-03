@@ -12,7 +12,7 @@ import type {
   Services,
   ExitFullScreenButtonServices,
   ExitFullScreenButtonKibanaDependencies,
-} from '@kbn/shared-ux-button-exit-full-screen-types';
+} from '../types';
 
 const ExitFullScreenButtonContext = React.createContext<Services | null>(null);
 
