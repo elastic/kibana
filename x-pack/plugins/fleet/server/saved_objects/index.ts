@@ -176,6 +176,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
         ca_trusted_fingerprint: { type: 'keyword', index: false },
+        service_token: { type: 'keyword', index: false },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
@@ -290,6 +291,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         schemas: {
           forwardCompatibility: migrateOutputEvictionsFromV8100,
         },
+      },
+      '2': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              service_token: { type: 'keyword', index: false },
+            },
+          },
+        ],
       },
     },
     migrations: {

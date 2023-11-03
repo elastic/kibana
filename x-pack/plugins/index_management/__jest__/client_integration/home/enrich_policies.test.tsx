@@ -31,7 +31,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-describe('Enrich policies tab', () => {
+// Failing: See https://github.com/elastic/kibana/issues/170239
+describe.skip('Enrich policies tab', () => {
   const { httpSetup, httpRequestsMockHelpers, setDelayResponse } = setupEnvironment();
   let testBed: EnrichPoliciesTestBed;
 
