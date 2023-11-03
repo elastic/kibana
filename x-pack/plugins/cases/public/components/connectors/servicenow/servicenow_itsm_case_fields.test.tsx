@@ -88,7 +88,7 @@ for (let i = 0; i < 50; i++) {
       );
 
       expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
-      
+
       const testers = ['severity', 'urgency', 'impact'];
       testers.forEach((subj) => {
         const select = within(screen.getByTestId(`${subj}Select`));
