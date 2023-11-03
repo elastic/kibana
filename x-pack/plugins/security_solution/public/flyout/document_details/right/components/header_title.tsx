@@ -61,6 +61,7 @@ export const HeaderTitle: FC = memo(() => {
               -webkit-box-orient: vertical;
               overflow: hidden;
               text-overflow: ellipsis;
+              margin-right: ${euiTheme.size.base};
             `}
           >
             <EuiIcon type={'warning'} size="m" className="eui-alignBaseline" />
@@ -70,11 +71,22 @@ export const HeaderTitle: FC = memo(() => {
                 <span data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>{ruleName}</span>
               </EuiTextColor>
             </EuiTitle>
+            &nbsp;
+            <EuiIcon
+              type={'popout'}
+              size="m"
+              css={css`
+                display: inline;
+                position: absolute;
+                bottom: ${euiTheme.size.xs};
+                right: 0;
+              `}
+            />
           </div>
         </RenderRuleName>
       </EuiToolTip>
     ),
-    [ruleName, ruleId, eventId, scopeId, euiTheme.colors.primaryText]
+    [ruleName, ruleId, eventId, scopeId, euiTheme.colors.primaryText, euiTheme.size]
   );
 
   const eventTitle = (
