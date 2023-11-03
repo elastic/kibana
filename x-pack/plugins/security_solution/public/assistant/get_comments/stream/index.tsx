@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
@@ -38,6 +38,22 @@ export const StreamComment = ({
     content,
     reader,
   });
+
+  const currentState = useRef({ isStreaming, pendingMessage, setComplete });
+
+  useEffect(() => {
+    currentState.current = { isStreaming, pendingMessage, amendMessage };
+  }, [amendMessage, isStreaming, pendingMessage]);
+
+  useEffect(
+    () => () => {
+      if (currentState.current.isStreaming && currentState.current.pendingMessage.length > 0) {
+        currentState.current.amendMessage(currentState.current.pendingMessage ?? '');
+      }
+    },
+    // store values in current state to detect true unmount
+    []
+  );
 
   const message = useMemo(
     // only transform streaming message, transform happens upstream for content message
