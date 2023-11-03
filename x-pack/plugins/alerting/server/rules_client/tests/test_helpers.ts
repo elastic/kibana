@@ -147,7 +147,7 @@ export const enabledRuleForBulkOps2 = {
   },
 };
 
-export const enabledRuleForBulkOpsWithActions1 = {
+export const disabledRuleForBulkOpsWithActions1 = {
   ...defaultRuleForBulkDelete,
   attributes: {
     ...defaultRuleForBulkDelete.attributes,
@@ -175,7 +175,7 @@ export const enabledRuleForBulkOpsWithActions1 = {
   ],
 };
 
-export const enabledRuleForBulkOpsWithActions2 = {
+export const disabledRuleForBulkOpsWithActions2 = {
   ...defaultRuleForBulkDelete,
   id: 'id2',
   attributes: {
