@@ -33,17 +33,23 @@ export const SnapshotContainer = ({ render }: Props) => {
     nodes,
     reload,
     interval = '60s',
-  } = useSnapshot({
-    filterQuery: filterQueryAsJson,
-    metrics: [metric],
-    groupBy,
-    nodeType,
-    sourceId,
-    currentTime,
-    accountId,
-    region,
-    sendRequestImmediately: false,
-  });
+  } = useSnapshot(
+    {
+      filterQuery: filterQueryAsJson,
+      metrics: [metric],
+      groupBy,
+      nodeType,
+      sourceId,
+      currentTime,
+      accountId,
+      region,
+      sendRequestImmediately: false,
+      includeTimeseries: false,
+    },
+    {
+      abortable: true,
+    }
+  );
 
   return render({ loading, nodes, reload, interval });
 };
