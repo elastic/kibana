@@ -594,7 +594,7 @@ export const cloneTimeline = async (
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   // Fetch all objects that need to be cloned
-  // TODO: clone saved search
+  // TODO: How to clone saved search?
   const [notes, pinnedEvents] = await Promise.all([
     note.getNotesByTimelineId(request, timelineId),
     pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
@@ -621,6 +621,7 @@ export const cloneTimeline = async (
           ..._note,
           timelineId: newTimelineId,
         },
+        overrideOwner: false,
       });
     })
   );

@@ -20,7 +20,7 @@ import { buildFrameworkRequest } from '../../../utils/common';
 
 export const cloneTimelineRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.versioned
