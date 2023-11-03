@@ -243,8 +243,8 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
       visit(ALERTS_URL);
       deleteAlertsAndRules();
       createRule(getNewRule());
-      login(ROLES.t1_analyst);
-      visit(ALERTS_URL, { role: ROLES.t1_analyst });
+      login(ROLES.viewer);
+      visit(ALERTS_URL, { role: ROLES.viewer });
       waitForAlertsToPopulate();
     });
 

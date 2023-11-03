@@ -1,4 +1,43 @@
 {
+  "viewer": {
+    "name": "viewer",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": ["*"],
+          "privileges": ["read"]
+        },
+        {
+          "names": ["/~(([.]|ilm-history-).*)/"],
+          "privileges": ["read", "view_index_metadata"]
+        },
+        {
+          "names": [".siem-signals*", ".lists-*", ".items-*"],
+          "privileges": ["read", "view_index_metadata"]
+        },
+        {
+          "names": [".alerts*", ".preview.alerts*"],
+          "privileges": ["read", "view_index_metadata"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "siem": ["read", "read_alerts"],
+          "securitySolutionAssistant": ["all"],
+          "securitySolutionCases": ["read"],
+          "actions": ["read"],
+          "builtInAlerts": ["read"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
   "t1_analyst": {
     "name": "t1_analyst",
     "elasticsearch": {
