@@ -13,7 +13,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  describe('empty pages', function () {
+  describe('default dataView', function () {
     // Error: expected testSubject(kbnOverviewElasticsearchGettingStarted) to exist
     this.tags(['failsOnMKI']);
     before(async () => {
@@ -25,28 +25,32 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonPage.forceLogout();
     });
 
-    it('should show search specific empty page in discover', async () => {
+    it('should show dashboard but with no data', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
       await testSubjects.existOrFail('~breadcrumb-deepLinkId-discover');
-      await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
-      await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Get started' });
+      await testSubjects.existOrFail('discover-dataView-switch-link');
+      await testSubjects.click('discover-dataView-switch-link');
+      await testSubjects.existOrFail('indexPattern-add-field');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
     });
 
-    it('should show search specific empty page in visualize', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'visualize' });
-      await testSubjects.existOrFail('~breadcrumb-deepLinkId-visualize');
-      await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
-      await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Get started' });
-    });
-
-    it('should show search specific empty page in dashboards', async () => {
+    it('should show dashboard but with no data in dashboard', async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
       await testSubjects.existOrFail('~breadcrumb-deepLinkId-dashboards');
-      await testSubjects.existOrFail('kbnOverviewElasticsearchGettingStarted');
-      await testSubjects.click('kbnOverviewElasticsearchGettingStarted');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Get started' });
+      await testSubjects.existOrFail('emptyListPrompt');
+      await testSubjects.click('newItemButton');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Editing New Dashboard',
+      });
+    });
+
+    it('should show dashboard but with no data in visualize', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'visualize' });
+      await testSubjects.existOrFail('~breadcrumb-deepLinkId-visualize');
+      await testSubjects.existOrFail('top-nav');
+      await testSubjects.click('newItemButton');
+      await testSubjects.existOrFail('visType-lens');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Visualizations' });
     });
   });
 }
