@@ -10,11 +10,9 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HostVm } from './types';
 import type { BaseVmCreateOptions } from './vm_services';
-import { createMultipassHostVmClient, createVagrantHostVmClient, createVm } from './vm_services';
+import { createVm, getHostVmClient } from './vm_services';
 import { downloadAndStoreAgent } from './agent_downloads_service';
 import { enrollHostVmWithFleet, getAgentDownloadUrl, unEnrollFleetAgent } from './fleet_services';
-
-export const VAGRANT_CWD = `${__dirname}/../endpoint_agent_runner/`;
 
 export interface CreateAndEnrollEndpointHostOptions
   extends Pick<BaseVmCreateOptions, 'disk' | 'cpus' | 'memory'> {
@@ -109,10 +107,6 @@ export const destroyEndpointHost = async (
     deleteMultipassVm(createdHost.hostname),
     unEnrollFleetAgent(kbnClient, createdHost.agentId, true),
   ]);
-};
-
-const getHostVmClient = (vmName: string): HostVm => {
-  return process.env.CI ? createVagrantHostVmClient(vmName) : createMultipassHostVmClient(vmName);
 };
 
 export const deleteMultipassVm = async (vmName: string): Promise<void> => {

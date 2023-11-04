@@ -6,10 +6,8 @@
  */
 
 // / <reference types="cypress" />
-import type { ExecaReturnValue } from 'execa';
-import execa from 'execa';
 
-import { VAGRANT_CWD } from '../../../../scripts/endpoint/common/endpoint_host_services';
+import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 
 export const agentActions = (on: Cypress.PluginEvents): void => {
   on('task', {
@@ -20,40 +18,19 @@ export const agentActions = (on: Cypress.PluginEvents): void => {
       hostname: string;
       uninstallToken?: string;
     }): Promise<string> => {
-      let result;
+      const hostVmClient = getHostVmClient(hostname);
+
       try {
-        if (process.env.CI) {
-          result = await execa(
-            'vagrant',
-            [
-              'ssh',
-              '--',
-              `sudo elastic-agent uninstall -f ${
-                uninstallToken ? `--uninstall-token ${uninstallToken}` : ''
-              }`,
-            ],
-            {
-              env: {
-                VAGRANT_CWD,
-              },
-            }
-          );
-        } else {
-          result = await execa(`multipass`, [
-            'exec',
-            hostname,
-            '--',
-            'sh',
-            '-c',
+        return (
+          await hostVmClient.exec(
             `sudo elastic-agent uninstall -f ${
               uninstallToken ? `--uninstall-token ${uninstallToken}` : ''
-            }`,
-          ]);
-        }
+            }`
+          )
+        ).stdout;
       } catch (err) {
         return err.stderr;
       }
-      return result.stdout;
     },
 
     isAgentAndEndpointUninstalledFromHost: async ({
@@ -62,25 +39,10 @@ export const agentActions = (on: Cypress.PluginEvents): void => {
       hostname: string;
       uninstallToken?: string;
     }): Promise<boolean> => {
-      let execaReturnValue: ExecaReturnValue<string>;
-      if (process.env.CI) {
-        execaReturnValue = await execa('vagrant', ['ssh', '--', `ls /opt/Elastic`], {
-          env: {
-            VAGRANT_CWD,
-          },
-        });
-      } else {
-        execaReturnValue = await execa(`multipass`, [
-          'exec',
-          hostname,
-          '--',
-          'sh',
-          '-c',
-          `ls /opt/Elastic`,
-        ]);
-      }
+      const hostVmClient = getHostVmClient(hostname);
+      const lsOutput = await hostVmClient.exec('ls /opt/Elastic');
 
-      if (execaReturnValue.stdout === '') {
+      if (lsOutput.stdout === '') {
         return true;
       }
 

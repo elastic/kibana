@@ -16,7 +16,7 @@ import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils
 import type { HostVm, HostVmExecResponse, SupportedVmManager } from './types';
 
 const baseGenerator = new BaseDataGenerator();
-const DEFAULT_VAGRANTFILE = pathJoin(__dirname, 'vagrant', 'Vagrantfile');
+export const DEFAULT_VAGRANTFILE = pathJoin(__dirname, 'vagrant', 'Vagrantfile');
 
 export interface BaseVmCreateOptions {
   name: string;
@@ -125,6 +125,20 @@ export const createMultipassHostVmClient = (
     log.verbose(`multipass stop response:\n`, response);
   };
 
+  const transfer: HostVm['transfer'] = async (localFilePath, destFilePath) => {
+    const response = await execa.command(
+      `multipass transfer ${localFilePath} ${name}:${destFilePath}`
+    );
+    log.verbose(`Transferred file to VM [${name}]:`, response);
+
+    return {
+      filePath: destFilePath,
+      delete: async () => {
+        return exec(`rm ${destFilePath}`);
+      },
+    };
+  };
+
   return {
     type: 'multipass',
     name,
@@ -133,6 +147,7 @@ export const createMultipassHostVmClient = (
     info,
     mount,
     unmount,
+    transfer,
     start,
     stop,
   };
@@ -315,6 +330,21 @@ export const createVagrantHostVmClient = (
     log.verbose('vagrant suspend response:\n', response);
   };
 
+  const transfer: HostVm['transfer'] = async (localFilePath, destFilePath) => {
+    const response = await execa.command(
+      `vagrant upload ${localFilePath} ${destFilePath}`,
+      execaOptions
+    );
+    log.verbose(`Transferred file to VM [${name}]:`, response);
+
+    return {
+      filePath: destFilePath,
+      delete: async () => {
+        return exec(`rm ${destFilePath}`);
+      },
+    };
+  };
+
   return {
     type: 'vagrant',
     name,
@@ -323,7 +353,27 @@ export const createVagrantHostVmClient = (
     info,
     mount,
     unmount,
+    transfer,
     start,
     stop,
   };
+};
+
+/**
+ * create and return a Host VM client client
+ * @param hostname
+ * @param type
+ * @param vagrantFile
+ * @param log
+ */
+export const getHostVmClient = (
+  hostname: string,
+  type: SupportedVmManager = process.env.CI ? 'vagrant' : 'multipass',
+  /** Will only be used if `type` is `vagrant` */
+  vagrantFile: string = DEFAULT_VAGRANTFILE,
+  log: ToolingLog = createToolingLogger()
+): HostVm => {
+  return type === 'vagrant'
+    ? createVagrantHostVmClient(hostname, vagrantFile, log)
+    : createMultipassHostVmClient(hostname, log);
 };

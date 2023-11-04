@@ -11,6 +11,7 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 import { setupStackServicesUsingCypressConfig } from './common';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
@@ -34,7 +35,6 @@ import {
   destroyEndpointHost,
   startEndpointHost,
   stopEndpointHost,
-  VAGRANT_CWD,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import type { IndexedEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import {
@@ -335,15 +335,7 @@ export const dataLoadersForRealEndpoints = (
       path: string;
       content: string;
     }): Promise<null> => {
-      if (process.env.CI) {
-        await execa('vagrant', ['ssh', '--', `echo ${content} > ${path}`], {
-          env: {
-            VAGRANT_CWD,
-          },
-        });
-      } else {
-        await execa(`multipass`, ['exec', hostname, '--', 'sh', '-c', `echo ${content} > ${path}`]);
-      }
+      await getHostVmClient(hostname).exec(`echo ${content} > ${path}`);
       return null;
     },
 
@@ -356,16 +348,7 @@ export const dataLoadersForRealEndpoints = (
       srcPath: string;
       destPath: string;
     }): Promise<null> => {
-      if (process.env.CI) {
-        await execa('vagrant', ['upload', srcPath, destPath], {
-          env: {
-            VAGRANT_CWD,
-          },
-        });
-      } else {
-        await execa(`multipass`, ['transfer', srcPath, `${hostname}:${destPath}`]);
-      }
-
+      await getHostVmClient(hostname).transfer(srcPath, destPath);
       return null;
     },
 
@@ -396,30 +379,9 @@ export const dataLoadersForRealEndpoints = (
       path: string;
       password?: string;
     }): Promise<string> => {
-      let result;
-
-      if (process.env.CI) {
-        result = await execa(
-          `vagrant`,
-          ['ssh', '--', `unzip -p ${password ? `-P ${password} ` : ''}${path}`],
-          {
-            env: {
-              VAGRANT_CWD,
-            },
-          }
-        );
-      } else {
-        result = await execa(`multipass`, [
-          'exec',
-          hostname,
-          '--',
-          'sh',
-          '-c',
-          `unzip -p ${password ? `-P ${password} ` : ''}${path}`,
-        ]);
-      }
-
-      return result.stdout;
+      return (
+        await getHostVmClient(hostname).exec(`unzip -p ${password ? `-P ${password} ` : ''}${path}`)
+      ).stdout;
     },
 
     stopEndpointHost: async (hostName) => {
