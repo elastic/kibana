@@ -615,14 +615,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     );
   }
 
-  private hasFiltersOrQuery() {
-    const hasFilters = Boolean(this.props.filters && this.props.filters.length > 0);
-    const hasQuery = Boolean(
-      this.state.query && isOfQueryType(this.state.query) && this.state.query.query
-    );
-    return hasFilters || hasQuery;
-  }
-
   private renderSavedQueryManagement = memoizeOne(
     (
       onClearSavedQuery: SearchBarOwnProps['onClearSavedQuery'],
@@ -637,7 +629,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           savedQueryService={this.savedQueryService}
           onClearSavedQuery={onClearSavedQuery}
           onClose={() => this.setState({ openQueryBarMenu: false })}
-          hasFiltersOrQuery={this.hasFiltersOrQuery()}
         />
       );
 

@@ -62,7 +62,6 @@ describe('Saved query management list component', () => {
       onClearSavedQuery: jest.fn(),
       onClose: jest.fn(),
       showSaveQuery: true,
-      hasFiltersOrQuery: false,
       savedQueryService: {
         ...dataMock.query.savedQueries,
         getAllSavedQueries: jest.fn().mockResolvedValue([

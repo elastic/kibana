@@ -13,23 +13,24 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSelectable,
-  EuiText,
   EuiPopoverFooter,
   EuiButtonIcon,
   EuiButtonEmpty,
   EuiConfirmModal,
   usePrettyDuration,
   ShortDate,
+  EuiPagination,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo, MouseEvent } from 'react';
 import { css } from '@emotion/react';
-import { sortBy } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
+import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import './saved_query_management_list.scss';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { debounce } from 'lodash';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface SavedQueryManagementListProps {
@@ -39,7 +40,6 @@ export interface SavedQueryManagementListProps {
   onLoad: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
   onClose: () => void;
-  hasFiltersOrQuery: boolean;
 }
 
 interface SelectableProps {
@@ -112,6 +112,30 @@ const itemLabel = (attributes: SavedQueryAttributes) => {
   return label;
 };
 
+const savedQueryDescriptionText = i18n.translate(
+  'unifiedSearch.search.searchBar.savedQueryDescriptionText',
+  {
+    defaultMessage: 'Save query text and filters that you want to use again.',
+  }
+);
+
+const noSavedQueriesDescriptionText =
+  i18n.translate('unifiedSearch.search.searchBar.savedQueryNoSavedQueriesText', {
+    defaultMessage: 'No saved queries.',
+  }) +
+  ' ' +
+  savedQueryDescriptionText;
+
+const savedQueryMultipleNamespacesDeleteWarning = i18n.translate(
+  'unifiedSearch.search.searchBar.savedQueryMultipleNamespacesDeleteWarning',
+  {
+    defaultMessage: `This saved query is shared in multiple spaces. When you delete it, you remove it from every space it is shared in. You can't undo this action.`,
+  }
+);
+
+const SAVED_QUERY_PAGE_SIZE = 3;
+const SAVED_QUERY_SEARCH_DEBOUNCE = 300;
+
 export function SavedQueryManagementList({
   showSaveQuery,
   loadedSavedQuery,
@@ -119,34 +143,50 @@ export function SavedQueryManagementList({
   onClearSavedQuery,
   savedQueryService,
   onClose,
-  hasFiltersOrQuery,
 }: SavedQueryManagementListProps) {
-  const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  const { uiSettings, http, application } = useKibana<IUnifiedSearchPluginServices>().services;
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSetSearchTerm = useMemo(
+    () => debounce(setSearchTerm, SAVED_QUERY_SEARCH_DEBOUNCE),
+    []
+  );
+  const [currentPageNumber, setCurrentPageNumber] = useState(0);
+  const [totalQueryCount, setTotalQueryCount] = useState(0);
+  const [currentPageQueries, setCurrentPageQueries] = useState<SavedQuery[]>([]);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const currentPageFetchId = useRef(0);
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(loadedSavedQuery);
-  const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState(null as SavedQuery | null);
+  const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState<SavedQuery | null>(null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
-  const cancelPendingListingRequest = useRef<() => void>(() => {});
-  const { uiSettings, http, application } = kibana.services;
   const format = uiSettings.get('dateFormat');
 
   useEffect(() => {
-    const fetchCountAndSavedQueries = async () => {
-      cancelPendingListingRequest.current();
-      let requestGotCancelled = false;
-      cancelPendingListingRequest.current = () => {
-        requestGotCancelled = true;
-      };
+    const fetchPage = async () => {
+      const fetchIdValue = ++currentPageFetchId.current;
 
-      const savedQueryItems = await savedQueryService.getAllSavedQueries();
+      try {
+        const trimmedSearchTerm = searchTerm.trim();
+        const { total, queries } = await savedQueryService.findSavedQueries(
+          trimmedSearchTerm ? `${trimmedSearchTerm}*` : undefined,
+          SAVED_QUERY_PAGE_SIZE,
+          currentPageNumber + 1
+        );
 
-      if (requestGotCancelled) return;
+        if (fetchIdValue !== currentPageFetchId.current) {
+          return;
+        }
 
-      const sortedSavedQueryItems = sortBy(savedQueryItems, 'attributes.title');
-      setSavedQueries(sortedSavedQueryItems);
+        setTotalQueryCount(total);
+        setCurrentPageQueries(queries);
+      } finally {
+        if (fetchIdValue === currentPageFetchId.current) {
+          setIsInitializing(false);
+        }
+      }
     };
-    fetchCountAndSavedQueries();
-  }, [savedQueryService]);
+
+    fetchPage();
+  }, [currentPageNumber, savedQueryService, searchTerm]);
 
   const handleLoad = useCallback(() => {
     if (selectedSavedQuery) {
@@ -167,9 +207,8 @@ export function SavedQueryManagementList({
   const onDelete = useCallback(
     (savedQueryToDelete: string) => {
       const onDeleteSavedQuery = async (savedQueryId: string) => {
-        cancelPendingListingRequest.current();
-        setSavedQueries(
-          savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQueryId)
+        setCurrentPageQueries(
+          currentPageQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQueryId)
         );
 
         if (loadedSavedQuery && loadedSavedQuery.id === savedQueryId) {
@@ -182,41 +221,19 @@ export function SavedQueryManagementList({
 
       onDeleteSavedQuery(savedQueryToDelete);
     },
-    [loadedSavedQuery, onClearSavedQuery, savedQueries, savedQueryService]
+    [currentPageQueries, loadedSavedQuery, onClearSavedQuery, savedQueryService]
   );
 
-  const savedQueryDescriptionText = i18n.translate(
-    'unifiedSearch.search.searchBar.savedQueryDescriptionText',
-    {
-      defaultMessage: 'Save query text and filters that you want to use again.',
+  const savedQueriesOptions = useMemo(() => {
+    const filteredQueries = currentPageQueries.filter(
+      (savedQuery) => savedQuery.id !== loadedSavedQuery?.id
+    );
+
+    if (loadedSavedQuery && filteredQueries.length !== currentPageQueries.length) {
+      filteredQueries.unshift(loadedSavedQuery);
     }
-  );
 
-  const noSavedQueriesDescriptionText =
-    i18n.translate('unifiedSearch.search.searchBar.savedQueryNoSavedQueriesText', {
-      defaultMessage: 'No saved queries.',
-    }) +
-    ' ' +
-    savedQueryDescriptionText;
-
-  const savedQueryMultipleNamespacesDeleteWarning = i18n.translate(
-    'unifiedSearch.search.searchBar.savedQueryMultipleNamespacesDeleteWarning',
-    {
-      defaultMessage: `This saved query is shared in multiple spaces. When you delete it, you remove it from every space it is shared in. You can't undo this action.`,
-    }
-  );
-
-  const savedQueriesOptions = () => {
-    const savedQueriesWithoutCurrent = savedQueries.filter((savedQuery) => {
-      if (!loadedSavedQuery) return true;
-      return savedQuery.id !== loadedSavedQuery.id;
-    });
-    const savedQueriesReordered =
-      loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
-        ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
-        : [...savedQueriesWithoutCurrent];
-
-    return savedQueriesReordered.map((savedQuery) => {
+    return filteredQueries.map<SelectableProps>((savedQuery) => {
       return {
         key: savedQuery.id,
         label: savedQuery.attributes.title,
@@ -240,16 +257,32 @@ export function SavedQueryManagementList({
               }
             `}
             iconType="trash"
-            aria-label={`Delete ${savedQuery.attributes.title}`}
+            aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
+              defaultMessage: 'Delete {savedQueryTitle}',
+              values: { savedQueryTitle: savedQuery.attributes.title },
+            })}
             data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
-            title={`Delete ${savedQuery.attributes.title}`}
-            onClick={() => handleDelete(savedQuery)}
+            title={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
+              defaultMessage: 'Delete {savedQueryTitle}',
+              values: { savedQueryTitle: savedQuery.attributes.title },
+            })}
+            onClick={(e: MouseEvent) => {
+              e.stopPropagation();
+              handleDelete(savedQuery);
+            }}
             color="danger"
           />
         ),
       };
-    }) as unknown as SelectableProps[];
-  };
+    });
+  }, [
+    currentPageQueries,
+    format,
+    handleDelete,
+    loadedSavedQuery,
+    selectedSavedQuery,
+    showSaveQuery,
+  ]);
 
   const renderOption = (option: RenderOptionProps) => {
     return <>{option.attributes ? itemLabel(option.attributes) : option.label}</>;
@@ -259,62 +292,85 @@ export function SavedQueryManagementList({
 
   const listComponent = (
     <>
-      {savedQueries.length > 0 ? (
-        <>
-          <div
-            className="kbnSavedQueryManagement__listWrapper"
-            data-test-subj="saved-query-management-list"
-          >
-            <EuiSelectable<SelectableProps>
-              aria-label="Basic example"
-              options={savedQueriesOptions()}
-              searchable
-              singleSelection="always"
-              onChange={(choices) => {
-                const choice = choices.find(({ checked }) => checked) as unknown as {
-                  value: string;
-                };
-                if (choice) {
-                  handleSelect(savedQueries.find((savedQuery) => savedQuery.id === choice.value));
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        className="kbnSavedQueryManagement__listWrapper"
+        data-test-subj="saved-query-management-list"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiSelectable<SelectableProps>
+            aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryListAriaLabel', {
+              defaultMessage: 'Query list',
+            })}
+            isLoading={isInitializing}
+            singleSelection="always"
+            options={savedQueriesOptions}
+            listProps={{
+              isVirtualized: true,
+              onFocusBadge: false,
+            }}
+            isPreFiltered
+            searchable
+            searchProps={{
+              compressed: true,
+              placeholder: i18n.translate(
+                'unifiedSearch.query.queryBar.indexPattern.findFilterSet',
+                {
+                  defaultMessage: 'Find a query',
                 }
-              }}
-              searchProps={{
-                compressed: true,
-                placeholder: i18n.translate(
-                  'unifiedSearch.query.queryBar.indexPattern.findFilterSet',
-                  {
-                    defaultMessage: 'Find a query',
-                  }
-                ),
-              }}
-              listProps={{
-                isVirtualized: true,
-              }}
-              renderOption={renderOption}
-            >
-              {(list, search) => (
-                <>
-                  <EuiPanel style={{ paddingBottom: 0 }} color="transparent" paddingSize="s">
-                    {search}
-                  </EuiPanel>
-                  {list}
-                </>
-              )}
-            </EuiSelectable>
-          </div>
-        </>
-      ) : (
-        <>
-          <EuiText
-            size="s"
-            color="subdued"
-            className="kbnSavedQueryManagement__text"
-            data-test-subj="saved-query-management-empty"
+              ),
+              onChange: debouncedSetSearchTerm,
+            }}
+            loadingMessage={i18n.translate(
+              'unifiedSearch.search.searchBar.savedQueryLoadingQueriesText',
+              {
+                defaultMessage: 'Loading queries',
+              }
+            )}
+            emptyMessage={
+              <span data-test-subj="saved-query-management-empty">
+                {noSavedQueriesDescriptionText}
+              </span>
+            }
+            onChange={(choices) => {
+              const choice = choices.find(({ checked }) => checked) as unknown as {
+                value: string;
+              };
+              if (choice) {
+                handleSelect(
+                  currentPageQueries.find((savedQuery) => savedQuery.id === choice.value)
+                );
+              }
+            }}
+            renderOption={renderOption}
           >
-            <p>{noSavedQueriesDescriptionText}</p>
-          </EuiText>
-        </>
-      )}
+            {(list, search) => (
+              <>
+                <EuiPanel style={{ paddingBottom: 0 }} color="transparent" paddingSize="s">
+                  {search}
+                </EuiPanel>
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </EuiFlexItem>
+        {totalQueryCount > SAVED_QUERY_PAGE_SIZE && (
+          <EuiFlexItem grow={false} css={{ padding: euiThemeVars.euiSizeS }}>
+            <EuiFlexGroup responsive={false} justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiPagination
+                  pageCount={Math.ceil(totalQueryCount / SAVED_QUERY_PAGE_SIZE)}
+                  activePage={currentPageNumber}
+                  onPageClick={(activePage) => setCurrentPageNumber(activePage)}
+                  compressed
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiPopoverFooter paddingSize="s">
         <EuiFlexGroup gutterSize="s" direction="column">
           <EuiFlexItem grow={false}>
