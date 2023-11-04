@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor as waitForRtl } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import faker from 'faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -21,9 +21,6 @@ import {
 } from './dimension_editor';
 import { DatasourcePublicAPI } from '../..';
 import { createMockFramePublicAPI, generateActiveData } from '../../mocks';
-
-const waitFor = (fn: () => void, options?: Parameters<typeof waitForRtl>[1]) =>
-  waitForRtl(fn, { timeout: 350, ...options });
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>

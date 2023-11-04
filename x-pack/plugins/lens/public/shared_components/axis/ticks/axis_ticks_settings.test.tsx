@@ -10,7 +10,7 @@ import { AxisTicksSettings, AxisTicksSettingsProps } from './axis_ticks_settings
 import { render, screen } from '@testing-library/react';
 
 const renderAxisTicksSettings = (propsOverrides?: Partial<AxisTicksSettingsProps>) => {
-  const rtlRender = render(
+  return render(
     <AxisTicksSettings
       isAxisLabelVisible={true}
       axis="x"
@@ -18,29 +18,25 @@ const renderAxisTicksSettings = (propsOverrides?: Partial<AxisTicksSettingsProps
       {...propsOverrides}
     />
   );
-  return {
-    tickLabelsSwitch: screen.getByLabelText('Tick labels'),
-    ...rtlRender,
-  };
 };
 
 describe('Axes Ticks settings', () => {
   it('should show the ticks switch as on', () => {
-    const { tickLabelsSwitch } = renderAxisTicksSettings();
-    expect(tickLabelsSwitch).toBeChecked();
+    renderAxisTicksSettings();
+    expect(screen.getByLabelText('Tick labels')).toBeChecked();
   });
 
   it('should show the ticks switch as off is the isAxisLabelVisible is set to false', () => {
-    const { tickLabelsSwitch } = renderAxisTicksSettings({ isAxisLabelVisible: false });
-    expect(tickLabelsSwitch).not.toBeChecked();
+    renderAxisTicksSettings({ isAxisLabelVisible: false });
+    expect(screen.getByLabelText('Tick labels')).not.toBeChecked();
   });
 
   it('should call the updateTicksVisibilityState when changing the switch status', () => {
     const updateTicksVisibilityStateSpy = jest.fn();
-    const { tickLabelsSwitch } = renderAxisTicksSettings({
+    renderAxisTicksSettings({
       updateTicksVisibilityState: updateTicksVisibilityStateSpy,
     });
-    tickLabelsSwitch.click();
+    screen.getByLabelText('Tick labels').click();
     expect(updateTicksVisibilityStateSpy.mock.calls.length).toBe(1);
   });
 });

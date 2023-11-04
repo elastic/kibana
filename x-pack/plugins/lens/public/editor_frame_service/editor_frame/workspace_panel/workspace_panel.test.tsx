@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { UserMessage } from '../../../types';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, act } from '@testing-library/react';
 import {
   createMockVisualization,
   createMockDatasource,
