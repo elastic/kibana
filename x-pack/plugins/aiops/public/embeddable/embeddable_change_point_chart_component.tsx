@@ -31,7 +31,7 @@ export interface EmbeddableChangePointChartProps {
   /**
    * Component to render if there are no change points found
    */
-  emptyState?: () => React.ReactElement;
+  emptyState?: React.ReactElement;
   /**
    * Outputs the most recent change point data
    */

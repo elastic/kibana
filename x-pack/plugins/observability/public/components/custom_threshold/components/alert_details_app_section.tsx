@@ -135,7 +135,7 @@ export default function AlertDetailsAppSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource]);
 
-  const overviewTab = !!ruleParams.criteria ? (
+  const overviewTabContent = !!ruleParams.criteria ? (
     <>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
@@ -198,24 +198,28 @@ export default function AlertDetailsAppSection({
     </>
   ) : null;
 
-  const tabs: EuiTabbedContentTab[] = [
-    {
-      id: OVERVIEW_TAB_ID,
-      name: i18n.translate('xpack.observability.threshold.alertDetails.tab.overviewLabel', {
-        defaultMessage: 'Overview',
-      }),
-      'data-test-subj': 'overviewTab',
-      content: overviewTab,
-    },
-    {
-      id: RELATED_EVENTS_TAB_ID,
-      name: i18n.translate('xpack.observability.threshold.alertDetails.tab.relatedEventsLabel', {
-        defaultMessage: 'Related Events',
-      }),
-      'data-test-subj': 'relatedEventsTab',
-      content: <AlertDetailsRelatedEvents alert={alert} rule={rule} dataView={dataView} />,
-    },
-  ];
+  const relatedEventsTabContent = AlertDetailsRelatedEvents({ alert, rule, dataView });
+
+  const overviewTab = {
+    id: OVERVIEW_TAB_ID,
+    name: i18n.translate('xpack.observability.threshold.alertDetails.tab.overviewLabel', {
+      defaultMessage: 'Overview',
+    }),
+    'data-test-subj': 'overviewTab',
+    content: overviewTabContent,
+  };
+
+  const relatedEventsTab = {
+    id: RELATED_EVENTS_TAB_ID,
+    name: i18n.translate('xpack.observability.threshold.alertDetails.tab.relatedEventsLabel', {
+      defaultMessage: 'Related Events',
+    }),
+    'data-test-subj': 'relatedEventsTab',
+    content: relatedEventsTabContent,
+  };
+
+  const tabs: EuiTabbedContentTab[] =
+    relatedEventsTabContent !== null ? [overviewTab, relatedEventsTab] : [overviewTab];
 
   return <EuiTabbedContent data-test-subj="customThresholdAlertDetailsTabbedContent" tabs={tabs} />;
 }

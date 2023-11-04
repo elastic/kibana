@@ -38,6 +38,8 @@ interface AlertDetailsRelatedEventsProps {
   dataView?: DataView;
 }
 
+const emptyState = <></>;
+
 // eslint-disable-next-line import/no-default-export
 export default function AlertDetailsRelatedEvents({
   alert,
@@ -153,48 +155,50 @@ export default function AlertDetailsRelatedEvents({
     }
   };
 
-  const emptyState = () => <></>;
-
-  const relatedEventsTab = !!ruleParams.criteria ? (
-    <>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" justifyContent="flexEnd" gutterSize="xs">
-        <EuiFlexItem grow={true} style={{ maxWidth: 150 }}>
-          <RelatedEventsSortBar loading={false} onChangeSort={onChangeSort} />
-        </EuiFlexItem>
-        <EuiButton data-test-subj="o11yAlertDetailsRelatedEventsRefreshButton" onClick={onRefresh}>
-          {i18n.translate('xpack.observability.alertDetailsRelatedEvents.refreshButtonLabel', {
-            defaultMessage: 'Refresh',
-          })}
-        </EuiButton>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-        data-test-subj="thresholdAlertRelatedEventsSection"
-      >
-        {relatedMetrics?.map(
-          (relatedMetric, relatedMetricIndex) =>
-            dataView &&
-            dataView.id &&
-            relatedMetric && (
-              <EmbeddableChangePointChart
-                id={`relatedMetric${relatedMetricIndex}`}
-                key={`relatedMetric${relatedMetricIndex}`}
-                dataViewId={dataView.id}
-                timeRange={relatedEventsTimeRange()}
-                fn={metricAggType || 'avg'}
-                metricField={relatedMetric}
-                emptyState={emptyState}
-                onChange={onChangePointDataChange}
-                style={{ marginTop: 10 }}
-                lastReloadRequestTime={lastReloadRequestTime}
-              />
-            )
-        )}
-      </EuiFlexGroup>
-    </>
-  ) : null;
+  const relatedEventsTab =
+    !!ruleParams.criteria && relatedMetrics.length > 0 ? (
+      <>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="row" justifyContent="flexEnd" gutterSize="xs">
+          <EuiFlexItem grow={true} style={{ maxWidth: 150 }}>
+            <RelatedEventsSortBar loading={false} onChangeSort={onChangeSort} />
+          </EuiFlexItem>
+          <EuiButton
+            data-test-subj="o11yAlertDetailsRelatedEventsRefreshButton"
+            onClick={onRefresh}
+          >
+            {i18n.translate('xpack.observability.alertDetailsRelatedEvents.refreshButtonLabel', {
+              defaultMessage: 'Refresh',
+            })}
+          </EuiButton>
+        </EuiFlexGroup>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          data-test-subj="thresholdAlertRelatedEventsSection"
+        >
+          {relatedMetrics?.map(
+            (relatedMetric, relatedMetricIndex) =>
+              dataView &&
+              dataView.id &&
+              relatedMetric && (
+                <EmbeddableChangePointChart
+                  id={`relatedMetric${relatedMetricIndex}`}
+                  key={`relatedMetric${relatedMetricIndex}`}
+                  dataViewId={dataView.id}
+                  timeRange={relatedEventsTimeRange()}
+                  fn={metricAggType || 'avg'}
+                  metricField={relatedMetric}
+                  emptyState={emptyState}
+                  onChange={onChangePointDataChange}
+                  style={{ marginTop: 10 }}
+                  lastReloadRequestTime={lastReloadRequestTime}
+                />
+              )
+          )}
+        </EuiFlexGroup>
+      </>
+    ) : null;
 
   return relatedEventsTab;
 }
