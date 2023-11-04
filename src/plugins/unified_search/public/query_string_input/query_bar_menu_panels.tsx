@@ -188,9 +188,16 @@ export function QueryBarMenuPanels({
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
-  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  const [hasSavedQueries, setHasSavedQueries] = useState(false);
   const [hasFiltersOrQuery, setHasFiltersOrQuery] = useState(false);
   const [savedQueryHasChanged, setSavedQueryHasChanged] = useState(false);
+
+  useEffect(() => {
+    if (savedQuery) {
+      cancelPendingListingRequest.current();
+      setHasSavedQueries(true);
+    }
+  }, [savedQuery]);
 
   useEffect(() => {
     const fetchSavedQueries = async () => {
@@ -200,16 +207,16 @@ export function QueryBarMenuPanels({
         requestGotCancelled = true;
       };
 
-      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries('');
+      const { queries } = await savedQueryService.findSavedQueries('', 1, 1);
 
       if (requestGotCancelled) return;
 
-      setSavedQueries(savedQueryItems.reverse().slice(0, 5));
+      setHasSavedQueries(queries.length > 0);
     };
     if (showQueryInput && showFilterBar) {
       fetchSavedQueries();
     }
-  }, [savedQueryService, savedQuery, showQueryInput, showFilterBar]);
+  }, [savedQueryService, showQueryInput, showFilterBar]);
 
   useEffect(() => {
     if (savedQuery) {
@@ -346,7 +353,7 @@ export function QueryBarMenuPanels({
       width: 350,
       icon: 'filter',
       'data-test-subj': 'saved-query-management-load-button',
-      disabled: !savedQueries.length,
+      disabled: !hasSavedQueries,
     },
     {
       name: savedQuery ? strings.getSaveAsNewFilterSetLabel() : strings.getSaveFilterSetLabel(),
