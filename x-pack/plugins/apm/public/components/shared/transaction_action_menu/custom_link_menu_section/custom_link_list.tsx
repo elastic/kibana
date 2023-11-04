@@ -41,7 +41,7 @@ export function CustomLinkList({
 
 function getHref(link: CustomLink, transaction?: Transaction) {
   try {
-    return Mustache.render(link.url, transaction);
+    return encodeURI(Mustache.render(link.url, transaction));
   } catch (e) {
     return link.url;
   }
