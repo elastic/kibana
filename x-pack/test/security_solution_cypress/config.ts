@@ -47,7 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'chartEmbeddablesEnabled',
         ])}`,
-        `--xpack.securitySolition.offeringSettings=${JSON.stringify({
+        `--xpack.securitySolution.offeringSettings=${JSON.stringify({
           disableTimelineSaveTour: true,
         })}`,
         // mock cloud to enable the guided onboarding tour in e2e tests

@@ -25,7 +25,7 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
     target: 'ess',
     services,
     kbnServerArgs: [
-      `--xpack.securitySolition.offeringSettings=${JSON.stringify({
+      `--xpack.securitySolution.offeringSettings=${JSON.stringify({
         disableTimelineSaveTour: true,
       })}`,
     ],

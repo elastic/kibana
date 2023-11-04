@@ -34,7 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           { product_line: 'endpoint', product_tier: 'complete' },
           { product_line: 'cloud', product_tier: 'complete' },
         ])}`,
-        `--xpack.securitySolition.offeringSettings=${JSON.stringify({
+        `--xpack.securitySolution.offeringSettings=${JSON.stringify({
           disableTimelineSaveTour: true,
         })}`,
       ],
