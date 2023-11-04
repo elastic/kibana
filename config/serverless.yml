@@ -51,9 +51,12 @@ xpack.index_management.enableDataStreamsStorageColumn: false
 dev_tools.deeplinks.navLinkStatus: visible
 management.deeplinks.navLinkStatus: visible
 
+# Onboarding team UI configurations
+xpack.cloud_integrations.data_migration.enabled: false
+guided_onboarding.enabled: false
+
 # Other disabled plugins
 xpack.canvas.enabled: false
-xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
 
