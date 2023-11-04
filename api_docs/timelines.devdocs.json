@@ -937,9 +937,7 @@
               "EuiButtonIconPropsForAnchor",
               "> & { type?: string | undefined; } & ",
               "EuiButtonIconProps",
-              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })> | typeof ",
-              "EuiContextMenuItem",
-              " | undefined"
+              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })> | React.FunctionComponent<Props> | undefined"
             ],
             "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "deprecated": false,
