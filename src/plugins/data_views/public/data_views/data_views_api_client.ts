@@ -35,19 +35,11 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     body?: string,
     forceRefresh?: boolean
   ): Promise<T | undefined> {
-    /*
-    console.log('HERE', new Date().getMinutes());
-    if (new Date().getMinutes() % 2 === 0) {
-      forceRefresh = true;
-    }
-    */
-    // const headers = forceRefresh ? { 'Cache-Control': '' } : undefined;
-    // const cacheOptions = forceRefresh ? { cache: 'reload' as RequestCache } : {};
+    const cacheOptions = forceRefresh ? { cache: 'reload' as RequestCache } : {};
 
     const request = body
       ? this.http.post<T>(url, { query, body, version })
-      : this.http.fetch<T>(url, { query, version });
-    // : this.http.fetch<T>(url, { query, version, ...cacheOptions });
+      : this.http.fetch<T>(url, { query, version, ...cacheOptions });
     return request.catch((resp) => {
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
