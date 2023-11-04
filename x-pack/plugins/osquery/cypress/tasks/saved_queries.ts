@@ -75,8 +75,6 @@ export const getSavedQueriesComplexTest = () =>
 
         // visit Status results
         cy.getBySel('osquery-status-tab').click();
-        // cy.react('EuiTab', { props: { id: 'status' } }).click();
-        // cy.react('EuiTableRow').should('have.lengthOf', 2);
         cy.get('tbody > tr.euiTableRow').should('have.lengthOf', 2);
 
         // save new query
@@ -92,9 +90,6 @@ export const getSavedQueriesComplexTest = () =>
         // play saved query
         navigateToWithoutWaitForReact('/app/osquery/saved_queries');
         cy.contains(savedQueryId);
-        // cy.react('PlayButtonComponent', {
-        //   props: { savedQuery: { id: savedQueryId } },
-        // }).click();
         cy.get(`[aria-label="Run ${savedQueryId}"]`).click();
         selectAllAgents();
         submitQuery();
@@ -102,13 +97,10 @@ export const getSavedQueriesComplexTest = () =>
         // edit saved query
         cy.contains('Saved queries').click();
         cy.contains(savedQueryId);
-        // cy.react('CustomItemAction', {
-        //   props: { index: 1, item: { id: savedQueryId } },
-        // }).click();
+
         cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
         cy.get('input[name="description"]').type(` Edited{downArrow}{enter}`);
 
-        // findFormFieldByRowsLabelAndType('Description (optional)', ' Edited');
         // Run in test configuration
         cy.contains('Test configuration').click();
         selectAllAgents();
@@ -134,10 +126,6 @@ export const getSavedQueriesComplexTest = () =>
         // delete saved query
         cy.contains(savedQueryId);
         cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
-        //
-        // cy.react('CustomItemAction', {
-        //   props: { index: 1, item: { id: savedQueryId } },
-        // }).click();
 
         deleteAndConfirm('query');
         cy.contains(savedQueryId).should('exist');

@@ -104,10 +104,6 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(packName).click();
         cy.contains(`${packName} details`);
         cy.contains('Edit').should('be.disabled');
-        // cy.react('CustomItemAction', {
-        //   props: { index: 0, item: { id: SAVED_QUERY_ID } },
-        //   options: { timeout: 3000 },
-        // }).should('not.exist');
         cy.get(`[aria-label="Run ${savedQueryId}"]`).should('not.exist');
         cy.get(`[aria-label="Edit ${savedQueryId}"]`).should('not.exist');
       });
