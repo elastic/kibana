@@ -8,15 +8,24 @@
 
 import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
 import { isFilters, isOfQueryType } from '@kbn/es-query';
+import { omit } from 'lodash';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
 
+interface InternalSavedQueryAttributes extends SavedQueryAttributes {
+  titleKeyword: string;
+}
+
 function injectReferences({
   id,
-  attributes,
+  attributes: internalAttributes,
   namespaces,
   references,
-}: Pick<SavedObject<SavedQueryAttributes>, 'id' | 'attributes' | 'namespaces' | 'references'>) {
+}: Pick<
+  SavedObject<InternalSavedQueryAttributes>,
+  'id' | 'attributes' | 'namespaces' | 'references'
+>) {
+  const attributes: SavedQueryAttributes = omit(internalAttributes, 'titleKeyword');
   const { query } = attributes;
   if (isOfQueryType(query) && typeof query.query === 'string') {
     try {
@@ -48,8 +57,9 @@ function extractReferences({
     }
   }
 
-  const attributes: SavedQueryAttributes = {
+  const attributes: InternalSavedQueryAttributes = {
     title: title.trim(),
+    titleKeyword: title.trim(),
     description: description.trim(),
     query: {
       ...query,
@@ -83,7 +93,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     verifySavedQuery(attrs);
     const { attributes, references } = extractReferences(attrs);
 
-    const savedObject = await soClient.create<SavedQueryAttributes>('query', attributes, {
+    const savedObject = await soClient.create<InternalSavedQueryAttributes>('query', attributes, {
       references,
     });
 
@@ -97,9 +107,14 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     verifySavedQuery(attrs);
     const { attributes, references } = extractReferences(attrs);
 
-    const savedObject = await soClient.update<SavedQueryAttributes>('query', id, attributes, {
-      references,
-    });
+    const savedObject = await soClient.update<InternalSavedQueryAttributes>(
+      'query',
+      id,
+      attributes,
+      {
+        references,
+      }
+    );
 
     // TODO: Handle properly
     if (savedObject.error) throw new Error(savedObject.error.message);
@@ -108,10 +123,8 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
   };
 
   const getSavedQuery = async (id: string) => {
-    const { saved_object: savedObject, outcome } = await soClient.resolve<SavedQueryAttributes>(
-      'query',
-      id
-    );
+    const { saved_object: savedObject, outcome } =
+      await soClient.resolve<InternalSavedQueryAttributes>('query', id);
     if (outcome === 'conflict') {
       throw new Error(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
     } else if (savedObject.error) {
@@ -121,7 +134,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
   };
 
   const getSavedQueriesCount = async () => {
-    const { total } = await soClient.find<SavedQueryAttributes>({
+    const { total } = await soClient.find<InternalSavedQueryAttributes>({
       type: 'query',
       page: 0,
       perPage: 0,
@@ -130,12 +143,15 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
   };
 
   const findSavedQueries = async ({ page = 1, perPage = 50, search = '' } = {}) => {
-    const { total, saved_objects: savedObjects } = await soClient.find<SavedQueryAttributes>({
-      type: 'query',
-      page,
-      perPage,
-      search,
-    });
+    const { total, saved_objects: savedObjects } =
+      await soClient.find<InternalSavedQueryAttributes>({
+        type: 'query',
+        page,
+        perPage,
+        search,
+        sortField: search ? undefined : 'titleKeyword',
+        sortOrder: search ? undefined : 'asc',
+      });
 
     const savedQueries = savedObjects.map(injectReferences);
 

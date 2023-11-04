@@ -30,6 +30,7 @@ import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import './saved_query_management_list.scss';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { debounce } from 'lodash';
+import useLatest from 'react-use/lib/useLatest';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface SavedQueryManagementListProps {
@@ -151,6 +152,7 @@ export function SavedQueryManagementList({
   const [isInitializing, setIsInitializing] = useState(true);
   const currentPageFetchId = useRef(0);
   const selectableRef = useRef<EuiSelectable | null>(null);
+  const latestLoadedQuery = useLatest(loadedSavedQuery);
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(loadedSavedQuery);
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState<SavedQuery | null>(null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
@@ -184,8 +186,15 @@ export function SavedQueryManagementList({
           return;
         }
 
+        const loadedQuery = latestLoadedQuery.current;
+        const filteredQueries = queries.filter((savedQuery) => savedQuery.id !== loadedQuery?.id);
+
+        if (loadedQuery && currentPageNumber === 0) {
+          filteredQueries.unshift(loadedQuery);
+        }
+
         setTotalQueryCount(total);
-        setCurrentPageQueries(queries);
+        setCurrentPageQueries(filteredQueries);
         selectableRef.current?.scrollToItem(0);
       } finally {
         if (fetchIdValue === currentPageFetchId.current) {
@@ -195,7 +204,7 @@ export function SavedQueryManagementList({
     };
 
     fetchPage();
-  }, [currentPageNumber, savedQueryService, searchTerm]);
+  }, [currentPageNumber, latestLoadedQuery, savedQueryService, searchTerm]);
 
   const handleLoad = useCallback(() => {
     if (selectedSavedQuery) {
@@ -234,15 +243,7 @@ export function SavedQueryManagementList({
   );
 
   const savedQueriesOptions = useMemo(() => {
-    const filteredQueries = currentPageQueries.filter(
-      (savedQuery) => savedQuery.id !== loadedSavedQuery?.id
-    );
-
-    if (loadedSavedQuery && filteredQueries.length !== currentPageQueries.length) {
-      filteredQueries.unshift(loadedSavedQuery);
-    }
-
-    return filteredQueries.map<SelectableProps>((savedQuery) => {
+    return currentPageQueries.map<SelectableProps>((savedQuery) => {
       return {
         key: savedQuery.id,
         label: savedQuery.attributes.title,
@@ -255,7 +256,7 @@ export function SavedQueryManagementList({
         },
       };
     });
-  }, [currentPageQueries, format, loadedSavedQuery, selectedSavedQuery]);
+  }, [currentPageQueries, format, selectedSavedQuery]);
 
   const renderOption = (option: RenderOptionProps) => {
     return <>{option.attributes ? itemLabel(option.attributes) : option.label}</>;

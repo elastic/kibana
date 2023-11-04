@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 
 // As per `SavedQueryAttributes`
-export const SCHEMA_QUERY_V8_8_0 = schema.object({
+export const SCHEMA_QUERY_BASE = schema.object({
   title: schema.string(),
   description: schema.string({ defaultValue: '' }),
   query: schema.object({
@@ -29,4 +29,10 @@ export const SCHEMA_QUERY_V8_8_0 = schema.object({
       ),
     })
   ),
+});
+
+export const SCHEMA_QUERY_V8_8_0 = SCHEMA_QUERY_BASE;
+
+export const SCHEMA_QUERY_MODEL_VERSION_1 = SCHEMA_QUERY_BASE.extends({
+  titleKeyword: schema.string(),
 });
