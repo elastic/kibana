@@ -218,12 +218,13 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-public.Index.ilm",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "ilm",
             "description": [],
             "signature": [
-              "{ index: string; managed: boolean; } | undefined"
+              "IlmExplainLifecycleLifecycleExplain",
+              " | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false,
@@ -588,12 +589,13 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-server.Index.ilm",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "ilm",
             "description": [],
             "signature": [
-              "{ index: string; managed: boolean; } | undefined"
+              "IlmExplainLifecycleLifecycleExplain",
+              " | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false,
@@ -1939,12 +1941,13 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.Index.ilm",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "ilm",
             "description": [],
             "signature": [
-              "{ index: string; managed: boolean; } | undefined"
+              "IlmExplainLifecycleLifecycleExplain",
+              " | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false,

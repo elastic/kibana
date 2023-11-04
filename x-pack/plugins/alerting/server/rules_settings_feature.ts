@@ -18,78 +18,86 @@ import {
   READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
 } from '../common';
 
-export const rulesSettingsFeature: KibanaFeatureConfig = {
-  id: RULES_SETTINGS_FEATURE_ID,
-  name: i18n.translate('xpack.alerting.feature.rulesSettingsFeatureName', {
-    defaultMessage: 'Rules Settings',
-  }),
-  category: DEFAULT_APP_CATEGORIES.management,
-  app: [],
-  management: {
-    insightsAndAlerting: ['triggersActions'],
-  },
-  privileges: {
-    all: {
-      app: [],
-      api: [],
-      management: {
-        insightsAndAlerting: ['triggersActions'],
-      },
-      savedObject: {
-        all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
-        read: [],
-      },
-      ui: ['show', 'save'],
+export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureConfig {
+  const settings = {
+    id: RULES_SETTINGS_FEATURE_ID,
+    name: i18n.translate('xpack.alerting.feature.rulesSettingsFeatureName', {
+      defaultMessage: 'Rules Settings',
+    }),
+    category: DEFAULT_APP_CATEGORIES.management,
+    app: [],
+    management: {
+      insightsAndAlerting: ['triggersActions'],
     },
-    read: {
-      app: [],
-      api: [],
-      management: {
-        insightsAndAlerting: ['triggersActions'],
-      },
-      savedObject: {
-        all: [],
-        read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
-      },
-      ui: ['show'],
-    },
-  },
-  subFeatures: [
-    {
-      name: i18n.translate('xpack.alerting.feature.flappingSettingsSubFeatureName', {
-        defaultMessage: 'Flapping detection',
-      }),
-      privilegeGroups: [
-        {
-          groupType: 'mutually_exclusive',
-          privileges: [
-            {
-              api: [API_PRIVILEGES.READ_FLAPPING_SETTINGS, API_PRIVILEGES.WRITE_FLAPPING_SETTINGS],
-              name: 'All',
-              id: ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
-              includeIn: 'all',
-              savedObject: {
-                all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
-                read: [],
-              },
-              ui: ['writeFlappingSettingsUI', 'readFlappingSettingsUI'],
-            },
-            {
-              api: [API_PRIVILEGES.READ_FLAPPING_SETTINGS],
-              name: 'Read',
-              id: READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
-              includeIn: 'read',
-              savedObject: {
-                all: [],
-                read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
-              },
-              ui: ['readFlappingSettingsUI'],
-            },
-          ],
+    privileges: {
+      all: {
+        app: [],
+        api: [],
+        management: {
+          insightsAndAlerting: ['triggersActions'],
         },
-      ],
+        savedObject: {
+          all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+          read: [],
+        },
+        ui: ['show', 'save'],
+      },
+      read: {
+        app: [],
+        api: [],
+        management: {
+          insightsAndAlerting: ['triggersActions'],
+        },
+        savedObject: {
+          all: [],
+          read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+        },
+        ui: ['show'],
+      },
     },
-    {
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.alerting.feature.flappingSettingsSubFeatureName', {
+          defaultMessage: 'Flapping detection',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                api: [
+                  API_PRIVILEGES.READ_FLAPPING_SETTINGS,
+                  API_PRIVILEGES.WRITE_FLAPPING_SETTINGS,
+                ],
+                name: 'All',
+                id: ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+                includeIn: 'all',
+                savedObject: {
+                  all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+                  read: [],
+                },
+                ui: ['writeFlappingSettingsUI', 'readFlappingSettingsUI'],
+              },
+              {
+                api: [API_PRIVILEGES.READ_FLAPPING_SETTINGS],
+                name: 'Read',
+                id: READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+                includeIn: 'read',
+                savedObject: {
+                  all: [],
+                  read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+                },
+                ui: ['readFlappingSettingsUI'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  if (isServerless) {
+    settings.subFeatures.push({
       name: i18n.translate('xpack.alerting.feature.queryDelaySettingsSubFeatureName', {
         defaultMessage: 'Query delay',
       }),
@@ -125,6 +133,8 @@ export const rulesSettingsFeature: KibanaFeatureConfig = {
           ],
         },
       ],
-    },
-  ],
-};
+    });
+  }
+
+  return settings as KibanaFeatureConfig;
+}

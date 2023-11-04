@@ -72,6 +72,8 @@ NOTE: If you use the default settings, you can still create a custom role that g
 +
 Access to data is an index-level privilege. For each index that contains the data you want to include in reports, add a line, then give each index `read` and `view_index_metadata` privileges.
 +
+NOTE: If you use index aliases, you must also grant `read` and `view_index_metadata` privileges to underlying indices to generate CSV reports.
++
 For more information, refer to {ref}/security-privileges.html[Security privileges].
 
 . Add the {kib} privileges.
