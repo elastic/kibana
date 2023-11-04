@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sortBy, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 
 interface Props {
@@ -38,7 +38,6 @@ export function SaveQueryForm({
   showTimeFilterOption = true,
 }: Props) {
   const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
-  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
     Boolean(savedQuery?.attributes.filters ?? true)
   );
@@ -49,6 +48,7 @@ export function SaveQueryForm({
     Boolean(savedQuery?.attributes.timefilter ?? false)
   );
   const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [saveIsDisabled, setSaveIsDisabled] = useState<boolean>(false);
 
   const titleConflictErrorText = i18n.translate(
     'unifiedSearch.search.searchBar.savedQueryForm.titleConflictText',
@@ -64,23 +64,16 @@ export function SaveQueryForm({
     }
   );
 
-  useEffect(() => {
-    const fetchQueries = async () => {
-      const allSavedQueries = await savedQueryService.getAllSavedQueries();
-      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
-      setSavedQueries(sortedAllSavedQueries);
-    };
-    fetchQueries();
-  }, [savedQueryService]);
-
-  const validate = useCallback(() => {
+  const validate = useCallback(async () => {
     const errors = [];
-    if (
-      !!savedQueries.find(
-        (existingSavedQuery) => !savedQuery && existingSavedQuery.attributes.title === title
-      )
-    ) {
-      errors.push(titleConflictErrorText);
+
+    if (!savedQuery) {
+      const { queries }: { queries: Array<SavedQuery | undefined> } =
+        await savedQueryService.findSavedQueries(title, 1, 1);
+
+      if (queries[0]?.attributes.title === title) {
+        errors.push(titleConflictErrorText);
+      }
     }
 
     if (!title) {
@@ -93,18 +86,31 @@ export function SaveQueryForm({
     }
 
     return !formErrors.length;
-  }, [savedQueries, formErrors, title, savedQuery, titleConflictErrorText, titleExistsErrorText]);
+  }, [
+    formErrors,
+    savedQuery,
+    savedQueryService,
+    title,
+    titleConflictErrorText,
+    titleExistsErrorText,
+  ]);
 
-  const onClickSave = useCallback(() => {
-    if (validate()) {
-      onSave({
-        id: savedQuery?.id,
-        title,
-        description: '',
-        shouldIncludeFilters,
-        shouldIncludeTimefilter,
-      });
-      onClose();
+  const onClickSave = useCallback(async () => {
+    try {
+      setSaveIsDisabled(true);
+
+      if (await validate()) {
+        onSave({
+          id: savedQuery?.id,
+          title,
+          description: '',
+          shouldIncludeFilters,
+          shouldIncludeTimefilter,
+        });
+        onClose();
+      }
+    } finally {
+      setSaveIsDisabled(false);
     }
   }, [
     validate,
@@ -200,7 +206,7 @@ export function SaveQueryForm({
           onClick={onClickSave}
           fill
           data-test-subj="savedQueryFormSaveButton"
-          disabled={hasErrors}
+          disabled={hasErrors || saveIsDisabled}
         >
           {i18n.translate('unifiedSearch.search.searchBar.savedQueryFormSaveButtonText', {
             defaultMessage: 'Save query',
