@@ -23,8 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useRef, useEffect, useMemo, MouseEvent } from 'react';
-import { css } from '@emotion/react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
@@ -254,45 +253,9 @@ export function SavedQueryManagementList({
         data: {
           attributes: savedQuery.attributes,
         },
-        append: !!showSaveQuery && (
-          <EuiButtonIcon
-            css={css`
-              opacity: 0.2;
-              filter: grayscale(100%);
-
-              &:hover,
-              &:focus:focus-visible {
-                opacity: 1;
-                filter: grayscale(0%);
-              }
-            `}
-            iconType="trash"
-            aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
-              defaultMessage: 'Delete {savedQueryTitle}',
-              values: { savedQueryTitle: savedQuery.attributes.title },
-            })}
-            data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
-            title={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
-              defaultMessage: 'Delete {savedQueryTitle}',
-              values: { savedQueryTitle: savedQuery.attributes.title },
-            })}
-            onClick={(e: MouseEvent) => {
-              e.stopPropagation();
-              handleDelete(savedQuery);
-            }}
-            color="danger"
-          />
-        ),
       };
     });
-  }, [
-    currentPageQueries,
-    format,
-    handleDelete,
-    loadedSavedQuery,
-    selectedSavedQuery,
-    showSaveQuery,
-  ]);
+  }, [currentPageQueries, format, loadedSavedQuery, selectedSavedQuery]);
 
   const renderOption = (option: RenderOptionProps) => {
     return <>{option.attributes ? itemLabel(option.attributes) : option.label}</>;
@@ -320,7 +283,6 @@ export function SavedQueryManagementList({
             options={savedQueriesOptions}
             listProps={{
               isVirtualized: true,
-              onFocusBadge: false,
             }}
             isPreFiltered
             searchable
@@ -385,26 +347,53 @@ export function SavedQueryManagementList({
       <EuiPopoverFooter paddingSize="s">
         <EuiFlexGroup gutterSize="s" direction="column">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              onClick={handleLoad}
-              disabled={!selectedSavedQuery}
-              aria-label={i18n.translate(
-                'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
-                {
-                  defaultMessage: 'Load query',
-                }
+            <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+              <EuiFlexItem>
+                <EuiButton
+                  size="s"
+                  fill
+                  onClick={handleLoad}
+                  disabled={!selectedSavedQuery}
+                  aria-label={i18n.translate(
+                    'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                    {
+                      defaultMessage: 'Load query',
+                    }
+                  )}
+                  data-test-subj="saved-query-management-apply-changes-button"
+                >
+                  {i18n.translate(
+                    'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                    {
+                      defaultMessage: 'Load query',
+                    }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+              {Boolean(showSaveQuery) && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    display="base"
+                    size="s"
+                    iconType="trash"
+                    color="danger"
+                    disabled={!selectedSavedQuery}
+                    title={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
+                      defaultMessage: 'Delete query',
+                    })}
+                    aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
+                      defaultMessage: 'Delete query',
+                    })}
+                    data-test-subj="delete-saved-query-button"
+                    onClick={() => {
+                      if (selectedSavedQuery) {
+                        handleDelete(selectedSavedQuery);
+                      }
+                    }}
+                  />
+                </EuiFlexItem>
               )}
-              data-test-subj="saved-query-management-apply-changes-button"
-            >
-              {i18n.translate(
-                'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
-                {
-                  defaultMessage: 'Load query',
-                }
-              )}
-            </EuiButton>
+            </EuiFlexGroup>
           </EuiFlexItem>
           {canEditSavedObjects && (
             <EuiFlexItem grow={false}>
