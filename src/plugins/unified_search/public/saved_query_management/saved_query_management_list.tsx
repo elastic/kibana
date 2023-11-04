@@ -133,8 +133,8 @@ const savedQueryMultipleNamespacesDeleteWarning = i18n.translate(
   }
 );
 
-const SAVED_QUERY_PAGE_SIZE = 3;
-const SAVED_QUERY_SEARCH_DEBOUNCE = 300;
+const SAVED_QUERY_PAGE_SIZE = 20;
+const SAVED_QUERY_SEARCH_DEBOUNCE = 500;
 
 export function SavedQueryManagementList({
   showSaveQuery,
@@ -146,19 +146,28 @@ export function SavedQueryManagementList({
 }: SavedQueryManagementListProps) {
   const { uiSettings, http, application } = useKibana<IUnifiedSearchPluginServices>().services;
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSetSearchTerm = useMemo(
-    () => debounce(setSearchTerm, SAVED_QUERY_SEARCH_DEBOUNCE),
-    []
-  );
   const [currentPageNumber, setCurrentPageNumber] = useState(0);
   const [totalQueryCount, setTotalQueryCount] = useState(0);
   const [currentPageQueries, setCurrentPageQueries] = useState<SavedQuery[]>([]);
   const [isInitializing, setIsInitializing] = useState(true);
   const currentPageFetchId = useRef(0);
+  const selectableRef = useRef<EuiSelectable | null>(null);
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(loadedSavedQuery);
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState<SavedQuery | null>(null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
   const format = uiSettings.get('dateFormat');
+
+  const debouncedSetSearchTerm = useMemo(() => {
+    return debounce((newSearchTerm: string) => {
+      setSearchTerm((currentSearchTerm) => {
+        if (currentSearchTerm !== newSearchTerm) {
+          setCurrentPageNumber(0);
+        }
+
+        return newSearchTerm;
+      });
+    }, SAVED_QUERY_SEARCH_DEBOUNCE);
+  }, []);
 
   useEffect(() => {
     const fetchPage = async () => {
@@ -178,6 +187,7 @@ export function SavedQueryManagementList({
 
         setTotalQueryCount(total);
         setCurrentPageQueries(queries);
+        selectableRef.current?.scrollToItem(0);
       } finally {
         if (fetchIdValue === currentPageFetchId.current) {
           setIsInitializing(false);
@@ -301,6 +311,7 @@ export function SavedQueryManagementList({
       >
         <EuiFlexItem grow={false}>
           <EuiSelectable<SelectableProps>
+            ref={selectableRef}
             aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryListAriaLabel', {
               defaultMessage: 'Query list',
             })}
@@ -348,7 +359,7 @@ export function SavedQueryManagementList({
           >
             {(list, search) => (
               <>
-                <EuiPanel style={{ paddingBottom: 0 }} color="transparent" paddingSize="s">
+                <EuiPanel color="transparent" paddingSize="s" css={{ paddingBottom: 0 }}>
                   {search}
                 </EuiPanel>
                 {list}
