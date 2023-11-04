@@ -41,93 +41,84 @@ const getExceptionList1 = () => ({
 
 const EXCEPTION_LIST_NAME = 'Newly created list';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-// FLAKY: https://github.com/elastic/kibana/issues/165640
-describe(
-  'Exception list detail page',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
-  () => {
-    before(() => {
-      login();
+describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
+  beforeEach(() => {
+    login();
 
-      // Create exception list associated with a rule
-      createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) =>
-        createRule(
-          getNewRule({
-            exceptions_list: [
-              {
-                id: response.body.id,
-                list_id: getExceptionList1().list_id,
-                type: getExceptionList1().type,
-                namespace_type: getExceptionList1().namespace_type,
-              },
-            ],
-          })
-        )
-      );
-      createRule(getNewRule({ name: 'Rule to link to shared list' }));
+    // Create exception list associated with a rule
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) =>
+      createRule(
+        getNewRule({
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: getExceptionList1().list_id,
+              type: getExceptionList1().type,
+              namespace_type: getExceptionList1().namespace_type,
+            },
+          ],
+        })
+      )
+    );
+    createRule(getNewRule({ name: 'Rule to link to shared list' }));
+    visit(EXCEPTIONS_URL);
+  });
+
+  it('Should edit list details', () => {
+    visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
+    waitForExceptionListDetailToBeLoaded();
+    // Check list details are loaded
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', LIST_NAME);
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', LIST_DESCRIPTION);
+
+    // Update list details in edit modal
+    editExceptionLisDetails({
+      name: { original: LIST_NAME, updated: UPDATED_LIST_NAME },
+      description: { original: LIST_DESCRIPTION, updated: UPDATED_LIST_DESCRIPTION },
     });
 
-    beforeEach(() => {
-      login();
-      visit(EXCEPTIONS_URL);
+    // Ensure that list details were updated
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', UPDATED_LIST_NAME);
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', UPDATED_LIST_DESCRIPTION);
+
+    // Ensure that list details changes persisted
+    visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', UPDATED_LIST_NAME);
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', UPDATED_LIST_DESCRIPTION);
+
+    // Remove description
+    editExceptionLisDetails({
+      description: { original: UPDATED_LIST_DESCRIPTION, updated: null },
     });
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
 
-    it('Should edit list details', () => {
-      visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
-      waitForExceptionListDetailToBeLoaded();
-      // Check list details are loaded
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', LIST_NAME);
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', LIST_DESCRIPTION);
+    // Ensure description removal persisted
+    visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
+  });
 
-      // Update list details in edit modal
-      editExceptionLisDetails({
-        name: { original: LIST_NAME, updated: UPDATED_LIST_NAME },
-        description: { original: LIST_DESCRIPTION, updated: UPDATED_LIST_DESCRIPTION },
-      });
+  // TODO: Flaky in ESS and Serverless: https://github.com/elastic/kibana/pull/169182#issuecomment-1792597980
+  it.skip('Should create a new list and link it to two rules', () => {
+    createSharedExceptionList(
+      { name: 'Newly created list', description: 'This is my list.' },
+      true
+    );
 
-      // Ensure that list details were updated
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', UPDATED_LIST_NAME);
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', UPDATED_LIST_DESCRIPTION);
+    // After creation - directed to list detail page
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
 
-      // Ensure that list details changes persisted
-      visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', UPDATED_LIST_NAME);
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', UPDATED_LIST_DESCRIPTION);
+    // Open Link rules flyout
+    cy.get(EXCEPTION_LIST_DETAILS_LINK_RULES_BTN).click();
 
-      // Remove description
-      editExceptionLisDetails({
-        description: { original: UPDATED_LIST_DESCRIPTION, updated: null },
-      });
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
+    // Link the first two Rules
+    linkSharedListToRulesFromListDetails(2);
 
-      // Ensure description removal persisted
-      visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
-    });
+    // Save the 2 linked Rules
+    saveLinkedRules();
 
-    it('Should create a new list and link it to two rules', () => {
-      createSharedExceptionList(
-        { name: 'Newly created list', description: 'This is my list.' },
-        true
-      );
+    const linkedRulesNames = ['Rule to link to shared list', 'New Rule Test'];
 
-      // After creation - directed to list detail page
-      cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
-
-      // Open Link rules flyout
-      cy.get(EXCEPTION_LIST_DETAILS_LINK_RULES_BTN).click();
-
-      // Link the first two Rules
-      linkSharedListToRulesFromListDetails(2);
-
-      // Save the 2 linked Rules
-      saveLinkedRules();
-
-      const linkedRulesNames = ['Rule to link to shared list', 'New Rule Test'];
-
-      // Validate the number of linked rules as well as the Rules' names
-      validateSharedListLinkedRules(2, linkedRulesNames);
-    });
-  }
-);
+    // Validate the number of linked rules as well as the Rules' names
+    validateSharedListLinkedRules(2, linkedRulesNames);
+  });
+});
