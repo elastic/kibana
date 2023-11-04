@@ -19,7 +19,6 @@ const {
   findSavedQueries,
   createQuery,
   updateQuery,
-  getAllSavedQueries,
   getSavedQueryCount,
 } = createSavedQueryService(http);
 
@@ -61,19 +60,6 @@ describe('saved query service', () => {
         body: '{"title":"foo","description":"bar","query":{"language":"kuery","query":"response:200"},"filters":[]}',
         version,
       });
-    });
-  });
-
-  describe('getAllSavedQueries', function () {
-    it('should post and extract the saved queries from the response', async () => {
-      http.post.mockResolvedValue({
-        total: 0,
-        savedQueries: [{ attributes: savedQueryAttributes }],
-      });
-      const result = await getAllSavedQueries();
-      expect(http.post).toBeCalled();
-      expect(http.post).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/_all`, { version });
-      expect(result).toEqual([{ attributes: savedQueryAttributes }]);
     });
   });
 

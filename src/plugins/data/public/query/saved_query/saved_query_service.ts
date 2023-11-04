@@ -30,15 +30,6 @@ export const createSavedQueryService = (http: HttpStart) => {
     return savedQuery;
   };
 
-  // we have to tell the saved objects client how many to fetch, otherwise it defaults to fetching 20 per page
-  const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
-    const { savedQueries } = await http.post<{ savedQueries: SavedQuery[] }>(
-      `${SAVED_QUERY_BASE_URL}/_all`,
-      { version }
-    );
-    return savedQueries;
-  };
-
   // findSavedQueries will do a 'match_all' if no search string is passed in
   const findSavedQueries = async (
     search: string = '',
@@ -71,7 +62,6 @@ export const createSavedQueryService = (http: HttpStart) => {
   return {
     createQuery,
     updateQuery,
-    getAllSavedQueries,
     findSavedQueries,
     getSavedQuery,
     deleteSavedQuery,

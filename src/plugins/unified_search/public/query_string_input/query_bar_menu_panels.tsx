@@ -207,11 +207,11 @@ export function QueryBarMenuPanels({
         requestGotCancelled = true;
       };
 
-      const { queries } = await savedQueryService.findSavedQueries('', 1, 1);
+      const queryCount = await savedQueryService.getSavedQueryCount();
 
       if (requestGotCancelled) return;
 
-      setHasSavedQueries(queries.length > 0);
+      setHasSavedQueries(queryCount > 0);
     };
     if (showQueryInput && showFilterBar) {
       fetchSavedQueries();

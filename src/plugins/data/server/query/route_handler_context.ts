@@ -123,6 +123,8 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
   const getSavedQueriesCount = async () => {
     const { total } = await soClient.find<SavedQueryAttributes>({
       type: 'query',
+      page: 0,
+      perPage: 0,
     });
     return total;
   };
@@ -140,22 +142,6 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     return { total, savedQueries };
   };
 
-  const getAllSavedQueries = async () => {
-    const finder = soClient.createPointInTimeFinder<SavedQueryAttributes>({
-      type: 'query',
-      perPage: 100,
-    });
-
-    const savedObjects: Array<SavedObject<SavedQueryAttributes>> = [];
-    for await (const response of finder.find()) {
-      savedObjects.push(...(response.saved_objects ?? []));
-    }
-    await finder.close();
-
-    const savedQueries = savedObjects.map(injectReferences);
-    return { total: savedQueries.length, savedQueries };
-  };
-
   const deleteSavedQuery = async (id: string) => {
     return await soClient.delete('query', id, { force: true });
   };
@@ -166,7 +152,6 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     get: getSavedQuery,
     count: getSavedQueriesCount,
     find: findSavedQueries,
-    getAll: getAllSavedQueries,
     delete: deleteSavedQuery,
   };
 }

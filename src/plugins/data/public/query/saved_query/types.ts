@@ -19,7 +19,6 @@ export type { SavedQuery, SavedQueryAttributes };
 export interface SavedQueryService {
   createQuery: (attributes: SavedQueryAttributes) => Promise<SavedQuery>;
   updateQuery: (id: string, attributes: SavedQueryAttributes) => Promise<SavedQuery>;
-  getAllSavedQueries: () => Promise<SavedQuery[]>;
   findSavedQueries: (
     searchText?: string,
     perPage?: number,
