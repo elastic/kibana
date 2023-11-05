@@ -470,8 +470,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "EuiButtonColor",
-              " | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,

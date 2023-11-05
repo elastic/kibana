@@ -283,7 +283,7 @@ export function LensEditConfigurationFlyout({
           gutterSize="none"
         >
           {isOfAggregateQueryType(query) && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
               <TextBasedLangEditor
                 query={query}
                 onTextLangQueryChange={(q) => {
@@ -352,7 +352,10 @@ export function LensEditConfigurationFlyout({
             </EuiAccordion>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={!isLayerAccordionOpen ? 1 : false}>
+          <EuiFlexItem
+            grow={!isLayerAccordionOpen ? 1 : false}
+            data-test-subj="InlineEditingSuggestions"
+          >
             <SuggestionPanel
               ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
               datasourceMap={datasourceMap}

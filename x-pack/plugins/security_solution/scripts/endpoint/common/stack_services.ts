@@ -337,7 +337,7 @@ export const isServerlessKibanaFlavor = async (client: KbnClient | Client): Prom
     // If we don't have status for plugins, then error
     // the Status API will always return something (its an open API), but if auth was successful,
     // it will also return more data.
-    if (!kbnStatus.status.plugins) {
+    if (!kbnStatus?.status?.plugins) {
       throw new Error(
         `Unable to retrieve Kibana plugins status (likely an auth issue with the username being used for kibana)`
       );
