@@ -24,7 +24,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
