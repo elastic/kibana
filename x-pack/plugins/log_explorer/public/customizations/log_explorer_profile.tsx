@@ -8,14 +8,16 @@ import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { type BehaviorSubject, combineLatest, from, map, Subscription } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { dynamic } from '../utils/dynamic';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 import { LogExplorerStateContainer } from '../components/log_explorer';
 import { LogExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
-const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
+const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
+const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
 
 export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
@@ -114,6 +116,20 @@ export const createLogExplorerProfileCustomizations =
           viewSingleDocument: { disabled: true },
           viewSurroundingDocument: { disabled: true },
         },
+      },
+      Content: (props) => {
+        const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
+
+        const internalState = useObservable(
+          stateContainer.internalState.state$,
+          stateContainer.internalState.get()
+        );
+
+        return (
+          <KibanaContextProviderForPlugin>
+            <LazyCustomFlyoutContent {...props} dataView={internalState.dataView} />
+          </KibanaContextProviderForPlugin>
+        );
       },
     });
 

@@ -1594,10 +1594,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@89.1.0":
-  version "89.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-89.1.0.tgz#25aa9a59515102221286780ab559c3cff91a3753"
-  integrity sha512-vvSfP+kMUeQlfmxnRZhdX7r3rxpmjc3PkWC0KrMTf+NlXEao1imvlMHJNIJ58z5YjUBSMN5jtXkNkjHGI86KDw==
+"@elastic/eui@90.0.0":
+  version "90.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-90.0.0.tgz#f105576513ed2fb31fefab5e1287be4e090ba0f3"
+  integrity sha512-4LXY4CwXU3FHeOiW76VPTaYcPVKEiqpb8GGHFEkYfBPWBgXyUJUVJyXwX9k8pzXElxM9I68OTDVRxIUzEzFiug==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -1618,8 +1618,8 @@
     react-remove-scroll-bar "^2.3.4"
     react-virtualized-auto-sizer "^1.0.20"
     react-window "^1.8.9"
-    refractor "^3.5.0"
-    rehype-raw "^5.0.0"
+    refractor "^3.6.0"
+    rehype-raw "^5.1.0"
     rehype-react "^6.2.1"
     rehype-stringify "^8.0.0"
     remark-breaks "^2.0.2"
@@ -1632,7 +1632,7 @@
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
     uuid "^8.3.0"
-    vfile "^4.2.0"
+    vfile "^4.2.1"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
@@ -3204,15 +3204,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-editor-mocks@link:packages/shared-ux/code_editor/mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/code-editor-types@link:packages/shared-ux/code_editor/types":
-  version "0.0.0"
-  uid ""
-
-"@kbn/code-editor@link:packages/shared-ux/code_editor/impl":
+"@kbn/code-editor@link:packages/shared-ux/code_editor":
   version "0.0.0"
   uid ""
 
@@ -5596,15 +5588,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen-mocks@link:packages/shared-ux/button/exit_full_screen/mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-button-exit-full-screen-types@link:packages/shared-ux/button/exit_full_screen/types":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-button-exit-full-screen@link:packages/shared-ux/button/exit_full_screen/impl":
+"@kbn/shared-ux-button-exit-full-screen@link:packages/shared-ux/button/exit_full_screen":
   version "0.0.0"
   uid ""
 
@@ -8706,13 +8690,6 @@
   dependencies:
     "@types/color-convert" "*"
 
-"@types/compression-webpack-plugin@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@types/compression-webpack-plugin/-/compression-webpack-plugin-2.0.2.tgz#9d8956a542ea974e018ab5dc2316480edbaf17fb"
-  integrity sha512-4GW0o21FHqRwP/HYC8o7ceiO9duBopo1v5MaTVZy8VqF6nnRRDoG/C6djGxAmC7uyXRBK8AdnB2IVQgkoRokXQ==
-  dependencies:
-    "@types/webpack" "*"
-
 "@types/connect-history-api-fallback@^1.3.5":
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/@types/connect-history-api-fallback/-/connect-history-api-fallback-1.3.5.tgz#d1f7a8a09d0ed5a57aee5ae9c18ab9b803205dae"
@@ -8968,13 +8945,6 @@
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/@types/graceful-fs/-/graceful-fs-4.1.3.tgz#039af35fe26bec35003e8d86d2ee9c586354348f"
   integrity sha512-AiHRaEB50LQg0pZmm659vNBb9f4SJ0qrAnteuzhSeAUcJKxoYgEnprg/83kppCnc2zvtCKbdZry1a5pVY3lOTQ==
-  dependencies:
-    "@types/node" "*"
-
-"@types/gulp-zip@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@types/gulp-zip/-/gulp-zip-4.0.1.tgz#96cd0b994219f9ae3bbbec7ec3baa043fba9d9ef"
-  integrity sha512-dYwGsHmwv4pnMD+jtyuIdZchJ0CIivnl8PIApHC+rYN7FMj01tJSAiQb+YN4T/pOn10pmmucBLEB9wXEhQX2Ug==
   dependencies:
     "@types/node" "*"
 
@@ -12291,7 +12261,7 @@ cacache@^12.0.2:
     unique-filename "^1.1.1"
     y18n "^4.0.0"
 
-cacache@^15.0.3, cacache@^15.0.4, cacache@^15.0.5, cacache@^15.2.0:
+cacache@^15.0.4, cacache@^15.0.5, cacache@^15.2.0:
   version "15.3.0"
   resolved "https://registry.yarnpkg.com/cacache/-/cacache-15.3.0.tgz#dc85380fb2f556fe3dda4c719bfa0ec875a7f1eb"
   integrity sha512-VVdYzXEn+cnbXpFgWs5hTT7OScegHVmLhJIR8Ufqk3iFD6A6j5iSX1KuBTfNEv4tdJWE2PzA6IVFtcLC7fN9wQ==
@@ -12731,10 +12701,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^117.0.3:
-  version "117.0.3"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-117.0.3.tgz#4a14cc992d572367b99b53c772adcc4c19078e1e"
-  integrity sha512-c2rk2eGK5zZFBJMdviUlAJfQEBuPNIKfal4+rTFVYAmrWbMPYAqPozB+rIkc1lDP/Ryw44lPiqKglrI01ILhTQ==
+chromedriver@^119.0.0:
+  version "119.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-119.0.0.tgz#f250c442e72266f3e28d2b1eebc6a671a8629340"
+  integrity sha512-3TmabGT7xg57/Jbsg6B/Kqk3HaSbCP1ZHkR5zNft5vT/IWKjZCAGTH9waMI+i5KHSEiMH0zOw/WF98l+1Npkpw==
   dependencies:
     "@testim/chrome-version" "^1.1.3"
     axios "^1.4.0"
@@ -13177,17 +13147,6 @@ compressible@~2.0.16:
   integrity sha512-BGHeLCK1GV7j1bSmQQAi26X+GgWcTjLr/0tzSvMCl3LH1w1IJ4PFSPoV5316b30cneTziC+B1a+3OjoSUcQYmw==
   dependencies:
     mime-db ">= 1.40.0 < 2"
-
-compression-webpack-plugin@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/compression-webpack-plugin/-/compression-webpack-plugin-4.0.0.tgz#7599f592050002a49cd3ad3ee18ae7371e266bca"
-  integrity sha512-DRoFQNTkQ8gadlk117Y2wxANU+MDY56b1FIZj/yJXucBOTViTHXjthM7G9ocnitksk4kLzt1N2RLF0gDjxI+hg==
-  dependencies:
-    cacache "^15.0.3"
-    find-cache-dir "^3.3.1"
-    schema-utils "^2.6.6"
-    serialize-javascript "^3.0.0"
-    webpack-sources "^1.4.3"
 
 compression@^1.7.4:
   version "1.7.4"
@@ -17762,17 +17721,6 @@ gulp-terser@^2.1.0:
     through2 "^4.0.2"
     vinyl-sourcemaps-apply "^0.2.1"
 
-gulp-zip@^5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/gulp-zip/-/gulp-zip-5.0.2.tgz#2edf797ec842e770f4dfde8bef97d139015b1972"
-  integrity sha512-rZd0Ppuc8Bf7J2/WzcdNaeb+lcEXf1R8mV/PJ9Kdu7PmnInWVeLSmiXIka/2QSe6uhAsGVFAMffWSaMzAPGTBg==
-  dependencies:
-    get-stream "^5.1.0"
-    plugin-error "^1.0.1"
-    through2 "^3.0.1"
-    vinyl "^2.1.0"
-    yazl "^2.5.1"
-
 gzip-size@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/gzip-size/-/gzip-size-6.0.0.tgz#065367fd50c239c0671cbcbad5be3e2eeb10e462"
@@ -17976,7 +17924,7 @@ hast-util-parse-selector@^2.0.0, hast-util-parse-selector@^2.2.0:
   resolved "https://registry.yarnpkg.com/hast-util-parse-selector/-/hast-util-parse-selector-2.2.3.tgz#57edd449103900c7f63fd9e6f694ffd7e4634719"
   integrity sha512-nxbeqjQNxsvo/uYYAw9kij6td05YVUlf1qti09rVfbWSLT5H6wo3c+USIwX6nzXWk5kFZzXnEqO82856r0aM2Q==
 
-hast-util-raw@6.0.1, hast-util-raw@^6.0.0:
+hast-util-raw@6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/hast-util-raw/-/hast-util-raw-6.0.1.tgz#973b15930b7529a7b66984c98148b46526885977"
   integrity sha512-ZMuiYA+UF7BXBtsTBNcLBF5HzXzkyE6MLzJnL605LKE8GJylNjGc4jjxazAHUtcwT5/CEt6afRKViYB4X66dig==
@@ -17987,6 +17935,23 @@ hast-util-raw@6.0.1, hast-util-raw@^6.0.0:
     html-void-elements "^1.0.0"
     parse5 "^6.0.0"
     unist-util-position "^3.0.0"
+    vfile "^4.0.0"
+    web-namespaces "^1.0.0"
+    xtend "^4.0.0"
+    zwitch "^1.0.0"
+
+hast-util-raw@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/hast-util-raw/-/hast-util-raw-6.1.0.tgz#e16a3c2642f65cc7c480c165400a40d604ab75d0"
+  integrity sha512-5FoZLDHBpka20OlZZ4I/+RBw5piVQ8iI1doEvffQhx5CbCyTtP8UCq8Tw6NmTAMtXgsQxmhW7Ly8OdFre5/YMQ==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    hast-util-from-parse5 "^6.0.0"
+    hast-util-to-parse5 "^6.0.0"
+    html-void-elements "^1.0.0"
+    parse5 "^6.0.0"
+    unist-util-position "^3.0.0"
+    unist-util-visit "^2.0.0"
     vfile "^4.0.0"
     web-namespaces "^1.0.0"
     xtend "^4.0.0"
@@ -25939,7 +25904,7 @@ redux@^4.0.0, redux@^4.0.4, redux@^4.1.2, redux@^4.2.0:
   dependencies:
     "@babel/runtime" "^7.9.2"
 
-refractor@^3.2.0, refractor@^3.5.0:
+refractor@^3.2.0, refractor@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/refractor/-/refractor-3.6.0.tgz#ac318f5a0715ead790fcfb0c71f4dd83d977935a"
   integrity sha512-MY9W41IOWxxk31o+YvFCNyNzdkc9M20NoZK5vq6jkv4I/uh2zkWcfudj0Q1fovjUQJrNewS9NMzeTtqPf+n5EA==
@@ -26057,12 +26022,12 @@ regjsparser@^0.8.2:
   dependencies:
     jsesc "~0.5.0"
 
-rehype-raw@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/rehype-raw/-/rehype-raw-5.0.0.tgz#3688e3e1132e958761e677a1b9b2ba358a465af8"
-  integrity sha512-q/MOBj4fs1WF/LSCh5uOtNhnm5OESuDcSvq1mDQP4/2t6Q52E9MHeVoLeMy9vOn93BEcgVBm4FCokcK2iXRDvA==
+rehype-raw@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/rehype-raw/-/rehype-raw-5.1.0.tgz#66d5e8d7188ada2d31bc137bc19a1000cf2c6b7e"
+  integrity sha512-MDvHAb/5mUnif2R+0IPCYJU8WjHa9UzGtM/F4AVy5GixPlDZ1z3HacYy4xojDU+uBa+0X/3PIfyQI26/2ljJNA==
   dependencies:
-    hast-util-raw "^6.0.0"
+    hast-util-raw "^6.1.0"
 
 rehype-react@^6.2.1:
   version "6.2.1"
@@ -26288,7 +26253,7 @@ repeating@^2.0.0:
   dependencies:
     is-finite "^1.0.0"
 
-replace-ext@1.0.0, replace-ext@^1.0.0:
+replace-ext@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/replace-ext/-/replace-ext-1.0.0.tgz#de63128373fcbf7c3ccfa4de5a480c45a67958eb"
   integrity sha1-3mMSg3P8v3w8z6TeWkgMRaZ5WOs=
@@ -26774,7 +26739,7 @@ scheduler@^0.20.2:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
 
-schema-utils@2.7.0, schema-utils@^2.0.0, schema-utils@^2.0.1, schema-utils@^2.5.0, schema-utils@^2.6.5, schema-utils@^2.6.6, schema-utils@^2.7.0:
+schema-utils@2.7.0, schema-utils@^2.0.0, schema-utils@^2.0.1, schema-utils@^2.5.0, schema-utils@^2.6.5, schema-utils@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-2.7.0.tgz#17151f76d8eae67fbbf77960c33c676ad9f4efc7"
   integrity sha512-0ilKFI6QQF5nxDZLFn2dMjvc4hjg/Wkg7rHd3jK6/A4a1Hl9VFdQWvgB1UMGoU94pad1P/8N7fMcEnLnSiju8A==
@@ -26931,7 +26896,7 @@ serialize-javascript@6.0.0, serialize-javascript@^6.0.0:
   dependencies:
     randombytes "^2.1.0"
 
-serialize-javascript@^3.0.0, serialize-javascript@^3.1.0:
+serialize-javascript@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-3.1.0.tgz#8bf3a9170712664ef2561b44b691eafe399214ea"
   integrity sha512-JIJT1DGiWmIKhzRsG91aS6Ze4sFUrYbltlkg2onR5OrnNM02Kl/hnY/T4FN2omvyeBbQmMJv+K4cPOpGzOTFBg==
@@ -30251,14 +30216,13 @@ vfile-message@^2.0.0:
     "@types/unist" "^2.0.0"
     unist-util-stringify-position "^2.0.0"
 
-vfile@^4.0.0, vfile@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/vfile/-/vfile-4.2.0.tgz#26c78ac92eb70816b01d4565e003b7e65a2a0e01"
-  integrity sha512-a/alcwCvtuc8OX92rqqo7PflxiCgXRFjdyoGVuYV+qbgCb0GgZJRvIgCD4+U/Kl1yhaRsaTwksF88xbPyGsgpw==
+vfile@^4.0.0, vfile@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/vfile/-/vfile-4.2.1.tgz#03f1dce28fc625c625bc6514350fbdb00fa9e624"
+  integrity sha512-O6AE4OskCG5S1emQ/4gl8zK586RqA3srz3nfK/Viy0UPToBc5Trp9BVFb1u0CjsKrAWwnpr4ifM/KBXPWwJbCA==
   dependencies:
     "@types/unist" "^2.0.0"
     is-buffer "^2.0.0"
-    replace-ext "1.0.0"
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
@@ -30309,7 +30273,7 @@ vinyl-sourcemaps-apply@^0.2.1:
   dependencies:
     source-map "^0.5.1"
 
-vinyl@^2.1.0, vinyl@^2.2.0:
+vinyl@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/vinyl/-/vinyl-2.2.0.tgz#d85b07da96e458d25b2ffe19fece9f2caa13ed86"
   integrity sha512-MBH+yP0kC/GQ5GwBqrTPTzEfiiLjta7hTtvQtbxBgTeSXsmKQRQecjibMbxIXzVT3Y9KJK+drOz1/k+vsu8Nkg==
