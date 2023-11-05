@@ -9,8 +9,11 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 import { i18n } from '@kbn/i18n';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
   Embeddable as AbstractEmbeddable,
@@ -22,6 +25,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
 
@@ -31,6 +35,7 @@ interface SloEmbeddableDeps {
   i18n: CoreStart['i18n'];
   application: ApplicationStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  data: DataPublicPluginStart;
 }
 
 const ALERTS_PER_PAGE = 10;
@@ -66,6 +71,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
         })
     );
     this.input.lastReloadRequestTime = Date.now();
+    const queryClient = new QueryClient();
 
     // const { sloId, sloInstanceId } = this.getInput(); // TODO uncomment once I implement handling explicit input
 
@@ -79,26 +85,28 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
     const { sloId, sloInstanceId } = this.getInput(); // TODO fix types
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={this.deps}>
-          <AlertsStateTable
-            query={{
-              bool: {
-                filter: [
-                  // { term: { 'slo.id': sloId } },
-                  // { term: { 'slo.instanceId': sloInstanceId ?? ALL_VALUE } },
-                  { term: { 'slo.id': '7bd92700-743d-11ee-bd9f-0fb31b48b974' } }, // TEMP hardcode it, until I implement explicit input
-                  { term: { 'slo.instanceId': ALL_VALUE } },
-                ],
-              },
-            }}
-            alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-            configurationId={AlertConsumers.OBSERVABILITY}
-            featureIds={[AlertConsumers.SLO]}
-            hideLazyLoader
-            id={ALERTS_TABLE_ID}
-            pageSize={ALERTS_PER_PAGE}
-            showAlertStatusWithFlapping
-          />
+        <KibanaContextProvider services={{ ...this.deps, storage: new Storage(localStorage) }}>
+          <QueryClientProvider client={queryClient}>
+            <AlertsStateTable
+              query={{
+                bool: {
+                  filter: [
+                    // { term: { 'slo.id': sloId } },
+                    // { term: { 'slo.instanceId': sloInstanceId ?? ALL_VALUE } },
+                    { term: { 'slo.id': '7bd92700-743d-11ee-bd9f-0fb31b48b974' } }, // TEMP hardcode it, until I implement explicit input
+                    { term: { 'slo.instanceId': 'blast-mail.co' } },
+                  ],
+                },
+              }}
+              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+              configurationId={AlertConsumers.OBSERVABILITY}
+              featureIds={[AlertConsumers.SLO]}
+              hideLazyLoader
+              id={ALERTS_TABLE_ID}
+              pageSize={ALERTS_PER_PAGE}
+              showAlertStatusWithFlapping
+            />
+          </QueryClientProvider>
         </KibanaContextProvider>
       </I18nContext>,
       node
