@@ -38,7 +38,7 @@ import {
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { latestRuleVersion, partiallyUpdateAlert } from '../saved_objects';
+import { partiallyUpdateAlert } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -783,7 +783,7 @@ export class TaskRunner<
         nextRun,
         lastRun: lastRunToRaw(lastRun),
         monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-        typeVersion: latestRuleVersion,
+        typeVersion: this.context.ruleTypeRegistry.getLatestRuleVersion(),
       });
     }
 
@@ -1007,7 +1007,7 @@ export class TaskRunner<
       },
       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
-      typeVersion: latestRuleVersion,
+      typeVersion: this.context.ruleTypeRegistry.getLatestRuleVersion(),
     });
   }
 }

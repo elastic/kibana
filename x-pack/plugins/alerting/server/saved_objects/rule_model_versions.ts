@@ -32,7 +32,10 @@ export const ruleModelVersions: CustomSavedObjectsModelVersionMap = {
 
 export const latestRuleVersion = Math.max(...Object.keys(ruleModelVersions).map(Number));
 
-export function getMinimumCompatibleVersion(version: number, rawRule: RawRule): number {
+export function getMinimumCompatibleVersion(
+  version: number = latestRuleVersion,
+  rawRule: RawRule
+): number {
   if (version === 1) {
     return 1;
   }

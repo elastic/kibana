@@ -12,7 +12,7 @@ import {
   LoadedIndirectParams,
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
-import { getMinimumCompatibleVersion, latestRuleVersion } from '../saved_objects';
+import { getMinimumCompatibleVersion } from '../saved_objects';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -133,7 +133,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   });
 
   const typeVersion = getMinimumCompatibleVersion(
-    rawRule.attributes.typeVersion || latestRuleVersion,
+    rawRule.attributes.typeVersion,
     rawRule.attributes
   );
 

@@ -236,6 +236,7 @@ describe('Task Runner', () => {
           (actionTypeId, actionId, params) => params
         );
         ruleTypeRegistry.get.mockReturnValue(ruleTypeWithAlerts);
+        ruleTypeRegistry.getLatestRuleVersion.mockReturnValue(1);
         taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation(
           (ctx, fn) => fn()
         );

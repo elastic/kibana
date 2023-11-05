@@ -191,6 +191,7 @@ describe('update()', () => {
       },
       validLegacyConsumers: [],
     });
+    ruleTypeRegistry.getLatestRuleVersion.mockReturnValue(1);
     (migrateLegacyActions as jest.Mock).mockResolvedValue({
       hasLegacyActions: false,
       resultedActions: [],
