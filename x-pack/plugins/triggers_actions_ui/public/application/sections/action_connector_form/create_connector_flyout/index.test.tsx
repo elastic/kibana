@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { act } from '@testing-library/react';
 import CreateConnectorFlyout from '.';
 import { betaBadgeProps } from '../beta_badge_props';

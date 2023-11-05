@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/dom';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';

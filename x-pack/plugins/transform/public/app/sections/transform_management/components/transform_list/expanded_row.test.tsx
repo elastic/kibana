@@ -12,7 +12,7 @@ import { TransformListRow } from '../../../../common';
 import { ExpandedRow } from './expanded_row';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
-import { within } from '@testing-library/dom';
+import { within } from '@testing-library/react';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');

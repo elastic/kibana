@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render as rTLRender } from '@testing-library/react';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { Rule } from '../../../../rule_management/logic/types';
