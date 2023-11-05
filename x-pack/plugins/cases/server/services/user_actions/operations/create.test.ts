@@ -15,7 +15,7 @@ import { set, unset } from 'lodash';
 import { createConnectorObject } from '../../test_utils';
 import { UserActionPersister } from './create';
 import { createUserActionSO } from '../test_utils';
-import type { BulkCreateAttachmentUserAction, CreateUserActionClient } from '../types';
+import type { BulkCreateAttachmentUserAction, CreateUserActionArgs } from '../types';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import {
   getAssigneesAddedRemovedUserActions,
@@ -67,14 +67,16 @@ describe('UserActionPersister', () => {
 
   const getRequest = () =>
     ({
-      action: 'update' as const,
-      type: 'connector' as const,
-      caseId: 'test',
-      payload: { connector: createConnectorObject().connector },
-      connectorId: '1',
-      owner: 'cases',
-      user: { email: '', full_name: '', username: '' },
-    } as CreateUserActionClient<'connector'>);
+      userAction: {
+        action: 'update' as const,
+        type: 'connector' as const,
+        caseId: 'test',
+        payload: { connector: createConnectorObject().connector },
+        connectorId: '1',
+        owner: 'cases',
+        user: { email: '', full_name: '', username: '' },
+      },
+    } as CreateUserActionArgs<'connector'>);
 
   const getBulkCreateAttachmentRequest = (): BulkCreateAttachmentUserAction => ({
     caseId: 'test',
@@ -107,7 +109,7 @@ describe('UserActionPersister', () => {
 
       it('throws if fields is omitted', async () => {
         const req = getRequest();
-        unset(req, 'payload.connector.fields');
+        unset(req, 'userAction.payload.connector.fields');
 
         await expect(persister.createUserAction(req)).rejects.toThrow(
           'Invalid value "undefined" supplied to "payload,connector,fields"'
