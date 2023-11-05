@@ -15,8 +15,7 @@ import {
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
-import { render } from '@testing-library/react';
+import { waitFor, render } from '@testing-library/react';
 
 import { EuiTextArea, EuiIcon } from '@elastic/eui';
 

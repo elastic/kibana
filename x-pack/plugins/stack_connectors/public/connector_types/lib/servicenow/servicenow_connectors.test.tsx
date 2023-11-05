@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { act, within } from '@testing-library/react';
+import { act, within, render } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render, act as reactAct } from '@testing-library/react';
 
 import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -278,11 +277,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await reactAct(async () => {
+      await act(async () => {
         userEvent.click(getByTestId('update-connector-btn'));
       });
 
-      await reactAct(async () => {
+      await act(async () => {
         const updateConnectorForm = getByTestId('updateConnectorForm');
         const urlInput = within(updateConnectorForm).getByTestId('credentialsApiUrlFromInput');
         const usernameInput = within(updateConnectorForm).getByTestId(
@@ -335,11 +334,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await reactAct(async () => {
+      await act(async () => {
         userEvent.click(getByTestId('update-connector-btn'));
       });
 
-      await reactAct(async () => {
+      await act(async () => {
         const updateConnectorForm = getByTestId('updateConnectorForm');
         const urlInput = within(updateConnectorForm).getByTestId('credentialsApiUrlFromInput');
         const usernameInput = within(updateConnectorForm).getByTestId(
