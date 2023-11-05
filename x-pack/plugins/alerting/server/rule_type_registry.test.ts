@@ -40,6 +40,7 @@ beforeEach(() => {
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
+    latestRuleVersion: 1,
   };
 });
 
