@@ -3204,6 +3204,7 @@ describe('Task Runner', () => {
 
   test('loadIndirectParams Fetches the ruleData and returns the indirectParams', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: {

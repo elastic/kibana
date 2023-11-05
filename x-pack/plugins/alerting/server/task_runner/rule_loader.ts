@@ -140,7 +140,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   return {
     rule,
     version: rawRule.version,
-    indirectParams: rawRule.attributes.params as Params,
+    indirectParams: rule.params,
     fakeRequest,
     rulesClient,
     apiKey: rawRule.attributes.apiKey,
