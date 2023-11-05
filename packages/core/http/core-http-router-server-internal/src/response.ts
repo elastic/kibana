@@ -49,12 +49,11 @@ const successResponseFactory: KibanaSuccessResponseFactory = {
 };
 
 const redirectionResponseFactory: KibanaRedirectionResponseFactory = {
-  redirected: (options: RedirectResponseOptions) => new KibanaResponse(302, undefined, options),
+  redirected: (options: RedirectResponseOptions) => new KibanaResponse(302, options.body, options),
 };
 
 const notModifiedResponseFactory: KibanaNotModifiedResponseFactory = {
-  notModified: (options: HttpResponseOptions = {}) =>
-    new KibanaResponse(304, options.body, options),
+  notModified: (options: HttpResponseOptions = {}) => new KibanaResponse(304, undefined, options),
 };
 
 const errorResponseFactory: KibanaErrorResponseFactory = {
