@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { stringHash } from '@kbn/ml-string-hash';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AssetDetailsProvider({ getService }: FtrProviderContext) {
@@ -102,9 +101,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async getMetadataAppliedFilter() {
       const filter = await testSubjects.find(
-        `filter-badge-${stringHash(
-          "'host.architecture: arm64'"
-        )} filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0`
+        "filter-badge-'host.architecture: arm64' filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0"
       );
       return filter.getVisibleText();
     },
