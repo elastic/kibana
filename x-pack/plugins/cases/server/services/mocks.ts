@@ -102,6 +102,7 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
     bulkCreateAttachmentDeletion: jest.fn(),
     bulkCreateAttachmentCreation: jest.fn(),
     createUserAction: jest.fn(),
+    bulkCreateUserAction: jest.fn(),
   };
 
   return service as unknown as CaseUserActionPersisterServiceMock;

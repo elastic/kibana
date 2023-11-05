@@ -90,8 +90,6 @@ export const bulkCreate = async (
             'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
           );
         }
-
-        licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
       }
 
       /**
@@ -182,6 +180,7 @@ export const bulkCreate = async (
     await userActionService.creator.bulkCreateUserAction({ userActions });
 
     if (assigneesPerCase.length > 0) {
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
       await notificationService.bulkNotifyAssignees(assigneesPerCase);
     }
 

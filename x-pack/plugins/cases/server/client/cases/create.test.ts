@@ -108,6 +108,14 @@ describe('create', () => {
         `Failed to create case: Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
       );
     });
+
+    it('should throw if the user does not have the correct license', async () => {
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+      await expect(create(theCase, clientArgs, casesClientMock)).rejects.toThrow(
+        `Failed to create case: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license`
+      );
+    });
   });
 
   describe('Attributes', () => {
@@ -784,26 +792,28 @@ describe('create', () => {
       await create(caseWithOnlyRequiredFields, clientArgs, casesClient);
 
       expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith({
-        caseId: 'mock-id-1',
-        owner: 'securitySolution',
-        payload: {
-          assignees: [],
-          category: null,
-          connector: { fields: null, id: '.none', name: 'None', type: '.none' },
-          customFields: [],
-          description: 'testing sir',
+        userAction: {
+          caseId: 'mock-id-1',
           owner: 'securitySolution',
-          settings: { syncAlerts: true },
-          severity: 'low',
-          tags: [],
-          title: 'My Case',
-        },
-        type: 'create_case',
-        user: {
-          email: 'damaged_raccoon@elastic.co',
-          full_name: 'Damaged Raccoon',
-          profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-          username: 'damaged_raccoon',
+          payload: {
+            assignees: [],
+            category: null,
+            connector: { fields: null, id: '.none', name: 'None', type: '.none' },
+            customFields: [],
+            description: 'testing sir',
+            owner: 'securitySolution',
+            settings: { syncAlerts: true },
+            severity: 'low',
+            tags: [],
+            title: 'My Case',
+          },
+          type: 'create_case',
+          user: {
+            email: 'damaged_raccoon@elastic.co',
+            full_name: 'Damaged Raccoon',
+            profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+            username: 'damaged_raccoon',
+          },
         },
       });
     });
@@ -812,26 +822,28 @@ describe('create', () => {
       await create(caseWithOptionalFields, clientArgs, casesClient);
 
       expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith({
-        caseId: 'mock-id-1',
-        owner: 'securitySolution',
-        payload: {
-          assignees: [{ uid: '1' }],
-          category: 'My category',
-          connector: { fields: null, id: '.none', name: 'None', type: '.none' },
-          customFields: caseWithOptionalFields.customFields,
-          description: 'testing sir',
+        userAction: {
+          caseId: 'mock-id-1',
           owner: 'securitySolution',
-          settings: { syncAlerts: true },
-          severity: 'critical',
-          tags: [],
-          title: 'My Case',
-        },
-        type: 'create_case',
-        user: {
-          email: 'damaged_raccoon@elastic.co',
-          full_name: 'Damaged Raccoon',
-          profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-          username: 'damaged_raccoon',
+          payload: {
+            assignees: [{ uid: '1' }],
+            category: 'My category',
+            connector: { fields: null, id: '.none', name: 'None', type: '.none' },
+            customFields: caseWithOptionalFields.customFields,
+            description: 'testing sir',
+            owner: 'securitySolution',
+            settings: { syncAlerts: true },
+            severity: 'critical',
+            tags: [],
+            title: 'My Case',
+          },
+          type: 'create_case',
+          user: {
+            email: 'damaged_raccoon@elastic.co',
+            full_name: 'Damaged Raccoon',
+            profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+            username: 'damaged_raccoon',
+          },
         },
       });
     });
