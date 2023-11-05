@@ -84,7 +84,7 @@ export const MetricDistributionChart: FC<Props> = ({
     >
       <Chart size={{ width, height }}>
         <Tooltip headerFormatter={headerFormatter} />
-        <Settings theme={theme} />
+        <Settings theme={theme} locale={i18n.getLocale()} />
         <Axis
           id="bottom"
           position={Position.Bottom}

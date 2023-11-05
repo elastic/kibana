@@ -16,8 +16,7 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
-  // Replace with the corresponding logs alert rule feature flag
-  if (!framework.config.featureFlags.logsUIEnabled) {
+  if (!framework.config.featureFlags.logThresholdAlertRuleEnabled) {
     return;
   }
 

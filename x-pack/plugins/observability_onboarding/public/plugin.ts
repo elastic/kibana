@@ -28,6 +28,7 @@ import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
 import { ObservabilityOnboardingPluginLocators } from './locators';
+import { ConfigSchema } from '.';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -42,6 +43,14 @@ export interface ObservabilityOnboardingPluginStartDeps {
   http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
+}
+
+export interface ObservabilityOnboardingPluginContextValue {
+  core: CoreStart;
+  plugins: ObservabilityOnboardingPluginSetupDeps;
+  data: DataPublicPluginStart;
+  observability: ObservabilityPublicStart;
+  config: ConfigSchema;
 }
 
 export class ObservabilityOnboardingPlugin

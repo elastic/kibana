@@ -34,6 +34,8 @@ import {
 } from '../../../tasks/timeline';
 import { hostsUrl, MANAGE_URL } from '../../../urls/navigation';
 
+// https://github.com/elastic/kibana/issues/169021
+
 describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();

@@ -24,6 +24,7 @@ import {
   cleanRiskEngineConfig,
   waitForRiskEngineTaskToBeGone,
   deleteRiskScoreIndices,
+  clearTransforms,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -37,8 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  // Failing: See https://github.com/elastic/kibana/issues/168424
-  describe.skip('Risk Engine - Risk Scoring Task', () => {
+  describe('Risk Engine - Risk Scoring Task', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -62,6 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+        await clearTransforms({ es, log });
       });
 
       afterEach(async () => {
@@ -70,6 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+        await clearTransforms({ es, log });
       });
 
       describe('with some alerts containing hosts', () => {
@@ -94,8 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/168415
-        describe.skip('initializing the risk engine', () => {
+        describe('initializing the risk engine', () => {
           beforeEach(async () => {
             await riskEngineRoutes.init();
           });

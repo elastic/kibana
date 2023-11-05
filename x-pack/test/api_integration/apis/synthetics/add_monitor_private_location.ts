@@ -81,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
             lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
+          namespace: 'default',
         },
       ]);
     });

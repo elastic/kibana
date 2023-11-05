@@ -11,13 +11,16 @@ import { EuiProgress } from '@elastic/eui';
 
 import { TooltipTable, TooltipHeader, TooltipValue, TooltipContainer } from '@elastic/charts';
 
-import { usePingStatusesIsLoading } from '../hooks/use_ping_statuses';
 import { MonitorStatusTimeBin, SUCCESS_VIZ_COLOR, DANGER_VIZ_COLOR } from './monitor_status_data';
 import * as labels from './labels';
 
-export const MonitorStatusCellTooltip = ({ timeBin }: { timeBin?: MonitorStatusTimeBin }) => {
-  const isLoading = usePingStatusesIsLoading();
-
+export const MonitorStatusCellTooltip = ({
+  timeBin,
+  isLoading,
+}: {
+  timeBin?: MonitorStatusTimeBin;
+  isLoading: boolean;
+}) => {
   if (!timeBin) {
     return <>{''}</>;
   }

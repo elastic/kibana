@@ -126,7 +126,6 @@
     "@kbn/maps-vector-tile-utils",
     "@kbn/server-route-repository",
     "@kbn/core-http-common",
-    "@kbn/slo-schema",
     "@kbn/lens-plugin",
     "@kbn/notifications-plugin",
     "@kbn/logs-shared-plugin",
@@ -147,5 +146,6 @@
     "@kbn/ecs",
     "@kbn/coloring",
     "@kbn/es",
+    "@kbn/metrics-data-access-plugin",
   ]
 }

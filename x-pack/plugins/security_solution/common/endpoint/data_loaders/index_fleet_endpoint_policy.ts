@@ -22,6 +22,7 @@ import {
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
+import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
@@ -36,88 +37,91 @@ export interface IndexedFleetEndpointPolicyResponse {
  * Create an endpoint Integration Policy (and associated Agent Policy) via Fleet
  * (NOTE: ensure that fleet is setup first before calling this loading function)
  */
-export const indexFleetEndpointPolicy = async (
-  kbnClient: KbnClient,
-  policyName: string,
-  endpointPackageVersion?: string,
-  agentPolicyName?: string
-): Promise<IndexedFleetEndpointPolicyResponse> => {
-  const response: IndexedFleetEndpointPolicyResponse = {
-    integrationPolicies: [],
-    agentPolicies: [],
-  };
+export const indexFleetEndpointPolicy = usageTracker.track(
+  'indexFleetEndpointPolicy',
+  async (
+    kbnClient: KbnClient,
+    policyName: string,
+    endpointPackageVersion?: string,
+    agentPolicyName?: string
+  ): Promise<IndexedFleetEndpointPolicyResponse> => {
+    const response: IndexedFleetEndpointPolicyResponse = {
+      integrationPolicies: [],
+      agentPolicies: [],
+    };
 
-  const packageVersion =
-    endpointPackageVersion ?? (await getDefaultEndpointPackageVersion(kbnClient));
+    const packageVersion =
+      endpointPackageVersion ?? (await getDefaultEndpointPackageVersion(kbnClient));
 
-  // Create Agent Policy first
-  const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-    name:
-      agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
-    description: `Policy created with endpoint data generator (${policyName})`,
-    namespace: 'default',
-    monitoring_enabled: ['logs', 'metrics'],
-  };
+    // Create Agent Policy first
+    const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
+      name:
+        agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
+      description: `Policy created with endpoint data generator (${policyName})`,
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+    };
 
-  let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
+    let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
 
-  try {
-    agentPolicy = (await kbnClient
+    try {
+      agentPolicy = (await kbnClient
+        .request({
+          path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+          headers: {
+            'elastic-api-version': API_VERSIONS.public.v1,
+          },
+          method: 'POST',
+          body: newAgentPolicyData,
+        })
+        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreateAgentPolicyResponse>;
+    } catch (error) {
+      throw new Error(`create fleet agent policy failed ${error}`);
+    }
+
+    response.agentPolicies.push(agentPolicy.data.item);
+
+    // Create integration (package) policy
+    const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
+      name: policyName,
+      description: 'Protect the worlds data',
+      policy_id: agentPolicy.data.item.id,
+      enabled: true,
+      inputs: [
+        {
+          type: 'endpoint',
+          enabled: true,
+          streams: [],
+          config: {
+            policy: {
+              value: policyConfigFactory(),
+            },
+          },
+        },
+      ],
+      namespace: 'default',
+      package: {
+        name: 'endpoint',
+        title: 'Elastic Defend',
+        version: packageVersion,
+      },
+    };
+    const packagePolicy = (await kbnClient
       .request({
-        path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+        path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+        method: 'POST',
+        body: newPackagePolicyData,
         headers: {
           'elastic-api-version': API_VERSIONS.public.v1,
         },
-        method: 'POST',
-        body: newAgentPolicyData,
       })
-      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreateAgentPolicyResponse>;
-  } catch (error) {
-    throw new Error(`create fleet agent policy failed ${error}`);
+      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreatePackagePolicyResponse>;
+
+    response.integrationPolicies.push(packagePolicy.data.item as PolicyData);
+
+    return response;
   }
-
-  response.agentPolicies.push(agentPolicy.data.item);
-
-  // Create integration (package) policy
-  const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-    name: policyName,
-    description: 'Protect the worlds data',
-    policy_id: agentPolicy.data.item.id,
-    enabled: true,
-    inputs: [
-      {
-        type: 'endpoint',
-        enabled: true,
-        streams: [],
-        config: {
-          policy: {
-            value: policyConfigFactory(),
-          },
-        },
-      },
-    ],
-    namespace: 'default',
-    package: {
-      name: 'endpoint',
-      title: 'Elastic Defend',
-      version: packageVersion,
-    },
-  };
-  const packagePolicy = (await kbnClient
-    .request({
-      path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-      method: 'POST',
-      body: newPackagePolicyData,
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
-    })
-    .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreatePackagePolicyResponse>;
-
-  response.integrationPolicies.push(packagePolicy.data.item as PolicyData);
-
-  return response;
-};
+);
 
 export interface DeleteIndexedFleetEndpointPoliciesResponse {
   integrationPolicies: PostDeletePackagePoliciesResponse | undefined;
@@ -183,11 +187,14 @@ export const deleteIndexedFleetEndpointPolicies = async (
   return response;
 };
 
-const getDefaultEndpointPackageVersion = memoize(
-  async (kbnClient: KbnClient) => {
-    return (await getEndpointPackageInfo(kbnClient)).version;
-  },
-  (kbnClient: KbnClient) => {
-    return kbnClient.resolveUrl('/');
-  }
+const getDefaultEndpointPackageVersion = usageTracker.track(
+  'getDefaultEndpointPackageVersion',
+  memoize(
+    async (kbnClient: KbnClient) => {
+      return (await getEndpointPackageInfo(kbnClient)).version;
+    },
+    (kbnClient: KbnClient) => {
+      return kbnClient.resolveUrl('/');
+    }
+  )
 );

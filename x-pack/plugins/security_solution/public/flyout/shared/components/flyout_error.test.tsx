@@ -9,7 +9,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { FlyoutError } from './flyout_error';
-import { FLYOUT_ERROR_TEST_ID } from '../test_ids';
+import { FLYOUT_ERROR_TEST_ID } from './test_ids';
 
 describe('<FlyoutError />', () => {
   it('should render error title and body', () => {

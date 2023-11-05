@@ -32,18 +32,15 @@ export function useFetchIndices({ search }: Params): UseFetchIndicesResponse {
     queryKey: ['fetchIndices', search],
     queryFn: async () => {
       const searchPattern = search?.endsWith('*') ? search : `${search}*`;
-      try {
-        const response = await http.get<ResolveIndexReponse>(
-          `/internal/index-pattern-management/resolve_index/${searchPattern}`
-        );
-        return response.indices.map((index) => index.name);
-      } catch (error) {
-        throw new Error(`Something went wrong. Error: ${error}`);
-      }
+      const response = await http.get<ResolveIndexReponse>(
+        `/internal/index-pattern-management/resolve_index/${searchPattern}`
+      );
+      return response.indices.map((index) => index.name);
     },
     retry: false,
     enabled: Boolean(search),
     refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 
   return { isLoading, isError, isSuccess, data };

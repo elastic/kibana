@@ -6,7 +6,7 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type {
   IndexName,
@@ -15,7 +15,7 @@ import type {
   MappingTypeMapping,
   Name,
 } from '@elastic/elasticsearch/lib/api/types';
-import { wrapErrorIfNeeded } from './utils';
+import { createToolingLogger, wrapErrorIfNeeded } from './utils';
 import { DEFAULT_ALERTS_INDEX } from '../../constants';
 import { EndpointRuleAlertGenerator } from '../data_generators/endpoint_rule_alert_generator';
 
@@ -53,7 +53,7 @@ export const indexEndpointRuleAlerts = async ({
   endpointHostname,
   endpointIsolated,
   count = 1,
-  log = new ToolingLog(),
+  log = createToolingLogger(),
 }: IndexEndpointRuleAlertsOptions): Promise<IndexedEndpointRuleAlerts> => {
   log.verbose(`Indexing ${count} endpoint rule alerts`);
 
@@ -88,7 +88,7 @@ export const indexEndpointRuleAlerts = async ({
 export const deleteIndexedEndpointRuleAlerts = async (
   esClient: Client,
   indexedAlerts: IndexedEndpointRuleAlerts['alerts'],
-  log = new ToolingLog()
+  log = createToolingLogger()
 ): Promise<DeletedIndexedEndpointRuleAlerts> => {
   let response: estypes.BulkResponse = {
     took: 0,

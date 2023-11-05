@@ -1,6 +1,6 @@
 get:
   summary: Retrieves a list of all connector types.
-  operationId: getConnectorTypes
+  operationId: getConnectorTypesWithSpaceId
   description: >
     You do not need any Kibana feature privileges to run this API.
   tags:
@@ -60,7 +60,3 @@ get:
               $ref: '../components/examples/get_connector_types_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

@@ -27,6 +27,9 @@ import { getRegistryDataStreamAssetBaseName } from '../../../../../common/servic
 import {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -76,12 +79,14 @@ export function getTemplate({
   registryElasticsearch,
   mappings,
   isIndexModeTimeSeries,
+  type,
 }: {
   templateIndexPattern: string;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
   mappings: IndexTemplateMappings;
+  type: string;
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
   isIndexModeTimeSeries?: boolean;
@@ -100,7 +105,10 @@ export function getTemplate({
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
 
+  const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
+
   template.composed_of = [
+    ...esBaseComponents,
     ...(template.composed_of || []),
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
@@ -110,6 +118,20 @@ export function getTemplate({
 
   return template;
 }
+
+const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): string[] => {
+  if (type === 'metrics') {
+    if (isIndexModeTimeSeries) {
+      return [STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS];
+    }
+
+    return [STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS];
+  } else if (type === 'logs') {
+    return [STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
+  }
+
+  return [];
+};
 
 /**
  * Generate mapping takes the given nested fields array and creates the Elasticsearch
@@ -206,7 +228,7 @@ function _generateMappings(
         if (type === 'object' && field.object_type) {
           const pathMatch = path.includes('*') ? path : `${path}.*`;
 
-          let dynProperties: Properties = getDefaultProperties(field);
+          const dynProperties: Properties = getDefaultProperties(field);
           let matchingType: string | undefined;
           switch (field.object_type) {
             case 'keyword':
@@ -216,10 +238,8 @@ function _generateMappings(
             case 'double':
             case 'long':
             case 'boolean':
-              dynProperties = {
-                type: field.object_type,
-                time_series_metric: field.metric_type,
-              };
+              dynProperties.type = field.object_type;
+              dynProperties.time_series_metric = field.metric_type;
               matchingType = field.object_type_mapping_type ?? field.object_type;
             default:
               break;
@@ -258,27 +278,74 @@ function _generateMappings(
             dynProperties = histogram(field);
             matchingType = field.object_type_mapping_type ?? '*';
             break;
-          case 'text':
-            dynProperties.type = field.object_type;
-            matchingType = field.object_type_mapping_type ?? 'string';
-            break;
+          case 'ip':
           case 'keyword':
+          case 'match_only_text':
+          case 'text':
+          case 'wildcard':
             dynProperties.type = field.object_type;
             matchingType = field.object_type_mapping_type ?? 'string';
             break;
-          case 'byte':
+          case 'scaled_float':
+            dynProperties = scaledFloat(field);
+            matchingType = field.object_type_mapping_type ?? '*';
+            break;
+          case 'aggregate_metric_double':
+            dynProperties.type = field.object_type;
+            dynProperties.metrics = field.metrics;
+            dynProperties.default_metric = field.default_metric;
+            matchingType = field.object_type_mapping_type ?? '*';
+            break;
           case 'double':
           case 'float':
+          case 'half_float':
+            dynProperties.type = field.object_type;
+            dynProperties.time_series_metric = field.metric_type;
+            matchingType = field.object_type_mapping_type ?? 'double';
+            break;
+          case 'byte':
           case 'long':
           case 'short':
-          case 'boolean':
-            dynProperties = {
-              type: field.object_type,
-              time_series_metric: field.metric_type,
-            };
-            matchingType = field.object_type_mapping_type ?? field.object_type;
-          default:
+          case 'unsigned_long':
+            dynProperties.type = field.object_type;
+            dynProperties.time_series_metric = field.metric_type;
+            matchingType = field.object_type_mapping_type ?? 'long';
             break;
+          case 'integer':
+            // Map integers as long, as in other cases.
+            dynProperties.type = 'long';
+            dynProperties.time_series_metric = field.metric_type;
+            matchingType = field.object_type_mapping_type ?? 'long';
+            break;
+          case 'boolean':
+            dynProperties.type = field.object_type;
+            dynProperties.time_series_metric = field.metric_type;
+            matchingType = field.object_type_mapping_type ?? field.object_type;
+            break;
+          case 'group':
+            if (!field?.fields) {
+              break;
+            }
+            const subFields = field.fields.map((subField) => ({
+              ...subField,
+              type: 'object',
+              object_type: subField.object_type ?? subField.type,
+            }));
+            _generateMappings(subFields, {
+              ...ctx,
+              groupFieldName: ctx.groupFieldName
+                ? `${ctx.groupFieldName}.${field.name}`
+                : field.name,
+            });
+            break;
+          case 'flattened':
+            dynProperties.type = field.object_type;
+            matchingType = field.object_type_mapping_type ?? 'object';
+            break;
+          default:
+            throw new Error(
+              `no dynamic mapping generated for field ${path} of type ${field.object_type}`
+            );
         }
 
         if (dynProperties && matchingType) {
