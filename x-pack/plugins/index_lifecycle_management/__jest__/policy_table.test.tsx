@@ -163,7 +163,7 @@ describe('policy table', () => {
     const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
     perPageButton.simulate('click');
     rendered.update();
-    const numberOfRowsButton = rendered.find('.euiContextMenuItem').at(1);
+    const numberOfRowsButton = rendered.find('button.euiContextMenuItem').at(1);
     numberOfRowsButton.simulate('click');
     rendered.update();
     expect(getPolicyNames(rendered).length).toBe(25);
