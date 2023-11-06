@@ -725,6 +725,7 @@ export const ModelsList: FC<Props> = ({
         ) : null}
         <EuiFlexItem grow={false}>
           <EuiButton
+            fill
             iconType={'plusInCircle'}
             color={'primary'}
             onClick={setIsAddModelFlyoutVisible.bind(null, true)}
