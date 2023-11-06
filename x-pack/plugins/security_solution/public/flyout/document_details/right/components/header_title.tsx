@@ -5,173 +5,140 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { NewChatById } from '@kbn/elastic-assistant';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { isEmpty } from 'lodash';
-import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
-import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
-import { CopyToClipboard } from '../../../shared/components/copy_to_clipboard';
-import { useRefetchByScope } from '../../../../timelines/components/side_panel/event_details/flyout/use_refetch_by_scope';
-import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
-import { DocumentStatus } from './status';
-import { useAssistant } from '../hooks/use_assistant';
 import {
-  ALERT_SUMMARY_CONVERSATION_ID,
-  EVENT_SUMMARY_CONVERSATION_ID,
-} from '../../../../common/components/event_details/translations';
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+  EuiTextColor,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { DocumentStatus } from './status';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
+import { useRefetchByScope } from '../../../../timelines/components/side_panel/event_details/flyout/use_refetch_by_scope';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { FLYOUT_HEADER_TITLE_TEST_ID, SHARE_BUTTON_TEST_ID } from './test_ids';
+import { RenderRuleName } from '../../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
+import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
-
-export interface HeaderTitleProps {
-  /**
-   * If false, update the margin-top to compensate the fact that the expand detail button is not displayed
-   */
-  flyoutIsExpandable: boolean;
-
-  /**
-   * Scope ID
-   */
-  scopeId: string;
-
-  /**
-   * Promise to trigger a data refresh
-   */
-  refetchFlyoutData: () => Promise<void>;
-}
 
 /**
  * Document details flyout right section header
  */
-export const HeaderTitle: VFC<HeaderTitleProps> = memo(
-  ({ flyoutIsExpandable, scopeId, refetchFlyoutData }) => {
-    const { dataFormattedForFieldBrowser, eventId, indexName, getFieldsData } =
-      useRightPanelContext();
-    const { isAlert, ruleName, timestamp } = useBasicDataFromDetailsData(
-      dataFormattedForFieldBrowser
-    );
-    const alertDetailsLink = useGetAlertDetailsFlyoutLink({
-      _id: eventId,
-      _index: indexName,
-      timestamp,
-    });
-
-    const showShareAlertButton = isAlert && alertDetailsLink;
-
-    const { showAssistant, promptContextId } = useAssistant({
-      dataFormattedForFieldBrowser,
-      isAlert,
-    });
-
-    const { refetch } = useRefetchByScope({ scopeId });
-    const alertAssignees = useMemo(
-      () => (getFieldsData(ALERT_WORKFLOW_ASSIGNEE_IDS) as string[]) ?? [],
-      [getFieldsData]
-    );
-    const onAssigneesUpdated = useCallback(() => {
-      refetch();
-      refetchFlyoutData();
-    }, [refetch, refetchFlyoutData]);
-
-    return (
-      <>
-        {(showShareAlertButton || showAssistant) && (
-          <EuiFlexGroup
-            direction="row"
-            justifyContent="flexEnd"
-            gutterSize="none"
+export const HeaderTitle: FC = memo(() => {
+  const { dataFormattedForFieldBrowser, eventId, scopeId, refetchFlyoutData, getFieldsData } =
+    useRightPanelContext();
+  const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
+    dataFormattedForFieldBrowser
+  );
+  const { euiTheme } = useEuiTheme();
+  const ruleTitle = useMemo(
+    () => (
+      <EuiToolTip content={ruleName}>
+        <RenderRuleName
+          contextId={scopeId}
+          eventId={eventId}
+          fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
+          fieldType={'string'}
+          isAggregatable={false}
+          isDraggable={false}
+          linkValue={ruleId}
+          value={ruleName}
+          openInNewTab
+        >
+          <div
             css={css`
-              margin-top: ${flyoutIsExpandable ? '-44px' : '-28px'};
-              padding: 0 25px;
+              word-break: break-word;
+              display: -webkit-box;
+              -webkit-line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              margin-right: ${euiTheme.size.base};
             `}
           >
-            {showAssistant && (
-              <EuiFlexItem grow={false}>
-                <NewChatById
-                  conversationId={
-                    isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
-                  }
-                  promptContextId={promptContextId}
-                />
-              </EuiFlexItem>
-            )}
-            {showShareAlertButton && (
-              <EuiFlexItem grow={false}>
-                <CopyToClipboard
-                  rawValue={alertDetailsLink}
-                  modifier={(value: string) => {
-                    const query = new URLSearchParams(window.location.search);
-                    return `${value}&${FLYOUT_URL_PARAM}=${query.get(FLYOUT_URL_PARAM)}`;
-                  }}
-                  text={
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.right.header.shareButtonLabel"
-                      defaultMessage="Share Alert"
-                    />
-                  }
-                  iconType={'share'}
-                  ariaLabel={i18n.translate(
-                    'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
-                    {
-                      defaultMessage: 'Share Alert',
-                    }
-                  )}
-                  data-test-subj={SHARE_BUTTON_TEST_ID}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        )}
-        <EuiSpacer size="s" />
-        <EuiTitle size="s">
-          <h2 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
-            {isAlert && !isEmpty(ruleName) ? (
-              ruleName
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.header.headerTitle"
-                defaultMessage="Event details"
-              />
-            )}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="row" gutterSize={isAlert ? 'm' : 'none'}>
-          <EuiFlexItem grow={false}>
-            <DocumentStatus />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="row" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <DocumentSeverity />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <RiskScore />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <Assignees
-              eventId={eventId}
-              assignedUserIds={alertAssignees}
-              onAssigneesUpdated={onAssigneesUpdated}
+            <EuiIcon type={'warning'} size="m" className="eui-alignBaseline" />
+            &nbsp;
+            <EuiTitle size="s">
+              <EuiTextColor color={euiTheme.colors.primaryText}>
+                <span data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>{ruleName}</span>
+              </EuiTextColor>
+            </EuiTitle>
+            &nbsp;
+            <EuiIcon
+              type={'popout'}
+              size="m"
+              css={css`
+                display: inline;
+                position: absolute;
+                bottom: ${euiTheme.size.xs};
+                right: 0;
+              `}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
-);
+          </div>
+        </RenderRuleName>
+      </EuiToolTip>
+    ),
+    [ruleName, ruleId, eventId, scopeId, euiTheme.colors.primaryText, euiTheme.size]
+  );
+
+  const eventTitle = (
+    <EuiTitle size="s">
+      <h2 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.header.headerTitle"
+          defaultMessage="Event details"
+        />
+      </h2>
+    </EuiTitle>
+  );
+
+  const { refetch } = useRefetchByScope({ scopeId });
+  const alertAssignees = useMemo(
+    () => (getFieldsData(ALERT_WORKFLOW_ASSIGNEE_IDS) as string[]) ?? [],
+    [getFieldsData]
+  );
+  const onAssigneesUpdated = useCallback(() => {
+    refetch();
+    refetchFlyoutData();
+  }, [refetch, refetchFlyoutData]);
+
+  return (
+    <>
+      <DocumentSeverity />
+      <EuiSpacer size="m" />
+      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+      <EuiSpacer size="xs" />
+      {isAlert && !isEmpty(ruleName) ? ruleTitle : eventTitle}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <DocumentStatus />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RiskScore />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Assignees
+            eventId={eventId}
+            assignedUserIds={alertAssignees}
+            onAssigneesUpdated={onAssigneesUpdated}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+});
 
 HeaderTitle.displayName = 'HeaderTitle';

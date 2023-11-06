@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlyoutHeader, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import type { VFC } from 'react';
+import { EuiSpacer, EuiTab } from '@elastic/eui';
+import type { FC } from 'react';
 import React, { memo } from 'react';
-import { css } from '@emotion/react';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabsType } from './tabs';
+import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
 import { HeaderTitle } from './components/header_title';
-import { ExpandDetailButton } from './components/expand_detail_button';
-import { useRightPanelContext } from './context';
 
 export interface PanelHeaderProps {
   /**
@@ -29,15 +28,10 @@ export interface PanelHeaderProps {
    * Tabs to display in the header
    */
   tabs: RightPanelTabsType;
-  /**
-   * If true, the expand detail button will be displayed
-   */
-  flyoutIsExpandable: boolean;
 }
 
-export const PanelHeader: VFC<PanelHeaderProps> = memo(
-  ({ flyoutIsExpandable, selectedTabId, setSelectedTabId, tabs }) => {
-    const { refetchFlyoutData, scopeId } = useRightPanelContext();
+export const PanelHeader: FC<PanelHeaderProps> = memo(
+  ({ selectedTabId, setSelectedTabId, tabs }) => {
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
     const renderTabs = tabs.map((tab, index) => (
       <EuiTab
@@ -51,35 +45,11 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
     ));
 
     return (
-      <EuiFlyoutHeader hasBorder>
-        {flyoutIsExpandable && (
-          <div
-            // moving the buttons up in the header
-            css={css`
-              margin-top: -24px;
-              margin-left: -8px;
-            `}
-          >
-            <ExpandDetailButton />
-          </div>
-        )}
-        <EuiSpacer size="xs" />
-        <HeaderTitle
-          flyoutIsExpandable={flyoutIsExpandable}
-          scopeId={scopeId}
-          refetchFlyoutData={refetchFlyoutData}
-        />
+      <FlyoutHeader>
+        <HeaderTitle />
         <EuiSpacer size="m" />
-        <EuiTabs
-          size="l"
-          expand
-          css={css`
-            margin-bottom: -25px;
-          `}
-        >
-          {renderTabs}
-        </EuiTabs>
-      </EuiFlyoutHeader>
+        <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>
+      </FlyoutHeader>
     );
   }
 );

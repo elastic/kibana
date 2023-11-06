@@ -12,11 +12,7 @@ import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
 const FLYOUT_HEADER_TEST_ID = `${PREFIX}Header` as const;
 export const FLYOUT_HEADER_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}Title` as const;
-export const EXPAND_DETAILS_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ExpandDetailButton` as const;
-export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
-  `${FLYOUT_HEADER_TEST_ID}CollapseDetailButton` as const;
 export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
-export const SEVERITY_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}SeverityTitle` as const;
 export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
 export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle` as const;
 export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
