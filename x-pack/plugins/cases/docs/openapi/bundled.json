@@ -6984,6 +6984,7 @@
             "syncAlerts": true
           },
           "owner": "cases",
+          "category": null,
           "customFields": [
             {
               "type": "text",

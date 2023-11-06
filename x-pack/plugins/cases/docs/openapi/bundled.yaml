@@ -4778,6 +4778,7 @@ components:
         settings:
           syncAlerts: true
         owner: cases
+        category: null
         customFields:
           - type: text
             key: d312efda-ec2b-42ec-9e2c-84981795c581
