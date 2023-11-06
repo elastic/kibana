@@ -60,7 +60,10 @@ export function deserializeTemplate(
     name,
     version,
     priority,
-    lifecycle: deserializeESLifecycle(template.lifecycle),
+    ...(template.lifecycle
+      ? { lifecycle: deserializeESLifecycle(template.lifecycle) }
+      : {}
+    ),
     indexPatterns: indexPatterns.sort(),
     template,
     ilmPolicy: settings?.index?.lifecycle,
