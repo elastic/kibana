@@ -153,7 +153,7 @@ export const ModelsList: FC<Props> = ({
 
   const trainedModelsApiService = useTrainedModelsApiService();
 
-  const { displayErrorToast } = useToastNotificationService();
+  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -407,6 +407,33 @@ export const ModelsList: FC<Props> = ({
     [existingModels]
   );
 
+  const onModelDownloadRequest = useCallback(
+    async (modelId: string) => {
+      try {
+        setIsLoading(true);
+        await trainedModelsApiService.installElasticTrainedModelConfig(modelId);
+        displaySuccessToast(
+          i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
+            defaultMessage: '"{modelId}" model download has been started successfully.',
+            values: { modelId },
+          })
+        );
+        // Need to fetch model state updates
+        await fetchModelsData();
+      } catch (e) {
+        displayErrorToast(
+          e,
+          i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
+            defaultMessage: 'Failed to download "{modelId}"',
+            values: { modelId },
+          })
+        );
+        setIsLoading(true);
+      }
+    },
+    [displayErrorToast, displaySuccessToast, fetchModelsData, trainedModelsApiService]
+  );
+
   /**
    * Table actions
    */
@@ -419,6 +446,7 @@ export const ModelsList: FC<Props> = ({
     onModelDeployRequest: setModelToDeploy,
     onLoading: setIsLoading,
     modelAndDeploymentIds,
+    onModelDownloadRequest,
   });
 
   const toggleDetails = async (item: ModelItem) => {
@@ -791,7 +819,8 @@ export const ModelsList: FC<Props> = ({
         <AddModelFlyout
           modelDownloads={items.filter((i) => i.state === MODEL_STATE.NOT_DOWNLOADED)}
           onClose={setIsAddModelFlyoutVisible.bind(null, false)}
-          onSumbit={(modelIds) => {
+          onSumbit={(modelId) => {
+            onModelDownloadRequest(modelId);
             setIsAddModelFlyoutVisible(false);
           }}
         />
