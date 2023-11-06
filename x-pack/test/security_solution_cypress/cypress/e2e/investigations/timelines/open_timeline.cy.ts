@@ -22,8 +22,6 @@ import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
-import { cleanKibana } from '../../../tasks/common';
-
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
@@ -39,7 +37,6 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   describe('Open timeline modal', () => {
     before(function () {
-      cleanKibana();
       login();
       visit(TIMELINES_URL);
 

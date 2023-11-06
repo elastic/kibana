@@ -23,7 +23,6 @@ import {
   FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -113,7 +112,6 @@ const assertFilterControlsWithFilterObject = (
 // Failing: See https://github.com/elastic/kibana/issues/167914
 describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
-    cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
   });
 
@@ -240,7 +238,6 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless
 
   context.skip('with data modificiation', () => {
     after(() => {
-      cleanKibana();
       createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
     });
 

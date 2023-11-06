@@ -28,15 +28,11 @@ import {
 } from '../../../tasks/timeline';
 import { getTimeline } from '../../../objects/timeline';
 import { hostsUrl } from '../../../urls/navigation';
-import { cleanKibana, scrollToBottom } from '../../../tasks/common';
+import { scrollToBottom } from '../../../tasks/common';
 
 // Failing in serverless
 // FLAKY: https://github.com/elastic/kibana/issues/169396
 describe.skip('timeline data providers', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));

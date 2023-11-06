@@ -41,7 +41,6 @@ import {
 
 import { getDetails } from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
-import { cleanKibana } from '../../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -62,7 +61,6 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
   const expectedNumberOfRules = 1;
 
   beforeEach(() => {
-    cleanKibana();
     login();
     visit(CREATE_RULE_URL);
   });

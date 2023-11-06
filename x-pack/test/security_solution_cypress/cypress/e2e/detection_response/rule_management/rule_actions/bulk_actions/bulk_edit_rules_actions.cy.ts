@@ -20,7 +20,7 @@ import {
 } from '../../../../../screens/rules_bulk_actions';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
 import type { RuleActionCustomFrequency } from '../../../../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
@@ -76,7 +76,6 @@ const expectedSlackMessage = 'Slack action test message';
 
 describe('Detection rules, bulk edit of rule actions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    cleanKibana();
     login();
     deleteAlertsAndRules();
     deleteConnectors();

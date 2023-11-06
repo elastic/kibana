@@ -21,7 +21,6 @@ import {
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
   clickAddElasticRulesButton,
@@ -43,9 +42,7 @@ describe(
   () => {
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
-      cleanKibana();
       login();
-
       visitRulesManagementTable();
     });
 

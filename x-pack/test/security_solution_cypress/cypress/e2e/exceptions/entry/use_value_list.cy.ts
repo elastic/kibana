@@ -17,7 +17,6 @@ import {
   visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
 import { getNewRule } from '../../../objects/rule';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
@@ -49,7 +48,6 @@ const goToRulesAndOpenValueListModal = () => {
 
 describe('Use Value list in exception entry', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    cleanKibana();
     login();
     createListsIndex();
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });

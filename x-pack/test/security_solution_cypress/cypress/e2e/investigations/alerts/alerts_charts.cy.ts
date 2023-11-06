@@ -15,7 +15,6 @@ import {
   selectAlertsHistogram,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -27,10 +26,6 @@ import { TOASTER } from '../../../screens/alerts_detection_rules';
 
 describe('Histogram legend hover actions', { tags: ['@ess', '@serverless'] }, () => {
   const ruleConfigs = getNewRule();
-
-  before(() => {
-    cleanKibana();
-  });
 
   beforeEach(() => {
     login();

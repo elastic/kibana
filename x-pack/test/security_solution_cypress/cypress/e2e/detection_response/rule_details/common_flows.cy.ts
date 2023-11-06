@@ -45,7 +45,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
@@ -54,10 +54,6 @@ import { ruleDetailsUrl } from '../../../urls/rule_details';
 // the same regardless of rule type. For any rule type specific functionalities, please include
 // them in the relevant /rule_details/[RULE_TYPE].cy.ts test.
 describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     deleteAlertsAndRules();
     deleteConnectors();
