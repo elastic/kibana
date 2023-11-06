@@ -39,7 +39,6 @@ describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
     before(function () {
       login();
       visit(TIMELINES_URL);
-
       createTimeline(getTimeline())
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
@@ -60,14 +59,9 @@ describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
         });
     });
 
-    beforeEach(function () {
-      login();
-      visit(TIMELINES_URL);
+    it('should display timeline info', function () {
       openTimelineFromSettings();
       openTimelineById(this.timelineId);
-    });
-
-    it('should display timeline info', () => {
       cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
       cy.contains(getTimeline().title).should('exist');
       cy.get(TIMELINES_DESCRIPTION).last().should('have.text', getTimeline().description);
