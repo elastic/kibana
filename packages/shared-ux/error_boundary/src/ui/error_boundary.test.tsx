@@ -12,8 +12,9 @@ import React, { FC } from 'react';
 import { KibanaErrorBoundary } from '../..';
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import { KibanaErrorBoundaryServices } from '../../types';
-import { errorMessageStrings as strings } from './message_strings';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
+import { KibanaErrorService } from '../services/error_service';
+import { errorMessageStrings as strings } from './message_strings';
 
 describe('<KibanaErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
@@ -71,5 +72,24 @@ describe('<KibanaErrorBoundary>', () => {
     (await findByTestId('fatalPromptReloadBtn')).click();
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('captures the error event for telemetry', async () => {
+    const mockDeps = {
+      analytics: { reportEvent: jest.fn() },
+    };
+    services.errorService = new KibanaErrorService(mockDeps);
+
+    const { findByTestId } = render(
+      <Template>
+        <BadComponent />
+      </Template>
+    );
+    (await findByTestId('clickForErrorBtn')).click();
+
+    expect(mockDeps.analytics.reportEvent).toHaveBeenCalledWith('fatal-error-react', {
+      component_name: 'BadComponent',
+      error_message: 'Error: This is an error to show the test user!',
+    });
   });
 });

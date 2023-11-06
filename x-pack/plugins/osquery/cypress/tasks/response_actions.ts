@@ -40,6 +40,7 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
   it(`response actions should ${enabled ? 'be available ' : 'not be available'}`, () => {
     cy.visit('/app/security/rules');
     clickRuleName(ruleName);
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.getBySel('editRuleSettingsLink').click();
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     closeDateTabIfVisible();
