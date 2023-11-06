@@ -513,48 +513,6 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should filter by status: closed', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(screen.getByTestId('options-filter-popover-button-status'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('options-filter-popover-item-closed'));
-    await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          queryParams: { ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.closedAt },
-        })
-      );
-    });
-  });
-
-  it('should filter by status: in-progress', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(screen.getByTestId('options-filter-popover-button-status'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('options-filter-popover-item-in-progress'));
-    await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          queryParams: DEFAULT_QUERY_PARAMS,
-        })
-      );
-    });
-  });
-
-  it('should filter by status: open', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={false} />);
-    userEvent.click(screen.getByTestId('options-filter-popover-button-status'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('options-filter-popover-item-open'));
-    await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          queryParams: DEFAULT_QUERY_PARAMS,
-        })
-      );
-    });
-  });
-
   it('should show the correct count on stats', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 

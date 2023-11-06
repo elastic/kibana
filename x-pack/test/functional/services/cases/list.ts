@@ -143,7 +143,7 @@ export function CasesTableServiceProvider(
 
     async filterByCategory(category: string) {
       await common.clickAndValidate(
-        'options-filter-popover-button-Categories',
+        'options-filter-popover-button-category',
         `options-filter-popover-item-${category}`
       );
 
