@@ -140,6 +140,8 @@ describe('rules_settings_modal', () => {
       addWarning: jest.fn(),
     } as unknown as IToasts;
 
+    useKibanaMock().services.isServerless = true;
+
     getFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
     updateFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
     getQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
@@ -435,5 +437,12 @@ describe('rules_settings_modal', () => {
     await waitForModalLoad({ flappingSection: false, queryDelaySection: false });
 
     expect(result.queryByTestId('rulesSettingsQueryDelaySection')).toBe(null);
+  });
+
+  test('hides query delay settings when not serverless', async () => {
+    useKibanaMock().services.isServerless = false;
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    await waitForModalLoad({ queryDelaySection: false });
+    expect(result.queryByTestId('rulesSettingsQueryDelaySection')).not.toBeInTheDocument();
   });
 });
