@@ -309,16 +309,16 @@ export const deletePrebuiltRulesAssets = () => {
   });
 };
 
-export const postDataView = (dataSource: string) => {
+export const postDataView = (indexPattern: string, name?: string, id?: string) => {
   rootRequest({
     method: 'POST',
     url: DATA_VIEW_PATH,
     body: {
       data_view: {
-        id: dataSource,
-        name: dataSource,
+        id: id || indexPattern,
+        name: name || indexPattern,
         fieldAttrs: '{}',
-        title: dataSource,
+        title: indexPattern,
         timeFieldName: '@timestamp',
       },
     },
@@ -330,11 +330,17 @@ export const postDataView = (dataSource: string) => {
   });
 };
 
-export const deleteDataView = (dataSource: string) => {
+export const deleteDataView = (dataViewId: string) => {
   rootRequest({
-    method: 'DELETE',
-    url: `api/data_views/data_view/${dataSource}`,
+    method: 'POST',
+    url: 'api/content_management/rpc/delete',
     headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    body: {
+      contentTypeId: 'index-pattern',
+      id: dataViewId,
+      options: { force: true },
+      version: 1,
+    },
     failOnStatusCode: false,
   });
 };
