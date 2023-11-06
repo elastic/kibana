@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Import Timelines API
-  version: 8.9.0
+  version: '2023-10-31'
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-import.html
   description: Documentation
@@ -15,7 +15,8 @@ servers:
 paths:
   /api/timeline/_import:
     post:
-      operationId: importTimelines
+      operationId: ImportTimelines
+      x-codegen-enabled: true
       description: Imports timelines.
       tags:
         - access:securitySolution
@@ -28,17 +29,17 @@ paths:
               type: object
               properties:
                 file:
-                  type: object
                   allOf:
-                   - $ref: '../model/components.yaml#/components/schemas/Readable'
-                   - properties:
-                      hapi:
-                        type: object
-                        properties:
-                          filename:
-                            type: string
-                          headers:
-                            type: object
+                    - $ref: '../model/components.schema.yaml#/components/schemas/Readable'
+                    - type: object
+                      properties:
+                        hapi:
+                          type: object
+                          properties:
+                            filename:
+                              type: string
+                            headers:
+                              type: object
       responses:
         200:
           description: Indicates the import of timelines was successful.
@@ -48,7 +49,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '../model/components.yaml#/components/schemas/ImportTimelineResult'
+                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
                 required:
                   - data
 
