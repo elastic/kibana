@@ -22,7 +22,10 @@ import { FieldTitleUnsavedIcon } from './icon_unsaved';
  */
 export interface TitleProps<T extends SettingType> {
   /** The {@link FieldDefinition} corresponding the setting. */
-  field: FieldDefinition<T>;
+  field: Pick<
+    FieldDefinition<T>,
+    'displayName' | 'savedValue' | 'isCustom' | 'id' | 'type' | 'isOverridden'
+  >;
   /** Emotion-based `css` for the root React element. */
   css?: Interpolation<Theme>;
   /** Classname for the root React element. */

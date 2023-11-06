@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+  SavedObject,
+} from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { ConcurrentInstallOperationError } from '../../../errors';
+
+import type { Installation } from '../../../../common';
+
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
@@ -29,7 +39,9 @@ jest.mock('../elasticsearch/datastream_ilm/install');
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 
-import { installIndexTemplatesAndPipelines } from './install';
+import { MAX_TIME_COMPLETE_INSTALL } from '../../../../common/constants';
+
+import { installIndexTemplatesAndPipelines, restartInstallation } from './install';
 
 import { _installPackage } from './_install_package';
 
@@ -69,9 +81,7 @@ describe('_installPackage', () => {
     jest.mocked(saveArchiveEntries).mockResolvedValue({
       saved_objects: [],
     });
-  });
-  afterEach(async () => {
-    appContextService.stop();
+    jest.mocked(restartInstallation).mockReset();
   });
   it('handles errors from  installKibanaAssets', async () => {
     // force errors from this function
@@ -125,7 +135,12 @@ describe('_installPackage', () => {
           disableProxies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
-          capabilities: [],
+          retrySetupOnBoot: false,
+          registry: {
+            kibanaVersionCheckEnabled: true,
+            capabilities: [],
+            excludePackages: [],
+          },
         },
       })
     );
@@ -179,7 +194,12 @@ describe('_installPackage', () => {
           disableILMPolicies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
-          capabilities: [],
+          retrySetupOnBoot: false,
+          registry: {
+            kibanaVersionCheckEnabled: true,
+            capabilities: [],
+            excludePackages: [],
+          },
         },
       })
     );
@@ -219,5 +239,131 @@ describe('_installPackage', () => {
 
     expect(installILMPolicy).toBeCalled();
     expect(installIlmForDataStream).toBeCalled();
+  });
+
+  describe('when package is stuck in `installing`', () => {
+    afterEach(() => {});
+    const mockInstalledPackageSo: SavedObject<Installation> = {
+      id: 'mocked-package',
+      attributes: {
+        name: 'test-package',
+        version: '1.0.0',
+        install_status: 'installing',
+        install_version: '1.0.0',
+        install_started_at: new Date().toISOString(),
+        install_source: 'registry',
+        verification_status: 'verified',
+        installed_kibana: [] as any,
+        installed_es: [] as any,
+        es_index_patterns: {},
+      },
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      references: [],
+    };
+
+    beforeEach(() => {
+      appContextService.start(
+        createAppContextStartContractMock({
+          internal: {
+            disableILMPolicies: true,
+            disableProxies: false,
+            fleetServerStandalone: false,
+            onlyAllowAgentUpgradeToKnownVersions: false,
+            retrySetupOnBoot: false,
+            registry: {
+              kibanaVersionCheckEnabled: true,
+              capabilities: [],
+              excludePackages: [],
+            },
+          },
+        })
+      );
+    });
+
+    describe('timeout reached', () => {
+      it('restarts installation', async () => {
+        await _installPackage({
+          savedObjectsClient: soClient,
+          // @ts-ignore
+          savedObjectsImporter: jest.fn(),
+          esClient,
+          logger: loggerMock.create(),
+          paths: [],
+          packageInfo: {
+            name: mockInstalledPackageSo.attributes.name,
+            version: mockInstalledPackageSo.attributes.version,
+            title: mockInstalledPackageSo.attributes.name,
+          } as any,
+          installedPkg: {
+            ...mockInstalledPackageSo,
+            attributes: {
+              ...mockInstalledPackageSo.attributes,
+              install_started_at: new Date(
+                Date.now() - MAX_TIME_COMPLETE_INSTALL * 2
+              ).toISOString(),
+            },
+          },
+        });
+
+        expect(restartInstallation).toBeCalled();
+      });
+    });
+
+    describe('timeout not reached', () => {
+      describe('force flag not provided', () => {
+        it('throws concurrent installation error if force flag is not provided', async () => {
+          expect(
+            _installPackage({
+              savedObjectsClient: soClient,
+              // @ts-ignore
+              savedObjectsImporter: jest.fn(),
+              esClient,
+              logger: loggerMock.create(),
+              paths: [],
+              packageInfo: {
+                name: mockInstalledPackageSo.attributes.name,
+                version: mockInstalledPackageSo.attributes.version,
+                title: mockInstalledPackageSo.attributes.name,
+              } as any,
+              installedPkg: {
+                ...mockInstalledPackageSo,
+                attributes: {
+                  ...mockInstalledPackageSo.attributes,
+                  install_started_at: new Date(Date.now() - 1000).toISOString(),
+                },
+              },
+            })
+          ).rejects.toThrowError(ConcurrentInstallOperationError);
+        });
+      });
+
+      describe('force flag provided', () => {
+        it('restarts installation', async () => {
+          await _installPackage({
+            savedObjectsClient: soClient,
+            // @ts-ignore
+            savedObjectsImporter: jest.fn(),
+            esClient,
+            logger: loggerMock.create(),
+            paths: [],
+            packageInfo: {
+              name: mockInstalledPackageSo.attributes.name,
+              version: mockInstalledPackageSo.attributes.version,
+              title: mockInstalledPackageSo.attributes.name,
+            } as any,
+            installedPkg: {
+              ...mockInstalledPackageSo,
+              attributes: {
+                ...mockInstalledPackageSo.attributes,
+                install_started_at: new Date(Date.now() - 1000).toISOString(),
+              },
+            },
+            force: true,
+          });
+
+          expect(restartInstallation).toBeCalled();
+        });
+      });
+    });
   });
 });

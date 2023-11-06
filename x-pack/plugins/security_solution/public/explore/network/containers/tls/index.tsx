@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import type { NetworkTlsRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -15,10 +16,7 @@ import { createFilter } from '../../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import type { networkModel } from '../../store';
 import { networkSelectors } from '../../store';
-import type {
-  NetworkTlsRequestOptions,
-  NetworkTlsStrategyResponse,
-} from '../../../../../common/search_strategy/security_solution/network';
+import type { NetworkTlsStrategyResponse } from '../../../../../common/search_strategy/security_solution/network';
 import { NetworkQueries } from '../../../../../common/search_strategy/security_solution/network';
 
 import * as i18n from './translations';
@@ -67,7 +65,9 @@ export const useNetworkTls = ({
   const getTlsSelector = useMemo(() => networkSelectors.tlsSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) => getTlsSelector(state, type));
 
-  const [networkTlsRequest, setNetworkTlsRequest] = useState<NetworkTlsRequestOptions | null>(null);
+  const [networkTlsRequest, setNetworkTlsRequest] = useState<NetworkTlsRequestOptionsInput | null>(
+    null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -134,7 +134,7 @@ export const useNetworkTls = ({
 
   useEffect(() => {
     setNetworkTlsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkTlsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.tls,

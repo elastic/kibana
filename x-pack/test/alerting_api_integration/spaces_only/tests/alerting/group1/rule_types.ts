@@ -41,6 +41,7 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
           id: 'recovered',
           name: 'Recovered',
         },
+        category: 'kibana',
         producer: 'alertsFixture',
         minimum_license_required: 'basic',
         is_exportable: true,
@@ -130,6 +131,7 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
             id: 'recovered',
             name: 'Recovered',
           },
+          category: 'kibana',
           producer: 'alertsFixture',
           minimumLicenseRequired: 'basic',
           isExportable: true,
@@ -137,6 +139,7 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
           hasFieldsForAAD: false,
           hasAlertsMappings: false,
           ruleTaskTimeout: '5m',
+          validLegacyConsumers: ['alerts'],
         });
         expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
       });

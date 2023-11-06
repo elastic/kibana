@@ -9,6 +9,7 @@ import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server
 import type { StorageContext } from '@kbn/content-management-plugin/server';
 import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 
 import {
   CONTENT_ID,
@@ -82,13 +83,20 @@ function savedObjectToLensSavedObject(
 }
 
 export class LensStorage extends SOContentStorage<LensCrudTypes> {
-  constructor() {
+  constructor(
+    private params: {
+      logger: Logger;
+      throwOnResultValidationError: boolean;
+    }
+  ) {
     super({
       savedObjectType: CONTENT_ID,
       cmServicesDefinition,
       searchArgsToSOFindOptions,
       enableMSearch: true,
       allowedSavedObjectAttributes: ['title', 'description', 'visualizationType', 'state'],
+      logger: params.logger,
+      throwOnResultValidationError: params.throwOnResultValidationError,
     });
   }
 
@@ -134,13 +142,28 @@ export class LensStorage extends SOContentStorage<LensCrudTypes> {
       ...optionsToLatest,
     });
 
+    const result = {
+      item: savedObjectToLensSavedObject(savedObject),
+    };
+
+    const validationError = transforms.update.out.result.validate(result);
+    if (validationError) {
+      if (this.params.throwOnResultValidationError) {
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+      } else {
+        this.params.logger.warn(`Invalid response. ${validationError.message}`);
+      }
+    }
+
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.update.out.result.down<
       LensCrudTypes['UpdateOut'],
       LensCrudTypes['UpdateOut']
-    >({
-      item: savedObjectToLensSavedObject(savedObject),
-    });
+    >(
+      result,
+      undefined, // do not override version
+      { validate: false } // validation is done above
+    );
 
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);

@@ -53,6 +53,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   }
 
   public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
+    const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
+
     this.spacesManager = new SpacesManager(core.http);
     this.spacesApi = {
       ui: getUiApi({
@@ -61,6 +63,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       }),
       getActiveSpace$: () => this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
+      hasOnlyDefaultSpace,
     };
 
     if (!this.isServerless) {
@@ -85,7 +88,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
-    return {};
+    return { hasOnlyDefaultSpace };
   }
 
   public start(core: CoreStart) {

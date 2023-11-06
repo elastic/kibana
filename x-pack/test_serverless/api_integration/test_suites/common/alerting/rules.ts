@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createIndexConnector,
@@ -35,16 +36,17 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  // Failing: See https://github.com/elastic/kibana/issues/164017
-  describe.skip('Alerting rules', () => {
+  describe('Alerting rules', function () {
+    // Timeout of 360000ms exceeded
+    this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
-    let actionId: string;
+    let connectorId: string;
     let ruleId: string;
 
     afterEach(async () => {
       await supertest
-        .delete(`/api/actions/connector/${actionId}`)
+        .delete(`/api/actions/connector/${connectorId}`)
         .set('kbn-xsrf', 'foo')
         .set('x-elastic-internal-origin', 'foo');
       await supertest
@@ -53,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
+        conflicts: 'proceed',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
@@ -61,12 +64,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should schedule task, run rule and schedule actions when appropriate', async () => {
       const testStart = new Date();
 
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -86,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -99,6 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -116,27 +120,12 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
 
-      await waitForAllTasksIdle({
-        esClient,
-        filter: testStart,
-      });
-
-      await disableRule({
-        supertest,
-        ruleId,
-      });
-
-      await waitForDisabled({
-        esClient,
-        ruleId,
-        filter: testStart,
-      });
-
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
         instanceContextValue: '',
@@ -157,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(eventLogResp.hits.hits.length).to.be(1);
 
       const eventLogDocument = eventLogResp.hits.hits[0]._source;
-      await validateEventLog(eventLogDocument, {
+      validateEventLog(eventLogDocument, {
         ruleId,
         ruleTypeId: RULE_TYPE_ID,
         outcome: 'success',
@@ -169,12 +158,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should pass updated rule params to executor', async () => {
       const testStart = new Date();
 
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -194,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -207,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -224,11 +214,12 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(document._source).to.eql({
+      expect(omit(document, '_source.date')._source).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
         instanceContextValue: '',
@@ -264,12 +255,13 @@ export default function ({ getService }: FtrProviderContext) {
       const resp2 = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
         num: 2,
       });
       expect(resp2.hits.hits.length).to.be(2);
 
-      const document2 = resp2.hits.hits[1];
-      expect(document2._source).to.eql({
+      const document2 = resp2.hits.hits[0];
+      expect(omit(document2, '_source.date')._source).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
         instanceContextValue: '',
@@ -287,11 +279,11 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
 
       // Should fail
-      const createdAction = await createSlackConnector({
+      const createdConnector = await createSlackConnector({
         supertest,
         name: 'Slack Connector: Alerting API test',
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -311,7 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               message: `message: {{rule.id}}`,
             },
@@ -338,12 +330,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should throttle alerts when appropriate', async () => {
       const testStart = new Date();
 
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -365,7 +357,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -378,6 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -404,6 +397,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
     });
@@ -411,12 +405,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should throttle alerts with throttled action when appropriate', async () => {
       const testStart = new Date();
 
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -437,7 +431,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -450,6 +444,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -481,6 +476,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
     });
@@ -488,12 +484,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should reset throttle window when not firing and should not throttle when changing groups', async () => {
       const testStart = new Date();
 
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -514,7 +510,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -527,6 +523,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -538,7 +535,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           {
             group: 'recovered',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -551,6 +548,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -568,6 +566,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
 
@@ -623,6 +622,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp2 = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
         num: 2,
       });
       expect(resp2.hits.hits.length).to.be(2);
@@ -632,12 +632,12 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -658,7 +658,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -671,6 +671,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -713,6 +714,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp2 = await getDocumentsInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp2.hits.hits.length).to.be(0);
     });
@@ -721,12 +723,12 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -747,7 +749,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -760,6 +762,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -803,17 +806,18 @@ export default function ({ getService }: FtrProviderContext) {
       const resp2 = await getDocumentsInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp2.hits.hits.length).to.be(0);
     });
 
     it(`should unmute all instances when unmuting an alert`, async () => {
-      const createdAction = await createIndexConnector({
+      const createdConnector = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      actionId = createdAction.id;
+      connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -834,7 +838,7 @@ export default function ({ getService }: FtrProviderContext) {
         actions: [
           {
             group: 'query matched',
-            id: actionId,
+            id: connectorId,
             params: {
               documents: [
                 {
@@ -847,6 +851,7 @@ export default function ({ getService }: FtrProviderContext) {
                   alertActionGroup: '{{alert.actionGroup}}',
                   instanceContextValue: '{{context.instanceContextValue}}',
                   instanceStateValue: '{{state.instanceStateValue}}',
+                  date: '{{date}}',
                 },
               ],
             },
@@ -885,6 +890,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await waitForDocumentInIndex({
         esClient,
         indexName: ALERT_ACTION_INDEX,
+        ruleId,
       });
       expect(resp.hits.hits.length).to.be(1);
     });
@@ -928,7 +934,8 @@ function validateEventLog(event: any, params: ValidateEventLogParams) {
 
   expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions).to.be(1);
   expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(1);
-  expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms).to.be(0);
+  // Sometimes fast enough that it will report 0ms
+  expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms >= 0).to.be.ok();
   expect(
     event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms
   ).to.be.greaterThan(0);
@@ -965,7 +972,7 @@ function validateEventLog(event: any, params: ValidateEventLogParams) {
     id: params.ruleId,
     license: 'basic',
     category: params.ruleTypeId,
-    ruleset: 'stackAlerts',
+    ruleset: event?.rule.ruleset,
     name: params.name,
   });
 

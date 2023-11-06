@@ -10,8 +10,6 @@ import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
-import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
-import { ExperimentalFeaturesService } from '../../../../../services';
 import type { GetAgentPoliciesResponse } from '../../../../../../common';
 import { createFleetTestRendererMock } from '../../../../../mock';
 import { sendGetAgents, sendGetAgentStatus } from '../../../hooks';
@@ -49,6 +47,7 @@ jest.mock('../../../hooks', () => ({
   },
   useFleetStatus: jest.fn().mockReturnValue({}),
   sendGetAgentStatus: jest.fn(),
+  sendGetAgentPolicies: jest.fn().mockReturnValue({ data: { items: [] } }),
   sendGetAgentTags: jest.fn().mockReturnValue({ data: { items: ['tag1', 'tag2'] } }),
   useAuthz: jest.fn().mockReturnValue({ fleet: { all: true } }),
   useStartServices: jest.fn().mockReturnValue({
@@ -288,13 +287,6 @@ describe('agent_list_page', () => {
       });
 
       const renderer = createFleetTestRendererMock();
-
-      // todo: this can be removed when agentTamperProtectionEnabled feature flag is enabled/deleted
-      ExperimentalFeaturesService.init({
-        ...allowedExperimentalValues,
-        // @ts-expect-error ts upgrade v4.7.4
-        agentTamperProtectionEnabled: true,
-      });
 
       renderResult = renderer.render(<AgentListPage />);
 

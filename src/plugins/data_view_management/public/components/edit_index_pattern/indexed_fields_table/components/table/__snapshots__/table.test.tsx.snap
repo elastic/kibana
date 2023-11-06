@@ -66,10 +66,8 @@ exports[`Table render conflict summary modal  1`] = `
   </EuiModalBody>
   <EuiModalFooter>
     <EuiButton
-      color="primary"
       fill={true}
       onClick={[Function]}
-      size="m"
     >
       <FormattedMessage
         defaultMessage="Close"
@@ -109,6 +107,7 @@ exports[`Table should render conflicting type 1`] = `
 <span>
   text, long
   <span>
+     
     <EuiBadge
       color="warning"
       iconOnClick={[Function]}
@@ -306,6 +305,7 @@ exports[`Table should render normally 1`] = `
     }
   }
   responsive={true}
+  searchFormat="eql"
   sorting={
     Object {
       "sort": Object {

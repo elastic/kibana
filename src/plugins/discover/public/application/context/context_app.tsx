@@ -18,7 +18,6 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { removeInterceptedWarningDuplicates } from '@kbn/search-response-warnings';
 import {
   DOC_TABLE_LEGACY,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -177,12 +176,11 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 
   const interceptedWarnings = useMemo(
-    () =>
-      removeInterceptedWarningDuplicates([
-        ...(fetchedState.predecessorsInterceptedWarnings || []),
-        ...(fetchedState.anchorInterceptedWarnings || []),
-        ...(fetchedState.successorsInterceptedWarnings || []),
-      ]),
+    () => [
+      ...(fetchedState.predecessorsInterceptedWarnings || []),
+      ...(fetchedState.anchorInterceptedWarnings || []),
+      ...(fetchedState.successorsInterceptedWarnings || []),
+    ],
     [
       fetchedState.predecessorsInterceptedWarnings,
       fetchedState.anchorInterceptedWarnings,
@@ -209,7 +207,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       showSearchBar: true,
       showQueryInput: false,
       showFilterBar: true,
-      showSaveQuery: false,
+      saveQueryMenuVisibility: 'hidden' as const,
       showDatePicker: false,
       indexPatterns: [dataView],
       useDefaultBehaviors: true,

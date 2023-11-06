@@ -8,22 +8,32 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects([
+    'discover',
+    'observabilityLogExplorer',
+    'svlCommonPage',
+    'timePicker',
+    'header',
+  ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/165839
-  describe.skip('Header menu', () => {
+  describe('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
+      await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
+      await PageObjects.svlCommonPage.forceLogout();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
@@ -36,14 +46,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Discover fallback link', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+
       it('should render a button link ', async () => {
         const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
         expect(await discoverLink.isDisplayed()).to.be(true);
       });
 
       it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
-        // Set timerange to specific values to match data and retrieve config
-        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+        await retry.try(async () => {
+          await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
+          await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
+        });
+
         const timeConfig = await PageObjects.timePicker.getTimeConfig();
 
         // Set query bar value
@@ -55,9 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
-            'All log datasets'
-          );
+          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql('All logs');
         });
 
         await retry.try(async () => {
@@ -75,6 +91,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
+        });
+      });
+    });
+
+    describe('Add data link', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should render a button link ', async () => {
+        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        expect(await onboardingLink.isDisplayed()).to.be(true);
+      });
+
+      it('should navigate to the observability onboarding overview page', async () => {
+        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        onboardingLink.click();
+
+        await retry.try(async () => {
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain(`/app/observabilityOnboarding`);
         });
       });
     });

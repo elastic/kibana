@@ -56,6 +56,11 @@ const externals = {
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
   'io-ts': '__kbnSharedDeps__.IoTs',
+  '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
+  'react-redux': '__kbnSharedDeps__.ReactRedux',
+  redux: '__kbnSharedDeps__.Redux',
+  immer: '__kbnSharedDeps__.Immer',
+  reselect: '__kbnSharedDeps__.Reselect',
 
   /**
    * big deps which are locked to a single version
@@ -86,6 +91,7 @@ const externals = {
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
   '@kbn/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
+  '@kbn/shared-ux-error-boundary': '__kbnSharedDeps__.KbnSharedUxErrorBoundary',
   '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',

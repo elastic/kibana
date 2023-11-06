@@ -153,7 +153,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
                 await supertest
                   .get('/api/ml/saved_objects/sync')
                   .set('kbn-xsrf', 'foo')
-                  .auth(ApmUsername.editorUser, kbnTestConfig.getUrlParts().password);
+                  .auth(ApmUsername.editorUser, kbnTestConfig.getUrlParts().password!);
               }
               if (condition.archives.length) {
                 log('Loaded all archives');

@@ -40,7 +40,7 @@
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/index-modules-blocks.html",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

@@ -26,7 +26,6 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { createStore } from '../../../common/store';
 import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
 import { sourcererPaths } from '../../../common/containers/sourcerer';
-import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -49,17 +48,7 @@ jest.mock('react-reverse-portal', () => ({
   createHtmlPortalNode: () => ({ unmount: jest.fn() }),
 }));
 
-jest.mock('../../../assistant/use_assistant_availability');
-
-jest.mocked(useAssistantAvailability).mockReturnValue({
-  hasAssistantPrivilege: false,
-  hasConnectorsAllPrivilege: true,
-  hasConnectorsReadPrivilege: true,
-  isAssistantEnabled: true,
-});
-
 describe('global header', () => {
-  const mockSetHeaderActionMenu = jest.fn();
   const state = {
     ...mockGlobalState,
     timeline: {
@@ -85,7 +74,7 @@ describe('global header', () => {
     ]);
     const { getByText } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByText('Add integrations')).toBeInTheDocument();
@@ -97,7 +86,7 @@ describe('global header', () => {
     ]);
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -108,7 +97,7 @@ describe('global header', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -128,7 +117,7 @@ describe('global header', () => {
     );
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -140,7 +129,7 @@ describe('global header', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
@@ -151,7 +140,7 @@ describe('global header', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
@@ -176,52 +165,24 @@ describe('global header', () => {
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
 
     expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
   });
 
-  it('shows AI Assistant header link if user has necessary privileges', () => {
+  it('shows AI Assistant header link', () => {
     (useLocation as jest.Mock).mockReturnValue([
       { pageName: SecurityPageName.overview, detailName: undefined },
     ]);
 
-    jest.mocked(useAssistantAvailability).mockReturnValue({
-      hasAssistantPrivilege: true,
-      hasConnectorsAllPrivilege: true,
-      hasConnectorsReadPrivilege: true,
-      isAssistantEnabled: true,
-    });
-
     const { findByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
 
     waitFor(() => expect(findByTestId('assistantHeaderLink')).toBeInTheDocument());
-  });
-
-  it('does not show AI Assistant header link if user does not have necessary privileges', () => {
-    (useLocation as jest.Mock).mockReturnValue([
-      { pageName: SecurityPageName.overview, detailName: undefined },
-    ]);
-
-    jest.mocked(useAssistantAvailability).mockReturnValue({
-      hasAssistantPrivilege: false,
-      hasConnectorsAllPrivilege: true,
-      hasConnectorsReadPrivilege: true,
-      isAssistantEnabled: true,
-    });
-
-    const { findByTestId } = render(
-      <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
-      </TestProviders>
-    );
-
-    waitFor(() => expect(findByTestId('assistantHeaderLink')).not.toBeInTheDocument());
   });
 });

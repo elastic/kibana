@@ -157,6 +157,53 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
       });
     });
 
+    it('should stop alert firing actions if category ID does not match the rule type', async () => {
+      const pattern = {
+        instance: [true, true, false, true],
+      };
+
+      // Create active maintenance window
+      const maintenanceWindow = await createMaintenanceWindow({
+        category_ids: ['observability'],
+      });
+      const activeMaintenanceWindows = await getActiveMaintenanceWindows();
+      expect(activeMaintenanceWindows[0].id).eql(maintenanceWindow.id);
+      expect(activeMaintenanceWindows[0].category_ids).eql(['observability']);
+
+      // Create action and rule
+      const action = await createAction();
+      const rule = await createRule({ actionId: action.id, pattern });
+
+      // Run 4 times - firing each time
+      await getRuleEvents({
+        id: rule.id,
+        action: 1,
+        activeInstance: 1,
+      });
+      await runSoon(rule.id);
+      await getRuleEvents({
+        id: rule.id,
+        action: 2,
+        activeInstance: 2,
+      });
+
+      await runSoon(rule.id);
+      await getRuleEvents({
+        id: rule.id,
+        action: 3,
+        activeInstance: 2,
+        recoveredInstance: 1,
+      });
+
+      await runSoon(rule.id);
+      await getRuleEvents({
+        id: rule.id,
+        action: 4,
+        activeInstance: 3,
+        recoveredInstance: 1,
+      });
+    });
+
     // Helper functions:
     async function createRule({
       actionId,
@@ -214,7 +261,7 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
       return createdAction;
     }
 
-    async function createMaintenanceWindow() {
+    async function createMaintenanceWindow(overwrites?: any) {
       const { body: window } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
         .set('kbn-xsrf', 'foo')
@@ -227,6 +274,7 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
             freq: 0, // yearly
             count: 1,
           },
+          ...overwrites,
         })
         .expect(200);
 

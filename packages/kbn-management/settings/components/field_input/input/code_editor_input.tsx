@@ -9,10 +9,12 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { SettingType } from '@kbn/management-settings-types';
 
-import { CodeEditor } from '../code_editor';
-import type { InputProps, OnChangeFn } from '../types';
+import { SettingType } from '@kbn/management-settings-types';
+import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
+
+import { CodeEditor, CodeEditorProps } from '../code_editor';
+import type { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 type Type = Extract<SettingType, 'json' | 'markdown'>;
@@ -23,11 +25,6 @@ type Type = Extract<SettingType, 'json' | 'markdown'>;
 export interface CodeEditorInputProps extends InputProps<Type> {
   /** The default value of the {@link CodeEditor} component. */
   defaultValue?: string;
-  /**
-   * The `onChange` event handler, expanded to include both `markdown`
-   * and `json`
-   */
-  onChange: OnChangeFn<Type>;
   /**
    * The {@link UiSettingType}, expanded to include both `markdown`
    * and `json`
@@ -41,23 +38,23 @@ export interface CodeEditorInputProps extends InputProps<Type> {
  * TODO: clintandrewhall - `kibana_react` `CodeEditor` does not support `disabled`.
  */
 export const CodeEditorInput = ({
-  ariaDescribedBy,
-  ariaLabel,
-  defaultValue,
-  id,
-  isDisabled = false,
-  onChange: onChangeProp,
+  field,
+  unsavedChange,
   type,
-  value: valueProp = '',
+  isSavingEnabled,
+  defaultValue,
+  onInputChange,
 }: CodeEditorInputProps) => {
-  const onChange = (newValue: string) => {
+  const onUpdate = useUpdate({ onInputChange, field });
+
+  const onChange: CodeEditorProps['onChange'] = (inputValue) => {
     let newUnsavedValue;
     let errorParams = {};
 
     switch (type) {
       case 'json':
         const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
-        newUnsavedValue = newValue || (isJsonArray ? '[]' : '{}');
+        newUnsavedValue = inputValue || (isJsonArray ? '[]' : '{}');
 
         try {
           JSON.parse(newUnsavedValue);
@@ -71,22 +68,16 @@ export const CodeEditorInput = ({
         }
         break;
       default:
-        newUnsavedValue = newValue;
+        newUnsavedValue = inputValue;
     }
 
-    // TODO: clintandrewhall - should we make this onBlur instead of onChange?
-    onChangeProp({
-      value: newUnsavedValue,
-      ...errorParams,
-    });
+    onUpdate({ type: field.type, unsavedValue: inputValue, ...errorParams });
   };
 
-  // nit: we have to do this because, while the `UiSettingsService` might return
-  // `null`, the {@link CodeEditor} component doesn't accept `null` as a value.
-  //
-  // @see packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts
-  //
-  const value = valueProp === null ? '' : valueProp;
+  const { id, ariaAttributes } = field;
+  const { ariaLabel, ariaDescribedBy } = ariaAttributes;
+  // @ts-expect-error
+  const [value] = getFieldInputValue(field, unsavedChange);
 
   return (
     <div>
@@ -94,7 +85,7 @@ export const CodeEditorInput = ({
         aria-describedby={ariaDescribedBy}
         aria-label={ariaLabel}
         data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
-        isReadOnly={isDisabled}
+        isReadOnly={!isSavingEnabled}
         name={`${TEST_SUBJ_PREFIX_FIELD}-${id}-editor`}
         {...{ onChange, type, value }}
       />

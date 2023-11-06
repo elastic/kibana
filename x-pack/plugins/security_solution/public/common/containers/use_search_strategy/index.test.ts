@@ -9,7 +9,10 @@ import { useSearch, useSearchStrategy } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
-import type { FactoryQueryTypes, StrategyRequestType } from '../../../../common/search_strategy';
+import type {
+  FactoryQueryTypes,
+  StrategyRequestInputType,
+} from '../../../../common/search_strategy';
 import { Observable } from 'rxjs';
 
 jest.mock('@kbn/securitysolution-hook-utils');
@@ -83,7 +86,7 @@ const userSearchStrategyProps = {
 const request = {
   fake: 'request',
   search: 'parameters',
-} as unknown as StrategyRequestType<FactoryQueryTypes>;
+} as unknown as StrategyRequestInputType<FactoryQueryTypes>;
 
 describe('useSearchStrategy', () => {
   beforeEach(() => {
@@ -99,7 +102,7 @@ describe('useSearchStrategy', () => {
       useSearchStrategy<FactoryQueryTypes>({ ...userSearchStrategyProps, initialResult })
     );
 
-    expect(result.current.result).toBe(initialResult);
+    expect(result.current.result).toEqual(initialResult);
   });
 
   it('calls start with the given request', () => {
@@ -275,9 +278,7 @@ describe('useSearchStrategy', () => {
 
     it('should handle search error', () => {
       mockResponse.mockImplementation(() => {
-        throw new Error(
-          'simulated search response error, which could be 1) undefined response, 2) response without rawResponse, or 3) partial response'
-        );
+        throw new Error('simulated search error');
       });
 
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));

@@ -12,7 +12,6 @@ import type { RiskSeverity } from '../../../../../../common/search_strategy/secu
 import type { SecuritySolutionFactory } from '../../types';
 import type { RelatedEntitiesQueries } from '../../../../../../common/search_strategy/security_solution/related_entities';
 import type {
-  HostsRelatedUsersRequestOptions,
   HostsRelatedUsersStrategyResponse,
   RelatedUserBucket,
   RelatedUser,
@@ -22,9 +21,9 @@ import { buildRelatedUsersQuery } from './query.related_users.dsl';
 import { getUserRiskData } from '../../users/all';
 
 export const hostsRelatedUsers: SecuritySolutionFactory<RelatedEntitiesQueries.relatedUsers> = {
-  buildDsl: (options: HostsRelatedUsersRequestOptions) => buildRelatedUsersQuery(options),
+  buildDsl: (options) => buildRelatedUsersQuery(options),
   parse: async (
-    options: HostsRelatedUsersRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
@@ -61,7 +60,7 @@ export const hostsRelatedUsers: SecuritySolutionFactory<RelatedEntitiesQueries.r
           relatedUsers,
           deps.spaceId,
           deps.esClient,
-          options.isNewRiskScoreModuleAvailable
+          options.isNewRiskScoreModuleInstalled
         )
       : relatedUsers;
 
@@ -78,14 +77,14 @@ async function addUserRiskData(
   relatedUsers: RelatedUser[],
   spaceId: string,
   esClient: IScopedClusterClient,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): Promise<RelatedUser[]> {
   const userNames = relatedUsers.map((item) => item.user);
   const userRiskData = await getUserRiskData(
     esClient,
     spaceId,
     userNames,
-    isNewRiskScoreModuleAvailable
+    isNewRiskScoreModuleInstalled
   );
   const usersRiskByUserName: Record<string, RiskSeverity> | undefined =
     userRiskData?.hits.hits.reduce(

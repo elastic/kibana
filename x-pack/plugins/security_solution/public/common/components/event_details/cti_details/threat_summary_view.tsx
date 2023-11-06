@@ -6,18 +6,8 @@
  */
 
 import styled from 'styled-components';
-import React, { useCallback, useState } from 'react';
-import {
-  EuiTitle,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiPopoverTitle,
-  EuiText,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 
@@ -31,6 +21,7 @@ import { EnrichmentSummary } from './enrichment_summary';
 import type { HostRisk, UserRisk } from '../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { RiskScoreInfoTooltip } from '../../../../overview/components/common';
 
 const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
@@ -82,42 +73,16 @@ export const ThreatSummaryPanelHeader: React.FC<{
   toolTipContent: React.ReactNode;
   toolTipTitle?: React.ReactNode;
 }> = ({ title, toolTipContent, toolTipTitle }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const onClick = useCallback(() => {
-    setIsPopoverOpen(!isPopoverOpen);
-  }, [isPopoverOpen, setIsPopoverOpen]);
-
-  const closePopover = useCallback(() => {
-    setIsPopoverOpen(false);
-  }, [setIsPopoverOpen]);
-
   return (
     <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
       <EuiFlexItem>
         <ThreatSummaryPanelTitle>{title}</ThreatSummaryPanelTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          anchorPosition="leftCenter"
-          button={
-            <EuiButtonIcon
-              color="text"
-              size="xs"
-              iconSize="m"
-              iconType="iInCircle"
-              aria-label={i18n.INFORMATION_ARIA_LABEL}
-              onClick={onClick}
-            />
-          }
-        >
-          <EuiPopoverTitle>{toolTipTitle ?? title}</EuiPopoverTitle>
-          <EuiText size="s" style={{ width: '270px' }}>
-            {toolTipContent}
-          </EuiText>
-        </EuiPopover>
+        <RiskScoreInfoTooltip
+          toolTipContent={toolTipContent}
+          toolTipTitle={toolTipTitle ?? title}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

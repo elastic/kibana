@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RESPONSE_NO_DATA_TEST_ID } from '../../../flyout/document_details/left/components/test_ids';
 import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
@@ -27,6 +29,34 @@ const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
 `;
+const InlineBlock = styled.div`
+  display: inline-block;
+  line-height: 1.7em;
+`;
+
+const EmptyResponseActions = () => {
+  return (
+    <InlineBlock data-test-subj={RESPONSE_NO_DATA_TEST_ID}>
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.response.noDataDescription"
+        defaultMessage="There are no response actions defined for this event. To add some, edit the rule's settings and set up {link}."
+        values={{
+          link: (
+            <EuiLink
+              href="https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-response-action"
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.response.noDataLinkText"
+                defaultMessage="response actions"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </InlineBlock>
+  );
+};
 
 export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData,
@@ -35,6 +65,15 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   ecsData?: Ecs | null;
   rawEventData: SearchHit | undefined;
 }): EuiTabbedContentTab | undefined => {
+  // can not be moved outside of the component, because then EventsViewType throws runtime error regarding not being initialized yet
+  const viewData = useMemo(
+    () => ({
+      id: EventsViewType.responseActionsView,
+      'data-test-subj': 'responseActionsViewTab',
+      name: i18n.RESPONSE_ACTIONS_VIEW,
+    }),
+    []
+  );
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
@@ -42,49 +81,55 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled || !responseActions?.length;
+  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled;
 
   const alertId = rawEventData?._id ?? '';
+  const [isLive, setIsLive] = useState(false);
 
   const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
       alertIds: [alertId],
     },
-    { enabled: !shouldEarlyReturn }
+    { enabled: !shouldEarlyReturn, isLive }
   );
+
+  // calculating whether or not our useGetAutomatedActionList (react-query) should try to refetch data
+  useEffect(() => {
+    setIsLive(() => !(!responseActions?.length || !!automatedList?.items?.length));
+  }, [automatedList, responseActions?.length]);
 
   if (shouldEarlyReturn) {
-    return;
+    return {
+      ...viewData,
+      content: <EmptyResponseActions />,
+    };
+  } else {
+    const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name?.[0];
+
+    const automatedListItems = automatedList?.items ?? [];
+    return {
+      ...viewData,
+      append: (
+        <EuiNotificationBadge data-test-subj="response-actions-notification">
+          {automatedListItems.length}
+        </EuiNotificationBadge>
+      ),
+      content: (
+        <>
+          <EuiSpacer size="s" />
+          <TabContentWrapper data-test-subj="responseActionsViewWrapper">
+            {isFetched && !!automatedListItems.length ? (
+              <ResponseActionsResults
+                actions={automatedListItems}
+                ruleName={ruleName}
+                ecsData={ecsData}
+              />
+            ) : (
+              <EmptyResponseActions />
+            )}
+          </TabContentWrapper>
+        </>
+      ),
+    };
   }
-
-  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name?.[0];
-
-  const totalItemCount = automatedList?.items?.length ?? 0;
-
-  const content = (
-    <>
-      <EuiSpacer size="s" />
-      <TabContentWrapper data-test-subj="responseActionsViewWrapper">
-        {isFetched && totalItemCount && automatedList?.items.length ? (
-          <ResponseActionsResults
-            actions={automatedList.items}
-            ruleName={ruleName}
-            ecsData={ecsData}
-          />
-        ) : null}
-      </TabContentWrapper>
-    </>
-  );
-
-  return {
-    id: EventsViewType.responseActionsView,
-    'data-test-subj': 'responseActionsViewTab',
-    name: i18n.RESPONSE_ACTIONS_VIEW,
-    append: (
-      <EuiNotificationBadge data-test-subj="response-actions-notification">
-        {totalItemCount}
-      </EuiNotificationBadge>
-    ),
-    content,
-  };
 };

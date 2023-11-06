@@ -47,11 +47,7 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await testSubjects.click(`.index-threshold-SelectOption`);
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
-      const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-      await indexComboBox.click();
-      await indexComboBox.type('k');
-      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await filterSelectItem.click();
+      await comboBox.set('thresholdIndexesComboBox', 'k');
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       await retry.try(async () => {
         const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');

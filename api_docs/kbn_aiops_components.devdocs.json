@@ -362,6 +362,22 @@
           },
           {
             "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartProps.height",
+            "type": "number",
+            "tags": [],
+            "label": "height",
+            "description": [
+              "Optional chart height"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
             "id": "def-common.DocumentCountChartProps.chartPoints",
             "type": "Array",
             "tags": [],
@@ -585,6 +601,22 @@
                 "text": "BrushSettings"
               },
               " | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [
+              "Optional data-test-subject"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,

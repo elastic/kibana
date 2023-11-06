@@ -30,7 +30,7 @@ import {
   SyntheticsCheckStepsPageHeader,
   SyntheticsCheckStepsPageRightSideItem,
 } from './pages/synthetics/synthetics_checks';
-import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/monitor_title';
+import { MonitorPageTitle } from './components/monitor/monitor_title';
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
@@ -69,7 +69,6 @@ const getRoutes = (): RouteProps[] => {
       component: MonitorPage,
       dataTestSubj: 'uptimeMonitorPage',
       pageHeader: {
-        children: <MonitorPageTitleContent />,
         pageTitle: <MonitorPageTitle />,
         rightSideItems: [<UptimeDatePicker />],
       },

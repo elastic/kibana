@@ -16,15 +16,16 @@ import {
 } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { populateTimeline } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 // Flaky on serverless
 const defaultPageSize = 25;
-describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'timeline' });
@@ -32,7 +33,7 @@ describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
   });
@@ -45,13 +46,13 @@ describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
     cy.get(TIMELINE_EVENT).should('have.length', defaultPageSize);
   });
 
-  it(`should select ${defaultPageSize} items per page by default`, () => {
-    cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', defaultPageSize);
-  });
-
-  it('should be able to go to next / previous page', { tags: '@brokenInServerless' }, () => {
+  it('should be able to go to next / previous page', () => {
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
     cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
+  });
+
+  it(`should select ${defaultPageSize} items per page by default`, () => {
+    cy.get(TIMELINE_EVENTS_COUNT_PER_PAGE).should('contain.text', defaultPageSize);
   });
 
   it('should be able to change items count per page with the dropdown', () => {

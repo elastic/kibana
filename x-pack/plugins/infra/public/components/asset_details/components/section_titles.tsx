@@ -38,7 +38,7 @@ const TitleWithTooltip = ({
   tooltipTestSubj?: string;
 }) => {
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <SectionTitle title={title} data-test-subj={dataTestSubject} />
       </EuiFlexItem>
@@ -64,10 +64,10 @@ export const MetricsSectionTitle = () => {
   );
 };
 
-export const NginxMetricsSectionTitle = () => (
+export const KubernetesMetricsSectionTitle = () => (
   <SectionTitle
-    title={i18n.translate('xpack.infra.assetDetails.overview.nginxMetricsSectionTitle', {
-      defaultMessage: 'Nginx Metric',
+    title={i18n.translate('xpack.infra.assetDetails.overview.kubernetesMetricsSectionTitle', {
+      defaultMessage: 'Kubernetes Overview',
     })}
   />
 );

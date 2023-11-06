@@ -91,8 +91,8 @@ describe('Endpoint package policies stats', () => {
           'latest',
           '2020-01-01',
           'latest',
-          moment().subtract(1, 'week').format('YYYY-MM-DD'),
-          moment().subtract(2, 'week').format('YYYY-MM-DD'),
+          moment.utc().subtract(1, 'week').format('YYYY-MM-DD'),
+          moment.utc().subtract(2, 'week').format('YYYY-MM-DD'),
         ])
       );
       const response = await requestEndpointPackagePoliciesStatsSearch(

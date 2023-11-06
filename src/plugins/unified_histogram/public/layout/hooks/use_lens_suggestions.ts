@@ -85,8 +85,8 @@ export const useLensSuggestions = ({
 
       const interval = computeInterval(timeRange, data);
       const language = getAggregateQueryMode(query);
-      const histogramQuery = `${query[language]} | eval uniqueName = 1
-        | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(uniqueName) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
+      const histogramQuery = `${query[language]}
+        | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',

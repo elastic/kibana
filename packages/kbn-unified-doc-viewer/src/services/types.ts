@@ -29,6 +29,11 @@ export interface DocViewRenderProps {
   hit: DataTableRecord;
   dataView: DataView;
   columns?: string[];
+  /**
+   * If not provided, types will be derived by default from the dataView field types.
+   * For displaying text-based search results, define column types (which are available separately in the fetch request) here.
+   */
+  columnTypes?: Record<string, string>;
   query?: Query | AggregateQuery;
   textBasedHits?: DataTableRecord[];
   filter?: DocViewFilterFn;

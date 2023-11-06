@@ -126,7 +126,7 @@ export const getEsdslFn = ({
       });
 
       try {
-        const { rawResponse } = await lastValueFrom(
+        const { rawResponse, requestParams } = await lastValueFrom(
           search(
             {
               params: {
@@ -180,7 +180,7 @@ export const getEsdslFn = ({
           };
         }
 
-        request.stats(stats).ok({ json: rawResponse });
+        request.stats(stats).ok({ json: rawResponse, requestParams });
         request.json(dsl);
 
         return {
@@ -188,7 +188,7 @@ export const getEsdslFn = ({
           body: rawResponse,
         };
       } catch (e) {
-        request.error({ json: e });
+        request.error({ json: 'attributes' in e ? e.attributes : { message: e.message } });
         throw e;
       }
     },

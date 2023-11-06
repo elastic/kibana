@@ -677,9 +677,7 @@ async function deleteTransforms(
             transform_id: transformId,
           });
           const transformConfig = body.transforms[0];
-          destinationIndex = Array.isArray(transformConfig.dest.index)
-            ? transformConfig.dest.index[0]
-            : transformConfig.dest.index;
+          destinationIndex = transformConfig.dest.index;
         } catch (getTransformConfigError) {
           transformDeleted.error = getTransformConfigError.meta.body.error;
           results[transformId] = {
@@ -690,19 +688,6 @@ async function deleteTransforms(
           };
           // No need to perform further delete attempts
           continue;
-        }
-      }
-      // If user checks box to delete the destinationIndex associated with the job
-      if (destinationIndex && deleteDestIndex) {
-        try {
-          // If user does have privilege to delete the index, then delete the index
-          // if no permission then return 403 forbidden
-          await esClient.asCurrentUser.indices.delete({
-            index: destinationIndex,
-          });
-          destIndexDeleted.success = true;
-        } catch (deleteIndexError) {
-          destIndexDeleted.error = deleteIndexError.meta.body.error;
         }
       }
 
@@ -723,8 +708,11 @@ async function deleteTransforms(
         await esClient.asCurrentUser.transform.deleteTransform({
           transform_id: transformId,
           force: shouldForceDelete && needToForceDelete,
+          // @ts-expect-error ES type needs to be updated
+          delete_dest_index: deleteDestIndex,
         });
         transformDeleted.success = true;
+        destIndexDeleted.success = deleteDestIndex;
       } catch (deleteTransformJobError) {
         transformDeleted.error = deleteTransformJobError.meta.body.error;
         if (deleteTransformJobError.statusCode === 403) {

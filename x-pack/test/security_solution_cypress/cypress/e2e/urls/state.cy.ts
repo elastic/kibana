@@ -25,7 +25,8 @@ import {
 } from '../../screens/security_header';
 import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../screens/timeline';
 
-import { login, visit, visitWithoutDateRange } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit, visitWithTimeRange } from '../../tasks/navigation';
 import {
   updateDates,
   setStartDate,
@@ -45,7 +46,7 @@ import {
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { addNameToTimeline, closeTimeline, populateTimeline } from '../../tasks/timeline';
 
-import { HOSTS_URL } from '../../urls/navigation';
+import { hostsUrl } from '../../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 
 import { getTimeline } from '../../objects/timeline';
@@ -74,7 +75,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets filters from the url', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlFiltersHostsHosts);
+    visit(ABSOLUTE_DATE_RANGE.urlFiltersHostsHosts);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(0)).should('have.text', 'host.name: test-host');
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(0))
@@ -84,7 +85,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets saved query from the url', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlFiltersHostsHosts);
+    visit(ABSOLUTE_DATE_RANGE.urlFiltersHostsHosts);
     saveQuery('test-query');
     // refresh the page to force loading the saved query from the URL
     cy.reload();
@@ -97,7 +98,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets the global start and end dates from the url', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
+    visit(ABSOLUTE_DATE_RANGE.url);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
       'have.attr',
       'title',
@@ -111,7 +112,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets the url state when start and end date are set', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
+    visit(ABSOLUTE_DATE_RANGE.url);
     setStartDate(ABSOLUTE_DATE.newStartTimeTyped);
     updateDates();
     waitForIpsTableToBeLoaded();
@@ -136,7 +137,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets the timeline start and end dates from the url when locked to global time', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
+    visit(ABSOLUTE_DATE_RANGE.url);
     openTimelineUsingToggle();
 
     cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(TIMELINE_DATE_PICKER_CONTAINER)).should(
@@ -152,7 +153,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets the timeline start and end dates independently of the global start and end dates when times are unlocked', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlUnlinked);
+    visit(ABSOLUTE_DATE_RANGE.urlUnlinked);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
       'have.attr',
       'title',
@@ -179,7 +180,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlUnlinked);
+    visit(ABSOLUTE_DATE_RANGE.urlUnlinked);
     openTimelineUsingToggle();
     setStartDate(ABSOLUTE_DATE.newStartTimeTyped, TIMELINE_DATE_PICKER_CONTAINER);
     updateTimelineDates();
@@ -204,17 +205,17 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets kql on network page', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
+    visit(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
     cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
+    visit(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
+    visit(ABSOLUTE_DATE_RANGE.url);
     kqlSearch('source.ip: "10.142.0.9" {enter}');
 
     cy.url().should(
@@ -224,7 +225,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets the url state when kql is set and check if href reflect this change', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
+    visit(ABSOLUTE_DATE_RANGE.url);
     kqlSearch('source.ip: "10.142.0.9" {enter}');
     navigateFromHeaderTo(HOSTS);
 
@@ -238,7 +239,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlHostNew);
+    visit(ABSOLUTE_DATE_RANGE.urlHostNew);
     kqlSearch('host.name: "siem-kibana" {enter}');
     openAllHosts();
     waitForAllHostsToBeLoaded();
@@ -286,13 +287,13 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('Do not clears kql when navigating to a new page', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
+    visit(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     navigateFromHeaderTo(NETWORK);
     cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets and reads the url state for timeline by id', () => {
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
 
@@ -303,8 +304,8 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
-      visit('/app/home');
-      visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
+      visitWithTimeRange('/app/home');
+      visitWithTimeRange(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');

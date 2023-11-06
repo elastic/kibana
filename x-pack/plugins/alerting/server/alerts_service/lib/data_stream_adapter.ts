@@ -168,7 +168,13 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
   let concreteWriteIndicesExist = false;
   // if a concrete write index already exists, update the underlying mapping
   if (concreteIndices.length > 0) {
-    await updateIndexMappings({ logger, esClient, totalFieldsLimit, concreteIndices });
+    await updateIndexMappings({
+      logger,
+      esClient,
+      totalFieldsLimit,
+      concreteIndices,
+      validIndexPrefixes: indexPatterns.validPrefixes,
+    });
 
     const concreteIndicesExist = concreteIndices.some(
       (index) => index.alias === indexPatterns.alias

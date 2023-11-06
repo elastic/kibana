@@ -10,7 +10,12 @@ import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 type AppName = keyof typeof PREFIX_MAP;
-const PREFIX_MAP = { visualize: 'vis', dashboard: 'dashboard', map: 'map' };
+const PREFIX_MAP = {
+  visualize: 'vis',
+  dashboard: 'dashboard',
+  map: 'map',
+  eventAnnotation: 'eventAnnotation',
+};
 
 export class ListingTableService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -18,7 +23,6 @@ export class ListingTableService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly header = this.ctx.getPageObject('header');
 
   private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
     name: 'Tag Popover',
@@ -84,7 +88,6 @@ export class ListingTableService extends FtrService {
       } else {
         throw new Error('Waiting');
       }
-      await this.header.waitUntilLoadingHasFinished();
     });
   }
 
@@ -186,10 +189,11 @@ export class ListingTableService extends FtrService {
   /**
    * Returns items count on landing page
    */
-  public async expectItemsCount(appName: AppName, count: number) {
+  public async expectItemsCount(appName: AppName, count: number, findTimeout?: number) {
     await this.retry.try(async () => {
       const elements = await this.find.allByCssSelector(
-        `[data-test-subj^="${PREFIX_MAP[appName]}ListingTitleLink"]`
+        `[data-test-subj^="${PREFIX_MAP[appName]}ListingTitleLink"]`,
+        findTimeout ?? 10000
       );
       expect(elements.length).to.equal(count);
     });

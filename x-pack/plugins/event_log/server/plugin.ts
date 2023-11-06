@@ -71,7 +71,6 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
-      kibanaVersion: this.kibanaVersion,
       // Only non-serverless deployments may have assets that need to be converted
       shouldSetExistingAssetsToHidden: !plugins.serverless,
     });

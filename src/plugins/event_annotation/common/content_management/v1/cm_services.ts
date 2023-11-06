@@ -79,7 +79,6 @@ const getResultSchema = schema.object(
 );
 
 const createOptionsSchema = schema.object({
-  overwrite: schema.maybe(schema.boolean()),
   references: schema.maybe(referencesSchema),
 });
 

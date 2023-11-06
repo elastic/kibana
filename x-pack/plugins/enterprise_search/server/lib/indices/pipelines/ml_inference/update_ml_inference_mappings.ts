@@ -77,7 +77,7 @@ const generateTextExpansionMappingProperties = (sourceFields: string[], targetFi
               type: 'keyword',
             },
             predicted_value: {
-              type: 'rank_features',
+              type: 'sparse_vector',
             },
           },
         },
@@ -97,7 +97,7 @@ const formDefaultElserMappingProps = (sourceFields: string[]) => {
             type: 'keyword',
           },
           predicted_value: {
-            type: 'rank_features',
+            type: 'sparse_vector',
           },
         },
       },

@@ -8,11 +8,9 @@
 import { MultiValueClickContext } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common/expression_types';
-import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { OnFilterEvent } from '../../../../lens';
 
 type ChartClickContextData = MultiValueClickContext['data']['data'];
-
-export type OnFilterEvent = Parameters<NonNullable<LensEmbeddableInput['onFilter']>>[0];
 
 export function isChartClickContextData(data: unknown): data is ChartClickContextData {
   return Array.isArray(data) && Array.isArray(data[0]?.cells) && data[0].cells.length > 0;

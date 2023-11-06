@@ -154,4 +154,40 @@ describe('downgradeRequired', () => {
 
     expect(downgradeRequired(doc, latestVersions)).toEqual(false);
   });
+
+  it('returns true when targetTypeVersion is specified and lower than the document version', () => {
+    const doc = createDoc({
+      typeMigrationVersion: '8.0.0',
+    });
+    const latestVersions = {
+      [TransformType.Migrate]: '8.5.0',
+    } as Record<TransformType, string>;
+    const targetTypeVersion = '7.9.0';
+
+    expect(downgradeRequired(doc, latestVersions, targetTypeVersion)).toEqual(true);
+  });
+
+  it('returns false when targetTypeVersion is specified and higher than the document version', () => {
+    const doc = createDoc({
+      typeMigrationVersion: '8.0.0',
+    });
+    const latestVersions = {
+      [TransformType.Migrate]: '7.9.0',
+    } as Record<TransformType, string>;
+    const targetTypeVersion = '8.5.0';
+
+    expect(downgradeRequired(doc, latestVersions, targetTypeVersion)).toEqual(false);
+  });
+
+  it('returns false when targetTypeVersion is specified and the same as the document version', () => {
+    const doc = createDoc({
+      typeMigrationVersion: '8.0.0',
+    });
+    const latestVersions = {
+      [TransformType.Migrate]: '7.9.0',
+    } as Record<TransformType, string>;
+    const targetTypeVersion = '8.0.0';
+
+    expect(downgradeRequired(doc, latestVersions, targetTypeVersion)).toEqual(false);
+  });
 });

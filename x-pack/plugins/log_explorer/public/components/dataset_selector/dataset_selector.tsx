@@ -5,45 +5,56 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiHorizontalRule } from '@elastic/eui';
+import { EuiContextMenu, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
+import styled from '@emotion/styled';
 import React, { useMemo } from 'react';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
-import { dynamic } from '../../utils/dynamic';
+import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 import {
-  contextMenuStyles,
+  dataViewsLabel,
+  DATA_VIEWS_PANEL_ID,
+  DATA_VIEWS_TAB_ID,
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   integrationsLabel,
-  INTEGRATION_PANEL_ID,
+  INTEGRATIONS_PANEL_ID,
+  INTEGRATIONS_TAB_ID,
   uncategorizedLabel,
-  UNMANAGED_STREAMS_PANEL_ID,
+  UNCATEGORIZED_PANEL_ID,
+  UNCATEGORIZED_TAB_ID,
 } from './constants';
 import { useDatasetSelector } from './state_machine/use_dataset_selector';
 import { DatasetsPopover } from './sub_components/datasets_popover';
-import { DatasetSkeleton } from './sub_components/datasets_skeleton';
+import { DataViewsPanelTitle } from './sub_components/data_views_panel_title';
+import { EsqlSelector } from './sub_components/esql_selector';
 import { SearchControls } from './sub_components/search_controls';
+import { SelectorActions } from './sub_components/selector_actions';
 import { DatasetSelectorProps } from './types';
 import {
   buildIntegrationsTree,
-  createAllLogDatasetsItem,
-  createUnmanagedDatasetsItem,
+  createDataViewsStatusItem,
   createIntegrationStatusItem,
+  createUncategorizedStatusItem,
 } from './utils';
-
-/**
- * Lazy load hidden components
- */
-const DatasetsList = dynamic(() => import('./sub_components/datasets_list'), {
-  fallback: <DatasetSkeleton />,
-});
 
 export function DatasetSelector({
   datasets,
-  datasetsError,
   datasetSelection,
+  datasetsError,
+  dataViews,
+  dataViewsError,
+  discoverEsqlUrlProps,
   integrations,
   integrationsError,
+  isEsqlEnabled,
+  isLoadingDataViews,
   isLoadingIntegrations,
-  isLoadingStreams,
+  isLoadingUncategorized,
+  isSearchingIntegrations,
+  onDataViewSelection,
+  onDataViewsReload,
+  onDataViewsSearch,
+  onDataViewsSort,
+  onDataViewsTabClick,
   onIntegrationsLoadMore,
   onIntegrationsReload,
   onIntegrationsSearch,
@@ -51,51 +62,56 @@ export function DatasetSelector({
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
   onSelectionChange,
-  onStreamsEntryClick,
-  onUnmanagedStreamsReload,
-  onUnmanagedStreamsSearch,
-  onUnmanagedStreamsSort,
+  onUncategorizedReload,
+  onUncategorizedSearch,
+  onUncategorizedSort,
+  onUncategorizedTabClick,
 }: DatasetSelectorProps) {
   const {
-    isOpen,
     panelId,
     search,
-    closePopover,
+    tabId,
+    isOpen,
+    isAllMode,
     changePanel,
+    closePopover,
     scrollToIntegrationsBottom,
     searchByName,
     selectAllLogDataset,
     selectDataset,
+    selectDataView,
     sortByOrder,
+    switchToIntegrationsTab,
+    switchToUncategorizedTab,
+    switchToDataViewsTab,
     togglePopover,
   } = useDatasetSelector({
     initialContext: { selection: datasetSelection },
+    onDataViewSelection,
+    onDataViewsSearch,
+    onDataViewsSort,
     onIntegrationsLoadMore,
     onIntegrationsReload,
     onIntegrationsSearch,
     onIntegrationsSort,
     onIntegrationsStreamsSearch,
     onIntegrationsStreamsSort,
-    onUnmanagedStreamsSearch,
-    onUnmanagedStreamsSort,
-    onUnmanagedStreamsReload,
+    onUncategorizedSearch,
+    onUncategorizedSort,
+    onUncategorizedReload,
     onSelectionChange,
   });
 
   const [setSpyRef] = useIntersectionRef({ onIntersecting: scrollToIntegrationsBottom });
 
   const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
-    const allLogDatasetsItem = createAllLogDatasetsItem({ onClick: selectAllLogDataset });
-    const unmanagedDatasetsItem = createUnmanagedDatasetsItem({ onClick: onStreamsEntryClick });
-
     if (!integrations || integrations.length === 0) {
       return {
         items: [
-          allLogDatasetsItem,
-          unmanagedDatasetsItem,
           createIntegrationStatusItem({
+            data: integrations,
             error: integrationsError,
-            integrations,
+            isLoading: isLoadingIntegrations,
             onRetry: onIntegrationsReload,
           }),
         ],
@@ -103,49 +119,94 @@ export function DatasetSelector({
       };
     }
 
-    const { items, panels } = buildIntegrationsTree({
+    return buildIntegrationsTree({
       integrations,
       onDatasetSelected: selectDataset,
       spyRef: setSpyRef,
     });
-
-    return {
-      items: [allLogDatasetsItem, unmanagedDatasetsItem, ...items],
-      panels,
-    };
   }, [
     integrations,
     integrationsError,
-    selectAllLogDataset,
+    isLoadingIntegrations,
     selectDataset,
     onIntegrationsReload,
-    onStreamsEntryClick,
     setSpyRef,
   ]);
 
-  const panels = [
+  const uncategorizedItems = useMemo(() => {
+    if (!datasets || datasets.length === 0) {
+      return [
+        createUncategorizedStatusItem({
+          data: datasets,
+          error: datasetsError,
+          isLoading: isLoadingUncategorized,
+          onRetry: onUncategorizedReload,
+        }),
+      ];
+    }
+
+    return datasets.map((dataset) => ({
+      name: dataset.title,
+      onClick: () => selectDataset(dataset),
+    }));
+  }, [datasets, datasetsError, isLoadingUncategorized, selectDataset, onUncategorizedReload]);
+
+  const dataViewsItems = useMemo(() => {
+    if (!dataViews || dataViews.length === 0) {
+      return [
+        createDataViewsStatusItem({
+          data: dataViews,
+          error: dataViewsError,
+          isLoading: isLoadingDataViews,
+          onRetry: onDataViewsReload,
+        }),
+      ];
+    }
+
+    return dataViews.map((dataView) => ({
+      'data-test-subj': getDataViewTestSubj(dataView.title),
+      name: dataView.name,
+      onClick: () => selectDataView(dataView),
+    }));
+  }, [dataViews, dataViewsError, isLoadingDataViews, selectDataView, onDataViewsReload]);
+
+  const tabs = [
     {
-      id: INTEGRATION_PANEL_ID,
-      title: integrationsLabel,
-      width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      items: integrationItems,
+      id: INTEGRATIONS_TAB_ID,
+      name: integrationsLabel,
+      onClick: switchToIntegrationsTab,
+      'data-test-subj': 'datasetSelectorIntegrationsTab',
     },
     {
-      id: UNMANAGED_STREAMS_PANEL_ID,
-      title: uncategorizedLabel,
-      width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-      content: (
-        <DatasetsList
-          datasets={datasets}
-          error={datasetsError}
-          isLoading={isLoadingStreams}
-          onRetry={onUnmanagedStreamsReload}
-          onDatasetClick={selectDataset}
-        />
-      ),
+      id: UNCATEGORIZED_TAB_ID,
+      name: uncategorizedLabel,
+      onClick: () => {
+        onUncategorizedTabClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
+        switchToUncategorizedTab();
+      },
+      'data-test-subj': 'datasetSelectorUncategorizedTab',
     },
-    ...integrationPanels,
+    {
+      id: DATA_VIEWS_TAB_ID,
+      name: dataViewsLabel,
+      onClick: () => {
+        onDataViewsTabClick(); // Lazy-load data views only when accessing the Data Views tab
+        switchToDataViewsTab();
+      },
+      'data-test-subj': 'datasetSelectorDataViewsTab',
+    },
   ];
+
+  const tabEntries = tabs.map((tab) => (
+    <EuiTab
+      key={tab.id}
+      onClick={tab.onClick}
+      isSelected={tab.id === tabId}
+      data-test-subj={tab['data-test-subj']}
+    >
+      {tab.name}
+    </EuiTab>
+  ));
 
   return (
     <DatasetsPopover
@@ -154,23 +215,82 @@ export function DatasetSelector({
       closePopover={closePopover}
       onClick={togglePopover}
     >
+      <Tabs>{tabEntries}</Tabs>
+      <SelectorActions>
+        <SelectorActions.ShowAllLogs isSelected={isAllMode} onClick={selectAllLogDataset} />
+      </SelectorActions>
+      <EuiHorizontalRule margin="none" />
       <SearchControls
         key={panelId}
         search={search}
         onSearch={searchByName}
         onSort={sortByOrder}
-        isLoading={isLoadingIntegrations || isLoadingStreams}
+        isLoading={isSearchingIntegrations || isLoadingUncategorized}
       />
       <EuiHorizontalRule margin="none" />
-      <EuiContextMenu
+      {/* For a smoother user experience, we keep each tab content mount and we only show the select one
+      "hiding" all the others. Unmounting mounting each tab content on change makes it feel glitchy,
+      while the tradeoff of keeping the contents in memory provide a better UX. */}
+      {/* Integrations tab content */}
+      <ContextMenu
+        hidden={tabId !== INTEGRATIONS_TAB_ID}
         initialPanelId={panelId}
-        panels={panels}
+        panels={[
+          {
+            id: INTEGRATIONS_PANEL_ID,
+            title: integrationsLabel,
+            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            items: integrationItems,
+          },
+          ...integrationPanels,
+        ]}
         onPanelChange={changePanel}
         className="eui-yScroll"
-        css={contextMenuStyles}
-        data-test-subj="datasetSelectorContextMenu"
+        data-test-subj="integrationsContextMenu"
         size="s"
       />
+      {/* Uncategorized tab content */}
+      <ContextMenu
+        hidden={tabId !== UNCATEGORIZED_TAB_ID}
+        initialPanelId={UNCATEGORIZED_PANEL_ID}
+        panels={[
+          {
+            id: UNCATEGORIZED_PANEL_ID,
+            title: uncategorizedLabel,
+            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            items: uncategorizedItems,
+          },
+        ]}
+        className="eui-yScroll"
+        data-test-subj="uncategorizedContextMenu"
+        size="s"
+      />
+      {/* Data views tab content */}
+      <ContextMenu
+        hidden={tabId !== DATA_VIEWS_TAB_ID}
+        initialPanelId={DATA_VIEWS_PANEL_ID}
+        panels={[
+          {
+            id: DATA_VIEWS_PANEL_ID,
+            title: <DataViewsPanelTitle />,
+            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            items: dataViewsItems,
+          },
+        ]}
+        className="eui-yScroll"
+        data-test-subj="dataViewsContextMenu"
+        size="s"
+      />
+      {isEsqlEnabled && <EsqlSelector {...discoverEsqlUrlProps} />}
     </DatasetsPopover>
   );
 }
+
+const Tabs = styled(EuiTabs)`
+  padding: 0 8px;
+`;
+
+const ContextMenu = styled(EuiContextMenu)`
+  max-height: 440px;
+  transition: none !important;
+`;

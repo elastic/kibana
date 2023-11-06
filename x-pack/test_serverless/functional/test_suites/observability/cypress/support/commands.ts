@@ -31,8 +31,8 @@ Cypress.Commands.add('loginAsElasticUser', () => {
       method: 'POST',
       url: `${kibanaUrlWithoutAuth}/internal/security/login`,
       body: {
-        providerType: basicProvider.type,
-        providerName: basicProvider.name,
+        providerType: basicProvider?.type,
+        providerName: basicProvider?.name,
         currentURL: `${kibanaUrlWithoutAuth}/login`,
         params: { username, password },
       },

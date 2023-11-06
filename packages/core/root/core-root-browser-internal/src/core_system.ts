@@ -216,17 +216,17 @@ export class CoreSystem {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
       const injectedMetadata = this.injectedMetadata.setup();
+      const analytics = this.analytics.setup({ injectedMetadata });
       const theme = this.theme.setup({ injectedMetadata });
 
       this.fatalErrorsSetup = this.fatalErrors.setup({
         injectedMetadata,
+        analytics,
         theme,
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
       this.docLinks.setup();
-
-      const analytics = this.analytics.setup({ injectedMetadata });
 
       this.registerLoadedKibanaEventType(analytics);
 
@@ -239,7 +239,7 @@ export class CoreSystem {
       this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
-      const notifications = this.notifications.setup({ uiSettings });
+      const notifications = this.notifications.setup({ uiSettings, analytics });
       const customBranding = this.customBranding.setup({ injectedMetadata });
 
       const application = this.application.setup({ http, analytics });
@@ -300,18 +300,26 @@ export class CoreSystem {
 
       const overlays = this.overlay.start({
         i18n,
+        analytics,
         theme,
         uiSettings,
         targetDomElement: overlayTargetDomElement,
       });
-      const notifications = await this.notifications.start({
+      const notifications = this.notifications.start({
+        analytics,
         i18n,
         overlays,
         theme,
         targetDomElement: notificationsTargetDomElement,
       });
       const customBranding = this.customBranding.start();
-      const application = await this.application.start({ http, theme, overlays, customBranding });
+      const application = await this.application.start({
+        http,
+        theme,
+        overlays,
+        customBranding,
+        analytics,
+      });
 
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
@@ -361,6 +369,7 @@ export class CoreSystem {
       this.rendering.start({
         application,
         chrome,
+        analytics,
         i18n,
         overlays,
         theme,

@@ -19,7 +19,8 @@ export interface ResponseError {
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (
-  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>,
+  shouldDelayResponse: () => boolean
 ) => {
   const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
     ['GET', 'PUT', 'DELETE', 'POST'].map(
@@ -28,7 +29,14 @@ const registerHttpRequestMockHelpers = (
   );
 
   const mockMethodImplementation = (method: HttpMethod, path: string) => {
-    return mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+    const responsePromise = mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+    if (shouldDelayResponse()) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(responsePromise), 1000);
+      });
+    }
+
+    return responsePromise;
   };
 
   httpSetup.get.mockImplementation((path) =>
@@ -82,6 +90,18 @@ const registerHttpRequestMockHelpers = (
   const setDeleteDataStreamResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/delete_data_streams`, response, error);
 
+  const setEditDataRetentionResponse = (
+    dataStreamId: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'PUT',
+      `${API_BASE_PATH}/data_streams/${encodeURIComponent(dataStreamId)}/data_retention`,
+      response,
+      error
+    );
+
   const setDeleteTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/delete_index_templates`, response, error);
 
@@ -130,6 +150,50 @@ const registerHttpRequestMockHelpers = (
   const setLoadTelemetryResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', '/api/ui_counters/_report', response, error);
 
+  const setLoadEnrichPoliciesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${INTERNAL_API_BASE_PATH}/enrich_policies`, response, error);
+
+  const setGetMatchingIndices = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse(
+      'POST',
+      `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`,
+      response,
+      error
+    );
+
+  const setGetFieldsFromIndices = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse(
+      'POST',
+      `${INTERNAL_API_BASE_PATH}/enrich_policies/get_fields_from_indices`,
+      response,
+      error
+    );
+
+  const setGetPrivilegesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${INTERNAL_API_BASE_PATH}/enrich_policies/privileges`, response, error);
+
+  const setCreateEnrichPolicy = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/enrich_policies`, response, error);
+
+  const setDeleteEnrichPolicyResponse = (
+    policyName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'DELETE',
+      `${INTERNAL_API_BASE_PATH}/enrich_policies/${policyName}`,
+      response,
+      error
+    );
+
+  const setExecuteEnrichPolicyResponse = (
+    policyName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) =>
+    mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/enrich_policies/${policyName}`, response, error);
+
   const setLoadIndexDetailsResponse = (
     indexName: string,
     response?: HttpResponse,
@@ -147,6 +211,7 @@ const registerHttpRequestMockHelpers = (
     setLoadDataStreamResponse,
     setDeleteDataStreamResponse,
     setDeleteTemplateResponse,
+    setEditDataRetentionResponse,
     setLoadTemplateResponse,
     setCreateTemplateResponse,
     setLoadIndexSettingsResponse,
@@ -157,17 +222,31 @@ const registerHttpRequestMockHelpers = (
     setLoadComponentTemplatesResponse,
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,
+    setLoadEnrichPoliciesResponse,
+    setDeleteEnrichPolicyResponse,
+    setExecuteEnrichPolicyResponse,
     setLoadIndexDetailsResponse,
     setCreateIndexResponse,
+    setGetMatchingIndices,
+    setGetFieldsFromIndices,
+    setGetPrivilegesResponse,
+    setCreateEnrichPolicy,
   };
 };
 
 export const init = () => {
+  let isResponseDelayed = false;
+  const getDelayResponse = () => isResponseDelayed;
+  const setDelayResponse = (shouldDelayResponse: boolean) => {
+    isResponseDelayed = shouldDelayResponse;
+  };
+
   const httpSetup = httpServiceMock.createSetupContract();
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup, getDelayResponse);
 
   return {
     httpSetup,
     httpRequestsMockHelpers,
+    setDelayResponse,
   };
 };

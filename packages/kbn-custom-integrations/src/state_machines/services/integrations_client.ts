@@ -19,6 +19,8 @@ import {
   IntegrationNotInstalledError,
   NamingCollisionError,
   UnknownError,
+  IntegrationName,
+  Dataset,
 } from '../../types';
 
 const GENERIC_CREATE_ERROR_MESSAGE = i18n.translate(
@@ -70,6 +72,7 @@ export class IntegrationsClient implements IIntegrationsClient {
 
       return {
         integrationName: params.integrationName,
+        datasets: params.datasets,
         installedAssets: data.items,
       };
     } catch (error) {
@@ -128,7 +131,8 @@ export const createCustomIntegrationResponseRT = rt.exact(
 );
 
 export interface CreateCustomIntegrationValue {
-  integrationName: string;
+  integrationName: IntegrationName;
+  datasets: Dataset[];
   installedAssets: AssetList;
 }
 

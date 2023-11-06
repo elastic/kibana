@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { Controller, FieldErrors, Control } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHealth,
+  EuiSuperSelectProps,
   EuiSuperSelect,
   EuiText,
   EuiToolTip,
@@ -23,16 +23,17 @@ import { i18n } from '@kbn/i18n';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
-export const PolicyHostsField = ({
-  errors,
-  control,
-  privateLocations,
-}: {
-  errors: FieldErrors;
-  control: Control<PrivateLocation, any>;
-  privateLocations: PrivateLocation[];
-}) => {
+export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
+
+export const PolicyHostsField = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);
+  const {
+    control,
+    formState: { isSubmitted },
+    trigger,
+  } = useFormContext<PrivateLocation>();
+  const { isTouched, error } = control.getFieldState(AGENT_POLICY_FIELD_NAME);
+  const showFieldInvalid = (isSubmitted || isTouched) && !!error;
 
   const policyHostsOptions = data?.map((item) => {
     const hasLocation = privateLocations.find((location) => location.agentPolicyId === item.id);
@@ -91,16 +92,16 @@ export const PolicyHostsField = ({
     <EuiFormRow
       fullWidth
       label={POLICY_HOST_LABEL}
-      helpText={!errors?.agentPolicyId ? SELECT_POLICY_HOSTS_HELP_TEXT : undefined}
-      isInvalid={!!errors?.agentPolicyId}
-      error={SELECT_POLICY_HOSTS}
+      helpText={showFieldInvalid ? SELECT_POLICY_HOSTS_HELP_TEXT : undefined}
+      isInvalid={showFieldInvalid}
+      error={showFieldInvalid ? SELECT_POLICY_HOSTS : undefined}
     >
       <Controller
-        name="agentPolicyId"
+        name={AGENT_POLICY_FIELD_NAME}
         control={control}
         rules={{ required: true }}
         render={({ field }) => (
-          <EuiSuperSelect
+          <SuperSelect
             fullWidth
             aria-label={SELECT_POLICY_HOSTS}
             placeholder={SELECT_POLICY_HOSTS}
@@ -108,9 +109,12 @@ export const PolicyHostsField = ({
             itemLayoutAlign="top"
             popoverProps={{ repositionOnScroll: true }}
             hasDividers
-            isInvalid={!!errors?.agentPolicyId}
+            isInvalid={showFieldInvalid}
             options={policyHostsOptions ?? []}
             {...field}
+            onBlur={async () => {
+              await trigger();
+            }}
           />
         )}
       />
@@ -136,3 +140,11 @@ const SELECT_POLICY_HOSTS_HELP_TEXT = i18n.translate(
 const POLICY_HOST_LABEL = i18n.translate('xpack.synthetics.monitorManagement.policyHost', {
   defaultMessage: 'Agent policy',
 });
+
+export const SuperSelect = React.forwardRef<HTMLSelectElement, EuiSuperSelectProps<string>>(
+  (props, ref) => (
+    <span ref={ref} tabIndex={-1}>
+      <EuiSuperSelect data-test-subj="syntheticsAgentPolicySelect" {...props} />
+    </span>
+  )
+);

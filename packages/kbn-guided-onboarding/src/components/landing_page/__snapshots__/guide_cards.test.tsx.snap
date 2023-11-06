@@ -18,14 +18,20 @@ exports[`guide cards snapshots should render all cards 1`] = `
           activeFilter="all"
           card={
             Object {
-              "icon": "vector",
-              "navigateTo": Object {
-                "appId": "enterpriseSearchVectorSearch",
-              },
+              "guideId": "databaseSearch",
+              "icon": "database",
               "order": 1,
               "solution": "search",
-              "telemetryId": "onboarding--search--vector",
-              "title": "Set up vector search",
+              "telemetryId": "onboarding--search--database",
+              "title": <FormattedMessage
+                defaultMessage="Search across databases {lineBreak} and business systems"
+                id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
+                values={
+                  Object {
+                    "lineBreak": <br />,
+                  }
+                }
+              />,
             }
           }
           guidesState={Array []}
@@ -44,14 +50,14 @@ exports[`guide cards snapshots should render all cards 1`] = `
           activeFilter="all"
           card={
             Object {
-              "icon": "magnifyWithPlus",
+              "icon": "vector",
               "navigateTo": Object {
-                "appId": "enterpriseSearchEsre",
+                "appId": "enterpriseSearchVectorSearch",
               },
               "order": 4,
               "solution": "search",
-              "telemetryId": "onboarding--search--semantic",
-              "title": "Build a semantic search experience",
+              "telemetryId": "onboarding--search--vector",
+              "title": "Set up vector search",
             }
           }
           guidesState={Array []}
@@ -70,9 +76,35 @@ exports[`guide cards snapshots should render all cards 1`] = `
           activeFilter="all"
           card={
             Object {
+              "icon": "magnifyWithPlus",
+              "navigateTo": Object {
+                "appId": "enterpriseSearchAISearch",
+              },
+              "order": 7,
+              "solution": "search",
+              "telemetryId": "onboarding--search--ai",
+              "title": "Build an AI-powered search experience",
+            }
+          }
+          guidesState={Array []}
+          navigateToApp={[MockFunction]}
+        />
+        <EuiSpacer
+          size="m"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        key="3"
+      >
+        <GuideCard
+          activateGuide={[MockFunction]}
+          activeFilter="all"
+          card={
+            Object {
               "guideId": "appSearch",
               "icon": "wrench",
-              "order": 7,
+              "order": 10,
               "solution": "search",
               "telemetryId": "onboarding--search--application",
               "title": <FormattedMessage
@@ -95,7 +127,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
-        key="3"
+        key="4"
       >
         <GuideCard
           activateGuide={[MockFunction]}
@@ -104,42 +136,10 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "guideId": "websiteSearch",
               "icon": "search",
-              "order": 10,
+              "order": 13,
               "solution": "search",
               "telemetryId": "onboarding--search--website",
               "title": "Add search to my website",
-            }
-          }
-          guidesState={Array []}
-          navigateToApp={[MockFunction]}
-        />
-        <EuiSpacer
-          size="m"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        key="4"
-      >
-        <GuideCard
-          activateGuide={[MockFunction]}
-          activeFilter="all"
-          card={
-            Object {
-              "guideId": "databaseSearch",
-              "icon": "database",
-              "order": 13,
-              "solution": "search",
-              "telemetryId": "onboarding--search--database",
-              "title": <FormattedMessage
-                defaultMessage="Search across databases {lineBreak} and business systems"
-                id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-                values={
-                  Object {
-                    "lineBreak": <br />,
-                  }
-                }
-              />,
             }
           }
           guidesState={Array []}
@@ -288,6 +288,33 @@ exports[`guide cards snapshots should render all cards 1`] = `
               "solution": "observability",
               "telemetryId": "onboarding--observability--synthetics",
               "title": "Create a Synthetic Monitor",
+            }
+          }
+          guidesState={Array []}
+          navigateToApp={[MockFunction]}
+        />
+        <EuiSpacer
+          size="m"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        key="5"
+      >
+        <GuideCard
+          activateGuide={[MockFunction]}
+          activeFilter="all"
+          card={
+            Object {
+              "icon": "visBarHorizontal",
+              "navigateTo": Object {
+                "appId": "profiling",
+                "path": "/add-data-instructions",
+              },
+              "order": 15,
+              "solution": "observability",
+              "telemetryId": "onboarding--observability--profiling",
+              "title": "Optimize my workloads with Universal Profiling",
             }
           }
           guidesState={Array []}

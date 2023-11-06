@@ -15,7 +15,6 @@ export async function SecuritySolutionConfigurableCypressTestRunner({
   getService,
 }: FtrProviderContext) {
   const config = getService('config');
-
   return {
     FORCE_COLOR: '1',
     BASE_URL: Url.format(config.get('servers.kibana')),

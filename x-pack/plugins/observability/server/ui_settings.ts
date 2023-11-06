@@ -30,6 +30,10 @@ import {
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
+  profilingUseLegacyFlamegraphAPI,
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPerCoreWatt,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -370,9 +374,81 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.apmEnableProfilingIntegration', {
       defaultMessage: 'Enable Universal Profiling integration in APM',
     }),
-    value: false,
+    value: true,
     schema: schema.boolean(),
     requiresPageReload: false,
+  },
+  [profilingUseLegacyFlamegraphAPI]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingUseLegacyFlamegraphAPI', {
+      defaultMessage: 'Use legacy Flamegraph API in Universal Profiling',
+    }),
+    value: false,
+    schema: schema.boolean(),
+  },
+  [profilingPerCoreWatt]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingPerCoreWattUiSettingName', {
+      defaultMessage: 'Per Core Watts',
+    }),
+    value: 7,
+    description: i18n.translate('xpack.observability.profilingPerCoreWattUiSettingDescription', {
+      defaultMessage: `The average amortized per-core power consumption (based on 100% CPU utilization).`,
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [profilingDatacenterPUE]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingName', {
+      defaultMessage: 'Data Center PUE',
+    }),
+    value: 1.7,
+    description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
+      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the {uptimeLink} survey  
+      </br></br>
+      You can also use the PUE that corresponds with your cloud provider: 
+      <ul style="list-style-type: none;margin-left: 4px;">
+        <li><strong>AWS:</strong> 1.135</li>
+        <li><strong>GCP:</strong> 1.1</li>
+        <li><strong>Azure:</strong> 1.185</li>
+      </ul>
+      `,
+      values: {
+        uptimeLink:
+          '<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate(
+            'xpack.observability.profilingDatacenterPUEUiSettingDescription.uptimeLink',
+            { defaultMessage: 'Uptime Institute' }
+          ) +
+          '</a>',
+      },
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [profilingCo2PerKWH]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingName', {
+      defaultMessage: 'Regional Carbon Intensity (ton/kWh)',
+    }),
+    value: 0.000379069,
+    description: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingDescription', {
+      defaultMessage: `Carbon intensity measures how clean your data center electricity is.  
+      Specifically, it measures the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region.
+      Use the cloud carbon footprint {datasheetLink} to update this value according to your region. Defaults to US East (N. Virginia).`,
+      values: {
+        datasheetLink:
+          '<a href="https://ela.st/grid-datasheet" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate(
+            'xpack.observability.profilingCo2PerKWHUiSettingDescription.datasheetLink',
+            { defaultMessage: 'datasheet' }
+          ) +
+          '</a>',
+      },
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
   },
 };
 

@@ -151,7 +151,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   >();
 
   const {
-    indexPattern,
+    sourcererDataView,
     runtimeMappings,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
@@ -382,7 +382,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       return (
         <AlertsTableComponent
           configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
-          flyoutSize="m"
           inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
           tableId={TableId.alertsOnAlertsPage}
           isLoading={isAlertTableLoading}
@@ -440,7 +439,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              indexPattern={indexPattern}
+              sourcererDataView={sourcererDataView}
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper

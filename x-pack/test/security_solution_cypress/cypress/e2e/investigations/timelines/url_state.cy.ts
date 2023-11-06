@@ -18,16 +18,17 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { getNewRule } from '../../../objects/rule';
 
-import { login, visitWithoutDateRange, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
+describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   let timelineSavedObjectId: string | null = null;
   before(function () {
     cleanKibana();
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
 
     createTimeline(getTimeline()).then((response) => {
       timelineSavedObjectId = response.body.data.persistTimeline.timeline.savedObjectId;
@@ -35,7 +36,7 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
     });
 
     createRule(getNewRule());
-    visit(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 
@@ -46,7 +47,7 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
   describe('open timeline from url exclusively', () => {
     it('should open a timeline via url alone without a saved object id', () => {
       const urlWithoutSavedObjectId = `${ALERTS_URL}?timeline=(activeTab:query,isOpen:!t)`;
-      visitWithoutDateRange(urlWithoutSavedObjectId);
+      visit(urlWithoutSavedObjectId);
       cy.get(TIMELINE_HEADER).should('be.visible');
     });
 
@@ -60,7 +61,7 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
         });
         params.set('timeline', timelineParams);
         const urlWithSavedObjectId = `${ALERTS_URL}?${params.toString()}`;
-        visitWithoutDateRange(urlWithSavedObjectId);
+        visit(urlWithSavedObjectId);
         cy.get(TIMELINE_HEADER).should('be.visible');
       });
     });

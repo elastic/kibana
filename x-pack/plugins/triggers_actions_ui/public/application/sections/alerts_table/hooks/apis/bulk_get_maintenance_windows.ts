@@ -43,6 +43,7 @@ const rewriteMaintenanceWindowRes = ({
   updated_at: updatedAt,
   event_start_time: eventStartTime,
   event_end_time: eventEndTime,
+  category_ids: categoryIds,
   ...rest
 }: AsApiContract<MaintenanceWindow>): MaintenanceWindow => ({
   ...rest,
@@ -54,6 +55,7 @@ const rewriteMaintenanceWindowRes = ({
   updatedAt,
   eventStartTime,
   eventEndTime,
+  categoryIds,
 });
 
 const rewriteErrorRes = ({

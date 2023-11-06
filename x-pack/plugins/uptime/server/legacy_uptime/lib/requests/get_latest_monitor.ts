@@ -6,6 +6,10 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  SUMMARY_FILTER,
+} from '../../../../common/constants/client_defaults';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../../common/runtime_types';
 
@@ -34,7 +38,8 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
     query: {
       bool: {
         filter: [
-          { exists: { field: 'summary' } },
+          SUMMARY_FILTER,
+          EXCLUDE_RUN_ONCE_FILTER,
           {
             range: {
               '@timestamp': {

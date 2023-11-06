@@ -15,8 +15,9 @@ import {
   updateOptionsSchema,
   createResultSchema,
 } from '@kbn/content-management-utils';
+import { MIN_SAVED_SEARCH_SAMPLE_SIZE, MAX_SAVED_SEARCH_SAMPLE_SIZE } from '../../constants';
 
-const sortSchema = schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 });
+const sortSchema = schema.arrayOf(schema.string(), { maxSize: 2 });
 
 const savedSearchAttributesSchema = schema.object(
   {
@@ -60,6 +61,12 @@ const savedSearchAttributesSchema = schema.object(
       })
     ),
     rowsPerPage: schema.maybe(schema.number()),
+    sampleSize: schema.maybe(
+      schema.number({
+        min: MIN_SAVED_SEARCH_SAMPLE_SIZE,
+        max: MAX_SAVED_SEARCH_SAMPLE_SIZE,
+      })
+    ),
     breakdownField: schema.maybe(schema.string()),
     version: schema.maybe(schema.number()),
   },

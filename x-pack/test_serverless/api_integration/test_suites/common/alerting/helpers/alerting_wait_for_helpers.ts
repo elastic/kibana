@@ -17,15 +17,35 @@ import { runRule } from './alerting_api_helper';
 export async function waitForDocumentInIndex({
   esClient,
   indexName,
+  ruleId,
   num = 1,
+  sort = 'desc',
 }: {
   esClient: Client;
   indexName: string;
+  ruleId: string;
   num?: number;
+  sort?: 'asc' | 'desc';
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
-      const response = await esClient.search({ index: indexName });
+      const response = await esClient.search({
+        index: indexName,
+        sort: `date:${sort}`,
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'ruleId.keyword': ruleId,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
       if (response.hits.hits.length < num) {
         throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
       }
@@ -38,11 +58,28 @@ export async function waitForDocumentInIndex({
 export async function getDocumentsInIndex({
   esClient,
   indexName,
+  ruleId,
 }: {
   esClient: Client;
   indexName: string;
+  ruleId: string;
 }): Promise<SearchResponse> {
-  return await esClient.search({ index: indexName });
+  return await esClient.search({
+    index: indexName,
+    body: {
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'ruleId.keyword': ruleId,
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
 }
 
 export async function createIndex({
@@ -74,7 +111,7 @@ export async function waitForAlertInIndex<T>({
   ruleId: string;
   num: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search<T>({
         index: indexName,
@@ -115,7 +152,7 @@ export async function waitForAllTasksIdle({
   esClient: Client;
   filter: Date;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -167,7 +204,7 @@ export async function waitForAllTasks({
   taskType: string;
   attempts: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -225,7 +262,7 @@ export async function waitForDisabled({
   ruleId: string;
   filter: Date;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana_task_manager',
@@ -280,7 +317,7 @@ export async function waitForExecutionEventLog({
   ruleId: string;
   num?: number;
 }): Promise<SearchResponse> {
-  return pRetry(
+  return await pRetry(
     async () => {
       const response = await esClient.search({
         index: '.kibana-event-log*',

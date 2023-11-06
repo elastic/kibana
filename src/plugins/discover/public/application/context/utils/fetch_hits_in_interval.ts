@@ -5,19 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
-import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import {
-  getSearchResponseInterceptedWarnings,
-  type SearchResponseInterceptedWarning,
-} from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
-import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import type { SurrDocType } from '../services/context';
 import type { DiscoverServices } from '../../../build_services';
 
@@ -40,7 +36,7 @@ export async function fetchHitsInInterval(
   sort: [EsQuerySortValue, EsQuerySortValue],
   sortDir: SortDirection,
   interval: IntervalValue[],
-  searchAfter: EsQuerySearchAfter,
+  searchAfter: estypes.SortResults,
   maxCount: number,
   nanosValue: string,
   anchorId: string,
@@ -48,7 +44,7 @@ export async function fetchHitsInInterval(
   services: DiscoverServices
 ): Promise<{
   rows: DataTableRecord[];
-  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+  interceptedWarnings: SearchResponseWarning[];
 }> {
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
@@ -91,7 +87,7 @@ export async function fetchHitsInInterval(
     .setField('sort', sort)
     .setField('version', true)
     .fetch$({
-      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      disableWarningToasts: true,
       inspector: {
         adapter,
         title: type,
@@ -101,15 +97,14 @@ export async function fetchHitsInInterval(
   const { rawResponse } = await lastValueFrom(fetch$);
   const dataView = searchSource.getField('index');
   const rows = rawResponse.hits?.hits.map((hit) => buildDataTableRecord(hit, dataView!));
+  const interceptedWarnings: SearchResponseWarning[] = [];
+  services.data.search.showWarnings(adapter, (warning) => {
+    interceptedWarnings.push(warning);
+    return true; // suppress the default behaviour
+  });
 
   return {
     rows: rows ?? [],
-    interceptedWarnings: getSearchResponseInterceptedWarnings({
-      services,
-      adapter,
-      options: {
-        disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
-      },
-    }),
+    interceptedWarnings,
   };
 }

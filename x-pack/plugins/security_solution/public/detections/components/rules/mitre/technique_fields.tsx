@@ -23,7 +23,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
-import type { MitreSubtechniquesOptions, MitreTechniquesOptions } from '../../../mitre/types';
+import type { MitreTechnique, MitreSubTechnique } from '../../../mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -37,7 +37,7 @@ const lazyMitreConfiguration = () => {
 };
 
 const hasSubtechniqueOptions = (
-  subtechniquesOptions: MitreSubtechniquesOptions[],
+  subtechniquesOptions: MitreSubTechnique[],
   technique: ThreatTechnique
 ) => subtechniquesOptions.some((subtechnique) => subtechnique.techniqueId === technique.id);
 
@@ -66,14 +66,14 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
 }): JSX.Element => {
   const values = field.value as Threats;
 
-  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechniquesOptions[]>([]);
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>([]);
+  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
+  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
-      setTechniquesOptions(mitreConfig.techniquesOptions);
-      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
+      setTechniquesOptions(mitreConfig.techniques);
+      setSubtechniquesOptions(mitreConfig.subtechniques);
     }
     getMitre();
   }, []);

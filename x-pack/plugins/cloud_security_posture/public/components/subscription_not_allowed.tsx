@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPageSection, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiEmptyPrompt, EuiPageSection } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SubscriptionLink } from '@kbn/subscription-tracking';
+import type { SubscriptionContextData } from '@kbn/subscription-tracking';
+
+const subscriptionContext: SubscriptionContextData = {
+  feature: 'cloud-security-posture',
+  source: 'security__cloud-security-posture',
+};
 
 export const SubscriptionNotAllowed = ({
   licenseManagementLocator,
@@ -34,12 +41,12 @@ export const SubscriptionNotAllowed = ({
                 defaultMessage="To use these cloud security features, you must {link}."
                 values={{
                   link: (
-                    <EuiLink href={licenseManagementLocator}>
+                    <SubscriptionLink subscriptionContext={subscriptionContext}>
                       <FormattedMessage
                         id="xpack.csp.subscriptionNotAllowed.promptLinkText"
                         defaultMessage="start a trial or upgrade your subscription"
                       />
-                    </EuiLink>
+                    </SubscriptionLink>
                   ),
                 }}
               />

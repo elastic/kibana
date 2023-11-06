@@ -33,6 +33,11 @@ describe('sql query helpers', () => {
       expect(flag).toBe(false);
     });
 
+    it('should return false for an undefined query', () => {
+      const flag = isOfAggregateQueryType(undefined);
+      expect(flag).toBe(false);
+    });
+
     it('should return true for an Aggregate type query', () => {
       const flag = isOfAggregateQueryType({ sql: 'SELECT * FROM foo' });
       expect(flag).toBe(true);
@@ -96,6 +101,18 @@ describe('sql query helpers', () => {
 
       const idxPattern5 = getIndexPatternFromESQLQuery('from foo | limit 2');
       expect(idxPattern5).toBe('foo');
+
+      const idxPattern6 = getIndexPatternFromESQLQuery('from foo-1,foo-2 | limit 2');
+      expect(idxPattern6).toBe('foo-1,foo-2');
+
+      const idxPattern7 = getIndexPatternFromESQLQuery('from foo-1, foo-2 | limit 2');
+      expect(idxPattern7).toBe('foo-1, foo-2');
+
+      const idxPattern8 = getIndexPatternFromESQLQuery('FROM foo-1,  foo-2');
+      expect(idxPattern8).toBe('foo-1,  foo-2');
+
+      const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 [metadata _id]');
+      expect(idxPattern9).toBe('foo-1, foo-2');
     });
   });
 });

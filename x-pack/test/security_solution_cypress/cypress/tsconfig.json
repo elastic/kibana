@@ -37,6 +37,9 @@
     "@kbn/config-schema",
     "@kbn/lists-plugin",
     "@kbn/securitysolution-list-constants",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/es-query",
+    "@kbn/ml-plugin"
   ]
 }

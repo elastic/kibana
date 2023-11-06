@@ -6,9 +6,15 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-server';
-import { ALL_VALUE, CreateSLOParams, HistogramIndicator, sloSchema } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  CreateSLOParams,
+  HistogramIndicator,
+  sloSchema,
+  TimesliceMetricIndicator,
+} from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -90,6 +96,25 @@ export const createMetricCustomIndicator = (
   },
 });
 
+export const createTimesliceMetricIndicator = (
+  metrics: TimesliceMetricIndicator['params']['metric']['metrics'] = [],
+  equation: TimesliceMetricIndicator['params']['metric']['equation'] = '',
+  queryFilter = ''
+): TimesliceMetricIndicator => ({
+  type: 'sli.metric.timeslice',
+  params: {
+    index: 'test-*',
+    timestampField: '@timestamp',
+    filter: queryFilter,
+    metric: {
+      metrics,
+      equation,
+      threshold: 100,
+      comparator: 'GTE',
+    },
+  },
+});
+
 export const createHistogramIndicator = (
   params: Partial<HistogramIndicator['params']> = {}
 ): HistogramIndicator => ({
@@ -161,7 +186,7 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
   const now = new Date();
   return cloneDeep({
     ...defaultSLO,
-    id: uuidv1(),
+    id: uuidv4(),
     revision: 1,
     createdAt: now,
     updatedAt: now,

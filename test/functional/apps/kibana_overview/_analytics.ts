@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    const apps = ['dashboard', 'discover', 'canvas', 'maps', 'ml'];
+    const apps = ['dashboards', 'discover', 'canvas', 'maps', 'ml'];
 
     it('should display Analytics apps cards', async () => {
       const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');

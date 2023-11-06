@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { SAVED_QUERY_ID } from '../../../public/saved_queries/constants';
-import { navigateTo } from '../../tasks/navigation';
+import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
   checkResults,
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { getSavedQueriesDropdown, LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import {
   cleanupPack,
   cleanupSavedQuery,
@@ -25,7 +24,7 @@ import type { ServerlessRoleName } from '../../support/roles';
 
 describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
   ['t1_analyst', 't2_analyst'].forEach((role: string) => {
-    describe(`${role}- READ + runSavedQueries `, { tags: ['@ess', '@serverless'] }, () => {
+    describe(`${role}- READ + runSavedQueries `, () => {
       let savedQueryName: string;
       let savedQueryId: string;
       let packName: string;
@@ -56,15 +55,12 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('should be able to run saved queries but not add new ones', () => {
-        navigateTo('/app/osquery/saved_queries');
-        cy.waitForReact(1000);
+        navigateToWithoutWaitForReact('/app/osquery/saved_queries');
         cy.contains(savedQueryName);
         cy.contains('Add saved query').should('be.disabled');
-        cy.react('PlayButtonComponent', {
-          props: { savedQuery: { id: savedQueryName } },
-        })
-          .should('not.be.disabled')
-          .click();
+        cy.get(`[aria-label="Run ${savedQueryName}"]`).should('not.be.disabled');
+        cy.get(`[aria-label="Run ${savedQueryName}"]`).click();
+
         selectAllAgents();
         cy.contains('select * from uptime;');
         submitQuery();
@@ -78,55 +74,42 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('should be able to play in live queries history', () => {
-        navigateTo('/app/osquery/live_queries');
-        cy.waitForReact(1000);
+        navigateToWithoutWaitForReact('/app/osquery/live_queries');
         cy.contains('New live query').should('not.be.disabled');
         cy.contains(liveQueryQuery);
-        cy.wait(1000);
-        cy.react('EuiTableBody').first().react('CustomItemAction').first().click();
+        cy.get(`[aria-label="Run query"]`).first().should('not.be.disabled');
+        cy.get(`[aria-label="Run query"]`).first().click();
         cy.contains(savedQueryName);
         submitQuery();
         checkResults();
       });
 
       it('should be able to use saved query in a new query', () => {
-        navigateTo('/app/osquery/live_queries');
-        cy.waitForReact(1000);
+        navigateToWithoutWaitForReact('/app/osquery/live_queries');
         cy.contains('New live query').should('not.be.disabled').click();
         selectAllAgents();
-        getSavedQueriesDropdown().type(`${savedQueryName}{downArrow} {enter}`);
+        cy.getBySel('savedQuerySelect').type(`${savedQueryName}{downArrow} {enter}`);
         cy.contains('select * from uptime');
         submitQuery();
         checkResults();
       });
 
       it('should not be able to add nor edit packs', () => {
-        navigateTo('/app/osquery/packs');
-        cy.waitForReact(1000);
+        navigateToWithoutWaitForReact('/app/osquery/packs');
         cy.getBySel('tablePaginationPopoverButton').click();
         cy.getBySel('tablePagination-50-rows').click();
         cy.contains('Add pack').should('be.disabled');
-        cy.react('ActiveStateSwitchComponent', {
-          props: { item: { name: packName } },
-        })
-          .find('button')
-          .should('be.disabled');
+        cy.get(`[aria-label="${packName}"]`).should('be.disabled');
+
         cy.contains(packName).click();
         cy.contains(`${packName} details`);
         cy.contains('Edit').should('be.disabled');
-        // TODO: fix it
-        cy.react('CustomItemAction', {
-          props: { index: 0, item: { id: SAVED_QUERY_ID } },
-          options: { timeout: 3000 },
-        }).should('not.exist');
-        cy.react('CustomItemAction', {
-          props: { index: 1, item: { id: SAVED_QUERY_ID } },
-          options: { timeout: 3000 },
-        }).should('not.exist');
+        cy.get(`[aria-label="Run ${savedQueryId}"]`).should('not.exist');
+        cy.get(`[aria-label="Edit ${savedQueryId}"]`).should('not.exist');
       });
 
       it('should not be able to create new liveQuery from scratch', () => {
-        navigateTo('/app/osquery');
+        navigateToWithoutWaitForReact('/app/osquery');
 
         cy.contains('New live query').click();
         selectAllAgents();

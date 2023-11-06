@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const memoryUsage: FormulaValueConfig = {
-  label: 'Memory Usage',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.memoryUsage', {
+    defaultMessage: 'Memory Usage',
+  }),
   value: 'average(system.memory.actual.used.pct)',
   format: {
     id: 'percent',

@@ -55,7 +55,8 @@ describe('FieldInput', () => {
         },
         options,
       } as FieldDefinition<typeof type>,
-      onChange: jest.fn(),
+      onInputChange: jest.fn(),
+      isSavingEnabled: true,
     };
 
     return props;
@@ -131,12 +132,12 @@ describe('FieldInput', () => {
     const { getByTestId } = render(wrap(<FieldInput {...props} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${name}`);
     fireEvent.change(input, { target: { value: 'new value' } });
-    expect(props.onChange).toHaveBeenCalledWith({ value: 'new value' });
+    expect(props.onInputChange).toHaveBeenCalledWith({ type: 'string', unsavedValue: 'new value' });
   });
 
   it('disables the input when isDisabled prop is true', () => {
     const props = getDefaultProps('string');
-    const { getByTestId } = render(wrap(<FieldInput {...props} isDisabled />));
+    const { getByTestId } = render(wrap(<FieldInput {...props} isSavingEnabled={false} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${name}`);
     expect(input).toBeDisabled();
   });
@@ -190,7 +191,7 @@ describe('FieldInput', () => {
         ...defaultProps.field,
         type: 'foobar',
       },
-    } as unknown as FieldInputProps<'string'>;
+    } as unknown as FieldInputProps;
 
     expect(() => render(wrap(<FieldInput {...props} />))).toThrowError(
       'Unknown or incompatible field type: foobar'

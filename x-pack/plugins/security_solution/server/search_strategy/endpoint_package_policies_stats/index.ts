@@ -42,7 +42,10 @@ export const requestEndpointPackagePoliciesStatsSearch = async (
   });
 
   const outdatedManifestsCount = rawResponse.items.reduce((acc, item) => {
-    const endpointInput = item.inputs[0];
+    const endpointInput = item.inputs.find((input) => input.type === 'endpoint');
+    if (!endpointInput) {
+      return acc;
+    }
     const manifestVersion = endpointInput.config?.policy?.value?.global_manifest_version;
     if (!manifestVersion) {
       return acc;
@@ -50,7 +53,7 @@ export const requestEndpointPackagePoliciesStatsSearch = async (
     if (manifestVersion === 'latest') {
       return acc;
     }
-    if (moment(manifestVersion, 'YYYY-MM-DD').isBefore(moment().subtract(1, 'month'))) {
+    if (moment.utc(manifestVersion, 'YYYY-MM-DD').isBefore(moment.utc().subtract(1, 'month'))) {
       return acc + 1;
     }
 

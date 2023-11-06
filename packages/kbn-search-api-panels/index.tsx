@@ -37,50 +37,57 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
   image,
   showDescription = true,
 }) => (
-  <EuiFlexGroup justifyContent="spaceBetween">
-    <EuiFlexItem grow={false}>
-      {/* Reversing column direction here so screenreaders keep h1 as the first element */}
-      <EuiFlexGroup justifyContent="flexStart" direction="columnReverse" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiTitle className="serverlessSearchHeaderTitle" size="s">
-            <h1>
-              {i18n.translate('searchApiPanels.welcomeBanner.header.title', {
-                defaultMessage: 'Get started with Elasticsearch',
-              })}
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        {Boolean(user) && (
+  <>
+    <EuiSpacer size="xxl" />
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem grow={2}>
+        {/* Reversing column direction here so screenreaders keep h1 as the first element */}
+        <EuiFlexGroup justifyContent="flexStart" direction="columnReverse" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xxxs">
-              <h2>
-                {user
-                  ? i18n.translate('searchApiPanels.welcomeBanner.header.greeting.customTitle', {
-                      defaultMessage: 'Hi {name}!',
-                      values: { name: user.full_name || user.username },
-                    })
-                  : i18n.translate('searchApiPanels.welcomeBanner.header.greeting.defaultTitle', {
-                      defaultMessage: 'Hi!',
-                    })}
-              </h2>
+            <EuiTitle size="l">
+              <h1>
+                {i18n.translate('searchApiPanels.welcomeBanner.header.title', {
+                  defaultMessage: 'Get started with Elasticsearch',
+                })}
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
+          {Boolean(user) && (
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <h4>
+                  {user
+                    ? i18n.translate('searchApiPanels.welcomeBanner.header.greeting.customTitle', {
+                        defaultMessage: 'Hi {name}!',
+                        values: { name: user.full_name || user.username },
+                      })
+                    : i18n.translate('searchApiPanels.welcomeBanner.header.greeting.defaultTitle', {
+                        defaultMessage: 'Hi!',
+                      })}
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer />
+        {showDescription && (
+          <EuiText>
+            {i18n.translate('searchApiPanels.welcomeBanner.header.description', {
+              defaultMessage:
+                "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
+            })}
+          </EuiText>
         )}
-      </EuiFlexGroup>
-      <EuiSpacer />
-      {showDescription && (
-        <EuiText>
-          {i18n.translate('searchApiPanels.welcomeBanner.header.description', {
-            defaultMessage:
-              "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
-          })}
-        </EuiText>
-      )}
-      <EuiSpacer size="xxl" />
-    </EuiFlexItem>
+      </EuiFlexItem>
 
-    <EuiFlexItem grow={false}>
-      <EuiImage alt="" src={image ? image : `${assetBasePath}serverless_header.png`} size="554px" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <EuiImage
+          alt=""
+          src={image ? image : `${assetBasePath}/serverless_header.png`}
+          size="original"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="xxl" />
+  </>
 );

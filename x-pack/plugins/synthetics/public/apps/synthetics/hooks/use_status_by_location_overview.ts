@@ -9,7 +9,13 @@ import { useSelector } from 'react-redux';
 import { OverviewStatusState } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';
 
-export function useStatusByLocationOverview(configId: string, locationId: string) {
+export function useStatusByLocationOverview({
+  configId,
+  locationId,
+}: {
+  configId: string;
+  locationId: string;
+}) {
   const { status } = useSelector(selectOverviewStatus);
 
   return getConfigStatusByLocation(status, configId, locationId);

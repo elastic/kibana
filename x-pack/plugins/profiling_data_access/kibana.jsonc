@@ -7,8 +7,10 @@
     "server": true,
     "browser": false,
     "configPath": ["xpack", "profiling"],
-    "requiredPlugins": ["data"],
-    "optionalPlugins": [],
+    "requiredPlugins": [
+      "data", 
+    ],
+    "optionalPlugins": ["cloud",  "fleet"],
     "requiredBundles": []
   }
 }

@@ -83,6 +83,7 @@ import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
 import { DocumentationPage } from './documentation';
+import { Configs } from './configs';
 
 import './index.scss';
 
@@ -92,7 +93,8 @@ export type DetailViewPanelName =
   | 'assets'
   | 'settings'
   | 'custom'
-  | 'api-reference';
+  | 'api-reference'
+  | 'configs';
 
 export interface DetailParams {
   pkgkey: string;
@@ -166,7 +168,6 @@ export function Detail() {
     }
     return getPackageInstallStatus(packageInfo?.name)?.status;
   }, [packageInfo, getPackageInstallStatus]);
-
   const isInstalled = useMemo(
     () =>
       packageInstallStatus === InstallStatus.installed ||
@@ -184,7 +185,7 @@ export function Detail() {
     boolean | undefined
   >();
 
-  const { data: settings } = useGetSettingsQuery();
+  const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery();
 
   useEffect(() => {
     const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled) || prerelease;
@@ -197,10 +198,19 @@ export function Detail() {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
+    isFetchedAfterMount: packageInfoIsFetchedAfterMount,
     refetch: refetchPackageInfo,
-  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, {
-    prerelease: prereleaseIntegrationsEnabled,
-  });
+  } = useGetPackageInfoByKeyQuery(
+    pkgName,
+    pkgVersion,
+    {
+      prerelease: prereleaseIntegrationsEnabled,
+    },
+    {
+      enabled: !isSettingsInitialLoading, // Load only after settings are loaded
+      refetchOnMount: 'always',
+    }
+  );
 
   const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
   const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
@@ -244,14 +254,18 @@ export function Detail() {
     }
   }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
-  const isLoading = packageInfoLoading || isPermissionCheckLoading || firstTimeUserLoading;
+  const isLoading =
+    packageInfoLoading ||
+    isPermissionCheckLoading ||
+    firstTimeUserLoading ||
+    !packageInfoIsFetchedAfterMount;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
-    if (packageInfoData?.item) {
+    if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
       const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
 
@@ -265,7 +279,7 @@ export function Detail() {
         setPackageInstallStatus({ name, status, version: installedVersion || null });
       }
     }
-  }, [packageInfoData, setPackageInstallStatus, setPackageInfo]);
+  }, [packageInfoData, packageInfoIsFetchedAfterMount, setPackageInstallStatus, setPackageInfo]);
 
   const integrationInfo = useMemo(
     () =>
@@ -293,7 +307,7 @@ export function Detail() {
 
   const headerLeftContent = useMemo(
     () => (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="headerLeft">
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
@@ -625,6 +639,24 @@ export function Detail() {
       });
     }
 
+    if (canReadPackageSettings) {
+      tabs.push({
+        id: 'configs',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.configsText"
+            defaultMessage="Configs"
+          />
+        ),
+        isSelected: panel === 'configs',
+        'data-test-subj': `tab-configs`,
+        href: getHref('integration_details_configs', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
+
     if (canReadPackageSettings && showCustomTab) {
       tabs.push({
         id: 'custom',
@@ -745,6 +777,9 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
+            <Configs packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
             <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />

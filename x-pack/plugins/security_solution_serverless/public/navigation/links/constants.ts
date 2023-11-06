@@ -13,7 +13,6 @@ export const SecurityPagePath = {
   [SecurityPageName.mlLanding]: '/ml',
   [SecurityPageName.assets]: '/assets',
   [SecurityPageName.cloudDefend]: '/cloud_defend',
-  [SecurityPageName.projectSettings]: '/project_settings',
 } as const;
 
 /**
@@ -30,6 +29,8 @@ export const SecurityPagePath = {
  * The path should not be used for links displayed in the main left navigation, since highlighting won't work.
  **/
 export enum ExternalPageName {
+  // Discover
+  discover = 'discover:',
   // Osquery
   osquery = 'osquery:',
   // Analytics
@@ -39,6 +40,7 @@ export enum ExternalPageName {
   // Ref: packages/default-nav/ml/default_navigation.ts
   mlOverview = 'ml:overview',
   mlNotifications = 'ml:notifications',
+  mlMemoryUsage = 'ml:memoryUsage',
   mlAnomalyDetection = 'ml:anomalyDetection',
   mlAnomalyExplorer = 'ml:anomalyExplorer',
   mlSingleMetricViewer = 'ml:singleMetricViewer',
@@ -50,7 +52,8 @@ export enum ExternalPageName {
   mlNodes = 'ml:nodes',
   mlFileUpload = 'ml:fileUpload',
   mlIndexDataVisualizer = 'ml:indexDataVisualizer',
-  mlExplainLogRateSpikes = 'ml:explainLogRateSpikes',
+  mlDataDrift = 'ml:dataDrift',
+  mlExplainLogRateSpikes = 'ml:logRateAnalysis',
   mlLogPatternAnalysis = 'ml:logPatternAnalysis',
   mlChangePointDetections = 'ml:changePointDetections',
   // Dev Tools
@@ -70,6 +73,7 @@ export enum ExternalPageName {
   integrationsSecurity = 'integrations:/browse/security',
   // Management
   // Ref: packages/default-nav/management/default_navigation.ts
+  management = 'management:',
   managementIngestPipelines = 'management:ingest_pipelines',
   managementPipelines = 'management:pipelines',
   managementIndexManagement = 'management:index_management',
@@ -93,4 +97,5 @@ export enum ExternalPageName {
   // cloudUrlKey Ref: x-pack/plugins/security_solution_serverless/public/navigation/links/util.ts
   cloudUsersAndRoles = 'cloud:usersAndRoles',
   cloudBilling = 'cloud:billing',
+  cloudPerformance = 'cloud:performance',
 }

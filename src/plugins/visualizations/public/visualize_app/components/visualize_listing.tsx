@@ -93,7 +93,7 @@ type CustomTableViewProps = Pick<
   | 'editItem'
   | 'contentEditor'
   | 'emptyPrompt'
-  | 'showEditActionForItem'
+  | 'itemIsEditable'
 >;
 
 const useTableListViewProps = (
@@ -257,8 +257,7 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    showEditActionForItem: ({ attributes: { readOnly } }) =>
-      visualizeCapabilities.save && !readOnly,
+    itemIsEditable: ({ attributes: { readOnly } }) => visualizeCapabilities.save && !readOnly,
   };
 
   return props;

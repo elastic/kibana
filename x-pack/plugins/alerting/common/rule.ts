@@ -10,7 +10,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import type { Filter, KueryNode } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { IsoWeekday } from './iso_weekdays';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
@@ -118,28 +118,6 @@ export interface RuleAction {
   alertsFilter?: AlertsFilter;
 }
 
-export interface AggregateOptions {
-  search?: string;
-  defaultSearchOperator?: 'AND' | 'OR';
-  searchFields?: string[];
-  hasReference?: {
-    type: string;
-    id: string;
-  };
-  filter?: string | KueryNode;
-  page?: number;
-  perPage?: number;
-}
-
-export interface RuleAggregationFormattedResult {
-  ruleExecutionStatus: { [status: string]: number };
-  ruleLastRunOutcome: { [status: string]: number };
-  ruleEnabledStatus: { enabled: number; disabled: number };
-  ruleMutedStatus: { muted: number; unmuted: number };
-  ruleSnoozedStatus: { snoozed: number };
-  ruleTags: string[];
-}
-
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
   outcomeOrder?: number;
@@ -213,7 +191,10 @@ export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
 > & { actions: SanitizedRuleAction[] };
 
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
-  Omit<SavedObjectsResolveResponse, 'saved_object'>;
+  Omit<SavedObjectsResolveResponse, 'saved_object'> & {
+    outcome: string;
+    alias_target_id?: string;
+  };
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,

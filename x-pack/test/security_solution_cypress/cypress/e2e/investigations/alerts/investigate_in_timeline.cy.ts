@@ -14,7 +14,8 @@ import { expandFirstAlert, investigateFirstAlertInTimeline } from '../../../task
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 import {
@@ -27,80 +28,76 @@ import {
 } from '../../../screens/alerts_details';
 import { verifyInsightCount } from '../../../tasks/alerts_details';
 
-describe(
-  'Investigate in timeline',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
-  () => {
-    before(() => {
-      cleanKibana();
-      createRule(getNewRule());
+describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    cleanKibana();
+    createRule(getNewRule());
+  });
+
+  describe('From alerts table', () => {
+    beforeEach(() => {
+      login();
+      visitWithTimeRange(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
-    describe('From alerts table', () => {
-      beforeEach(() => {
-        login();
-        visit(ALERTS_URL);
-        waitForAlertsToPopulate();
-      });
-
-      it('should open new timeline from alerts table', () => {
-        investigateFirstAlertInTimeline();
-        cy.get(PROVIDER_BADGE)
-          .first()
-          .invoke('text')
-          .then((eventId) => {
-            cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', eventId);
-          });
-      });
-    });
-
-    describe('From alerts details flyout', () => {
-      beforeEach(() => {
-        login();
-        disableExpandableFlyout();
-        visit(ALERTS_URL);
-        waitForAlertsToPopulate();
-        expandFirstAlert();
-      });
-
-      it('should open a new timeline from a prevalence field', () => {
-        // Only one alert matches the exact process args in this case
-        const alertCount = 1;
-
-        // Click on the last button that lets us investigate in timeline.
-        // We expect this to be the `process.args` row.
-        cy.get(ALERT_FLYOUT)
-          .find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON)
-          .last()
-          .should('have.text', alertCount)
-          .click();
-
-        // Make sure a new timeline is created and opened
-        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
-
-        // The alert count in this timeline should match the count shown on the alert flyout
-        cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
-
-        // The correct filter is applied to the timeline query
-        cy.get(FILTER_BADGE).should(
-          'have.text',
-          ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}'
-        );
-      });
-
-      it('should open a new timeline from an insights module', () => {
-        verifyInsightCount({
-          tableSelector: INSIGHTS_RELATED_ALERTS_BY_SESSION,
-          investigateSelector: INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON,
+    it('should open new timeline from alerts table', () => {
+      investigateFirstAlertInTimeline();
+      cy.get(PROVIDER_BADGE)
+        .first()
+        .invoke('text')
+        .then((eventId) => {
+          cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', eventId);
         });
-      });
+    });
+  });
 
-      it('should open a new timeline with alert ids from the process ancestry', () => {
-        verifyInsightCount({
-          tableSelector: INSIGHTS_RELATED_ALERTS_BY_ANCESTRY,
-          investigateSelector: INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON,
-        });
+  describe('From alerts details flyout', () => {
+    beforeEach(() => {
+      login();
+      disableExpandableFlyout();
+      visitWithTimeRange(ALERTS_URL);
+      waitForAlertsToPopulate();
+      expandFirstAlert();
+    });
+
+    it('should open a new timeline from a prevalence field', () => {
+      // Only one alert matches the exact process args in this case
+      const alertCount = 1;
+
+      // Click on the last button that lets us investigate in timeline.
+      // We expect this to be the `process.args` row.
+      cy.get(ALERT_FLYOUT)
+        .find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON)
+        .last()
+        .should('have.text', alertCount)
+        .click();
+
+      // Make sure a new timeline is created and opened
+      cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
+
+      // The alert count in this timeline should match the count shown on the alert flyout
+      cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
+
+      // The correct filter is applied to the timeline query
+      cy.get(FILTER_BADGE).should(
+        'have.text',
+        ' {"bool":{"must":[{"term":{"process.args":"-zsh"}},{"term":{"process.args":"unique"}}]}}'
+      );
+    });
+
+    it('should open a new timeline from an insights module', () => {
+      verifyInsightCount({
+        tableSelector: INSIGHTS_RELATED_ALERTS_BY_SESSION,
+        investigateSelector: INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON,
       });
     });
-  }
-);
+
+    it('should open a new timeline with alert ids from the process ancestry', () => {
+      verifyInsightCount({
+        tableSelector: INSIGHTS_RELATED_ALERTS_BY_ANCESTRY,
+        investigateSelector: INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON,
+      });
+    });
+  });
+});

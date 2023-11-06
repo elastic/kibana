@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { stringHash } from '@kbn/ml-string-hash';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AssetDetailsProvider({ getService }: FtrProviderContext) {
@@ -44,6 +45,13 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const container = await testSubjects.find('infraAssetDetailsNginxMetricsChartGrid');
       return container.findAllByCssSelector(
         '[data-test-subj*="infraAssetDetailsNginxMetricsChart"]'
+      );
+    },
+
+    async getAssetDetailsKubernetesMetricsCharts() {
+      const container = await testSubjects.find('infraAssetDetailsKubernetesMetricsChartGrid');
+      return container.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsKubernetesMetricsChart"]'
       );
     },
 
@@ -94,7 +102,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async getMetadataAppliedFilter() {
       const filter = await testSubjects.find(
-        "filter-badge-'host.architecture: arm64' filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0"
+        `filter-badge-${stringHash(
+          'host.architecture: arm64'
+        )} filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0`
       );
       return filter.getVisibleText();
     },
@@ -172,6 +182,11 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     // Osquery
     async clickOsqueryTab() {
       return testSubjects.click('infraAssetDetailsOsqueryTab');
+    },
+
+    // APM Tab link
+    async clickApmTabLink() {
+      return testSubjects.click('infraAssetDetailsApmServicesLinkTab');
     },
   };
 }

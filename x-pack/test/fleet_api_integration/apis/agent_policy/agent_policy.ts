@@ -513,6 +513,14 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
+        await supertest
+          .post(`/api/fleet/epm/packages/endpoint/8.10.2`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            force: true,
+          })
+          .expect(200);
+
         // add endpoint package policy, which is required for tamper protection
         await supertest
           .post(`/api/fleet/package_policies`)

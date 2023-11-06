@@ -7,7 +7,7 @@ paths:
     summary: Exports rules to an `.ndjson` file
     post:
       operationId: ExportRules
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       summary: Export rules
       description: Exports rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file - Actions, Exception lists. Prebuilt rules cannot be exported.
       tags:
@@ -35,6 +35,7 @@ paths:
               type: object
               required:
                 - objects
+              nullable: true
               properties:
                 objects:
                   type: array
@@ -44,13 +45,13 @@ paths:
                       - rule_id
                     properties:
                       rule_id:
-                        type: string
+                        $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
                   description: Array of `rule_id` fields. Exports all rules when unspecified.
       responses:
         200:
           description: Indicates a successful call.
           content:
-            application/json:
+            application/ndjson:
               schema:
                 type: string
                 format: binary

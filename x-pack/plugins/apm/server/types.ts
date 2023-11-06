@@ -54,7 +54,7 @@ import {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
 } from '@kbn/fleet-plugin/server';
-import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 
 import {
@@ -79,7 +79,7 @@ export interface APMPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  infra?: InfraPluginSetup;
+  metricsDataAccess: MetricsDataPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
 
@@ -105,7 +105,7 @@ export interface APMPluginStartDependencies {
   licensing: LicensingPluginStart;
   observability: undefined;
   ruleRegistry: RuleRegistryPluginStartContract;
-  infra: InfraPluginStart;
+  metricsDataAccess: MetricsDataPluginSetup;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
 

@@ -30,6 +30,7 @@ export function fetchTextBased(
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
   inspectorAdapters: Adapters,
+  abortSignal?: AbortSignal,
   filters?: Filter[],
   inputQuery?: Query
 ): Promise<RecordsFetchResponse> {
@@ -43,9 +44,11 @@ export function fetchTextBased(
   })
     .then((ast) => {
       if (ast) {
-        const execution = expressions.run(ast, null, {
+        const contract = expressions.execute(ast, null, {
           inspectorAdapters,
         });
+        abortSignal?.addEventListener('abort', contract.cancel);
+        const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
         let textBasedQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;

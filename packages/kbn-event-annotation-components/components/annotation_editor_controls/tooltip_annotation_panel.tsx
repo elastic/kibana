@@ -9,7 +9,8 @@
 import { htmlIdGenerator, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
-import { useExistingFieldsReader, getFieldIconType } from '@kbn/unified-field-list';
+import { getFieldIconType } from '@kbn/field-utils';
+import { useExistingFieldsReader } from '@kbn/unified-field-list';
 import {
   FieldOption,
   FieldOptionValue,
@@ -181,6 +182,7 @@ export function TooltipSection({
               data-test-subj={`lnsXY-annotation-tooltip-${index}`}
             >
               <FieldPicker
+                compressed
                 selectedOptions={
                   value
                     ? [

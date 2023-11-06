@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(status).to.be(200);
-        expect(body.validIndices.length).to.be.greaterThan(0);
+        expect(body.validIndices?.length).to.be.greaterThan(0);
         expect(body.invalidIndices).to.eql([]);
       });
     });
@@ -102,7 +102,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(status).to.be(200);
-        expect(body.validIndices.length).to.be.greaterThan(0);
+        expect(body.validIndices?.length).to.be.greaterThan(0);
         expect(body.invalidIndices).to.eql([
           {
             isValid: false,
@@ -158,10 +158,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           expect(status).to.be(200);
-          expect(body.validIndices.length).to.be.greaterThan(0);
-          expect(body.invalidIndices.length).to.be(1);
+          expect(body.validIndices?.length).to.be.greaterThan(0);
+          expect(body.invalidIndices?.length).to.be(1);
 
-          expect(omit(body.invalidIndices[0], 'index')).to.eql({
+          expect(omit(body.invalidIndices?.[0], 'index')).to.eql({
             isValid: false,
             fieldMappings: { isValid: true },
             ingestPipeline: { isValid: false },
@@ -187,9 +187,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           expect(status).to.be(200);
-          expect(body.validIndices.length).to.be.greaterThan(0);
-          expect(body.invalidIndices.length).to.be(1);
-          expect(omit(body.invalidIndices[0], 'index')).to.eql({
+          expect(body.validIndices?.length).to.be.greaterThan(0);
+          expect(body.invalidIndices?.length).to.be(1);
+          expect(omit(body.invalidIndices?.[0], 'index')).to.eql({
             isValid: false,
             fieldMappings: { isValid: true },
             ingestPipeline: { isValid: false, id: 'logs-default-pipeline' },

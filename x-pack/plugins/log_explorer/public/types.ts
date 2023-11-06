@@ -4,20 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { ComponentType } from 'react';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LogExplorerLocators } from '../common/locators';
 import type { LogExplorerProps } from './components/log_explorer';
 
-export type LogExplorerPluginSetup = void;
+export interface LogExplorerPluginSetup {
+  locators: LogExplorerLocators;
+}
 export interface LogExplorerPluginStart {
   LogExplorer: ComponentType<LogExplorerProps>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogExplorerSetupDeps {}
+export interface LogExplorerSetupDeps {
+  share: SharePluginSetup;
+  discover: DiscoverSetup;
+}
 
 export interface LogExplorerStartDeps {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
+  fieldFormats: FieldFormatsStart;
 }

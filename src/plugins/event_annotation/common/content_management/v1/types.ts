@@ -18,6 +18,7 @@ import {
   CreateResult,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
+import { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
@@ -79,8 +80,6 @@ export type EventAnnotationGroupGetOut = GetResult<
 // ----------- CREATE --------------
 
 export interface CreateOptions {
-  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
-  overwrite?: boolean;
   /** Array of referenced saved objects. */
   references?: Reference[];
 }
@@ -127,3 +126,13 @@ export type EventAnnotationGroupSearchIn = SearchIn<
 >;
 
 export type EventAnnotationGroupSearchOut = SearchResult<EventAnnotationGroupSavedObject>;
+
+// ----------- CRUD TYPES --------------
+
+export type EventAnnotationGroupCrudTypes = ContentManagementCrudTypes<
+  EventAnnotationGroupContentType,
+  EventAnnotationGroupSavedObjectAttributes,
+  CreateOptions,
+  UpdateOptions,
+  {}
+>;

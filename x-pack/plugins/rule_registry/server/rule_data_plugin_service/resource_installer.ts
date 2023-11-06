@@ -21,6 +21,7 @@ import {
   TOTAL_FIELDS_LIMIT,
   type PublicFrameworkAlertsService,
   type DataStreamAdapter,
+  VALID_ALERT_INDEX_PREFIXES,
 } from '@kbn/alerting-plugin/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
@@ -220,6 +221,7 @@ export class ResourceInstaller {
       alias: indexInfo.getPrimaryAlias(namespace),
       name: indexInfo.getConcreteIndexInitialName(namespace),
       template: indexInfo.getIndexTemplateName(namespace),
+      validPrefixes: VALID_ALERT_INDEX_PREFIXES,
       ...(secondaryNamespacedAlias ? { secondaryAlias: secondaryNamespacedAlias } : {}),
     };
 

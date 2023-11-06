@@ -10,7 +10,6 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import {
-  AlertConsumers,
   ALERT_TIME_RANGE,
   ALERT_STATUS,
   getEsQueryConfig,
@@ -29,7 +28,7 @@ import {
   InlineScript,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleTypeParams } from '@kbn/alerting-plugin/server';
+import { RuleTypeParams, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -50,7 +49,7 @@ import {
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
+import { IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
 import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
 
@@ -81,6 +80,7 @@ export interface ConstructorOptions {
   esClient: ElasticsearchClient;
   ruleDataService: IRuleDataService;
   getRuleType: RuleTypeRegistry['get'];
+  getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -137,6 +137,7 @@ interface SingleSearchAfterAndAudit {
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   sort?: estypes.SortOptions[] | undefined;
   lastSortIds?: Array<string | number> | undefined;
+  featureIds?: string[];
 }
 
 /**
@@ -152,6 +153,7 @@ export class AlertsClient {
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
   private readonly getRuleType: RuleTypeRegistry['get'];
+  private getAlertIndicesAlias!: AlertingStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
@@ -163,6 +165,7 @@ export class AlertsClient {
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
     this.getRuleType = options.getRuleType;
+    this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
 
   private getOutcome(
@@ -281,6 +284,7 @@ export class AlertsClient {
     operation,
     sort,
     lastSortIds = [],
+    featureIds,
   }: SingleSearchAfterAndAudit) {
     try {
       const alertSpaceId = this.spaceId;
@@ -294,7 +298,14 @@ export class AlertsClient {
 
       let queryBody: estypes.SearchRequest['body'] = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
-        query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
+        query: await this.buildEsQueryWithAuthz(
+          query,
+          id,
+          alertSpaceId,
+          operation,
+          config,
+          featureIds ? new Set(featureIds) : undefined
+        ),
         aggs,
         _source,
         track_total_hits: trackTotalHits,
@@ -433,10 +444,15 @@ export class AlertsClient {
     id: string | null | undefined,
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
-    config: EsQueryConfig
+    config: EsQueryConfig,
+    featuresIds?: Set<string>
   ) {
     try {
-      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
+      const authzFilter = (await getAuthzFilter(
+        this.authorization,
+        operation,
+        featuresIds
+      )) as Filter;
       const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
       let esQuery;
       if (id != null) {
@@ -681,6 +697,7 @@ export class AlertsClient {
           },
         },
         size: 0,
+        featureIds,
       });
 
       let activeAlertCount = 0;
@@ -1006,35 +1023,16 @@ export class AlertsClient {
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
     try {
-      // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
-      // return all of the features that you can access and does not care about your featureIds
-      const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
-        featureIds,
-        [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
-        AlertingAuthorizationEntity.Alert
+      const authorizedRuleTypes = await this.authorization.getAuthorizedRuleTypes(
+        AlertingAuthorizationEntity.Alert,
+        new Set(featureIds)
       );
-      // As long as the user can read a minimum of one type of rule type produced by the provided feature,
-      // the user should be provided that features' alerts index.
-      // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
-      const authorizedFeatures = new Set<string>();
-      for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
-        authorizedFeatures.add(ruleType.producer);
-      }
-      const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
-        (feature): feature is ValidFeatureId =>
-          featureIds.includes(feature) && isValidFeatureId(feature)
+      const indices = this.getAlertIndicesAlias(
+        authorizedRuleTypes.map((art: { id: any }) => art.id),
+        this.spaceId
       );
-      const toReturn = validAuthorizedFeatures.map((feature) => {
-        const index = this.ruleDataService.findIndexByFeature(feature, Dataset.alerts);
-        if (index == null) {
-          throw new Error(`This feature id ${feature} should be associated to an alert index`);
-        }
-        return (
-          index?.getPrimaryAlias(feature === AlertConsumers.SIEM ? this.spaceId ?? '*' : '*') ?? ''
-        );
-      });
 
-      return toReturn;
+      return indices;
     } catch (exc) {
       const errMessage = `getAuthorizedAlertsIndices failed to get authorized rule types: ${exc}`;
       this.logger.error(errMessage);

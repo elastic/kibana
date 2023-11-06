@@ -9,7 +9,7 @@
 import { getFieldRowStory, getStory } from './common';
 
 const argTypes = {
-  value: {
+  userValue: {
     name: 'Current saved value',
     control: {
       type: 'select',

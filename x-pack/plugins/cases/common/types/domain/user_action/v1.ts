@@ -22,6 +22,7 @@ import { SeverityUserActionRt } from './severity/v1';
 import { StatusUserActionRt } from './status/v1';
 import { TagsUserActionRt } from './tags/v1';
 import { TitleUserActionRt } from './title/v1';
+import { CustomFieldsUserActionRt } from './custom_fields/v1';
 
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
@@ -59,6 +60,7 @@ const BasicUserActionsRt = rt.union([
   AssigneesUserActionRt,
   DeleteCaseUserActionRt,
   CategoryUserActionRt,
+  CustomFieldsUserActionRt,
 ]);
 
 const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);
@@ -151,3 +153,4 @@ export type CreateCaseUserAction = UserAction<rt.TypeOf<typeof CreateCaseUserAct
 export type CreateCaseUserActionWithoutConnectorId = UserActionWithAttributes<
   rt.TypeOf<typeof CreateCaseUserActionWithoutConnectorIdRt>
 >;
+export type CustomFieldsUserAction = UserAction<rt.TypeOf<typeof CustomFieldsUserActionRt>>;

@@ -9,7 +9,6 @@
 export * from './expressions';
 
 export type {
-  SearchResponseWarning,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,

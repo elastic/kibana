@@ -10,6 +10,7 @@ import { ReactWrapper } from 'enzyme';
 import {
   EuiButton,
   EuiCopy,
+  EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridCustomBodyProps,
 } from '@elastic/eui';
@@ -52,7 +53,7 @@ function getProps(): UnifiedDataTableProps {
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
     rows: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
-    sampleSize: 30,
+    sampleSizeState: 30,
     searchDescription: '',
     searchTitle: '',
     setExpandedDoc: jest.fn(),
@@ -301,6 +302,74 @@ describe('UnifiedDataTable', () => {
     });
   });
 
+  describe('display settings', () => {
+    it('should include additional display settings if onUpdateSampleSize is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sampleSizeState: 150,
+        onUpdateSampleSize: jest.fn(),
+        onUpdateRowHeight: jest.fn(),
+      });
+
+      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        Object {
+          "additionalControls": null,
+          "showColumnSelector": false,
+          "showDisplaySelector": Object {
+            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              onChangeSampleSize={[MockFunction]}
+              sampleSize={150}
+            />,
+            "allowDensity": false,
+            "allowResetButton": false,
+            "allowRowHeight": true,
+          },
+          "showFullScreenSelector": true,
+          "showSortSelector": true,
+        }
+      `);
+    });
+
+    it('should not include additional display settings if onUpdateSampleSize is not provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sampleSizeState: 200,
+        onUpdateRowHeight: jest.fn(),
+      });
+
+      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        Object {
+          "additionalControls": null,
+          "showColumnSelector": false,
+          "showDisplaySelector": Object {
+            "allowDensity": false,
+            "allowRowHeight": true,
+          },
+          "showFullScreenSelector": true,
+          "showSortSelector": true,
+        }
+      `);
+    });
+
+    it('should hide display settings if no handlers provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        onUpdateRowHeight: undefined,
+        onUpdateSampleSize: undefined,
+      });
+
+      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        Object {
+          "additionalControls": null,
+          "showColumnSelector": false,
+          "showDisplaySelector": undefined,
+          "showFullScreenSelector": true,
+          "showSortSelector": true,
+        }
+      `);
+    });
+  });
+
   describe('externalControlColumns', () => {
     it('should render external leading control columns', async () => {
       const component = await getComponent({
@@ -324,27 +393,36 @@ describe('UnifiedDataTable', () => {
   });
 
   it('should render provided in renderDocumentView DocumentView on expand clicked', async () => {
+    const expandedDoc = {
+      id: 'test',
+      raw: {
+        _index: 'test_i',
+        _id: 'test',
+      },
+      flattened: { test: jest.fn() },
+    };
+    const columnTypesOverride = { testField: 'number ' };
+    const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+      <div data-test-subj="test-document-view">{hit.id}</div>
+    ));
+
     const component = await getComponent({
       ...getProps(),
-      expandedDoc: {
-        id: 'test',
-        raw: {
-          _index: 'test_i',
-          _id: 'test',
-        },
-        flattened: { test: jest.fn() },
-      },
+      expandedDoc,
       setExpandedDoc: jest.fn(),
-      renderDocumentView: (
-        hit: DataTableRecord,
-        displayedRows: DataTableRecord[],
-        displayedColumns: string[]
-      ) => <div data-test-subj="test-document-view">{hit.id}</div>,
+      columnTypes: columnTypesOverride,
+      renderDocumentView: renderDocumentViewMock,
       externalControlColumns: [testLeadingControlColumn],
     });
 
     findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
     expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
+    expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
+      expandedDoc,
+      getProps().rows,
+      ['_source'],
+      columnTypesOverride
+    );
   });
 
   describe('externalAdditionalControls', () => {
@@ -430,6 +508,108 @@ describe('UnifiedDataTable', () => {
       const gridExpandBtn = findTestSubject(component, 'docTableExpandToggleColumn').first();
       const tourStep = gridExpandBtn.getDOMNode().getAttribute('id');
       expect(tourStep).toEqual('test-expand');
+    });
+  });
+
+  describe('renderCustomToolbar', () => {
+    it('should render a custom toolbar', async () => {
+      let toolbarParams: Record<string, unknown> = {};
+      let gridParams: Record<string, unknown> = {};
+      const renderCustomToolbarMock = jest.fn((props) => {
+        toolbarParams = props.toolbarProps;
+        gridParams = props.gridProps;
+        return <div data-test-subj="custom-toolbar">Custom layout</div>;
+      });
+      const component = await getComponent({
+        ...getProps(),
+        renderCustomToolbar: renderCustomToolbarMock,
+      });
+
+      // custom toolbar should be rendered
+      expect(findTestSubject(component, 'custom-toolbar').exists()).toBe(true);
+
+      expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          toolbarProps: expect.objectContaining({
+            hasRoomForGridControls: true,
+          }),
+          gridProps: expect.objectContaining({
+            additionalControls: null,
+          }),
+        })
+      );
+
+      // the default eui controls should be available for custom rendering
+      expect(toolbarParams?.columnSortingControl).toBeTruthy();
+      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+      expect(gridParams?.additionalControls).toBe(null);
+
+      // additional controls become available after selecting a document
+      act(() => {
+        component
+          .find('[data-gridcell-column-id="select"] .euiCheckbox__input')
+          .first()
+          .simulate('change');
+      });
+
+      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+      expect(gridParams?.additionalControls).toBeTruthy();
+    });
+  });
+
+  describe('gridStyleOverride', () => {
+    it('should render the grid with the default style if no gridStyleOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+      });
+
+      const grid = findTestSubject(component, 'docTable');
+
+      expect(grid.hasClass('euiDataGrid--bordersHorizontal')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--fontSizeSmall')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--paddingLarge')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
+      expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();
+    });
+    it('should render the grid with style override if gridStyleOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        gridStyleOverride: {
+          stripes: false,
+          rowHover: 'none',
+          border: 'none',
+        },
+      });
+
+      const grid = findTestSubject(component, 'docTable');
+
+      expect(grid.hasClass('euiDataGrid--stripes')).toBeFalsy();
+      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeFalsy();
+      expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
+    });
+  });
+  describe('rowLineHeightOverride', () => {
+    it('should render the grid with the default row line height if no rowLineHeightOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+      });
+
+      const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
+      expect(gridRowCell.prop('style')).toMatchObject({
+        lineHeight: '1.6em',
+      });
+    });
+    it('should render the grid with row line height override if rowLineHeightOverride is provided', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        rowLineHeightOverride: '24px',
+      });
+
+      const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
+      expect(gridRowCell.prop('style')).toMatchObject({
+        lineHeight: '24px',
+      });
     });
   });
 });

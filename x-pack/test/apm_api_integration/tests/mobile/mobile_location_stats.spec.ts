@@ -219,6 +219,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.currentPeriod.mostRequests.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
+        expect(response.currentPeriod.mostCrashes.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
       });
     });
   });
@@ -253,6 +256,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { location } = response.currentPeriod.mostRequests;
         expect(location).to.be('China');
       });
+
+      it('returns location for most crashes', () => {
+        const { location } = response.currentPeriod.mostCrashes;
+        expect(location).to.be('China');
+      });
     });
 
     describe('when filters are applied', () => {
@@ -265,11 +273,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.mostSessions.value).to.eql(0);
         expect(response.currentPeriod.mostRequests.value).to.eql(0);
+        expect(response.currentPeriod.mostCrashes.value).to.eql(0);
 
         expect(response.currentPeriod.mostSessions.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
         expect(response.currentPeriod.mostRequests.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
+        expect(response.currentPeriod.mostCrashes.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
       });
@@ -283,6 +295,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.mostSessions.value).to.eql(3);
         expect(response.currentPeriod.mostRequests.value).to.eql(3);
+        expect(response.currentPeriod.mostCrashes.value).to.eql(3);
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
@@ -293,6 +306,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.mostSessions.value).to.eql(3);
         expect(response.currentPeriod.mostRequests.value).to.eql(3);
+        expect(response.currentPeriod.mostCrashes.value).to.eql(3);
       });
     });
   });

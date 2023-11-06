@@ -27,11 +27,20 @@ export type CreateCustomIntegrationNotificationEvent =
     };
 
 export const CreateIntegrationNotificationEventSelectors = {
-  integrationCreated: (context: CreateCustomIntegrationContext) =>
-    ({
-      type: 'INTEGRATION_CREATED',
-      fields: context.fields,
-    } as CreateCustomIntegrationNotificationEvent),
+  integrationCreated: (
+    context: CreateCustomIntegrationContext,
+    event: CreateCustomIntegrationEvent
+  ) => {
+    return 'data' in event && 'integrationName' in event.data && 'datasets' in event.data
+      ? ({
+          type: 'INTEGRATION_CREATED',
+          fields: {
+            integrationName: event.data.integrationName,
+            datasets: event.data.datasets,
+          },
+        } as CreateCustomIntegrationNotificationEvent)
+      : null;
+  },
   integrationCleanup: (
     context: CreateCustomIntegrationContext,
     event: CreateCustomIntegrationEvent

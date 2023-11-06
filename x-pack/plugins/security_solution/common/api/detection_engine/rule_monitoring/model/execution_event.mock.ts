@@ -18,8 +18,9 @@ const getMessageEvent = (props: Partial<RuleExecutionEvent> = {}): RuleExecution
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
     level: LogLevel.debug,
+    execution_id: 'execution-id-1',
     message: 'Some message',
-    // Overriden values
+    // Overridden values
     ...props,
     // Mandatory values for this type of event
     type: RuleExecutionEventType.message,
@@ -31,8 +32,9 @@ const getRunningStatusChange = (props: Partial<RuleExecutionEvent> = {}): RuleEx
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
+    execution_id: 'execution-id-1',
     message: 'Rule changed status to "running"',
-    // Overriden values
+    // Overridden values
     ...props,
     // Mandatory values for this type of event
     level: LogLevel.info,
@@ -47,8 +49,9 @@ const getPartialFailureStatusChange = (
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
+    execution_id: 'execution-id-1',
     message: 'Rule changed status to "partial failure". Unknown error',
-    // Overriden values
+    // Overridden values
     ...props,
     // Mandatory values for this type of event
     level: LogLevel.warn,
@@ -61,8 +64,9 @@ const getFailedStatusChange = (props: Partial<RuleExecutionEvent> = {}): RuleExe
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
+    execution_id: 'execution-id-1',
     message: 'Rule changed status to "failed". Unknown error',
-    // Overriden values
+    // Overridden values
     ...props,
     // Mandatory values for this type of event
     level: LogLevel.error,
@@ -75,8 +79,9 @@ const getSucceededStatusChange = (props: Partial<RuleExecutionEvent> = {}): Rule
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
+    execution_id: 'execution-id-1',
     message: 'Rule changed status to "succeeded". Rule executed successfully',
-    // Overriden values
+    // Overridden values
     ...props,
     // Mandatory values for this type of event
     level: LogLevel.info,
@@ -89,8 +94,9 @@ const getExecutionMetricsEvent = (props: Partial<RuleExecutionEvent> = {}): Rule
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
-    message: '',
-    // Overriden values
+    execution_id: 'execution-id-1',
+    message: JSON.stringify({ some_metric_ms: 10 }),
+    // Overridden values
     ...props,
     // Mandatory values for this type of event
     level: LogLevel.debug,

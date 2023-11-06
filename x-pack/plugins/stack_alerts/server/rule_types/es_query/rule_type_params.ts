@@ -15,6 +15,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { MAX_SELECTABLE_GROUP_BY_TERMS } from '../../../common/constants';
 import { ComparatorFnNames } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';
@@ -48,7 +49,12 @@ const EsQueryRuleParamsSchemaProperties = {
   // how to group
   groupBy: schema.string({ validate: validateGroupBy, defaultValue: 'all' }),
   // field to group on (for groupBy: top)
-  termField: schema.maybe(schema.string({ minLength: 1 })),
+  termField: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string(), { minSize: 2, maxSize: MAX_SELECTABLE_GROUP_BY_TERMS }),
+    ])
+  ),
   // limit on number of groups returned
   termSize: schema.maybe(schema.number({ min: 1 })),
   searchType: schema.oneOf(
@@ -153,7 +159,28 @@ function validateParams(anyParams: unknown): string | undefined {
     }
   }
 
-  if (isSearchSourceRule(searchType) || isEsqlQueryRule(searchType)) {
+  if (isSearchSourceRule(searchType)) {
+    return;
+  }
+
+  if (isEsqlQueryRule(searchType)) {
+    const { timeField } = anyParams as EsQueryRuleParams;
+
+    if (!timeField) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlTimeFieldErrorMessage', {
+        defaultMessage: '[timeField]: is required',
+      });
+    }
+    if (thresholdComparator !== Comparator.GT) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdComparatorErrorMessage', {
+        defaultMessage: '[thresholdComparator]: is required to be greater than',
+      });
+    }
+    if (threshold && threshold[0] !== 0) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdErrorMessage', {
+        defaultMessage: '[threshold]: is required to be 0',
+      });
+    }
     return;
   }
 

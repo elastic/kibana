@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { Logger, ElasticsearchClient, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   RuleType,
@@ -99,6 +99,7 @@ export class BaseRule {
           state: ExecutedState;
         }
       ): Promise<any> => this.execute(options),
+      category: DEFAULT_APP_CATEGORIES.management.id,
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,

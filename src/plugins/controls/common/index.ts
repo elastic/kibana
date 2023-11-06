@@ -26,6 +26,7 @@ export {
   serializableToRawControlGroupAttributes,
   persistableControlGroupInputIsEqual,
   getDefaultControlGroupInput,
+  generateNewControlIds,
 } from './control_group/control_group_persistence';
 
 export {
