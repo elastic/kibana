@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
+  fetchConnectors,
   fetchSyncJobsByConnectorId,
   putUpdateNative,
   updateConnectorConfiguration,
@@ -465,6 +466,26 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { is_native } = request.body;
       const result = await putUpdateNative(client.asCurrentUser, connectorId, is_native);
       return result ? response.ok({ body: result }) : response.conflict();
+    })
+  );
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors',
+      validate: {
+        query: schema.object({
+          connector_type: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const connectorType = request.query.connector_type;
+      const result = await fetchConnectors(
+        client.asCurrentUser,
+        undefined,
+        connectorType as 'connector' | 'crawler' | undefined
+      );
+      return response.ok({ body: result });
     })
   );
 }

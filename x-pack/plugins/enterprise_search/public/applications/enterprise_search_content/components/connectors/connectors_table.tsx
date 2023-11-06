@@ -18,27 +18,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { Connector } from '@kbn/search-connectors';
+
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
-import { IngestionStatus } from '../../types';
 import {
   ingestionStatusToColor,
   ingestionStatusToText,
 } from '../../utils/ingestion_status_helpers';
 
-interface ConnectorItem {
-  connector_name: string;
-  docs_count: string;
-  index_name: string;
-  status: IngestionStatus;
-  type: string;
-}
 interface ConnectorsTableProps {
-  items: ConnectorItem[];
+  items: Connector[];
 }
 export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({ items }) => {
-  const columns: Array<EuiBasicTableColumn<ConnectorItem>> = [
+  const columns: Array<EuiBasicTableColumn<Connector>> = [
     {
-      field: 'connector_name',
+      field: 'name',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.connectorName',
         {
@@ -65,7 +59,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({ items }) => {
       ),
     },
     {
-      field: 'type',
+      field: 'service_type',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.type',
         {
@@ -81,7 +75,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({ items }) => {
           defaultMessage: 'Ingestion status',
         }
       ),
-      render: (connector: ConnectorItem) => {
+      render: (connector: Connector) => {
         const label = ingestionStatusToText(connector.status);
         return (
           <EuiBadgeTo to={''} label={label} color={ingestionStatusToColor(connector.status)} />
@@ -103,7 +97,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({ items }) => {
               {
                 defaultMessage: 'View index {connectorName}',
                 values: {
-                  connectorName: connector.connector_name,
+                  connectorName: connector.name,
                 },
               }
             ),
@@ -126,7 +120,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({ items }) => {
               {
                 defaultMessage: 'Delete index {connectorName}',
                 values: {
-                  connectorName: connector.connector_name,
+                  connectorName: connector.name,
                 },
               }
             ),

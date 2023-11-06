@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { useActions, useValues } from 'kea';
 
 import { EuiButton } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IngestionStatus } from '../../types';
+import { Status } from '../../../../../common/types/api';
+
+import { FetchConnectorsApiLogic } from '../../api/connector/fetch_connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 import { SelectConnector } from '../new_index/select_connector/select_connector';
 
@@ -24,15 +29,20 @@ export const baseBreadcrumbs = [
   }),
 ];
 export const Connectors: React.FC = () => {
-  // Check if empty
+  const { makeRequest } = useActions(FetchConnectorsApiLogic);
+  const { data = { connectors: [] }, status } = useValues(FetchConnectorsApiLogic);
+  useEffect(() => {
+    makeRequest({ connectorType: 'connector' });
+  }, []);
   // Spinner while loading
-  // if empty -> show selectconnector
-  // if not empty use table.
   // get filtered endpoint
+  // fix pagination
+  // add docs count
   // add stats
   // make table searchable
-  const isEmpty = false;
-  const isLoading = false;
+  const isEmpty = data.connectors.length <= 0;
+  const isLoading = status === Status.IDLE || status === Status.LOADING;
+  console.log('efe', data.connectors)
   return (
     <>
       {isEmpty ? (
@@ -72,17 +82,7 @@ export const Connectors: React.FC = () => {
           }}
         >
           <ConnectorStats />
-          <ConnectorsTable
-            items={[
-              {
-                connector_name: '123',
-                docs_count: '123123',
-                index_name: 'test',
-                status: IngestionStatus.CONFIGURED,
-                type: 'test',
-              },
-            ]}
-          />
+          <ConnectorsTable items={data.connectors} />
         </EnterpriseSearchContentPageTemplate>
       )}
     </>

@@ -65,7 +65,8 @@ export const fetchConnectorByIndexName = async (
 
 export const fetchConnectors = async (
   client: ElasticsearchClient,
-  indexNames?: string[]
+  indexNames?: string[],
+  connectorType?: 'connector' | 'crawler'
 ): Promise<Connector[]> => {
   const query: QueryDslQueryContainer = indexNames
     ? { terms: { index_name: indexNames } }
@@ -86,9 +87,18 @@ export const fetchConnectors = async (
       accumulator = accumulator.concat(hits);
     } while (hits.length >= 1000);
 
-    return accumulator
+    const result = accumulator
       .map(({ _source, _id }) => (_source ? { ..._source, id: _id } : undefined))
       .filter(isNotNullish);
+
+    if (connectorType) {
+      return result.filter((hit) => {
+        return connectorType === 'connector'
+          ? hit.service_type !== 'elastic-crawler'
+          : hit.service_type === 'elastic-crawler';
+      });
+    }
+    return result;
   } catch (error) {
     if (isIndexNotFoundException(error)) {
       return [];
