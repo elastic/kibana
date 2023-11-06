@@ -63,7 +63,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
   alerting: PluginSetupContract;
   features: FeaturesSetup;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
@@ -344,7 +344,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     /**
      * Register a config for the observability guide
      */
-    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+    plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
 
     return {
       getAlertDetailsConfig() {
