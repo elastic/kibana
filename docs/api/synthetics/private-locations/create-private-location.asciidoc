@@ -8,7 +8,7 @@ Creates a private location with the following schema.
 
 === {api-request-title}
 
-`POST <kibana host>:<port>/api/synthetics/private-locations`
+`POST <kibana host>:<port>/api/synthetics/private_locations`
 
 `POST <kibana host>:<port>/s/<space_id>/api/synthetics/private-locations`
 
