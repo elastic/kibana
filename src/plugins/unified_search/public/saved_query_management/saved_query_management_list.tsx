@@ -20,6 +20,7 @@ import {
   usePrettyDuration,
   ShortDate,
   EuiPagination,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -187,9 +188,11 @@ export function SavedQueryManagementList({
         }
 
         const loadedQuery = latestLoadedQuery.current;
-        const filteredQueries = queries.filter((savedQuery) => savedQuery.id !== loadedQuery?.id);
+        const filteredQueries = trimmedSearchTerm
+          ? queries
+          : queries.filter((savedQuery) => savedQuery.id !== loadedQuery?.id);
 
-        if (loadedQuery && currentPageNumber === 0) {
+        if (loadedQuery && !trimmedSearchTerm && currentPageNumber === 0) {
           filteredQueries.unshift(loadedQuery);
         }
 
@@ -259,7 +262,18 @@ export function SavedQueryManagementList({
   }, [currentPageQueries, format, selectedSavedQuery]);
 
   const renderOption = (option: RenderOptionProps) => {
-    return <>{option.attributes ? itemLabel(option.attributes) : option.label}</>;
+    return (
+      <>
+        {option.attributes ? itemLabel(option.attributes) : option.label}
+        {option.value === loadedSavedQuery?.id && (
+          <EuiBadge color="hollow" css={{ marginLeft: euiThemeVars.euiSizeS }}>
+            {i18n.translate('unifiedSearch.search.searchBar.savedQueryActiveBadgeText', {
+              defaultMessage: 'Active',
+            })}
+          </EuiBadge>
+        )}
+      </>
+    );
   };
 
   const canEditSavedObjects = application.capabilities.savedObjectsManagement.edit;
