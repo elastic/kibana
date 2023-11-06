@@ -182,7 +182,7 @@ export function MachineLearningDataVisualizerTableProvider(
       await retry.tryForTime(30 * 1000, async () => {
         await this.ensureActionsMenuOpen(fieldName);
         const actionMenuViewInLensButton = await find.byCssSelector(
-          '[data-test-subj="dataVisualizerActionViewInLensButton"][class="euiContextMenuItem"]'
+          '.euiContextMenuItem[data-test-subj="dataVisualizerActionViewInLensButton"]'
         );
         const isEnabled = await actionMenuViewInLensButton.isEnabled();
         expect(isEnabled).to.eql(
@@ -217,7 +217,7 @@ export function MachineLearningDataVisualizerTableProvider(
         await this.ensureActionsMenuOpen(fieldName);
 
         const button = await find.byCssSelector(
-          `[data-test-subj="${testSubj}"][class="euiContextMenuItem"]`
+          `.euiContextMenuItem[data-test-subj="${testSubj}"]`
         );
         await button.click();
         await this.assertActionsMenuClosed(fieldName, testSubj);
