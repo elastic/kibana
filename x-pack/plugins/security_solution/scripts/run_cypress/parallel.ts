@@ -357,7 +357,7 @@ ${JSON.stringify(
             // Setup fleet if Cypress config requires it
             let fleetServer: void | StartedFleetServer;
             if (cypressConfigFile.env?.WITH_FLEET_SERVER) {
-              log.info(`Setting fleet-server for this Cypress config`);
+              log.info(`Setting up fleet-server for this Cypress config`);
 
               const kbnClient = createKbnClient({
                 url: baseUrl,
