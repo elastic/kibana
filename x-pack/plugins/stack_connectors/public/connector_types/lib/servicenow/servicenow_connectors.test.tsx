@@ -280,9 +280,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       userEvent.click(await screen.findByTestId('update-connector-btn'));
 
       const updateConnectorForm = await screen.findByTestId('updateConnectorForm');
-      const urlInput = await within(updateConnectorForm).findByTestId(
-        'credentialsApiUrlFromInput'
-      );
+      const urlInput = await within(updateConnectorForm).findByTestId('credentialsApiUrlFromInput');
       const usernameInput = await within(updateConnectorForm).findByTestId(
         'connector-servicenow-username-form-input'
       );
@@ -293,9 +291,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       userEvent.paste(urlInput, 'https://example.com');
       userEvent.paste(usernameInput, 'user');
       userEvent.paste(passwordInput, 'pass');
-      userEvent.click(
-        await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit')
-      );
+      userEvent.click(await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit'));
 
       await waitFor(() => {
         expect(getAppInfoMock).toHaveBeenCalledTimes(1);
@@ -339,9 +335,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       userEvent.click(await screen.findByTestId('update-connector-btn'));
 
       const updateConnectorForm = await screen.findByTestId('updateConnectorForm');
-      const urlInput = await within(updateConnectorForm).findByTestId(
-        'credentialsApiUrlFromInput'
-      );
+      const urlInput = await within(updateConnectorForm).findByTestId('credentialsApiUrlFromInput');
       const usernameInput = await within(updateConnectorForm).findByTestId(
         'connector-servicenow-username-form-input'
       );
@@ -352,9 +346,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       userEvent.paste(urlInput, 'https://example.com');
       userEvent.paste(usernameInput, 'user');
       userEvent.paste(passwordInput, 'pass');
-      userEvent.click(
-        await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit')
-      );
+      userEvent.click(await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit'));
 
       await waitFor(() => {
         expect(getAppInfoMock).toHaveBeenCalledTimes(1);
@@ -364,9 +356,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
       expect(await screen.findByTestId('updateConnectorForm')).toBeInTheDocument();
       expect(
-        within(await screen.findByTestId('updateConnectorForm')).getByTestId(
-          'snApplicationCallout'
-        )
+        within(await screen.findByTestId('updateConnectorForm')).getByTestId('snApplicationCallout')
       ).toBeInTheDocument();
     });
   });
