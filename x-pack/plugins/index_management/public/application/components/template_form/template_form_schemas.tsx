@@ -168,7 +168,7 @@ export const schemas: Record<string, FormSchema> = {
     },
     'lifecycle.infiniteDataRetention': {
       type: FIELD_TYPES.TOGGLE,
-      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.enableDataRetentionLabel', {
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.infiniteDataRetentionLabel', {
         defaultMessage: 'Keep data indefinitely',
       }),
       defaultValue: false,
