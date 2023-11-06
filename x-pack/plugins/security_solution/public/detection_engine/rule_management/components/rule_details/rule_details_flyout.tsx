@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiTitle,
   EuiFlyout,
@@ -24,7 +23,7 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps } from '@elastic/eui';
 
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
 import { RuleInvestigationGuideTab } from './rule_investigation_guide_tab';
 
@@ -102,17 +101,15 @@ const TabContentPadding: React.FC = ({ children }) => (
 
 interface RuleDetailsFlyoutProps {
   rule: RuleResponse;
-  actionButtonLabel: string;
-  isActionButtonDisabled: boolean;
-  onActionButtonClick: (ruleId: string) => void;
+  ruleActions?: React.ReactNode;
+  dataTestSubj?: string;
   closeFlyout: () => void;
 }
 
 export const RuleDetailsFlyout = ({
   rule,
-  actionButtonLabel,
-  isActionButtonDisabled,
-  onActionButtonClick,
+  ruleActions,
+  dataTestSubj,
   closeFlyout,
 }: RuleDetailsFlyoutProps) => {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
@@ -176,6 +173,7 @@ export const RuleDetailsFlyout = ({
       ownFocus={false}
       key="prebuilt-rules-flyout"
       paddingSize="l"
+      data-test-subj={dataTestSubj}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
@@ -197,18 +195,7 @@ export const RuleDetailsFlyout = ({
               {i18n.DISMISS_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              disabled={isActionButtonDisabled}
-              onClick={() => {
-                onActionButtonClick(rule.rule_id ?? '');
-                closeFlyout();
-              }}
-              fill
-            >
-              {actionButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

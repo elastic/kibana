@@ -8,8 +8,8 @@
 
 export { PluginsService, PluginWrapper, config, isNewPlatformPlugin } from './src';
 export type {
-  PluginsServiceSetup,
-  PluginsServiceStart,
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
   DiscoveredPlugins,
   PluginDependencies,
 } from './src';

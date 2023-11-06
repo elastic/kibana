@@ -820,115 +820,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.Reason",
-        "type": "Interface",
-        "tags": [],
-        "label": "Reason",
-        "description": [],
-        "path": "src/plugins/data/public/search/errors/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.reason",
-            "type": "string",
-            "tags": [],
-            "label": "reason",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.script_stack",
-            "type": "Array",
-            "tags": [],
-            "label": "script_stack",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.position",
-            "type": "Object",
-            "tags": [],
-            "label": "position",
-            "description": [],
-            "signature": [
-              "{ offset: number; start: number; end: number; } | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.lang",
-            "type": "string",
-            "tags": [],
-            "label": "lang",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.script",
-            "type": "string",
-            "tags": [],
-            "label": "script",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.Reason.caused_by",
-            "type": "Object",
-            "tags": [],
-            "label": "caused_by",
-            "description": [],
-            "signature": [
-              "{ type: string; reason: string; } | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.SearchSessionInfoProvider",
         "type": "Interface",
         "tags": [],
@@ -1306,7 +1197,15 @@
             "section": "def-common.KibanaServerError",
             "text": "KibanaServerError"
           },
-          "<IEsErrorAttributes>"
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsErrorAttributes",
+            "text": "IEsErrorAttributes"
+          },
+          ">"
         ],
         "path": "src/plugins/data/public/search/errors/types.ts",
         "deprecated": false,
@@ -6847,14 +6746,15 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggType.valueType",
-            "type": "CompoundType",
+            "id": "def-common.AggType.getValueType",
+            "type": "Function",
             "tags": [],
-            "label": "valueType",
+            "label": "getValueType",
             "description": [
               "\nThe type the values produced by this agg will have in the final data table.\nIf not specified, the type of the field is used."
             ],
             "signature": [
+              "((aggConfig: TAggConfig) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -6862,7 +6762,7 @@
                 "section": "def-common.DatatableColumnType",
                 "text": "DatatableColumnType"
               },
-              " | undefined"
+              ") | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
@@ -7417,7 +7317,7 @@
                     "section": "def-common.SearchSourceSearchOptions",
                     "text": "SearchSourceSearchOptions"
                   },
-                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
+                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -8333,17 +8233,48 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.BaseParamType.valueType",
-            "type": "Any",
+            "id": "def-common.BaseParamType.getValueType",
+            "type": "Function",
             "tags": [],
-            "label": "valueType",
+            "label": "getValueType",
             "description": [],
             "signature": [
-              "any"
+              "(aggConfig: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              ") => any"
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/base.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.BaseParamType.getValueType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "aggConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.AggConfig",
+                    "text": "AggConfig"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/aggs/param_types/base.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -10817,7 +10748,7 @@
               "\nserializes search source fields (which can later be passed to {@link ISearchStartSearchSource})"
             ],
             "signature": [
-              "(recurse?: boolean, includeFields?: boolean) => ",
+              "(recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -10836,21 +10767,6 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "recurse",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.SearchSource.getSerializedFields.$2",
-                "type": "boolean",
-                "tags": [],
-                "label": "includeFields",
                 "description": [],
                 "signature": [
                   "boolean"
@@ -25173,12 +25089,13 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggTypeConfig.valueType",
-            "type": "CompoundType",
+            "id": "def-common.AggTypeConfig.getValueType",
+            "type": "Function",
             "tags": [],
-            "label": "valueType",
+            "label": "getValueType",
             "description": [],
             "signature": [
+              "((aggConfig: TAggConfig) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -25186,11 +25103,29 @@
                 "section": "def-common.DatatableColumnType",
                 "text": "DatatableColumnType"
               },
-              " | undefined"
+              ") | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggTypeConfig.getValueType.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "aggConfig",
+                "description": [],
+                "signature": [
+                  "TAggConfig"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -27580,6 +27515,73 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.IEsErrorAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "IEsErrorAttributes",
+        "description": [],
+        "path": "src/plugins/data/common/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IEsErrorAttributes.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "ErrorCause",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IEsErrorAttributes.rawResponse",
+            "type": "Object",
+            "tags": [],
+            "label": "rawResponse",
+            "description": [],
+            "signature": [
+              "SearchResponseBody",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">> | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IEsErrorAttributes.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SanitizedConnectionRequestParams",
+                "text": "SanitizedConnectionRequestParams"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.IEsSearchRequest",
         "type": "Interface",
         "tags": [],
@@ -27920,6 +27922,29 @@
             ],
             "signature": [
               "RawResponse"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IKibanaSearchResponse.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [
+              "\nHTTP request parameters from elasticsearch transport client t"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SanitizedConnectionRequestParams",
+                "text": "SanitizedConnectionRequestParams"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
@@ -34407,7 +34432,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -34700,6 +34725,21 @@
           "\"sampler\""
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/sampler.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SanitizedConnectionRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SanitizedConnectionRequestParams",
+        "description": [],
+        "signature": [
+          "{ path: string; method: string; querystring?: string | undefined; }"
+        ],
+        "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -38681,7 +38721,15 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          "[] | undefined) | undefined; options?: any[] | undefined; valueType?: any; onChange?: ((agg: ",
+          "[] | undefined) | undefined; options?: any[] | undefined; getValueType?: ((aggConfig: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggConfig",
+            "text": "AggConfig"
+          },
+          ") => any) | undefined; onChange?: ((agg: ",
           {
             "pluginId": "data",
             "scope": "common",

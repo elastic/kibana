@@ -30,3 +30,5 @@ export const AIOPS_TELEMETRY_ID = {
   AIOPS_DEFAULT_SOURCE: 'ml_aiops_labs',
   AIOPS_ANALYSIS_RUN_ORIGIN: 'aiops-analysis-run-origin',
 } as const;
+
+export const EMBEDDABLE_ORIGIN = 'embeddable';

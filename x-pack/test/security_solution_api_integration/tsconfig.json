@@ -27,6 +27,8 @@
     "@kbn/tooling-log",
     "@kbn/rule-data-utils",
     "@kbn/securitysolution-list-constants",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/core",
+    "@kbn/alerting-plugin"
   ]
 }
