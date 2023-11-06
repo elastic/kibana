@@ -15,7 +15,6 @@ steps:
     label: 'Serverless MKI QA Explore - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
     parallelism: 4
@@ -28,7 +27,6 @@ steps:
     label: 'Serverless MKI QA Investigations - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
-    depends_on: build
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
     parallelism: 8
