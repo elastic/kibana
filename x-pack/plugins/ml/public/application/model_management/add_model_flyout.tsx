@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 import React, { type FC, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlKibana } from '../contexts/kibana';
 import { ModelItem } from './models_list';
 
 export interface AddModelFlyoutProps {
@@ -38,6 +39,10 @@ export interface AddModelFlyoutProps {
 }
 
 export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, modelDownloads }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+
   const [selectedTabId, setSelectedTabId] = useState('elser');
   const [selectedModelId, setSelectedModelId] = useState<string | undefined>(
     modelDownloads.find((m) => m.recommended)?.model_id
@@ -130,7 +135,12 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, mod
                 />
               </p>
               <p>
-                <EuiButton href={''} color={'primary'} fill={false} target={'_blank'}>
+                <EuiButton
+                  href={docLinks.links.clients.eland}
+                  color={'primary'}
+                  fill={false}
+                  target={'_blank'}
+                >
                   <FormattedMessage
                     id="xpack.ml.trainedModels.addModelFlyout.thirdParty.elandDocumentationButtonLabel"
                     defaultMessage="Eland documentation"
@@ -176,7 +186,12 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, mod
                         />
                       </p>
                       <p>
-                        <EuiButton href={''} color={'primary'} fill={false} target={'_blank'}>
+                        <EuiButton
+                          href={docLinks.links.ml.nlpImportModel}
+                          color={'primary'}
+                          fill={false}
+                          target={'_blank'}
+                        >
                           <FormattedMessage
                             id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step2ButtonLabel"
                             defaultMessage="Import models with Eland"
@@ -229,7 +244,12 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, mod
         ),
       },
     ];
-  }, [modelDownloads, selectedModelId]);
+  }, [
+    docLinks.links.clients.eland,
+    docLinks.links.ml.nlpImportModel,
+    modelDownloads,
+    selectedModelId,
+  ]);
 
   const selectedTabContent = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)?.content;
