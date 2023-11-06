@@ -62,7 +62,7 @@ describe('Flyout', () => {
       expect(screen.getByText('Untitled timeline')).toBeInTheDocument();
     });
 
-    test('should call the onOpen when the mouse is clicked for rendering', () => {
+    test('should call the onOpen when the mouse is clicked for rendering', async () => {
       render(
         <TestProviders>
           <Flyout {...props} />

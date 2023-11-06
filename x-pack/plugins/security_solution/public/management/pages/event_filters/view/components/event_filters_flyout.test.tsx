@@ -239,7 +239,7 @@ describe('Event filter flyout', () => {
       expect(confirmButton.hasAttribute('disabled')).toBeTruthy();
     });
 
-    it('should close when click on cancel button', () => {
+    it('should close when click on cancel button', async () => {
       render();
       const cancelButton = renderResult.getByTestId('cancelExceptionAddButton');
       expect(onCancelMock).toHaveBeenCalledTimes(0);
@@ -279,7 +279,7 @@ describe('Event filter flyout', () => {
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
       expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
     });
-    it('should prevent close when submitting data', () => {
+    it('should prevent close when submitting data', async () => {
       (useCreateArtifact as jest.Mock).mockImplementation(() => {
         return { isLoading: true, mutateAsync: jest.fn() };
       });
@@ -291,7 +291,7 @@ describe('Event filter flyout', () => {
       expect(onCancelMock).toHaveBeenCalledTimes(0);
     });
 
-    it('should close when exception has been submitted successfully and close flyout', () => {
+    it('should close when exception has been submitted successfully and close flyout', async () => {
       // mock submit query
       (useCreateArtifact as jest.Mock).mockImplementation(() => {
         return {

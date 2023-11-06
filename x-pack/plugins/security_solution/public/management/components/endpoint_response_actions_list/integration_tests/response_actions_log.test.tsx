@@ -174,7 +174,7 @@ describe('Response actions history', () => {
   let mockedContext: AppContextTestRender;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
 
-  const filterByHosts = (selectedOptionIndexes: number[]) => {
+  const filterByHosts = async (selectedOptionIndexes: number[]) => {
     const { getByTestId, getAllByTestId } = renderResult;
     const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
 
@@ -183,11 +183,11 @@ describe('Response actions history', () => {
     if (selectedOptionIndexes.length) {
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
 
-      allFilterOptions.forEach((option, i) => {
+      for (let i = 0; i < allFilterOptions.length; i++) {
         if (selectedOptionIndexes.includes(i)) {
-          await userEvent.click(option, undefined, { skipPointerEventsCheck: true });
+          await userEvent.click(allFilterOptions[i]);
         }
-      });
+      }
     }
   };
 
@@ -505,11 +505,11 @@ describe('Response actions history', () => {
       );
       const expandButtonsOnPage1 = getAllByTestId(`${testPrefix}-expand-button`);
       // expand 2nd, 4th, 6th rows
-      expandButtonsOnPage1.forEach((button, i) => {
+      for (let i = 0; i < expandButtonsOnPage1.length; i++) {
         if ([1, 3, 5].includes(i)) {
-          await userEvent.click(button);
+          await userEvent.click(expandButtonsOnPage1[i]);
         }
-      });
+      }
       // verify 3 rows are expanded
       const traysOnPage1 = getAllByTestId(`${testPrefix}-details-tray`);
       expect(traysOnPage1).toBeTruthy();
@@ -1072,7 +1072,7 @@ describe('Response actions history', () => {
   describe('Actions filter', () => {
     const filterPrefix = 'actions-filter';
 
-    it('should have a search bar', () => {
+    it('should have a search bar', async () => {
       render();
 
       const { getByTestId } = renderResult;
@@ -1084,7 +1084,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions when opened', () => {
+    it('should show a list of actions when opened', async () => {
       mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
@@ -1107,7 +1107,7 @@ describe('Response actions history', () => {
       ]);
     });
 
-    it('should have `clear all` button `disabled` when no selected values', () => {
+    it('should have `clear all` button `disabled` when no selected values', async () => {
       render();
       const { getByTestId } = renderResult;
 
@@ -1120,7 +1120,7 @@ describe('Response actions history', () => {
   describe('Statuses filter', () => {
     const filterPrefix = 'statuses-filter';
 
-    it('should show a list of statuses when opened', () => {
+    it('should show a list of statuses when opened', async () => {
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1135,7 +1135,7 @@ describe('Response actions history', () => {
       ]);
     });
 
-    it('should have `clear all` button `disabled` when no selected values', () => {
+    it('should have `clear all` button `disabled` when no selected values', async () => {
       render();
 
       const { getByTestId } = renderResult;
@@ -1145,7 +1145,7 @@ describe('Response actions history', () => {
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
 
-    it('should use selected statuses on api call', () => {
+    it('should use selected statuses on api call', async () => {
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1200,7 +1200,7 @@ describe('Response actions history', () => {
       ).toBeTruthy();
     });
 
-    it('should have a search bar ', () => {
+    it('should have a search bar ', async () => {
       render({ showHostNames: true });
       const { getByTestId } = renderResult;
 
@@ -1210,7 +1210,7 @@ describe('Response actions history', () => {
       expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual('Search hosts');
     });
 
-    it('should show a list of host names when opened', () => {
+    it('should show a list of host names when opened', async () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1226,20 +1226,21 @@ describe('Response actions history', () => {
       ).toEqual('50');
     });
 
-    it('should not pin selected host names to the top when opened and selections are being made', () => {
+    it('should not pin selected host names to the top when opened and selections are being made', async () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       await userEvent.click(popoverButton);
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
+
       // click 3 options skip alternates
-      allFilterOptions.forEach((option, i) => {
+      for (let i = 0; i < allFilterOptions.length; i++) {
         if ([1, 3, 5].includes(i)) {
-          option.style.pointerEvents = 'all';
-          await userEvent.click(option);
+          allFilterOptions[i].style.pointerEvents = 'all';
+          await userEvent.click(allFilterOptions[i]);
         }
-      });
+      }
 
       const selectedFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`).reduce<number[]>(
         (acc, curr, i) => {
@@ -1254,20 +1255,21 @@ describe('Response actions history', () => {
       expect(selectedFilterOptions).toEqual([1, 3, 5]);
     });
 
-    it('should pin selected host names to the top when opened after selections were made', () => {
+    it('should pin selected host names to the top when opened after selections were made', async () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       await userEvent.click(popoverButton);
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
+
       // click 3 options skip alternates
-      allFilterOptions.forEach((option, i) => {
+      for (let i = 0; i < allFilterOptions.length; i++) {
         if ([1, 3, 5].includes(i)) {
-          option.style.pointerEvents = 'all';
-          await userEvent.click(option);
+          allFilterOptions[i].style.pointerEvents = 'all';
+          await userEvent.click(allFilterOptions[i]);
         }
-      });
+      }
 
       // close
       await userEvent.click(popoverButton);
@@ -1288,20 +1290,21 @@ describe('Response actions history', () => {
       expect(selectedFilterOptions).toEqual([0, 1, 2]);
     });
 
-    it('should not pin newly selected items with already pinned items', () => {
+    it('should not pin newly selected items with already pinned items', async () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       await userEvent.click(popoverButton);
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
+
       // click 3 options skip alternates
-      allFilterOptions.forEach((option, i) => {
+      for (let i = 0; i < allFilterOptions.length; i++) {
         if ([1, 3, 5].includes(i)) {
-          option.style.pointerEvents = 'all';
-          await userEvent.click(option);
+          allFilterOptions[i].style.pointerEvents = 'all';
+          await userEvent.click(allFilterOptions[i]);
         }
-      });
+      }
 
       // close
       await userEvent.click(popoverButton);
@@ -1310,13 +1313,14 @@ describe('Response actions history', () => {
       await userEvent.click(popoverButton);
 
       const newSetAllFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
+
       // click new options
-      newSetAllFilterOptions.forEach((option, i) => {
+      for (let i = 0; i < newSetAllFilterOptions.length; i++) {
         if ([4, 6, 8].includes(i)) {
-          option.style.pointerEvents = 'all';
-          await userEvent.click(option);
+          newSetAllFilterOptions[i].style.pointerEvents = 'all';
+          await userEvent.click(newSetAllFilterOptions[i]);
         }
-      });
+      }
 
       const selectedFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`).reduce<number[]>(
         (acc, curr, i) => {
@@ -1345,13 +1349,14 @@ describe('Response actions history', () => {
       const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       await userEvent.click(popoverButton);
       const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
+
       // click 3 options skip alternates
-      allFilterOptions.forEach((option, i) => {
+      for (let i = 0; i < allFilterOptions.length; i++) {
         if ([0, 2, 4, 6].includes(i)) {
-          option.style.pointerEvents = 'all';
-          await userEvent.click(option);
+          allFilterOptions[i].style.pointerEvents = 'all';
+          await userEvent.click(allFilterOptions[i]);
         }
-      });
+      }
 
       expect(popoverButton.textContent).toEqual('Hosts4');
     });

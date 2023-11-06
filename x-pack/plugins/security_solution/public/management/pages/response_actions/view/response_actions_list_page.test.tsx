@@ -204,7 +204,7 @@ describe('Response actions history page', () => {
       expect(getByTestId('pagination-button-2').getAttribute('aria-current')).toStrictEqual('true');
     });
 
-    it('should read and set command filter values from URL params', () => {
+    it('should read and set command filter values from URL params', async () => {
       const filterPrefix = 'actions-filter';
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?commands=release,processes`);
@@ -230,7 +230,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?commands=release,processes');
     });
 
-    it('should read and set hosts filter values from URL params', () => {
+    it('should read and set hosts filter values from URL params', async () => {
       mockUseGetEndpointsList.mockReturnValue({
         data: Array.from({ length: 10 }).map((_, i) => {
           return {
@@ -274,7 +274,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5');
     });
 
-    it('should read and set status filter values from URL params', () => {
+    it('should read and set status filter values from URL params', async () => {
       const filterPrefix = 'statuses-filter';
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?statuses=pending,failed`);
@@ -390,7 +390,7 @@ describe('Response actions history page', () => {
   });
 
   describe('Set selected/set values to URL params', () => {
-    it('should set selected page number to URL params', () => {
+    it('should set selected page number to URL params', async () => {
       render();
       const { getByTestId } = renderResult;
 
@@ -398,7 +398,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?page=2&pageSize=10');
     });
 
-    it('should set selected pageSize value to URL params', () => {
+    it('should set selected pageSize value to URL params', async () => {
       render();
       const { getByTestId } = renderResult;
 
@@ -410,56 +410,57 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?page=1&pageSize=20');
     });
 
-    it('should set selected command filter options to URL params ', () => {
+    it('should set selected command filter options to URL params ', async () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         await userEvent.click(option);
-      });
+      }
 
       expect(history.location.search).toEqual(
         '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
       );
     });
 
-    it('should set selected hosts filter options to URL params ', () => {
+    it('should set selected hosts filter options to URL params ', async () => {
       const filterPrefix = 'hosts-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option, i) => {
+      for (let i = 0; i < allFilterOptions.length; i++) {
         if ([0, 1, 2].includes(i)) {
+          const option = allFilterOptions[i];
           option.style.pointerEvents = 'all';
           await userEvent.click(option);
         }
-      });
+      }
 
       expect(history.location.search).toEqual('?hosts=agent-id-0%2Cagent-id-1%2Cagent-id-2');
     });
 
-    it('should set selected status filter options to URL params ', () => {
+    it('should set selected status filter options to URL params ', async () => {
       const filterPrefix = 'statuses-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         await userEvent.click(option);
-      });
+      }
 
       expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
     });
 
-    it('should set selected users search input strings to URL params ', () => {
+    it('should set selected users search input strings to URL params ', async () => {
       const filterPrefix = 'users-filter';
       render();
       const { getByTestId } = renderResult;
@@ -503,13 +504,13 @@ describe('Response actions history page', () => {
       render();
       const { getAllByTestId } = renderResult;
 
-      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
       // expand some rows
-      expandButtons.forEach((button, i) => {
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      for (let i = 0; i < expandButtons.length; i++) {
         if ([0, 1].includes(i)) {
-          await userEvent.click(button);
+          await userEvent.click(expandButtons[i]);
         }
-      });
+      }
 
       // verify 2 rows are expanded and are the ones from before
       expect(history.location.search).toEqual(`?withOutputs=${actionIdsWithDetails}`);

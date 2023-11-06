@@ -143,7 +143,7 @@ describe.skip('When on the policy list page', () => {
       expect(endpointCount[0].textContent).toBe('4');
     });
 
-    it('endpoint count link should navigate to the endpoint list filtered by policy', () => {
+    it('endpoint count link should navigate to the endpoint list filtered by policy', async () => {
       const policyId = policies.items[0].id;
       const filterByPolicyQuery = `?admin_query=(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
       const backLink = {

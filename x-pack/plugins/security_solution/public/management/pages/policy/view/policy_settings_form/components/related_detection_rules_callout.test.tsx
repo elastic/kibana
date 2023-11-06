@@ -37,7 +37,7 @@ describe('Policy form RelatedDetectionRulesCallout component', () => {
     );
   });
 
-  it('should navigate to Detection Rules when link is clicked', () => {
+  it('should navigate to Detection Rules when link is clicked', async () => {
     render();
     await userEvent.click(renderResult.getByTestId('test-link'));
 

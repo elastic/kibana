@@ -80,7 +80,7 @@ describe('When rendering PolicySettingsLayout', () => {
      * Makes updates to the policy form on the UI and return back a new (cloned) `PolicyData`
      * with the updates reflected in it
      */
-    const makeUpdates = () => {
+    const makeUpdates = async () => {
       const { getByTestId } = renderResult;
       const expectedUpdates = cloneDeep(policyData);
       const policySettings = expectedUpdates.inputs[0].config.policy.value;
@@ -127,7 +127,7 @@ describe('When rendering PolicySettingsLayout', () => {
 
     it('should allow updates to be made', async () => {
       render();
-      const expectedUpdatedPolicy = makeUpdates();
+      const expectedUpdatedPolicy = await makeUpdates();
       await clickSave();
 
       expect(apiMocks.responseProvider.updateEndpointPolicy).toHaveBeenCalledWith({

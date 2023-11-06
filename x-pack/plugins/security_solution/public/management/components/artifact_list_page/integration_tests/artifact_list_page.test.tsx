@@ -105,9 +105,7 @@ describe('When using the ArtifactListPage component', () => {
 
     it('should persist pagination `page` changes to the URL', async () => {
       const { getByTestId } = await renderWithListData();
-      act(() => {
-        await userEvent.click(getByTestId('pagination-button-1'));
-      });
+      await userEvent.click(getByTestId('pagination-button-1'));
 
       await waitFor(() => {
         expect(history.location.search).toMatch(/page=2/);
@@ -116,18 +114,14 @@ describe('When using the ArtifactListPage component', () => {
 
     it('should persist pagination `pageSize` changes to the URL', async () => {
       const { getByTestId } = await renderWithListData();
-      act(() => {
-        await userEvent.click(getByTestId('tablePaginationPopoverButton'));
-      });
+      await userEvent.click(getByTestId('tablePaginationPopoverButton'));
       await act(async () => {
         await waitFor(() => {
           expect(getByTestId('tablePagination-20-rows')).toBeEnabled();
         });
       });
 
-      await userEvent.click(getByTestId('tablePagination-20-rows'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(getByTestId('tablePagination-20-rows'));
 
       await waitFor(() => {
         expect(history.location.search).toMatch(/pageSize=20/);
@@ -137,27 +131,15 @@ describe('When using the ArtifactListPage component', () => {
     describe('and interacting with card actions', () => {
       const clickCardAction = async (action: 'edit' | 'delete') => {
         await getFirstCard({ showActions: true });
-        act(() => {
-          switch (action) {
-            case 'delete':
-              await userEvent.click(
-                renderResult.getByTestId('testPage-card-cardDeleteAction'),
-                undefined,
-                { skipPointerEventsCheck: true }
-              );
-              break;
+        switch (action) {
+          case 'delete':
+            await userEvent.click(renderResult.getByTestId('testPage-card-cardDeleteAction'));
+            break;
 
-            case 'edit':
-              await userEvent.click(
-                renderResult.getByTestId('testPage-card-cardEditAction'),
-                undefined,
-                {
-                  skipPointerEventsCheck: true,
-                }
-              );
-              break;
-          }
-        });
+          case 'edit':
+            await userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'));
+            break;
+        }
       };
 
       it('should display the Edit flyout when edit action is clicked', async () => {
@@ -218,9 +200,7 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       it('should persist filter to the URL params', async () => {
-        act(() => {
-          await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-        });
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
         clickSearchButton();
 
         await waitFor(() => {
@@ -248,9 +228,7 @@ describe('When using the ArtifactListPage component', () => {
           });
         });
 
-        act(() => {
-          await userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
-        });
+        await userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
 
         await act(async () => {
           await waitFor(() => {
@@ -290,9 +268,7 @@ describe('When using the ArtifactListPage component', () => {
           };
         });
 
-        act(() => {
-          await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-        });
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
 
         clickSearchButton();
 

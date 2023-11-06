@@ -99,7 +99,7 @@ describe('FormattedIp', () => {
     expect(screen.getByTestId('DraggableWrapper')).toBeInTheDocument();
   });
 
-  test('if not enableIpDetailsFlyout, should go to network details page', () => {
+  test('if not enableIpDetailsFlyout, should go to network details page', async () => {
     render(
       <TestProviders>
         <FormattedIp {...props} />
@@ -111,7 +111,7 @@ describe('FormattedIp', () => {
     expect(toggleExpandedDetail).not.toHaveBeenCalled();
   });
 
-  test('if enableIpDetailsFlyout, should open NetworkDetailsSidePanel', () => {
+  test('if enableIpDetailsFlyout, should open NetworkDetailsSidePanel', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,

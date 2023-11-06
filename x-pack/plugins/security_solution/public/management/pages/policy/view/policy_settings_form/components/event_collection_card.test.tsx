@@ -76,7 +76,7 @@ describe('Policy Event Collection Card common component', () => {
     expect(isChecked('test-network')).toBe(true);
   });
 
-  it('should allow items to be unchecked', () => {
+  it('should allow items to be unchecked', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.events.file', false);
     render();
@@ -88,7 +88,7 @@ describe('Policy Event Collection Card common component', () => {
     });
   });
 
-  it('should allow items to be checked', () => {
+  it('should allow items to be checked', async () => {
     set(formProps.policy, 'windows.events.file', false);
     formProps.selection.file = false;
 

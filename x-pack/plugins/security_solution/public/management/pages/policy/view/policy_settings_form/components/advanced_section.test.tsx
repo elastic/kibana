@@ -6,7 +6,7 @@
  */
 
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../mocks';
-import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import type { UiRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import React from 'react';
@@ -28,10 +28,10 @@ describe('Policy Advanced Settings section', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
 
   let formProps: AdvancedSectionProps;
-  let render: (expanded?: boolean) => ReturnType<AppContextTestRender['render']>;
-  let renderResult: ReturnType<typeof render>;
+  let render: (expanded?: boolean) => Promise<void>;
+  let renderResult: ReturnType<UiRender>;
 
-  const clickShowHideButton = () => {
+  const clickShowHideButton = async () => {
     await userEvent.click(renderResult.getByTestId(testSubj.showHideButton));
   };
 
@@ -46,47 +46,45 @@ describe('Policy Advanced Settings section', () => {
       'data-test-subj': testSubj.container,
     };
 
-    render = (expanded = true) => {
+    render = async (expanded = true) => {
       renderResult = mockedContext.render(<AdvancedSection {...formProps} />);
 
       if (expanded) {
-        clickShowHideButton();
+        await clickShowHideButton();
         expect(renderResult.getByTestId(testSubj.settingsContainer));
       }
-
-      return renderResult;
     };
   });
 
-  it('should render initially collapsed', () => {
-    render(false);
+  it('should render initially collapsed', async () => {
+    await render(false);
 
     expect(renderResult.queryByTestId(testSubj.settingsContainer)).toBeNull();
   });
 
-  it('should expand and collapse section when button is clicked', () => {
-    render(false);
+  it('should expand and collapse section when button is clicked', async () => {
+    await render(false);
 
     expect(renderResult.queryByTestId(testSubj.settingsContainer)).toBeNull();
 
-    clickShowHideButton();
+    await clickShowHideButton();
 
     expect(renderResult.getByTestId(testSubj.settingsContainer));
   });
 
-  it('should show warning callout', () => {
-    const { getByTestId } = render(true);
+  it('should show warning callout', async () => {
+    await render(true);
 
-    expect(getByTestId(testSubj.warningCallout));
+    expect(renderResult.getByTestId(testSubj.warningCallout));
   });
 
-  it('should render all advanced options', () => {
+  it('should render all advanced options', async () => {
     const fieldsWithDefaultValues = [
       'mac.advanced.capture_env_vars',
       'linux.advanced.capture_env_vars',
     ];
 
-    render(true);
+    await render(true);
 
     for (const advancedOption of AdvancedPolicySchema) {
       const optionTestSubj = testSubj.settingRowTestSubjects(advancedOption.key);
@@ -154,28 +152,28 @@ describe('Policy Advanced Settings section', () => {
       formProps.mode = 'view';
     });
 
-    it('should render with no form fields', () => {
-      render();
+    it('should render with no form fields', async () => {
+      await render();
 
       expectIsViewOnly(renderResult.getByTestId(testSubj.settingsContainer));
     });
 
-    it('should render options in expected content', () => {
+    it('should render options in expected content', async () => {
       const option1 = AdvancedPolicySchema[0];
       const option2 = AdvancedPolicySchema[4];
 
       set(formProps.policy, option1.key, 'foo');
       set(formProps.policy, option2.key, ''); // test empty value
 
-      const { getByTestId } = render();
+      await render();
 
       expectIsViewOnly(renderResult.getByTestId(testSubj.settingsContainer));
-      expect(getByTestId(testSubj.settingRowTestSubjects(option1.key).container)).toHaveTextContent(
-        exactMatchText('linux.advanced.agent.connection_delayInfo 7.9+foo')
-      );
-      expect(getByTestId(testSubj.settingRowTestSubjects(option2.key).container)).toHaveTextContent(
-        exactMatchText('linux.advanced.artifacts.global.intervalInfo 7.9+—')
-      );
+      expect(
+        renderResult.getByTestId(testSubj.settingRowTestSubjects(option1.key).container)
+      ).toHaveTextContent(exactMatchText('linux.advanced.agent.connection_delayInfo 7.9+foo'));
+      expect(
+        renderResult.getByTestId(testSubj.settingRowTestSubjects(option2.key).container)
+      ).toHaveTextContent(exactMatchText('linux.advanced.artifacts.global.intervalInfo 7.9+—'));
     });
   });
 });

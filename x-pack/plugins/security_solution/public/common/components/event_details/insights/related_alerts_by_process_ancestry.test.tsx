@@ -63,7 +63,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
     expect(mockUseAlertPrevalenceFromProcessTree).not.toHaveBeenCalled();
   });
 
-  it('shows a loading indicator and starts to fetch data when clicked', () => {
+  it('shows a loading indicator and starts to fetch data when clicked', async () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: true,
     });
@@ -79,7 +79,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('shows an error message when the request fails', () => {
+  it('shows an error message when the request fails', async () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: true,

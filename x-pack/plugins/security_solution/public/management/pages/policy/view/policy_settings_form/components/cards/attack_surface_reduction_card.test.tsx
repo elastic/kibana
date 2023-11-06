@@ -80,7 +80,7 @@ describe('Policy Attack Surface Reduction Card', () => {
     );
   });
 
-  it('should be able to toggle to disabled', () => {
+  it('should be able to toggle to disabled', async () => {
     const expectedUpdate = cloneDeep(formProps.policy);
     set(expectedUpdate, 'windows.attack_surface_reduction.credential_hardening.enabled', false);
     render();
@@ -98,7 +98,7 @@ describe('Policy Attack Surface Reduction Card', () => {
     });
   });
 
-  it('should should be able to toggle to enabled', () => {
+  it('should should be able to toggle to enabled', async () => {
     set(formProps.policy, 'windows.attack_surface_reduction.credential_hardening.enabled', false);
 
     const expectedUpdate = cloneDeep(formProps.policy);

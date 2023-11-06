@@ -24,17 +24,15 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
 
   const clickCardAction = async (action: 'edit' | 'delete') => {
     await getFirstCard({ showActions: true });
-    act(() => {
-      switch (action) {
-        case 'delete':
-          await userEvent.click(renderResult.getByTestId('testPage-card-cardDeleteAction'));
-          break;
+    switch (action) {
+      case 'delete':
+        await userEvent.click(renderResult.getByTestId('testPage-card-cardDeleteAction'));
+        break;
 
-        case 'edit':
-          await userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'));
-          break;
-      }
-    });
+      case 'edit':
+        await userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'));
+        break;
+    }
   };
 
   beforeEach(
@@ -92,9 +90,7 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
     const deferred = getDeferred();
     mockedApi.responseProvider.trustedAppDelete.mockDelay.mockReturnValue(deferred.promise);
 
-    act(() => {
-      await userEvent.click(submitButton);
-    });
+    await userEvent.click(submitButton);
 
     await waitFor(() => {
       expect(cancelButton).toBeEnabled();
@@ -107,9 +103,7 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
   });
 
   it('should show success toast if deleted successfully', async () => {
-    act(() => {
-      await userEvent.click(submitButton);
-    });
+    await userEvent.click(submitButton);
 
     await act(async () => {
       await waitFor(() => {
@@ -129,9 +123,7 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
       throw new Error('oh oh');
     });
 
-    act(() => {
-      await userEvent.click(submitButton);
-    });
+    await userEvent.click(submitButton);
 
     await act(async () => {
       await waitFor(() => {

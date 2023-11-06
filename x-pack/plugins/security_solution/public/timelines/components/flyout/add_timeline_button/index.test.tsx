@@ -97,12 +97,12 @@ describe('AddTimelineButton', () => {
       expect(screen.getByText(i18n.NEW_TIMELINE)).toBeInTheDocument();
     });
 
-    test('it renders create timeline template btn', () => {
+    test('it renders create timeline template btn', async () => {
       await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByText(i18n.NEW_TEMPLATE_TIMELINE)).toBeInTheDocument();
     });
 
-    test('it renders Open timeline btn', () => {
+    test('it renders Open timeline btn', async () => {
       await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByTestId('open-timeline-button')).toBeInTheDocument();
     });
@@ -132,12 +132,12 @@ describe('AddTimelineButton', () => {
       expect(screen.getByLabelText(i18n.ADD_TIMELINE)).toBeInTheDocument();
     });
 
-    test('it renders create timeline btn', () => {
+    test('it renders create timeline btn', async () => {
       await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByText(i18n.NEW_TIMELINE)).toBeInTheDocument();
     });
 
-    test('it renders create timeline template btn', () => {
+    test('it renders create timeline template btn', async () => {
       await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByText(i18n.NEW_TEMPLATE_TIMELINE)).toBeInTheDocument();
     });

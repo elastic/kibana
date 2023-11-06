@@ -58,7 +58,7 @@ describe('Policy Form Antivirus Registration Card', () => {
     );
   });
 
-  it('should be able to enable the option', () => {
+  it('should be able to enable the option', async () => {
     const expectedUpdate = cloneDeep(formProps.policy);
     set(expectedUpdate, 'windows.antivirus_registration.enabled', true);
 

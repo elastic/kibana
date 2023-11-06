@@ -43,7 +43,7 @@ describe('ControlledComboboxInput', () => {
     expect(screen.getByText('test'));
   });
 
-  it('calls onChangeCallback, and disabledButtonCallback when value is removed', () => {
+  it('calls onChangeCallback, and disabledButtonCallback when value is removed', async () => {
     renderControlledComboboxInput();
     const removeButton = screen.getByTestId('is-one-of-combobox-input').querySelector('button');
 
@@ -66,7 +66,7 @@ describe('ControlledDefaultInput', () => {
     expect(screen.getByDisplayValue('test'));
   });
 
-  it('calls onChangeCallback, and disabledButtonCallback when value is changed', () => {
+  it('calls onChangeCallback, and disabledButtonCallback when value is changed', async () => {
     renderControlledDefaultInput([]);
     const inputBox = screen.getByPlaceholderText('value');
 
