@@ -1048,7 +1048,6 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it invokes "setWarningsExist" when invalid value in field value input', async () => {
-    console.log('the field name: ', getField('file.path.text'));
     const mockSetWarningsExists = jest.fn();
 
     (validateFilePathInput as jest.Mock).mockReturnValue('some warning message');
