@@ -8,47 +8,28 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
-import { ExpandDetailButton } from './expand_detail_button';
-import { RightPanelContext } from '../context';
-// TODO
+import { StorybookProviders } from '../../../common/mock/storybook_providers';
+import { mockRiskScoreState } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { RiskSummary } from './risk_summary';
+
 export default {
-  component: ExpandDetailButton,
-  title: 'Flyout/ExpandDetailButton',
+  component: RiskSummary,
+  title: 'Components/RiskSummary',
 };
 
-export const Expand: Story<void> = () => {
-  const flyoutContextValue = {
-    openLeftPanel: () => window.alert('openLeftPanel called'),
-    panels: {},
-  } as unknown as ExpandableFlyoutContext;
-  const panelContextValue = {
-    eventId: 'eventId',
-    indexName: 'indexName',
-  } as unknown as RightPanelContext;
+const flyoutContextValue = {
+  openLeftPanel: () => window.alert('openLeftPanel called'),
+  panels: {},
+} as unknown as ExpandableFlyoutContext;
 
+export const Default: Story<void> = () => {
   return (
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <RightPanelContext.Provider value={panelContextValue}>
-        <ExpandDetailButton />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
-  );
-};
-
-export const Collapse: Story<void> = () => {
-  const flyoutContextValue = {
-    closeLeftPanel: () => window.alert('closeLeftPanel called'),
-    panels: {
-      left: {},
-    },
-  } as unknown as ExpandableFlyoutContext;
-  const panelContextValue = {} as unknown as RightPanelContext;
-
-  return (
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <RightPanelContext.Provider value={panelContextValue}>
-        <ExpandDetailButton />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
+    <StorybookProviders>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <div style={{ maxWidth: '300px' }}>
+          <RiskSummary riskScoreData={mockRiskScoreState} />
+        </div>
+      </ExpandableFlyoutContext.Provider>
+    </StorybookProviders>
   );
 };

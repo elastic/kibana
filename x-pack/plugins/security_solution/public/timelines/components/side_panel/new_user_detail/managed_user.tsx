@@ -14,6 +14,7 @@ import {
   useEuiTheme,
   EuiEmptyPrompt,
   EuiCallOut,
+  useEuiFontSize,
 } from '@elastic/eui';
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -59,6 +60,8 @@ export const ManagedUser = ({
     [getAppUrl]
   );
 
+  const xsFontSize = useEuiFontSize('xxs').fontSize;
+
   return (
     <>
       <InspectButtonContainer>
@@ -92,19 +95,25 @@ export const ManagedUser = ({
                 />
               </span>
               {managedUser.lastSeen.date && (
-                <FormattedMessage
-                  id="xpack.securitySolution.timeline.userDetails.updatedTime"
-                  defaultMessage="Updated {time}"
-                  values={{
-                    time: (
-                      <FormattedRelativePreferenceDate
-                        value={managedUser.lastSeen.date}
-                        dateFormat="MMM D, YYYY"
-                        relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
-                      />
-                    ),
-                  }}
-                />
+                <span
+                  css={css`
+                    font-size: ${xsFontSize};
+                  `}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.timeline.userDetails.updatedTime"
+                    defaultMessage="Updated {time}"
+                    values={{
+                      time: (
+                        <FormattedRelativePreferenceDate
+                          value={managedUser.lastSeen.date}
+                          dateFormat="MMM D, YYYY"
+                          relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
+                        />
+                      ),
+                    }}
+                  />
+                </span>
               )}
             </>
           }

@@ -5,41 +5,24 @@
  * 2.0.
  */
 
-import {
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiBadge,
-  EuiText,
-  EuiFlexItem,
-  EuiFlexGroup,
-  useEuiTheme,
-  EuiTitle,
-  EuiPanel,
-} from '@elastic/eui';
-
-import React, { useMemo } from 'react';
+import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import React from 'react';
 import { css } from '@emotion/react';
-import { max } from 'lodash';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
+import { i18n } from '@kbn/i18n';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { RiskScoreState } from '../../../explore/containers/risk_score';
 import type {
   ManagedUserData,
   ObservedUserData,
 } from '../../../timelines/components/side_panel/new_user_detail/types';
-import { ManagedUser } from '../../../timelines/components/side_panel/new_user_detail/managed_user';
-import { ObservedUser } from '../../../timelines/components/side_panel/new_user_detail/observed_user';
-import * as i18n from './translations';
+import type { RiskScoreEntity } from '../../../../common/risk_engine';
+import { ExpandFlyoutButton } from './expand_flyout_button';
+import { useExpandDetailsFlyout } from '../hooks/use_expand_details_flyout';
 
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import type { RiskScoreState } from '../../../explore/containers/risk_score';
-import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { RiskSummary } from './risk_summary';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { UserDetailsBody } from './user_details_body';
 
-export const QUERY_ID = 'usersDetailsQuery';
-
-interface UserDetailsContentComponentProps {
+export interface UserDetailsContentProps extends Record<string, unknown> {
   userName: string;
   observedUser: ObservedUserData;
   managedUser: ManagedUserData;
@@ -49,110 +32,89 @@ interface UserDetailsContentComponentProps {
   isDraggable: boolean;
 }
 
+export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
+  key: 'user-details';
+  params: UserDetailsContentProps;
+}
+
+export const UserDetailsContentKey: UserDetailsExpandableFlyoutProps['key'] = 'user-details';
+export const USER_DETAILS_RISK_SCORE_QUERY_ID = 'userDetailsRiskScoreQuery';
+
 /**
  * This is a visual component. It doesn't access any external Context or API.
  * It designed for unit testing the UI and previewing changes on storybook.
  */
 export const UserDetailsContent = ({
-  userName,
   observedUser,
   managedUser,
-  riskScoreState,
   contextID,
   scopeId,
+  userName,
   isDraggable,
-}: UserDetailsContentComponentProps) => {
-  const { euiTheme } = useEuiTheme();
+  riskScoreState,
+}: UserDetailsContentProps) => {
+  const { data: userRisk } = riskScoreState;
+  const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const riskInputs = userRiskData?.user.risk.inputs ?? [];
 
-  const lastSeenDate = useMemo(
-    () =>
-      max([observedUser.lastSeen, managedUser.lastSeen].map((el) => el.date && new Date(el.date))),
-    [managedUser.lastSeen, observedUser.lastSeen]
-  );
+  const { isExpanded, onToggle } = useExpandDetailsFlyout({ riskInputs });
+
+  if (riskScoreState.loading || observedUser.isLoading || managedUser.isLoading) {
+    return <FlyoutLoading />;
+  }
 
   return (
     <>
-      <EuiPanel hasShadow={false}>
-        <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" data-test-subj={'user-details-content-lastSeen'}>
-              {lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />}
-              <EuiSpacer size="xs" />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="user" size="l" color="primary" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h2>
-                    <SecuritySolutionLinkAnchor
-                      deepLinkId={SecurityPageName.users}
-                      path={getUsersDetailsUrl(userName)}
-                      target={'_blank'}
-                      css={css`
-                        font-weight: ${euiTheme.font.weight.bold};
-                      `}
-                    >
-                      {userName}
-                    </SecuritySolutionLinkAnchor>
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              responsive={false}
-              data-test-subj="user-details-content-header"
-            >
-              <EuiFlexItem grow={false}>
-                {observedUser.lastSeen.date && (
-                  <EuiBadge data-test-subj="user-details-content-observed-badge" color="hollow">
-                    {i18n.OBSERVED_BADGE}
-                  </EuiBadge>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {managedUser.lastSeen.date && (
-                  <EuiBadge data-test-subj="user-details-content-managed-badge" color="hollow">
-                    {i18n.MANAGED_BADGE}
-                  </EuiBadge>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiHorizontalRule margin="xs" />
-      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
-        <>
-          <EuiPanel hasShadow={false}>
-            <RiskSummary riskScoreData={riskScoreState} />
-          </EuiPanel>
-          <EuiHorizontalRule margin="xs" />
-        </>
-      )}
+      <EuiFlyoutHeader
+        hasBorder
+        // Temporary code to force the FlyoutHeader height.
+        // Please delete it when FlyoutHeader supports multiple heights.
+        css={css`
+          &.euiFlyoutHeader {
+            padding: 5px 0;
+            min-height: 34px;
+          }
+        `}
+      >
+        {riskInputs.length > 0 && (
+          <ExpandFlyoutButton
+            isExpanded={isExpanded}
+            onToggle={onToggle}
+            expandedText={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.header.expandDetailButtonLabel',
+              {
+                defaultMessage: 'Collapse details',
+              }
+            )}
+            collapsedText={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.header.collapseDetailButtonLabel',
+              {
+                defaultMessage: 'Expand details',
+              }
+            )}
+          />
+        )}
+      </EuiFlyoutHeader>
 
-      <EuiPanel hasShadow={false}>
-        <ObservedUser
-          observedUser={observedUser}
-          contextID={contextID}
-          scopeId={scopeId}
-          isDraggable={isDraggable}
-        />
-        <EuiSpacer />
-        <ManagedUser
+      <EuiFlyoutBody
+        css={css`
+          .euiFlyoutBody__overflowContent {
+            padding: 0;
+          }
+        `}
+      >
+        <UserDetailsBody
+          userName={userName}
           managedUser={managedUser}
+          observedUser={observedUser}
+          riskScoreState={riskScoreState}
           contextID={contextID}
           scopeId={scopeId}
-          isDraggable={isDraggable}
+          isDraggable={!!isDraggable}
         />
-      </EuiPanel>
+      </EuiFlyoutBody>
     </>
   );
 };
+
+UserDetailsContent.displayName = 'UserDetailsContent';

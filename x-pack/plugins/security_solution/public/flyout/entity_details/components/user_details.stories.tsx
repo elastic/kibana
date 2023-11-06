@@ -8,20 +8,32 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
-import { UserDetailsContentComponent } from './user_details_content';
-import { StorybookProviders } from '../../../../common/mock/storybook_providers';
-import { mockManagedUser, mockObservedUser, mockRiskScoreState } from './__mocks__';
+import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { StorybookProviders } from '../../../common/mock/storybook_providers';
+import {
+  mockManagedUser,
+  mockObservedUser,
+  mockRiskScoreState,
+} from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { UserDetailsContent } from './user_details_content';
 
-storiesOf('UserDetailsContent', module)
+const flyoutContextValue = {
+  openLeftPanel: () => window.alert('openLeftPanel called'),
+  panels: {},
+} as unknown as ExpandableFlyoutContext;
+
+storiesOf('Components/UserDetailsContent', module)
   .addDecorator((storyFn) => (
     <StorybookProviders>
-      <EuiFlyout size="m" onClose={() => {}}>
-        <EuiFlyoutBody>{storyFn()}</EuiFlyoutBody>
-      </EuiFlyout>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <EuiFlyout size="m" onClose={() => {}}>
+          <EuiFlyoutBody>{storyFn()}</EuiFlyoutBody>
+        </EuiFlyout>
+      </ExpandableFlyoutContext.Provider>
     </StorybookProviders>
   ))
   .add('default', () => (
-    <UserDetailsContentComponent
+    <UserDetailsContent
       userName="test"
       managedUser={mockManagedUser}
       observedUser={mockObservedUser}
@@ -32,7 +44,7 @@ storiesOf('UserDetailsContent', module)
     />
   ))
   .add('integration disabled', () => (
-    <UserDetailsContentComponent
+    <UserDetailsContent
       userName="test"
       managedUser={{
         details: undefined,
@@ -55,7 +67,7 @@ storiesOf('UserDetailsContent', module)
     />
   ))
   .add('no managed data', () => (
-    <UserDetailsContentComponent
+    <UserDetailsContent
       userName="test"
       managedUser={{
         details: undefined,
@@ -78,7 +90,7 @@ storiesOf('UserDetailsContent', module)
     />
   ))
   .add('no observed data', () => (
-    <UserDetailsContentComponent
+    <UserDetailsContent
       userName="test"
       managedUser={mockManagedUser}
       observedUser={{
@@ -113,7 +125,7 @@ storiesOf('UserDetailsContent', module)
     />
   ))
   .add('loading', () => (
-    <UserDetailsContentComponent
+    <UserDetailsContent
       userName="test"
       managedUser={{
         details: undefined,

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
@@ -22,10 +19,7 @@ import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anom
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../common/risk_engine';
-import { ExpandFlyoutButton } from '../components/expand_flyout_button';
-import { useExpandDetailsFlyout } from '../hooks/use_expand_details_flyout';
 import { UserDetailsContent } from '../components/user_details_content';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -64,10 +58,7 @@ export const UserDetailsPanel = ({
     pagination: FIRST_RECORD_PAGINATION,
   });
 
-  const { data: userRisk, inspect, refetch, loading } = riskScoreState;
-  const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-  const riskInputs = userRiskData?.user.risk.inputs ?? [];
-  const { isExpanded, onToggle } = useExpandDetailsFlyout({ riskInputs });
+  const { inspect, refetch, loading } = riskScoreState;
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const observedUser = useObservedUser(userName);
   const managedUser = useManagedUser(userName);
@@ -81,77 +72,32 @@ export const UserDetailsPanel = ({
     setQuery,
   });
 
-  if (riskScoreState.loading || observedUser.isLoading || managedUser.isLoading) {
-    return <FlyoutLoading />;
-  }
-
   return (
-    <>
-      <EuiFlyoutHeader
-        hasBorder
-        // Temporary code to force the FlyoutHeader height.
-        // Please delete it when FlyoutHeader supports multiple heights.
-        css={css`
-          &.euiFlyoutHeader {
-            padding: 5px 0;
-            min-height: 34px;
-          }
-        `}
-      >
-        {riskInputs.length > 0 && (
-          <ExpandFlyoutButton
-            isExpanded={isExpanded}
-            onToggle={onToggle}
-            expandedText={i18n.translate(
-              'xpack.securitySolution.flyout.right.header.expandDetailButtonLabel',
-              {
-                defaultMessage: 'Collapse details',
-              }
-            )}
-            collapsedText={i18n.translate(
-              'xpack.securitySolution.flyout.right.header.collapseDetailButtonLabel',
-              {
-                defaultMessage: 'Expand details',
-              }
-            )}
-          />
-        )}
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody
-        css={css`
-          .euiFlyoutBody__overflowContent {
-            padding: 0;
-          }
-        `}
-      >
-        <AnomalyTableProvider
-          criteriaFields={getCriteriaFromUsersType(UsersType.details, userName)}
-          startDate={from}
-          endDate={to}
-          skip={isInitializing}
-        >
-          {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
-            <UserDetailsContent
-              userName={userName}
-              managedUser={managedUser}
-              observedUser={{
-                ...observedUser,
-                anomalies: {
-                  isLoading: isLoadingAnomaliesData,
-                  anomalies: anomaliesData,
-                  jobNameById,
-                },
-              }}
-              riskScoreState={riskScoreState}
-              contextID={contextID}
-              scopeId={scopeId}
-              isDraggable={!!isDraggable}
-            />
-          )}
-        </AnomalyTableProvider>
-      </EuiFlyoutBody>
-    </>
+    <AnomalyTableProvider
+      criteriaFields={getCriteriaFromUsersType(UsersType.details, userName)}
+      startDate={from}
+      endDate={to}
+      skip={isInitializing}
+    >
+      {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
+        <UserDetailsContent
+          userName={userName}
+          managedUser={managedUser}
+          observedUser={{
+            ...observedUser,
+            anomalies: {
+              isLoading: isLoadingAnomaliesData,
+              anomalies: anomaliesData,
+              jobNameById,
+            },
+          }}
+          riskScoreState={riskScoreState}
+          contextID={contextID}
+          scopeId={scopeId}
+          isDraggable={!!isDraggable}
+        />
+      )}
+    </AnomalyTableProvider>
   );
 };
 

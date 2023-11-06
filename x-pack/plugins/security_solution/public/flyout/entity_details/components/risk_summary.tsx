@@ -146,7 +146,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
           <EuiFlexItem grow={false}>
             <div
               // Improve Visualization loading state by predefining the size
-              css={`
+              css={css`
                 width: ${LENS_VISUALIZATION_SIZE}px;
                 height: ${LENS_VISUALIZATION_SIZE}px;
               `}
@@ -173,7 +173,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
             <InspectButtonContainer>
               <div
                 // Anchors the position absolute inspect button (nearest positioned ancestor)
-                css={`
+                css={css`
                   position: relative;
                 `}
               >
