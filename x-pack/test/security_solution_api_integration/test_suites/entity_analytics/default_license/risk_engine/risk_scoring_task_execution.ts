@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @brokenInServerless Risk Scoring Task', () => {
+  describe('@ess @serverless Risk Scoring Task', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,

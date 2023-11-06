@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const log = getService('log');
 
-  describe('@ess @serverless @brokenInServerless init_and_status_apis', () => {
+  describe('@ess @serverless init_and_status_apis', () => {
     beforeEach(async () => {
       await cleanRiskEngineConfig({ kibanaServer });
       await deleteRiskEngineTask({ es, log });

@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('@ess @serverless @brokenInServerless Risk Scoring Calculation API', () => {
+  describe('@ess @serverless Risk Scoring Calculation API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
