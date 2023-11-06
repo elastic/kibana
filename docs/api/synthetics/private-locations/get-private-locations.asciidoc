@@ -69,7 +69,7 @@ Here's an example request for a single location by ID:
 
 [source,sh]
 --------------------------------------------------
-GET api/synthetics/private_locations/Test private location
+GET api/synthetics/private_locations/<location_id>
 --------------------------------------------------
 
 or by label:
