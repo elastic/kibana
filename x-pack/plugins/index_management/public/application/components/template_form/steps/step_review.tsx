@@ -111,7 +111,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     const serializedMappings = getTemplateParameter(serializedTemplate, 'mappings');
     const serializedSettings = getTemplateParameter(serializedTemplate, 'settings');
     const serializedAliases = getTemplateParameter(serializedTemplate, 'aliases');
-    const serializedLifecycle = indexTemplate?.lifecycle;
+    const serializedLifecycle = (indexTemplate as TemplateDeserialized)?.lifecycle;
 
     const numIndexPatterns = indexPatterns!.length;
 
