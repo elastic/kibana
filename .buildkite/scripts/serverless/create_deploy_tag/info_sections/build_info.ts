@@ -54,10 +54,8 @@ export async function getOnMergePRBuild(commitHash: string): Promise<BuildkiteBu
   };
 }
 
-export async function getQAFTestBuilds(date: string, limit = 3): Promise<BuildkiteBuildExtract[]> {
-  const builds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, limit);
-
-  console.log(builds);
+export async function getQAFTestBuilds(date: string): Promise<BuildkiteBuildExtract[]> {
+  const builds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, 10);
 
   return builds
     .map((build) => ({
@@ -71,22 +69,20 @@ export async function getQAFTestBuilds(date: string, limit = 3): Promise<Buildki
 }
 
 export async function getArtifactBuildJob(
-  date: string,
   commitHash: string
 ): Promise<BuildkiteBuildExtract | null> {
-  const builds = await buildkite.getBuildsAfterDate(KIBANA_ARTIFACT_BUILD_SLUG, date, 10);
-  const correspondingBuild = builds.find((build) => build.commit === commitHash);
+  const build = await buildkite.getBuildForCommit(KIBANA_ARTIFACT_BUILD_SLUG, commitHash);
 
-  if (!correspondingBuild) {
+  if (!build) {
     return null;
   }
 
   return {
-    success: correspondingBuild.state === 'passed',
-    stateEmoji: buildkiteBuildStateToEmoji(correspondingBuild.state),
-    url: correspondingBuild.web_url,
+    success: build.state === 'passed',
+    stateEmoji: buildkiteBuildStateToEmoji(build.state),
+    url: build.web_url,
     slug: KIBANA_ARTIFACT_BUILD_SLUG,
-    buildNumber: correspondingBuild.number,
+    buildNumber: build.number,
   };
 }
 

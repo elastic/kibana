@@ -162,6 +162,21 @@ export class BuildkiteClient {
     return response.data as Build[];
   };
 
+  getBuildForCommit = async (pipelineSlug: string, commit: string): Promise<Build | null> => {
+    if (commit.length !== 40) {
+      throw new Error(`Invalid commit hash: ${commit}, this endpoint works with full SHAs only`);
+    }
+
+    const response = await this.http.get(
+      `v2/organizations/elastic/pipelines/${pipelineSlug}/builds?commit=${commit}`
+    );
+    const builds = response.data as Build[];
+    if (builds.length === 0) {
+      return null;
+    }
+    return builds[0];
+  };
+
   getCurrentBuild = (includeRetriedJobs = false) => {
     if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
       throw new Error(

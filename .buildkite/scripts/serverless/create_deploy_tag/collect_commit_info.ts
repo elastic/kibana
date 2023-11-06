@@ -43,7 +43,7 @@ async function main() {
   // Buildkite build info
   const buildkiteBuild = await getOnMergePRBuild(selectedSha);
   const qafBuilds = await getQAFTestBuilds(selectedCommitInfo.date!);
-  const artifactBuild = await getArtifactBuildJob(selectedCommitInfo.date!, selectedSha);
+  const artifactBuild = await getArtifactBuildJob(selectedSha);
   addBuildkiteInfoSection(
     toBuildkiteBuildInfoHtml('Relevant build info:', {
       'Merge build': buildkiteBuild,

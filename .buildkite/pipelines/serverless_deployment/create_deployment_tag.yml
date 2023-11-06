@@ -8,7 +8,7 @@ steps:
     commands:
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state initialize
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state collect_commits
-      - ts-node .buildkite/scripts/serverless/create_deploy_tag/generate_commit_selector.ts 20
+      - ts-node .buildkite/scripts/serverless/create_deploy_tag/generate_commit_selector.ts 25
       - ts-node .buildkite/scripts/serverless/create_deploy_tag/release_events.ts --state wait_for_selection
     key: select_commit
 
