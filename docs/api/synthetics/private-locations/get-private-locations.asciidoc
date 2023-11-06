@@ -76,7 +76,7 @@ or by label:
 
 [source,sh]
 --------------------------------------------------
-GET api/synthetics/private_locations/test-private-location-id
+GET api/synthetics/private_locations/<Location label>
 --------------------------------------------------
 
 Here's an example response for a single location:
