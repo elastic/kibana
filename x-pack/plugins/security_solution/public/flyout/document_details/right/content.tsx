@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { useMemo } from 'react';
 import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabsType } from './tabs';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 import {} from './tabs';
 
 export interface PanelContentProps {
@@ -33,7 +33,7 @@ export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId, tabs }) =>
     return tabs.find((tab) => tab.id === selectedTabId)?.content;
   }, [selectedTabId, tabs]);
 
-  return <EuiFlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>{selectedTabContent}</EuiFlyoutBody>;
+  return <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>{selectedTabContent}</FlyoutBody>;
 };
 
 PanelContent.displayName = 'PanelContent';
