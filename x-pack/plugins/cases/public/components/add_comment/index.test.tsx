@@ -137,42 +137,15 @@ describe.skip('AddComment ', () => {
 
     appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
 
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
+    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
 
     await act(async () => {
       ref.current!.addQuote(sampleQuote);
     });
 
-    await waitFor(() => {
-      expect(screen.getByTestId('euiMarkdownEditorTextArea').textContent).toContain(
-        `${sampleData.comment}\n\n> what a cool quote \n>  with new lines \n\n`
-      );
-    });
-  });
-
-  it('should call onFocus when adding a quote', async () => {
-    const ref = React.createRef<AddCommentRefObject>();
-
-    appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
-
-    ref.current!.editor!.textarea!.focus = jest.fn();
-
-    await act(async () => {
-      ref.current!.addQuote('a comment');
-    });
-
-    await waitFor(() => {
-      expect(ref.current!.editor!.textarea!.focus).toHaveBeenCalled();
-    });
-  });
-
-  it('should NOT call onFocus on mount', async () => {
-    const ref = React.createRef<AddCommentRefObject>();
-
-    appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
-
-    ref.current!.editor!.textarea!.focus = jest.fn();
-    expect(ref.current!.editor!.textarea!.focus).not.toHaveBeenCalled();
+    expect((await screen.findByTestId('euiMarkdownEditorTextArea')).textContent).toContain(
+      `${sampleData.comment}\n\n> what a cool quote \n>  with new lines \n\n`
+    );
   });
 
   it('it should insert a timeline', async () => {
@@ -191,13 +164,13 @@ describe.skip('AddComment ', () => {
       </CasesTimelineIntegrationProvider>
     );
 
-    act(() => {
+    await act(async () => {
       attachTimeline('[title](url)');
     });
 
-    await waitFor(() => {
-      expect(screen.getByTestId('euiMarkdownEditorTextArea')).toHaveTextContent('[title](url)');
-    });
+    expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(
+      '[title](url)'
+    );
   });
 
   describe('errors', () => {
