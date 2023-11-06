@@ -16,10 +16,12 @@ export interface AgentExecutorParams {
   actions: ActionsPluginStart;
   connectorId: string;
   esClient: ElasticsearchClient;
+  kbResource: string | undefined;
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
   request: KibanaRequest<unknown, unknown, RequestBody>;
+  elserId?: string;
 }
 
 export type AgentExecutorResponse = Promise<ResponseBody>;

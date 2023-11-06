@@ -1581,4 +1581,23 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       },
     }),
   },
+  [ConfigKey.MAX_ATTEMPTS]: {
+    fieldKey: ConfigKey.MAX_ATTEMPTS,
+    component: Switch,
+    controlled: true,
+    props: ({ setValue, field, trigger }): EuiSwitchProps => ({
+      disabled: readOnly,
+      id: 'syntheticsMonitorConfigMaxAttempts',
+      label: i18n.translate('xpack.synthetics.monitorConfig.retest.label', {
+        defaultMessage: 'Enable retest on failure',
+      }),
+      checked: field?.value === 2,
+      onChange: async (event) => {
+        const isChecked = !!event.target.checked;
+        setValue(ConfigKey.MAX_ATTEMPTS, isChecked ? 2 : 1);
+        await trigger(ConfigKey.MAX_ATTEMPTS);
+      },
+      'data-test-subj': 'syntheticsEnableAttemptSwitch',
+    }),
+  },
 });

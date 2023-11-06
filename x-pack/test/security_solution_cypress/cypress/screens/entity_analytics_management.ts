@@ -7,7 +7,7 @@
 
 import { getDataTestSubjectSelector } from '../helpers/common';
 
-export const PAGE_TITLE = '[data-test-subj="entityAnalyticsManagmentPageTitle"]';
+export const PAGE_TITLE = '[data-test-subj="entityAnalyticsManagementPageTitle"]';
 
 export const HOST_RISK_PREVIEW_TABLE = '[data-test-subj="host-risk-preview-table"]';
 

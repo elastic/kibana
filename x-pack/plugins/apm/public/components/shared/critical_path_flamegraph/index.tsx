@@ -15,6 +15,7 @@ import { css } from '@emotion/css';
 import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   FETCH_STATUS,
   useFetcher,
@@ -145,6 +146,7 @@ export function CriticalPathFlamegraph(
                   ...chartTheme,
                 ]}
                 onElementClick={(elements) => {}}
+                locale={i18n.getLocale()}
               />
               <Flame
                 id="aggregated_critical_path"

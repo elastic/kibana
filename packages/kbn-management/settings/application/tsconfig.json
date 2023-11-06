@@ -5,7 +5,8 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -22,5 +23,13 @@
     "@kbn/management-settings-utilities",
     "@kbn/management-settings-components-form",
     "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-application-browser",
+    "@kbn/i18n-react",
+    "@kbn/management-settings-components-field-category",
+    "@kbn/react-kibana-context-root",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-analytics-browser-mocks",
   ]
 }

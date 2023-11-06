@@ -84,6 +84,14 @@ export const noDataRetryLabel = i18n.translate('xpack.logExplorer.datasetSelecto
   defaultMessage: 'Retry',
 });
 
+export const tryEsql = i18n.translate('xpack.logExplorer.datasetSelector.TryEsql', {
+  defaultMessage: 'Try ES|QL',
+});
+
+export const technicalPreview = i18n.translate('xpack.logExplorer.TechPreview', {
+  defaultMessage: 'Technical preview',
+});
+
 export const sortOptions = [
   {
     id: 'asc',

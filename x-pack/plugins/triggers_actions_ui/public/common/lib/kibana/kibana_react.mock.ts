@@ -61,7 +61,9 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       has: jest.fn(),
       register: jest.fn(),
       get: jest.fn(),
+      getActions: jest.fn(),
       list: jest.fn(),
+      update: jest.fn(),
     } as AlertsTableConfigurationRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,
@@ -72,6 +74,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     theme$: themeServiceMock.createTheme$(),
     licensing: licensingPluginMock,
     expressions: expressionsPluginMock.createStartContract(),
+    isServerless: false,
   } as TriggersAndActionsUiServices;
 };
 

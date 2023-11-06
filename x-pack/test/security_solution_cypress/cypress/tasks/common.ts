@@ -11,6 +11,7 @@ import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 import { deleteAllDocuments } from './api_calls/elasticsearch';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './api_calls/alerts';
+import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../env_var_names_constants';
 
 const primaryButton = 0;
 
@@ -21,11 +22,14 @@ const primaryButton = 0;
 const dndSloppyClickDetectionThreshold = 5;
 
 export const API_AUTH = Object.freeze({
-  user: Cypress.env('ELASTICSEARCH_USERNAME'),
-  pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  user: Cypress.env(ELASTICSEARCH_USERNAME),
+  pass: Cypress.env(ELASTICSEARCH_PASSWORD),
 });
 
-export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+export const API_HEADERS = Object.freeze({
+  'kbn-xsrf': 'cypress-creds',
+  'x-elastic-internal-origin': 'security-solution',
+});
 
 export const rootRequest = <T = unknown>(
   options: Partial<Cypress.RequestOptions>
@@ -93,6 +97,7 @@ export const resetRulesTableState = () => {
 
 export const cleanKibana = () => {
   resetRulesTableState();
+  deletePrebuiltRulesAssets();
   deleteAlertsAndRules();
   deleteAllCasesItems();
   deleteTimelines();
@@ -137,6 +142,48 @@ export const deleteAlertsAndRules = () => {
   });
 
   deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
+};
+
+export const deleteExceptionLists = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'exception-list',
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+};
+
+export const deleteEndpointExceptionList = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'exception-list-agnostic',
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
 };
 
 export const deleteTimelines = () => {
@@ -258,16 +305,16 @@ export const deletePrebuiltRulesAssets = () => {
   });
 };
 
-export const postDataView = (dataSource: string) => {
+export const postDataView = (indexPattern: string, name?: string, id?: string) => {
   rootRequest({
     method: 'POST',
     url: DATA_VIEW_PATH,
     body: {
       data_view: {
-        id: dataSource,
-        name: dataSource,
+        id: id || indexPattern,
+        name: name || indexPattern,
         fieldAttrs: '{}',
-        title: dataSource,
+        title: indexPattern,
         timeFieldName: '@timestamp',
       },
     },
@@ -280,11 +327,17 @@ export const postDataView = (dataSource: string) => {
   });
 };
 
-export const deleteDataView = (dataSource: string) => {
+export const deleteDataView = (dataViewId: string) => {
   rootRequest({
-    method: 'DELETE',
-    url: `api/data_views/data_view/${dataSource}`,
+    method: 'POST',
+    url: 'api/content_management/rpc/delete',
     headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    body: {
+      contentTypeId: 'index-pattern',
+      id: dataViewId,
+      options: { force: true },
+      version: 1,
+    },
     failOnStatusCode: false,
   });
 };

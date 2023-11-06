@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { configSchema, ConfigSchema } from '../config';
 import { GraphPlugin } from './plugin';
 
-export const plugin = () => new GraphPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new GraphPlugin(initializerContext);
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {

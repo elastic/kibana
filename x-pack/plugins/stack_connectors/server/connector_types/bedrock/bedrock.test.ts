@@ -14,8 +14,10 @@ import {
   BEDROCK_CONNECTOR_ID,
   DEFAULT_BEDROCK_MODEL,
   DEFAULT_BEDROCK_URL,
+  DEFAULT_TOKEN_LIMIT,
 } from '../../../common/bedrock/constants';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
+import { AxiosError } from 'axios';
 
 jest.mock('aws4', () => ({
   sign: () => ({ signed: true }),
@@ -64,6 +66,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
+          timeout: 120000,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: RunActionResponseSchema,
@@ -95,16 +98,18 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
+          timeout: 120000,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: RunActionResponseSchema,
           data: JSON.stringify({
             prompt: '\n\nHuman:Hello world \n\nAssistant:',
-            max_tokens_to_sample: 300,
+            max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+            temperature: 0.5,
             stop_sequences: ['\n\nHuman:'],
           }),
         });
-        expect(response).toEqual(mockResponseString);
+        expect(response.message).toEqual(mockResponseString);
       });
 
       it('Properly formats messages from user, assistant, and system', async () => {
@@ -131,17 +136,19 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           signed: true,
+          timeout: 120000,
           url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
           method: 'post',
           responseSchema: RunActionResponseSchema,
           data: JSON.stringify({
             prompt:
               '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
-            max_tokens_to_sample: 300,
+            max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+            temperature: 0.5,
             stop_sequences: ['\n\nHuman:'],
           }),
         });
-        expect(response).toEqual(mockResponseString);
+        expect(response.message).toEqual(mockResponseString);
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -149,6 +156,56 @@ describe('BedrockConnector', () => {
         connector.request = mockError;
 
         await expect(connector.invokeAI(aiAssistantBody)).rejects.toThrow('API Error');
+      });
+    });
+    describe('getResponseErrorMessage', () => {
+      it('returns an unknown error message', () => {
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage({})).toEqual(
+          `Unexpected API Error:  - Unknown error`
+        );
+      });
+
+      it('returns the error.message', () => {
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage({ message: 'a message' })).toEqual(
+          `Unexpected API Error:  - a message`
+        );
+      });
+
+      it('returns the error.response.data.error.message', () => {
+        const err = {
+          response: {
+            headers: {},
+            status: 404,
+            statusText: 'Resource Not Found',
+            data: {
+              message: 'Resource not found',
+            },
+          },
+        } as AxiosError<{ message?: string }>;
+        expect(
+          // @ts-expect-error expects an axios error as the parameter
+          connector.getResponseErrorMessage(err)
+        ).toEqual(`API Error: Resource Not Found - Resource not found`);
+      });
+
+      it('returns auhtorization error', () => {
+        const err = {
+          response: {
+            headers: {},
+            status: 401,
+            statusText: 'Auth error',
+            data: {
+              message: 'The api key was invalid.',
+            },
+          },
+        } as AxiosError<{ message?: string }>;
+
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage(err)).toEqual(
+          `Unauthorized API Error - The api key was invalid.`
+        );
       });
     });
   });

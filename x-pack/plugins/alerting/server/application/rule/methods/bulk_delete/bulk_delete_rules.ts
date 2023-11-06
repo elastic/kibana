@@ -29,20 +29,21 @@ import type {
   BulkDeleteRulesResult,
   BulkDeleteRulesRequestBody,
 } from './types';
-import { validateCommonBulkOptions } from './validation';
+import { validateBulkDeleteRulesBody } from './validation';
 import type { RuleAttributes } from '../../../../data/rule/types';
 import { bulkDeleteRulesSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
+import { untrackRuleAlerts } from '../../../../rules_client/lib';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
   options: BulkDeleteRulesRequestBody
 ): Promise<BulkDeleteRulesResult<Params>> => {
   try {
-    validateCommonBulkOptions(options);
+    validateBulkDeleteRulesBody(options);
   } catch (error) {
     throw Boom.badRequest(`Error validating bulk delete data - ${error.message}`);
   }
@@ -92,7 +93,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   const deletedRules = rules.map(({ id, attributes, references }) => {
     // TODO (http-versioning): alertTypeId should never be null, but we need to
     // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
-    // when we are doing the bulk create and this should fix itself
+    // when we are doing the bulk delete and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
     const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
       id,
@@ -105,7 +106,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     try {
       ruleDomainSchema.validate(ruleDomain);
     } catch (e) {
-      context.logger.warn(`Error validating bulk edited rule domain object for id: ${id}, ${e}`);
+      context.logger.warn(`Error validating bulk deleted rule domain object for id: ${id}, ${e}`);
     }
     return ruleDomain;
   });
@@ -176,6 +177,10 @@ const bulkDeleteWithOCC = async (
     }
   );
 
+  for (const { id, attributes } of rulesToDelete) {
+    await untrackRuleAlerts(context, id, attributes as RuleAttributes);
+  }
+
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
     () =>
@@ -213,7 +218,7 @@ const bulkDeleteWithOCC = async (
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
   // migrate legacy actions only for SIEM rules
-  // TODO (http-versioning) Remove RawRuleAction and RawRule casts
+  // TODO (http-versioning) Remove RawRule casts
   await pMap(
     rules,
     async (rule) => {

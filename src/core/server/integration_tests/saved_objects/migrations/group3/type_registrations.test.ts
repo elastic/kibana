@@ -15,6 +15,7 @@ const previouslyRegisteredTypes = [
   'action_task_params',
   'alert',
   'api_key_pending_invalidation',
+  'apm-custom-dashboards',
   'apm-indices',
   'apm-server-schema',
   'apm-service-group',

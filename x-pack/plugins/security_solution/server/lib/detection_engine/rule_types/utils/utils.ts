@@ -32,7 +32,7 @@ import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
-import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -94,7 +94,7 @@ export const hasReadIndexPrivileges = async (args: {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
     warningStatusMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
     await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatus['partial failure'],
+      newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
     return { wroteWarningMessage: true, warningStatusMessage };
@@ -129,7 +129,7 @@ export const hasTimestampFields = async (args: {
     }`;
 
     await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatus['partial failure'],
+      newStatus: RuleExecutionStatusEnum['partial failure'],
       message: errorString.trimEnd(),
     });
 
@@ -157,7 +157,7 @@ export const hasTimestampFields = async (args: {
     )}`;
 
     await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatus['partial failure'],
+      newStatus: RuleExecutionStatusEnum['partial failure'],
       message: errorString,
     });
 

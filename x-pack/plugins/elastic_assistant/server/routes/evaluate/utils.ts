@@ -23,7 +23,7 @@ export const getLlmType = (connectorId: string, connectors: ActionResult[]): str
     // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/agents/openai/index.ts#L185
     return 'openai';
   }
-  // TODO: Add support for AWS Bedrock Connector once merged
+  // TODO: Add support for Amazon Bedrock Connector once merged
   // Note: Doesn't appear to be a difference between Azure and OpenAI LLM types, so TBD for functions agent on Azure
   // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/llms/openai.ts#L539
 

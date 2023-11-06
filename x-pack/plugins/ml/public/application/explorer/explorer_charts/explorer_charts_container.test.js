@@ -100,7 +100,7 @@ describe('ExplorerChartsContainer', () => {
     );
 
     expect(wrapper.html()).toEqual(
-      '<div class="euiFlexGrid css-17f5jta-euiFlexGrid-m-row-stretch-responsive" data-test-subj="mlExplorerChartsContainer"></div>'
+      '<div class="euiFlexGrid css-3oynhh-euiFlexGrid-m-row-stretch-responsive" data-test-subj="mlExplorerChartsContainer"></div>'
     );
   });
 

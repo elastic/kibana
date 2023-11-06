@@ -16,7 +16,7 @@ import { closeFlyout } from '../../../../tasks/expandable_flyout/alert_details_r
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE } from '../../../../screens/expandable_flyout/alert_details_right_panel';
 
-describe('Expandable flyout state sync', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Expandable flyout state sync', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewRule();
 
   beforeEach(() => {

@@ -40,7 +40,7 @@ interface MetricRowWithAggProps extends MetricRowBaseProps {
 
 export function MetricRowWithAgg({
   name,
-  aggType = Aggregators.AVERAGE,
+  aggType = Aggregators.COUNT,
   field,
   onDelete,
   dataView,
@@ -128,7 +128,7 @@ export function MetricRowWithAgg({
                   description={aggregationTypes[aggType].text}
                   value={aggType === Aggregators.COUNT ? filter : field}
                   isActive={aggTypePopoverOpen}
-                  display={'columns'}
+                  display="columns"
                   onClick={() => {
                     setAggTypePopoverOpen(true);
                   }}

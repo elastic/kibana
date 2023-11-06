@@ -40,7 +40,7 @@ import {
   waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
 } from '../../../tasks/rule_details';
 
-describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Basic functions', () => {
     beforeEach(() => {
       cleanKibana();

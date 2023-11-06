@@ -13,8 +13,7 @@ import {
   EuiCode,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,49 +42,47 @@ export const InactiveLicenseSlate = () => {
   return (
     <EuiPage>
       <EuiPageBody component="div">
-        <EuiPageContent verticalPosition="center" horizontalPosition="center">
-          <EuiPageContentBody>
-            <EuiCallOut
-              title={i18n.translate('xpack.grokDebugger.licenseErrorMessageTitle', {
-                defaultMessage: 'License error',
-              })}
-              color="danger"
-              iconType="warning"
-              style={{ padding: '16px' }}
-            >
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.grokDebugger.licenseErrorMessageDescription"
-                    defaultMessage="The Grok Debugger requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster."
-                    values={{
-                      licenseTypeList: (
-                        <>
-                          <EuiCode>{trialLicense}</EuiCode>, <EuiCode>{basicLicense}</EuiCode>,{' '}
-                          <EuiCode>{goldLicense}</EuiCode>
-                        </>
-                      ),
-                      platinumLicenseType: <EuiCode>{platinumLicense}</EuiCode>,
-                    }}
-                  />
-                </p>
-                <p>
-                  <FormattedMessage
-                    id="xpack.grokDebugger.registerLicenseDescription"
-                    defaultMessage="Please {registerLicenseLink} to continue using the Grok Debugger"
-                    values={{
-                      registerLicenseLink: (
-                        <EuiLink href="https://www.elastic.co/subscriptions" rel="noopener">
-                          {registerLicenseLinkLabel}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            </EuiCallOut>
-          </EuiPageContentBody>
-        </EuiPageContent>
+        <EuiPageSection alignment="center" grow={true} color="plain">
+          <EuiCallOut
+            title={i18n.translate('xpack.grokDebugger.licenseErrorMessageTitle', {
+              defaultMessage: 'License error',
+            })}
+            color="danger"
+            iconType="warning"
+            style={{ padding: '16px' }}
+          >
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.grokDebugger.licenseErrorMessageDescription"
+                  defaultMessage="The Grok Debugger requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster."
+                  values={{
+                    licenseTypeList: (
+                      <>
+                        <EuiCode>{trialLicense}</EuiCode>, <EuiCode>{basicLicense}</EuiCode>,{' '}
+                        <EuiCode>{goldLicense}</EuiCode>
+                      </>
+                    ),
+                    platinumLicenseType: <EuiCode>{platinumLicense}</EuiCode>,
+                  }}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.grokDebugger.registerLicenseDescription"
+                  defaultMessage="Please {registerLicenseLink} to continue using the Grok Debugger"
+                  values={{
+                    registerLicenseLink: (
+                      <EuiLink href="https://www.elastic.co/subscriptions" rel="noopener">
+                        {registerLicenseLinkLabel}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiCallOut>
+        </EuiPageSection>
       </EuiPageBody>
     </EuiPage>
   );

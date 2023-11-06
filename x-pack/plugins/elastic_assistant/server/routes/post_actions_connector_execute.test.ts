@@ -14,9 +14,17 @@ import { postActionsConnectorExecuteRoute } from './post_actions_connector_execu
 import { ElasticAssistantRequestHandlerContext } from '../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
+}));
+jest.mock('../lib/executor', () => ({
+  executeAction: jest.fn().mockImplementation((x) => ({
+    connector_id: 'mock-connector-id',
+    data: mockActionResponse,
+    status: 'ok',
+  })),
 }));
 
 jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
@@ -54,6 +62,7 @@ const mockContext = {
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),
     },
+    savedObjects: coreMock.createRequestHandlerContext().savedObjects,
   },
 };
 
@@ -80,6 +89,7 @@ const mockRequest = {
       },
       subAction: 'invokeAI',
     },
+    assistantLangChain: true,
   },
 };
 
@@ -89,11 +99,44 @@ const mockResponse = {
 };
 
 describe('postActionsConnectorExecuteRoute', () => {
+  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns the expected response', async () => {
+  it('returns the expected response when assistantLangChain=false', async () => {
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        const result = await handler(
+          mockContext,
+          {
+            ...mockRequest,
+            body: {
+              ...mockRequest.body,
+              assistantLangChain: false,
+            },
+          },
+          mockResponse
+        );
+
+        expect(result).toEqual({
+          body: {
+            connector_id: 'mock-connector-id',
+            data: mockActionResponse,
+            status: 'ok',
+          },
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when assistantLangChain=true', async () => {
     const mockRouter = {
       post: jest.fn().mockImplementation(async (_, handler) => {
         const result = await handler(mockContext, mockRequest, mockResponse);
@@ -109,7 +152,8 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
     );
   });
 
@@ -131,7 +175,8 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
     );
   });
 });

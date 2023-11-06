@@ -183,7 +183,7 @@ export const dataLoaders = (
     },
 
     indexEndpointHosts: async (options: IndexEndpointHostsCyTaskOptions = {}) => {
-      const { kbnClient, esClient } = await stackServicesPromise;
+      const { kbnClient, esClient, log } = await stackServicesPromise;
       const {
         count: numHosts,
         version,
@@ -194,7 +194,7 @@ export const dataLoaders = (
         alertIds,
       } = options;
 
-      return cyLoadEndpointDataHandler(esClient, kbnClient, {
+      return cyLoadEndpointDataHandler(esClient, kbnClient, log, {
         numHosts,
         version,
         os,
@@ -316,9 +316,14 @@ export const dataLoadersForRealEndpoints = (
     fleetServerContainerId = data?.fleetServerContainerId;
   });
 
-  on('after:run', () => {
+  on('after:run', async () => {
+    const { log } = await stackServicesPromise;
     if (fleetServerContainerId) {
-      execa.sync('docker', ['kill', fleetServerContainerId]);
+      try {
+        execa.sync('docker', ['kill', fleetServerContainerId]);
+      } catch (error) {
+        log.error(error);
+      }
     }
   });
 
@@ -327,16 +332,39 @@ export const dataLoadersForRealEndpoints = (
       options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostResponse> => {
       const { kbnClient, log } = await stackServicesPromise;
-      return createAndEnrollEndpointHost({
-        useClosestVersionMatch: true,
-        ...options,
-        log,
-        kbnClient,
-      }).then((newHost) => {
-        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000).then(() => {
+
+      let retryAttempt = 0;
+      const attemptCreateEndpointHost = async (): Promise<CreateAndEnrollEndpointHostResponse> => {
+        try {
+          log.info(`Creating endpoint host, attempt ${retryAttempt}`);
+          const newHost = await createAndEnrollEndpointHost({
+            useClosestVersionMatch: true,
+            ...options,
+            log,
+            kbnClient,
+          });
+          await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
           return newHost;
-        });
-      });
+        } catch (err) {
+          log.info(`Caught error when setting up the agent: ${err}`);
+          if (retryAttempt === 0 && err.agentId) {
+            retryAttempt++;
+            await destroyEndpointHost(kbnClient, {
+              hostname: err.hostname || '', // No hostname in CI env for vagrant
+              agentId: err.agentId,
+            });
+            log.info(`Deleted endpoint host ${err.agentId} and retrying`);
+            return attemptCreateEndpointHost();
+          } else {
+            log.info(
+              `${retryAttempt} attempts of creating endpoint host failed, reason for the last failure was ${err}`
+            );
+            throw err;
+          }
+        }
+      };
+
+      return attemptCreateEndpointHost();
     },
 
     destroyEndpointHost: async (

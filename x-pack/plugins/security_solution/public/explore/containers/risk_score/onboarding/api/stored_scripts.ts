@@ -27,6 +27,7 @@ export async function createStoredScript({
 }: CreateStoredScript) {
   const res = await http
     .put(RISK_SCORE_CREATE_STORED_SCRIPT, {
+      version: '1',
       body: JSON.stringify(options),
       signal,
     })
@@ -53,6 +54,7 @@ export async function deleteStoredScript({
 }: DeleteStoredScript) {
   const res = await http
     .delete(RISK_SCORE_DELETE_STORED_SCRIPT, {
+      version: '1',
       body: JSON.stringify(options),
       signal,
     })

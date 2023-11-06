@@ -28,7 +28,6 @@ const ContextWrapper: React.FC = ({ children }) => (
   <AssistantProvider
     actionTypeRegistry={actionTypeRegistry}
     assistantAvailability={mockAssistantAvailability}
-    assistantLangChain={false}
     augmentMessageCodeBlocks={jest.fn()}
     baseAllow={[]}
     baseAllowReplacement={[]}

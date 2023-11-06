@@ -34,7 +34,7 @@ import {
   XY_CHART,
 } from '../../../screens/shared';
 
-describe(`Event Rendered View`, () => {
+describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -60,7 +60,7 @@ describe(`Event Rendered View`, () => {
     cy.get(SHOW_TOP_N_HEADER).first().should('have.text', 'Top host.name');
     cy.get(XY_CHART).should('be.visible');
     cy.get(TOP_N_CONTAINER_CLOSE_BTN).trigger('click');
-    cy.get(XY_CHART).should('not.be.visible');
+    cy.get(XY_CHART).should('not.exist');
   });
 
   /*

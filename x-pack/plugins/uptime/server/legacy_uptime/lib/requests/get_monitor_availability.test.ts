@@ -255,7 +255,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         }
       `);
     });
@@ -415,7 +415,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         }
       `);
 
@@ -750,7 +750,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         }
       `);
 
@@ -862,7 +862,7 @@ describe('monitor availability', () => {
               },
               "size": 0,
             },
-            "index": "heartbeat-8*,heartbeat-7*",
+            "index": "heartbeat-*",
           },
           Object {
             "meta": true,
@@ -1009,7 +1009,7 @@ describe('monitor availability', () => {
             },
             "size": 0,
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         }
       `);
     });

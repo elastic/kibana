@@ -2202,21 +2202,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.EditPanelAction.Unnamed.$4",
-                "type": "Function",
-                "tags": [],
-                "label": "getOriginatingPath",
-                "description": [],
-                "signature": [
-                  "(() => string) | undefined"
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/edit_panel_action/edit_panel_action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2688,6 +2673,30 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.getAppContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableAppContext",
+                "text": "EmbeddableAppContext"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -6423,10 +6432,10 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.EmbeddableContainerContext",
+        "id": "def-public.EmbeddableAppContext",
         "type": "Interface",
         "tags": [],
-        "label": "EmbeddableContainerContext",
+        "label": "EmbeddableAppContext",
         "description": [],
         "path": "src/plugins/embeddable/public/embeddable_panel/types.ts",
         "deprecated": false,
@@ -6434,7 +6443,7 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddableContainerContext.getCurrentPath",
+            "id": "def-public.EmbeddableAppContext.getCurrentPath",
             "type": "Function",
             "tags": [],
             "label": "getCurrentPath",
@@ -6449,6 +6458,20 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableAppContext.currentAppId",
+            "type": "string",
+            "tags": [],
+            "label": "currentAppId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/embeddable_panel/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9144,6 +9167,32 @@
                 "text": "ContainerOutput"
               },
               ">"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.getAppContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppContext",
+            "description": [
+              "\nReturns the context of this embeddable's container, or undefined."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableAppContext",
+                "text": "EmbeddableAppContext"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,

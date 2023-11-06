@@ -16,8 +16,10 @@ import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
 import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytics';
 import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 
-describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  describe('with legacy risk score', () => {
+describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169033
+  // FLAKY: https://github.com/elastic/kibana/issues/169034
+  describe.skip('with legacy risk score', () => {
     before(() => {
       cleanKibana();
       // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
@@ -52,7 +54,7 @@ describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, (
 
       openRiskInformationFlyout();
 
-      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('How is host risk calculated?');
+      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
     });
   });
 
@@ -60,7 +62,7 @@ describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, (
     before(() => {
       cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
-      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
       login();
       enableRiskEngine();
     });
@@ -91,7 +93,7 @@ describe('risk tab', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, (
 
       openRiskInformationFlyout();
 
-      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('How is host risk calculated?');
+      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
     });
   });
 });

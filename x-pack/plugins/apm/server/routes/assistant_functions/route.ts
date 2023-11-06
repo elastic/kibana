@@ -177,7 +177,7 @@ const getApmErrorDocRoute = createApmServerRoute({
   },
   handler: async (
     resources
-  ): Promise<{ content: Partial<APMError> | undefined }> => {
+  ): Promise<{ content: Array<Partial<APMError>> }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { query } = params;
@@ -260,6 +260,7 @@ const getApmServicesListRoute = createApmServerRoute({
       rollupInterval: RollupInterval.OneMinute,
       serviceGroup: null,
       mlClient,
+      useDurationSummary: false,
     });
 
     let mappedItems = serviceItems.items.map((item): ApmServicesListItem => {

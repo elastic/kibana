@@ -27,14 +27,16 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { AnonymizationSettings } from '../../data_anonymization/settings/anonymization_settings';
-import { QuickPromptSettings } from '../quick_prompts/quick_prompt_settings/quick_prompt_settings';
-import { SystemPromptSettings } from '../prompt_editor/system_prompt/system_prompt_modal/system_prompt_settings';
-import { AdvancedSettings } from './advanced_settings/advanced_settings';
-import { ConversationSettings } from '../conversations/conversation_settings/conversation_settings';
 import { TEST_IDS } from '../constants';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
-import { EvaluationSettings } from './evaluation_settings/evaluation_settings';
+import {
+  AnonymizationSettings,
+  ConversationSettings,
+  EvaluationSettings,
+  KnowledgeBaseSettings,
+  QuickPromptSettings,
+  SystemPromptSettings,
+} from '.';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -45,7 +47,7 @@ export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
 export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
 export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
-export const ADVANCED_TAB = 'ADVANCED_TAB' as const;
+export const KNOWLEDGE_BASE_TAB = 'KNOWLEDGE_BASE_TAB' as const;
 export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
 
 export type SettingsTabs =
@@ -53,7 +55,7 @@ export type SettingsTabs =
   | typeof QUICK_PROMPTS_TAB
   | typeof SYSTEM_PROMPTS_TAB
   | typeof ANONYMIZATION_TAB
-  | typeof ADVANCED_TAB
+  | typeof KNOWLEDGE_BASE_TAB
   | typeof EVALUATION_TAB;
 interface Props {
   defaultConnectorId?: string;
@@ -68,7 +70,7 @@ interface Props {
 
 /**
  * Modal for overall Assistant Settings, including conversation settings, quick prompts, system prompts,
- * anonymization, functions (coming soon!), and advanced settings.
+ * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
   ({
@@ -79,17 +81,20 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
   }) => {
-    const { assistantLangChain, http, selectedSettingsTab, setSelectedSettingsTab } =
+    const { modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
       useAssistantContext();
+
     const {
       conversationSettings,
       defaultAllow,
       defaultAllowReplacement,
+      knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
       setUpdatedConversationSettings,
       setUpdatedDefaultAllow,
       setUpdatedDefaultAllowReplacement,
+      setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
       setUpdatedSystemPromptSettings,
       saveSettings,
@@ -169,6 +174,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 label={i18n.CONVERSATIONS_MENU_ITEM}
                 isSelected={selectedSettingsTab === CONVERSATIONS_TAB}
                 onClick={() => setSelectedSettingsTab(CONVERSATIONS_TAB)}
+                data-test-subj={`${CONVERSATIONS_TAB}-button`}
               >
                 <>
                   <EuiIcon
@@ -195,6 +201,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 label={i18n.QUICK_PROMPTS_MENU_ITEM}
                 isSelected={selectedSettingsTab === QUICK_PROMPTS_TAB}
                 onClick={() => setSelectedSettingsTab(QUICK_PROMPTS_TAB)}
+                data-test-subj={`${QUICK_PROMPTS_TAB}-button`}
               >
                 <>
                   <EuiIcon type="editorComment" size="xxl" />
@@ -215,6 +222,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 label={i18n.SYSTEM_PROMPTS_MENU_ITEM}
                 isSelected={selectedSettingsTab === SYSTEM_PROMPTS_TAB}
                 onClick={() => setSelectedSettingsTab(SYSTEM_PROMPTS_TAB)}
+                data-test-subj={`${SYSTEM_PROMPTS_TAB}-button`}
               >
                 <EuiIcon type="editorComment" size="xxl" />
                 <EuiIcon
@@ -233,25 +241,26 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 label={i18n.ANONYMIZATION_MENU_ITEM}
                 isSelected={selectedSettingsTab === ANONYMIZATION_TAB}
                 onClick={() => setSelectedSettingsTab(ANONYMIZATION_TAB)}
+                data-test-subj={`${ANONYMIZATION_TAB}-button`}
               >
                 <EuiIcon type="eyeClosed" size="l" />
               </EuiKeyPadMenuItem>
-              {assistantLangChain && (
-                <EuiKeyPadMenuItem
-                  id={ADVANCED_TAB}
-                  label={i18n.ADVANCED_MENU_ITEM}
-                  isSelected={selectedSettingsTab === ADVANCED_TAB}
-                  onClick={() => setSelectedSettingsTab(ADVANCED_TAB)}
-                >
-                  <EuiIcon type="advancedSettingsApp" size="l" />
-                </EuiKeyPadMenuItem>
-              )}
-              {assistantLangChain && (
+              <EuiKeyPadMenuItem
+                id={KNOWLEDGE_BASE_TAB}
+                label={i18n.KNOWLEDGE_BASE_MENU_ITEM}
+                isSelected={selectedSettingsTab === KNOWLEDGE_BASE_TAB}
+                onClick={() => setSelectedSettingsTab(KNOWLEDGE_BASE_TAB)}
+                data-test-subj={`${KNOWLEDGE_BASE_TAB}-button`}
+              >
+                <EuiIcon type="notebookApp" size="l" />
+              </EuiKeyPadMenuItem>
+              {modelEvaluatorEnabled && (
                 <EuiKeyPadMenuItem
                   id={EVALUATION_TAB}
                   label={i18n.EVALUATION_MENU_ITEM}
                   isSelected={selectedSettingsTab === EVALUATION_TAB}
                   onClick={() => setSelectedSettingsTab(EVALUATION_TAB)}
+                  data-test-subj={`${EVALUATION_TAB}-button`}
                 >
                   <EuiIcon type="crossClusterReplicationApp" size="l" />
                 </EuiKeyPadMenuItem>
@@ -276,6 +285,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     setUpdatedConversationSettings={setUpdatedConversationSettings}
                     allSystemPrompts={systemPromptSettings}
                     selectedConversation={selectedConversation}
+                    isDisabled={selectedConversation == null}
                     onSelectedConversationChange={onHandleSelectedConversationChange}
                     http={http}
                   />
@@ -307,7 +317,12 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     setUpdatedDefaultAllowReplacement={setUpdatedDefaultAllowReplacement}
                   />
                 )}
-                {selectedSettingsTab === ADVANCED_TAB && <AdvancedSettings />}
+                {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
+                  <KnowledgeBaseSettings
+                    knowledgeBase={knowledgeBase}
+                    setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+                  />
+                )}
                 {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner
@@ -322,11 +337,17 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     padding: 4px;
                   `}
                 >
-                  <EuiButtonEmpty size="s" onClick={onClose}>
+                  <EuiButtonEmpty size="s" data-test-subj="cancel-button" onClick={onClose}>
                     {i18n.CANCEL}
                   </EuiButtonEmpty>
 
-                  <EuiButton size="s" type="submit" onClick={handleSave} fill>
+                  <EuiButton
+                    size="s"
+                    type="submit"
+                    data-test-subj="save-button"
+                    onClick={handleSave}
+                    fill
+                  >
                     {i18n.SAVE}
                   </EuiButton>
                 </EuiModalFooter>

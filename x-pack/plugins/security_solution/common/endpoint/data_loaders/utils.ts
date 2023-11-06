@@ -6,6 +6,7 @@
  */
 
 import { mergeWith } from 'lodash';
+import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { ToolingLog } from '@kbn/tooling-log';
 
 export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
@@ -53,7 +54,7 @@ export const retryOnError = async <T>(
   tryCount: number = 5,
   interval: number = 10000
 ): Promise<T> => {
-  const log = logger ?? new ToolingLog({ writeTo: { write(_: string) {} }, level: 'silent' });
+  const log = logger ?? createToolingLogger('silent');
   const msg = (message: string): string => `retryOnError(): ${message}`;
   const isRetryableError = (err: Error): boolean => {
     return errors.some((retryMessage) => {
@@ -106,3 +107,33 @@ export const retryOnError = async <T>(
   // @ts-expect-error TS2454: Variable 'responsePromise' is used before being assigned.
   return responsePromise;
 };
+
+interface CreateLoggerInterface {
+  (level?: Partial<ToolingLogTextWriterConfig>['level']): ToolingLog;
+
+  /**
+   * The default log level if one is not provided to the `createToolingLogger()` utility.
+   * Can be used to globally set the log level to calls made to this utility with no `level` set
+   * on input.
+   */
+  defaultLogLevel: ToolingLogTextWriterConfig['level'];
+}
+
+/**
+ * Creates an instance of `ToolingLog` that outputs to `stdout`.
+ * The default log `level` for all instances can be set by setting the function's `defaultLogLevel`.
+ * Log level can also be explicitly set on input.
+ *
+ * @param level
+ *
+ * @example
+ * // Set default log level - example: from cypress for CI jobs
+ * createLogger.defaultLogLevel = 'verbose'
+ */
+export const createToolingLogger: CreateLoggerInterface = (level): ToolingLog => {
+  return new ToolingLog({
+    level: level || createToolingLogger.defaultLogLevel,
+    writeTo: process.stdout,
+  });
+};
+createToolingLogger.defaultLogLevel = 'info';

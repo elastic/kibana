@@ -14,10 +14,12 @@ import { useFetchApmIndex } from '../../../hooks/slo/use_fetch_apm_indices';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
   APM_LATENCY_DEFAULT_VALUES,
+  BUDGETING_METHOD_OPTIONS,
   CUSTOM_KQL_DEFAULT_VALUES,
   CUSTOM_METRIC_DEFAULT_VALUES,
   HISTOGRAM_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES,
+  TIMESLICE_METRIC_DEFAULT_VALUES,
 } from '../constants';
 import { CreateSLOForm } from '../types';
 
@@ -43,6 +45,22 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
           reset(
             Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
               indicator: CUSTOM_METRIC_DEFAULT_VALUES,
+            }),
+            {
+              keepDefaultValues: true,
+            }
+          );
+          break;
+        case 'sli.metric.timeslice':
+          reset(
+            Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
+              budgetingMethod: BUDGETING_METHOD_OPTIONS[1].value,
+              objective: {
+                target: 99,
+                timesliceTarget: 95,
+                timesliceWindow: 1,
+              },
+              indicator: TIMESLICE_METRIC_DEFAULT_VALUES,
             }),
             {
               keepDefaultValues: true,

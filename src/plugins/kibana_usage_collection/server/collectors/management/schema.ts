@@ -489,10 +489,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'labs:dashboard:dashboardControls': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'labs:dashboard:linksPanel': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -590,6 +586,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableLegacyUptimeApp': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingUseLegacyFlamegraphAPI': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

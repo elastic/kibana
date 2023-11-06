@@ -10,6 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+
 import { usageReportingService } from '../common/services';
 import type {
   MeteringCallback,
@@ -18,6 +19,8 @@ import type {
   UsageRecord,
 } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
+
+import { stateSchemaByVersion, emptyState } from './task_state';
 
 const SCOPE = ['serverlessSecurity'];
 const TIMEOUT = '1m';
@@ -58,6 +61,7 @@ export class SecurityUsageReportingTask {
         [taskType]: {
           title: taskTitle,
           timeout: TIMEOUT,
+          stateSchemaByVersion,
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
             return {
               run: async () => {
@@ -94,9 +98,7 @@ export class SecurityUsageReportingTask {
         schedule: {
           interval,
         },
-        state: {
-          lastSuccessfulReport: null,
-        },
+        state: emptyState,
         params: { version: this.version },
       });
     } catch (e) {
@@ -124,7 +126,8 @@ export class SecurityUsageReportingTask {
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
-    const lastSuccessfulReport = taskInstance.state.lastSuccessfulReport;
+    const lastSuccessfulReport =
+      taskInstance.state.lastSuccessfulReport && new Date(taskInstance.state.lastSuccessfulReport);
 
     let usageRecords: UsageRecord[] = [];
     // save usage record query time so we can use it to know where
@@ -168,14 +171,13 @@ export class SecurityUsageReportingTask {
     }
 
     const state = {
-      lastSuccessfulReport:
-        usageReportResponse?.status === 201
-          ? meteringCallbackTime
-          : this.getFailedLastSuccessfulReportTime(
-              meteringCallbackTime,
-              taskInstance.state.lastSuccessfulReport,
-              lookBackLimitMinutes
-            ),
+      lastSuccessfulReport: this.shouldUpdateLastSuccessfulReport(usageRecords, usageReportResponse)
+        ? meteringCallbackTime.toISOString()
+        : this.getFailedLastSuccessfulReportTime(
+            meteringCallbackTime,
+            lastSuccessfulReport,
+            lookBackLimitMinutes
+          ).toISOString(),
     };
     return { state };
   };
@@ -201,6 +203,13 @@ export class SecurityUsageReportingTask {
       `lastSuccessfulReport time of ${nextLastSuccessfulReport.toISOString()} is past the limit of ${lookBackLimitMinutes} minutes, adjusting lastSuccessfulReport to ${lookBackLimitTime.toISOString()}`
     );
     return lookBackLimitTime;
+  }
+
+  private shouldUpdateLastSuccessfulReport(
+    usageRecords: UsageRecord[],
+    usageReportResponse: Response | undefined
+  ): boolean {
+    return !usageRecords.length || usageReportResponse?.status === 201;
   }
 
   private get taskId() {

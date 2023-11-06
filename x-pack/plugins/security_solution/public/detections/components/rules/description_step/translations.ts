@@ -15,9 +15,23 @@ export const FILTERS_LABEL = i18n.translate(
 );
 
 export const QUERY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.QueryLabel',
+  'xpack.securitySolution.detectionEngine.createRule.queryLabel',
   {
     defaultMessage: 'Custom query',
+  }
+);
+
+export const EQL_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.eqlQueryLabel',
+  {
+    defaultMessage: 'EQL query',
+  }
+);
+
+export const ESQL_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.esqlQueryLabel',
+  {
+    defaultMessage: 'ES|QL query',
   }
 );
 

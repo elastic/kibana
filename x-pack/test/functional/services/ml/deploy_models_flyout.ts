@@ -109,6 +109,9 @@ export function DeployDFAModelFlyoutProvider(
       await editor.click();
       const input = await find.activeElement();
       await input.clearValueWithKeyboard();
+      // Ensure the editor is cleared before adding input
+      const editorContentAfterClearing = await input.getAttribute('value');
+      expect(editorContentAfterClearing).to.eql('');
 
       for (const chr of value) {
         await retry.tryForTime(5000, async () => {
@@ -138,6 +141,7 @@ export function DeployDFAModelFlyoutProvider(
         'mlTrainedModelsInferencePipelineFieldMapEditButton'
       );
       await editFieldMapButton.click();
+
       await this.setTrainedModelsInferenceFlyoutCustomEditorValues(
         'mlTrainedModelsInferencePipelineFieldMapEdit',
         JSON.stringify(values.editedFieldMap)

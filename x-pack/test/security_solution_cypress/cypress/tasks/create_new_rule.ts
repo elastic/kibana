@@ -127,31 +127,18 @@ import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
-import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
-export const createAndEnableRuleOnly = () => {
-  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
-  cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
-};
-
 export const createAndEnableRule = () => {
-  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
+  cy.get(CREATE_AND_ENABLE_BTN).click();
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
-  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
-};
-
-export const pressRuleCreateBtn = () => {
-  cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
-  cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
 };
 
 export const createRuleWithoutEnabling = () => {
-  pressRuleCreateBtn();
-  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
-  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
 };
 
 export const fillAboutRule = (rule: RuleCreateProps) => {

@@ -12,10 +12,13 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165511
-  describe.skip('scripted fields disabled', function () {
+  describe('scripted fields disabled', function () {
     before(async () => {
+      // TODO: We're running into a 'Duplicate data view: basic_index'
+      // error in Serverless, so make sure to clean up first
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
 

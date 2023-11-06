@@ -22,6 +22,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: 'https://learn.microsoft.com/azure/storage/blobs/',
     icon: CONNECTOR_ICONS.azure_blob_storage,
   },
+  box: {
+    docsUrl: docLinks.connectorsBox,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.box,
+    platinumOnly: true,
+  },
   confluence: {
     docsUrl: docLinks.connectorsConfluence,
     externalAuthDocsUrl: '',
@@ -40,6 +47,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.dropbox,
+    platinumOnly: true,
   },
   github: {
     docsUrl: docLinks.connectorsGithub,
@@ -114,6 +122,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: 'https://docs.oracle.com/database/oracle/oracle-database/',
     icon: CONNECTOR_ICONS.oracle,
   },
+  outlook: {
+    docsUrl: docLinks.connectorsOutlook,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.outlook,
+    platinumOnly: true,
+  },
   postgresql: {
     docsUrl: docLinks.connectorsPostgreSQL,
     externalAuthDocsUrl: 'https://www.postgresql.org/docs/15/auth-methods.html',
@@ -138,13 +153,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.servicenow,
-  },
-  sharepoint_server: {
-    docsUrl: docLinks.connectorsSharepoint,
-    externalAuthDocsUrl: '',
-    externalDocsUrl: '',
-    icon: CONNECTOR_ICONS.sharepoint,
-    platinumOnly: false,
+    platinumOnly: true,
   },
   sharepoint_online: {
     docsUrl: docLinks.connectorsSharepointOnline,
@@ -153,11 +162,32 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     icon: CONNECTOR_ICONS.sharepoint_online,
     platinumOnly: true,
   },
+  sharepoint_server: {
+    docsUrl: docLinks.connectorsSharepoint,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.sharepoint,
+    platinumOnly: false,
+  },
   slack: {
     docsUrl: docLinks.connectorsSlack,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.slack,
+    platinumOnly: true,
+  },
+  teams: {
+    docsUrl: docLinks.connectorsTeams,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.teams,
+    platinumOnly: true,
+  },
+  zoom: {
+    docsUrl: docLinks.connectorsZoom,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.zoom,
     platinumOnly: true,
   },
 };

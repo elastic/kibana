@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { SuperTest, Test } from 'supertest';
 
 interface CreateEsQueryRuleParams {
@@ -107,6 +108,169 @@ export async function createEsQueryRule({
       consumer,
       schedule: schedule || {
         interval: '1h',
+      },
+      tags,
+      name,
+      rule_type_id: ruleTypeId,
+      actions,
+      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
+    })
+    .expect(200);
+  return body;
+}
+
+import { v4 as uuidv4 } from 'uuid';
+export const generateUniqueKey = () => uuidv4().replace(/-/g, '');
+
+export async function createAnomalyRule({
+  supertest,
+  name = generateUniqueKey(),
+  actions = [],
+  tags = ['foo', 'bar'],
+  schedule,
+  consumer = 'alerts',
+  notifyWhen,
+  enabled = true,
+  ruleTypeId = 'apm.anomaly',
+  params,
+}: {
+  supertest: SuperTest<Test>;
+  name?: string;
+  consumer?: string;
+  actions?: any[];
+  tags?: any[];
+  schedule?: { interval: string };
+  notifyWhen?: string;
+  enabled?: boolean;
+  ruleTypeId?: string;
+  params?: any;
+}) {
+  const { body } = await supertest
+    .post(`/api/alerting/rule`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
+    .send({
+      enabled,
+      params: params || {
+        anomalySeverityType: 'critical',
+        environment: 'ENVIRONMENT_ALL',
+        windowSize: 30,
+        windowUnit: 'm',
+      },
+      consumer,
+      schedule: schedule || {
+        interval: '1m',
+      },
+      tags,
+      name,
+      rule_type_id: ruleTypeId,
+      actions,
+      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
+    })
+    .expect(200);
+  return body;
+}
+
+export async function createLatencyThresholdRule({
+  supertest,
+  name = generateUniqueKey(),
+  actions = [],
+  tags = ['foo', 'bar'],
+  schedule,
+  consumer = 'apm',
+  notifyWhen,
+  enabled = true,
+  ruleTypeId = 'apm.transaction_duration',
+  params,
+}: {
+  supertest: SuperTest<Test>;
+  name?: string;
+  consumer?: string;
+  actions?: any[];
+  tags?: any[];
+  schedule?: { interval: string };
+  notifyWhen?: string;
+  enabled?: boolean;
+  ruleTypeId?: string;
+  params?: any;
+}) {
+  const { body } = await supertest
+    .post(`/api/alerting/rule`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
+    .send({
+      enabled,
+      params: params || {
+        aggregationType: 'avg',
+        environment: 'ENVIRONMENT_ALL',
+        threshold: 1500,
+        windowSize: 5,
+        windowUnit: 'm',
+      },
+      consumer,
+      schedule: schedule || {
+        interval: '1m',
+      },
+      tags,
+      name,
+      rule_type_id: ruleTypeId,
+      actions,
+      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
+    });
+  return body;
+}
+
+export async function createInventoryRule({
+  supertest,
+  name = generateUniqueKey(),
+  actions = [],
+  tags = ['foo', 'bar'],
+  schedule,
+  consumer = 'alerts',
+  notifyWhen,
+  enabled = true,
+  ruleTypeId = 'metrics.alert.inventory.threshold',
+  params,
+}: {
+  supertest: SuperTest<Test>;
+  name?: string;
+  consumer?: string;
+  actions?: any[];
+  tags?: any[];
+  schedule?: { interval: string };
+  notifyWhen?: string;
+  enabled?: boolean;
+  ruleTypeId?: string;
+  params?: any;
+}) {
+  const { body } = await supertest
+    .post(`/api/alerting/rule`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
+    .send({
+      enabled,
+      params: params || {
+        nodeType: 'host',
+        criteria: [
+          {
+            metric: 'cpu',
+            comparator: '>',
+            threshold: [5],
+            timeSize: 1,
+            timeUnit: 'm',
+            customMetric: {
+              type: 'custom',
+              id: 'alert-custom-metric',
+              field: '',
+              aggregation: 'avg',
+            },
+          },
+        ],
+        sourceId: 'default',
+      },
+      consumer,
+      schedule: schedule || {
+        interval: '1m',
       },
       tags,
       name,
@@ -247,4 +411,46 @@ export async function unmuteRule({
     .set('x-elastic-internal-origin', 'foo')
     .expect(204);
   return body;
+}
+
+export async function snoozeRule({
+  supertest,
+  ruleId,
+}: {
+  supertest: SuperTest<Test>;
+  ruleId: string;
+}) {
+  const { body } = await supertest
+    .post(`/internal/alerting/rule/${ruleId}/_snooze`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
+    .send({
+      snooze_schedule: {
+        duration: 100000000,
+        rRule: {
+          count: 1,
+          dtstart: moment().format(),
+          tzid: 'UTC',
+        },
+      },
+    })
+    .expect(204);
+  return body;
+}
+
+export async function findRule({
+  supertest,
+  ruleId,
+}: {
+  supertest: SuperTest<Test>;
+  ruleId: string;
+}) {
+  if (!ruleId) {
+    throw new Error(`'ruleId' is undefined`);
+  }
+  const response = await supertest
+    .get(`/api/alerting/rule/${ruleId}`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo');
+  return response.body || {};
 }

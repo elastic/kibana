@@ -152,9 +152,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
       const aadDocs = await waitForAAD(1);
 
       for (const doc of aadDocs) {
-        const { job_id: jobId, url } = doc._source.kibana.alert;
-        expect(jobId).to.be(AD_JOB_ID);
-        expect(url).to.contain(
+        expect(doc._source['kibana.alert.job_id']).to.be(AD_JOB_ID);
+        expect(doc._source['kibana.alert.url']).to.contain(
           '/s/space1/app/ml/explorer/?_g=(ml%3A(jobIds%3A!(rt-anomaly-mean-value))'
         );
       }

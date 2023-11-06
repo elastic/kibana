@@ -12,6 +12,7 @@ import type {
   TransformPutTransformResponse,
   TransformGetTransformTransformSummary,
   TransformPutTransformRequest,
+  TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
@@ -99,6 +100,13 @@ export const createTransform = async ({
   }
 };
 
+export const getLatestTransformId = (namespace: string): string =>
+  `risk_score_latest_transform_${namespace}`;
+
+const hasTransformStarted = (transformStats: TransformGetTransformStatsTransformStats): boolean => {
+  return transformStats.state === 'indexing' || transformStats.state === 'started';
+};
+
 export const startTransform = async ({
   esClient,
   transformId,
@@ -110,13 +118,51 @@ export const startTransform = async ({
     transform_id: transformId,
   });
   if (transformStats.count <= 0) {
-    throw new Error(`Can't check ${transformId} status`);
+    throw new Error(
+      `Unable to find transform status for [${transformId}] while attempting to start`
+    );
   }
-  if (
-    transformStats.transforms[0].state === 'indexing' ||
-    transformStats.transforms[0].state === 'started'
-  ) {
+  if (hasTransformStarted(transformStats.transforms[0])) {
     return;
   }
+
   return esClient.transform.startTransform({ transform_id: transformId });
+};
+
+export const scheduleTransformNow = async ({
+  esClient,
+  transformId,
+}: {
+  esClient: ElasticsearchClient;
+  transformId: string;
+}): Promise<TransformStartTransformResponse | void> => {
+  const transformStats = await esClient.transform.getTransformStats({
+    transform_id: transformId,
+  });
+  if (transformStats.count <= 0) {
+    throw new Error(
+      `Unable to find transform status for [${transformId}] while attempting to schedule now`
+    );
+  }
+
+  if (hasTransformStarted(transformStats.transforms[0])) {
+    await esClient.transform.scheduleNowTransform({
+      transform_id: transformId,
+    });
+  } else {
+    await esClient.transform.startTransform({
+      transform_id: transformId,
+    });
+  }
+};
+
+export const scheduleLatestTransformNow = async ({
+  namespace,
+  esClient,
+}: {
+  namespace: string;
+  esClient: ElasticsearchClient;
+}): Promise<void> => {
+  const transformId = getLatestTransformId(namespace);
+  await scheduleTransformNow({ esClient, transformId });
 };

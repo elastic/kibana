@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
+import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const ES_TEST_INDEX_NAME = '.kibana-alerting-test-data';
 
@@ -135,13 +136,12 @@ export class ESTestIndexTool {
   }
 
   async removeAll() {
-    const params = {
+    const params: DeleteByQueryRequest = {
       index: this.index,
-      body: {
-        query: {
-          match_all: {},
-        },
+      query: {
+        match_all: {},
       },
+      conflicts: 'proceed',
     };
     return await this.es.deleteByQuery(params);
   }

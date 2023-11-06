@@ -31,6 +31,7 @@ import type {
   UserRiskScore,
 } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskInformationButtonEmpty } from '../../../components/risk_score/risk_information';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -59,6 +60,7 @@ interface UserRiskScoreTableProps {
 
 export type UserRiskScoreColumns = [
   Columns<UserRiskScoreItem[RiskScoreFields.userName]>,
+  Columns<UserRiskScoreItem[RiskScoreFields.timestamp]>,
   Columns<UserRiskScoreItem[RiskScoreFields.userRiskScore]>,
   Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>
 ];
@@ -174,16 +176,22 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
       dataTestSubj={`table-${tableType}`}
       headerCount={totalCount}
       headerFilters={
-        <SeverityFilterGroup
-          selectedSeverities={severitySelectionRedux}
-          severityCount={severityCount}
-          onSelect={onSelect}
-          riskEntity={RiskScoreEntity.user}
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.user} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SeverityFilterGroup
+              selectedSeverities={severitySelectionRedux}
+              severityCount={severityCount}
+              onSelect={onSelect}
+              riskEntity={RiskScoreEntity.user}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       headerSupplement={risk}
       headerTitle={i18nUsers.NAVIGATION_RISK_TITLE}
-      headerTooltip={i18n.USER_RISK_TABLE_TOOLTIP}
       headerUnit={i18n.UNIT(totalCount)}
       id={id}
       isInspect={isInspect}

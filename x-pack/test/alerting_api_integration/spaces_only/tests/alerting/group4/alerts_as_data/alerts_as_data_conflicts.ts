@@ -13,6 +13,14 @@ import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { basename } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import { get, omit } from 'lodash';
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_CASE_IDS,
+  ALERT_INSTANCE_ID,
+  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
+} from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
@@ -21,7 +29,7 @@ type AlertDoc = Alert & { runCount: number };
 
 // sort results of a search of alert docs by alert instance id
 function sortAlertDocsByInstanceId(a: SearchHit<AlertDoc>, b: SearchHit<AlertDoc>) {
-  return a._source!.kibana.alert.instance.id.localeCompare(b._source!.kibana.alert.instance.id);
+  return a._source![ALERT_INSTANCE_ID].localeCompare(b._source![ALERT_INSTANCE_ID]);
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -250,16 +258,12 @@ async function adHocUpdate(es: Client, index: string, id: string) {
 // we'll do the adhoc updates with this data
 const DocUpdate = {
   runCount: -1, // rule-specific field, will be overwritten by rule execution
-  kibana: {
-    alert: {
-      action_group: 'not-the-default', // will be overwritten by rule execution
-      // below are all fields that will NOT be overwritten by rule execution
-      workflow_status: 'a-ok!',
-      workflow_tags: ['fee', 'fi', 'fo', 'fum'],
-      case_ids: ['123', '456', '789'],
-      status: 'untracked',
-    },
-  },
+  [ALERT_ACTION_GROUP]: 'not-the-default', // will be overwritten by rule execution
+  // below are all fields that will NOT be overwritten by rule execution
+  [ALERT_WORKFLOW_STATUS]: 'a-ok!',
+  [ALERT_WORKFLOW_TAGS]: ['fee', 'fi', 'fo', 'fum'],
+  [ALERT_CASE_IDS]: ['123', '456', '789'],
+  [ALERT_STATUS]: 'untracked',
 };
 
 const SkipFields = [

@@ -187,6 +187,11 @@ export function getPersistableState(state: XYState) {
         } else {
           const persistableLayer: XYPersistedLinkedByValueAnnotationLayerConfig = {
             persistanceType: 'linked',
+            cachedMetadata: layer.cachedMetadata || {
+              title: layer.__lastSaved.title,
+              description: layer.__lastSaved.description,
+              tags: layer.__lastSaved.tags,
+            },
             layerId: layer.layerId,
             layerType: layer.layerType,
             annotationGroupRef: referenceName,
@@ -298,6 +303,7 @@ export function injectReferences(
               ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
               indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
               annotations: cloneDeep(persistedLayer.annotations),
+              cachedMetadata: persistedLayer.cachedMetadata,
             };
           }
         }
