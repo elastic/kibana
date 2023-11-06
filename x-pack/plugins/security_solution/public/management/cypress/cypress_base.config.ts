@@ -6,7 +6,7 @@
  */
 
 import { merge } from 'lodash';
-import { getFailedSpecVideos } from './support/filter_videos';
+import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
@@ -88,7 +88,7 @@ export const getCypressBaseConfig = (
           require('@cypress/grep/src/plugin')(config);
 
           on('after:spec', (_, results) => {
-            getFailedSpecVideos(results);
+            getVideosForFailedSpecs(results);
             createToolingLogger().info(
               'Tooling Usage Tracking summary:\n',
               usageTracker.toSummaryTable()
