@@ -120,7 +120,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       onSubmit: submitMaintenanceWindow,
     });
 
-    const [{ recurring, timezone, categoryIds }] = useFormData<FormProps>({
+    const [{ recurring, timezone, categoryIds }, _, mounted] = useFormData<FormProps>({
       form,
       watch: ['recurring', 'timezone', 'categoryIds'],
     });
@@ -188,6 +188,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       if (isEditMode) {
         return;
       }
+      if (!mounted) {
+        return;
+      }
       if (hasSetInitialCategories.current) {
         return;
       }
@@ -197,13 +200,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       setFieldValue('categoryIds', [...new Set(ruleTypes.map((ruleType) => ruleType.category))]);
       hasSetInitialCategories.current = true;
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isEditMode, ruleTypes]);
+    }, [isEditMode, ruleTypes, mounted]);
 
     // For edit mode, if a maintenance window => category_ids is not an array, this means
     // the maintenance window was created before the introduction of category filters.
     // For backwards compat we will initialize all options for these.
     useEffect(() => {
       if (!isEditMode) {
+        return;
+      }
+      if (!mounted) {
         return;
       }
       if (hasSetInitialCategories.current) {
@@ -219,7 +225,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       ]);
       hasSetInitialCategories.current = true;
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isEditMode, categoryIds]);
+    }, [isEditMode, categoryIds, mounted]);
 
     return (
       <Form form={form}>

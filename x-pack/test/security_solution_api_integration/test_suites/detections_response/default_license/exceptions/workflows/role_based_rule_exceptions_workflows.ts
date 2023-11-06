@@ -180,7 +180,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(bodyToCompare).toEqual(expected);
         });
 
-        it('should allow removing an exception list from an immutable rule through patch', async () => {
+        it('@skipInQA should allow removing an exception list from an immutable rule through patch', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           // This rule has an existing exceptions_list that we are going to use
@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(immutableRuleSecondTime.exceptions_list.length).toEqual(0);
         });
 
-        it('should allow adding a second exception list to an immutable rule through patch', async () => {
+        it('@skipInQA should allow adding a second exception list to an immutable rule through patch', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(immutableRuleSecondTime.exceptions_list.length).toEqual(2);
         });
 
-        it('should override any updates to pre-packaged rules if the user removes the exception list through the API but the new version of a rule has an exception list again', async () => {
+        it('@skipInQA should override any updates to pre-packaged rules if the user removes the exception list through the API but the new version of a rule has an exception list again', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           // This rule has an existing exceptions_list that we are going to use
@@ -259,7 +259,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(immutableRuleSecondTime.exceptions_list).toEqual(immutableRule.exceptions_list);
         });
 
-        it('should merge back an exceptions_list if it was removed from the immutable rule through PATCH', async () => {
+        it('@skipInQA should merge back an exceptions_list if it was removed from the immutable rule through PATCH', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -305,7 +305,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('should NOT add an extra exceptions_list that already exists on a rule during an upgrade', async () => {
+        it('@skipInQA should NOT add an extra exceptions_list that already exists on a rule during an upgrade', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
@@ -324,7 +324,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('should NOT allow updates to pre-packaged rules to overwrite existing exception based rules when the user adds an additional exception list', async () => {
+        it('@skipInQA should NOT allow updates to pre-packaged rules to overwrite existing exception based rules when the user adds an additional exception list', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -371,7 +371,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('should not remove any exceptions added to a pre-packaged/immutable rule during an update if that rule has no existing exception lists', async () => {
+        it('@skipInQA should not remove any exceptions added to a pre-packaged/immutable rule during an update if that rule has no existing exception lists', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           // Create a new exception list
@@ -425,7 +425,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
         });
 
-        it('should not change the immutable tags when adding a second exception list to an immutable rule through patch', async () => {
+        it('@skipInQA should not change the immutable tags when adding a second exception list to an immutable rule through patch', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
@@ -466,7 +466,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(bodyToCompare.version).toEqual(immutableRule.version); // The version should never update on a patch
         });
 
-        it('should not change count of prepacked rules when adding a second exception list to an immutable rule through patch. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
+        it('@skipInQA should not change count of prepacked rules when adding a second exception list to an immutable rule through patch. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
           await installMockPrebuiltRules(supertest, es);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(

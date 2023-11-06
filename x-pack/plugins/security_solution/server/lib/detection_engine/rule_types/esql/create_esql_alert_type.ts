@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ESQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import type { EsqlRuleParams } from '../../rule_schema';
-import { esqlRuleParams } from '../../rule_schema';
+import { EsqlRuleParams } from '../../rule_schema';
 import { esqlExecutor } from './esql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 
@@ -25,14 +23,7 @@ export const createEsqlAlertType = (
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, esqlRuleParams);
-          if (errors != null) {
-            throw new Error(errors);
-          }
-          if (validated == null) {
-            throw new Error('Validation of rule params failed');
-          }
-          return validated;
+          return EsqlRuleParams.parse(object);
         },
       },
     },

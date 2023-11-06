@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import {
   cleanupCase,
@@ -29,6 +30,9 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
   let packId: string;
   let packName: string;
   const packData = packFixture();
+  before(() => {
+    initializeDataViews();
+  });
 
   beforeEach(() => {
     loadPack(packData).then((data) => {

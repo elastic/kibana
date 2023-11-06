@@ -615,6 +615,7 @@ export interface IndexTemplate {
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];
+  ignore_missing_component_templates?: string[];
   _meta: object;
 }
 
