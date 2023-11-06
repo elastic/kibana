@@ -42,7 +42,7 @@ const fromEuiSelectableOptionToRawOption = (options: EuiSelectableOption[]) =>
 const getEuiSelectableCheckedOptions = (options: EuiSelectableOption[]) =>
   options.filter((option) => option.checked === 'on');
 
-interface UseFilterParams {
+interface UseFilterParams<T> {
   buttonLabel?: string;
   id: keyof FilterOptions;
   limit?: number;
@@ -50,9 +50,9 @@ interface UseFilterParams {
   onChange: ({ filterId, options }: { filterId: keyof FilterOptions; options: string[] }) => void;
   options: string[];
   selectedOptions?: string[];
-  renderOption?: (option: EuiSelectableOption) => React.ReactNode;
+  renderOption?: (option: T) => React.ReactNode;
 }
-export const MultiSelectFilterComponent = ({
+export const MultiSelectFilter = <T extends EuiSelectableOption>({
   buttonLabel,
   id,
   limit,
@@ -61,7 +61,7 @@ export const MultiSelectFilterComponent = ({
   options: rawOptions,
   selectedOptions = [],
   renderOption,
-}: UseFilterParams) => {
+}: UseFilterParams<T>) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
@@ -124,7 +124,7 @@ export const MultiSelectFilterComponent = ({
           <EuiHorizontalRule margin="none" />
         </>
       ) : null}
-      <EuiSelectable
+      <EuiSelectable<T>
         options={options}
         searchable
         searchProps={{ placeholder: id, compressed: false }}
@@ -158,6 +158,4 @@ export const MultiSelectFilterComponent = ({
   );
 };
 
-MultiSelectFilterComponent.displayName = 'MultiSelectFilterComponent';
-
-export const MultiSelectFilter = React.memo(MultiSelectFilterComponent);
+MultiSelectFilter.displayName = 'MultiSelectFilter';

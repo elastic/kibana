@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import { CaseStatuses } from '../../../common/types/domain';
@@ -14,6 +13,10 @@ import { statuses } from '../status';
 import type { FilterOptions } from '../../../common/ui/types';
 import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
+
+interface StatusOption {
+  label: CaseStatuses;
+}
 
 interface Props {
   countClosedCases: number | null;
@@ -46,8 +49,8 @@ export const StatusFilterComponent = ({
     () => [...caseStatuses].filter((status) => !hiddenStatuses.includes(status)),
     [hiddenStatuses]
   );
-  const renderOption = (option: EuiSelectableOption) => {
-    const selectedStatus = option.label as CaseStatuses;
+  const renderOption = (option: StatusOption) => {
+    const selectedStatus = option.label;
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={1}>
@@ -60,7 +63,7 @@ export const StatusFilterComponent = ({
     );
   };
   return (
-    <MultiSelectFilter
+    <MultiSelectFilter<StatusOption>
       buttonLabel={i18n.STATUS}
       id={'status'}
       onChange={onChange}

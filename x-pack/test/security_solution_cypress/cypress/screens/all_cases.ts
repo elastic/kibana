@@ -23,7 +23,7 @@ export const ALL_CASES_NOT_PUSHED = '[data-test-subj="case-table-column-external
 
 export const ALL_CASES_NUMBER_OF_ALERTS = '[data-test-subj="case-table-column-alertsCount"]';
 
-export const ALL_CASES_OPEN_CASES_COUNT = '[data-test-subj="options-filter-popover-button-status"]';
+export const ALL_CASES_STATUS_FILTER = '[data-test-subj="options-filter-popover-button-status"]';
 
 export const ALL_CASES_OPEN_FILTER = '[data-test-subj="options-filter-popover-item-open"]';
 
