@@ -18,12 +18,14 @@ import {
   TOASTER,
 } from '../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../tasks/alerts_detection_rules';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../screens/breadcrumbs';
 import { installPrebuiltRuleAssets } from '../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../tasks/login';
 import {
-  addElasticRulesButtonClick,
-  assertInstallationSuccess,
   assertInstallationRequestIsComplete,
+  assertRuleInstallationSuccessToastShown,
+  assertRulesPresentInInstalledRulesTable,
+  clickAddElasticRulesButton,
 } from '../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
@@ -49,7 +51,7 @@ describe(
         cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform').as(
           'installPrebuiltRules'
         );
-        addElasticRulesButtonClick();
+        clickAddElasticRulesButton();
       });
 
       it('should install prebuilt rules one by one', () => {
@@ -58,27 +60,39 @@ describe(
         // Wait for request to complete
         assertInstallationRequestIsComplete([RULE_1]);
         // Assert installation succeeded
-        assertInstallationSuccess([RULE_1]);
+        assertRuleInstallationSuccessToastShown([RULE_1]);
+        // Go back to rules table and assert that the rules are installed
+        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+        assertRulesPresentInInstalledRulesTable([RULE_1]);
       });
 
       it('should install multiple selected prebuilt rules by selecting them individually', () => {
         selectRulesByName([RULE_1['security-rule'].name, RULE_2['security-rule'].name]);
         cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
         assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertInstallationSuccess([RULE_1, RULE_2]);
+        assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
+        // Go back to rules table and assert that the rules are installed
+        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+        assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
       });
 
       it('should install multiple selected prebuilt rules by selecting all in page', () => {
         cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
         cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
         assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertInstallationSuccess([RULE_1, RULE_2]);
+        assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
+        // Go back to rules table and assert that the rules are installed
+        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+        assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
       });
 
       it('should install all available rules at once', () => {
         cy.get(INSTALL_ALL_RULES_BUTTON).click();
         assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertInstallationSuccess([RULE_1, RULE_2]);
+        assertRuleInstallationSuccessToastShown([RULE_1, RULE_2]);
+        // Go back to rules table and assert that the rules are installed
+        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+        assertRulesPresentInInstalledRulesTable([RULE_1, RULE_2]);
       });
 
       it('should display an empty screen when all available prebuilt rules have been installed', () => {
