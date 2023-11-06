@@ -6,7 +6,7 @@
  */
 
 import { initializeDataViews } from '../../tasks/login';
-import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
+import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
   checkResults,
@@ -63,7 +63,7 @@ describe('ALL - Custom space', () => {
 
       beforeEach(() => {
         cy.login(ServerlessRoleName.SOC_MANAGER);
-        navigateToWithoutWaitForReact(`/s/${spaceId}/app/osquery`);
+        navigateTo(`/s/${spaceId}/app/osquery`);
       });
 
       after(() => {

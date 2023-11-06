@@ -6,7 +6,7 @@
  */
 
 import { customActionEditSavedQuerySelector, UPDATE_QUERY_BUTTON } from '../../screens/packs';
-import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
+import { navigateTo } from '../../tasks/navigation';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -23,7 +23,7 @@ describe('ALL - Edit saved query', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
-    navigateToWithoutWaitForReact('/app/osquery/saved_queries');
+    navigateTo('/app/osquery/saved_queries');
   });
 
   after(() => {

@@ -7,7 +7,7 @@
 
 import { initializeDataViews } from '../../tasks/login';
 import { getAdvancedButton } from '../../screens/integrations';
-import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
+import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
   getOsqueryFieldTypes,
@@ -29,7 +29,7 @@ describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should properly show static values in form and results', () => {
-    navigateToWithoutWaitForReact('/app/osquery');
+    navigateTo('/app/osquery');
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery('select * from processes;');
@@ -57,7 +57,7 @@ describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should hide and show ecs mappings on Advanced accordion click', () => {
-    navigateToWithoutWaitForReact('/app/osquery');
+    navigateTo('/app/osquery');
     cy.contains('New live query').click();
     selectAllAgents();
     cy.getBySel('savedQuerySelect').within(() => {

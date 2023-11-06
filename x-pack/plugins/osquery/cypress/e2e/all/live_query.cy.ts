@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
+import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
   inputQuery,
@@ -21,7 +21,7 @@ import { ServerlessRoleName } from '../../support/roles';
 describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
-    navigateToWithoutWaitForReact('/app/osquery');
+    navigateTo('/app/osquery');
   });
 
   it('should validate the form', () => {

@@ -10,7 +10,7 @@ import {
   customActionRunSavedQuerySelector,
   formFieldInputSelector,
 } from '../../screens/packs';
-import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
+import { navigateTo } from '../../tasks/navigation';
 import {
   cleanupPack,
   cleanupSavedQuery,
@@ -51,7 +51,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
   });
 
   it('should not be able to add nor run saved queries', () => {
-    navigateToWithoutWaitForReact('/app/osquery/saved_queries');
+    navigateTo('/app/osquery/saved_queries');
     cy.contains(savedQueryName);
     cy.contains('Add saved query').should('be.disabled');
     cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
@@ -64,12 +64,12 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
   });
 
   it('should not be able to enter live queries with just read and no run saved queries', () => {
-    navigateToWithoutWaitForReact('/app/osquery/live_queries/new');
+    navigateTo('/app/osquery/live_queries/new');
     cy.contains('Permission denied');
   });
 
   it('should not be able to play in live queries history', () => {
-    navigateToWithoutWaitForReact('/app/osquery/live_queries');
+    navigateTo('/app/osquery/live_queries');
     cy.contains('New live query').should('be.disabled');
     cy.contains(liveQueryQuery);
     cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
@@ -77,7 +77,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
   });
 
   it('should not be able to add nor edit packs', () => {
-    navigateToWithoutWaitForReact('/app/osquery/packs');
+    navigateTo('/app/osquery/packs');
     cy.contains('Add pack').should('be.disabled');
     cy.getBySel('tablePaginationPopoverButton').click();
     cy.getBySel('tablePagination-50-rows').click();
