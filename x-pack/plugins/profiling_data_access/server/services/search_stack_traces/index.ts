@@ -15,12 +15,14 @@ export async function searchStackTraces({
   rangeFrom,
   rangeTo,
   kuery,
+  durationSeconds,
 }: {
   client: ProfilingESClient;
   sampleSize: number;
   rangeFrom: number;
   rangeTo: number;
   kuery: string;
+  durationSeconds: number;
 }) {
   const response = await client.profilingStacktraces({
     query: {
@@ -41,6 +43,7 @@ export async function searchStackTraces({
       },
     },
     sampleSize,
+    durationSeconds,
   });
 
   return decodeStackTraceResponse(response);

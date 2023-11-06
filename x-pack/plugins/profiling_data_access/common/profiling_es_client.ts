@@ -22,11 +22,13 @@ export interface ProfilingESClient {
   profilingStacktraces({}: {
     query: QueryDslQueryContainer;
     sampleSize: number;
+    durationSeconds: number;
   }): Promise<StackTraceResponse>;
   profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
   profilingFlamegraph({}: {
     query: QueryDslQueryContainer;
     sampleSize: number;
+    durationSeconds: number;
   }): Promise<BaseFlameGraph>;
 }

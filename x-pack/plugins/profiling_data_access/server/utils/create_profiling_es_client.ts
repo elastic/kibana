@@ -39,7 +39,7 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    profilingStacktraces({ query, sampleSize }) {
+    profilingStacktraces({ query, sampleSize, durationSeconds }) {
       const controller = new AbortController();
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
         return esClient.transport.request(
@@ -49,6 +49,7 @@ export function createProfilingEsClient({
             body: {
               query,
               sample_size: sampleSize,
+              requested_duration: durationSeconds,
             },
           },
           {
@@ -83,7 +84,7 @@ export function createProfilingEsClient({
     getEsClient() {
       return esClient;
     },
-    profilingFlamegraph({ query, sampleSize }) {
+    profilingFlamegraph({ query, sampleSize, durationSeconds }) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/flamegraph', () => {
@@ -94,6 +95,7 @@ export function createProfilingEsClient({
             body: {
               query,
               sample_size: sampleSize,
+              requested_duration: durationSeconds,
             },
           },
           {

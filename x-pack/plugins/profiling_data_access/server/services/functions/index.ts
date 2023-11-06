@@ -33,6 +33,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
   }: FetchFunctionsParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
+    const totalSeconds = rangeToSecs - rangeFromSecs;
 
     const profilingEsClient = createProfilingEsClient({ esClient });
 
@@ -43,6 +44,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
         rangeTo: rangeToSecs,
         kuery,
         sampleSize: targetSampleSize,
+        durationSeconds: totalSeconds,
       }
     );
 

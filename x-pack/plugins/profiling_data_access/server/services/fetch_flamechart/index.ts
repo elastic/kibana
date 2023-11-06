@@ -45,6 +45,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
           rangeTo: rangeToSecs,
           kuery,
           sampleSize: targetSampleSize,
+          durationSeconds: totalSeconds,
         });
 
       return await withProfilingSpan('create_flamegraph', async () => {
@@ -79,6 +80,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
         },
       },
       sampleSize: targetSampleSize,
+      durationSeconds: totalSeconds,
     });
     return { ...flamegraph, TotalSeconds: totalSeconds };
   };
