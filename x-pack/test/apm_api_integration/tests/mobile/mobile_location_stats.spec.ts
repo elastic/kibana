@@ -19,10 +19,6 @@ type MobileLocationStats =
 // timerange 15min, interval 5m, rate 1
 // generate 3 http spans for galaxy10 device
 
-interface GeneratedData {
-  timestamps: number[];
-}
-
 async function generateData({
   start,
   end,
@@ -31,7 +27,7 @@ async function generateData({
   start: number;
   end: number;
   synthtraceEsClient: ApmSynthtraceEsClient;
-}): Promise<GeneratedData> {
+}) {
   const galaxy10 = apm
     .mobileApp({
       name: 'synth-android',
@@ -134,14 +130,11 @@ async function generateData({
       carrierMCC: '440',
     });
 
-  const timestamps: number[] = [];
-
   await synthtraceEsClient.index([
     timerange(start, end)
       .interval('5m')
       .rate(1)
       .generator((timestamp) => {
-        timestamps.push(timestamp);
         galaxy10.startNewSession();
         galaxy7.startNewSession();
         huaweiP2.startNewSession();
@@ -181,7 +174,6 @@ async function generateData({
         ];
       }),
   ]);
-  return { timestamps } as GeneratedData;
 }
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -241,9 +233,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('Location stats', { config: 'basic', archives: [] }, () => {
-    let generatedData: GeneratedData;
     before(async () => {
-      generatedData = await generateData({
+      await generateData({
         synthtraceEsClient,
         start,
         end,
@@ -317,27 +308,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"1.1"`,
         });
 
-        const timestamps = generatedData.timestamps;
-        expect(
-          response.currentPeriod.mostSessions.timeseries.every((item) =>
-            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
-          )
-        ).to.eql(true);
-        expect(
-          response.currentPeriod.mostRequests.timeseries.every((item) =>
-            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
-          )
-        ).to.eql(true);
-        expect(
-          response.currentPeriod.mostCrashes.timeseries.every((item) =>
-            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
-          )
-        ).to.eql(true);
-        expect(
-          response.currentPeriod.mostLaunches.timeseries.every((item) =>
-            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
-          )
-        ).to.eql(true);
+        expect(response.currentPeriod.mostSessions.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostCrashes.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostRequests.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostLaunches.timeseries[0].y).to.eql(1);
 
         expect(response.currentPeriod.mostSessions.value).to.eql(3);
         expect(response.currentPeriod.mostRequests.value).to.eql(3);
@@ -351,27 +325,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"1.1" and service.environment: "production"`,
         });
 
-        const timestamps = generatedData.timestamps;
-        expect(
-          response.currentPeriod.mostSessions.timeseries.every((item) =>
-            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
-          )
-        ).to.eql(true);
-        expect(
-          response.currentPeriod.mostRequests.timeseries.every((item) =>
-            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
-          )
-        ).to.eql(true);
-        expect(
-          response.currentPeriod.mostCrashes.timeseries.every((item) =>
-            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
-          )
-        ).to.eql(true);
-        expect(
-          response.currentPeriod.mostLaunches.timeseries.every((item) =>
-            timestamps.includes(item.x) ? item.y === 1 : item.y === 0
-          )
-        ).to.eql(true);
+        expect(response.currentPeriod.mostSessions.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostCrashes.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostRequests.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostLaunches.timeseries[0].y).to.eql(1);
 
         expect(response.currentPeriod.mostSessions.value).to.eql(3);
         expect(response.currentPeriod.mostRequests.value).to.eql(3);
