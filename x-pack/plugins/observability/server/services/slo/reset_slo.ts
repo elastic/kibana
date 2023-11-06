@@ -34,12 +34,7 @@ export class ResetSLO {
 
     await Promise.all([this.deleteRollupData(slo.id), this.deleteSummaryData(slo.id)]);
 
-    try {
-      await this.transformManager.install(slo);
-    } catch (err) {
-      // what can we do in this case?
-      throw err;
-    }
+    await this.transformManager.install(slo);
 
     try {
       await this.transformManager.preview(transformId);
