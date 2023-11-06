@@ -289,7 +289,7 @@ const startFleetServerWithDocker = async ({
 
       await execa('docker', ['kill', containerName])
         .then(() => {
-          log.verbose(
+          log.debug(
             `Killed an existing container with name [${containerName}]. New one will be started.`
           );
         })
@@ -656,12 +656,13 @@ export const isFleetServerRunning = async (
       httpsAgent: new https.Agent({ rejectUnauthorized: false }),
     })
     .then((response) => {
-      log.debug(`Fleet server is up and running as [${fleetServerUrl}]`, response.data);
+      log.debug(`Fleet server is up and running at [${fleetServerUrl}]. Status: `, response.data);
       return true;
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .catch((e) => {
-      log.debug(`Fleet server not up. Attempt to call [${url.toString()}] failed with:`, e);
+      log.debug(`Fleet server not up at [${fleetServerUrl}]`);
+      log.verbose(`Call to [${url.toString()}] failed with:`, e);
       return false;
     });
 };

@@ -203,8 +203,10 @@ const waitForHasAgentPolicyChanged = (
   policyRevision: number
 ): Cypress.Chainable<boolean> => {
   let isPolicyUpdated = false;
+
   return cy
     .waitUntil(
+      `Wait for Fleet Agent to report policy revision ${policyRevision}`,
       () => {
         return request<GetOneAgentResponse>({
           method: 'GET',
@@ -213,16 +215,20 @@ const waitForHasAgentPolicyChanged = (
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         }).then((response) => {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          const { status, policy_revision, policy_id } = response.body.item;
+
+          cy.log('Checking Agent data:', { status, policy_revision, policy_id });
+
           if (
-            response.body.item.status !== 'updating' &&
-            response.body.item?.policy_revision === policyRevision &&
-            response.body.item?.policy_id === policyId
+            status !== 'updating' &&
+            policy_revision === policyRevision &&
+            policy_id === policyId
           ) {
             isPolicyUpdated = true;
-            return true;
           }
 
-          return false;
+          return cy.wrap(isPolicyUpdated);
         });
       },
       { timeout: 120000 }
