@@ -185,7 +185,7 @@ export const EMPTY_FILTER_MESSAGE = i18n.translate(
 );
 
 export const OPTIONS = (totalCount: number) =>
-  i18n.translate('x-pack.cases.tableFilters.useFilters.options', {
+  i18n.translate('xpack.cases.tableFilters.useFilters.options', {
     defaultMessage: '{totalCount, plural, one {# option} other {# options}}',
     values: { totalCount },
   });
