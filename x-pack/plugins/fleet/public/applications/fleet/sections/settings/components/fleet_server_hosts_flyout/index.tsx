@@ -26,6 +26,7 @@ import {
   EuiSwitch,
   EuiComboBox,
   EuiCallOut,
+  EuiBetaBadge,
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
@@ -158,7 +159,21 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.proxyIdLabel"
-                defaultMessage="Proxy"
+                defaultMessage="Proxy {badge}"
+                values={{
+                  badge: (
+                    <EuiBetaBadge
+                      size="s"
+                      className="eui-alignTop"
+                      label={i18n.translate(
+                        'xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge',
+                        {
+                          defaultMessage: 'Beta',
+                        }
+                      )}
+                    />
+                  ),
+                }}
               />
             }
           >
