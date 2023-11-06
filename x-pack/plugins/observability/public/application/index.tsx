@@ -54,6 +54,7 @@ export const renderApp = ({
   usageCollection,
   isDev,
   kibanaVersion,
+  isServerless,
 }: {
   core: CoreStart;
   config: ConfigSchema;
@@ -64,6 +65,7 @@ export const renderApp = ({
   usageCollection: UsageCollectionSetup;
   isDev?: boolean;
   kibanaVersion: string;
+  isServerless?: boolean;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -97,6 +99,7 @@ export const renderApp = ({
                 storage: new Storage(localStorage),
                 isDev,
                 kibanaVersion,
+                isServerless,
               }}
             >
               <ObservabilityAIAssistantProvider value={plugins.observabilityAIAssistant}>

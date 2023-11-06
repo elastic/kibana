@@ -1197,7 +1197,15 @@
             "section": "def-common.KibanaServerError",
             "text": "KibanaServerError"
           },
-          "<IEsErrorAttributes>"
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsErrorAttributes",
+            "text": "IEsErrorAttributes"
+          },
+          ">"
         ],
         "path": "src/plugins/data/public/search/errors/types.ts",
         "deprecated": false,
@@ -27507,6 +27515,73 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.IEsErrorAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "IEsErrorAttributes",
+        "description": [],
+        "path": "src/plugins/data/common/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IEsErrorAttributes.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "ErrorCause",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IEsErrorAttributes.rawResponse",
+            "type": "Object",
+            "tags": [],
+            "label": "rawResponse",
+            "description": [],
+            "signature": [
+              "SearchResponseBody",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">> | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IEsErrorAttributes.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SanitizedConnectionRequestParams",
+                "text": "SanitizedConnectionRequestParams"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.IEsSearchRequest",
         "type": "Interface",
         "tags": [],
@@ -27847,6 +27922,29 @@
             ],
             "signature": [
               "RawResponse"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IKibanaSearchResponse.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [
+              "\nHTTP request parameters from elasticsearch transport client t"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SanitizedConnectionRequestParams",
+                "text": "SanitizedConnectionRequestParams"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
@@ -34627,6 +34725,21 @@
           "\"sampler\""
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/sampler.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SanitizedConnectionRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SanitizedConnectionRequestParams",
+        "description": [],
+        "signature": [
+          "{ path: string; method: string; querystring?: string | undefined; }"
+        ],
+        "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
