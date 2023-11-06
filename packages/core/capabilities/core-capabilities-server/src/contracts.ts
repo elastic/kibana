@@ -102,10 +102,8 @@ export interface CapabilitiesStart {
    * Resolve the {@link Capabilities} to be used for given request
    *
    * @param request The request to resolve capabilities for
-   * @param capabilityPath The path(s) of the capabilities that needs to be retrieved. Use '*' to retrieve all paths.
-   *                       Used to avoid unnecessarily running switched on parts of the capabilities that won't be used by the API consumer.
-   * @param options Additional options
-   *
+   * @param options.capabilityPath The path(s) of the capabilities that needs to be retrieved. Use '*' to retrieve all paths.
+   * Used to avoid unnecessarily running switched on parts of the capabilities that won't be used by the API consumer.
    *
    * @example
    * ```ts
@@ -119,7 +117,7 @@ export interface CapabilitiesStart {
 }
 
 /**
- * Defines a set of additional options for the `resolveCapabilities` method of {@link CapabilitiesStart}.
+ * Options for {@link CapabilitiesStart.resolveCapabilities}.
  *
  * @public
  */
@@ -127,7 +125,7 @@ export interface ResolveCapabilitiesOptions {
   /**
    * The path(s) of capabilities that the API consumer is interested in. The '*' wildcard is supported as a suffix only.
    *
-   * E.g. capabilityPath: "myPlugin.*" or capabilityPath: "myPlugin.myKey"
+   * E.g. capabilityPath: "*" or capabilityPath: "myPlugin.*" or capabilityPath: "myPlugin.myKey"
    *
    * @remark All the capabilities will be returned, but the ones not matching the specified path(s) may not have been processed
    *        by the capability switchers and should not be used.
