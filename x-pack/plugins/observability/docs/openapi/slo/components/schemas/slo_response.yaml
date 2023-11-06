@@ -17,6 +17,7 @@ required:
   - tags
   - createdAt
   - updatedAt
+  - version
 properties:
   id:
     description: The identifier of the SLO.
@@ -86,3 +87,7 @@ properties:
     description: The last update date
     type: string
     example: "2023-01-12T10:03:19.000Z"
+  version:
+    description: The internal SLO version
+    type: number
+    example: 2

@@ -365,6 +365,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+  /s/{spaceId}/api/observability/slos/{sloId}/_reset:
+    post:
+      summary: Resets an SLO.
+      operationId: resetSloOp
+      description: |
+        You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - slo
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/slo_id'
+      responses:
+        '204':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/slo_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
   /s/{spaceId}/internal/observability/slos/_historical_summary:
     post:
       summary: Retrieves the historical summary for a list of SLOs
@@ -1122,6 +1165,7 @@ components:
         - tags
         - createdAt
         - updatedAt
+        - version
       properties:
         id:
           description: The identifier of the SLO.
@@ -1191,6 +1235,10 @@ components:
           description: The last update date
           type: string
           example: '2023-01-12T10:03:19.000Z'
+        version:
+          description: The internal SLO version
+          type: number
+          example: 2
     find_slo_response:
       title: Find SLO response
       description: |
