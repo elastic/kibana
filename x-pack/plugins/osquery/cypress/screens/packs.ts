@@ -11,6 +11,7 @@ export const SAVE_PACK_BUTTON = 'save-pack-button';
 export const UPDATE_PACK_BUTTON = 'update-pack-button';
 
 export const ADD_QUERY_BUTTON = 'add-query-button';
+export const UPDATE_QUERY_BUTTON = 'update-query-button';
 
 export const FLYOUT_SAVED_QUERY_SAVE_BUTTON = 'query-flyout-save-button';
 export const FLYOUT_SAVED_QUERY_CANCEL_BUTTON = 'query-flyout-cancel-button';

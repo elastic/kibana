@@ -17,7 +17,6 @@ import {
   addToCase,
   checkResults,
   deleteAndConfirm,
-  findFormFieldByRowsLabelAndType,
   inputQuery,
   selectAllAgents,
   submitQuery,
@@ -59,7 +58,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('Saved queries').click();
     cy.contains('Add saved query').click();
 
-    findFormFieldByRowsLabelAndType('ID', 'users_elastic');
+    cy.get('input[name="id"]').type(`users_elastic{downArrow}{enter}`);
+
     cy.contains('ID must be unique').should('not.exist');
     inputQuery('test');
     cy.contains('Save query').click();

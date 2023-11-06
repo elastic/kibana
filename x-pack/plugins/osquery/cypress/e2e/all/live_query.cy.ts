@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { navigateTo } from '../../tasks/navigation';
+import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
 import {
   checkResults,
   inputQuery,
@@ -21,7 +21,7 @@ import { ServerlessRoleName } from '../../support/roles';
 describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
-    navigateTo('/app/osquery');
+    navigateToWithoutWaitForReact('/app/osquery');
   });
 
   it('should validate the form', () => {
@@ -44,10 +44,7 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('ECS field is required.').should('not.exist');
 
     checkResults();
-    cy.react('Cell', { props: { colIndex: 0 } })
-      .should('exist')
-      .first()
-      .click();
+    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist').click();
     cy.url().should('include', 'app/fleet/agents/');
   });
 

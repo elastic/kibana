@@ -120,7 +120,7 @@ export const getSavedQueriesComplexTest = () =>
 
         // Save edited
         cy.getBySel('euiFlyoutCloseButton').click();
-        cy.getBySel('savedQueryFormUpdateButton').click();
+        cy.getBySel('update-query-button').click();
         cy.contains(`${savedQueryDescription} Edited`);
 
         // delete saved query
