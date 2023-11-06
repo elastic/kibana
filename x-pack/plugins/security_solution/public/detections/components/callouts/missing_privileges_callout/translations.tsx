@@ -53,10 +53,11 @@ const CANNOT_EDIT_ALERTS = i18n.translate(
 export const missingPrivilegesCallOutBody = ({
   indexPrivileges,
   featurePrivileges = [],
+  clusterPrivileges,
 }: MissingPrivileges) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail"
-    defaultMessage="{essence} {indexPrivileges} {featurePrivileges} Related documentation: {docs}"
+    defaultMessage="{essence} {clusterPrivileges} {indexPrivileges} {featurePrivileges} Related documentation: {docs}"
     values={{
       essence: (
         <p>
@@ -66,6 +67,22 @@ export const missingPrivilegesCallOutBody = ({
           />
         </p>
       ),
+      clusterPrivileges:
+        clusterPrivileges.length > 0 ? (
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesTitle"
+              defaultMessage="Missing cluster privileges:"
+            />
+            <ul>
+              {clusterPrivileges.map((missingPrivilege) => (
+                <li key={missingPrivilege}>
+                  <EuiCode>{missingPrivilege}</EuiCode>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null,
       indexPrivileges:
         indexPrivileges.length > 0 ? (
           <>

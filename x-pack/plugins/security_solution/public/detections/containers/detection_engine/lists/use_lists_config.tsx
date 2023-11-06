@@ -17,6 +17,7 @@ export interface UseListsConfigReturn {
   enabled: boolean;
   loading: boolean;
   needsConfiguration: boolean;
+  indexExists: boolean;
 }
 
 export const useListsConfig = (): UseListsConfigReturn => {
@@ -38,5 +39,12 @@ export const useListsConfig = (): UseListsConfigReturn => {
     }
   }, [canManageIndex, createIndex, needsIndex]);
 
-  return { canManageIndex, canWriteIndex, enabled, loading, needsConfiguration };
+  return {
+    canManageIndex,
+    canWriteIndex,
+    enabled,
+    loading,
+    needsConfiguration,
+    indexExists: !!indexExists,
+  };
 };

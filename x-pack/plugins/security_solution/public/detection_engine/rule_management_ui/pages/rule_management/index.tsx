@@ -69,6 +69,7 @@ const RulesPageComponent: React.FC = () => {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
     needsConfiguration: needsListsConfiguration,
+    indexExists: listIndexExists,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
 
@@ -137,7 +138,7 @@ const RulesPageComponent: React.FC = () => {
                   <EuiButtonEmpty
                     data-test-subj="open-value-lists-modal-button"
                     iconType="importAction"
-                    isDisabled={!canWriteListsIndex || !canUserCRUD || loading}
+                    isDisabled={!canWriteListsIndex || !canUserCRUD || loading || !listIndexExists}
                     onClick={showValueListFlyout}
                   >
                     {i18n.IMPORT_VALUE_LISTS}

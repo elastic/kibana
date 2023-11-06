@@ -11,7 +11,8 @@ import type { Privilege } from '../../../containers/detection_engine/alerts/type
 import { useUserData } from '../../user_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-const REQUIRED_INDEX_PRIVILIGES = ['read', 'write', 'view_index_metadata', 'maintenance'] as const;
+const REQUIRED_INDEX_PRIVILEGES = ['read', 'write', 'view_index_metadata', 'manage'] as const;
+const REQUIRED_CLUSTER_PRIVILEGES = ['manage'] as const;
 
 const getIndexName = (indexPrivileges: Privilege['index']) => {
   const [indexName] = Object.keys(indexPrivileges);
@@ -24,11 +25,19 @@ const getMissingIndexPrivileges = (
 ): MissingIndexPrivileges | undefined => {
   const indexName = getIndexName(indexPrivileges);
   const privileges = indexPrivileges[indexName];
-  const missingPrivileges = REQUIRED_INDEX_PRIVILIGES.filter((privelege) => !privileges[privelege]);
+  const missingPrivileges = REQUIRED_INDEX_PRIVILEGES.filter((privilege) => !privileges[privilege]);
 
   if (missingPrivileges.length) {
     return [indexName, missingPrivileges];
   }
+};
+
+const getMissingClusterPrivileges = (clusterPrivileges: Privilege['cluster']): string[] => {
+  const missingPrivileges = REQUIRED_CLUSTER_PRIVILEGES.filter(
+    (privilege) => !clusterPrivileges[privilege]
+  );
+
+  return missingPrivileges;
 };
 
 export type MissingFeaturePrivileges = [feature: string, privileges: string[]];
@@ -37,6 +46,7 @@ export type MissingIndexPrivileges = [indexName: string, privileges: string[]];
 export interface MissingPrivileges {
   featurePrivileges: MissingFeaturePrivileges[];
   indexPrivileges: MissingIndexPrivileges[];
+  clusterPrivileges: string[];
 }
 
 export const useMissingPrivileges = (): MissingPrivileges => {
@@ -59,6 +69,7 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       return {
         featurePrivileges,
         indexPrivileges,
+        clusterPrivileges: [],
       };
     }
 
@@ -83,9 +94,12 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       indexPrivileges.push(missingDetectionPrivileges);
     }
 
+    const clusterPrivileges = getMissingClusterPrivileges(detectionEnginePrivileges.result.cluster);
+
     return {
       featurePrivileges,
       indexPrivileges,
+      clusterPrivileges,
     };
   }, [canUserCRUD, listPrivileges, detectionEnginePrivileges]);
 };
