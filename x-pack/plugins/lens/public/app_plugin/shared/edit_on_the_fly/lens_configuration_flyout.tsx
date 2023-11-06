@@ -36,6 +36,7 @@ import {
   useLensDispatch,
   updateIndexPatterns,
   selectFramePublicAPI,
+  onActiveDataChange,
 } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
@@ -106,30 +107,33 @@ export function LensEditConfigurationFlyout({
   displayFlyoutHeader,
 }: EditConfigPanelProps) {
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
-  const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
-  const activeDatasource = datasourceMap[datasourceId];
   const [isInlineFooterVisible, setIsInlineFlyoutFooterVisible] = useState(true);
   const { euiTheme } = useEuiTheme();
   const { datasourceStates, visualization, isLoading, searchSessionId, annotationGroups } =
     useLensSelector((state) => state.lens);
   const dispatch = useLensDispatch();
-  const activeData: Record<string, Datatable> = useMemo(() => {
-    return {};
-  }, []);
+
   useEffect(() => {
     const s = output$?.subscribe(() => {
-      const layers = activeDatasource.getLayers(datasourceState);
       const adaptersTables = lensAdapters?.tables?.tables as Record<string, Datatable>;
-      const [table] = Object.values(adaptersTables || {});
-      layers.forEach((layer) => {
-        if (table) {
-          activeData[layer] = table;
-        }
-      });
+
+      if (adaptersTables) {
+        dispatch(
+          onActiveDataChange({
+            activeData: Object.entries(adaptersTables).reduce<Record<string, Datatable>>(
+              (acc, [key, value]) => ({
+                ...acc,
+                [key]: value,
+              }),
+              {}
+            ),
+          })
+        );
+      }
     });
     return () => s?.unsubscribe();
-  }, [activeDatasource, lensAdapters, datasourceState, output$, activeData]);
+  }, [dispatch, output$, lensAdapters?.tables?.tables]);
 
   const attributesChanged: boolean = useMemo(() => {
     // todo: write a helper for this that would be used in the editor frame as well
@@ -263,16 +267,7 @@ export function LensEditConfigurationFlyout({
     [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
   );
 
-  const framePublicAPI = useLensSelector((state) => {
-    const newState = {
-      ...state,
-      lens: {
-        ...state.lens,
-        activeData,
-      },
-    };
-    return selectFramePublicAPI(newState, datasourceMap);
-  });
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
 
   const { getUserMessages } = useGetUserMessages({
     coreStart,
