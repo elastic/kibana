@@ -468,7 +468,15 @@
           },
           " | undefined; isChartLoading?: boolean | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\"> & React.RefAttributes<",
+          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\"> & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<",
           {
             "pluginId": "unifiedHistogram",
             "scope": "public",
