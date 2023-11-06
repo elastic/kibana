@@ -42,10 +42,6 @@
       }
     }
   },
-  "metrics-data-source": {
-    "dynamic": false,
-    "properties": {}
-  },
   "url": {
     "dynamic": false,
     "properties": {
@@ -1473,6 +1469,10 @@
       }
     }
   },
+  "metrics-data-source": {
+    "dynamic": false,
+    "properties": {}
+  },
   "canvas-element": {
     "dynamic": false,
     "properties": {
@@ -1867,6 +1867,9 @@
         "type": "boolean"
       },
       "policy_id": {
+        "type": "keyword"
+      },
+      "output_id": {
         "type": "keyword"
       },
       "package": {
@@ -2679,50 +2682,6 @@
       }
     }
   },
-  "apm-telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-server-schema": {
-    "properties": {
-      "schemaJson": {
-        "type": "text",
-        "index": false
-      }
-    }
-  },
-  "apm-service-group": {
-    "properties": {
-      "groupName": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "apm-custom-dashboards": {
-    "properties": {
-      "dashboardSavedObjectId": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "serviceEnvironmentFilterEnabled": {
-        "type": "boolean"
-      },
-      "serviceNameFilterEnabled": {
-        "type": "boolean"
-      }
-    }
-  },
   "enterprise_search_telemetry": {
     "dynamic": false,
     "properties": {}
@@ -3194,6 +3153,50 @@
       "note": {
         "type": "text",
         "index": false
+      }
+    }
+  },
+  "apm-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "apm-server-schema": {
+    "properties": {
+      "schemaJson": {
+        "type": "text",
+        "index": false
+      }
+    }
+  },
+  "apm-service-group": {
+    "properties": {
+      "groupName": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
       }
     }
   }
