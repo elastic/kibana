@@ -13,7 +13,7 @@ import {
   packIdOrUndefined,
   queryOrUndefined,
   arrayQueries,
-  timeout,
+  timeoutOrUndefined,
 } from '@kbn/osquery-io-ts-types';
 
 export const createLiveQueryRequestBodySchema = t.partial({
@@ -24,7 +24,7 @@ export const createLiveQueryRequestBodySchema = t.partial({
   query: queryOrUndefined,
   queries: arrayQueries,
   saved_query_id: savedQueryIdOrUndefined,
-  timeout,
+  timeout: timeoutOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,
   pack_id: packIdOrUndefined,
   alert_ids: t.array(t.string),

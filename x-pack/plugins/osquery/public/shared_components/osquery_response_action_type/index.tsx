@@ -109,7 +109,6 @@ const OsqueryResponseActionParamsFormComponent = ({
 
   useEffect(() => {
     const subscription = watch((formData) => {
-      console.log('formData', formData);
       onChange(
         // @ts-expect-error update types
         formData.queryType === 'pack'

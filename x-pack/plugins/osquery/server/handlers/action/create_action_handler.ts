@@ -17,7 +17,7 @@ import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
-import { ACTIONS_INDEX } from '../../../common/constants';
+import { ACTIONS_INDEX, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
@@ -66,9 +66,6 @@ export const createActionHandler = async (
     packSO = await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, params.pack_id);
   }
 
-  console.log('params', params);
-  console.log('packSO', packSO);
-
   const osqueryAction = {
     action_id: uuidv4(),
     '@timestamp': moment().toISOString(),
@@ -93,7 +90,6 @@ export const createActionHandler = async (
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
           const replacedQuery = replacedQueries(packQuery.query, alertData);
-          console.log('packQuery', packQuery);
 
           return pickBy(
             {
@@ -119,8 +115,6 @@ export const createActionHandler = async (
         }),
   };
 
-  console.log('osqueryAction', osqueryAction);
-
   const fleetActions = !error
     ? map(
         filter(osqueryAction.queries, (query) => !query.error),
@@ -132,13 +126,11 @@ export const createActionHandler = async (
           input_type: 'osquery',
           agents: query.agents,
           user_id: metadata?.currentUser,
-          timeout: query.timeout,
+          ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
           data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
         })
       )
     : [];
-
-  console.log('fleetActions', fleetActions);
 
   if (fleetActions.length) {
     await osqueryContext.service.getFleetActionsClient()?.bulkCreate(fleetActions);

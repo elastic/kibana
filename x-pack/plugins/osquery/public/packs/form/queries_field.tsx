@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { useController, useFormContext, useWatch, useFieldArray } from 'react-hook-form';
 
+import { QUERY_TIMEOUT } from '../../../common/constants';
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
@@ -138,7 +139,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
             {
               id: newQueryId,
               interval: newQuery.interval ?? parsedContent.interval ?? '3600',
-              timeout: newQuery.timeout ?? parsedContent.timeout ?? 60,
+              timeout: newQuery.timeout ?? parsedContent.timeout ?? QUERY_TIMEOUT.DEFAULT,
               query: newQuery.query,
               version: newQuery.version ?? parsedContent.version,
               snapshot: newQuery.snapshot ?? parsedContent.snapshot,

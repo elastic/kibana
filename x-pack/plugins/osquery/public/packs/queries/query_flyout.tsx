@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
-import { DEFAULT_PLATFORM } from '../../../common/constants';
+import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
 import {
   QueryIdField,
   IntervalField,
@@ -70,9 +70,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     resetField,
   } = hooksForm;
   const onSubmit = async (payload: PackQueryFormData) => {
-    console.log('payload', payload);
     const serializedData: PackSOQueryFormData = serializer(payload);
-    console.log('serializedData', serializedData);
     await onSave(serializedData);
     onClose();
   };
@@ -87,7 +85,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         });
         resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
         resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
-        resetField('timeout', { defaultValue: savedQuery.timeout ? savedQuery.timeout : 60 });
+        resetField('timeout', {
+          defaultValue: savedQuery.timeout ? savedQuery.timeout : QUERY_TIMEOUT.DEFAULT,
+        });
         resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
         resetField('removed', { defaultValue: savedQuery.removed });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
@@ -135,7 +135,6 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <TimeoutField />
               <IntervalField
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{ append: 's' }}
@@ -158,6 +157,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <PlatformCheckBoxGroupField />
+              <TimeoutField />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />

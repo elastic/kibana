@@ -8,23 +8,26 @@ import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { useController } from 'react-hook-form';
 import type { EuiFieldNumberProps } from '@elastic/eui';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { QUERY_TIMEOUT } from '../../common/constants';
 
 const timeoutFieldValidations = {
   min: {
     message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMinNumberError', {
       defaultMessage: 'Timeout value must be greater than {than} seconds.',
-      values: { than: 60 },
+      values: { than: QUERY_TIMEOUT.DEFAULT },
     }),
-    value: 60,
+    value: QUERY_TIMEOUT.DEFAULT,
   },
   max: {
     message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMaxNumberError', {
       defaultMessage: 'Timeout value must be lower than {than} seconds.',
-      values: { than: 60 * 15 },
+      values: { than: QUERY_TIMEOUT.MAX },
     }),
-    value: 60 * 15,
+    value: QUERY_TIMEOUT.MAX,
   },
 };
 
@@ -38,7 +41,7 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
     fieldState: { error },
   } = useController({
     name: 'timeout',
-    defaultValue: 60,
+    defaultValue: QUERY_TIMEOUT.DEFAULT,
     rules: {
       ...timeoutFieldValidations,
     },
@@ -55,10 +58,21 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.osquery.liveQuery.timeout', {
-        defaultMessage: 'Timeout (optional)',
+        defaultMessage: 'Timeout',
       })}
+      fullWidth
       error={error?.message}
       isInvalid={hasError}
+      labelAppend={
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.osquery.osquery.liveQuery.timeoutFieldOptionalLabel"
+              defaultMessage="(optional)"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      }
     >
       <EuiFieldNumber
         isInvalid={hasError}
@@ -68,9 +82,9 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
         type="number"
         data-test-subj="timeout-input"
         name="timeout"
-        min={60}
-        max={60 * 15}
-        defaultValue={60}
+        min={QUERY_TIMEOUT.DEFAULT}
+        max={QUERY_TIMEOUT.MAX}
+        defaultValue={QUERY_TIMEOUT.DEFAULT}
         step={1}
         append="seconds"
         {...euiFieldProps}

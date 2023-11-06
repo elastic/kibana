@@ -92,8 +92,6 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           )
         );
 
-        console.log('savedQuerySO', savedQuerySO);
-
         const { attributes } = savedQuerySO;
 
         const data: Partial<SavedQueryResponse> = pickBy(
