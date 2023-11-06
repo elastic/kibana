@@ -41,7 +41,7 @@ import {
   goToQueryTab,
   pinFirstEvent,
   populateTimeline,
-  saveTimeline,
+  addNameToTimelineAndSave,
 } from '../../../tasks/timeline';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
@@ -161,7 +161,7 @@ describe('Timelines', (): void => {
       cy.get(TIMELINE_STATUS).should('be.visible');
       cy.get(TIMELINE_STATUS).should('have.text', 'Unsaved');
 
-      saveTimeline();
+      addNameToTimelineAndSave('Test');
 
       // Saved
       cy.get(TIMELINE_STATUS).should('be.visible');

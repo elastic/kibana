@@ -19,10 +19,10 @@ import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
+  addNameToTimelineAndSave,
   changeTimelineQueryLanguage,
   executeTimelineKQL,
   executeTimelineSearch,
-  saveTimeline,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
@@ -71,7 +71,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
 
     it('should be able to update timeline kqlMode with filter', () => {
       cy.get(TIMELINE_KQLMODE_FILTER).click();
-      saveTimeline();
+      addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
@@ -81,7 +81,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
 
     it('should be able to update timeline kqlMode with search', () => {
       cy.get(TIMELINE_KQLMODE_SEARCH).click();
-      saveTimeline();
+      addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');

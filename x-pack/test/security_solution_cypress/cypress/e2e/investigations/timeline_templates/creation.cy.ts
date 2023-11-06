@@ -34,7 +34,7 @@ import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   addDescriptionToTimeline,
   addFilter,
-  addNameToTimeline,
+  addNameToTimelineAndSave,
   addNotesToTimeline,
   clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
@@ -43,7 +43,6 @@ import {
   markAsFavorite,
   openTimelineTemplateFromSettings,
   populateTimeline,
-  saveTimeline,
 } from '../../../tasks/timeline';
 import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
@@ -70,7 +69,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     );
     cy.get(LOCKED_ICON).should('be.visible');
 
-    addNameToTimeline(getTimeline().title);
+    addNameToTimelineAndSave(getTimeline().title);
 
     cy.wait('@timeline').then(({ response }) => {
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
@@ -109,7 +108,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     waitForTimelinesPanelToBeLoaded();
     expandEventAction();
     clickingOnCreateTemplateFromTimelineBtn();
-    saveTimeline();
+    addNameToTimelineAndSave('Test');
     cy.wait('@timeline', { timeout: 100000 });
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
     cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);

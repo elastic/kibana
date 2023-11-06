@@ -22,7 +22,11 @@ import {
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { closeTimelineUsingToggle } from '../../../tasks/security_main';
-import { createNewTimeline, populateTimeline, saveTimeline } from '../../../tasks/timeline';
+import {
+  addNameToTimelineAndSave,
+  createNewTimeline,
+  populateTimeline,
+} from '../../../tasks/timeline';
 import { hostsUrl, MANAGE_URL } from '../../../urls/navigation';
 
 // https://github.com/elastic/kibana/issues/169021
@@ -82,7 +86,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServ
 
   it('Changed & saved timeline should NOT prompt when user navigates away out of security solution', () => {
     populateTimeline();
-    saveTimeline();
+    addNameToTimelineAndSave('Test');
     closeTimelineUsingToggle();
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
@@ -91,7 +95,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServ
 
   it('Changed & saved timeline should NOT prompt when user navigates within security solution where timelines are disabled', () => {
     populateTimeline();
-    saveTimeline();
+    addNameToTimelineAndSave('Test');
     closeTimelineUsingToggle();
     openKibanaNavigation();
     cy.get(MANAGE_PAGE).click();

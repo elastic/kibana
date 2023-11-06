@@ -22,7 +22,7 @@ import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { populateTimeline, saveTimeline } from '../../../tasks/timeline';
+import { addNameToTimelineAndSave, populateTimeline, saveTimeline } from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
@@ -69,7 +69,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
 
     // close modal and save timeline changes
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON).click();
-    saveTimeline();
+    addNameToTimelineAndSave('Test');
 
     cy.wait('@excludedNetflow').then((interception) => {
       expect(
@@ -109,7 +109,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON).click();
 
-    saveTimeline();
+    addNameToTimelineAndSave('Test');
 
     cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);
   });
