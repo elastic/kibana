@@ -17,6 +17,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiRadioGroup,
   EuiSpacer,
   EuiSteps,
@@ -24,6 +25,7 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { type FC, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,7 +39,9 @@ export interface AddModelFlyoutProps {
 
 export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, modelDownloads }) => {
   const [selectedTabId, setSelectedTabId] = useState('elser');
-  const [selectedModelId, setSelectedModelId] = useState<string>(modelDownloads[0].model_id);
+  const [selectedModelId, setSelectedModelId] = useState<string | undefined>(
+    modelDownloads.find((m) => m.recommended)?.model_id
+  );
 
   const tabs = useMemo(() => {
     return [
@@ -55,7 +59,31 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, mod
               options={modelDownloads.map((model) => {
                 return {
                   id: model.model_id,
-                  label: model.model_id,
+                  label: (
+                    <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="logoElastic" size="l" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{model.model_id}</EuiFlexItem>
+                      {model.recommended ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip
+                            content={
+                              <FormattedMessage
+                                id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                                defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+                              />
+                            }
+                          >
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                              defaultMessage="(Recommended)"
+                            />
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
+                  ),
                 };
               })}
               idSelected={selectedModelId}
@@ -245,9 +273,9 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, mod
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={onSumbit.bind(null, selectedModelId)}
+              onClick={onSumbit.bind(null, selectedModelId!)}
               fill
-              disabled={!selectedModelId.length}
+              disabled={!selectedModelId}
             >
               <FormattedMessage
                 id="xpack.ml.trainedModels.addModelFlyout.downloadButtonLabel"
