@@ -31,13 +31,21 @@ export const executeAction = async ({
     actionId: connectorId,
     params: request.body.params,
   });
-  const content = get('data.message', actionResult);
-  if (typeof content === 'string') {
-    return {
-      connector_id: connectorId,
-      data: content, // the response from the actions framework
-      status: 'ok',
-    };
+
+  if (actionResult.status === 'error') {
+    throw new Error(
+      `Action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+    );
   }
-  throw new Error('Unexpected action result');
+  const content = get('data.message', actionResult);
+  if (typeof content !== 'string') {
+    throw new Error(
+      `Action result status is error: content should be a string, but it had an unexpected type: ${typeof content}`
+    );
+  }
+  return {
+    connector_id: connectorId,
+    data: content, // the response from the actions framework
+    status: 'ok',
+  };
 };
