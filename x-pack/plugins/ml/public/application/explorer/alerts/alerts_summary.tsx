@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_DURATION, ALERT_END, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { groupBy } from 'lodash';
+import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { getAlertFormatters } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
 import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
+import { getAlertsSummary } from './get_alerts_summary';
 
 export const AlertsSummary: React.FC = () => {
   const {
@@ -24,18 +24,27 @@ export const AlertsSummary: React.FC = () => {
   const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$, []);
   const formatter = getAlertFormatters(fieldFormats);
 
-  const alertsByRule = useMemo(() => {
-    return groupBy(alertsData, ALERT_RULE_NAME);
+  const sortedAlertsByRule = useMemo(() => {
+    return getAlertsSummary(alertsData);
   }, [alertsData]);
 
   return (
     <EuiFlexGroup>
-      {Object.entries(alertsByRule ?? []).map(([ruleName, alerts]) => {
+      {sortedAlertsByRule.map(([ruleName, ruleSummary]) => {
         return (
           <EuiFlexItem key={ruleName} grow={false}>
-            <EuiTitle size={'xs'}>
-              <h5>{ruleName}</h5>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size={'xs'}>
+                  <h5>{ruleName}</h5>
+                </EuiTitle>
+              </EuiFlexItem>
+              {ruleSummary.activeCount > 0 ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent">Active</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
 
             <EuiDescriptionList
               compressed
@@ -43,21 +52,21 @@ export const AlertsSummary: React.FC = () => {
               listItems={[
                 {
                   title: i18n.translate('xpack.ml.explorer.alertsPanel.summary.totalAlerts', {
-                    defaultMessage: 'Total alerts',
+                    defaultMessage: 'Total alerts: ',
                   }),
-                  description: alerts.length,
+                  description: ruleSummary.totalCount,
                 },
                 {
                   title: i18n.translate('xpack.ml.explorer.alertsPanel.summary.recoveredAt', {
-                    defaultMessage: 'Recovered at',
+                    defaultMessage: 'Recovered at: ',
                   }),
-                  description: formatter(ALERT_END, alerts[alerts.length - 1][ALERT_END]),
+                  description: formatter(ALERT_END, ruleSummary.recoveredAt),
                 },
                 {
                   title: i18n.translate('xpack.ml.explorer.alertsPanel.summary.lastDuration', {
-                    defaultMessage: 'Last duration',
+                    defaultMessage: 'Last duration: ',
                   }),
-                  description: formatter(ALERT_DURATION, alerts[alerts.length - 1][ALERT_DURATION]),
+                  description: formatter(ALERT_DURATION, ruleSummary.lastDuration),
                 },
               ]}
             />

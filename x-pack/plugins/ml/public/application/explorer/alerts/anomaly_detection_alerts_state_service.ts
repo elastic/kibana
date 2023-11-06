@@ -43,10 +43,10 @@ export interface AnomalyDetectionAlert {
   [ALERT_ANOMALY_DETECTION_JOB_ID]: string;
   [ALERT_ANOMALY_TIMESTAMP]: number;
   [ALERT_START]: number;
-  [ALERT_END]: number;
+  [ALERT_END]: number | undefined;
   [ALERT_RULE_NAME]: string;
   [ALERT_STATUS]: string;
-  [ALERT_DURATION]: string;
+  [ALERT_DURATION]: number;
   // Additional fields for the UI
   color: string;
 }
@@ -179,7 +179,8 @@ export class AnomalyDetectionAlertsStateService extends StateService {
                       fields[ALERT_ANOMALY_TIMESTAMP][0]
                     ).getTime(),
                     [ALERT_START]: fields[ALERT_START][0],
-                    [ALERT_END]: fields[ALERT_END][0],
+                    // Can be undefined if the alert is still active
+                    [ALERT_END]: fields[ALERT_END]?.[0],
                     [ALERT_STATUS]: fields[ALERT_STATUS][0],
                     [ALERT_DURATION]: fields[ALERT_DURATION][0],
                     color: getSeverityColor(anomalyScore),
