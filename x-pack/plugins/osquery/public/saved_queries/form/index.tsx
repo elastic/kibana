@@ -91,7 +91,12 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <EuiSpacer />
       <CodeEditorField euiFieldProps={euiFieldProps} />
       <EuiSpacer size="m" />
-      <TimeoutField />
+      <EuiFlexGroup justifyContent={'spaceBetween'}>
+        <EuiFlexItem>
+          <TimeoutField />
+        </EuiFlexItem>
+        <EuiFlexItem />
+      </EuiFlexGroup>
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem css={overflowCss}>
