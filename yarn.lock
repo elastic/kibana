@@ -1594,10 +1594,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@89.1.0":
-  version "89.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-89.1.0.tgz#25aa9a59515102221286780ab559c3cff91a3753"
-  integrity sha512-vvSfP+kMUeQlfmxnRZhdX7r3rxpmjc3PkWC0KrMTf+NlXEao1imvlMHJNIJ58z5YjUBSMN5jtXkNkjHGI86KDw==
+"@elastic/eui@90.0.0":
+  version "90.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-90.0.0.tgz#f105576513ed2fb31fefab5e1287be4e090ba0f3"
+  integrity sha512-4LXY4CwXU3FHeOiW76VPTaYcPVKEiqpb8GGHFEkYfBPWBgXyUJUVJyXwX9k8pzXElxM9I68OTDVRxIUzEzFiug==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -1618,8 +1618,8 @@
     react-remove-scroll-bar "^2.3.4"
     react-virtualized-auto-sizer "^1.0.20"
     react-window "^1.8.9"
-    refractor "^3.5.0"
-    rehype-raw "^5.0.0"
+    refractor "^3.6.0"
+    rehype-raw "^5.1.0"
     rehype-react "^6.2.1"
     rehype-stringify "^8.0.0"
     remark-breaks "^2.0.2"
@@ -1632,7 +1632,7 @@
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
     uuid "^8.3.0"
-    vfile "^4.2.0"
+    vfile "^4.2.1"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
@@ -3204,15 +3204,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-editor-mocks@link:packages/shared-ux/code_editor/mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/code-editor-types@link:packages/shared-ux/code_editor/types":
-  version "0.0.0"
-  uid ""
-
-"@kbn/code-editor@link:packages/shared-ux/code_editor/impl":
+"@kbn/code-editor@link:packages/shared-ux/code_editor":
   version "0.0.0"
   uid ""
 
@@ -5596,15 +5588,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen-mocks@link:packages/shared-ux/button/exit_full_screen/mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-button-exit-full-screen-types@link:packages/shared-ux/button/exit_full_screen/types":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-button-exit-full-screen@link:packages/shared-ux/button/exit_full_screen/impl":
+"@kbn/shared-ux-button-exit-full-screen@link:packages/shared-ux/button/exit_full_screen":
   version "0.0.0"
   uid ""
 
@@ -17940,7 +17924,7 @@ hast-util-parse-selector@^2.0.0, hast-util-parse-selector@^2.2.0:
   resolved "https://registry.yarnpkg.com/hast-util-parse-selector/-/hast-util-parse-selector-2.2.3.tgz#57edd449103900c7f63fd9e6f694ffd7e4634719"
   integrity sha512-nxbeqjQNxsvo/uYYAw9kij6td05YVUlf1qti09rVfbWSLT5H6wo3c+USIwX6nzXWk5kFZzXnEqO82856r0aM2Q==
 
-hast-util-raw@6.0.1, hast-util-raw@^6.0.0:
+hast-util-raw@6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/hast-util-raw/-/hast-util-raw-6.0.1.tgz#973b15930b7529a7b66984c98148b46526885977"
   integrity sha512-ZMuiYA+UF7BXBtsTBNcLBF5HzXzkyE6MLzJnL605LKE8GJylNjGc4jjxazAHUtcwT5/CEt6afRKViYB4X66dig==
@@ -17951,6 +17935,23 @@ hast-util-raw@6.0.1, hast-util-raw@^6.0.0:
     html-void-elements "^1.0.0"
     parse5 "^6.0.0"
     unist-util-position "^3.0.0"
+    vfile "^4.0.0"
+    web-namespaces "^1.0.0"
+    xtend "^4.0.0"
+    zwitch "^1.0.0"
+
+hast-util-raw@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/hast-util-raw/-/hast-util-raw-6.1.0.tgz#e16a3c2642f65cc7c480c165400a40d604ab75d0"
+  integrity sha512-5FoZLDHBpka20OlZZ4I/+RBw5piVQ8iI1doEvffQhx5CbCyTtP8UCq8Tw6NmTAMtXgsQxmhW7Ly8OdFre5/YMQ==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    hast-util-from-parse5 "^6.0.0"
+    hast-util-to-parse5 "^6.0.0"
+    html-void-elements "^1.0.0"
+    parse5 "^6.0.0"
+    unist-util-position "^3.0.0"
+    unist-util-visit "^2.0.0"
     vfile "^4.0.0"
     web-namespaces "^1.0.0"
     xtend "^4.0.0"
@@ -25903,7 +25904,7 @@ redux@^4.0.0, redux@^4.0.4, redux@^4.1.2, redux@^4.2.0:
   dependencies:
     "@babel/runtime" "^7.9.2"
 
-refractor@^3.2.0, refractor@^3.5.0:
+refractor@^3.2.0, refractor@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/refractor/-/refractor-3.6.0.tgz#ac318f5a0715ead790fcfb0c71f4dd83d977935a"
   integrity sha512-MY9W41IOWxxk31o+YvFCNyNzdkc9M20NoZK5vq6jkv4I/uh2zkWcfudj0Q1fovjUQJrNewS9NMzeTtqPf+n5EA==
@@ -26021,12 +26022,12 @@ regjsparser@^0.8.2:
   dependencies:
     jsesc "~0.5.0"
 
-rehype-raw@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/rehype-raw/-/rehype-raw-5.0.0.tgz#3688e3e1132e958761e677a1b9b2ba358a465af8"
-  integrity sha512-q/MOBj4fs1WF/LSCh5uOtNhnm5OESuDcSvq1mDQP4/2t6Q52E9MHeVoLeMy9vOn93BEcgVBm4FCokcK2iXRDvA==
+rehype-raw@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/rehype-raw/-/rehype-raw-5.1.0.tgz#66d5e8d7188ada2d31bc137bc19a1000cf2c6b7e"
+  integrity sha512-MDvHAb/5mUnif2R+0IPCYJU8WjHa9UzGtM/F4AVy5GixPlDZ1z3HacYy4xojDU+uBa+0X/3PIfyQI26/2ljJNA==
   dependencies:
-    hast-util-raw "^6.0.0"
+    hast-util-raw "^6.1.0"
 
 rehype-react@^6.2.1:
   version "6.2.1"
@@ -26252,7 +26253,7 @@ repeating@^2.0.0:
   dependencies:
     is-finite "^1.0.0"
 
-replace-ext@1.0.0, replace-ext@^1.0.0:
+replace-ext@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/replace-ext/-/replace-ext-1.0.0.tgz#de63128373fcbf7c3ccfa4de5a480c45a67958eb"
   integrity sha1-3mMSg3P8v3w8z6TeWkgMRaZ5WOs=
@@ -30215,14 +30216,13 @@ vfile-message@^2.0.0:
     "@types/unist" "^2.0.0"
     unist-util-stringify-position "^2.0.0"
 
-vfile@^4.0.0, vfile@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/vfile/-/vfile-4.2.0.tgz#26c78ac92eb70816b01d4565e003b7e65a2a0e01"
-  integrity sha512-a/alcwCvtuc8OX92rqqo7PflxiCgXRFjdyoGVuYV+qbgCb0GgZJRvIgCD4+U/Kl1yhaRsaTwksF88xbPyGsgpw==
+vfile@^4.0.0, vfile@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/vfile/-/vfile-4.2.1.tgz#03f1dce28fc625c625bc6514350fbdb00fa9e624"
+  integrity sha512-O6AE4OskCG5S1emQ/4gl8zK586RqA3srz3nfK/Viy0UPToBc5Trp9BVFb1u0CjsKrAWwnpr4ifM/KBXPWwJbCA==
   dependencies:
     "@types/unist" "^2.0.0"
     is-buffer "^2.0.0"
-    replace-ext "1.0.0"
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
