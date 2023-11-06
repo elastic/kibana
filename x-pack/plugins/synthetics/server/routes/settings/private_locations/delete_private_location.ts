@@ -15,13 +15,9 @@ import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
-import type { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
-import { toClientContract } from './helpers';
 
-export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsPrivateLocations
-> = () => ({
+export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined> = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
   validate: {},
@@ -36,7 +32,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
   handler: async ({ response, savedObjectsClient, syntheticsMonitorClient, request, server }) => {
     const { locationId } = request.params as { locationId: string };
 
-    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
+    const { locations } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,
       syntheticsMonitorClient
     );
@@ -62,7 +58,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
 
     const remainingLocations = locations.filter((loc) => loc.id !== locationId);
 
-    const result = await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
+    await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
       privateLocationsSavedObjectName,
       { locations: remainingLocations },
       {
@@ -71,6 +67,6 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
       }
     );
 
-    return toClientContract(result.attributes, agentPolicies);
+    return;
   },
 });
