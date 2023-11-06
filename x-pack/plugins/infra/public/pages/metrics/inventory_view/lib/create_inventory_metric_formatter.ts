@@ -6,7 +6,7 @@
  */
 
 import { get, isNumber } from 'lodash';
-import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { InfraFormatterType } from '../../../../lib/lib';
 import {
   SnapshotMetricInput,

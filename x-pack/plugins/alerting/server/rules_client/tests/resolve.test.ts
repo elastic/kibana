@@ -98,6 +98,11 @@ describe('resolve()', () => {
             },
           ],
           notifyWhen: 'onActiveAlert',
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
         },
         references: [
           {
@@ -125,6 +130,10 @@ describe('resolve()', () => {
         "alertTypeId": "123",
         "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "ok",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
@@ -140,86 +149,12 @@ describe('resolve()', () => {
     `);
     expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
-  });
-
-  test('calls saved objects client with id and includeLegacyId params', async () => {
-    const rulesClient = new RulesClient(rulesClientParams);
-    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
-      saved_object: {
-        id: '1',
-        type: 'alert',
-        attributes: {
-          legacyId: 'some-legacy-id',
-          alertTypeId: '123',
-          schedule: { interval: '10s' },
-          params: {
-            bar: true,
-          },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          actions: [
-            {
-              group: 'default',
-              actionRef: 'action_0',
-              params: {
-                foo: true,
-              },
-            },
-          ],
-          notifyWhen: 'onActiveAlert',
-        },
-        references: [
-          {
-            name: 'action_0',
-            type: 'action',
-            id: '1',
-          },
-        ],
-      },
-      outcome: 'aliasMatch',
-      alias_target_id: '2',
-    });
-    const result = await rulesClient.resolve({ id: '1', includeLegacyId: true });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actions": Array [
-          Object {
-            "group": "default",
-            "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeId": "123",
-        "alias_target_id": "2",
-        "createdAt": 2019-02-12T21:01:22.479Z,
-        "id": "1",
-        "legacyId": "some-legacy-id",
-        "notifyWhen": "onActiveAlert",
-        "outcome": "aliasMatch",
-        "params": Object {
-          "bar": true,
-        },
-        "schedule": Object {
-          "interval": "10s",
-        },
-        "snoozeSchedule": Array [],
-        "updatedAt": 2019-02-12T21:01:22.479Z,
-      }
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
     `);
-    expect(unsecuredSavedObjectsClient.resolve).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.resolve.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
   });
 
   test('calls saved objects client with id and includeSnoozeData params', async () => {
@@ -258,6 +193,11 @@ describe('resolve()', () => {
             },
           ],
           notifyWhen: 'onActiveAlert',
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
         },
         references: [
           {
@@ -325,6 +265,11 @@ describe('resolve()', () => {
             },
           ],
           notifyWhen: 'onActiveAlert',
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
         },
         references: [
           {
@@ -365,6 +310,10 @@ describe('resolve()', () => {
         "alertTypeId": "123",
         "alias_target_id": "2",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+          "status": "ok",
+        },
         "id": "1",
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
@@ -402,6 +351,11 @@ describe('resolve()', () => {
               },
             },
           ],
+          executionStatus: {
+            status: 'ok',
+            last_execution_date: new Date().toISOString(),
+            last_duration: 10,
+          },
         },
         references: [],
       },
@@ -507,6 +461,11 @@ describe('resolve()', () => {
                 },
               },
             ],
+            executionStatus: {
+              status: 'ok',
+              last_execution_date: new Date().toISOString(),
+              last_duration: 10,
+            },
           },
           references: [
             {
@@ -565,6 +524,11 @@ describe('resolve()', () => {
               bar: true,
             },
             actions: [],
+            executionStatus: {
+              status: 'ok',
+              last_execution_date: new Date().toISOString(),
+              last_duration: 10,
+            },
           },
           references: [],
         },
@@ -635,6 +599,11 @@ describe('resolve()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        executionStatus: {
+          status: 'ok',
+          last_execution_date: new Date().toISOString(),
+          last_duration: 10,
+        },
       },
       references: [
         {

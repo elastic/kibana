@@ -444,6 +444,9 @@ export interface RawRuleExecutionStatus {
   };
 }
 
+/**
+ * @deprecated in favor of Rule
+ */
 export interface RawRule {
   enabled: boolean;
   name: string;
