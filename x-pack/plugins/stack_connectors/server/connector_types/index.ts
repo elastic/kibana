@@ -32,6 +32,7 @@ import { getOpsgenieConnectorType } from './opsgenie';
 import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
 import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
 import { getSentinelOneConnectorType } from './sentinelone';
+import { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
 export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
@@ -78,9 +79,11 @@ export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 export function registerConnectorTypes({
   actions,
   publicBaseUrl,
+  experimentalFeatures,
 }: {
   actions: ActionsPluginSetupContract;
   publicBaseUrl?: string;
+  experimentalFeatures: ExperimentalFeatures;
 }) {
   actions.registerType(getEmailConnectorType({ publicBaseUrl }));
   actions.registerType(getIndexConnectorType());
@@ -105,5 +108,8 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
-  actions.registerSubActionConnectorType(getSentinelOneConnectorType());
+
+  if (experimentalFeatures.sentinelOneConnectorOn) {
+    actions.registerSubActionConnectorType(getSentinelOneConnectorType());
+  }
 }

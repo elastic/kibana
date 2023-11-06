@@ -29,6 +29,7 @@ import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
 import { getXmattersConnectorType } from './xmatters';
 import { getD3SecurityConnectorType } from './d3security';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { getSentinelOneConnectorType } from './sentinelone';
 
 export interface RegistrationServices {
@@ -67,5 +68,8 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
-  connectorTypeRegistry.register(getSentinelOneConnectorType());
+
+  if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
+    connectorTypeRegistry.register(getSentinelOneConnectorType());
+  }
 }
