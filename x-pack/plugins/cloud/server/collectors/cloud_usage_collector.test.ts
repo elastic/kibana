@@ -63,6 +63,7 @@ describe('createCloudUsageCollector', () => {
         isElasticStaffOwned: true,
         deploymentId: 'a-deployment-id',
         projectId: 'a-project-id',
+        projectType: 'security',
       });
 
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
@@ -72,6 +73,7 @@ describe('createCloudUsageCollector', () => {
         isElasticStaffOwned: true,
         deploymentId: 'a-deployment-id',
         projectId: 'a-project-id',
+        projectType: 'security',
       });
     });
   });
