@@ -22,12 +22,7 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
     baseConfig: svlBaseConfig,
     testFiles: [resolve(__dirname, './apps/endpoint')],
     junitReportName: 'X-Pack Endpoint Functional Tests on Serverless',
-    kbnServerArgs: [
-      '--serverless=security',
-      `--xpack.securitySolution.offeringSettings=${JSON.stringify({
-        disableTimelineSaveTour: true,
-      })}`,
-    ],
+    kbnServerArgs: ['--serverless=security'],
     target: 'serverless',
     services: svlServices,
   });

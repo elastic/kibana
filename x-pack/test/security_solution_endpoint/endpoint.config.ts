@@ -24,10 +24,5 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
     junitReportName: 'X-Pack Endpoint Functional Tests on ESS',
     target: 'ess',
     services,
-    kbnServerArgs: [
-      `--xpack.securitySolution.offeringSettings=${JSON.stringify({
-        disableTimelineSaveTour: true,
-      })}`,
-    ],
   });
 }
