@@ -240,8 +240,6 @@ The `GroupDefinition` interface represents a group of items in the side navigati
 | `appendHorizontalRule`          | `boolean`           | Optional flag to indicate if a horizontal rule should be rendered after the node. <br />Note: this property is currently only available for group nodes in the navigation **panel** opening on the right of the side nav. |
 | `isCollapsible`          | `boolean`           | Optional flag to indicate if the accordion is collapsible (when `renderAs` is set to `'accordion'`.|
 
-
-
 ##### `RecentlyAccessedDefinition`
 
 | Property             | Type                       | Description                                                                                                                            |
@@ -261,7 +259,7 @@ The `PresetDefinition` interface represents a group of items which are prepopula
 
 ##### `ItemDefinition`
 
-The `GroupDefinition` interface represents a group of items in the side navigation. It extends the `NodeDefinition` interface and has the following additional properties:
+The `ItemDefinition` interface represents a top level item in the side navigation. It extends the `NodeDefinition` interface and has the following additional properties:
 
 
 | Property             | Type                    | Description|
@@ -568,7 +566,7 @@ Most of the applications are already setting the complete breadcrumb path for st
 
 For example, consider the navigation tree:
 
-````tsx
+```tsx
 <Navigation>
   <Navigation.Group id="aiops" title="AI Ops">
     <Navigation.Item id="ml:anomalyexplorer" link="ml:anomalyexplorer" title="Anomaly Explorer" />

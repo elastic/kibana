@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { Logger } from '@kbn/logging';
 
 import { UserProfileSettingsClient } from './user_profile_settings_client';
 import type { UserSettingServiceStart } from './user_setting_service';
@@ -13,20 +15,31 @@ import type { UserSettingServiceStart } from './user_setting_service';
 describe('UserProfileSettingsClient', () => {
   let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let client: UserProfileSettingsClient;
+  let logger: Logger;
+  let userSettingServiceStart: jest.Mocked<UserSettingServiceStart>;
 
   beforeEach(() => {
-    const userSettingsServiceStart = {
+    userSettingServiceStart = {
       getCurrentUserProfileSettings: jest.fn(),
-    } as jest.Mocked<UserSettingServiceStart>;
+    };
 
-    userSettingsServiceStart.getCurrentUserProfileSettings.mockResolvedValue({ darkMode: 'dark' });
+    userSettingServiceStart.getCurrentUserProfileSettings.mockResolvedValue({ darkMode: 'dark' });
 
-    client = new UserProfileSettingsClient(userSettingsServiceStart);
+    logger = loggingSystemMock.createLogger();
+    client = new UserProfileSettingsClient(logger);
   });
 
   describe('#get', () => {
-    it('should return user settings', async () => {
+    it('should return empty before UserSettingServiceStart is set', async () => {
       const userSettings = await client.get(mockRequest);
+      expect(userSettings).toEqual({});
+      expect(logger.debug).toHaveBeenCalledWith('UserSettingsServiceStart has not been set yet');
+    });
+
+    it('should return user settings after UserSettingServiceStart is set', async () => {
+      client.setUserSettingsServiceStart(userSettingServiceStart);
+      const userSettings = await client.get(mockRequest);
+
       expect(userSettings).toEqual({ darkMode: 'dark' });
     });
   });

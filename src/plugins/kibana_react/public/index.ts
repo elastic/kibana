@@ -21,9 +21,6 @@ export {
 export type { UrlTemplateEditorVariable, UrlTemplateEditorProps } from './url_template_editor';
 export { UrlTemplateEditor } from './url_template_editor';
 
-export type { ExitFullScreenButtonProps } from './exit_full_screen_button';
-export { ExitFullScreenButton } from './exit_full_screen_button';
-
 export type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './context';
 export {
   context,

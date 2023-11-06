@@ -450,7 +450,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
       use_document_level_security: {
         default_value: null,
-        depends_on: [],
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'confluence_cloud',
+          },
+        ],
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
@@ -1224,7 +1229,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
       use_document_level_security: {
         default_value: null,
-        depends_on: [],
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'jira_cloud',
+          },
+        ],
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
