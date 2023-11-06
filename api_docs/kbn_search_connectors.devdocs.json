@@ -8830,7 +8830,7 @@
                         "label": "depends_on",
                         "description": [],
                         "signature": [
-                          "never[]"
+                          "{ field: string; value: string; }[]"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -16434,7 +16434,7 @@
                         "label": "depends_on",
                         "description": [],
                         "signature": [
-                          "never[]"
+                          "{ field: string; value: string; }[]"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
