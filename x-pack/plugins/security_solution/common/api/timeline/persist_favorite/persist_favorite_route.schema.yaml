@@ -1,10 +1,7 @@
 openapi: 3.0.0
 info:
-  title: Elastic Security - Timeline - Create Timelines API
-  version: 8.9.0
-externalDocs:
-  url: https://www.elastic.co/guide/en/security/current/timeline-api-create.html
-  description: Documentation
+  title: Elastic Security - Timeline - Favorite API (https://www.elastic.co/guide/en/security/current/timeline-api-delete.html)
+  version: '2023-10-31'
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -13,10 +10,11 @@ servers:
       port:
         default: '5601'
 paths:
-  /api/timeline:
-    post:
-      operationId: createTimelines
-      description: Creates a new timeline.
+  /api/timeline/_favorite:
+    patch:
+      operationId: PersistFavorite
+      x-codegen-enabled: true
+      description: Persists a given users favorite status of a timeline.
       tags:
         - access:securitySolution
       requestBody:
@@ -26,13 +24,7 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - timeline
               properties:
-                status:
-                  allOf:
-                    - $ref: '../model/components.yaml#/components/schemas/TimelineStatus'
-                    - nullable: true
                 timelineId:
                   type: string
                   nullable: true
@@ -44,16 +36,11 @@ paths:
                   nullable: true
                 timelineType:
                   allOf:
-                    - $ref: '../model/components.yaml#/components/schemas/TimelineType'
-                    - nullable: true
-                version:
-                  type: string
+                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
                   nullable: true
-                timeline:
-                  $ref: '../model/components.yaml#/components/schemas/SavedTimeline'
       responses:
         200:
-          description: Indicates the timeline was successfully created.
+          description: Indicates the favorite status was successfully updated.
           content:
             application/json:
               schema:
@@ -62,17 +49,14 @@ paths:
                   data:
                     type: object
                     properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
+                      persistFavorite:
+                        $ref: '../model/components.schema.yaml#/components/schemas/FavoriteTimelineResponse'
                 required:
                   - data
-        405:
-          description: Indicates that there was an error in the timeline creation.
+        403:
+          description: Indicates the user does not have the required permissions to persist the favorite status.
           content:
-            application/json:
+            application:json:
               schema:
                 type: object
                 properties:
