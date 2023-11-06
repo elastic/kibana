@@ -8,7 +8,9 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { DefaultSortOrderAsc, DefaultSortOrderDesc } from './sorting';
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
+import { DefaultSortOrderAsc, DefaultSortOrderDesc } from './sorting_legacy';
 
 describe('Common sorting schemas', () => {
   describe('DefaultSortOrderAsc', () => {

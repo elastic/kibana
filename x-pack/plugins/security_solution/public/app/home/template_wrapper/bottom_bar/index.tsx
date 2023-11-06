@@ -9,7 +9,6 @@ import React from 'react';
 import type { EuiBottomBarProps } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
 import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirect';
 
@@ -21,12 +20,7 @@ export const SecuritySolutionBottomBar = React.memo(() => {
 
   const { onAppLeave } = useKibana().services;
 
-  return (
-    <>
-      <AutoSaveWarningMsg />
-      <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
-    </>
-  );
+  return <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />;
 });
 
 export const SecuritySolutionBottomBarProps: EuiBottomBarProps & {

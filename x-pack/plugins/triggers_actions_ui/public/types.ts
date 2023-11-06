@@ -547,7 +547,6 @@ export type AlertsTableProps = {
   pageSizeOptions: number[];
   id?: string;
   leadingControlColumns: EuiDataGridControlColumn[];
-  showExpandToDetails: boolean;
   showAlertStatusWithFlapping?: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
@@ -839,4 +838,5 @@ export interface NotifyWhenSelectOptions {
 export type RuleCreationValidConsumer =
   | typeof AlertConsumers.LOGS
   | typeof AlertConsumers.INFRASTRUCTURE
+  | typeof AlertConsumers.OBSERVABILITY
   | typeof STACK_ALERTS_FEATURE_ID;
