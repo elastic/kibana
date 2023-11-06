@@ -28,8 +28,8 @@ import {
   savedObjectWith500Error,
   enabledRuleForBulkOpsWithActions1,
   enabledRuleForBulkOpsWithActions2,
-  returnedRuleForBulkDisableWithActions1,
-  returnedRuleForBulkDisableWithActions2,
+  returnedRuleForBulkEnableWithActions1,
+  returnedRuleForBulkEnableWithActions2,
   enabledRuleForBulkOps1,
   enabledRuleForBulkOps2,
   returnedRuleForBulkOps1,
@@ -225,7 +225,7 @@ describe('bulkEnableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
-      rules: [returnedRuleForBulkDisableWithActions1, returnedRuleForBulkDisableWithActions2],
+      rules: [returnedRuleForBulkEnableWithActions1, returnedRuleForBulkEnableWithActions2],
       total: 2,
     });
   });
