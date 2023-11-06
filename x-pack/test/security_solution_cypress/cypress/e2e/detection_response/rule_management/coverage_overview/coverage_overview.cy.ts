@@ -27,6 +27,7 @@ import {
 } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import {
+  enableAllDisabledRules,
   openTechniquePanel,
   selectCoverageOverviewActivityFilterOption,
   selectCoverageOverviewSourceFilterOption,
@@ -105,5 +106,55 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
       .contains('Disabled custom rule')
       .should('not.exist');
     cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+
+    // only filtering for prebuilt rules
+    selectCoverageOverviewActivityFilterOption('Enabled rules');
+    openTechniquePanel(getMockThreatData().technique.name);
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+      .contains('Enabled custom rule')
+      .should('not.exist');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+      .contains('Disabled custom rule')
+      .should('not.exist');
+    cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+
+    // only filtering for custom rules
+    selectCoverageOverviewSourceFilterOption('Custom rules');
+    selectCoverageOverviewSourceFilterOption('Elastic rules'); // Turn off filter
+
+    openTechniquePanel(getMockThreatData().technique.name);
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+      .contains('Enabled prebuilt rule')
+      .should('not.exist');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+      .contains('Disabled prebuilt rule')
+      .should('not.exist');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled custom rule');
+    cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+  });
+
+  it('enables all disabled rules', () => {
+    selectCoverageOverviewActivityFilterOption('Disabled rules');
+    openTechniquePanel(getMockThreatData().technique.name);
+    enableAllDisabledRules();
+
+    // Should now render all rules in "enabled" section
+    openTechniquePanel(getMockThreatData().technique.name);
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Disabled prebuilt rule');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Disabled custom rule');
+
+    // Shouldn't render the rules in "disabled" section
+    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+      .contains('Disabled prebuilt rule')
+      .should('not.exist');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+      .contains('Disabled custom rule')
+      .should('not.exist');
+    cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('be.disabled');
   });
 });

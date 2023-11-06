@@ -55,6 +55,8 @@ import {
   COVERAGE_OVERVIEW_ACTIVITY_FILTER_BUTTON,
   COVERAGE_OVERVIEW_FILTER_LIST,
   COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON,
+  COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON,
+  COVERAGE_OVERVIEW_SEARCH_BAR,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -512,4 +514,16 @@ export const selectCoverageOverviewSourceFilterOption = (option: string) => {
   cy.get(COVERAGE_OVERVIEW_FILTER_LIST).contains(option).click();
   cy.get(LOADING_INDICATOR).should('not.exist');
   cy.get(COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON).click(); // close filter popover
+};
+
+export const filterCoverageOverviewBySearchBar = (searchTerm: string) => {
+  cy.get(COVERAGE_OVERVIEW_SEARCH_BAR).type(searchTerm);
+  cy.get(COVERAGE_OVERVIEW_SEARCH_BAR).type('{enter}');
+  cy.get(LOADING_INDICATOR).should('not.exist');
+};
+
+export const enableAllDisabledRules = () => {
+  cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).click();
+  cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
 };

@@ -202,3 +202,5 @@ export const COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON =
   '[data-test-subj="coverageOverviewRuleSourceFilterButton"]';
 
 export const COVERAGE_OVERVIEW_FILTER_LIST = '[data-test-subj="coverageOverviewFilterList"]';
+
+export const COVERAGE_OVERVIEW_SEARCH_BAR = '[data-test-subj="coverageOverviewFilterSearchBar"]';
