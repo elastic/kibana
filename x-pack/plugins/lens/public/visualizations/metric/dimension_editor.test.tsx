@@ -303,7 +303,7 @@ describe('dimension editor', () => {
         expect(customPrefixTextbox).toHaveValue(customPrefixState.secondaryPrefix);
       });
 
-      it('clicking on the buttons calls setState with a correct secondaryPrefix', () => {
+      it('clicking on the buttons calls setState with a correct secondaryPrefix', async () => {
         const customPrefix = faker.lorem.word(3);
         const setState = jest.fn();
 
@@ -312,12 +312,12 @@ describe('dimension editor', () => {
           state: { ...localState, secondaryPrefix: customPrefix },
         });
 
-        userEvent.click(settingNone);
+        await userEvent.click(settingNone);
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({ secondaryPrefix: NONE_PREFIX })
         );
 
-        userEvent.click(settingAuto);
+        await userEvent.click(settingAuto);
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({ secondaryPrefix: AUTO_PREFIX })
         );
@@ -384,15 +384,15 @@ describe('dimension editor', () => {
         />
       );
 
-      const selectCollapseBy = (collapseFn: string) => {
+      const selectCollapseBy = async (collapseFn: string) => {
         const collapseBySelect = screen.getByLabelText(/collapse by/i);
-        userEvent.selectOptions(collapseBySelect, collapseFn);
+        await userEvent.selectOptions(collapseBySelect, collapseFn);
       };
 
-      const setMaxCols = (maxCols: number) => {
+      const setMaxCols = async (maxCols: number) => {
         const maxColsInput = screen.getByLabelText(/layout columns/i);
-        userEvent.clear(maxColsInput);
-        userEvent.type(maxColsInput, maxCols.toString());
+        await userEvent.clear(maxColsInput);
+        await userEvent.type(maxColsInput, maxCols.toString());
       };
 
       return {
@@ -410,25 +410,25 @@ describe('dimension editor', () => {
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).toBeInTheDocument();
     });
 
-    it('supports setting a collapse function', () => {
+    it('supports setting a collapse function', async () => {
       const { selectCollapseBy } = renderBreakdownEditor();
       const newCollapseFn = 'min';
-      selectCollapseBy(newCollapseFn);
+      await selectCollapseBy(newCollapseFn);
 
       expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFn });
     });
 
     it('sets max columns', async () => {
       const { setMaxCols } = renderBreakdownEditor();
-      setMaxCols(1);
+      await setMaxCols(1);
       await waitFor(() =>
         expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 1 }))
       );
-      setMaxCols(2);
+      await setMaxCols(2);
       await waitFor(() =>
         expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 2 }))
       );
-      setMaxCols(3);
+      await setMaxCols(3);
       await waitFor(() =>
         expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 3 }))
       );
@@ -461,12 +461,12 @@ describe('dimension editor', () => {
           screen.queryByLabelText(/line/i) || screen.queryByRole('button', { name: /line/i }),
       };
 
-      const clickOnSupportingVis = (type: SupportingVisType) => {
+      const clickOnSupportingVis = async (type: SupportingVisType) => {
         const supportingVis = supportingVisOptions[type];
         if (!supportingVis) {
           throw new Error(`Supporting visualization ${type} not found`);
         }
-        userEvent.click(supportingVis);
+        await userEvent.click(supportingVis);
       };
 
       return {
@@ -578,18 +578,18 @@ describe('dimension editor', () => {
       describe('responding to buttons', () => {
         it('enables trendline', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({ state: stateWOTrend });
-          clickOnSupportingVis('trendline');
+          await clickOnSupportingVis('trendline');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.addLayer).toHaveBeenCalledWith('metricTrendline');
           expectCalledBefore(mockSetState, props.addLayer as jest.Mock);
         });
 
-        it('enables bar', () => {
+        it('enables bar', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: metricAccessorState,
           });
-          clickOnSupportingVis('bar');
+          await clickOnSupportingVis('bar');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: true });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
@@ -597,21 +597,21 @@ describe('dimension editor', () => {
           expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
         });
 
-        it('selects none from bar', () => {
+        it('selects none from bar', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: stateWOTrend,
           });
-          clickOnSupportingVis('none');
+          await clickOnSupportingVis('none');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.removeLayer).not.toHaveBeenCalled();
         });
 
-        it('selects none from trendline', () => {
+        it('selects none from trendline', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: metricAccessorState,
           });
-          clickOnSupportingVis('none');
+          await clickOnSupportingVis('none');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
@@ -628,7 +628,7 @@ describe('dimension editor', () => {
           expect(progressDirectionShowing).not.toBeInTheDocument();
         });
 
-        it('toggles progress direction', () => {
+        it('toggles progress direction', async () => {
           const { progressOptions } = renderAdditionalSectionEditor({
             state: metricAccessorState,
           });
@@ -639,7 +639,7 @@ describe('dimension editor', () => {
             throw new Error('horizontal radio button not found');
           }
 
-          userEvent.click(progressOptions.horizontal);
+          await userEvent.click(progressOptions.horizontal);
 
           expect(mockSetState).toHaveBeenCalledWith({
             ...metricAccessorState,
