@@ -42,7 +42,7 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
     if (!location) {
       return response.notFound({
         body: {
-          message: `Private location with id ${id} not found`,
+          message: `Private location with id or label "${id}" not found`,
         },
       });
     }
