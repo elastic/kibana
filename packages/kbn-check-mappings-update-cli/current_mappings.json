@@ -572,6 +572,9 @@
       "title": {
         "type": "text"
       },
+      "titleKeyword": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       }
