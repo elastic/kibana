@@ -25,7 +25,7 @@ interface Props {
 }
 export const SnapshotContainer = ({ render }: Props) => {
   const { sourceId } = useSourceContext();
-  const { metric, groupBy, nodeType, accountId, region } = useWaffleOptionsContext();
+  const { metric, groupBy, nodeType, accountId, region, view } = useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
   const {
@@ -44,7 +44,7 @@ export const SnapshotContainer = ({ render }: Props) => {
       accountId,
       region,
       sendRequestImmediately: false,
-      includeTimeseries: false,
+      includeTimeseries: view === 'table',
     },
     {
       abortable: true,
