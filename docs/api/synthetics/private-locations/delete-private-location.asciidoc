@@ -8,20 +8,20 @@ Deletes a private location using the provided location ID.
 
 === {api-request-title}
 
-`DELETE <kibana host>:<port>/api/synthetics/private-locations/{locationId}`
+`DELETE <kibana host>:<port>/api/synthetics/private_locations/<location_id>`
 
-`DELETE <kibana host>:<port>/s/<space_id>/api/synthetics/private-locations/{locationId}`
+`DELETE <kibana host>:<port>/s/<space_id>/api/synthetics/private_locations/<location_id>`
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
+You must have `all` privileges for the *Synthetics and Uptime* feature in the *{observability}* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
 
 [[private-location-delete-params]]
 ==== Path Parameters
 
-`locationId`::
+`location_id`::
 (Required, string) The unique identifier of the private location to be deleted. It should be between 1 and 1024 characters.
 
 [[private-location-delete-example]]
@@ -31,7 +31,7 @@ Here is an example of a DELETE request to delete a private location:
 
 [source,sh]
 --------------------------------------------------
-DELETE /api/private-locations/unique-location-id
+DELETE /api/private-locations/<location_id>
 --------------------------------------------------
 
 The API does not return a response body for deletion, but it will return an appropriate status code upon successful deletion.

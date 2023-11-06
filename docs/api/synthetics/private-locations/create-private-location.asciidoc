@@ -8,13 +8,13 @@ Creates a private location with the following schema.
 
 === {api-request-title}
 
-`POST <kibana host>:<port>/api/synthetics/private-locations`
+`POST <kibana host>:<port>/api/synthetics/private_locations`
 
-`POST <kibana host>:<port>/s/<space_id>/api/synthetics/private-locations`
+`POST <kibana host>:<port>/s/<space_id>/api/synthetics/private_locations`
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
+You must have `all` privileges for the *Synthetics and Uptime* feature in the *{observability}* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
 [[private-location-request-body]]
@@ -32,7 +32,7 @@ The request body should contain the following attributes:
 (Optional, array of strings) An array of tags to categorize the private location.
 
 `geo`::
-(Optional, object) Geographic coordinates for the location. It should include the following attributes:
+(Optional, object) Geographic coordinates (WGS84) for the location. It should include the following attributes:
 
 - `lat` (Required, number): The latitude of the location.
 - `lon` (Required, number): The longitude of the location.
@@ -44,7 +44,7 @@ Here is an example of a POST request to create a private location:
 
 [source,sh]
 --------------------------------------------------
-POST /api/private-locations
+POST /api/private_locations
 {
   "label": "Private Location 1",
   "agentPolicyId": "abcd1234",
