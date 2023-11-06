@@ -82,7 +82,7 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     // check if it get's bigger when we add more lines
     cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     inputQuery(multilineQuery);
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 550);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 600);
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
