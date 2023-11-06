@@ -31,6 +31,7 @@ import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable, isDfaTrainedModel } from './test_models';
 import { ModelItem } from './models_list';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export function useModelActions({
   onDfaTestAction,
@@ -53,7 +54,7 @@ export function useModelActions({
 }): Array<Action<ModelItem>> {
   const {
     services: {
-      application: { navigateToUrl, capabilities },
+      application: { navigateToUrl },
       overlays,
       theme,
       i18n: i18nStart,
@@ -61,6 +62,18 @@ export function useModelActions({
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+
+  const [
+    canCreateTrainedModels,
+    canStartStopTrainedModels,
+    canTestTrainedModels,
+    canDeleteTrainedModels,
+  ] = usePermissionCheck([
+    'canCreateTrainedModels',
+    'canStartStopTrainedModels',
+    'canTestTrainedModels',
+    'canDeleteTrainedModels',
+  ]);
 
   const [canManageIngestPipelines, setCanManageIngestPipelines] = useState<boolean>(false);
 
@@ -73,10 +86,6 @@ export function useModelActions({
   const urlLocator = useMlLocator()!;
 
   const trainedModelsApiService = useTrainedModelsApiService();
-
-  const canStartStopTrainedModels = capabilities.ml.canStartStopTrainedModels as boolean;
-  const canTestTrainedModels = capabilities.ml.canTestTrainedModels as boolean;
-  const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
 
   useEffect(() => {
     let isMounted = true;
@@ -396,15 +405,14 @@ export function useModelActions({
         type: 'button',
         isPrimary: true,
         available: (item) =>
-          item.tags.includes(ELASTIC_MODEL_TAG) && item.state === MODEL_STATE.NOT_DOWNLOADED,
+          canCreateTrainedModels &&
+          item.tags.includes(ELASTIC_MODEL_TAG) &&
+          item.state === MODEL_STATE.NOT_DOWNLOADED,
         enabled: (item) => !isLoading,
         onClick: async (item) => {
           try {
             onLoading(true);
-            await trainedModelsApiService.putTrainedModelConfig(
-              item.model_id,
-              item.putModelConfig!
-            );
+            await trainedModelsApiService.installElasticTrainedModelConfig(item.model_id);
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
                 defaultMessage: '"{modelId}" model download has been started successfully.',
@@ -584,27 +592,28 @@ export function useModelActions({
       },
     ],
     [
-      urlLocator,
-      navigateToUrl,
-      navigateToPath,
+      canCreateTrainedModels,
+      canDeleteTrainedModels,
+      canManageIngestPipelines,
       canStartStopTrainedModels,
-      isLoading,
-      getUserInputModelDeploymentParams,
-      modelAndDeploymentIds,
-      onLoading,
-      trainedModelsApiService,
+      canTestTrainedModels,
+      displayErrorToast,
       displaySuccessToast,
       fetchModels,
-      displayErrorToast,
       getUserConfirmation,
-      onModelsDeleteRequest,
-      onModelDeployRequest,
-      canDeleteTrainedModels,
+      getUserInputModelDeploymentParams,
       isBuiltInModel,
-      onTestAction,
+      isLoading,
+      modelAndDeploymentIds,
+      navigateToPath,
+      navigateToUrl,
       onDfaTestAction,
-      canTestTrainedModels,
-      canManageIngestPipelines,
+      onLoading,
+      onModelDeployRequest,
+      onModelsDeleteRequest,
+      onTestAction,
+      trainedModelsApiService,
+      urlLocator,
     ]
   );
 }
