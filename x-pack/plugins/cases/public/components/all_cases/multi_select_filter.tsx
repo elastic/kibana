@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { css } from '@emotion/react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopoverTitle,
@@ -16,6 +17,7 @@ import {
   EuiFilterButton,
   EuiTextColor,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import type { FilterOptions } from '../../../common/ui/types';
@@ -60,8 +62,9 @@ export const MultiSelectFilterComponent = ({
   selectedOptions = [],
   renderOption,
 }: UseFilterParams) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const toggleIsPopoverOpen = () => setIsPopoverOpen(!isPopoverOpen);
+  const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
   const isInvalid = Boolean(limit && limitReachedMessage && selectedOptions.length >= limit);
   const options = fromRawOptionsToEuiSelectableOptions(rawOptions, selectedOptions);
 
@@ -105,7 +108,7 @@ export const MultiSelectFilterComponent = ({
         </EuiFilterButton>
       }
       isOpen={isPopoverOpen}
-      closePopover={toggleIsPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
       repositionOnScroll
     >
@@ -124,16 +127,26 @@ export const MultiSelectFilterComponent = ({
       <EuiSelectable
         options={options}
         searchable
-        searchProps={{ placeholder: id, compressed: false, isInvalid }}
+        searchProps={{ placeholder: id, compressed: false }}
         emptyMessage={i18n.EMPTY_FILTER_MESSAGE}
         onChange={_onChange}
         singleSelection={false}
         renderOption={renderOption}
       >
         {(list, search) => (
-          <div style={{ width: '400px' }}>
+          <div
+            css={css`
+              width: 400px;
+            `}
+          >
             <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-            <div style={{ lineHeight: '32px', marginLeft: '16px' }}>
+            <div
+              css={css`
+                line-height: ${euiTheme.size.xl};
+                padding-left: ${euiTheme.size.m};
+                border-bottom: ${euiTheme.border.thin};
+              `}
+            >
               <EuiTextColor color="subdued">{i18n.OPTIONS(options.length)}</EuiTextColor>
             </div>
             <EuiSpacer size="xs" />
