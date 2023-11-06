@@ -15,6 +15,8 @@ import {
   ValidateEmailAddressesOptions,
   MustacheInEmailRegExp,
 } from '@kbn/actions-plugin/common';
+import { experimentalFeaturesMock } from '../../mocks';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const CONNECTOR_TYPE_ID = '.email';
 let connectorTypeModel: ConnectorTypeModel;
@@ -45,6 +47,7 @@ beforeEach(() => {
 });
 
 beforeAll(() => {
+  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   registerConnectorTypes({ connectorTypeRegistry, services: RegistrationServices });
   const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);

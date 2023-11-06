@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
@@ -85,10 +84,12 @@ export function CasesTableServiceProvider(
     },
 
     async validateCasesTableHasNthRows(nrRows: number) {
-      await retry.tryForTime(3000, async () => {
+      await retry.waitFor(`the cases table to have ${nrRows} cases`, async () => {
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
-        expect(rows.length).equal(nrRows);
+        return rows.length === nrRows;
       });
+
+      await header.waitUntilLoadingHasFinished();
     },
 
     async waitForCasesToBeListed() {
