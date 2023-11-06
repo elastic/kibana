@@ -20,6 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { copyToClipboard } from '@elastic/eui';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   CONNECTOR_LABEL,
   COPY_CONNECTOR_ID_LABEL,
@@ -44,7 +45,8 @@ export const EditConnector: React.FC = () => {
     application: { navigateToUrl },
   } = useKibanaServices();
 
-  const { data, isLoading, refetch } = useConnector(id);
+  const { data, isLoading, queryKey } = useConnector(id);
+  const queryClient = useQueryClient();
 
   if (isLoading) {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">
@@ -91,7 +93,7 @@ export const EditConnector: React.FC = () => {
         <EuiText size="s">{CONNECTOR_LABEL}</EuiText>
         <EuiFlexGroup direction="row" justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EditName connectorId={id} name={connector.name} onSuccess={refetch} />
+            <EditName connector={connector} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {deleteModalIsOpen && (
@@ -151,17 +153,9 @@ export const EditConnector: React.FC = () => {
       <EuiPageTemplate.Section>
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={1}>
-            <EditServiceType
-              connectorId={id}
-              serviceType={connector.service_type ?? ''}
-              onSuccess={() => refetch()}
-            />
+            <EditServiceType connector={connector} />
             <EuiSpacer />
-            <EditDescription
-              connectorId={id}
-              description={connector.description ?? ''}
-              onSuccess={refetch}
-            />
+            <EditDescription connector={connector} />
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <EuiPanel hasBorder hasShadow={false}>
