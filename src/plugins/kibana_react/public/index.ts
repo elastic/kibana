@@ -74,6 +74,10 @@ export type { ToastInput, KibanaReactNotifications } from './notifications';
 export { createNotifications } from './notifications';
 
 export { toMountPoint } from './util';
+
+/** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
+export { Markdown, MarkdownSimple } from './markdown';
+
 export type { ToMountPointOptions } from './util';
 
 /** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
