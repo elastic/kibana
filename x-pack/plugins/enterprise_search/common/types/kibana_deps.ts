@@ -22,7 +22,7 @@ export interface KibanaDeps {
   data: DataPublicPluginStart;
   discover: DiscoverStart;
   features: FeaturesPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
