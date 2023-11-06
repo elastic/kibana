@@ -27,6 +27,11 @@ export const useUnmuteAlert = () => {
       unmuteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
       onSuccess() {
+        toasts.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.alertsTable.alertUnuted', {
+            defaultMessage: 'Alert unmuted',
+          })
+        );
         return queryClient.invalidateQueries(triggersActionsUiQueriesKeys.getMutedAlerts());
       },
       onError: (error: ServerError) => {

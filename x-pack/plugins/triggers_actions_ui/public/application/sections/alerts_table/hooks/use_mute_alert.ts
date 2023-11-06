@@ -27,6 +27,11 @@ export const useMuteAlert = () => {
       muteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
       onSuccess() {
+        toasts.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.alertsTable.alertMuted', {
+            defaultMessage: 'Alert muted',
+          })
+        );
         return queryClient.invalidateQueries(triggersActionsUiQueriesKeys.getMutedAlerts());
       },
       onError: (error: ServerError) => {
