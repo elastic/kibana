@@ -40,8 +40,8 @@ export interface TemplateDeserialized {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
+    lifecycle?: DataRetention;
   };
-  lifecycle?: DataRetention;
   composedOf?: string[]; // Composable template only
   version?: number;
   priority?: number; // Composable template only
@@ -55,6 +55,7 @@ export interface TemplateDeserialized {
     hidden?: boolean;
     [key: string]: any;
   };
+  lifecycle?: DataRetention;
   _kbnMeta: {
     type: TemplateType;
     hasDatastream: boolean;
