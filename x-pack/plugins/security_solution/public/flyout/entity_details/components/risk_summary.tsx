@@ -20,15 +20,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/risk_engine';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
-
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getRiskScoreMetricAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_metric';
 import { ExpandFlyoutButton } from './expand_flyout_button';
 import { useExpandDetailsFlyout } from '../hooks/use_expand_details_flyout';
+import { USER_DETAILS_RISK_SCORE_QUERY_ID } from '../user_details';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;
@@ -158,12 +160,45 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
                   timerange={LAST_30_DAYS}
                   width={LENS_VISUALIZATION_SIZE}
                   height={LENS_VISUALIZATION_SIZE}
+                  inspectTitle={
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.inspectVisualizationTitle"
+                      defaultMessage="Risk Summary Visualization"
+                    />
+                  }
                 />
               )}
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBasicTable columns={columns} items={items} loading={!userRiskData} compressed />
+            <InspectButtonContainer>
+              <div
+                // Anchors the position absolute inspect button (nearest positioned ancestor)
+                css={`
+                  position: relative;
+                `}
+              >
+                <div
+                  // Position the inspect button above the table
+                  css={css`
+                    position: absolute;
+                    right: 0;
+                    top: -${euiThemeVars.euiSize};
+                  `}
+                >
+                  <InspectButton
+                    queryId={USER_DETAILS_RISK_SCORE_QUERY_ID}
+                    title={
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.inspectTableTitle"
+                        defaultMessage="Risk Summary Table"
+                      />
+                    }
+                  />
+                </div>
+                <EuiBasicTable columns={columns} items={items} loading={!userRiskData} compressed />
+              </div>
+            </InspectButtonContainer>
           </EuiFlexItem>
         </EuiFlexGroup>
 

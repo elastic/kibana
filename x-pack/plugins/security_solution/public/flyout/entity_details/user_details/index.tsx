@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -39,6 +40,11 @@ export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 
 export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'user-details';
+export const USER_DETAILS_RISK_SCORE_QUERY_ID = 'userDetailsRiskScoreQuery';
+const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};
 
 export const UserDetailsPanel = ({
   contextID,
@@ -54,15 +60,26 @@ export const UserDetailsPanel = ({
   const riskScoreState = useRiskScore({
     riskEntity: RiskScoreEntity.user,
     filterQuery: userNameFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
   });
 
-  const { data: userRisk } = riskScoreState;
+  const { data: userRisk, inspect, refetch, loading } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   const riskInputs = userRiskData?.user.risk.inputs ?? [];
   const { isExpanded, onToggle } = useExpandDetailsFlyout({ riskInputs });
-  const { to, from, isInitializing } = useGlobalTime();
+  const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const observedUser = useObservedUser(userName);
   const managedUser = useManagedUser(userName);
+
+  useQueryInspector({
+    deleteQuery,
+    inspect,
+    loading,
+    queryId: USER_DETAILS_RISK_SCORE_QUERY_ID,
+    refetch,
+    setQuery,
+  });
 
   if (riskScoreState.loading || observedUser.isLoading || managedUser.isLoading) {
     return <FlyoutLoading />;
