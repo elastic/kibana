@@ -18,7 +18,7 @@ import {
 import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {
-  DashboardAppLocatorParams,
+  DashboardLocatorParams,
   getDashboardLocatorParamsFromEmbeddable,
 } from '@kbn/dashboard-plugin/public';
 
@@ -106,7 +106,7 @@ export const DashboardLinkComponent = ({
       ...link.options,
     } as DashboardDrilldownOptions;
 
-    const params: DashboardAppLocatorParams = {
+    const params: DashboardLocatorParams = {
       dashboardId: link.destination,
       ...getDashboardLocatorParamsFromEmbeddable(linksEmbeddable, linkOptions),
     };
