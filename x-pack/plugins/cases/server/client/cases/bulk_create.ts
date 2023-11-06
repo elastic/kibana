@@ -26,9 +26,8 @@ import type {
   CasePostRequest,
 } from '../../../common/types/api';
 import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
-import {} from '../utils';
 import { validateCustomFields } from './validators';
-import { fillMissingCustomFields } from './utils';
+import { normalizeCreateCaseRequest } from './utils';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
 
@@ -100,23 +99,13 @@ export const bulkCreate = async (
 
       const { id, ...caseWithoutId } = theCase;
 
-      const normalizedQuery = {
-        ...caseWithoutId,
-        title: caseWithoutId.title.trim(),
-        description: caseWithoutId.description.trim(),
-        category: caseWithoutId.category?.trim() ?? null,
-        tags: caseWithoutId.tags?.map((tag) => tag.trim()) ?? [],
-        customFields: fillMissingCustomFields({
-          customFields: caseWithoutId.customFields,
-          customFieldsConfiguration,
-        }),
-      };
+      const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 
       bulkCreateRequest.push({
         id,
         ...transformNewCase({
           user,
-          newCase: normalizedQuery,
+          newCase: normalizedCase,
         }),
       });
     }

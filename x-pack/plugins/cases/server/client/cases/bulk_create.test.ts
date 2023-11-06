@@ -188,7 +188,7 @@ describe('bulkCreate', () => {
       `);
     });
 
-    it('sets a custom ID correctly', async () => {
+    it('accepts an ID in the request correctly', async () => {
       await bulkCreate({ cases: getCases({ id: 'my-id' }) }, clientArgs, casesClientMock);
 
       expect(clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0].id).toBe(
@@ -196,7 +196,7 @@ describe('bulkCreate', () => {
       );
     });
 
-    it('sets an ID if not provided', async () => {
+    it('generates an ID if not provided in the request', async () => {
       await bulkCreate({ cases: getCases() }, clientArgs, casesClientMock);
 
       expect(clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0].id).toBe(
@@ -367,7 +367,7 @@ describe('bulkCreate', () => {
       saved_objects: [caseSO],
     });
 
-    it('sets an ID if not provided', async () => {
+    it('validates the cases correctly', async () => {
       await bulkCreate(
         { cases: [getCases()[0], getCases({ owner: 'cases' })[0]] },
         clientArgs,
@@ -1031,7 +1031,42 @@ describe('bulkCreate', () => {
       expect(casesClient.configure.get).toHaveBeenCalledWith();
     });
 
-    it('validate custom fields from different owners', async () => {
+    it('validate required custom fields from different owners', async () => {
+      const casesWithDifferentOwners = [getCases()[0], getCases({ owner: 'cases' })[0]];
+
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [
+            {
+              key: 'sec_first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'sec custom field',
+              required: false,
+            },
+          ],
+        },
+        {
+          owner: 'cases',
+          customFields: [
+            {
+              key: 'cases_first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'stack cases custom field',
+              required: true,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        bulkCreate({ cases: casesWithDifferentOwners }, clientArgs, casesClient)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to bulk create cases: Error: Missing required custom fields: \\"stack cases custom field\\""`
+      );
+    });
+
+    it('should fill out missing custom fields from different owners correctly', async () => {
       const casesWithDifferentOwners = [getCases()[0], getCases({ owner: 'cases' })[0]];
 
       casesClient.configure.get = jest.fn().mockResolvedValue([

@@ -23,7 +23,7 @@ import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {} from '../utils';
 import { validateCustomFields } from './validators';
-import { fillMissingCustomFields } from './utils';
+import { normalizeCreateCaseRequest } from './utils';
 
 /**
  * Creates a new case.
@@ -82,22 +82,12 @@ export const create = async (
      * before saving to ES
      */
 
-    const normalizedQuery = {
-      ...query,
-      title: query.title.trim(),
-      description: query.description.trim(),
-      category: query.category?.trim() ?? null,
-      tags: query.tags?.map((tag) => tag.trim()) ?? [],
-      customFields: fillMissingCustomFields({
-        customFields: query.customFields,
-        customFieldsConfiguration,
-      }),
-    };
+    const normalizedCase = normalizeCreateCaseRequest(query, customFieldsConfiguration);
 
     const newCase = await caseService.createCase({
       attributes: transformNewCase({
         user,
-        newCase: normalizedQuery,
+        newCase: normalizedCase,
       }),
       id: savedObjectID,
       refresh: false,

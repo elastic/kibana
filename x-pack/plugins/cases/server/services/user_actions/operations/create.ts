@@ -416,9 +416,7 @@ export class UserActionPersister {
       }
 
       const userActionsPayload = userActions
-        .map((ua) => {
-          const { action, type, caseId, user, owner, payload, connectorId, attachmentId } = ua;
-
+        .map(({ action, type, caseId, user, owner, payload, connectorId, attachmentId }) => {
           const userActionBuilder = this.builderFactory.getBuilder<T>(type);
           const userAction = userActionBuilder?.build({
             action,

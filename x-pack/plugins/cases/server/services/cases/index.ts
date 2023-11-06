@@ -637,6 +637,9 @@ export class CasesService {
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);
 
+        transformedAttributes.total_alerts = -1;
+        transformedAttributes.total_comments = -1;
+
         return {
           type: CASE_SAVED_OBJECT,
           id,

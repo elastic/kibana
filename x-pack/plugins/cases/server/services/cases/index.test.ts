@@ -45,7 +45,11 @@ import {
 } from '../test_utils';
 import { AttachmentService } from '../attachments';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { CaseSavedObjectTransformed, CasePersistedAttributes } from '../../common/types/case';
+import type {
+  CaseSavedObjectTransformed,
+  CasePersistedAttributes,
+  CaseTransformedAttributes,
+} from '../../common/types/case';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
@@ -1063,6 +1067,8 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_alerts": -1,
+                  "total_comments": -1,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -1081,6 +1087,27 @@ describe('CasesService', () => {
           ]
         `);
       });
+    });
+
+    it('includes default values for total_alerts and total_comments', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [createCaseSavedObjectResponse({})],
+      });
+
+      await service.bulkCreateCases({
+        cases: [
+          {
+            ...createCasePostParams({ connector: getNoneCaseConnector() }),
+            id: '1',
+          },
+        ],
+      });
+
+      const postAttributes = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0]
+        .attributes as CasePersistedAttributes;
+
+      expect(postAttributes.total_alerts).toEqual(-1);
+      expect(postAttributes.total_comments).toEqual(-1);
     });
   });
 
@@ -1686,6 +1713,26 @@ describe('CasesService', () => {
             ],
           }
         `);
+      });
+
+      it('does not include total_alerts and total_comments fields in the response', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [createCaseSavedObjectResponse({})],
+        });
+
+        const res = await service.bulkCreateCases({
+          cases: [
+            {
+              ...createCasePostParams({ connector: getNoneCaseConnector() }),
+              id: '1',
+            },
+          ],
+        });
+
+        const theCase = res.saved_objects[0] as SavedObject<CaseTransformedAttributes>;
+
+        expect(theCase.attributes).not.toHaveProperty('total_alerts');
+        expect(theCase.attributes).not.toHaveProperty('total_comments');
       });
     });
 
