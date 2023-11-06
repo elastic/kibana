@@ -190,6 +190,59 @@ const CasesAll: User = {
   },
 };
 
+/** Used to test subactions that implement `getSubActionPrivileges()` during connector registration */
+export const ExecuteSubActionsAll: User = {
+  username: 'sub_action_execute_all',
+  fullName: 'sub_action_execute_all_fixture',
+  password: 'sub_action_execute_all-password',
+  role: {
+    name: 'sub_action_execute_all_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+          subActionsFixture: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
+/** Used to test subactions that implement `getSubActionPrivileges()` during connector registration */
+export const ExecuteSubActionsNone: User = {
+  username: 'sub_action_execute_none',
+  fullName: 'sub_action_execute_none_fixture',
+  password: 'sub_action_execute_none-password',
+  role: {
+    name: 'sub_action_execute_none_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
@@ -198,6 +251,8 @@ export const Users: User[] = [
   Space1AllWithRestrictedFixture,
   Space1AllAlertingNoneActions,
   CasesAll,
+  ExecuteSubActionsAll,
+  ExecuteSubActionsNone,
 ];
 
 const Space1: Space = {

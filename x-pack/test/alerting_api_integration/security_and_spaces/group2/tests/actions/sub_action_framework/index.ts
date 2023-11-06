@@ -13,49 +13,11 @@ import {
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { Role } from '@kbn/security-plugin/common';
 import { SECURITY_PRIVILEGE_ID } from '@kbn/security-solution-features/privileges';
-import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { ExecuteSubActionsAll, ExecuteSubActionsNone } from '../../../../scenarios';
 
-let log: ToolingLog;
 const DEFAULT_SECRETS = Object.freeze({ username: 'elastic', password: 'changeme' });
-
-interface LogErrorDetailsInterface {
-  (this: SuperTest.Test, err: Error & { response?: any }): SuperTest.Test;
-  ignoreCodes: (
-    codes: number[]
-  ) => (this: SuperTest.Test, err: Error & { response?: SuperTest.Response }) => SuperTest.Test;
-}
-
-const logErrorDetails: LogErrorDetailsInterface = function (err) {
-  if (err.response && (err.response.body || err.response.text)) {
-    let outputData =
-      'RESPONSE:\n' + err.response.body
-        ? JSON.stringify(err.response.body, null, 2)
-        : err.response.text;
-
-    if (err.response.request) {
-      const { url = '', method = '', _data = '' } = err.response.request;
-
-      outputData += `\nREQUEST:
-${method}  ${url}
-${JSON.stringify(_data, null, 2)}
-`;
-    }
-
-    log.error(outputData);
-  }
-
-  return this ?? err;
-};
-logErrorDetails.ignoreCodes = (codes) => {
-  return function (err) {
-    if (err.response && err.response.status && !codes.includes(err.response.status)) {
-      return logErrorDetails.call(this, err);
-    }
-    return this;
-  };
-};
 
 /**
  * The sub action connector is defined here
@@ -67,7 +29,6 @@ const createSubActionConnector = async ({
   secrets = DEFAULT_SECRETS,
   connectorTypeId = 'test.sub-action-connector',
   expectedHttpCode = 200,
-  errorLogger = logErrorDetails,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   config?: Record<string, unknown>;
@@ -79,7 +40,6 @@ const createSubActionConnector = async ({
   const response = await supertest
     .post(`${getUrlPrefix('default')}/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
-    .on('error', errorLogger)
     .send({
       name: 'My sub connector',
       connector_type_id: connectorTypeId,
@@ -102,7 +62,6 @@ const executeSubAction = async ({
   expectedHttpCode = 200,
   username = 'elastic',
   password = 'changeme',
-  errorLogger = logErrorDetails,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   connectorId: string;
@@ -116,7 +75,6 @@ const executeSubAction = async ({
   const response = await supertest
     .post(`${getUrlPrefix('default')}/api/actions/connector/${connectorId}/_execute`)
     .set('kbn-xsrf', 'foo')
-    .on('error', errorLogger)
     .auth(username, password)
     .send({
       params: {
@@ -134,8 +92,6 @@ export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const securityService = getService('security');
-
-  log = getService('log');
 
   describe('Sub action framework', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -167,7 +123,6 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           supertest,
           config: { foo: 'foo' },
           expectedHttpCode: 400,
-          errorLogger: logErrorDetails.ignoreCodes([400]),
         });
 
         expect(res.body).to.eql({
@@ -182,7 +137,6 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           supertest,
           secrets: { ...DEFAULT_SECRETS, foo: 'foo' },
           expectedHttpCode: 400,
-          errorLogger: logErrorDetails.ignoreCodes([400]),
         });
 
         expect(res.body).to.eql({
@@ -372,6 +326,69 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           retry: true,
           connector_id: res.body.id,
           service_message: 'You should register at least one subAction for your connector type',
+        });
+      });
+
+      describe('sub-actions execute custom authz', () => {
+        let connectorId: string;
+
+        before(async () => {
+          connectorId = (
+            await createSubActionConnector({
+              supertest,
+              connectorTypeId: 'test.sub-action-connector-with-privileged-sub-actions',
+            })
+          ).body.id;
+        });
+
+        after(async () => {
+          if (connectorId) {
+            await supertest
+              .delete(`${getUrlPrefix('default')}/api/actions/connector/${connectorId}`)
+              .set('kbn-xsrf', 'true')
+              .send()
+              .expect(({ ok, status }) => {
+                // Should cover all success codes (ex. 204 (no content), 200, etc...)
+                if (!ok) {
+                  throw new Error(
+                    `Expected delete to return a status code in the 200, but got ${status}`
+                  );
+                }
+              });
+
+            connectorId = '';
+          }
+        });
+
+        it('should deny execute if user has no authz to sub-action', async () => {
+          const execRes = await executeSubAction({
+            supertest: supertestWithoutAuth,
+            connectorId,
+            subAction: 'authzRequired',
+            subActionParams: {},
+            username: ExecuteSubActionsNone.username,
+            password: ExecuteSubActionsNone.password,
+          });
+
+          expect(execRes.body).to.eql({
+            status: 'error',
+            message: 'Unauthorized to execute actions',
+            retry: false,
+            connector_id: connectorId,
+          });
+        });
+
+        it('should allow execute if user has authz to sub-action', async () => {
+          const execRes = await executeSubAction({
+            supertest: supertestWithoutAuth,
+            connectorId,
+            subAction: 'authzRequired',
+            subActionParams: {},
+            username: ExecuteSubActionsAll.username,
+            password: ExecuteSubActionsAll.password,
+          });
+
+          expect(execRes.body).to.eql({ status: 'ok', data: {}, connector_id: connectorId });
         });
       });
 

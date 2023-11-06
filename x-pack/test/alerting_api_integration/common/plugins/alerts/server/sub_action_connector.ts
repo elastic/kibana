@@ -122,7 +122,7 @@ export const getTestSubActionConnectorWithPrivilegedSubActions = (
 
       this.registerSubAction({
         name: 'authzRequired',
-        method: 'authRequired',
+        method: 'authzRequired',
         schema: null,
       });
     }
