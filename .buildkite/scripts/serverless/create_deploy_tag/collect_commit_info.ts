@@ -13,8 +13,9 @@ import {
   getSelectedCommitHash,
   hashToCommit,
   toCommitInfoHtml,
-} from './info_sections/release_info';
+} from './info_sections/commit_info';
 import {
+  getArtifactBuildJob,
   getOnMergePRBuild,
   getQAFTestBuilds,
   toBuildkiteBuildInfoHtml,
@@ -32,31 +33,31 @@ async function main() {
   // Current commit info
   const previousCommit = await hashToCommit(previousSha);
   const previousCommitInfo = getCommitExtract(previousCommit);
-  await addBuildkiteInfoSection(toCommitInfoHtml('Current commit on QA:', previousCommitInfo));
+  addBuildkiteInfoSection(toCommitInfoHtml('Current commit on QA:', previousCommitInfo));
 
   // Target commit info
   const selectedCommit = await hashToCommit(selectedSha);
   const selectedCommitInfo = getCommitExtract(selectedCommit);
-  await addBuildkiteInfoSection(toCommitInfoHtml('Target commit:', selectedCommitInfo));
+  addBuildkiteInfoSection(toCommitInfoHtml('Target commit:', selectedCommitInfo));
 
   // Buildkite build info
   const buildkiteBuild = await getOnMergePRBuild(selectedSha);
   const qafBuilds = await getQAFTestBuilds(selectedCommitInfo.date!);
-  await addBuildkiteInfoSection(
+  const artifactBuild = await getArtifactBuildJob(selectedCommitInfo.date!, selectedSha);
+  addBuildkiteInfoSection(
     toBuildkiteBuildInfoHtml('Relevant build info:', {
       'Merge build': buildkiteBuild,
       'QAF test build': qafBuilds[0],
-      'QAF test build (n+1)': qafBuilds[1],
-      'QAF test build (n+2)': qafBuilds[2],
+      'Artifact container build': artifactBuild,
     })
   );
 
   // Save Object migration comparison
   const comparisonResult = compareSOSnapshots(previousSha, selectedSha);
-  await addBuildkiteInfoSection(toSOComparisonBlockHtml(comparisonResult));
+  addBuildkiteInfoSection(toSOComparisonBlockHtml(comparisonResult));
 
   // Useful links
-  await addBuildkiteInfoSection(
+  addBuildkiteInfoSection(
     getUsefulLinksHtml('Useful links:', {
       previousCommitHash: previousSha,
       selectedCommitHash: selectedSha,
@@ -64,7 +65,7 @@ async function main() {
   );
 }
 
-async function addBuildkiteInfoSection(html: string) {
+function addBuildkiteInfoSection(html: string) {
   exec(`buildkite-agent annotate --append --style 'info' --context '${COMMIT_INFO_CTX}'`, {
     input: html + '<br />',
   });

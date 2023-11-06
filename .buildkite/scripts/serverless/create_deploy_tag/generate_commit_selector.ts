@@ -6,66 +6,83 @@
  * Side Public License, v 1.
  */
 
-import { buildkite, buildStateToEmoji, exec, octokit, SELECTED_COMMIT_META_KEY } from './shared';
+import { buildkite, COMMIT_INFO_CTX, exec, SELECTED_COMMIT_META_KEY } from './shared';
+import {
+  BuildkiteBuildExtract,
+  getArtifactBuildJob,
+  getOnMergePRBuild,
+  getQAFTestBuilds,
+  toCommitInfoWithBuildResults,
+} from './info_sections/build_info';
+import { getRecentCommits, GitCommitExtract } from './info_sections/commit_info';
 import { BuildkiteInputStep } from '#pipeline-utils';
 
-interface Commit {
-  message: string;
-  hash: string;
-}
-
-interface CommitData {
-  commits: Commit[];
-  currentKibanaCommit: string;
-}
-
-async function main(commitCount: string) {
-  const commitData = await collectAvailableCommits(commitCount);
-
-  await generateCommitSelectionInput(commitData);
-}
-
-async function collectAvailableCommits(commitCount: string): Promise<CommitData> {
-  console.log('--- Collecting recent kibana commits');
-
-  const currentKibanaCommit = exec('git rev-parse HEAD')!;
-  const kibanaCommits = exec(`git log --pretty=format:"%s<@>%H" -n ${commitCount}`);
-
-  if (!kibanaCommits) {
-    throw new Error('Could not find any, while listing recent commits');
-  }
-
-  const kibanaCommitList = kibanaCommits.split('\n').map((commit) => {
-    const [message, hash] = commit.split('<@>');
-    return { message, hash };
-  });
-
-  return {
-    commits: kibanaCommitList,
-    currentKibanaCommit,
+export interface CommitWithStatuses extends GitCommitExtract {
+  title: string;
+  author: string | undefined;
+  checks: {
+    onMergeBuild: BuildkiteBuildExtract | null;
+    ftrBuild: BuildkiteBuildExtract | null;
+    artifactBuild: BuildkiteBuildExtract | null;
   };
 }
 
-async function enrichWithStatuses(commits: Commit[]): Promise<Commit[]> {
+async function main(commitCountArg: string) {
+  console.log('--- Listing commits');
+  const commitCount = parseInt(commitCountArg, 10);
+  const commitData = await collectAvailableCommits(commitCount);
+  const commitsWithStatuses = await enrichWithStatuses(commitData);
+
+  console.log('--- Updating buildkite context with listed commits');
+  const commitListWithBuildResultsHtml = toCommitInfoWithBuildResults(commitsWithStatuses);
+  exec(`buildkite-agent annotate --style 'info' --context '${COMMIT_INFO_CTX}'`, {
+    input: commitListWithBuildResultsHtml,
+  });
+
+  console.log('--- Generating buildkite input step');
+  addBuildkiteInputStep();
+}
+
+async function collectAvailableCommits(commitCount: number): Promise<GitCommitExtract[]> {
+  console.log('--- Collecting recent kibana commits');
+
+  const recentCommits = await getRecentCommits(commitCount);
+
+  if (!recentCommits) {
+    throw new Error('Could not find any, while listing recent commits');
+  }
+
+  return recentCommits;
+}
+
+async function enrichWithStatuses(commits: GitCommitExtract[]): Promise<CommitWithStatuses[]> {
   console.log('--- Enriching with build statuses');
 
-  const commitsWithStatuses = await Promise.all(
+  const commitsWithStatuses: CommitWithStatuses[] = await Promise.all(
     commits.map(async (commit) => {
-      const statusesResponse = await octokit.request(
-        `GET /repos/{owner}/{repo}/commits/{ref}/status`,
-        {
-          owner: 'elastic',
-          repo: 'kibana',
-          ref: commit.hash,
-        }
-      );
+      const onMergeBuild = await getOnMergePRBuild(commit.sha);
 
-      const combinedState = statusesResponse.data.state;
-      const emoji = buildStateToEmoji(combinedState);
+      if (!commit.date) {
+        return {
+          ...commit,
+          checks: {
+            onMergeBuild,
+            ftrBuild: null,
+            artifactBuild: null,
+          },
+        };
+      }
+
+      const nextFTRBuild = (await getQAFTestBuilds(commit.date, 3))[0] || null;
+      const artifactBuild = await getArtifactBuildJob(commit.date, commit.sha);
 
       return {
-        message: `${emoji} ${commit.message}`,
-        hash: commit.hash,
+        ...commit,
+        checks: {
+          onMergeBuild,
+          ftrBuild: nextFTRBuild,
+          artifactBuild,
+        },
       };
     })
   );
@@ -73,24 +90,15 @@ async function enrichWithStatuses(commits: Commit[]): Promise<Commit[]> {
   return commitsWithStatuses;
 }
 
-async function generateCommitSelectionInput(commitData: CommitData) {
-  console.log('--- Generating select step');
-
-  const commits = commitData.commits;
-  const commitsWithStatuses = await enrichWithStatuses(commits);
-
+function addBuildkiteInputStep() {
   const inputStep: BuildkiteInputStep = {
     input: 'Select commit to deploy',
     prompt: 'Select commit to deploy.',
     key: 'select-commit',
     fields: [
       {
-        select: 'Select commit to deploy',
+        text: 'Enter the release candidate commit SHA',
         key: SELECTED_COMMIT_META_KEY,
-        options: commitsWithStatuses.map((commit) => ({
-          label: commit.message,
-          value: commit.hash,
-        })),
       },
     ],
   };

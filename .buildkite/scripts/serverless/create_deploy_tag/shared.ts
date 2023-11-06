@@ -28,4 +28,29 @@ const buildStateToEmoji = (state: string) => {
   );
 };
 
-export { octokit, exec, buildkite, buildStateToEmoji, SELECTED_COMMIT_META_KEY, COMMIT_INFO_CTX };
+const buildkiteBuildStateToEmoji = (state: string) => {
+  return (
+    {
+      running: '⏳',
+      scheduled: '⏳',
+      passed: '✅',
+      failed: '❌',
+      blocked: '❌',
+      canceled: '❌',
+      canceling: '❌',
+      skipped: '❌',
+      not_run: '❌',
+      finished: '✅',
+    }[state] || '❓'
+  );
+};
+
+export {
+  octokit,
+  exec,
+  buildkite,
+  buildStateToEmoji,
+  buildkiteBuildStateToEmoji,
+  SELECTED_COMMIT_META_KEY,
+  COMMIT_INFO_CTX,
+};

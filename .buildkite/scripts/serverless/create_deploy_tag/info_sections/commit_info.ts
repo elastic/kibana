@@ -10,16 +10,19 @@ import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/d
 import { buildkite, octokit, SELECTED_COMMIT_META_KEY } from '../shared';
 
 type GithubCommitType = RestEndpointMethodTypes['repos']['getCommit']['response']['data'];
+type ListedGithubCommitType =
+  RestEndpointMethodTypes['repos']['listCommits']['response']['data'][0];
 
 const KIBANA_PR_BASE = 'https://github.com/elastic/kibana/pull';
 
 export interface GitCommitExtract {
+  sha: string;
+  title: string;
+  message: string;
+  link: string;
   date: string | undefined;
   author: string | undefined;
-  link: string;
-  message: string;
-  title: string;
-  sha: string;
+  prLink: string | undefined;
 }
 
 export async function getCurrentQARelease() {
@@ -61,21 +64,40 @@ export async function hashToCommit(hash: string): Promise<GithubCommitType> {
   return commit.data;
 }
 
-export function getCommitExtract(commit: GithubCommitType): GitCommitExtract {
+export async function getRecentCommits(commitCount: number): Promise<GitCommitExtract[]> {
+  const kibanaCommits: ListedGithubCommitType[] = (
+    await octokit.repos.listCommits({
+      owner: 'elastic',
+      repo: 'kibana',
+      per_page: Number(commitCount),
+    })
+  ).data;
+
+  return kibanaCommits.map(getCommitExtract);
+}
+
+export function getCommitExtract(
+  commit: GithubCommitType | ListedGithubCommitType
+): GitCommitExtract {
+  const title = commit.commit.message.split('\n')[0];
+  const prNumber = title.match(/#(\d{4,6})/)?.[1];
+  const prLink = prNumber ? `${KIBANA_PR_BASE}/${prNumber}` : undefined;
+
   return {
     sha: commit.sha,
     message: commit.commit.message,
-    date: commit.commit.author?.date,
-    author: commit.author?.login,
-    title: commit.commit.message.split('\n')[0],
+    title,
     link: commit.html_url,
+    date: commit.commit.author?.date || commit.commit.committer?.date,
+    author: commit.author?.login || commit.committer?.login,
+    prLink,
   };
 }
 
 export function toCommitInfoHtml(sectionTitle: string, commitInfo: GitCommitExtract): string {
   const titleWithLink = commitInfo.title.replace(
     /#(\d{4,6})/,
-    `<a href="${KIBANA_PR_BASE}/$1">$&</a>`
+    `<a href="${commitInfo.prLink}">$&</a>`
   );
 
   return `<div>
