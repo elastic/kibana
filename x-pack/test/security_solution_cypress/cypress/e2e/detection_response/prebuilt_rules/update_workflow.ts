@@ -31,7 +31,7 @@ import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
     describe('Upgrade of prebuilt rules', () => {
       const RULE_1_ID = 'rule_1';

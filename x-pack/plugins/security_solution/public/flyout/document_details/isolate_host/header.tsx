@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
+import { FlyoutHeader } from '../../shared/components/flyout_header';
 
 /**
  * Document details expandable right section header for the isolate host panel
@@ -32,10 +33,10 @@ export const PanelHeader: FC = () => {
     );
 
   return (
-    <EuiFlyoutHeader hasBorder>
+    <FlyoutHeader>
       <EuiTitle size="s">
         <h4 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>{title}</h4>
       </EuiTitle>
-    </EuiFlyoutHeader>
+    </FlyoutHeader>
   );
 };
