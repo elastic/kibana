@@ -348,7 +348,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public stop() {
     this.queryService.stop();
     licenseService.stop();
-    return this.contract.getStopContract();
+    this.contract.getStopContract();
   }
 
   private lazyHelpersForRoutes() {
