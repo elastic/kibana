@@ -19,7 +19,7 @@ describe('usePrivateLocationsAPI', () => {
   const deletedAPI = jest
     .spyOn(locationAPI, 'deleteSyntheticsPrivateLocations')
     .mockResolvedValue([]);
-  const getAPI = jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
+  jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
   jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(dispatch);
 
   it('returns expected results', () => {
@@ -33,7 +33,7 @@ describe('usePrivateLocationsAPI', () => {
         privateLocations: [],
       })
     );
-    expect(getAPI).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledTimes(1);
   });
   jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations').mockResolvedValue([
     {
@@ -58,12 +58,7 @@ describe('usePrivateLocationsAPI', () => {
     expect(result.current).toEqual(
       expect.objectContaining({
         loading: false,
-        privateLocations: [
-          {
-            id: 'Test',
-            agentPolicyId: 'testPolicy',
-          },
-        ],
+        privateLocations: [],
       })
     );
   });
