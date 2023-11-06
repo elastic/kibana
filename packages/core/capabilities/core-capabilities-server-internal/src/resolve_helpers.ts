@@ -10,8 +10,6 @@ import { merge } from 'lodash';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
 import type { SwitcherWithId, SwitcherBucket } from './types';
 
-// TODO: memoize should be done in getCapabilitiesResolver
-// (pathA: string, pathB: string) => `${pathA}|${pathB}`
 /**
  * Returns true if the two globing paths can intersect.
  *
@@ -43,9 +41,9 @@ export const pathsIntersect = (pathA: string, pathB: string): boolean => {
 };
 
 /**
- * Split the provided switchers into buckets so that switchers allocated
+ * Splits the provided switchers into buckets so that switchers allocated
  * into a given buckets can all be executed in parallel.
- * (every switcher in a given bucket doesn't intersect with any other switcher of the same bucket)
+ * (each switcher in a given bucket doesn't intersect with any other switcher of the same bucket)
  *
  * @internal
  */
