@@ -42,6 +42,11 @@ export const executeAction = async ({
     },
   });
 
+  if (actionResult.status === 'error') {
+    throw new Error(
+      `Action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+    );
+  }
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
     return {
@@ -53,7 +58,7 @@ export const executeAction = async ({
   const readable = get('data', actionResult) as Readable;
 
   if (typeof readable?.read !== 'function') {
-    throw new Error('Unexpected action result');
+    throw new Error('Action result status is error: result is not streamable');
   }
 
   return readable.pipe(new PassThrough());

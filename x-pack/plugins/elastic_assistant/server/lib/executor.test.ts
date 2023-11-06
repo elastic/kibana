@@ -4,11 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
 import { executeAction, Props } from './executor';
 import { PassThrough } from 'stream';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { RequestBody } from './langchain/types';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+const request = {
+  body: {
+    params: {},
+  },
+} as KibanaRequest<unknown, unknown, RequestBody>;
 
 describe('executeAction', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should execute an action and return a StaticResponse when the response from the actions framework is a string', async () => {
     const actions = {
       getActionsClientWithRequest: jest.fn().mockResolvedValue({
@@ -18,13 +35,6 @@ describe('executeAction', () => {
           },
         }),
       }),
-    };
-    const request = {
-      body: {
-        params: {
-          subActionParams: {},
-        },
-      },
     };
     const connectorId = 'testConnectorId';
 
@@ -46,13 +56,6 @@ describe('executeAction', () => {
         }),
       }),
     };
-    const request = {
-      body: {
-        params: {
-          subActionParams: {},
-        },
-      },
-    };
     const connectorId = 'testConnectorId';
 
     const result = await executeAction({ actions, request, connectorId } as unknown as Props);
@@ -68,13 +71,6 @@ describe('executeAction', () => {
         .fn()
         .mockRejectedValue(new Error('Failed to retrieve actions client')),
     };
-    const request = {
-      body: {
-        params: {
-          subActionParams: {},
-        },
-      },
-    };
     const connectorId = 'testConnectorId';
 
     await expect(
@@ -87,13 +83,6 @@ describe('executeAction', () => {
       getActionsClientWithRequest: jest.fn().mockResolvedValue({
         execute: jest.fn().mockRejectedValue(new Error('Failed to execute action')),
       }),
-    };
-    const request = {
-      body: {
-        params: {
-          subActionParams: {},
-        },
-      },
     };
     const connectorId = 'testConnectorId';
 
@@ -110,47 +99,47 @@ describe('executeAction', () => {
         }),
       }),
     };
-    const request = {
-      body: {
-        params: {
-          subActionParams: {},
-        },
-      },
-    };
     const connectorId = 'testConnectorId';
 
     try {
       await executeAction({ actions, request, connectorId } as unknown as Props);
     } catch (e) {
-      expect(e.message).toBe('Unexpected action result');
+      expect(e.message).toBe('Action result status is error: result is not streamable');
     }
   });
 
-  it('should return a StaticResponse object with connector_id, data, and status fields when the response from the actions framework is a string', async () => {
+  it('should throw an error if action result status is "error"', async () => {
     const actions = {
       getActionsClientWithRequest: jest.fn().mockResolvedValue({
         execute: jest.fn().mockResolvedValue({
+          status: 'error',
+          message: 'Error message',
+          serviceMessage: 'Service error message',
+        }),
+      }),
+    } as unknown as ActionsPluginStart;
+    const connectorId = '12345';
+
+    await expect(executeAction({ actions, request, connectorId })).rejects.toThrowError(
+      'Action result status is error: Error message - Service error message'
+    );
+  });
+
+  it('should throw an error if content of response data is not a string or streamable', async () => {
+    const actions = {
+      getActionsClientWithRequest: jest.fn().mockResolvedValue({
+        execute: jest.fn().mockResolvedValue({
+          status: 'ok',
           data: {
-            message: 'Test message',
+            message: 12345,
           },
         }),
       }),
-    };
-    const request = {
-      body: {
-        params: {
-          subActionParams: {},
-        },
-      },
-    };
-    const connectorId = 'testConnectorId';
+    } as unknown as ActionsPluginStart;
+    const connectorId = '12345';
 
-    const result = await executeAction({ actions, request, connectorId } as unknown as Props);
-
-    expect(result).toEqual({
-      connector_id: connectorId,
-      data: 'Test message',
-      status: 'ok',
-    });
+    await expect(executeAction({ actions, request, connectorId })).rejects.toThrowError(
+      'Action result status is error: result is not streamable'
+    );
   });
 });
