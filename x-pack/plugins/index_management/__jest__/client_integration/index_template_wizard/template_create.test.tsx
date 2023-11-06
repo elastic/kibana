@@ -629,6 +629,7 @@ describe('<TemplateCreate />', () => {
       `${API_BASE_PATH}/index_templates/simulate`,
       expect.objectContaining({
         body: JSON.stringify({
+          template: {},
           index_patterns: DEFAULT_INDEX_PATTERNS,
           data_stream: {},
         }),

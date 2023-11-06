@@ -12,7 +12,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { getComposableTemplate } from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 
-import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS, MAPPINGS } from './constants';
+import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS } from './constants';
 import { setup } from './template_clone.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 
@@ -37,9 +37,7 @@ jest.mock('@elastic/eui', () => {
 const templateToClone = getComposableTemplate({
   name: TEMPLATE_NAME,
   indexPatterns: ['indexPattern1'],
-  template: {
-    mappings: MAPPINGS,
-  },
+  template: {},
 });
 
 describe('<TemplateClone />', () => {
@@ -97,7 +95,8 @@ describe('<TemplateClone />', () => {
         actions.clickNextButton();
       });
 
-      const { priority, version, _kbnMeta } = templateToClone;
+      const { template, priority, version, _kbnMeta } = templateToClone;
+
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/index_templates`,
         expect.objectContaining({
@@ -107,6 +106,7 @@ describe('<TemplateClone />', () => {
             priority,
             version,
             _kbnMeta,
+            template,
           }),
         })
       );

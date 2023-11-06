@@ -149,6 +149,7 @@ describe('<TemplateEdit />', () => {
               hasDatastream: true,
               isLegacy: false,
             },
+            template: {},
           }),
         })
       );
