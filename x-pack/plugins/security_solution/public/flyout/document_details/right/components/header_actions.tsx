@@ -7,7 +7,7 @@
 
 import type { VFC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
 import { CopyToClipboard } from '../../../shared/components/copy_to_clipboard';
@@ -41,16 +41,19 @@ export const HeaderActions: VFC = memo(() => {
               const query = new URLSearchParams(window.location.search);
               return `${value}&${FLYOUT_URL_PARAM}=${query.get(FLYOUT_URL_PARAM)}`;
             }}
-            iconType={'share'}
-            color={'text'}
-            ariaLabel={i18n.translate(
-              'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
-              {
-                defaultMessage: 'Share Alert',
-              }
-            )}
             data-test-subj={SHARE_BUTTON_TEST_ID}
-          />
+          >
+            <EuiButtonIcon
+              iconType={'share'}
+              color={'text'}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
+                {
+                  defaultMessage: 'Share Alert',
+                }
+              )}
+            />
+          </CopyToClipboard>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

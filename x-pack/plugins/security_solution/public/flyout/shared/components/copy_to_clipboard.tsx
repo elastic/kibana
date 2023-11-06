@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { EuiButtonEmptyProps } from '@elastic/eui';
-import { copyToClipboard, EuiButtonEmpty, EuiCopy } from '@elastic/eui';
-import type { FC, ReactElement } from 'react';
+import { copyToClipboard, EuiCopy } from '@elastic/eui';
+import type { FC } from 'react';
 import React from 'react';
 
 export interface CopyToClipboardProps {
@@ -20,66 +19,42 @@ export interface CopyToClipboardProps {
    */
   modifier?: (rawValue: string) => string;
   /**
-   * Button main text (next to icon)
-   */
-  text?: ReactElement;
-  /**
-   * Icon name (value coming from EUI)
-   */
-  iconType: EuiButtonEmptyProps['iconType'];
-  /**
-   * Button size (values coming from EUI)
-   */
-  size?: EuiButtonEmptyProps['size'];
-  /**
-   * Optional button color
-   */
-  color?: EuiButtonEmptyProps['color'];
-  /**
-   * Aria label value for the button
-   */
-  ariaLabel: string;
-  /**
    Data test subject string for testing
    */
   ['data-test-subj']?: string;
 }
 
 /**
- * Copy to clipboard component
+ * Copy to clipboard wrapper component. It allows adding a copy to clipboard functionality to any element.
+ * It expects the value to be copied with an optional function to modify the value if necessary.
  */
 export const CopyToClipboard: FC<CopyToClipboardProps> = ({
   rawValue,
   modifier,
-  text,
-  iconType,
-  size = 'm',
-  color = 'primary',
-  ariaLabel,
   'data-test-subj': dataTestSubj,
+  children,
 }) => {
+  const copyFunction = (copy: Function) => {
+    copy();
+
+    if (modifier) {
+      const modifiedCopyValue = modifier(rawValue);
+      copyToClipboard(modifiedCopyValue);
+    } else {
+      copyToClipboard(rawValue);
+    }
+  };
+
   return (
     <EuiCopy textToCopy={rawValue}>
       {(copy) => (
-        <EuiButtonEmpty
-          onClick={() => {
-            copy();
-
-            if (modifier) {
-              const modifiedCopyValue = modifier(rawValue);
-              copyToClipboard(modifiedCopyValue);
-            } else {
-              copyToClipboard(rawValue);
-            }
-          }}
-          iconType={iconType}
-          size={size}
-          color={color}
-          aria-label={ariaLabel}
+        <div
           data-test-subj={dataTestSubj}
+          onClick={() => copyFunction(copy)}
+          onKeyDown={() => copyFunction(copy)}
         >
-          {text}
-        </EuiButtonEmpty>
+          {children}
+        </div>
       )}
     </EuiCopy>
   );

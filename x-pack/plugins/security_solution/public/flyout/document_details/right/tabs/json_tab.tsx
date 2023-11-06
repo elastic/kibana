@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CopyToClipboard } from '../../../shared/components/copy_to_clipboard';
@@ -48,8 +48,8 @@ export const JsonTab: FC = memo(() => {
   return (
     <EuiFlexGroup
       ref={flexGroupElement}
-      direction={'column'}
-      gutterSize={'none'}
+      direction="column"
+      gutterSize="none"
       data-test-subj={JSON_TAB_CONTENT_TEST_ID}
     >
       <EuiFlexItem>
@@ -57,22 +57,24 @@ export const JsonTab: FC = memo(() => {
           <EuiFlexItem grow={false}>
             <CopyToClipboard
               rawValue={jsonValue}
-              text={
+              data-test-subj={JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID}
+            >
+              <EuiButtonEmpty
+                iconType={'copyClipboard'}
+                size={'xs'}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonAriaLabel',
+                  {
+                    defaultMessage: 'Copy to clipboard',
+                  }
+                )}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonLabel"
                   defaultMessage="Copy to clipboard"
                 />
-              }
-              iconType={'copyClipboard'}
-              size={'xs'}
-              ariaLabel={i18n.translate(
-                'xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonAriaLabel',
-                {
-                  defaultMessage: 'Copy to clipboard',
-                }
-              )}
-              data-test-subj={JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID}
-            />
+              </EuiButtonEmpty>
+            </CopyToClipboard>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

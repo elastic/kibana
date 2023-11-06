@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import type { CopyToClipboardProps } from './copy_to_clipboard';
 import { CopyToClipboard } from './copy_to_clipboard';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -20,7 +21,11 @@ jest.mock('@elastic/eui', () => ({
 const renderShareButton = (props: CopyToClipboardProps) =>
   render(
     <IntlProvider locale="en">
-      <CopyToClipboard {...props} />
+      <CopyToClipboard {...props}>
+        <EuiButtonEmpty iconType={'copyClipboard'} aria-label={'Copy'} data-test-subj={'children'}>
+          {'Copy'}
+        </EuiButtonEmpty>
+      </CopyToClipboard>
     </IntlProvider>
   );
 
@@ -29,25 +34,18 @@ describe('ShareButton', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the copy to clipboard button', () => {
-    const text = 'text';
-
+  it('should render the children element', () => {
     const props = {
       rawValue: 'rawValue',
-      text: <span>{text}</span>,
-      iconType: 'iconType',
-      ariaLabel: 'ariaLabel',
       'data-test-subj': 'data-test-subj',
     };
-    const { getByTestId, getByText } = renderShareButton(props);
+    const { getByTestId } = renderShareButton(props);
 
     const button = getByTestId('data-test-subj');
+    const children = getByTestId('children');
 
     expect(button).toBeInTheDocument();
-    expect(button).toHaveAttribute('aria-label', props.ariaLabel);
-    expect(button).toHaveAttribute('type', 'button');
-
-    expect(getByText(text)).toBeInTheDocument();
+    expect(children).toBeInTheDocument();
   });
 
   it('should use modifier if provided', () => {
@@ -56,9 +54,6 @@ describe('ShareButton', () => {
     const props = {
       rawValue: 'rawValue',
       modifier: modifiedFc,
-      text: <span>{'text'}</span>,
-      iconType: 'iconType',
-      ariaLabel: 'ariaLabel',
       'data-test-subj': 'data-test-subj',
     };
     const { getByTestId } = renderShareButton(props);

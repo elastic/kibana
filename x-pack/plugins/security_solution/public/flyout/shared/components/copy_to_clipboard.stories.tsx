@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { CopyToClipboard } from './copy_to_clipboard';
 
 export default {
@@ -21,12 +21,11 @@ const json = JSON.stringify({
 
 export const Default: Story<void> = () => {
   return (
-    <CopyToClipboard
-      rawValue={json}
-      text={<p>{'Copy'}</p>}
-      iconType={'copyClipboard'}
-      ariaLabel={'Copy'}
-    />
+    <CopyToClipboard rawValue={json}>
+      <EuiButtonEmpty iconType={'copyClipboard'} aria-label={'Copy'}>
+        {'Copy'}
+      </EuiButtonEmpty>
+    </CopyToClipboard>
   );
 };
 
@@ -38,88 +37,10 @@ export const WithModifier: Story<void> = () => {
         window.alert('modifier');
         return value;
       }}
-      text={<p>{'Copy'}</p>}
-      iconType={'copyClipboard'}
-      ariaLabel={'Copy'}
-    />
-  );
-};
-
-export const MultipleSizes: Story<void> = () => {
-  return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <CopyToClipboard
-          rawValue={json}
-          text={<p>{'xs size'}</p>}
-          iconType={'copyClipboard'}
-          size={'xs'}
-          ariaLabel={'Copy'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <CopyToClipboard
-          rawValue={json}
-          text={<p>{'s size'}</p>}
-          iconType={'copyClipboard'}
-          size={'s'}
-          ariaLabel={'Copy'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <CopyToClipboard
-          rawValue={json}
-          text={<p>{'m size'}</p>}
-          iconType={'copyClipboard'}
-          size={'m'}
-          ariaLabel={'Copy'}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-export const ButtonOnly: Story<void> = () => {
-  return (
-    <CopyToClipboard
-      rawValue={json}
-      modifier={(value) => {
-        window.alert('modifier');
-        return value;
-      }}
-      iconType={'copyClipboard'}
-      ariaLabel={'Copy'}
-    />
-  );
-};
-
-export const CustomColor: Story<void> = () => {
-  return (
-    <CopyToClipboard
-      rawValue={json}
-      modifier={(value) => {
-        window.alert('modifier');
-        return value;
-      }}
-      iconType={'copyClipboard'}
-      ariaLabel={'Copy'}
-      text={<p>{'showing custom color'}</p>}
-      color={'accent'}
-    />
-  );
-};
-
-export const CustomIcon: Story<void> = () => {
-  return (
-    <CopyToClipboard
-      rawValue={json}
-      modifier={(value) => {
-        window.alert('modifier');
-        return value;
-      }}
-      iconType={'share'}
-      ariaLabel={'Share'}
-      text={<p>{'custom icon'}</p>}
-    />
+    >
+      <EuiButtonEmpty iconType={'copyClipboard'} aria-label={'Copy'}>
+        {'Copy with modifier'}
+      </EuiButtonEmpty>
+    </CopyToClipboard>
   );
 };
