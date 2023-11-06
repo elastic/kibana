@@ -340,7 +340,7 @@ describe('take action dropdown', () => {
         wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
         await waitFor(() => {
           expect(
-            wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+            wrapper.find('[data-test-subj="add-event-filter-menu-item"]').last().getDOMNode()
           ).toBeEnabled();
         });
       });
