@@ -789,8 +789,11 @@ export const ModelsList: FC<Props> = ({
       ) : null}
       {isAddModelFlyoutVisible ? (
         <AddModelFlyout
+          modelDownloads={items.filter((i) => i.state === MODEL_STATE.NOT_DOWNLOADED)}
           onClose={setIsAddModelFlyoutVisible.bind(null, false)}
-          onSumbit={(modelIds) => {}}
+          onSumbit={(modelIds) => {
+            setIsAddModelFlyoutVisible(false);
+          }}
         />
       ) : null}
     </>
