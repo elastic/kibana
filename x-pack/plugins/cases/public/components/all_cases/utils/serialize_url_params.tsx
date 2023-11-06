@@ -6,10 +6,14 @@
  */
 
 export function serializeUrlParams(urlParams: {
-  [key in string]: string[] | string;
+  [key in string]: string[] | string | undefined;
 }) {
   const urlSearchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(urlParams)) {
+    if (!value) {
+      break;
+    }
+
     if (Array.isArray(value)) {
       urlSearchParams.append(key, value.join(','));
     } else {

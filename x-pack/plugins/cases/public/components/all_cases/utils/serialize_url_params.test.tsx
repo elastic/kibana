@@ -8,7 +8,7 @@
 import { serializeUrlParams } from './serialize_url_params';
 
 describe('serializeUrlParams', () => {
-  const repeatedProps = {
+  const commonProps = {
     page: '1',
     perPage: '5',
     sortField: 'createdAt',
@@ -17,7 +17,7 @@ describe('serializeUrlParams', () => {
 
   it('empty severity and status', () => {
     const urlParams = {
-      ...repeatedProps,
+      ...commonProps,
       status: [],
       severity: [],
     };
@@ -29,7 +29,7 @@ describe('serializeUrlParams', () => {
 
   it('severity and status with one value', () => {
     const urlParams = {
-      ...repeatedProps,
+      ...commonProps,
       status: ['open'],
       severity: ['low'],
     };
@@ -41,13 +41,25 @@ describe('serializeUrlParams', () => {
 
   it('severity and status with multiple values', () => {
     const urlParams = {
-      ...repeatedProps,
+      ...commonProps,
       status: ['open', 'closed'],
       severity: ['low', 'high'],
     };
 
     expect(serializeUrlParams(urlParams).toString()).toEqual(
       'page=1&perPage=5&sortField=createdAt&sortOrder=desc&status=open%2Cclosed&severity=low%2Chigh'
+    );
+  });
+
+  it('severity and status are undefined', () => {
+    const urlParams = {
+      ...commonProps,
+      status: undefined,
+      severity: undefined,
+    };
+
+    expect(serializeUrlParams(urlParams).toString()).toEqual(
+      'page=1&perPage=5&sortField=createdAt&sortOrder=desc'
     );
   });
 });

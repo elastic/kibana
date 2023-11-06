@@ -28,7 +28,9 @@ export const removeLegacyValuesFromOptions = ({
   };
 };
 
-export const getStoreableFilters = (filterOptions: Partial<FilterOptions>) => {
+export const getStoreableFilters = (
+  filterOptions: Partial<FilterOptions>
+): { status: CaseStatuses[] | undefined; severity: CaseSeverity[] | undefined } => {
   const { status, severity } = filterOptions;
 
   return { status, severity };
