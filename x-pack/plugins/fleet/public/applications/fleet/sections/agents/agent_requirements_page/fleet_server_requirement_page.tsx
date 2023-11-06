@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useStartServices, sendGetPermissionsCheck } from '../../../hooks';
+import { useStartServices, useCheckPermissions } from '../../../hooks';
 
 import { FleetServerMissingPrivileges } from '../components/fleet_server_callouts';
 
@@ -42,28 +42,7 @@ export const FleetServerRequirementPage: React.FunctionComponent<
   const startService = useStartServices();
   const deploymentUrl = startService.cloud?.deploymentUrl;
 
-  const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
-  const [permissionsError, setPermissionsError] = useState<string>();
-
-  useEffect(() => {
-    async function checkPermissions() {
-      setIsPermissionsLoading(false);
-      setPermissionsError(undefined);
-
-      try {
-        setIsPermissionsLoading(true);
-        const permissionsResponse = await sendGetPermissionsCheck(true);
-
-        setIsPermissionsLoading(false);
-        if (!permissionsResponse.data?.success) {
-          setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
-        }
-      } catch (err) {
-        setPermissionsError('REQUEST_ERROR');
-      }
-    }
-    checkPermissions();
-  }, []);
+  const { permissionsError, isPermissionsLoading } = useCheckPermissions();
 
   return (
     <>

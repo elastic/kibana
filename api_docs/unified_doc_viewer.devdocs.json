@@ -13,6 +13,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "JsonCodeEditorProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/unified_doc_viewer/public/index.tsx",
@@ -47,6 +55,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/unified_doc_viewer/public/index.tsx",
