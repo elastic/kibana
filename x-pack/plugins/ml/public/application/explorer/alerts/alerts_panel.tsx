@@ -5,32 +5,23 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useState } from 'react';
-import { groupBy } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButtonGroup,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import useObservable from 'react-use/lib/useObservable';
-import { ALERT_DURATION, ALERT_END, ALERT_RULE_NAME, AlertConsumers } from '@kbn/rule-data-utils';
+import { EuiButtonGroup, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getAlertFormatters } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
-import { AnomalyDetectionAlertsOverviewChart } from './chart';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import React, { useState, type FC } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
 import { CollapsiblePanel } from '../../components/collapsible_panel';
 import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
+import { AlertsSummary } from './alerts_summary';
+import { AnomalyDetectionAlertsOverviewChart } from './chart';
 import { statusNameMap } from './const';
 
 export const AlertsPanel: FC = () => {
   const {
-    services: { triggersActionsUi, fieldFormats },
+    services: { triggersActionsUi },
   } = useMlKibana();
 
   const [isOpen, setIsOpen] = useState(true);
@@ -40,11 +31,6 @@ export const AlertsPanel: FC = () => {
 
   const countByStatus = useObservable(anomalyDetectionAlertsStateService.countByStatus$);
   const alertsQuery = useObservable(anomalyDetectionAlertsStateService.alertsQuery$, {});
-  const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$, []);
-
-  const alertsByRule = useMemo(() => {
-    return groupBy(alertsData, ALERT_RULE_NAME);
-  }, [alertsData]);
 
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi!.alertsTableConfigurationRegistry,
@@ -56,8 +42,6 @@ export const AlertsPanel: FC = () => {
     showAlertStatusWithFlapping: true,
   };
   const alertsStateTable = triggersActionsUi!.getAlertsStateTable(alertStateProps);
-
-  const formatter = getAlertFormatters(fieldFormats);
 
   const toggleButtons = [
     {
@@ -104,60 +88,7 @@ export const AlertsPanel: FC = () => {
         />
         <EuiSpacer size="m" />
 
-        {toggleSelected === 'alertsTable' ? (
-          alertsStateTable
-        ) : (
-          <>
-            <EuiFlexGroup>
-              {Object.entries(alertsByRule ?? []).map(([ruleName, alerts]) => {
-                return (
-                  <EuiFlexItem key={ruleName} grow={false}>
-                    <EuiTitle size={'xs'}>
-                      <h5>{ruleName}</h5>
-                    </EuiTitle>
-
-                    <EuiDescriptionList
-                      compressed
-                      type="column"
-                      listItems={[
-                        {
-                          title: i18n.translate(
-                            'xpack.ml.explorer.alertsPanel.summary.totalAlerts',
-                            {
-                              defaultMessage: 'Total alerts',
-                            }
-                          ),
-                          description: alerts.length,
-                        },
-                        {
-                          title: i18n.translate(
-                            'xpack.ml.explorer.alertsPanel.summary.recoveredAt',
-                            {
-                              defaultMessage: 'Recovered at',
-                            }
-                          ),
-                          description: formatter(ALERT_END, alerts[alerts.length - 1][ALERT_END]),
-                        },
-                        {
-                          title: i18n.translate(
-                            'xpack.ml.explorer.alertsPanel.summary.lastDuration',
-                            {
-                              defaultMessage: 'Last duration',
-                            }
-                          ),
-                          description: formatter(
-                            ALERT_DURATION,
-                            alerts[alerts.length - 1][ALERT_DURATION]
-                          ),
-                        },
-                      ]}
-                    />
-                  </EuiFlexItem>
-                );
-              })}
-            </EuiFlexGroup>
-          </>
-        )}
+        {toggleSelected === 'alertsTable' ? alertsStateTable : <AlertsSummary />}
       </CollapsiblePanel>
       <EuiSpacer size="m" />
     </>
