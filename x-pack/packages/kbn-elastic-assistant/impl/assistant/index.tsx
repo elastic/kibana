@@ -52,6 +52,7 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 
 export interface Props {
   conversationId?: string;
+  embeddedLayout?: boolean;
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
@@ -64,6 +65,7 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   conversationId,
+  embeddedLayout = false,
   promptContextId = '',
   shouldRefocusPrompt = false,
   showTitle = true,
@@ -167,16 +169,10 @@ const AssistantComponent: React.FC<Props> = ({
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
     conversation: blockBotConversation,
-    onSetupComplete: () => {
-      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
-    },
   });
 
   const currentTitle: string | JSX.Element =
     isWelcomeSetup && blockBotConversation.theme?.title ? blockBotConversation.theme?.title : title;
-
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-  const lastCommentRef = useRef<HTMLDivElement | null>(null);
 
   const [promptTextPreview, setPromptTextPreview] = useState<string>('');
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
@@ -217,17 +213,22 @@ const AssistantComponent: React.FC<Props> = ({
   }, []);
   // End drill in `Add To Timeline` action
 
-  // Scroll to bottom on conversation change
+  // Start Scrolling
+  const commentsContainerRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'auto' });
-  }, []);
-  useEffect(() => {
-    setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
-    }, 0);
-  }, [currentConversation.messages.length, selectedPromptContextsCount]);
-  ////
-  //
+    const parent = commentsContainerRef.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+    // when scrollHeight changes, parent is scrolled to bottom
+    parent.scrollTop = parent.scrollHeight;
+  });
+
+  const getWrapper = (children: React.ReactNode, isCommentContainer: boolean) =>
+    isCommentContainer ? <span ref={commentsContainerRef}>{children}</span> : <>{children}</>;
+
+  //  End Scrolling
 
   const selectedSystemPrompt = useMemo(
     () => getDefaultSystemPrompt({ allSystemPrompts, conversation: currentConversation }),
@@ -368,7 +369,6 @@ const AssistantComponent: React.FC<Props> = ({
         <EuiCommentList
           comments={getComments({
             currentConversation,
-            lastCommentRef,
             showAnonymizedValues,
             amendMessage,
             regenerateMessage: handleRegenerateResponse,
@@ -397,8 +397,6 @@ const AssistantComponent: React.FC<Props> = ({
             setSelectedPromptContexts={setSelectedPromptContexts}
           />
         )}
-
-        <div ref={bottomRef} />
       </>
     ),
     [
@@ -421,15 +419,12 @@ const AssistantComponent: React.FC<Props> = ({
   const comments = useMemo(() => {
     if (isDisabled) {
       return (
-        <>
-          <EuiCommentList
-            comments={connectorComments}
-            css={css`
-              margin-right: 20px;
-            `}
-          />
-          <span ref={bottomRef} />
-        </>
+        <EuiCommentList
+          comments={connectorComments}
+          css={css`
+            margin-right: 20px;
+          `}
+        />
       );
     }
 
@@ -446,7 +441,7 @@ const AssistantComponent: React.FC<Props> = ({
     [assistantTelemetry, selectedConversationId]
   );
 
-  return (
+  return getWrapper(
     <>
       <EuiModalHeader
         css={css`
@@ -489,21 +484,26 @@ const AssistantComponent: React.FC<Props> = ({
         )}
       </EuiModalHeader>
       <EuiModalBody>
-        {comments}
-
-        {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
+        {getWrapper(
           <>
-            <EuiSpacer />
-            <EuiFlexGroup justifyContent="spaceAround">
-              <EuiFlexItem grow={false}>
-                <ConnectorMissingCallout
-                  isConnectorConfigured={connectors?.length > 0}
-                  isSettingsModalVisible={isSettingsModalVisible}
-                  setIsSettingsModalVisible={setIsSettingsModalVisible}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
+            {comments}
+
+            {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
+              <>
+                <EuiSpacer />
+                <EuiFlexGroup justifyContent="spaceAround">
+                  <EuiFlexItem grow={false}>
+                    <ConnectorMissingCallout
+                      isConnectorConfigured={connectors?.length > 0}
+                      isSettingsModalVisible={isSettingsModalVisible}
+                      setIsSettingsModalVisible={setIsSettingsModalVisible}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
+          </>,
+          !embeddedLayout
         )}
       </EuiModalBody>
       <EuiModalFooter
@@ -537,7 +537,8 @@ const AssistantComponent: React.FC<Props> = ({
           />
         )}
       </EuiModalFooter>
-    </>
+    </>,
+    embeddedLayout
   );
 };
 

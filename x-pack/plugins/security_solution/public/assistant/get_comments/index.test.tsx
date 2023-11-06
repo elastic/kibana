@@ -21,14 +21,12 @@ const currentConversation = {
     },
   ],
 };
-const lastCommentRef = { current: null };
 const showAnonymizedValues = false;
 const testProps = {
   amendMessage: jest.fn(),
   regenerateMessage: jest.fn(),
   isFetchingResponse: false,
   currentConversation,
-  lastCommentRef,
   showAnonymizedValues,
 };
 describe('getComments', () => {

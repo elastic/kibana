@@ -67,7 +67,6 @@ export interface AssistantProviderProps {
     amendMessage,
     currentConversation,
     isFetchingResponse,
-    lastCommentRef,
     regenerateMessage,
     showAnonymizedValues,
   }: {
@@ -80,7 +79,6 @@ export interface AssistantProviderProps {
     }) => void;
     currentConversation: Conversation;
     isFetchingResponse: boolean;
-    lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
     regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
@@ -114,14 +112,12 @@ export interface UseAssistantContext {
   conversations: Record<string, Conversation>;
   getComments: ({
     currentConversation,
-    lastCommentRef,
     showAnonymizedValues,
     amendMessage,
     isFetchingResponse,
   }: {
     currentConversation: Conversation;
     isFetchingResponse: boolean;
-    lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
     amendMessage: ({
       conversationId,
       content,

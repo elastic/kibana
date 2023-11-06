@@ -46,14 +46,12 @@ export const getComments = ({
   amendMessage,
   currentConversation,
   isFetchingResponse,
-  lastCommentRef,
   regenerateMessage,
   showAnonymizedValues,
 }: {
   amendMessage: ({ conversationId, content }: { conversationId: string; content: string }) => void;
   currentConversation: Conversation;
   isFetchingResponse: boolean;
-  lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
 }): EuiCommentProps[] => {
@@ -75,19 +73,16 @@ export const getComments = ({
           timelineAvatar: <EuiLoadingSpinner size="xl" />,
           timestamp: '...',
           children: (
-            <>
-              <StreamComment
-                amendMessage={amendMessageOfConversation}
-                content=""
-                regenerateMessage={regenerateMessageOfConversation}
-                isLastComment
-                transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
-                isFetching
-                // we never need to append to a code block in the loading comment, which is what this index is used for
-                index={999}
-              />
-              <span ref={lastCommentRef} />
-            </>
+            <StreamComment
+              amendMessage={amendMessageOfConversation}
+              content=""
+              regenerateMessage={regenerateMessageOfConversation}
+              isLastComment
+              transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+              isFetching
+              // we never need to append to a code block in the loading comment, which is what this index is used for
+              index={999}
+            />
           ),
         },
       ]
@@ -125,17 +120,14 @@ export const getComments = ({
         return {
           ...messageProps,
           children: (
-            <>
-              <StreamComment
-                amendMessage={amendMessageOfConversation}
-                index={index}
-                isLastComment={isLastComment}
-                reader={message.reader}
-                regenerateMessage={regenerateMessageOfConversation}
-                transformMessage={transformMessage}
-              />
-              {isLastComment ? <span ref={lastCommentRef} /> : null}
-            </>
+            <StreamComment
+              amendMessage={amendMessageOfConversation}
+              index={index}
+              isLastComment={isLastComment}
+              reader={message.reader}
+              regenerateMessage={regenerateMessageOfConversation}
+              transformMessage={transformMessage}
+            />
           ),
         };
       }
@@ -147,19 +139,16 @@ export const getComments = ({
         ...messageProps,
         actions: <CommentActions message={transformedMessage} />,
         children: (
-          <>
-            <StreamComment
-              amendMessage={amendMessageOfConversation}
-              content={transformedMessage.content}
-              index={index}
-              isLastComment={isLastComment}
-              // reader is used to determine if streaming controls are shown
-              reader={transformedMessage.reader}
-              regenerateMessage={regenerateMessageOfConversation}
-              transformMessage={transformMessage}
-            />
-            {isLastComment ? <span ref={lastCommentRef} /> : null}
-          </>
+          <StreamComment
+            amendMessage={amendMessageOfConversation}
+            content={transformedMessage.content}
+            index={index}
+            isLastComment={isLastComment}
+            // reader is used to determine if streaming controls are shown
+            reader={transformedMessage.reader}
+            regenerateMessage={regenerateMessageOfConversation}
+            transformMessage={transformMessage}
+          />
         ),
       };
     }),
