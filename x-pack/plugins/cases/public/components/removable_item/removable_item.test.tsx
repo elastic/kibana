@@ -80,14 +80,14 @@ describe('UserRepresentation', () => {
     expect(screen.queryByTestId('remove-button')).not.toBeInTheDocument();
   });
 
-  it('call onRemoveItem correctly', () => {
+  it('call onRemoveItem correctly', async () => {
     appMockRender.render(
       <RemovableItem {...defaultProps}>
         <MockComponent />
       </RemovableItem>
     );
 
-    userEvent.click(screen.getByTestId('remove-button'));
+    await userEvent.click(screen.getByTestId('remove-button'));
 
     expect(onRemoveItem).toBeCalled();
   });

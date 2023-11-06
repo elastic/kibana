@@ -352,7 +352,7 @@ describe('JiraParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].incident.description).toEqual('new desc');
     });
 
-    it('updates issue type', () => {
+    it('updates issue type', async () => {
       const results = render(<JiraParamsFields {...defaultProps} />);
 
       expect(results.getByTestId('issueTypeSelect')).toBeInTheDocument();
@@ -360,12 +360,10 @@ describe('JiraParamsFields renders', () => {
         true
       );
 
-      act(() => {
-        userEvent.selectOptions(
-          results.getByTestId('issueTypeSelect'),
-          results.getByRole('option', { name: 'Task' })
-        );
-      });
+      await userEvent.selectOptions(
+        results.getByTestId('issueTypeSelect'),
+        results.getByRole('option', { name: 'Task' })
+      );
 
       expect(editAction.mock.calls[0][1].incident.issueType).toEqual('10005');
     });
@@ -381,12 +379,10 @@ describe('JiraParamsFields renders', () => {
         );
       });
 
-      act(() => {
-        userEvent.selectOptions(
-          results.getByTestId('prioritySelect'),
-          results.getByRole('option', { name: 'Medium' })
-        );
-      });
+      await userEvent.selectOptions(
+        results.getByTestId('prioritySelect'),
+        results.getByRole('option', { name: 'Medium' })
+      );
 
       expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
     });
@@ -409,7 +405,7 @@ describe('JiraParamsFields renders', () => {
       const parentField = within(results.getByTestId('search-parent-issues'));
 
       await act(async () => {
-        await userEvent.type(parentField.getByTestId('comboBoxSearchInput'), 'p{enter}', {
+        await await userEvent.type(parentField.getByTestId('comboBoxSearchInput'), 'p{enter}', {
           delay: 1,
         });
       });
@@ -428,7 +424,7 @@ describe('JiraParamsFields renders', () => {
       const labels = within(results.getByTestId('labelsComboBox'));
 
       await act(async () => {
-        await userEvent.type(labels.getByTestId('comboBoxSearchInput'), 'l{enter}', {
+        await await userEvent.type(labels.getByTestId('comboBoxSearchInput'), 'l{enter}', {
           delay: 1,
         });
       });

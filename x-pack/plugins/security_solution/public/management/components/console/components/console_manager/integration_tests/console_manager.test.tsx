@@ -263,15 +263,15 @@ describe('When using ConsoleManager', () => {
 
     it('should hide the console page overlay', async () => {
       await render();
-      userEvent.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
+      await userEvent.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
 
       expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
     });
 
     it("should persist a console's command output history on hide/show", async () => {
       await render();
-      enterConsoleCommand(renderResult, 'help', { dataTestSubj: 'testRunningConsole' });
-      enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
+      await enterConsoleCommand(renderResult, 'help', { dataTestSubj: 'testRunningConsole' });
+      await enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('testRunningConsole-historyItem')).toHaveLength(2);
@@ -290,7 +290,7 @@ describe('When using ConsoleManager', () => {
     it('should provide console rendering state between show/hide', async () => {
       const expectedStoreValue = JSON.stringify({ foo: 'bar' }, null, 2);
       await render();
-      enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
+      await enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
 
       // Command should have `pending` status and no store values
       expect(renderResult.getByTestId('exec-output-statusState').textContent).toEqual(

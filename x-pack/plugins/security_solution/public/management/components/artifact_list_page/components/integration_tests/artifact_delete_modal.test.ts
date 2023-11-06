@@ -27,11 +27,11 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
     act(() => {
       switch (action) {
         case 'delete':
-          userEvent.click(renderResult.getByTestId('testPage-card-cardDeleteAction'));
+          await userEvent.click(renderResult.getByTestId('testPage-card-cardDeleteAction'));
           break;
 
         case 'edit':
-          userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'));
+          await userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'));
           break;
       }
     });
@@ -83,7 +83,7 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
   });
 
   it('should close modal if Cancel/Close buttons are clicked', async () => {
-    userEvent.click(cancelButton);
+    await userEvent.click(cancelButton);
 
     expect(renderResult.queryByTestId('testPage-deleteModal')).toBeNull();
   });
@@ -93,7 +93,7 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
     mockedApi.responseProvider.trustedAppDelete.mockDelay.mockReturnValue(deferred.promise);
 
     act(() => {
-      userEvent.click(submitButton);
+      await userEvent.click(submitButton);
     });
 
     await waitFor(() => {
@@ -108,7 +108,7 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
 
   it('should show success toast if deleted successfully', async () => {
     act(() => {
-      userEvent.click(submitButton);
+      await userEvent.click(submitButton);
     });
 
     await act(async () => {
@@ -130,7 +130,7 @@ describe('When displaying the Delete artifact modal in the Artifact List Page', 
     });
 
     act(() => {
-      userEvent.click(submitButton);
+      await userEvent.click(submitButton);
     });
 
     await act(async () => {

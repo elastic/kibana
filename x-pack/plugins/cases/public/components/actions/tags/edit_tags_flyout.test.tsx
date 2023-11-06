@@ -49,7 +49,7 @@ describe('EditTagsFlyout', () => {
   it('calls onClose when pressing the cancel button', async () => {
     const result = appMock.render(<EditTagsFlyout {...props} />);
 
-    userEvent.click(result.getByTestId('cases-edit-tags-flyout-cancel'));
+    await userEvent.click(result.getByTestId('cases-edit-tags-flyout-cancel'));
     expect(props.onClose).toHaveBeenCalled();
 
     await waitForComponentToUpdate();
@@ -64,8 +64,8 @@ describe('EditTagsFlyout', () => {
       expect(result.getByText('coke')).toBeInTheDocument();
     });
 
-    userEvent.click(result.getByText('coke'));
-    userEvent.click(result.getByTestId('cases-edit-tags-flyout-submit'));
+    await userEvent.click(result.getByText('coke'));
+    await userEvent.click(result.getByTestId('cases-edit-tags-flyout-submit'));
 
     expect(props.onSaveTags).toHaveBeenCalledWith({
       selectedItems: ['pepsi'],

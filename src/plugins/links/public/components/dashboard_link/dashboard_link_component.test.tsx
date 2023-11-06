@@ -103,7 +103,7 @@ describe('Dashboard link component', () => {
 
     const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toHaveTextContent('another dashboard');
-    await userEvent.click(link);
+    await await userEvent.click(link);
     expect(coreServices.application.navigateToApp).toBeCalledTimes(1);
     expect(coreServices.application.navigateToApp).toBeCalledWith('dashboard', {
       path: '/dashboardItem/456',
@@ -154,7 +154,7 @@ describe('Dashboard link component', () => {
     await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toBeInTheDocument();
-    await userEvent.click(link);
+    await await userEvent.click(link);
     expect(coreServices.application.navigateToApp).toBeCalledTimes(0);
     expect(window.open).toHaveBeenCalledWith('https://my-kibana.com/dashboard/123', '_blank');
   });
@@ -229,7 +229,7 @@ describe('Dashboard link component', () => {
     await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--bar');
     expect(link).toHaveTextContent('current dashboard');
-    await userEvent.click(link);
+    await await userEvent.click(link);
     expect(coreServices.application.navigateToApp).toBeCalledTimes(0);
     expect(window.open).toBeCalledTimes(0);
   });
@@ -249,7 +249,7 @@ describe('Dashboard link component', () => {
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');
-    await userEvent.hover(link);
+    await await userEvent.hover(link);
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
     expect(tooltip).toHaveTextContent('another dashboard'); // title
     expect(tooltip).toHaveTextContent('something awesome'); // description
@@ -276,7 +276,7 @@ describe('Dashboard link component', () => {
     await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
     const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toHaveTextContent(label);
-    await userEvent.hover(link);
+    await await userEvent.hover(link);
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
     expect(tooltip).toHaveTextContent(label);
   });

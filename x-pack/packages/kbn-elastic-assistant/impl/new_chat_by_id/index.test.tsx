@@ -63,14 +63,14 @@ describe('NewChatById', () => {
     expect(newChatButton.querySelector('.euiButtonContent__icon')).not.toBeInTheDocument();
   });
 
-  it('calls showAssistantOverlay on click', () => {
+  it('calls showAssistantOverlay on click', async () => {
     const conversationId = 'test-conversation-id';
     const promptContextId = 'test-prompt-context-id';
 
     render(<NewChatById conversationId={conversationId} promptContextId={promptContextId} />);
     const newChatButton = screen.getByTestId('newChatById');
 
-    userEvent.click(newChatButton);
+    await userEvent.click(newChatButton);
 
     expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
       conversationId,

@@ -70,12 +70,12 @@ describe('NewChat', () => {
     expect(newChatButton.querySelector('.euiButtonContent__icon')).not.toBeInTheDocument();
   });
 
-  it('calls showAssistantOverlay on click', () => {
+  it('calls showAssistantOverlay on click', async () => {
     render(<NewChat {...defaultProps} />);
 
     const newChatButton = screen.getByTestId('newChat');
 
-    userEvent.click(newChatButton);
+    await userEvent.click(newChatButton);
 
     expect(mockUseAssistantOverlay.showAssistantOverlay).toHaveBeenCalledWith(true);
   });

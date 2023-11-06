@@ -66,9 +66,9 @@ describe('Severity form field', () => {
       </MockHookWrapperComponent>
     );
     expect(result.getByTestId('caseSeverity')).toBeTruthy();
-    userEvent.click(result.getByTestId('case-severity-selection'));
+    await userEvent.click(result.getByTestId('case-severity-selection'));
     await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-severity-selection-high'));
+    await userEvent.click(result.getByTestId('case-severity-selection-high'));
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ severity: 'high' });
     });

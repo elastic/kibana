@@ -43,7 +43,7 @@ describe('Category', () => {
     );
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -59,7 +59,7 @@ describe('Category', () => {
     );
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -75,7 +75,7 @@ describe('Category', () => {
     );
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -92,7 +92,7 @@ describe('Category', () => {
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -113,7 +113,7 @@ describe('Category', () => {
 
     expect(screen.getByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -134,8 +134,8 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), `${categories[1]}{enter}`);
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.type(screen.getByRole('combobox'), `${categories[1]}{enter}`);
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -150,8 +150,8 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), 'my new category{enter}');
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.type(screen.getByRole('combobox'), 'my new category{enter}');
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -166,8 +166,8 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), ' {enter}');
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.type(screen.getByRole('combobox'), ' {enter}');
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -183,16 +183,16 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), ' {enter}');
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.type(screen.getByRole('combobox'), ' {enter}');
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith({}, false);
     });
 
-    userEvent.click(screen.getByTestId('comboBoxClearButton'));
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByTestId('comboBoxClearButton'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

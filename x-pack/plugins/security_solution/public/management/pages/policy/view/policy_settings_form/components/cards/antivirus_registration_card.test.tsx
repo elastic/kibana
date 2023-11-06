@@ -69,7 +69,7 @@ describe('Policy Form Antivirus Registration Card', () => {
       'false'
     );
 
-    userEvent.click(renderResult.getByTestId(antivirusTestSubj.enableDisableSwitch));
+    await userEvent.click(renderResult.getByTestId(antivirusTestSubj.enableDisableSwitch));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -90,7 +90,7 @@ describe('Policy Form Antivirus Registration Card', () => {
       'true'
     );
 
-    userEvent.click(renderResult.getByTestId(antivirusTestSubj.enableDisableSwitch));
+    await userEvent.click(renderResult.getByTestId(antivirusTestSubj.enableDisableSwitch));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

@@ -105,7 +105,7 @@ describe('SelectSystemPrompt', () => {
     expect(queryByTestId('addSystemPrompt')).not.toBeInTheDocument();
   });
 
-  it('clears the selected system prompt when the clear button is clicked', () => {
+  it('clears the selected system prompt when the clear button is clicked', async () => {
     const clearSelectedSystemPrompt = jest.fn();
 
     const { getByTestId } = render(
@@ -117,12 +117,12 @@ describe('SelectSystemPrompt', () => {
       />
     );
 
-    userEvent.click(getByTestId('clearSystemPrompt'));
+    await userEvent.click(getByTestId('clearSystemPrompt'));
 
     expect(clearSelectedSystemPrompt).toHaveBeenCalledTimes(1);
   });
 
-  it('hides the select when the clear button is clicked', () => {
+  it('hides the select when the clear button is clicked', async () => {
     const setIsEditing = jest.fn();
 
     const { getByTestId } = render(
@@ -134,19 +134,19 @@ describe('SelectSystemPrompt', () => {
       />
     );
 
-    userEvent.click(getByTestId('clearSystemPrompt'));
+    await userEvent.click(getByTestId('clearSystemPrompt'));
 
     expect(setIsEditing).toHaveBeenCalledWith(false);
   });
 
-  it('shows the select when the add button is clicked', () => {
+  it('shows the select when the add button is clicked', async () => {
     const setIsEditing = jest.fn();
 
     const { getByTestId } = render(
       <SelectSystemPrompt {...props} setIsEditing={setIsEditing} isEditing={false} />
     );
 
-    userEvent.click(getByTestId('addSystemPrompt'));
+    await userEvent.click(getByTestId('addSystemPrompt'));
 
     expect(setIsEditing).toHaveBeenCalledWith(true);
   });

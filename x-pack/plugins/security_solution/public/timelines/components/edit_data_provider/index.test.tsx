@@ -471,7 +471,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('save'));
+    await userEvent.click(screen.getByTestId('save'));
 
     expect(onDataProviderEdited).toBeCalledWith({
       andProviderId: undefined,

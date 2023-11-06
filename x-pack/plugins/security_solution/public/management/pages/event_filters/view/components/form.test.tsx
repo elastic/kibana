@@ -280,7 +280,7 @@ describe('Event filter form', () => {
 
     it('should display the policy list when "per policy" is selected', async () => {
       render();
-      userEvent.click(renderResult.getByTestId('perPolicy'));
+      await userEvent.click(renderResult.getByTestId('perPolicy'));
       rerenderWithLatestProps();
       // policy selector should show up
       expect(
@@ -292,8 +292,8 @@ describe('Event filter form', () => {
       formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
       render();
       const policyId = formProps.policies[0].id;
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
-      userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
+      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
       formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
       rerender();
       const expected = createOnChangeArgs({
@@ -317,8 +317,8 @@ describe('Event filter form', () => {
       const policyId = formProps.policies[0].id;
 
       // move to per-policy and select the first
-      userEvent.click(renderResult.getByTestId('perPolicy'));
-      userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
+      await userEvent.click(renderResult.getByTestId('perPolicy'));
+      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
       formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
       rerender();
       expect(
@@ -327,7 +327,8 @@ describe('Event filter form', () => {
       expect(formProps.item.tags).toEqual([`policy:${policyId}`]);
 
       // move back to global
-      userEvent.click(renderResult.getByTestId('globalPolicy'));
+      await userEvent.click(renderResult.getByTestId('globalPolicy'));
+      formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
       formProps.item.tags = ['policy:all'];
       rerenderWithLatestProps();
       expect(formProps.item.tags).toEqual(['policy:all']);
@@ -336,8 +337,8 @@ describe('Event filter form', () => {
       ).toBeFalsy();
 
       // move back to per-policy
-      userEvent.click(renderResult.getByTestId('perPolicy'));
-      formProps.item.tags = [`policy:${policyId}`];
+      await userEvent.click(renderResult.getByTestId('perPolicy'));
+      formProps.item.tags = [`policy:${formProps.policies[0].id}`];
       rerender();
       // on change called with the previous policy
       expect(formProps.item.tags).toEqual([`policy:${policyId}`]);
@@ -382,10 +383,10 @@ describe('Event filter form', () => {
       expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toBe('true');
     });
 
-    it("allows the user to set the event filter entry to 'Global' in the edit option", () => {
+    it("allows the user to set the event filter entry to 'Global' in the edit option", async () => {
       render();
       const globalButtonInput = renderResult.getByTestId('globalPolicy') as HTMLButtonElement;
-      userEvent.click(globalButtonInput);
+      await userEvent.click(globalButtonInput);
       formProps.item.tags = ['policy:all'];
       rerender();
       const expected = createOnChangeArgs({

@@ -150,7 +150,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     const result = appMockRender.render(<TestComponent />);
-    userEvent.click(result.getByTestId('open-modal'));
+    await userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(getAttachments).toHaveBeenCalledTimes(1);
@@ -174,7 +174,7 @@ describe('use cases add to existing case modal hook', () => {
     const result = appMockRender.render(
       <TestComponent noAttachmentsToaster={{ title: 'My title', content: 'My content' }} />
     );
-    userEvent.click(result.getByTestId('open-modal'));
+    await userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(mockedToastInfo).toHaveBeenCalledWith('My title', 'My content');
@@ -195,7 +195,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     const result = appMockRender.render(<TestComponent />);
-    userEvent.click(result.getByTestId('open-modal'));
+    await userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(mockedToastInfo).toHaveBeenCalledWith('No attachments added to the case', undefined);
@@ -219,7 +219,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     const result = appMockRender.render(<TestComponent />);
-    userEvent.click(result.getByTestId('open-modal'));
+    await userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(mockBulkCreateAttachments).toHaveBeenCalledTimes(1);
@@ -250,7 +250,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     const result = appMockRender.render(<TestComponent />);
-    userEvent.click(result.getByTestId('open-modal'));
+    await userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalled();
@@ -274,7 +274,7 @@ describe('use cases add to existing case modal hook', () => {
 
     const result = appMockRender.render(<TestComponent />);
 
-    userEvent.click(result.getByTestId('open-modal'));
+    await userEvent.click(result.getByTestId('open-modal'));
     // give a small delay for the reducer to run
 
     act(() => {
@@ -301,7 +301,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     const result = appMockRender.render(<TestComponent />);
-    userEvent.click(result.getByTestId('open-modal'));
+    await userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(mockBulkCreateAttachments).toHaveBeenCalledWith({

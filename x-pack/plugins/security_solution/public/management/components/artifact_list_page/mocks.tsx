@@ -68,7 +68,7 @@ export const getFirstCard = async (
 
   if (showActions) {
     await act(async () => {
-      userEvent.click(within(card).getByTestId(`${testId}-card-header-actions-button`));
+      await userEvent.click(within(card).getByTestId(`${testId}-card-header-actions-button`));
 
       await waitFor(() => {
         expect(renderResult.getByTestId(`${testId}-card-header-actions-contextMenuPanel`));

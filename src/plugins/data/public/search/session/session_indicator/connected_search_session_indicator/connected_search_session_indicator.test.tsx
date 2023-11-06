@@ -159,7 +159,7 @@ test('should be disabled in case uiConfig says so ', async () => {
 
   await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-  await userEvent.click(screen.getByLabelText('Search session loading'));
+  await await userEvent.click(screen.getByLabelText('Search session loading'));
 
   expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
 });
@@ -182,7 +182,7 @@ test('should be disabled in case not enough permissions', async () => {
 
   await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-  await userEvent.click(screen.getByLabelText('Search session complete'));
+  await await userEvent.click(screen.getByLabelText('Search session complete'));
 
   expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
   expect(screen.getByRole('button', { name: 'Manage sessions' })).toBeDisabled();
@@ -211,7 +211,7 @@ describe('Completed inactivity', () => {
 
     await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-    await userEvent.click(screen.getByLabelText('Search session loading'));
+    await await userEvent.click(screen.getByLabelText('Search session loading'));
 
     expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
 

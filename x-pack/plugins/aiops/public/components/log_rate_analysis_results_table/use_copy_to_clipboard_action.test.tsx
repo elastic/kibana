@@ -36,7 +36,7 @@ describe('useCopyToClipboardAction', () => {
 
     const button = getByTestId('aiopsTableActionButtonCopyToClipboard enabled');
 
-    userEvent.hover(button);
+    await userEvent.hover(button);
 
     // The tooltip from EUI takes 250ms to appear, so we must
     // use a `find*` query to asynchronously poll for it.
@@ -45,7 +45,7 @@ describe('useCopyToClipboardAction', () => {
     ).toBeInTheDocument();
 
     await act(async () => {
-      await userEvent.click(button);
+      await await userEvent.click(button);
     });
 
     // EUI implements copy-to-clipboard with deprecated `document.execCommand`.
@@ -63,14 +63,14 @@ describe('useCopyToClipboardAction', () => {
 
     const button = getByText('Copy to clipboard');
 
-    userEvent.hover(button);
+    await userEvent.hover(button);
 
     // The tooltip from EUI takes 250ms to appear, so we must
     // use a `find*` query to asynchronously poll for it.
     expect(await findByText('Copy group items as KQL syntax to clipboard')).toBeInTheDocument();
 
     await act(async () => {
-      await userEvent.click(button);
+      await await userEvent.click(button);
     });
 
     // EUI implements copy-to-clipboard with deprecated `document.execCommand`.

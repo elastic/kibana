@@ -98,8 +98,8 @@ describe('EditConnectorFlyout', () => {
     expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
 
     await act(async () => {
-      await userEvent.clear(getByTestId('nameInput'));
-      await userEvent.type(getByTestId('nameInput'), 'My new name', {
+      await await userEvent.clear(getByTestId('nameInput'));
+      await await userEvent.type(getByTestId('nameInput'), 'My new name', {
         delay: 10,
       });
     });
@@ -119,14 +119,14 @@ describe('EditConnectorFlyout', () => {
     expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
 
     await act(async () => {
-      await userEvent.clear(getByTestId('nameInput'));
-      await userEvent.type(getByTestId('nameInput'), 'My new name', {
+      await await userEvent.clear(getByTestId('nameInput'));
+      await await userEvent.type(getByTestId('nameInput'), 'My new name', {
         delay: 10,
       });
     });
 
-    act(() => {
-      userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
+    await act(async () => {
+      await userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
     });
 
     expect(getByText('Discard unsaved changes to connector?')).toBeInTheDocument();
@@ -241,14 +241,14 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
     });
 
-    act(() => {
+    await act(async () => {
       /**
        * Clear the name so the form can be invalid
        */
-      userEvent.clear(getByTestId('nameInput'));
+      await userEvent.clear(getByTestId('nameInput'));
     });
-    act(() => {
-      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
+    await act(async () => {
+      await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
     });
 
     await waitFor(() => {
@@ -368,8 +368,8 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
       expect(getByTestId('testConnectorTab')).toBeInTheDocument();
 
-      act(() => {
-        userEvent.click(getByTestId('testConnectorTab'));
+      await act(async () => {
+        await userEvent.click(getByTestId('testConnectorTab'));
       });
 
       await waitFor(() => {
@@ -409,16 +409,16 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      userEvent.clear(getByTestId('nameInput'));
-      userEvent.type(getByTestId('nameInput'), 'My new name');
-      userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My new name');
+      await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toHaveValue('My new name');
         expect(getByTestId('test-connector-secret-text-field')).toHaveValue('password');
       });
 
-      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
+      await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
 
       await waitFor(() => {
         expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
@@ -456,23 +456,23 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      userEvent.clear(getByTestId('test-connector-text-field'));
-      userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field');
+      await userEvent.clear(getByTestId('test-connector-text-field'));
+      await userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field');
 
       await waitFor(() => {
         expect(getByTestId('test-connector-text-field')).toHaveValue('My updated text field');
       });
 
-      userEvent.clear(getByTestId('nameInput'));
-      userEvent.type(getByTestId('nameInput'), 'My test');
-      userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My test');
+      await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toHaveValue('My test');
         expect(getByTestId('test-connector-secret-text-field')).toHaveValue('password');
       });
 
-      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
+      await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
 
       await waitFor(() => {
         expect(getByTestId('test-connector-text-field')).toHaveValue('My updated text field');
@@ -493,16 +493,16 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      userEvent.clear(getByTestId('nameInput'));
-      userEvent.type(getByTestId('nameInput'), 'My new name');
-      userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My new name');
+      await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toHaveValue('My new name');
         expect(getByTestId('test-connector-secret-text-field')).toHaveValue('password');
       });
 
-      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
+      await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
 
       await waitFor(() => {
         expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
@@ -515,7 +515,7 @@ describe('EditConnectorFlyout', () => {
 
       expect(getByText('Changes Saved')).toBeInTheDocument();
 
-      userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
+      await userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
 
       expect(onClose).toHaveBeenCalled();
       expect(onConnectorUpdated).toHaveBeenCalledWith({
@@ -549,14 +549,14 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-error-text-field')).toBeInTheDocument();
       });
 
-      userEvent.clear(getByTestId('nameInput'));
-      userEvent.type(getByTestId('nameInput'), 'My new name');
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My new name');
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toHaveValue('My new name');
       });
 
-      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
+      await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
 
       await waitFor(() => {
         expect(getByText('Error on pre submit validator')).toBeInTheDocument();
@@ -582,8 +582,8 @@ describe('EditConnectorFlyout', () => {
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
 
-      act(() => {
-        userEvent.click(getByTestId('executeActionButton'));
+      await act(async () => {
+        await userEvent.click(getByTestId('executeActionButton'));
       });
 
       await waitFor(() => {
@@ -613,24 +613,24 @@ describe('EditConnectorFlyout', () => {
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
 
-      act(() => {
-        userEvent.click(getByTestId('executeActionButton'));
+      await act(async () => {
+        await userEvent.click(getByTestId('executeActionButton'));
       });
 
       await waitFor(() => {
         expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(getByTestId('configureConnectorTab'));
+      await act(async () => {
+        await userEvent.click(getByTestId('configureConnectorTab'));
       });
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(getByTestId('testConnectorTab'));
+      await act(async () => {
+        await userEvent.click(getByTestId('testConnectorTab'));
       });
 
       await waitFor(() => {
@@ -659,8 +659,8 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(getByTestId('executeActionButton'));
+      await act(async () => {
+        await userEvent.click(getByTestId('executeActionButton'));
       });
 
       await waitFor(() => {
@@ -683,16 +683,16 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(getByTestId('executeActionButton'));
+      await act(async () => {
+        await userEvent.click(getByTestId('executeActionButton'));
       });
 
       await waitFor(() => {
         expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(getByTestId('configureConnectorTab'));
+      await act(async () => {
+        await userEvent.click(getByTestId('configureConnectorTab'));
       });
 
       await waitFor(() => {
@@ -700,14 +700,14 @@ describe('EditConnectorFlyout', () => {
       });
 
       await act(async () => {
-        await userEvent.clear(getByTestId('nameInput'));
-        await userEvent.type(getByTestId('nameInput'), 'My new name', {
+        await await userEvent.clear(getByTestId('nameInput'));
+        await await userEvent.type(getByTestId('nameInput'), 'My new name', {
           delay: 10,
         });
       });
 
-      act(() => {
-        userEvent.click(getByTestId('testConnectorTab'));
+      await act(async () => {
+        await userEvent.click(getByTestId('testConnectorTab'));
       });
 
       await waitFor(() => {

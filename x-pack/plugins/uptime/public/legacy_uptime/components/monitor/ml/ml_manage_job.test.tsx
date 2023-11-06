@@ -26,7 +26,7 @@ describe('Manage ML Job', () => {
   };
 
   describe('when users have write access to uptime', () => {
-    it('enables the button to create alerts', () => {
+    it('enables the button to create alerts', async () => {
       const { getByText } = render(
         <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
         {
@@ -37,7 +37,7 @@ describe('Manage ML Job', () => {
 
       const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
       expect(anomalyDetectionBtn).toBeInTheDocument();
-      userEvent.click(anomalyDetectionBtn as HTMLElement);
+      await userEvent.click(anomalyDetectionBtn as HTMLElement);
 
       expect(forNearestButton(getByText)(labels.ENABLE_ANOMALY_ALERT)).toBeEnabled();
     });
@@ -53,10 +53,10 @@ describe('Manage ML Job', () => {
 
       const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
       expect(anomalyDetectionBtn).toBeInTheDocument();
-      userEvent.click(anomalyDetectionBtn as HTMLElement);
+      await userEvent.click(anomalyDetectionBtn as HTMLElement);
       await waitForEuiPopoverOpen();
 
-      userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
+      await userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
       expect(
         await queryByText('You need write access to Uptime to create anomaly alerts.')
       ).toBeNull();
@@ -64,7 +64,7 @@ describe('Manage ML Job', () => {
   });
 
   describe("when users don't have write access to uptime", () => {
-    it('disables the button to create alerts', () => {
+    it('disables the button to create alerts', async () => {
       const { getByText } = render(
         <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />,
         {
@@ -75,7 +75,7 @@ describe('Manage ML Job', () => {
 
       const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
       expect(anomalyDetectionBtn).toBeInTheDocument();
-      userEvent.click(anomalyDetectionBtn as HTMLElement);
+      await userEvent.click(anomalyDetectionBtn as HTMLElement);
 
       expect(forNearestButton(getByText)(labels.ENABLE_ANOMALY_ALERT)).toBeDisabled();
     });
@@ -91,10 +91,10 @@ describe('Manage ML Job', () => {
 
       const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
       expect(anomalyDetectionBtn).toBeInTheDocument();
-      userEvent.click(anomalyDetectionBtn as HTMLElement);
+      await userEvent.click(anomalyDetectionBtn as HTMLElement);
       await waitForEuiPopoverOpen();
 
-      userEvent.hover(
+      await userEvent.hover(
         screen.getByTestSubject('uptimeEnableAnomalyAlertBtn').closest('span') as HTMLElement
       );
       expect(

@@ -98,7 +98,7 @@ describe('EditableMarkdown', () => {
       target: { value: newValue },
     });
 
-    userEvent.click(screen.getByTestId('editable-save-markdown'));
+    await userEvent.click(screen.getByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onSaveContent).toHaveBeenCalledWith(newValue);
@@ -113,7 +113,7 @@ describe('EditableMarkdown', () => {
       </MockHookWrapperComponent>
     );
 
-    userEvent.click(screen.getByTestId('editable-save-markdown'));
+    await userEvent.click(screen.getByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
@@ -128,7 +128,7 @@ describe('EditableMarkdown', () => {
       </MockHookWrapperComponent>
     );
 
-    userEvent.click(screen.getByTestId('editable-cancel-markdown'));
+    await userEvent.click(screen.getByTestId('editable-cancel-markdown'));
 
     await waitFor(() => {
       expect(onSaveContent).not.toHaveBeenCalled();
@@ -144,9 +144,9 @@ describe('EditableMarkdown', () => {
         </MockHookWrapperComponent>
       );
 
-      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
+      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
 
       await waitFor(() => {
         expect(screen.getByText('Required field')).toBeInTheDocument();
@@ -161,9 +161,9 @@ describe('EditableMarkdown', () => {
         </MockHookWrapperComponent>
       );
 
-      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
+      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
 
       await waitFor(() => {
         expect(screen.getByText('Required field')).toBeInTheDocument();
@@ -180,9 +180,8 @@ describe('EditableMarkdown', () => {
         </MockHookWrapperComponent>
       );
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
-
-      userEvent.paste(markdown, longComment);
+      screen.getByTestId('euiMarkdownEditorTextArea').focus();
+      await userEvent.keyboard(longComment);
 
       await waitFor(() => {
         expect(

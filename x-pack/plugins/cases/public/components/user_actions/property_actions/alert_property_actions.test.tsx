@@ -36,7 +36,7 @@ describe('AlertPropertyActions', () => {
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(1);
@@ -48,12 +48,12 @@ describe('AlertPropertyActions', () => {
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(result.queryByTestId('property-actions-user-action-minusInCircle')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-minusInCircle'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-minusInCircle'));
 
     await waitFor(() => {
       expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
@@ -68,12 +68,12 @@ describe('AlertPropertyActions', () => {
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(result.queryByTestId('property-actions-user-action-minusInCircle')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-minusInCircle'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-minusInCircle'));
 
     await waitFor(() => {
       expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
@@ -88,18 +88,18 @@ describe('AlertPropertyActions', () => {
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(result.queryByTestId('property-actions-user-action-minusInCircle')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-minusInCircle'));
+    await userEvent.click(result.getByTestId('property-actions-user-action-minusInCircle'));
 
     await waitFor(() => {
       expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
 
-    userEvent.click(result.getByText('Remove'));
+    await userEvent.click(result.getByText('Remove'));
     expect(props.onDelete).toHaveBeenCalled();
   });
 

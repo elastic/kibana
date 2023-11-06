@@ -41,14 +41,13 @@ describe('AssigneesFilterPopover', () => {
     const props = { ...defaultProps, onSelectionChange };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByPlaceholderText('Search users')).toBeInTheDocument();
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByPlaceholderText('Search users')).toBeInTheDocument();
+
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-    userEvent.click(screen.getByText('WD'));
+    await userEvent.click(screen.getByText('WD'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`
           Array [
@@ -71,16 +70,14 @@ describe('AssigneesFilterPopover', () => {
     const props = { ...defaultProps, onSelectionChange };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByText('wet_dingo@elastic.co'));
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByText('wet_dingo@elastic.co'));
 
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-    userEvent.click(screen.getByText('WD'));
-    userEvent.click(screen.getByText('damaged_raccoon@elastic.co'));
+    await userEvent.click(screen.getByText('WD'));
+    await userEvent.click(screen.getByText('damaged_raccoon@elastic.co'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -115,10 +112,8 @@ describe('AssigneesFilterPopover', () => {
   it('does not show the assigned users total if there are no assigned users', async () => {
     appMockRender.render(<AssigneesFilterPopover {...defaultProps} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
 
     await waitForEuiPopoverOpen();
 
@@ -133,7 +128,7 @@ describe('AssigneesFilterPopover', () => {
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
     await waitFor(async () => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
       expect(screen.getByText('1 filter selected')).toBeInTheDocument();
     });
 
@@ -150,7 +145,7 @@ describe('AssigneesFilterPopover', () => {
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
     await waitFor(async () => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
       expect(screen.getByText('2 filters selected')).toBeInTheDocument();
     });
 
@@ -163,10 +158,9 @@ describe('AssigneesFilterPopover', () => {
   it('shows three users when initially rendered', async () => {
     appMockRender.render(<AssigneesFilterPopover {...defaultProps} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
+
     await waitForEuiPopoverOpen();
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
@@ -181,10 +175,8 @@ describe('AssigneesFilterPopover', () => {
 
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
     await waitForEuiPopoverOpen();
 
     const assignees = screen.getAllByRole('option');
@@ -198,10 +190,8 @@ describe('AssigneesFilterPopover', () => {
   it('does not show the number of filters', async () => {
     appMockRender.render(<AssigneesFilterPopover {...defaultProps} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('3')).not.toBeInTheDocument();
@@ -215,10 +205,8 @@ describe('AssigneesFilterPopover', () => {
 
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
 
     await waitForEuiPopoverOpen();
 
@@ -230,13 +218,11 @@ describe('AssigneesFilterPopover', () => {
     const props = { ...defaultProps, onSelectionChange };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByPlaceholderText('Search users')).toBeInTheDocument();
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByPlaceholderText('Search users')).toBeInTheDocument();
     await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByText('No assignees'));
+    await userEvent.click(screen.getByText('No assignees'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -250,15 +236,13 @@ describe('AssigneesFilterPopover', () => {
     const props = { ...defaultProps, onSelectionChange };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByPlaceholderText('Search users')).toBeInTheDocument();
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByPlaceholderText('Search users')).toBeInTheDocument();
     await waitForEuiPopoverOpen();
 
-    userEvent.click(screen.getByText('No assignees'));
-    userEvent.click(screen.getByText('WD'));
-    userEvent.click(screen.getByText('damaged_raccoon@elastic.co'));
+    await userEvent.click(screen.getByText('No assignees'));
+    await userEvent.click(screen.getByText('WD'));
+    await userEvent.click(screen.getByText('damaged_raccoon@elastic.co'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -302,10 +286,8 @@ describe('AssigneesFilterPopover', () => {
     const props = { ...defaultProps, onSelectionChange };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-      expect(screen.getByPlaceholderText('Search users')).toBeInTheDocument();
-    });
+    await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    expect(screen.getByPlaceholderText('Search users')).toBeInTheDocument();
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
@@ -321,7 +303,7 @@ describe('AssigneesFilterPopover', () => {
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
     await waitFor(async () => {
-      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      await userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
       expect(
         screen.getByText(`${MAX_ASSIGNEES_FILTER_LENGTH} filters selected`)
       ).toBeInTheDocument();

@@ -39,7 +39,7 @@ describe('Policy form RelatedDetectionRulesCallout component', () => {
 
   it('should navigate to Detection Rules when link is clicked', () => {
     render();
-    userEvent.click(renderResult.getByTestId('test-link'));
+    await userEvent.click(renderResult.getByTestId('test-link'));
 
     expect(history.location.pathname).toEqual('/rules');
   });

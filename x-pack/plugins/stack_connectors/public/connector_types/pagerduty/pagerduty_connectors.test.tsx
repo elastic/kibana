@@ -84,7 +84,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -129,7 +129,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -171,7 +171,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -205,7 +205,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({

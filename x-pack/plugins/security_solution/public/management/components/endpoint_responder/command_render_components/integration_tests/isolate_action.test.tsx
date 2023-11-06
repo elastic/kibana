@@ -72,7 +72,7 @@ describe.skip('When using isolate action from response actions console', () => {
 
   it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'isolate');
+    await enterConsoleCommand(renderResult, 'isolate');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
@@ -81,7 +81,7 @@ describe.skip('When using isolate action from response actions console', () => {
 
   it('should call `isolate` api when command is entered', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate');
+    await enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe.skip('When using isolate action from response actions console', () => {
 
   it('should accept an optional `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate --comment "This is a comment"');
+    await enterConsoleCommand(renderResult, 'isolate --comment "This is a comment"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledWith(
@@ -103,7 +103,7 @@ describe.skip('When using isolate action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate --comment "one" --comment "two"');
+    await enterConsoleCommand(renderResult, 'isolate --comment "one" --comment "two"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
@@ -112,7 +112,7 @@ describe.skip('When using isolate action from response actions console', () => {
 
   it('should call the action status api after creating the `isolate` request', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate');
+    await enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe.skip('When using isolate action from response actions console', () => {
 
   it('should show success when `isolate` action completes with no errors', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'isolate');
+    await enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('isolate-success')).toBeTruthy();
@@ -136,7 +136,7 @@ describe.skip('When using isolate action from response actions console', () => {
     pendingDetailResponse.data.errors = ['error one', 'error two'];
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, 'isolate');
+    await enterConsoleCommand(renderResult, 'isolate');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('isolate-actionFailure').textContent).toMatch(
@@ -151,7 +151,7 @@ describe.skip('When using isolate action from response actions console', () => {
     await render();
 
     // enter command
-    enterConsoleCommand(renderResult, 'isolate');
+    await enterConsoleCommand(renderResult, 'isolate');
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
 
@@ -175,7 +175,7 @@ describe.skip('When using isolate action from response actions console', () => {
 
       render = async () => {
         const response = await _render();
-        enterConsoleCommand(response, 'isolate');
+        await enterConsoleCommand(response, 'isolate');
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);

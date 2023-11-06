@@ -33,7 +33,7 @@ describe('FileAttachmentEvent', () => {
 
     expect(nameLink).toBeInTheDocument();
 
-    userEvent.click(nameLink);
+    await userEvent.click(nameLink);
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
   });

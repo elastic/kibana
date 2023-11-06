@@ -43,9 +43,9 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -70,7 +70,7 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(

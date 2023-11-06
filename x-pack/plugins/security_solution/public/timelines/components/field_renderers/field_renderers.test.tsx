@@ -410,7 +410,7 @@ describe('Field Renderers', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('DefaultFieldRendererOverflow-button'));
+      await userEvent.click(screen.getByTestId('DefaultFieldRendererOverflow-button'));
 
       expect(
         screen.getByText(

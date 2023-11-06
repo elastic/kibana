@@ -52,13 +52,13 @@ describe('FormFields ', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByTestId('custom-field-label-input'), 'hello');
+    await userEvent.type(screen.getByTestId('custom-field-label-input'), 'hello');
 
     fireEvent.change(screen.getByTestId('custom-field-type-selector'), {
       target: { value: CustomFieldTypes.TOGGLE },
     });
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

@@ -93,17 +93,17 @@ describe('AddTimelineButton', () => {
     });
 
     test('it renders create timeline btn', async () => {
-      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByText(i18n.NEW_TIMELINE)).toBeInTheDocument();
     });
 
     test('it renders create timeline template btn', () => {
-      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByText(i18n.NEW_TEMPLATE_TIMELINE)).toBeInTheDocument();
     });
 
     test('it renders Open timeline btn', () => {
-      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByTestId('open-timeline-button')).toBeInTheDocument();
     });
   });
@@ -133,17 +133,17 @@ describe('AddTimelineButton', () => {
     });
 
     test('it renders create timeline btn', () => {
-      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByText(i18n.NEW_TIMELINE)).toBeInTheDocument();
     });
 
     test('it renders create timeline template btn', () => {
-      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByText(i18n.NEW_TEMPLATE_TIMELINE)).toBeInTheDocument();
     });
 
     test('it renders Open timeline btn', async () => {
-      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       expect(screen.getByTestId('open-timeline-button')).toBeInTheDocument();
     });
   });
@@ -185,20 +185,20 @@ describe('AddTimelineButton', () => {
     });
 
     it('should render timelines table', async () => {
-      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       await waitForEuiPopoverOpen();
       expect(screen.getByTestId('open-timeline-button')).toBeVisible();
 
-      userEvent.click(screen.getByTestId('open-timeline-button'));
+      await userEvent.click(screen.getByTestId('open-timeline-button'));
       expect(screen.getByTestId('timelines-table')).toBeInTheDocument();
     });
 
     it('should render correct actions', async () => {
-      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
       await waitForEuiPopoverOpen();
       expect(screen.getByTestId('open-timeline-button')).toBeVisible();
 
-      userEvent.click(screen.getByTestId('open-timeline-button'));
+      await userEvent.click(screen.getByTestId('open-timeline-button'));
 
       screen.queryAllByTestId('open-duplicate').forEach((element) => {
         expect(element).toBeInTheDocument();

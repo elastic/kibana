@@ -120,7 +120,7 @@ describe('When using processes action from response actions console', () => {
     pendingActionsMock();
     endpointDetailsMock();
     await render();
-    enterConsoleCommand(renderResult, 'status');
+    await enterConsoleCommand(renderResult, 'status');
     const statusResults = renderResult.getByTestId('agent-status-console-output');
 
     expect(

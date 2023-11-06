@@ -51,7 +51,7 @@ describe('external link component', () => {
     expect(onRender).toBeCalledTimes(1);
     const link = await screen.findByTestId('externalLink--foo');
     expect(link).toBeInTheDocument();
-    await userEvent.click(link);
+    await await userEvent.click(link);
     expect(window.open).toHaveBeenCalledWith('https://example.com', '_blank');
   });
 
@@ -86,7 +86,7 @@ describe('external link component', () => {
     );
     expect(onRender).toBeCalledTimes(1);
     const link = await screen.findByTestId('externalLink--foo');
-    await userEvent.click(link);
+    await await userEvent.click(link);
     expect(coreServices.application.navigateToUrl).toBeCalledTimes(1);
     expect(coreServices.application.navigateToUrl).toBeCalledWith('https://example.com');
   });
@@ -106,7 +106,7 @@ describe('external link component', () => {
     expect(link).toBeDisabled();
     /**
      * TODO: We should test the tooltip content, but the component is disabled
-     * so it has pointer-events: none. This means we can not use userEvent.hover().
+     * so it has pointer-events: none. This means we can not use await userEvent.hover().
      * See https://testing-library.com/docs/ecosystem-user-event#pointer-events-options
      */
   });

@@ -279,7 +279,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       await reactAct(async () => {
-        userEvent.click(getByTestId('update-connector-btn'));
+        await userEvent.click(getByTestId('update-connector-btn'));
       });
 
       await reactAct(async () => {
@@ -292,10 +292,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
           'connector-servicenow-password-form-input'
         );
 
-        await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
-        await userEvent.type(usernameInput, 'user', { delay: 100 });
-        await userEvent.type(passwordInput, 'pass', { delay: 100 });
-        userEvent.click(within(updateConnectorForm).getByTestId('snUpdateInstallationSubmit'));
+        await await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
+        await await userEvent.type(usernameInput, 'user', { delay: 100 });
+        await await userEvent.type(passwordInput, 'pass', { delay: 100 });
+        await userEvent.click(
+          within(updateConnectorForm).getByTestId('snUpdateInstallationSubmit')
+        );
       });
 
       expect(getAppInfoMock).toHaveBeenCalledTimes(1);
@@ -336,7 +338,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       await reactAct(async () => {
-        userEvent.click(getByTestId('update-connector-btn'));
+        await userEvent.click(getByTestId('update-connector-btn'));
       });
 
       await reactAct(async () => {
@@ -349,10 +351,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
           'connector-servicenow-password-form-input'
         );
 
-        await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
-        await userEvent.type(usernameInput, 'user', { delay: 100 });
-        await userEvent.type(passwordInput, 'pass', { delay: 100 });
-        userEvent.click(within(updateConnectorForm).getByTestId('snUpdateInstallationSubmit'));
+        await await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
+        await await userEvent.type(usernameInput, 'user', { delay: 100 });
+        await await userEvent.type(passwordInput, 'pass', { delay: 100 });
+        await userEvent.click(
+          within(updateConnectorForm).getByTestId('snUpdateInstallationSubmit')
+        );
       });
 
       expect(getAppInfoMock).toHaveBeenCalledTimes(1);
@@ -401,7 +405,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         );
 
         await act(async () => {
-          userEvent.click(getByTestId('form-test-provide-submit'));
+          await userEvent.click(getByTestId('form-test-provide-submit'));
         });
 
         expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
@@ -430,7 +434,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       const {
@@ -456,13 +460,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+        await await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
           delay: 10,
         });
       });
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
@@ -480,13 +484,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+        await await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
           delay: 10,
         });
       });
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });

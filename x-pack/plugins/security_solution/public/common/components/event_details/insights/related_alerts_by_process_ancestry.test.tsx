@@ -74,7 +74,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
+    await userEvent.click(screen.getByText(PROCESS_ANCESTRY));
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalled();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -91,7 +91,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
+    await userEvent.click(screen.getByText(PROCESS_ANCESTRY));
     expect(screen.getByText(PROCESS_ANCESTRY_ERROR)).toBeInTheDocument();
   });
 
@@ -114,7 +114,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
+    await userEvent.click(screen.getByText(PROCESS_ANCESTRY));
     await waitFor(() => {
       expect(screen.getByText(PROCESS_ANCESTRY_COUNT(2))).toBeInTheDocument();
 
@@ -138,7 +138,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
+    await userEvent.click(screen.getByText(PROCESS_ANCESTRY));
     await waitFor(() => {
       expect(screen.getByText(PROCESS_ANCESTRY_EMPTY)).toBeInTheDocument();
     });
@@ -158,7 +158,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
+    await userEvent.click(screen.getByText(PROCESS_ANCESTRY));
     await waitFor(() => {
       expect(screen.getByText(PROCESS_ANCESTRY_EMPTY)).toBeInTheDocument();
     });

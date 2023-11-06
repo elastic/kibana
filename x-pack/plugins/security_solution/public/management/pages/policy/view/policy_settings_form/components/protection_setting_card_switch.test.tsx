@@ -71,7 +71,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     setMalwareMode(expectedUpdatedPolicy, true, true, false);
     render();
-    userEvent.click(renderResult.getByTestId('test'));
+    await userEvent.click(renderResult.getByTestId('test'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -84,7 +84,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     setMalwareMode(expectedUpdatedPolicy, false, true, false);
     render();
-    userEvent.click(renderResult.getByTestId('test'));
+    await userEvent.click(renderResult.getByTestId('test'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -106,7 +106,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     expectedUpdatedPolicy.windows.popup.malware.message = 'foo';
 
     render();
-    userEvent.click(renderResult.getByTestId('test'));
+    await userEvent.click(renderResult.getByTestId('test'));
 
     expect(formProps.additionalOnSwitchChange).toHaveBeenCalledWith({
       value: false,
@@ -136,7 +136,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       const expectedUpdatedPolicy = cloneDeep(formProps.policy);
       setMalwareMode(expectedUpdatedPolicy, true, false, false);
       render();
-      userEvent.click(renderResult.getByTestId('test'));
+      await userEvent.click(renderResult.getByTestId('test'));
 
       expect(formProps.onChange).toHaveBeenCalledWith({
         isValid: true,
@@ -148,7 +148,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       const expectedUpdatedPolicy = cloneDeep(formProps.policy);
       setMalwareMode(formProps.policy, true, false, false);
       render();
-      userEvent.click(renderResult.getByTestId('test'));
+      await userEvent.click(renderResult.getByTestId('test'));
 
       expect(formProps.onChange).toHaveBeenCalledWith({
         isValid: true,

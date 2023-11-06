@@ -125,20 +125,22 @@ const fillFormReactTestingLib = async ({
 }) => {
   const titleInput = within(renderer.getByTestId('caseTitle')).getByTestId('input');
 
-  userEvent.paste(titleInput, sampleDataWithoutTags.title);
+  titleInput.focus();
+  await userEvent.paste(sampleDataWithoutTags.title);
 
   const descriptionInput = within(renderer.getByTestId('caseDescription')).getByTestId(
     'euiMarkdownEditorTextArea'
   );
 
-  userEvent.paste(descriptionInput, sampleDataWithoutTags.description);
+  descriptionInput.focus();
+  await userEvent.paste(sampleDataWithoutTags.description);
 
   if (withTags) {
     const caseTags = renderer.getByTestId('caseTags');
 
     for (const tag of sampleTags) {
       const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
-      userEvent.type(tagsInput, `${tag}{enter}`);
+      await userEvent.type(tagsInput, `${tag}{enter}`);
     }
   }
 };
@@ -269,7 +271,7 @@ describe.skip('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen, withTags: true });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -294,13 +296,13 @@ describe.skip('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('case-severity-selection'));
+      await userEvent.click(screen.getByTestId('case-severity-selection'));
       await waitForEuiPopoverOpen();
 
       expect(screen.getByTestId('case-severity-selection-high')).toBeVisible();
 
-      userEvent.click(screen.getByTestId('case-severity-selection-high'));
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('case-severity-selection-high'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -329,26 +331,28 @@ describe.skip('Create case', () => {
 
       const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
 
-      userEvent.paste(titleInput, `${sampleDataWithoutTags.title}       `);
+      titleInput.focus();
+      await userEvent.paste(`${sampleDataWithoutTags.title}       `);
 
       const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
         'euiMarkdownEditorTextArea'
       );
 
-      userEvent.paste(descriptionInput, `${sampleDataWithoutTags.description}           `);
+      descriptionInput.focus();
+      await userEvent.paste(`${sampleDataWithoutTags.description}           `);
 
       const caseTags = screen.getByTestId('caseTags');
 
       for (const tag of newTags) {
         const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
-        userEvent.type(tagsInput, `${tag}{enter}`);
+        await userEvent.type(tagsInput, `${tag}{enter}`);
       }
 
       const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
 
-      userEvent.type(categoryComboBox, `${newCategory}{enter}`);
+      await userEvent.type(categoryComboBox, `${newCategory}{enter}`);
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -375,8 +379,8 @@ describe.skip('Create case', () => {
 
       const syncAlertsButton = within(screen.getByTestId('caseSyncAlerts')).getByTestId('input');
 
-      userEvent.click(syncAlertsButton);
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(syncAlertsButton);
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -408,7 +412,7 @@ describe.skip('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -468,16 +472,14 @@ describe.skip('Create case', () => {
 
       expect(screen.getByTestId('create-case-custom-fields')).toBeInTheDocument();
 
-      userEvent.paste(
-        screen.getByTestId(`${textField.key}-${textField.type}-create-custom-field`),
-        'My text test value 1'
-      );
+      screen.getByTestId(`${textField.key}-${textField.type}-create-custom-field`).focus();
+      await userEvent.paste('My text test value 1');
 
-      userEvent.click(
+      await userEvent.click(
         screen.getByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
       );
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -525,7 +527,7 @@ describe.skip('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -577,7 +579,7 @@ describe.skip('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalled();
@@ -608,9 +610,9 @@ describe.skip('Create case', () => {
 
       const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
 
-      userEvent.type(categoryComboBox, `${category}{enter}`);
+      await userEvent.type(categoryComboBox, `${category}{enter}`);
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -637,10 +639,8 @@ describe.skip('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('dropdown-connectors'));
-      userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByTestId('dropdown-connectors'));
+      await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
       await waitFor(() => {
         expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
@@ -650,10 +650,11 @@ describe.skip('Create case', () => {
         'comboBoxSearchInput'
       );
 
-      userEvent.paste(checkbox, 'Denial of Service');
-      userEvent.keyboard('{enter}');
-      userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      checkbox.focus();
+      await userEvent.paste('Denial of Service');
+      await userEvent.keyboard('{enter}');
+      await userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -710,20 +711,20 @@ describe.skip('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('dropdown-connectors'));
-      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-1'));
+      await userEvent.click(screen.getByTestId('dropdown-connectors'));
+      await userEvent.click(screen.getByTestId('dropdown-connector-servicenow-1'));
 
       await waitFor(() => {
         expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
       });
 
-      userEvent.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
+      await userEvent.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
       expect(screen.getByTestId('severitySelect')).toHaveValue('4');
 
-      userEvent.click(screen.getByTestId('dropdown-connectors'));
-      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
+      await userEvent.click(screen.getByTestId('dropdown-connectors'));
+      await userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalledWith({
@@ -763,16 +764,14 @@ describe.skip('Create case', () => {
     await waitForFormToRender(screen);
     await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
-    });
-    userEvent.click(screen.getByTestId('create-case-submit'));
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitFor(() => {
       expect(afterCaseCreated).toHaveBeenCalled();
@@ -826,7 +825,7 @@ describe.skip('Create case', () => {
     await waitForFormToRender(screen);
     await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(screen.getByTestId('create-case-submit'));
+    await userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitFor(() => {
       expect(createAttachments).toHaveBeenCalledTimes(1);
@@ -857,7 +856,7 @@ describe.skip('Create case', () => {
     await waitForFormToRender(screen);
     await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(screen.getByTestId('create-case-submit'));
+    await userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitForComponentToUpdate();
 
@@ -896,17 +895,15 @@ describe.skip('Create case', () => {
     await waitForFormToRender(screen);
     await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
-    userEvent.click(screen.getByTestId('create-case-submit'));
+    await userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitFor(() => {
       expect(postCase).toHaveBeenCalled();
@@ -947,7 +944,7 @@ describe.skip('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitForComponentToUpdate();
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
@@ -984,13 +981,14 @@ describe.skip('Create case', () => {
         expect(assigneesComboBox.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
       });
 
-      userEvent.paste(assigneesComboBox.getByTestId('comboBoxSearchInput'), 'dr');
+      assigneesComboBox.getByTestId('comboBoxSearchInput').focus();
+      await userEvent.paste('dr');
       act(() => {
         jest.advanceTimersByTime(500);
       });
 
-      userEvent.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();

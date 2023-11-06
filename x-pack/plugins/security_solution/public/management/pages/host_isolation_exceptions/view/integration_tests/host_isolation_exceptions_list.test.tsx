@@ -59,7 +59,7 @@ describe('When on the host isolation exceptions page', () => {
     apiMocks.responseProvider.exceptionsFind.mockClear();
 
     act(() => {
-      userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
+      await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
     });
     act(() => {
       fireEvent.click(renderResult.getByTestId('searchButton'));
@@ -176,9 +176,9 @@ describe('When on the host isolation exceptions page', () => {
         const deleteButton = getByTestId(`${pageTestId}-card-cardDeleteAction`);
         expect(deleteButton).toBeTruthy();
 
-        userEvent.click(deleteButton);
+        await userEvent.click(deleteButton);
         const confirmDeleteButton = getByTestId(`${pageTestId}-deleteModal-submitButton`);
-        userEvent.click(confirmDeleteButton);
+        await userEvent.click(confirmDeleteButton);
         await waitFor(() => {
           expect(apiMocks.responseProvider.exceptionDelete).toHaveReturnedWith(
             expect.objectContaining({

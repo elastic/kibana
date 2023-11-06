@@ -37,13 +37,13 @@ describe('AnomalyChartsInitializer', () => {
     expect(confirmButton).toBeDefined();
     expect(onCreate).toHaveBeenCalledTimes(0);
 
-    userEvent.click(confirmButton!);
+    await userEvent.click(confirmButton!);
     expect(onCreate).toHaveBeenCalledWith({
       panelTitle: defaultTitle,
       maxSeriesToPlot: input.maxSeriesToPlot,
     });
 
-    userEvent.clear(await getByTestId('panelTitleInput'));
+    await userEvent.clear(await getByTestId('panelTitleInput'));
     expect(confirmButton).toHaveAttribute('disabled');
   });
 });

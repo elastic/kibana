@@ -60,22 +60,22 @@ describe('ArrayInput', () => {
     expect(screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).toHaveValue('foo, bar, baz');
   });
 
-  it('formats array when blurred', () => {
+  it('formats array when blurred', async () => {
     render(wrap(<ArrayInput {...defaultProps} />));
     const input = screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.focus(input);
-    userEvent.type(input, ',baz');
+    await userEvent.type(input, ',baz');
     expect(input).toHaveValue('foo, bar,baz');
     input.blur();
     expect(input).toHaveValue('foo, bar, baz');
   });
 
-  it('only calls onInputChange when blurred ', () => {
+  it('only calls onInputChange when blurred ', async () => {
     render(wrap(<ArrayInput {...defaultProps} />));
     const input = screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
 
     fireEvent.focus(input);
-    userEvent.type(input, ',baz');
+    await userEvent.type(input, ',baz');
 
     expect(input).toHaveValue('foo, bar,baz');
     expect(defaultProps.onInputChange).not.toHaveBeenCalled();

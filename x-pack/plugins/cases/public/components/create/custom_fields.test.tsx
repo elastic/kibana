@@ -84,15 +84,15 @@ describe('CustomFields', () => {
     const textField = customFieldsConfigurationMock[0];
     const toggleField = customFieldsConfigurationMock[1];
 
-    userEvent.type(
+    await userEvent.type(
       screen.getByTestId(`${textField.key}-${textField.type}-create-custom-field`),
       'hello'
     );
-    userEvent.click(
+    await userEvent.click(
       screen.getByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

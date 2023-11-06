@@ -103,9 +103,10 @@ describe('AddComment ', () => {
     appMockRender.render(<AddComment {...addCommentProps} />);
 
     const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
-    userEvent.type(markdown, sampleData.comment);
 
-    userEvent.click(screen.getByTestId('submit-comment'));
+    await userEvent.type(markdown, sampleData.comment);
+
+    await userEvent.click(screen.getByTestId('submit-comment'));
 
     await waitFor(() => expect(onCommentSaving).toBeCalled());
     await waitFor(() =>
@@ -131,7 +132,8 @@ describe('AddComment ', () => {
 
     appMockRender.render(<AddComment {...addCommentProps} ref={ref} />);
 
-    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), sampleData.comment);
+    (await screen.findByTestId('euiMarkdownEditorTextArea')).focus();
+    userEvent.paste(sampleData.comment);
 
     await act(async () => {
       ref.current!.addQuote(sampleQuote);
@@ -173,8 +175,8 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.type(markdown, 'test');
-      userEvent.clear(markdown);
+      await userEvent.type(markdown, 'test');
+      await userEvent.clear(markdown);
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -187,8 +189,8 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.clear(markdown);
-      userEvent.type(markdown, '  ');
+      await userEvent.clear(markdown);
+      await userEvent.type(markdown, '  ');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -201,9 +203,8 @@ describe('AddComment ', () => {
 
       appMockRender.render(<AddComment {...addCommentProps} />);
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
-
-      userEvent.paste(markdown, longComment);
+      screen.getByTestId('euiMarkdownEditorTextArea').focus();
+      await userEvent.paste(longComment);
 
       await waitFor(() => {
         expect(

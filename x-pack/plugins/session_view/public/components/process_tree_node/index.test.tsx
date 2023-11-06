@@ -165,7 +165,7 @@ describe('ProcessTreeNode component', () => {
         <ProcessTreeNode {...props} process={processMock} onProcessSelected={onProcessSelected} />
       );
 
-      userEvent.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
+      await userEvent.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
       expect(onProcessSelected).toHaveBeenCalled();
     });
 
@@ -181,7 +181,7 @@ describe('ProcessTreeNode component', () => {
       // @ts-ignore
       windowGetSelectionSpy.mockImplementation(() => ({ type: 'Range' }));
 
-      userEvent.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
+      await userEvent.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
       expect(onProcessSelected).not.toHaveBeenCalled();
 
       // cleanup
@@ -250,9 +250,9 @@ describe('ProcessTreeNode component', () => {
         renderResult = mockedContext.render(
           <ProcessTreeNode {...props} process={sessionViewAlertProcessMock} />
         );
-        userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
+        await userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
-        userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
+        await userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeFalsy();
       });
     });
@@ -300,12 +300,12 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(1);
 
-        userEvent.click(
+        await userEvent.click(
           renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton')
         );
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(2);
 
-        userEvent.click(
+        await userEvent.click(
           renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton')
         );
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(1);

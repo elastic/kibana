@@ -106,7 +106,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('network-details'));
+    await userEvent.click(screen.getByTestId('network-details'));
     expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
     expect(toggleExpandedDetail).not.toHaveBeenCalled();
   });
@@ -126,7 +126,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('network-details'));
+    await userEvent.click(screen.getByTestId('network-details'));
     expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
       id: context.timelineID,
       panelView: 'networkDetail',
@@ -153,7 +153,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('network-details'));
+    await userEvent.click(screen.getByTestId('network-details'));
     expect(toggleExpandedDetail).toHaveBeenCalledWith({
       panelView: 'networkDetail',
       params: {
@@ -178,7 +178,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('network-details'));
+    await userEvent.click(screen.getByTestId('network-details'));
     expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
       id: context.timelineID,
       panelView: 'networkDetail',

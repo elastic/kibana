@@ -225,7 +225,7 @@ describe('CaseViewPage', () => {
     expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
     expect(await screen.findByTestId('push-to-external-service')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('push-to-external-service'));
+    await userEvent.click(screen.getByTestId('push-to-external-service'));
 
     await waitFor(() => {
       expect(pushCaseToExternalService).toHaveBeenCalled();
@@ -271,7 +271,11 @@ describe('CaseViewPage', () => {
     const showAlertDetails = jest.fn();
     appMockRenderer.render(<CaseViewPage {...caseProps} showAlertDetails={showAlertDetails} />);
 
-    userEvent.click((await screen.findAllByTestId('comment-action-show-alert-alert-action-id'))[1]);
+    await userEvent.click(
+      (
+        await screen.findAllByTestId('comment-action-show-alert-alert-action-id')
+      )[1]
+    );
 
     await waitFor(() => {
       expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
@@ -291,7 +295,7 @@ describe('CaseViewPage', () => {
   it('should update settings', async () => {
     appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-    userEvent.click(await screen.findByTestId('sync-alerts-switch'));
+    await userEvent.click(await screen.findByTestId('sync-alerts-switch'));
 
     await waitFor(() => {
       const updateObject = updateCaseProperty.mock.calls[0][0];
@@ -399,7 +403,7 @@ describe('CaseViewPage', () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
+      await userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
 
       await waitFor(() => {
         expect(navigateToCaseViewMock).toHaveBeenCalledWith({
@@ -413,7 +417,7 @@ describe('CaseViewPage', () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
+      await userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
 
       await waitFor(async () => {
         expect(navigateToCaseViewMock).toHaveBeenCalledWith({

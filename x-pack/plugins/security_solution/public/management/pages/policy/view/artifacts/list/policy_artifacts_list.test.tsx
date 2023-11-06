@@ -109,7 +109,7 @@ describe('Policy details artifacts list', () => {
       expect(renderResult.getAllByTestId('artifacts-collapsed-list-card')).toHaveLength(1);
     });
 
-    userEvent.click(
+    await userEvent.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-expandCollapse')
     );
 
@@ -120,7 +120,7 @@ describe('Policy details artifacts list', () => {
 
   it('should change the address location when a filter is applied', async () => {
     await render();
-    userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
+    await userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
     expect(history.location.search).toBe('?filter=search%20me');
   });
 
@@ -134,7 +134,7 @@ describe('Policy details artifacts list', () => {
         })
       )
     );
-    userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
+    await userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
     await waitFor(mockedApi.responseProvider.eventFiltersList);
     expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenLastCalledWith(
       getDefaultQueryParameters(
@@ -152,7 +152,7 @@ describe('Policy details artifacts list', () => {
     );
     await render();
     // click the actions button
-    userEvent.click(
+    await userEvent.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-actions-button')
     );
     expect(renderResult.queryByTestId('view-full-details-action')).toBeTruthy();
@@ -166,7 +166,7 @@ describe('Policy details artifacts list', () => {
       getFoundExceptionListItemSchemaMock()
     );
     await render();
-    userEvent.click(
+    await userEvent.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-actions-button')
     );
 
@@ -190,7 +190,7 @@ describe('Policy details artifacts list', () => {
       );
       await render(false);
       // click the actions button
-      userEvent.click(
+      await userEvent.click(
         await renderResult.findByTestId('artifacts-collapsed-list-card-header-actions-button')
       );
       expect(renderResult.queryByTestId('remove-from-policy-action')).toBeFalsy();

@@ -73,7 +73,7 @@ describe('TeamsActionFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -113,7 +113,7 @@ describe('TeamsActionFields renders', () => {
       );
 
       await act(async () => {
-        await userEvent.type(
+        await await userEvent.type(
           getByTestId('teamsWebhookUrlInput'),
           `{selectall}{backspace}no-valid`,
           {
@@ -123,7 +123,7 @@ describe('TeamsActionFields renders', () => {
       });
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });

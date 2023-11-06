@@ -213,7 +213,7 @@ describe('SearchBar', () => {
       jest.spyOn(Date, 'now').mockReturnValue(1000);
 
       await focusAndUpdate();
-      userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
+      await userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
 
       jest.spyOn(Date, 'now').mockReturnValue(2000);
 
@@ -247,7 +247,7 @@ describe('SearchBar', () => {
         </IntlProvider>
       );
 
-      userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
+      await userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
 
       await focusAndUpdate();
 

@@ -34,7 +34,7 @@ describe('When using Console component', () => {
 
   it('should focus on input area when it gains focus', () => {
     render();
-    userEvent.click(renderResult.getByTestId('test-mainPanel-inputArea'));
+    await userEvent.click(renderResult.getByTestId('test-mainPanel-inputArea'));
 
     expect(document.activeElement!.classList.contains('invisible-input')).toBe(true);
   });

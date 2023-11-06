@@ -29,7 +29,7 @@ describe('When entering data into the Console input', () => {
 
     const selectable = renderResult.getByTestId('test-inputHistorySelector');
 
-    userEvent.tab({ focusTrap: selectable });
+    await userEvent.tab({ focusTrap: selectable });
   };
 
   const getInputPlaceholderText = () => {
@@ -170,7 +170,7 @@ describe('When entering data into the Console input', () => {
   it('should hide the history popover if user clicks back on input area', async () => {
     render();
     await showInputHistoryPopover();
-    userEvent.click(renderResult.getByTestId('test-keyCapture-input'));
+    await userEvent.click(renderResult.getByTestId('test-keyCapture-input'));
 
     await waitFor(() => {
       expect(renderResult.queryByTestId('test-inputHistorySelector')).toBeNull();
@@ -208,7 +208,7 @@ describe('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
-      userEvent.keyboard('{Escape}');
+      await userEvent.keyboard('{Escape}');
 
       await waitFor(() => {
         expect(getLeftOfCursorText()).toEqual('one');
@@ -222,7 +222,7 @@ describe('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
-      userEvent.keyboard('{Enter}');
+      await userEvent.keyboard('{Enter}');
 
       await waitFor(() => {
         expect(getLeftOfCursorText()).toEqual('cmd1 --help');
@@ -232,7 +232,7 @@ describe('When entering data into the Console input', () => {
     it('should show confirm dialog when Clear history button is clicked', async () => {
       await renderWithInputHistory('one');
 
-      userEvent.click(renderResult.getByTestId('test-clearInputHistoryButton'));
+      await userEvent.click(renderResult.getByTestId('test-clearInputHistoryButton'));
 
       await waitFor(() => {
         expect(renderResult.getByTestId('confirmModalTitleText'));
@@ -242,14 +242,14 @@ describe('When entering data into the Console input', () => {
     describe('and clear history confirm dialog is displayed', () => {
       beforeEach(async () => {
         await renderWithInputHistory('one');
-        userEvent.click(renderResult.getByTestId('test-clearInputHistoryButton'));
+        await userEvent.click(renderResult.getByTestId('test-clearInputHistoryButton'));
         await waitFor(() => {
           expect(renderResult.getByTestId('confirmModalTitleText'));
         });
       });
 
       it('should close the confirm modal if Cancel button is clicked', async () => {
-        userEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
+        await userEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
 
         await waitFor(() => {
           expect(renderResult.queryByTestId('confirmModalTitleText')).toBeNull();
@@ -258,7 +258,7 @@ describe('When entering data into the Console input', () => {
       });
 
       it('should clear all input history if Clear button is clicked', async () => {
-        userEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
+        await userEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
 
         await waitFor(() => {
           expect(renderResult.getByTestId('euiSelectableMessage')).toHaveTextContent(
@@ -432,7 +432,7 @@ describe('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('isolate');
       });
 
-      userEvent.keyboard('{Escape}');
+      await userEvent.keyboard('{Escape}');
 
       expect(getLeftOfCursorText()).toEqual('r');
       expect(getRightOfCursorText()).toEqual('elease');
@@ -457,7 +457,7 @@ describe('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('isolate');
       });
 
-      userEvent.keyboard('{Enter}');
+      await userEvent.keyboard('{Enter}');
 
       expect(getLeftOfCursorText()).toEqual('isolate');
       expect(getRightOfCursorText()).toEqual('');

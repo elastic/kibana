@@ -195,8 +195,9 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
-    userEvent.paste(screen.getByTestId('case-text-custom-field-form-field-test_key_1'), '!!!');
+    await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
+    screen.getByTestId('case-text-custom-field-form-field-test_key_1').focus();
+    await userEvent.paste('!!!');
 
     await waitFor(() => {
       expect(
@@ -204,7 +205,7 @@ describe('Edit ', () => {
       ).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-submit-button-test_key_1'));
+    await userEvent.click(screen.getByTestId('case-text-custom-field-submit-button-test_key_1'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
@@ -227,8 +228,8 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
-    userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
+    await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
+    await userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
 
     await waitFor(() => {
       expect(
@@ -236,7 +237,7 @@ describe('Edit ', () => {
       ).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-submit-button-test_key_1'));
+    await userEvent.click(screen.getByTestId('case-text-custom-field-submit-button-test_key_1'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
@@ -259,11 +260,11 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
+    await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
 
     expect(screen.getByTestId('case-text-custom-field-form-field-test_key_1')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-cancel-button-test_key_1'));
+    await userEvent.click(screen.getByTestId('case-text-custom-field-cancel-button-test_key_1'));
 
     expect(
       screen.queryByTestId('case-text-custom-field-form-field-test_key_1')
@@ -283,8 +284,9 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
-    userEvent.paste(screen.getByTestId('case-text-custom-field-form-field-test_key_1'), '!!!');
+    await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
+    screen.getByTestId('case-text-custom-field-form-field-test_key_1').focus();
+    await userEvent.paste('!!!');
 
     await waitFor(() => {
       expect(
@@ -292,13 +294,13 @@ describe('Edit ', () => {
       ).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-cancel-button-test_key_1'));
+    await userEvent.click(screen.getByTestId('case-text-custom-field-cancel-button-test_key_1'));
 
     expect(
       screen.queryByTestId('case-text-custom-field-form-field-test_key_1')
     ).not.toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
+    await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
     expect(screen.getByTestId('case-text-custom-field-form-field-test_key_1')).toHaveValue(
       'My text test value 1'
     );
@@ -317,8 +319,8 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
-    userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
+    await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
+    await userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
 
     await waitFor(() => {
       expect(screen.getByText('My test label 1 is required.')).toBeInTheDocument();
@@ -338,8 +340,8 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
-    userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
+    await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
+    await userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
 
     await waitFor(() => {
       expect(
@@ -363,12 +365,10 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
-    userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
-    userEvent.paste(
-      screen.getByTestId('case-text-custom-field-form-field-test_key_1'),
-      'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)
-    );
+    await userEvent.click(screen.getByTestId('case-text-custom-field-edit-button-test_key_1'));
+    await userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
+    screen.getByTestId('case-text-custom-field-form-field-test_key_1').focus();
+    await userEvent.paste('a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1));
 
     await waitFor(() => {
       expect(

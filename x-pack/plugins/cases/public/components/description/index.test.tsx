@@ -48,13 +48,13 @@ describe('Description', () => {
       <Description {...defaultProps} onUpdateField={onUpdateField} />
     );
 
-    userEvent.click(res.getByTestId('description-collapse-icon'));
+    await userEvent.click(res.getByTestId('description-collapse-icon'));
 
     await waitFor(() => {
       expect(screen.queryByText('Security banana Issue')).not.toBeInTheDocument();
     });
 
-    userEvent.click(res.getByTestId('description-collapse-icon'));
+    await userEvent.click(res.getByTestId('description-collapse-icon'));
 
     expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
   });
@@ -64,7 +64,7 @@ describe('Description', () => {
       <Description {...defaultProps} onUpdateField={onUpdateField} />
     );
 
-    userEvent.click(res.getByTestId('description-edit-icon'));
+    await userEvent.click(res.getByTestId('description-edit-icon'));
 
     expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toBeInTheDocument();
   });
@@ -75,12 +75,12 @@ describe('Description', () => {
       <Description {...defaultProps} onUpdateField={onUpdateField} />
     );
 
-    userEvent.click(res.getByTestId('description-edit-icon'));
+    await userEvent.click(res.getByTestId('description-edit-icon'));
 
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
 
-    userEvent.click(screen.getByTestId('editable-save-markdown'));
+    await userEvent.click(screen.getByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onUpdateField).toHaveBeenCalledWith({
@@ -96,14 +96,15 @@ describe('Description', () => {
       <Description {...defaultProps} onUpdateField={onUpdateField} />
     );
 
-    userEvent.click(res.getByTestId('description-edit-icon'));
+    await userEvent.click(res.getByTestId('description-edit-icon'));
 
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    screen.getByTestId('euiMarkdownEditorTextArea').focus();
+    await userEvent.paste(editedDescription);
 
     expect(screen.getByText(editedDescription)).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('editable-cancel-markdown'));
+    await userEvent.click(screen.getByTestId('editable-cancel-markdown'));
 
     await waitFor(() => {
       expect(onUpdateField).not.toHaveBeenCalled();
@@ -119,10 +120,11 @@ describe('Description', () => {
       <Description {...defaultProps} onUpdateField={onUpdateField} />
     );
 
-    userEvent.click(res.getByTestId('description-edit-icon'));
+    await userEvent.click(res.getByTestId('description-edit-icon'));
 
-    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), longDescription);
+    await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    screen.getByTestId('euiMarkdownEditorTextArea').focus();
+    await userEvent.paste(longDescription);
 
     expect(
       await screen.findByText(
