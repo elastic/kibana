@@ -54,7 +54,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
     onError: (error) =>
       showErrorToast(
         error,
-        i18n.translate('xpack.serverlessSearch.connectors.config.connectorServiceTypeName', {
+        i18n.translate('xpack.serverlessSearch.connectors.config.connectorNameError', {
           defaultMessage: 'Error updating name',
         })
       ),

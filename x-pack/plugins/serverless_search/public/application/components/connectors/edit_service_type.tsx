@@ -62,7 +62,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
     onError: (error) =>
       showErrorToast(
         error,
-        i18n.translate('xpack.serverlessSearch.connectors.config.connectorServiceTypeName', {
+        i18n.translate('xpack.serverlessSearch.connectors.config.connectorServiceTypeError', {
           defaultMessage: 'Error updating service type',
         })
       ),
