@@ -30,7 +30,7 @@
   },
   {
     "name": "elastic_agent",
-    "version": "1.15.0"
+    "version": "1.16.0"
   },
   {
     "name": "endpoint",
