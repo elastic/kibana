@@ -41,6 +41,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/shared-ux-router",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",
