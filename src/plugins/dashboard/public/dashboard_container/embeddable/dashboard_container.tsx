@@ -56,7 +56,7 @@ import { initializeDashboard } from './create/create_dashboard';
 import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
-import { DashboardAppLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
+import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
@@ -108,7 +108,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
-  public locator?: Pick<LocatorPublic<DashboardAppLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;

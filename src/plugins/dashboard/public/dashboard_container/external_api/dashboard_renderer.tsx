@@ -28,14 +28,13 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
-import { DashboardAppLocatorParams } from '../../dashboard_app/locator/locator';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
 import {
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
   DashboardCreationOptions,
 } from '../embeddable/dashboard_container_factory';
-import { DashboardRedirect } from '../types';
+import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
 import {
   AwaitingDashboardAPI,
@@ -48,7 +47,7 @@ export interface DashboardRendererProps {
   showPlainSpinner?: boolean;
   dashboardRedirect?: DashboardRedirect;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
-  locator?: Pick<LocatorPublic<DashboardAppLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 }
 
 export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRendererProps>(
