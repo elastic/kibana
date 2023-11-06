@@ -52,7 +52,7 @@ const recordAuditLoggingUsage = jest.fn();
 beforeEach(() => {
   logger.info.mockClear();
   logging.configure.mockClear();
-  logger.isLevelEnabled.mockReturnValue(true);
+  logger.isLevelEnabled.mockClear().mockReturnValue(true);
   recordAuditLoggingUsage.mockClear();
   http.registerOnPostAuth.mockClear();
 });
@@ -323,7 +323,7 @@ describe('#asScoped', () => {
     audit.stop();
   });
 
-  it('does not log to audit logger if logging is disabled', async () => {
+  it('does not log to audit logger if info logging level is disabled', async () => {
     logger.isLevelEnabled.mockReturnValue(false);
 
     const audit = new AuditService(logger);
@@ -350,7 +350,11 @@ describe('#asScoped', () => {
       event: { action: 'ACTION' },
       http: { request: { method: 'GET' } },
     });
+
     expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.isLevelEnabled).toHaveBeenCalledTimes(1);
+    expect(logger.isLevelEnabled).toHaveBeenCalledWith('info');
+
     audit.stop();
   });
 });
