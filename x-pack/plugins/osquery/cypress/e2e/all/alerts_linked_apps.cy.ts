@@ -41,7 +41,7 @@ describe(
       cleanupRule(ruleId);
     });
 
-    it.only('should be able to add investigation guides to response actions', () => {
+    it('should be able to add investigation guides to response actions', () => {
       cy.getBySel('editRuleSettingsLink').click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
