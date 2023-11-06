@@ -1017,7 +1017,8 @@
                         "type": "boolean"
                       },
                       "has_fields_for_a_a_d": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Indicates whether the rule has fields for alerts as data. This property is specific to Observability rule types. It affects whether the rule supports actions that run only when an alert matches a KQL query.\n"
                       },
                       "id": {
                         "description": "The unique identifier for the rule type.",
