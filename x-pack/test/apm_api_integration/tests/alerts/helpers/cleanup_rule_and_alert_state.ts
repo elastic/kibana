@@ -13,6 +13,7 @@ import {
   deleteApmRules,
   deleteApmAlerts,
   deleteActionConnectorIndex,
+  deleteAllActionConnectors,
 } from './alerting_api_helper';
 
 export async function cleanupRuleAndAlertState({
@@ -26,10 +27,11 @@ export async function cleanupRuleAndAlertState({
 }) {
   try {
     await Promise.all([
-      await deleteActionConnectorIndex(es),
-      await deleteApmRules(supertest),
-      await deleteApmAlerts(es),
-      await clearKibanaApmEventLog(es),
+      deleteApmRules(supertest),
+      deleteApmAlerts(es),
+      clearKibanaApmEventLog(es),
+      deleteActionConnectorIndex(es),
+      deleteAllActionConnectors({ supertest, es }),
     ]);
   } catch (e) {
     logger.error(`An error occured while cleaning up the state: ${e}`);

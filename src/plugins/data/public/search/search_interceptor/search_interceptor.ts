@@ -56,6 +56,7 @@ import {
   ISearchOptionsSerializable,
   pollSearch,
   UI_SETTINGS,
+  type SanitizedConnectionRequestParams,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
 import {
@@ -304,17 +305,37 @@ export class SearchInterceptor {
 
     const cancel = () => id && !isSavedToBackground && sendCancelRequest();
 
+    // Async search requires a series of requests
+    // 1) POST /<index pattern>/_async_search/
+    // 2..n) GET /_async_search/<async search identifier>
+    //
+    // First request contains useful request params for tools like Inspector.
+    // Preserve and project first request params into responses.
+    let firstRequestParams: SanitizedConnectionRequestParams;
+
     return pollSearch(search, cancel, {
       pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
       tap((response) => {
+        if (!firstRequestParams && response.requestParams) {
+          firstRequestParams = response.requestParams;
+        }
+
         id = response.id;
 
         if (!isRunningResponse(response)) {
           searchTracker?.complete();
         }
+      }),
+      map((response) => {
+        return firstRequestParams
+          ? {
+              ...response,
+              requestParams: firstRequestParams,
+            }
+          : response;
       }),
       catchError((e: Error) => {
         searchTracker?.error();
