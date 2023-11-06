@@ -46,7 +46,7 @@ steps:
         env:
           USE_GROUP_LABEL: true
         agents:
-          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.4"
+          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"
 
   - group: "Observability"
     steps:
@@ -56,4 +56,4 @@ steps:
           NOTIFICATION_APPENDIX: "<!subteam^S060GJFKGGP> please execute your manual testing plan."
           USE_GROUP_LABEL: true
         agents:
-          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.4"
+          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"
