@@ -21,7 +21,7 @@ You must have `all` privileges for the *Synthetics and Uptime* feature in the *{
 [[private-location-delete-params]]
 ==== Path Parameters
 
-`locationId`::
+`location_id`::
 (Required, string) The unique identifier of the private location to be deleted. It should be between 1 and 1024 characters.
 
 [[private-location-delete-example]]
