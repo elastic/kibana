@@ -34,10 +34,7 @@ export const riskEngineDisableRoute = (
       if (!taskManager) {
         return siemResponse.error({
           statusCode: 400,
-          body: {
-            message:
-              'Task Manager is unavailable, but is required to disable the risk engine. Please enable the taskManager plugin and try again.',
-          },
+          body: 'Task Manager is unavailable, but is required to disable the risk engine. Please enable the taskManager plugin and try again.',
         });
       }
 
@@ -50,6 +47,7 @@ export const riskEngineDisableRoute = (
         return siemResponse.error({
           statusCode: error.statusCode,
           body: { message: error.message, full_error: JSON.stringify(e) },
+          bypassErrorFormat: true,
         });
       }
     });

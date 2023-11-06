@@ -29,14 +29,10 @@ export const riskEngineEnableRoute = (
       const [_, { taskManager }] = await getStartServices();
       const securitySolution = await context.securitySolution;
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
-
       if (!taskManager) {
         return siemResponse.error({
           statusCode: 400,
-          body: {
-            message:
-              'Task Manager is unavailable, but is required to enable the risk engine. Please enable the taskManager plugin and try again.',
-          },
+          body: 'Task Manager is unavailable, but is required to enable the risk engine. Please enable the taskManager plugin and try again.',
         });
       }
 
@@ -49,6 +45,7 @@ export const riskEngineEnableRoute = (
         return siemResponse.error({
           statusCode: error.statusCode,
           body: { message: error.message, full_error: JSON.stringify(e) },
+          bypassErrorFormat: true,
         });
       }
     });

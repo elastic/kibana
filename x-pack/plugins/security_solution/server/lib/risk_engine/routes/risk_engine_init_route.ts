@@ -36,10 +36,7 @@ export const riskEngineInitRoute = (
         if (!taskManager) {
           return siemResponse.error({
             statusCode: 400,
-            body: {
-              message:
-                'Task Manager is unavailable, but is required to initialize the risk engine. Please enable the taskManager plugin and try again.',
-            },
+            body: 'Task Manager is unavailable, but is required to initialize the risk engine. Please enable the taskManager plugin and try again.',
           });
         }
 
@@ -67,6 +64,7 @@ export const riskEngineInitRoute = (
               message: initResultResponse.errors.join('\n'),
               full_error: initResultResponse,
             },
+            bypassErrorFormat: true,
           });
         }
         return response.ok({ body: { result: initResultResponse } });
@@ -76,6 +74,7 @@ export const riskEngineInitRoute = (
         return siemResponse.error({
           statusCode: error.statusCode,
           body: { message: error.message, full_error: JSON.stringify(e) },
+          bypassErrorFormat: true,
         });
       }
     });
