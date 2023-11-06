@@ -127,8 +127,8 @@ export function getTrainedModelsProvider(
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
-            .ok(async ({ scopedClient }) => {
-              return modelsProvider(scopedClient, cloud).getELSER(params);
+            .ok(async ({ scopedClient, mlClient }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).getELSER(params);
             });
         },
       };
