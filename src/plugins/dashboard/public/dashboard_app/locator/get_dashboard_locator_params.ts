@@ -19,7 +19,7 @@ interface EmbeddableQueryInput extends EmbeddableInput {
   timeRange?: TimeRange;
 }
 
-export const getEmbeddableParams = (
+export const getDashboardLocatorParamsFromEmbeddable = (
   source: IEmbeddable<EmbeddableQueryInput>,
   options: DashboardDrilldownOptions
 ): Partial<DashboardAppLocatorParams> => {

@@ -17,7 +17,10 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import { DashboardAppLocatorParams, getEmbeddableParams } from '@kbn/dashboard-plugin/public';
+import {
+  DashboardAppLocatorParams,
+  getDashboardLocatorParamsFromEmbeddable,
+} from '@kbn/dashboard-plugin/public';
 
 import { LINKS_VERTICAL_LAYOUT, LinksLayoutType, Link } from '../../../common/content_management';
 import { DashboardLinkStrings } from './dashboard_link_strings';
@@ -105,7 +108,7 @@ export const DashboardLinkComponent = ({
 
     const params: DashboardAppLocatorParams = {
       dashboardId: link.destination,
-      ...getEmbeddableParams(linksEmbeddable, linkOptions),
+      ...getDashboardLocatorParamsFromEmbeddable(linksEmbeddable, linkOptions),
     };
 
     const locator = dashboardContainer.locator;

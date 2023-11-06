@@ -9,7 +9,7 @@ import type { KibanaLocation } from '@kbn/share-plugin/public';
 import {
   cleanEmptyKeys,
   DashboardAppLocatorParams,
-  getEmbeddableParams,
+  getDashboardLocatorParamsFromEmbeddable,
 } from '@kbn/dashboard-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -49,7 +49,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
     if (context.embeddable) {
       params = {
         ...params,
-        ...getEmbeddableParams(context.embeddable, config),
+        ...getDashboardLocatorParamsFromEmbeddable(context.embeddable, config),
       };
     }
 
