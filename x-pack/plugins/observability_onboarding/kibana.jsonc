@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-onboarding-plugin",
-  "owner": ["@elastic/apm-ui", "@elastic/obs-ux-logs-team"],
+  "owner": "@elastic/obs-ux-logs-team",
   "plugin": {
     "id": "observabilityOnboarding",
     "server": true,
