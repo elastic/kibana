@@ -139,7 +139,7 @@ export const CasePostRequestRt = rt.intersection([
  * Bulk create cases
  */
 
-export const CaseCreateRequestWithOptionalId = rt.intersection([
+const CaseCreateRequestWithOptionalId = rt.intersection([
   CasePostRequestRt,
   rt.exact(rt.partial({ id: rt.string })),
 ]);

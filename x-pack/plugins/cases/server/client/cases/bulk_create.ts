@@ -66,6 +66,8 @@ export const bulkCreate = async (
       entities: casesWithIds.map((theCase) => ({ owner: theCase.owner, id: theCase.id })),
     });
 
+    const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
     const bulkCreateRequest: BulkCreateCasesArgs['cases'] = [];
 
     for (const theCase of casesWithIds) {
@@ -83,8 +85,6 @@ export const bulkCreate = async (
        */
 
       if (theCase.assignees && theCase.assignees.length !== 0) {
-        const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-
         if (!hasPlatinumLicenseOrGreater) {
           throw Boom.forbidden(
             'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
@@ -141,7 +141,7 @@ export const bulkCreate = async (
     }
 
     for (const theCase of casesSOs) {
-      const payload: CasePostRequest = {
+      const userActionPayload: CasePostRequest = {
         title: theCase.attributes.title,
         tags: theCase.attributes.tags,
         connector: theCase.attributes.connector,
@@ -158,7 +158,7 @@ export const bulkCreate = async (
         type: UserActionTypes.create_case,
         caseId: theCase.id,
         user,
-        payload,
+        payload: userActionPayload,
         owner: theCase.attributes.owner,
       });
 

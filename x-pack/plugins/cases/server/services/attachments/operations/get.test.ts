@@ -14,6 +14,7 @@ import { createPersistableStateAttachmentTypeRegistryMock } from '../../../attac
 import { AttachmentGetter } from './get';
 import { createAlertAttachment, createFileAttachment, createUserAttachment } from '../test_utils';
 import { mockPointInTimeFinder, createSOFindResponse, createErrorSO } from '../../test_utils';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common';
 
 describe('AttachmentService getter', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -46,13 +47,13 @@ describe('AttachmentService getter', () => {
       it('does not modified the error saved objects', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           // @ts-expect-error: SO client types are not correct
-          saved_objects: [createUserAttachment(), createErrorSO('cases-comments')],
+          saved_objects: [createUserAttachment(), createErrorSO(CASE_COMMENT_SAVED_OBJECT)],
         });
 
         const res = await attachmentGetter.bulkGet(['1', '2']);
 
         expect(res).toStrictEqual({
-          saved_objects: [createUserAttachment(), createErrorSO('cases-comments')],
+          saved_objects: [createUserAttachment(), createErrorSO(CASE_COMMENT_SAVED_OBJECT)],
         });
       });
 
