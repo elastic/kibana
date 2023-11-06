@@ -78,7 +78,7 @@ describe('risk score calculation route', () => {
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(500);
-      expect(response.body.message.message).toEqual('something went wrong');
+      expect(response.body.message).toEqual('something went wrong');
     });
   });
 
@@ -94,10 +94,8 @@ describe('risk score calculation route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        message: {
-          message:
-            'Task Manager is unavailable, but is required to enable the risk engine. Please enable the taskManager plugin and try again.',
-        },
+        message:
+          'Task Manager is unavailable, but is required to enable the risk engine. Please enable the taskManager plugin and try again.',
         status_code: 400,
       });
     });
