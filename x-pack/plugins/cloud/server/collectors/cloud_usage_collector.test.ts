@@ -37,6 +37,7 @@ describe('createCloudUsageCollector', () => {
         trialEndDate: undefined,
         deploymentId: undefined,
         projectId: undefined,
+        projectType: undefined,
       });
     });
 
@@ -53,6 +54,7 @@ describe('createCloudUsageCollector', () => {
         inTrial: false,
         deploymentId: undefined,
         projectId: undefined,
+        projectType: undefined,
       });
     });
 
