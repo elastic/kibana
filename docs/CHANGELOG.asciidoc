@@ -71,7 +71,7 @@ Gatekeeper error on macOS
 ====
 *Details* +
 Due to a version upgrade in the server binary used by {kib} and an upstream notarization issue, a gatekeeper error may display for "node"
-when starting Kibana in macOS environments.  For information on a workaround, refer to <<install-darwin64>>.
+when starting {kib} in macOS environments.  For information on a workaround, refer to <<install-darwin64>>.
 ====
 // end::known-issue-169170[]
 
