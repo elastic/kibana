@@ -401,8 +401,12 @@ export function CasesTableServiceProvider(
       return column.length !== 0;
     },
 
-    async toggleColumnInPopover(columnId: string) {
+    async openColumnsPopover() {
       await testSubjects.click('column-selection-popover-button');
+    },
+
+    async toggleColumnInPopover(columnId: string) {
+      await this.openColumnsPopover();
 
       await testSubjects.existOrFail(`column-selection-switch-${columnId}`);
       await testSubjects.click(`column-selection-switch-${columnId}`);

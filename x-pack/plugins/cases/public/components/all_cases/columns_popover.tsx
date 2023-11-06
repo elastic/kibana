@@ -125,7 +125,10 @@ export const ColumnsPopover: React.FC<Props> = ({
         />
       </EuiPopoverTitle>
       <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiFlexGroup css={{ width: 300 }}>
+        <EuiFlexGroup
+          css={{ width: 300 }}
+          data-test-subj="column-selection-popover-drag-drop-context"
+        >
           <EuiFlexItem>
             <EuiDroppable
               droppableId="casesColumnDroppableArea"
