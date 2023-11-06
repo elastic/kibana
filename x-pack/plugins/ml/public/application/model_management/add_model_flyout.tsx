@@ -160,10 +160,26 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, mod
                   ),
                   children: (
                     <EuiText>
-                      <p>Eland can be installed with pip from PyPI:</p>
                       <p>
-                        <EuiCodeBlock isCopyable language="">
+                        <FormattedMessage
+                          id="xpack.ml.trainedModels.addModelFlyout.thirdParty.pipInstallLabel"
+                          defaultMessage="Eland can be installed with pip from PyPI:"
+                        />
+                      </p>
+                      <p>
+                        <EuiCodeBlock isCopyable language="shell">
                           $ python -m pip install eland
+                        </EuiCodeBlock>
+                      </p>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.ml.trainedModels.addModelFlyout.thirdParty.condaInstallLabel"
+                          defaultMessage="and can also be installed with Conda from Conda Forge:"
+                        />
+                      </p>
+                      <p>
+                        <EuiCodeBlock isCopyable language="shell">
+                          $ conda install -c conda-forge eland
                         </EuiCodeBlock>
                       </p>
                     </EuiText>
