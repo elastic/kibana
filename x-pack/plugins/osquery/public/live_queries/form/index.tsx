@@ -39,7 +39,7 @@ export interface LiveQueryFormFields {
   savedQueryId?: string | null;
   ecs_mapping: ECSMapping;
   packId: string[];
-  timeout: number;
+  timeout?: number;
   queryType: 'query' | 'pack';
 }
 

@@ -30,7 +30,7 @@ interface OsqueryResponseActionsValues {
     id: string;
     ecs_mapping: ECSMapping;
     query: string;
-    timeout: number;
+    timeout?: number;
   }>;
 }
 
@@ -44,7 +44,7 @@ interface OsqueryResponseActionsParamsFormFields {
     id: string;
     ecs_mapping: ECSMapping;
     query: string;
-    timeout: number;
+    timeout?: number;
   }>;
   queryType: 'query' | 'pack';
 }

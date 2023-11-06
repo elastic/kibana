@@ -8,6 +8,7 @@
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
+  fillInQueryTimeout,
   inputQuery,
   selectAllAgents,
   submitQuery,
@@ -36,13 +37,26 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('Query is a required field').should('not.exist');
     checkResults();
     getAdvancedButton().click();
+    fillInQueryTimeout('91');
+    submitQuery();
+    cy.contains('Timeout value must be lower than 900 seconds.');
+    fillInQueryTimeout('89');
+    submitQuery();
+    cy.contains('Timeout value must be lower than 900 seconds.').should('not.exist');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();
     cy.contains('ECS field is required.');
     typeInECSFieldInput('message{downArrow}{enter}');
+
+    cy.intercept('POST', '/api/osquery/live_queries').as('postQuery');
     submitQuery();
     cy.contains('ECS field is required.').should('not.exist');
-
+    cy.wait('@postQuery').then((interception) => {
+      expect(interception.request.body).to.have.property('query', 'select * from uptime;');
+      expect(interception.request.body).to.have.property('timeout', 890);
+      expect(interception.response?.statusCode).to.eq(200);
+      expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 890);
+    });
     checkResults();
     cy.react('Cell', { props: { colIndex: 0 } })
       .should('exist')

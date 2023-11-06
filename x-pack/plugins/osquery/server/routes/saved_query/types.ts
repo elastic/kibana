@@ -11,7 +11,7 @@ export interface SavedQueryResponse {
   description: string | undefined;
   query: string;
   interval: number | string;
-  timeout: number;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform?: string;
@@ -30,7 +30,7 @@ export interface UpdateSavedQueryResponse {
   description: string | undefined;
   query: string;
   interval: number | string;
-  timeout: number;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform?: string;

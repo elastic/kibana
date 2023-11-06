@@ -41,7 +41,7 @@ export const convertPackQueriesToSO = (queries) =>
       name: string;
       query: string;
       interval: number;
-      timeout: number;
+      timeout?: number;
       snapshot?: boolean;
       removed?: boolean;
       ecs_mapping?: Record<string, unknown>;
