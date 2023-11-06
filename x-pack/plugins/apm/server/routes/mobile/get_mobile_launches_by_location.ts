@@ -10,16 +10,14 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
+  LABEL_LIFECYCLE_STATE,
   SERVICE_NAME,
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
 } from '../../../common/es_fields/apm';
-import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
+import { environmentQuery } from '../../../common/utils/environment_query';
 
 interface Props {
   kuery: string;
@@ -32,7 +30,7 @@ interface Props {
   offset?: string;
 }
 
-export async function getHttpRequestsByLocation({
+export async function getLaunchesByLocation({
   kuery,
   apmEventClient,
   serviceName,
@@ -55,10 +53,12 @@ export async function getHttpRequestsByLocation({
   });
 
   const aggs = {
-    requests: {
-      filter: { term: { [SPAN_SUBTYPE]: 'http' } },
+    launches: {
+      filter: {
+        terms: { [LABEL_LIFECYCLE_STATE]: ['created', 'active'] },
+      },
       aggs: {
-        requestsByLocation: {
+        byLocation: {
           terms: {
             field: locationField,
           },
@@ -67,12 +67,9 @@ export async function getHttpRequestsByLocation({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_mobile_location_http_requests',
+  const response = await apmEventClient.logEventSearch(
+    'get_mobile_location_launches',
     {
-      apm: {
-        events: [ProcessorEvent.span],
-      },
       body: {
         track_total_hits: false,
         size: 0,
@@ -80,7 +77,6 @@ export async function getHttpRequestsByLocation({
           bool: {
             filter: [
               ...termQuery(SERVICE_NAME, serviceName),
-              ...termQuery(SPAN_TYPE, 'external'),
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -103,15 +99,14 @@ export async function getHttpRequestsByLocation({
   );
 
   return {
-    location: response.aggregations?.requests?.requestsByLocation?.buckets[0]
+    location: response.aggregations?.launches?.byLocation?.buckets[0]
       ?.key as string,
     value:
-      response.aggregations?.requests?.requestsByLocation?.buckets[0]
-        ?.doc_count ?? 0,
+      response.aggregations?.launches?.byLocation?.buckets[0]?.doc_count ?? 0,
     timeseries:
       response.aggregations?.timeseries?.buckets.map((bucket) => ({
         x: bucket.key,
-        y: bucket?.requests?.requestsByLocation?.buckets[0]?.doc_count ?? 0,
+        y: bucket.launches?.byLocation?.buckets[0]?.doc_count ?? 0,
       })) ?? [],
   };
 }
