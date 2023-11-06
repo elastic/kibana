@@ -181,7 +181,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
       deleteConnectors();
     });
 
-    it('adds an action to a snoozed rule', () => {
+    it('adds an action to a snoozed rule', { tags: ['@brokenInServerlessQA'] }, () => {
       createSnoozedRule(getNewRule({ name: 'Snoozed rule' })).then(({ body: rule }) => {
         visitEditRulePage(rule.id);
         goToActionsStepTab();

@@ -10,6 +10,7 @@ import { combineEpics } from 'redux-observable';
 import type { Action } from 'redux';
 
 import { createTimelineEpic } from '../../timelines/store/timeline/epic';
+import { createTimelineChangedEpic } from '../../timelines/store/timeline/epic_changed';
 import { createTimelineFavoriteEpic } from '../../timelines/store/timeline/epic_favorite';
 import { createTimelineNoteEpic } from '../../timelines/store/timeline/epic_note';
 import { createTimelinePinnedEventEpic } from '../../timelines/store/timeline/epic_pinned_event';
@@ -24,6 +25,7 @@ export const createRootEpic = <State>(): Epic<
 > =>
   combineEpics(
     createTimelineEpic<State>(),
+    createTimelineChangedEpic(),
     createTimelineFavoriteEpic<State>(),
     createTimelineNoteEpic<State>(),
     createTimelinePinnedEventEpic<State>(),
