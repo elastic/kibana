@@ -86,11 +86,11 @@ describe('ServiceNowITSM Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
+      expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
-    const testers = ['severity', 'urgency', 'impact'];
-    testers.forEach((subj) => {
-      const select = within(screen.getByTestId(`${subj}Select`));
+      const testers = ['severity', 'urgency', 'impact'];
+      testers.forEach((subj) => {
+        const select = within(screen.getByTestId(`${subj}Select`));
 
       expect(select.getByRole('option', { name: '1 - Critical' }));
       expect(select.getByRole('option', { name: '2 - High' }));
