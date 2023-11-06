@@ -9,7 +9,6 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { StackConnectorsPlugin } from './plugin';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../common/sentinelone/constants';
 
 describe('Stack Connectors Plugin', () => {
   describe('setup()', () => {
@@ -139,7 +138,7 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(6);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(5);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -173,13 +172,6 @@ describe('Stack Connectors Plugin', () => {
         expect.objectContaining({
           id: '.d3security',
           name: 'D3 Security',
-        })
-      );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        6,
-        expect.objectContaining({
-          id: SENTINELONE_CONNECTOR_ID,
-          name: SENTINELONE_TITLE,
         })
       );
     });

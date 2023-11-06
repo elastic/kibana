@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -62,7 +61,6 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.opsgenie',
         'actions:.pagerduty',
         'actions:.resilient',
-        `actions:${SENTINELONE_CONNECTOR_ID}`,
         'actions:.server-log',
         'actions:.servicenow',
         'actions:.servicenow-itom',
