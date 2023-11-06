@@ -6,6 +6,7 @@
  */
 
 import { merge } from 'lodash';
+import { getVideosForFailedSpecs } from './support/filter_videos';
 import { dataLoaders, dataLoadersForRealEndpoints } from './support/data_loaders';
 import { responseActionTasks } from './support/response_actions';
 
@@ -31,7 +32,9 @@ export const getCypressBaseConfig = (
       screenshotsFolder:
         '../../../target/kibana-security-solution/public/management/cypress/screenshots',
       trashAssetsBeforeRuns: false,
-      video: false,
+      video: true,
+      videoCompression: 15,
+      videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
       viewportHeight: 900,
       viewportWidth: 1440,
       experimentalStudio: true,
@@ -70,6 +73,10 @@ export const getCypressBaseConfig = (
 
           // eslint-disable-next-line @typescript-eslint/no-var-requires
           require('@cypress/grep/src/plugin')(config);
+
+          on('after:spec', (_, results) => {
+            getVideosForFailedSpecs(results);
+          });
 
           return config;
         },
