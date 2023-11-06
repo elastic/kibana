@@ -243,7 +243,7 @@ export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU =
   '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuEmptyButton"]';
 
 export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] div button';
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] .euiContextMenuItem';
 
 export const EXCEPTION_LIST_DETAIL_MENU_ITEMS =
   '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsButtonIcon"]';

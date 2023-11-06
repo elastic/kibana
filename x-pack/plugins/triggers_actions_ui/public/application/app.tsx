@@ -72,6 +72,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
+  isServerless: boolean;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

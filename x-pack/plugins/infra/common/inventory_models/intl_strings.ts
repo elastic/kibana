@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SnapshotMetricType, SnapshotMetricTypeKeys } from '@kbn/metrics-data-access-plugin/common';
 import { toMetricOpt } from '../snapshot_metric_i18n';
-import { SnapshotMetricType, SnapshotMetricTypeKeys } from './types';
 
 interface Lookup {
   [id: string]: string;
