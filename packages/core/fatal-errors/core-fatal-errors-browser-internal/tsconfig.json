@@ -23,6 +23,8 @@
     "@kbn/test-subj-selector",
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-context-root",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-analytics-browser",
   ],
   "exclude": [
     "target/**/*",
