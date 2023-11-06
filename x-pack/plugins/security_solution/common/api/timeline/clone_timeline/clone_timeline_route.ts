@@ -7,16 +7,9 @@
 
 import * as rt from 'io-ts';
 
-import type { ResponseTimeline } from '../model/api';
 import { SavedTimelineRuntimeType } from '../model/api';
 
 export const cloneTimelineSchema = rt.type({
   timeline: SavedTimelineRuntimeType,
-  savedObjectId: rt.string,
+  timelineIdToClone: rt.string,
 });
-
-export interface CloneTimelinesResponse {
-  data: {
-    clonedTimeline: ResponseTimeline;
-  };
-}

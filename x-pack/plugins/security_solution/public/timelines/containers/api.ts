@@ -162,7 +162,7 @@ export const cloneTimeline = async ({
   let response = null;
   let requestBody = null;
   try {
-    requestBody = JSON.stringify({ timeline, timelineId, version });
+    requestBody = JSON.stringify({ timeline, timelineIdToClone: timelineId });
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }

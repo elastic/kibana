@@ -10,7 +10,7 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 import { cloneTimelineSchema } from '../../../../../../common/api/timeline';
-import type { CloneTimelinesResponse } from '../../../../../../common/api/timeline';
+import type { TimelineResponse } from '../../../../../../common/api/timeline';
 import { cloneTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
@@ -48,15 +48,17 @@ export const cloneTimelineRoute = async (
         try {
           const searchSourceClient = await data.search.searchSource.asScoped(request);
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
-          const { timeline, savedObjectId } = request.body;
-
+          const { timeline, timelineIdToClone } = request.body;
           const clonedTimeline = await cloneTimeline(
             frameworkRequest,
             timeline,
-            savedObjectId,
+            timelineIdToClone,
             searchSourceClient
           );
-          return response.ok<CloneTimelinesResponse>({ body: { data: { clonedTimeline } } });
+
+          return response.ok<TimelineResponse>({
+            body: { data: { persistTimeline: clonedTimeline } },
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({
