@@ -33,7 +33,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
     },
   },
   writeAccess: true,
-  handler: async ({ response, savedObjectsClient, syntheticsMonitorClient, request }) => {
+  handler: async ({ response, savedObjectsClient, syntheticsMonitorClient, request, server }) => {
     const { locationId } = request.params as { locationId: string };
 
     const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
@@ -49,7 +49,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<
       });
     }
 
-    const monitors = await getMonitorsByLocation(savedObjectsClient, locationId);
+    const monitors = await getMonitorsByLocation(server, locationId);
 
     if (!isEmpty(monitors)) {
       const count = monitors.find((monitor) => monitor.id === locationId)?.count;

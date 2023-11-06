@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getKqlFilter } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { SyntheticsServerSetup } from '../../../types';
 
 type Payload = Array<{
   id: string;
@@ -39,15 +40,13 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () =>
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
 
   validate: {},
-  handler: async ({ savedObjectsClient: soClient }) => {
-    return await getMonitorsByLocation(soClient);
+  handler: async ({ server }) => {
+    return await getMonitorsByLocation(server);
   },
 });
 
-export const getMonitorsByLocation = async (
-  soClient: SavedObjectsClientContract,
-  locationId?: string
-) => {
+export const getMonitorsByLocation = async (server: SyntheticsServerSetup, locationId?: string) => {
+  const soClient = server.coreStart.savedObjects.createInternalRepository();
   const locationFilter = getKqlFilter({ field: 'locations.id', values: locationId });
 
   const locationMonitors = await soClient.find<unknown, ExpectedResponse>({
@@ -55,6 +54,7 @@ export const getMonitorsByLocation = async (
     perPage: 0,
     aggs,
     filter: locationFilter,
+    namespaces: [ALL_SPACES_ID],
   });
 
   return (

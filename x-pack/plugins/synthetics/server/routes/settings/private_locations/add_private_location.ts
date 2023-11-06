@@ -13,9 +13,9 @@ import {
   privateLocationsSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import type { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
 import { toClientContract, toSavedObjectContract } from './helpers';
+import { PrivateLocation } from '../../../../common/runtime_types';
 
 export const PrivateLocationSchema = schema.object({
   label: schema.string(),
@@ -31,9 +31,7 @@ export const PrivateLocationSchema = schema.object({
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
 
-export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsPrivateLocations
-> = () => ({
+export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocation> = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
   validate: {},
@@ -92,6 +90,8 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       }
     );
 
-    return toClientContract(result.attributes, agentPolicies);
+    const allLocations = toClientContract(result.attributes, agentPolicies);
+
+    return allLocations.find((loc) => loc.id === location.agentPolicyId)!;
   },
 });
