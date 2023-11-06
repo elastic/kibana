@@ -12,7 +12,7 @@ import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/commo
 import { INSTALL_ALL_RULES_BUTTON, TOASTER } from '../../../screens/alerts_detection_rules';
 import { getRuleAssets } from '../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../tasks/login';
-import { addElasticRulesButtonClick } from '../../../tasks/prebuilt_rules';
+import { clickAddElasticRulesButton } from '../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
 describe(
@@ -86,7 +86,7 @@ describe(
             );
 
             const numberOfRulesToInstall = new Set(ruleIds).size;
-            addElasticRulesButtonClick();
+            clickAddElasticRulesButton();
 
             cy.get(INSTALL_ALL_RULES_BUTTON).should('be.enabled').click();
             cy.wait('@installPrebuiltRules', {
