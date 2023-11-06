@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
 import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
@@ -47,7 +47,7 @@ import { visit } from './navigation';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
-  role?: ROLES;
+  role?: SecurityRoleName;
 }
 
 export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsPageOptions): void {
