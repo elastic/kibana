@@ -70,8 +70,12 @@ Gatekeeper error on macOS
 [%collapsible]
 ====
 *Details* +
-Due to a version upgrade in the server binary used by {kib} and an upstream notarization issue, a gatekeeper error may display for "node"
-when starting {kib} in macOS environments.  For information on a workaround, refer to <<install-darwin64>>.
+Due to a version upgrade of the server binary used by {kib} and an upstream notarization issue, a gatekeeper error may display for "node"
+when starting {kib} in macOS environments.  
+
+*Workaround* +
+More information can be found at <<install-darwin64>>.
+
 ====
 // end::known-issue-169170[]
 
