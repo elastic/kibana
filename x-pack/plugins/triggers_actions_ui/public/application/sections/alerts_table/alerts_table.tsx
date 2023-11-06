@@ -6,7 +6,17 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  Suspense,
+  lazy,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -17,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
-import { AlertsTableProps, FetchAlertData } from '../../../types';
+import { AlertsTableProps, FetchAlertData, OpenAlertFlyout } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
 import './alerts_table.scss';
@@ -59,7 +69,11 @@ const isSystemCell = (columnId: string): columnId is SystemCellId => {
   return systemCells.includes(columnId as SystemCellId);
 };
 
-const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
+export interface ForwardRefAlertTable {
+  openAlertFlyout: OpenAlertFlyout;
+}
+
+const AlertsTable = forwardRef<ForwardRefAlertTable, AlertsTableProps>((props, ref) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [activeRowClasses, setActiveRowClasses] = useState<
     NonNullable<EuiDataGridStyle['rowClasses']>
@@ -152,6 +166,23 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [alerts, setFlyoutAlertIndex]
   );
+
+  const openAlertFlyout = useCallback(
+    ({ alertId, alertIdx }) => {
+      let idx = alertIdx ?? -1;
+      if (alertId) {
+        idx = alerts.findIndex((a) => (a as any)[ALERT_UUID].includes(alertId));
+      }
+      if (idx >= 0) {
+        setFlyoutAlertIndex(idx);
+      }
+    },
+    [alerts, setFlyoutAlertIndex]
+  );
+
+  useImperativeHandle(ref, () => ({
+    openAlertFlyout,
+  }));
 
   const fieldBrowserOptions = props.alertsTableConfiguration.useFieldBrowserOptions
     ? props.alertsTableConfiguration?.useFieldBrowserOptions({
@@ -485,7 +516,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       </section>
     </InspectButtonContainer>
   );
-};
+});
 
 export { AlertsTable };
 // eslint-disable-next-line import/no-default-export

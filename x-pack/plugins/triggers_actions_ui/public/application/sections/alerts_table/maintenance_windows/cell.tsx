@@ -31,25 +31,21 @@ export const MaintenanceWindowBaseCell = memo((props: MaintenanceWindowBaseCellP
     return (
       <>
         {maintenanceWindows.map((mw, index) => (
-          <>
-            <EuiToolTip
-              key={`${mw.id}_tooltip`}
-              content={<TooltipContent maintenanceWindow={mw} timestamp={timestamp} />}
-            >
-              <span key={`${mw.id}_title`}>
-                {mw.title}
-                {index !== totalLength - 1 && <>, &nbsp;</>}
-              </span>
-            </EuiToolTip>
-          </>
+          <EuiToolTip
+            key={`${mw.id}_tooltip`}
+            content={<TooltipContent maintenanceWindow={mw} timestamp={timestamp} />}
+          >
+            <span key={`${mw.id}_title`}>
+              {mw.title}
+              {index !== totalLength - 1 && <>, &nbsp;</>}
+            </span>
+          </EuiToolTip>
         ))}
         {maintenanceWindowIds.map((id, index) => (
-          <>
-            <span key={`${id}_id`}>
-              {id}
-              {index + maintenanceWindows.length !== totalLength - 1 && <>, &nbsp;</>}
-            </span>
-          </>
+          <span key={`${id}_id`}>
+            {id}
+            {index + maintenanceWindows.length !== totalLength - 1 && <>, &nbsp;</>}
+          </span>
         ))}
       </>
     );

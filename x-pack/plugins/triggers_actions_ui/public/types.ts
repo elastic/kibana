@@ -696,11 +696,26 @@ export interface AlertsTableConfigurationRegistry {
   showInspectButton?: boolean;
 }
 
+export type OpenAlertFlyout = ({
+  alertId,
+  alertIndex,
+}:
+  | {
+      alertId: string;
+      alertIndex?: number;
+    }
+  | {
+      alertId?: string;
+      alertIndex: number;
+    }) => void;
+export interface AlertsTableStateActions {
+  toggleColumn: (columnId: string) => void;
+  getAlerts: () => Alert[];
+  openAlertFlyout: OpenAlertFlyout;
+}
 export interface AlertsTableConfigurationRegistryWithActions
   extends AlertsTableConfigurationRegistry {
-  actions: {
-    toggleColumn: (columnId: string) => void;
-  };
+  actions: AlertsTableStateActions;
 }
 
 export enum BulkActionsVerbs {

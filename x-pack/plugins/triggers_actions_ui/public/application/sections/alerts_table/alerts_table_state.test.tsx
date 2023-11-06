@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
-import { fireEvent, render, waitFor, screen } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import {
   AlertConsumers,
   ALERT_CASE_IDS,
@@ -22,6 +22,7 @@ import {
   AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
+  AlertsTableStateActions,
   FetchAlertData,
   RenderCustomActionsRowArgs,
 } from '../../../types';
@@ -249,38 +250,39 @@ const hasMock = jest.fn().mockImplementation((plugin: string) => {
   return plugin === PLUGIN_ID;
 });
 
+const initialAlertTableConfigProps = {
+  columns,
+  sort: DefaultSort,
+  externalFlyout: { body: FlyoutBody },
+  useInternalFlyout: () => ({
+    body: FlyoutBody,
+    header: () => <>{'header'}</>,
+    footer: () => <>{'footer'}</>,
+  }),
+  getRenderCellValue: () =>
+    jest.fn().mockImplementation((props) => {
+      return `${props.colIndex}:${props.rowIndex}`;
+    }),
+  useActionsColumn: () => ({
+    renderCustomActionsRow: ({ setFlyoutAlert }: RenderCustomActionsRowArgs) => {
+      return (
+        <button
+          data-test-subj="expandColumnCellOpenFlyoutButton-0"
+          onClick={() => {
+            setFlyoutAlert({
+              fields: {
+                [ALERT_UUID]: 'alert-id-1',
+              },
+            });
+          }}
+        />
+      );
+    },
+  }),
+};
 const getMock = jest.fn().mockImplementation((plugin: string) => {
   if (plugin === PLUGIN_ID) {
-    return {
-      columns,
-      sort: DefaultSort,
-      externalFlyout: { body: FlyoutBody },
-      useInternalFlyout: () => ({
-        body: FlyoutBody,
-        header: () => <>{'header'}</>,
-        footer: () => <>{'footer'}</>,
-      }),
-      getRenderCellValue: () =>
-        jest.fn().mockImplementation((props) => {
-          return `${props.colIndex}:${props.rowIndex}`;
-        }),
-      useActionsColumn: () => ({
-        renderCustomActionsRow: ({ setFlyoutAlert }: RenderCustomActionsRowArgs) => {
-          return (
-            <button
-              data-test-subj="expandColumnCellOpenFlyoutButton-0"
-              onClick={() => {
-                setFlyoutAlert({
-                  fields: {
-                    [ALERT_UUID]: 'alert-id-1',
-                  },
-                });
-              }}
-            />
-          );
-        },
-      }),
-    };
+    return initialAlertTableConfigProps;
   }
   return {};
 });
@@ -291,7 +293,7 @@ const alertsTableConfigurationRegistryMock = {
   has: hasMock,
   get: getMock,
   getActions: getActionsMock,
-  update: updateMock,
+  updateActions: updateMock,
 } as unknown as AlertTableConfigRegistry;
 
 const storageMock = Storage as jest.Mock;
@@ -311,22 +313,21 @@ const fetchAlertsResponse = {
   ecsAlertsData,
   oldAlertsData,
 };
-
 hookUseFetchAlerts.mockReturnValue([false, fetchAlertsResponse]);
-
 const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
 hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
-
 const casesMap = getCasesMockMap();
 const useBulkGetCasesMock = useBulkGetCases as jest.Mock;
 
 const maintenanceWindowsMap = getMaintenanceWindowMockMap();
 const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mock;
 
-const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
-  <IntlProvider locale="en">
-    <AlertsTableState {...props} />
-  </IntlProvider>
+const AlertsTableWithLocale = forwardRef<AlertsTableStateActions, AlertsTableStateProps>(
+  (props, ref) => (
+    <IntlProvider locale="en">
+      <AlertsTableState {...props} ref={ref} />
+    </IntlProvider>
+  )
 );
 
 describe('AlertsTableState', () => {
@@ -352,7 +353,7 @@ describe('AlertsTableState', () => {
     const alertsTableConfigurationRegistryWithPersistentControlsMock = {
       has: hasMock,
       get: getMockWithUsePersistentControls,
-      update: updateMock,
+      updateActions: updateMock,
     } as unknown as AlertTableConfigRegistry;
 
     return {
@@ -967,6 +968,66 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...customTableProps} />);
 
       expect(screen.queryByTestId('dataGridColumnSortingButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Alert actions', () => {
+    beforeAll(() => {
+      jest.clearAllMocks();
+      mockCustomProps(initialAlertTableConfigProps);
+      hookUseFetchAlerts.mockReturnValue([false, fetchAlertsResponse]);
+      hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
+    });
+    test('should get the alert data when getAlerts is called', () => {
+      const ref = React.createRef<AlertsTableStateActions>();
+      render(<AlertsTableWithLocale {...tableProps} ref={ref} />);
+      let alertData;
+      act(() => {
+        alertData = ref.current?.getAlerts();
+      });
+      expect(alertData).toEqual(alerts);
+    });
+
+    test('should be able to toggle column when getAlerts is called', async () => {
+      const ref = React.createRef<AlertsTableStateActions>();
+      render(<AlertsTableWithLocale {...tableProps} ref={ref} />);
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId(`dataGridHeaderCell-${AlertsField.reason}`)
+        ).toBeInTheDocument();
+      });
+
+      act(() => {
+        ref.current?.toggleColumn(AlertsField.reason);
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId(`dataGridHeaderCell-${AlertsField.reason}`)
+        ).not.toBeInTheDocument();
+      });
+
+      // Bring back the column
+      act(() => {
+        ref.current?.toggleColumn(AlertsField.reason);
+      });
+    });
+
+    test('should be able to open alert flyout when getAlerts is called', async () => {
+      const ref = React.createRef<AlertsTableStateActions>();
+      render(<AlertsTableWithLocale {...tableProps} ref={ref} />);
+
+      act(() => {
+        ref.current?.openAlertFlyout({ alertId: 'alert-id-1' });
+      });
+
+      await waitFor(() => {
+        const result = screen.queryAllByTestId('alertsFlyout');
+        expect(result.length).toBe(1);
+
+        expect(screen.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
+        expect(screen.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+      });
     });
   });
 });
