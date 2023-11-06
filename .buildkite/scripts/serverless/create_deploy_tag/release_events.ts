@@ -45,7 +45,7 @@ const states: Record<StateNames, StateShape> = {
     description: 'No description',
     display: false,
     post: async () => {
-      buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Release candidate info</h4>`);
+      buildkite.setAnnotation(COMMIT_INFO_CTX, 'info', `<h4>:kibana: Release candidates</h4>`);
     },
   },
   initialize: {
@@ -65,7 +65,7 @@ const states: Record<StateNames, StateShape> = {
   wait_for_selection: {
     name: 'Waiting for selection',
     description: 'Waiting for the Release Manager to select a release candidate commit.',
-    instruction: `Please select a commit candidate for release.`,
+    instruction: `Please find, copy and enter a commit SHA to the buildkite input box to proceed.`,
     instructionStyle: 'warning',
     display: true,
   },
@@ -75,6 +75,13 @@ const states: Record<StateNames, StateShape> = {
     instruction: `Please wait, while we're collecting data about the commit, and the release candidate.`,
     instructionStyle: 'info',
     display: true,
+    pre: async () => {
+      buildkite.setAnnotation(
+        COMMIT_INFO_CTX,
+        'info',
+        `<h4>:kibana: Selected release candidate info:</h4>`
+      );
+    },
   },
   wait_for_confirmation: {
     name: 'Waiting for confirmation',
@@ -219,7 +226,11 @@ function updateWizardInstruction(targetState: string, stateData: any) {
   const { instructionStyle, instruction } = states[targetState];
 
   if (instruction) {
-    buildkite.setAnnotation(WIZARD_CTX_INSTRUCTION, instructionStyle || 'info', instruction);
+    buildkite.setAnnotation(
+      WIZARD_CTX_INSTRUCTION,
+      instructionStyle || 'info',
+      `<strong>${instruction}</strong>`
+    );
   }
 }
 

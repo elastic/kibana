@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { buildkite, buildStateToEmoji, octokit } from '../shared';
+import { buildkite, buildkiteBuildStateToEmoji, buildStateToEmoji, octokit } from '../shared';
+import { CommitWithStatuses } from '../generate_commit_selector';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';
+const KIBANA_ARTIFACT_BUILD_SLUG = 'kibana-artifacts-container-image';
 const KIBANA_PR_BUILD_SLUG = 'kibana-on-merge';
 
 export interface BuildkiteBuildExtract {
@@ -52,19 +54,40 @@ export async function getOnMergePRBuild(commitHash: string): Promise<BuildkiteBu
   };
 }
 
-export async function getQAFTestBuilds(date: string): Promise<BuildkiteBuildExtract[]> {
-  // We'd get up to the last 3 builds, but the most recent first
-  const builds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, 3);
+export async function getQAFTestBuilds(date: string, limit = 3): Promise<BuildkiteBuildExtract[]> {
+  const builds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, limit);
+
+  console.log(builds);
 
   return builds
     .map((build) => ({
       success: build.state === 'passed',
-      stateEmoji: build.state === 'passed' ? ':white_check_mark:' : ':x:',
+      stateEmoji: buildkiteBuildStateToEmoji(build.state),
       url: build.web_url,
       slug: QA_FTR_TEST_SLUG,
       buildNumber: build.number,
     }))
     .reverse();
+}
+
+export async function getArtifactBuildJob(
+  date: string,
+  commitHash: string
+): Promise<BuildkiteBuildExtract | null> {
+  const builds = await buildkite.getBuildsAfterDate(KIBANA_ARTIFACT_BUILD_SLUG, date, 10);
+  const correspondingBuild = builds.find((build) => build.commit === commitHash);
+
+  if (!correspondingBuild) {
+    return null;
+  }
+
+  return {
+    success: correspondingBuild.state === 'passed',
+    stateEmoji: buildkiteBuildStateToEmoji(correspondingBuild.state),
+    url: correspondingBuild.web_url,
+    slug: KIBANA_ARTIFACT_BUILD_SLUG,
+    buildNumber: correspondingBuild.number,
+  };
 }
 
 export function toBuildkiteBuildInfoHtml(
@@ -83,4 +106,37 @@ export function toBuildkiteBuildInfoHtml(
   html += '</div>';
 
   return html;
+}
+
+export function toCommitInfoWithBuildResults(commits: CommitWithStatuses[]) {
+  const commitWithBuildResultsHtml = commits.map((commitInfo) => {
+    const checks = commitInfo.checks;
+    const prBuildSnippet = getBuildInfoSnippet('on merge', checks.onMergeBuild);
+    const ftrBuildSnippet = getBuildInfoSnippet('ftr tests', checks.ftrBuild);
+    const artifactBuildSnippet = getBuildInfoSnippet('artifact build', checks.artifactBuild);
+    const titleWithLink = commitInfo.title.replace(
+      /#(\d{4,6})/,
+      `<a href="${commitInfo.prLink}">$&</a>`
+    );
+
+    return `<div>
+  <div>
+      <strong><a href="${commitInfo.link}">${commitInfo.sha}</a></strong> | [${prBuildSnippet}][${ftrBuildSnippet}][${artifactBuildSnippet}]
+  </div>
+  <div>
+      <strong>${titleWithLink}</strong><i> by ${commitInfo.author} on ${commitInfo.date}</i>
+  </div>
+  <hr />
+</div>`;
+  });
+
+  return commitWithBuildResultsHtml.join('\n');
+}
+
+function getBuildInfoSnippet(name: string, build: BuildkiteBuildExtract | null) {
+  if (!build) {
+    return `[❓] ${name}`;
+  } else {
+    return `${build.stateEmoji} <a href="${build.url}">${name}</a>`;
+  }
 }
