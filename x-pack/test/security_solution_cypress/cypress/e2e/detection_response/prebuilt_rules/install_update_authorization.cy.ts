@@ -68,7 +68,7 @@ const loginPageAsWriteAuthorizedUser = (url: string) => {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
