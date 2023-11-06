@@ -16,10 +16,7 @@ import {
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
 import { getRenderCellValue } from './render_cell_value';
 import { columns } from './default_columns';
-import {
-  AlertActions,
-  Props as AlertActionsProps,
-} from '../../pages/alerts/components/alert_actions';
+import { AlertActions } from '../../pages/alerts/components/alert_actions';
 import { useGetAlertFlyoutComponents } from '../alerts_flyout/use_get_alert_flyout_components';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import type { ConfigSchema } from '../../plugin';
@@ -43,24 +40,12 @@ export const getAlertsTableConfiguration = (
     },
   ],
   useActionsColumn: () => ({
-    renderCustomActionsRow: ({
-      alert,
-      id,
-      setFlyoutAlert,
-      refresh,
-    }: RenderCustomActionsRowArgs) => {
+    renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {
       return (
         <AlertActions
+          {...props}
           config={config}
-          data={Object.entries(alert).reduce<AlertActionsProps['data']>(
-            (acc, [field, value]) => [...acc, { field, value: value as string[] }],
-            []
-          )}
-          ecsData={{ _id: alert._id, _index: alert._index }}
-          id={id}
           observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-          setFlyoutAlert={setFlyoutAlert}
-          refresh={refresh}
         />
       );
     },

@@ -154,3 +154,5 @@ export { transformRule } from './application/lib/rule_api/common_transformations
 export { validateActionFilterQuery } from './application/lib/value_validators';
 
 export { useBulkUntrackAlerts } from './application/sections/alerts_table/hooks/use_bulk_untrack_alerts';
+
+export { ToggleAction } from './application/sections/alerts_table/row_actions/toggle_action';

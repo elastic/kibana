@@ -66,3 +66,17 @@ export interface CasesService {
     canUseCases: (owners: string[]) => Record<string, unknown>;
   };
 }
+
+/**
+ * Map from rule ids to muted alert instance ids
+ */
+export type MutedAlerts = Record<string, string[]>;
+
+export interface ToggleAlertParams {
+  ruleId: string;
+  alertInstanceId: string;
+}
+
+export interface AlertsTableContextType {
+  mutedAlerts: MutedAlerts;
+}
