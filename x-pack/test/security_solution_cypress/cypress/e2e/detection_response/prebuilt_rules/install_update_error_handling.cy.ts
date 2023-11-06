@@ -24,14 +24,16 @@ import {
 import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
-  addElasticRulesButtonClick,
+  clickAddElasticRulesButton,
   assertInstallationRequestIsComplete,
   interceptInstallationRequestToFail,
   interceptUpgradeRequestToFail,
-  assertUpgradeFailure,
-  ruleUpdatesTabClick,
-  assertInstallationFailure,
+  clickRuleUpdatesTab,
   assertUpgradeRequestIsComplete,
+  assertRuleInstallationFailureToastShown,
+  assertRulesPresentInAddPrebuiltRulesTable,
+  assertRuleUpgradeFailureToastShown,
+  assertRulesPresentInRuleUpdatesTable,
 } from '../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
@@ -64,7 +66,7 @@ describe(
 
       it('installing prebuilt rules one by one', () => {
         // Navigate to install Elastic rules page
-        addElasticRulesButtonClick();
+        clickAddElasticRulesButton();
 
         // Intercept and force the installation request to fail
         interceptInstallationRequestToFail([RULE_1]);
@@ -74,34 +76,38 @@ describe(
         // Wait for request to complete
         assertInstallationRequestIsComplete([RULE_1]);
 
-        assertInstallationFailure([RULE_1]);
+        assertRuleInstallationFailureToastShown([RULE_1]);
+        assertRulesPresentInAddPrebuiltRulesTable([RULE_1]);
       });
 
       it('installing multiple selected prebuilt rules by selecting them individually', () => {
-        addElasticRulesButtonClick();
+        clickAddElasticRulesButton();
 
         interceptInstallationRequestToFail([RULE_1, RULE_2]);
         selectRulesByName([RULE_1['security-rule'].name, RULE_2['security-rule'].name]);
         cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
         assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertInstallationFailure([RULE_1, RULE_2]);
+        assertRuleInstallationFailureToastShown([RULE_1, RULE_2]);
+        assertRulesPresentInAddPrebuiltRulesTable([RULE_1, RULE_2]);
       });
 
       it('installing multiple selected prebuilt rules by selecting all in page', () => {
-        addElasticRulesButtonClick();
+        clickAddElasticRulesButton();
         interceptInstallationRequestToFail([RULE_1, RULE_2]);
         cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
         cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
         assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertInstallationFailure([RULE_1, RULE_2]);
+        assertRuleInstallationFailureToastShown([RULE_1, RULE_2]);
+        assertRulesPresentInAddPrebuiltRulesTable([RULE_1, RULE_2]);
       });
 
       it('installing all available rules at once', () => {
-        addElasticRulesButtonClick();
+        clickAddElasticRulesButton();
         interceptInstallationRequestToFail([RULE_1, RULE_2]);
         cy.get(INSTALL_ALL_RULES_BUTTON).click();
         assertInstallationRequestIsComplete([RULE_1, RULE_2]);
-        assertInstallationFailure([RULE_1, RULE_2]);
+        assertRuleInstallationFailureToastShown([RULE_1, RULE_2]);
+        assertRulesPresentInAddPrebuiltRulesTable([RULE_1, RULE_2]);
       });
     });
 
@@ -141,7 +147,7 @@ describe(
         interceptUpgradeRequestToFail([OUTDATED_RULE_1]);
 
         // Navigate to Rule Upgrade table
-        ruleUpdatesTabClick();
+        clickRuleUpdatesTab();
 
         // Attempt to upgrade rule
         cy.get(
@@ -150,14 +156,15 @@ describe(
         // Wait for request to complete
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1]);
 
-        assertUpgradeFailure([OUTDATED_RULE_1]);
+        assertRuleUpgradeFailureToastShown([OUTDATED_RULE_1]);
+        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1]);
       });
 
       it('upgrading multiple selected prebuilt rules by selecting them individually', () => {
         interceptUpgradeRequestToFail([OUTDATED_RULE_1, OUTDATED_RULE_2]);
 
         // Navigate to Rule Upgrade table
-        ruleUpdatesTabClick();
+        clickRuleUpdatesTab();
 
         selectRulesByName([
           OUTDATED_RULE_1['security-rule'].name,
@@ -165,29 +172,32 @@ describe(
         ]);
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
-        assertUpgradeFailure([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRuleUpgradeFailureToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
       });
 
       it('upgrading multiple selected prebuilt rules by selecting all in page', () => {
         interceptUpgradeRequestToFail([OUTDATED_RULE_1, OUTDATED_RULE_2]);
 
         // Navigate to Rule Upgrade table
-        ruleUpdatesTabClick();
+        clickRuleUpdatesTab();
         cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
-        assertUpgradeFailure([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRuleUpgradeFailureToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
       });
 
       it('upgrading all rules with available upgrades at once', () => {
         interceptUpgradeRequestToFail([OUTDATED_RULE_1, OUTDATED_RULE_2]);
 
         // Navigate to Rule Upgrade table
-        ruleUpdatesTabClick();
+        clickRuleUpdatesTab();
 
         cy.get(UPGRADE_ALL_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
-        assertUpgradeFailure([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRuleUpgradeFailureToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
       });
     });
   }
