@@ -17,21 +17,23 @@ import { MessageText } from './message_text';
 interface Props {
   amendMessage: (message: string) => void;
   content?: string;
-  isLastComment: boolean;
   isFetching?: boolean;
+  isLastComment: boolean;
+  index: number;
+  reader?: ReadableStreamDefaultReader<Uint8Array>;
   regenerateMessage: () => void;
   transformMessage: (message: string) => ContentMessage;
-  reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 
 export const StreamComment = ({
   amendMessage,
   content,
+  index,
+  isFetching = false,
   isLastComment,
   reader,
   regenerateMessage,
   transformMessage,
-  isFetching = false,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     amendMessage,
@@ -89,7 +91,7 @@ export const StreamComment = ({
 
   return (
     <MessagePanel
-      body={<MessageText content={message} loading={isAnythingLoading} />}
+      body={<MessageText content={message} index={index} loading={isAnythingLoading} />}
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

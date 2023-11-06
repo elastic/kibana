@@ -24,6 +24,7 @@ import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
 
 interface Props {
   content: string;
+  index: number;
   loading: boolean;
 }
 
@@ -153,7 +154,7 @@ const getPluginDependencies = () => {
   };
 };
 
-export function MessageText({ loading, content }: Props) {
+export function MessageText({ loading, content, index }: Props) {
   const containerClassName = css`
     overflow-wrap: break-word;
   `;
@@ -163,6 +164,8 @@ export function MessageText({ loading, content }: Props) {
   return (
     <EuiText className={containerClassName}>
       <EuiMarkdownFormat
+        // used by augmentMessageCodeBlocks
+        className={`message-${index}`}
         data-test-subj={'messageText'}
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}

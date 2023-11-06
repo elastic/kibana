@@ -83,6 +83,8 @@ export const getComments = ({
                 isLastComment
                 transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
                 isFetching
+                // we never need to append to a code block in the loading comment, which is what this index is used for
+                index={999}
               />
               <span ref={lastCommentRef} />
             </>
@@ -126,10 +128,11 @@ export const getComments = ({
             <>
               <StreamComment
                 amendMessage={amendMessageOfConversation}
+                index={index}
+                isLastComment={isLastComment}
                 reader={message.reader}
                 regenerateMessage={regenerateMessageOfConversation}
                 transformMessage={transformMessage}
-                isLastComment={isLastComment}
               />
               {isLastComment ? <span ref={lastCommentRef} /> : null}
             </>
@@ -148,10 +151,11 @@ export const getComments = ({
             <StreamComment
               amendMessage={amendMessageOfConversation}
               content={transformedMessage.content}
+              index={index}
+              isLastComment={isLastComment}
               // reader is used to determine if streaming controls are shown
               reader={transformedMessage.reader}
               regenerateMessage={regenerateMessageOfConversation}
-              isLastComment={isLastComment}
               transformMessage={transformMessage}
             />
             {isLastComment ? <span ref={lastCommentRef} /> : null}

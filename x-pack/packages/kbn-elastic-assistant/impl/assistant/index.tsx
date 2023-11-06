@@ -189,7 +189,10 @@ const AssistantComponent: React.FC<Props> = ({
   const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
   const [_, setCodeBlockControlsVisible] = useState(false);
   useLayoutEffect(() => {
-    setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
+    // need in order for code block controls to be added to the DOM
+    setTimeout(() => {
+      setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
+    }, 0);
   }, [augmentMessageCodeBlocks, currentConversation]);
 
   const isSendingDisabled = useMemo(() => {

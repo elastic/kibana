@@ -17,6 +17,7 @@ const content = 'Test Content';
 const testProps = {
   amendMessage: jest.fn(),
   content,
+  index: 1,
   isLastComment: true,
   regenerateMessage: jest.fn(),
   transformMessage: jest.fn(),
