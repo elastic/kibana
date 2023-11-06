@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { DropResult } from '@elastic/eui';
-
 import {
+  EuiPopoverFooter,
+  EuiFieldText,
+  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -33,6 +36,11 @@ interface Props {
   onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
 }
 
+interface ToggleColumnsParams {
+  isChecked: boolean;
+  field?: string;
+}
+
 export const ColumnsPopover: React.FC<Props> = ({
   selectedColumns,
   onSelectedColumnsChange,
@@ -44,18 +52,14 @@ export const ColumnsPopover: React.FC<Props> = ({
   const togglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  const onDragEnd = ({ source, destination }: DropResult) => {
-    if (source && destination) {
-      const reorderedColumns = euiDragDropReorder(selectedColumns, source.index, destination.index);
+  const [columnSearchText, setColumnSearchText] = useState('');
 
-      onSelectedColumnsChange(reorderedColumns);
-    }
-  };
+  const isDragEnabled = columnSearchText.length === 0;
 
-  const toggleColumn = useCallback(
-    ({ field, isChecked }) => {
+  const toggleColumns = useCallback(
+    ({ isChecked, field }: ToggleColumnsParams) => {
       const newSelectedColumns = selectedColumns.map((column) => {
-        if (column.field === field) {
+        if (column.field === field || !field) {
           return { ...column, isChecked };
         }
         return column;
@@ -66,11 +70,37 @@ export const ColumnsPopover: React.FC<Props> = ({
     [selectedColumns, onSelectedColumnsChange]
   );
 
+  const showAll = useCallback(() => toggleColumns({ isChecked: true }), [toggleColumns]);
+  const hideAll = useCallback(() => toggleColumns({ isChecked: false }), [toggleColumns]);
+
+  const onDragEnd = ({ source, destination }: DropResult) => {
+    if (source && destination) {
+      const reorderedColumns = euiDragDropReorder(selectedColumns, source.index, destination.index);
+
+      onSelectedColumnsChange(reorderedColumns);
+    }
+  };
+
+  const filteredColumns = useMemo(
+    () =>
+      selectedColumns.filter(
+        ({ name }) => name.toLowerCase().indexOf(columnSearchText.toLowerCase()) !== -1
+      ),
+    [selectedColumns, columnSearchText]
+  );
+
   return (
     <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="s"
+      anchorPosition="leftUp"
+      hasDragDrop
+      zIndex={0}
+      data-test-subj="column-selection-popover"
       button={
         <EuiButtonEmpty
-          aria-label="Columns"
+          aria-label={i18n.COLUMNS}
           className="columns"
           data-test-subj="column-selection-popover-button"
           iconType="indexOpen"
@@ -81,38 +111,52 @@ export const ColumnsPopover: React.FC<Props> = ({
           {i18n.COLUMNS}
         </EuiButtonEmpty>
       }
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="leftUp"
-      hasDragDrop
-      zIndex={0}
-      data-test-subj="column-selection-popover"
     >
+      <EuiPopoverTitle>
+        <EuiFieldText
+          compressed
+          placeholder={i18n.SEARCH}
+          aria-label={i18n.SEARCH_COLUMNS}
+          value={columnSearchText}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setColumnSearchText(e.currentTarget.value)
+          }
+          data-test-subj="column-selection-popover-search"
+        />
+      </EuiPopoverTitle>
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiFlexGroup css={{ width: 300 }}>
           <EuiFlexItem>
             <EuiDroppable
               droppableId="casesColumnDroppableArea"
-              css={{ paddingBottom: euiTheme.size.base }}
+              css={
+                isDragEnabled
+                  ? {
+                      paddingBottom: euiTheme.size.base,
+                    }
+                  : {
+                      paddingTop: euiTheme.size.base,
+                    }
+              }
             >
-              {selectedColumns.map(({ field, name, isChecked }, idx) => (
+              {filteredColumns.map(({ field, name, isChecked }, idx) => (
                 <EuiDraggable
                   key={field}
                   index={idx}
                   draggableId={field}
-                  customDragHandle={true}
-                  hasInteractiveChildren={true}
+                  isDragDisabled={!isDragEnabled}
                   css={{ height: euiTheme.size.xl, paddingLeft: euiTheme.size.base }}
+                  customDragHandle
+                  hasInteractiveChildren
                 >
                   {(provided) => (
                     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false}>
                         <EuiSwitch
                           label={name}
                           checked={isChecked}
                           data-test-subj={`column-selection-switch-${field}`}
-                          onChange={(e) => toggleColumn({ field, isChecked: e.target.checked })}
+                          onChange={(e) => toggleColumns({ field, isChecked: e.target.checked })}
                           compressed
                           labelProps={{
                             style: {
@@ -125,15 +169,21 @@ export const ColumnsPopover: React.FC<Props> = ({
                           }}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiPanel
-                          color="transparent"
-                          {...provided.dragHandleProps}
-                          aria-label="Drag Handle"
+                      {isDragEnabled && (
+                        <EuiFlexItem
+                          grow={false}
+                          data-test-subj="column-selection-popover-draggable-icon"
                         >
-                          <EuiIcon type="grab" />
-                        </EuiPanel>
-                      </EuiFlexItem>
+                          <EuiPanel
+                            color="transparent"
+                            {...provided.dragHandleProps}
+                            aria-label={i18n.DRAG_HANDLE}
+                            grow={false}
+                          >
+                            <EuiIcon type="grab" color="subdued" />
+                          </EuiPanel>
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
                   )}
                 </EuiDraggable>
@@ -142,6 +192,30 @@ export const ColumnsPopover: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiDragDropContext>
+      <EuiPopoverFooter>
+        <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              onClick={showAll}
+              data-test-subj="column-selection-popover-show-all-button"
+            >
+              {i18n.SHOW_ALL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              flush="right"
+              onClick={hideAll}
+              data-test-subj="column-selection-popover-hide-all-button"
+            >
+              {i18n.HIDE_ALL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
