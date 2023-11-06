@@ -152,3 +152,4 @@ xpack.reporting.statefulSettings.enabled: false
 
 # Disabled Observability plugins
 xpack.ux.enabled: false
+xpack.monitoring.enabled: false
