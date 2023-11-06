@@ -15,10 +15,12 @@ import type { SwitcherWithId, SwitcherBucket } from './types';
 describe('pathsIntersect', () => {
   test.each([
     ['*', '*', true],
+    ['foo', 'foo', true],
     ['foo.*', '*', true],
     ['bar', '*', true],
     ['foo.bar', '*', true],
     ['foo.bar', 'foo.*', true],
+    ['foo.bar', 'foo.bar', true],
     ['foo', 'bar', false],
     ['foo.*', 'bar.*', false],
     ['foo.bar', 'bar.*', false],

@@ -39,7 +39,7 @@ export const pathsIntersect = (pathA: string, pathB: string): boolean => {
       return false;
     }
   }
-  return false;
+  return splitA.length === splitB.length;
 };
 
 /**

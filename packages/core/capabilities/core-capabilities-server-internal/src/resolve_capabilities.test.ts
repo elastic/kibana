@@ -11,6 +11,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import { getCapabilitiesResolver } from './resolve_capabilities';
+import type { SwitcherWithOptions } from './types';
 
 describe('resolveCapabilities', () => {
   let defaultCaps: Capabilities;
@@ -27,52 +28,53 @@ describe('resolveCapabilities', () => {
     request = httpServerMock.createKibanaRequest();
   });
 
-  it('returns the initial capabilities if no switcher are used', async () => {
-    const result = await getCapabilitiesResolver(
-      () => defaultCaps,
-      () => []
-    )({
-      request,
-      capabilityPath: ['*'],
-      applications: [],
-      useDefaultCapabilities: false,
+  describe('base feature', () => {
+    it('returns the initial capabilities if no switcher are used', async () => {
+      const result = await getCapabilitiesResolver(
+        () => defaultCaps,
+        () => []
+      )({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(result).toEqual(defaultCaps);
     });
 
-    expect(result).toEqual(defaultCaps);
-  });
-
-  it('applies the switcher to the capabilities ', async () => {
-    const caps = {
-      ...defaultCaps,
-      catalogue: {
-        A: true,
-        B: true,
-      },
-    };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
-      ...capabilities,
-      catalogue: {
-        ...capabilities.catalogue,
-        A: false,
-      },
-    });
-
-    const result = await getCapabilitiesResolver(
-      () => caps,
-      () => [
-        {
-          switcher,
-          capabilityPath: ['*'],
+    it('applies the switcher to the capabilities ', async () => {
+      const caps = {
+        ...defaultCaps,
+        catalogue: {
+          A: true,
+          B: true,
         },
-      ]
-    )({
-      request,
-      capabilityPath: ['*'],
-      applications: [],
-      useDefaultCapabilities: false,
-    });
+      };
+      const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+        ...capabilities,
+        catalogue: {
+          ...capabilities.catalogue,
+          A: false,
+        },
+      });
 
-    expect(result).toMatchInlineSnapshot(`
+      const result = await getCapabilitiesResolver(
+        () => caps,
+        () => [
+          {
+            switcher,
+            capabilityPath: ['*'],
+          },
+        ]
+      )({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(result).toMatchInlineSnapshot(`
       Object {
         "catalogue": Object {
           "A": false,
@@ -82,155 +84,292 @@ describe('resolveCapabilities', () => {
         "navLinks": Object {},
       }
     `);
-  });
+    });
 
-  it('does not mutate the input capabilities', async () => {
-    const caps = {
-      ...defaultCaps,
-      catalogue: {
+    it('does not mutate the input capabilities', async () => {
+      const caps = {
+        ...defaultCaps,
+        catalogue: {
+          A: true,
+          B: true,
+        },
+      };
+      const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+        ...capabilities,
+        catalogue: {
+          ...capabilities.catalogue,
+          A: false,
+        },
+      });
+
+      await getCapabilitiesResolver(
+        () => caps,
+        () => [
+          {
+            switcher,
+            capabilityPath: ['*'],
+          },
+        ]
+      )({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(caps.catalogue).toEqual({
         A: true,
         B: true,
-      },
-    };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
-      ...capabilities,
-      catalogue: {
-        ...capabilities.catalogue,
-        A: false,
-      },
+      });
     });
 
-    await getCapabilitiesResolver(
-      () => caps,
-      () => [
-        {
-          switcher,
-          capabilityPath: ['*'],
+    it('ignores any added capability from the switcher', async () => {
+      const caps = {
+        ...defaultCaps,
+        catalogue: {
+          A: true,
+          B: true,
         },
-      ]
-    )({
-      request,
-      capabilityPath: ['*'],
-      applications: [],
-      useDefaultCapabilities: false,
-    });
+      };
+      const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+        ...capabilities,
+        catalogue: {
+          ...capabilities.catalogue,
+          C: false,
+        },
+      });
 
-    expect(caps.catalogue).toEqual({
-      A: true,
-      B: true,
-    });
-  });
+      const result = await getCapabilitiesResolver(
+        () => caps,
+        () => [
+          {
+            switcher,
+            capabilityPath: ['*'],
+          },
+        ]
+      )({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
 
-  it('ignores any added capability from the switcher', async () => {
-    const caps = {
-      ...defaultCaps,
-      catalogue: {
+      expect(result.catalogue).toEqual({
         A: true,
         B: true,
-      },
-    };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
-      ...capabilities,
-      catalogue: {
-        ...capabilities.catalogue,
-        C: false,
-      },
+      });
     });
 
-    const result = await getCapabilitiesResolver(
-      () => caps,
-      () => [
-        {
-          switcher,
-          capabilityPath: ['*'],
+    it('ignores any removed capability from the switcher', async () => {
+      const caps = {
+        ...defaultCaps,
+        catalogue: {
+          A: true,
+          B: true,
+          C: true,
         },
-      ]
-    )({
-      request,
-      capabilityPath: ['*'],
-      applications: [],
-      useDefaultCapabilities: false,
-    });
-
-    expect(result.catalogue).toEqual({
-      A: true,
-      B: true,
-    });
-  });
-
-  it('ignores any removed capability from the switcher', async () => {
-    const caps = {
-      ...defaultCaps,
-      catalogue: {
+      };
+      const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+        ...capabilities,
+        catalogue: Object.entries(capabilities.catalogue)
+          .filter(([key]) => key !== 'B')
+          .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
+      });
+      const result = await getCapabilitiesResolver(
+        () => caps,
+        () => [
+          {
+            switcher,
+            capabilityPath: ['*'],
+          },
+        ]
+      )({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+      expect(result.catalogue).toEqual({
         A: true,
         B: true,
         C: true,
-      },
-    };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
-      ...capabilities,
-      catalogue: Object.entries(capabilities.catalogue)
-        .filter(([key]) => key !== 'B')
-        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
+      });
     });
-    const result = await getCapabilitiesResolver(
-      () => caps,
-      () => [
-        {
-          switcher,
-          capabilityPath: ['*'],
-        },
-      ]
-    )({
-      request,
-      capabilityPath: ['*'],
-      applications: [],
-      useDefaultCapabilities: false,
-    });
-    expect(result.catalogue).toEqual({
-      A: true,
-      B: true,
-      C: true,
-    });
-  });
 
-  it('ignores any capability type mutation from the switcher', async () => {
-    const caps = {
-      ...defaultCaps,
-      section: {
+    it('ignores any capability type mutation from the switcher', async () => {
+      const caps = {
+        ...defaultCaps,
+        section: {
+          boolean: true,
+          record: {
+            entry: true,
+          },
+        },
+      };
+      const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
+        section: {
+          boolean: {
+            entry: false,
+          },
+          record: false,
+        },
+      });
+      const result = await getCapabilitiesResolver(
+        () => caps,
+        () => [
+          {
+            switcher,
+            capabilityPath: ['*'],
+          },
+        ]
+      )({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+      expect(result.section).toEqual({
         boolean: true,
         record: {
           entry: true,
         },
-      },
+      });
+    });
+  });
+
+  describe('multiple switchers', () => {
+    const getCapabilities = (overrides: Partial<Capabilities>): Capabilities => {
+      return {
+        ...defaultCaps,
+        ...overrides,
+      } as Capabilities;
     };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
-      section: {
-        boolean: {
-          entry: false,
+
+    it('applies multiple switchers', async () => {
+      const caps = getCapabilities({
+        section: {
+          entryA: true,
+          entryB: true,
+          entryC: true,
         },
-        record: false,
-      },
+      });
+
+      const switcherA: SwitcherWithOptions = {
+        switcher: (req: KibanaRequest, capabilities: Capabilities) => ({
+          section: {
+            entryA: false,
+          },
+        }),
+        capabilityPath: ['*'],
+      };
+      const switcherB: SwitcherWithOptions = {
+        switcher: (req: KibanaRequest, capabilities: Capabilities) => ({
+          section: {
+            entryB: false,
+          },
+        }),
+        capabilityPath: ['*'],
+      };
+
+      const result = await getCapabilitiesResolver(
+        () => caps,
+        () => [switcherA, switcherB]
+      )({
+        request,
+        capabilityPath: ['*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(result.section).toEqual({
+        entryA: false,
+        entryB: false,
+        entryC: true,
+      });
     });
-    const result = await getCapabilitiesResolver(
-      () => caps,
-      () => [
-        {
-          switcher,
-          capabilityPath: ['*'],
+
+    it('only applies the switchers intersecting with the requested paths', async () => {
+      const caps = getCapabilities({
+        section: {
+          entryA: true,
+          entryB: true,
+          entryC: true,
         },
-      ]
-    )({
-      request,
-      capabilityPath: ['*'],
-      applications: [],
-      useDefaultCapabilities: false,
+      });
+
+      const switcherAFunc = jest.fn().mockResolvedValue({});
+      const switcherBFunc = jest.fn().mockResolvedValue({});
+      const switcherCFunc = jest.fn().mockResolvedValue({});
+
+      const switcherA: SwitcherWithOptions = {
+        switcher: switcherAFunc,
+        capabilityPath: ['*'],
+      };
+      const switcherB: SwitcherWithOptions = {
+        switcher: switcherBFunc,
+        capabilityPath: ['ml.*'],
+      };
+      const switcherC: SwitcherWithOptions = {
+        switcher: switcherCFunc,
+        capabilityPath: ['fileUpload.*'],
+      };
+
+      await getCapabilitiesResolver(
+        () => caps,
+        () => [switcherA, switcherB, switcherC]
+      )({
+        request,
+        capabilityPath: ['ml.*'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(switcherAFunc).toHaveBeenCalledTimes(1);
+      expect(switcherBFunc).toHaveBeenCalledTimes(1);
+      expect(switcherCFunc).toHaveBeenCalledTimes(0);
     });
-    expect(result.section).toEqual({
-      boolean: true,
-      record: {
-        entry: true,
-      },
+
+    it('returns full capabilities even if not all switchers were applied', async () => {
+      const caps = getCapabilities({
+        section: {
+          entryA: true,
+          entryB: true,
+          entryC: true,
+        },
+      });
+
+      const switcherA: SwitcherWithOptions = {
+        switcher: (req: KibanaRequest, capabilities: Capabilities) => ({
+          section: {
+            entryA: false,
+          },
+        }),
+        capabilityPath: ['section.entryA'],
+      };
+      const switcherB: SwitcherWithOptions = {
+        switcher: (req: KibanaRequest, capabilities: Capabilities) => ({
+          section: {
+            entryB: false,
+          },
+        }),
+        capabilityPath: ['section.entryB'],
+      };
+
+      const result = await getCapabilitiesResolver(
+        () => caps,
+        () => [switcherA, switcherB]
+      )({
+        request,
+        capabilityPath: ['section.entryA'],
+        applications: [],
+        useDefaultCapabilities: false,
+      });
+
+      expect(result.section).toEqual({
+        entryA: false,
+        entryB: true,
+        entryC: true,
+      });
     });
   });
 
