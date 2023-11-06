@@ -32,7 +32,7 @@ The request body should contain the following attributes:
 (Optional, array of strings) An array of tags to categorize the private location.
 
 `geo`::
-(Optional, object) Geographic coordinates for the location. It should include the following attributes:
+(Optional, object) Geographic coordinates (WGS84) for the location. It should include the following attributes:
 
 - `lat` (Required, number): The latitude of the location.
 - `lon` (Required, number): The longitude of the location.
