@@ -690,6 +690,12 @@ describe('utils', () => {
           label: 'Toggle field',
           required: true,
         },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'another toggle field',
+          required: false,
+        },
       ];
       expect(
         constructQueryOptions({
@@ -778,7 +784,7 @@ describe('utils', () => {
                         Object {
                           "isQuoted": false,
                           "type": "literal",
-                          "value": "value.undefined",
+                          "value": "value.boolean",
                         },
                         Object {
                           "isQuoted": false,
