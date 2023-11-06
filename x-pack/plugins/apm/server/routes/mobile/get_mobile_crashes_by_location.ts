@@ -11,7 +11,7 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { SERVICE_NAME, ERROR_TYPE } from '../../../common/es_fields/apm';
+import { ERROR_TYPE, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
@@ -101,9 +101,7 @@ export async function getCrashesByLocation({
     timeseries:
       response.aggregations?.timeseries?.buckets.map((bucket) => ({
         x: bucket.key,
-        y:
-          response.aggregations?.crashes?.crashesByLocation?.buckets[0]
-            ?.doc_count ?? 0,
+        y: bucket?.crashes?.crashesByLocation?.buckets[0]?.doc_count ?? 0,
       })) ?? [],
   };
 }

@@ -58,12 +58,10 @@ exports[`OpenSearchPanel render 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="manageSearchesBtn"
           fill={true}
           href="/app/management/kibana/objects?initialQuery=type:(search)"
           onClick={[MockFunction]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Manage searches"
