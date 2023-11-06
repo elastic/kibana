@@ -88,9 +88,9 @@ export const generateConfig = async ({
         // this will be removed in 8.7 when the file upload feature is released
         `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
         // disable a tour that prevents tests from passing
-        `--xpack.securitySolution.offeringSettings=${JSON.stringify({
-          disableTimelineSaveTour: true,
-        })}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'disableTimelineSaveTour',
+        ])}`,
         ...kbnServerArgs,
       ],
     },

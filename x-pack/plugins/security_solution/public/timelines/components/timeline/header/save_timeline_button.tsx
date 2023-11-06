@@ -10,11 +10,12 @@ import { EuiButton, EuiToolTip, EuiTourStep, EuiCode, EuiText, EuiButtonEmpty } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimelineStatusByIdSelector } from '../../flyout/header/selectors';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineStatus } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { useLocalStorage } from '../../../../common/components/local_storage';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as timelineTranslations from './translations';
 
@@ -26,11 +27,8 @@ const SAVE_BUTTON_ELEMENT_ID = 'SAVE_BUTTON_ELEMENT_ID';
 const LOCAL_STORAGE_KEY = 'security.timelineFlyoutHeader.saveTimelineTourSeen';
 
 export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelineId }) => {
-  const {
-    services: {
-      configSettings: { disableTimelineSaveTour },
-    },
-  } = useKibana();
+  const isTimelineSaveTourSaveTourDisabled =
+    useIsExperimentalFeatureEnabled('disableTimelineSaveTour');
   const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
 
   const closeSaveTimeline = useCallback(() => {
@@ -69,7 +67,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
   // The last flag, checks if the tour has been dismissed before.
   const showTimelineSaveTour =
     // The timeline save tour could be disabled on a plugin level
-    !disableTimelineSaveTour &&
+    !isTimelineSaveTourSaveTourDisabled &&
     canEditTimeline &&
     isVisible &&
     !isLoading &&
