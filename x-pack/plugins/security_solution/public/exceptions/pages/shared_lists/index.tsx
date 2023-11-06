@@ -82,10 +82,16 @@ const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | '
 export const SharedLists = React.memo(() => {
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
-  const { loading: listsConfigLoading } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
 
-  const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canShowEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canAccessEndpointExceptions = useMemo(
+    () => canShowEndpointExceptions && !(needsListsConfiguration || listsConfigLoading),
+    [canShowEndpointExceptions, needsListsConfiguration, listsConfigLoading]
+  );
+
   const {
     services: {
       http,

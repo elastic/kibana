@@ -32,6 +32,7 @@ export interface AlertsTableComponentProps {
   from: string;
   globalFilters: Filter[];
   globalQuery: Query;
+  hasAccessToLists: boolean;
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;

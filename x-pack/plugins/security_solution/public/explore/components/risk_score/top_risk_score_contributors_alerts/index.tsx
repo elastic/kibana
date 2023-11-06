@@ -10,6 +10,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 
+import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 import * as i18n from './translations';
@@ -45,6 +46,12 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
     useUserData();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
+  const hasAccessToLists = useMemo(
+    () => !(listsConfigLoading || needsListsConfiguration),
+    [listsConfigLoading, needsListsConfiguration]
+  );
   const { runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -117,6 +124,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
               from={from}
               globalFilters={filters}
               globalQuery={query}
+              hasAccessToLists={hasAccessToLists}
               hasIndexMaintenance={hasIndexMaintenance ?? false}
               hasIndexWrite={hasIndexWrite ?? false}
               loading={userInfoLoading || loading}

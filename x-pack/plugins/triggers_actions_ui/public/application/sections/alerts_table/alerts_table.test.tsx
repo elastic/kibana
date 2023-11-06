@@ -6,18 +6,19 @@
  */
 import React, { useMemo, useReducer } from 'react';
 
-import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
-  ALERT_RULE_NAME,
-  ALERT_REASON,
-  ALERT_FLAPPING,
-  ALERT_STATUS,
   ALERT_CASE_IDS,
+  ALERT_FLAPPING,
+  ALERT_REASON,
+  ALERT_RULE_NAME,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
 import {
+  Alerts,
   AlertsField,
   AlertsTableConfigurationRegistry,
   AlertsTableProps,
@@ -25,7 +26,6 @@ import {
   FetchAlertData,
   RowSelectionState,
   UseCellActions,
-  Alerts,
 } from '../../../types';
 import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { BulkActionsContext } from './bulk_actions/context';
@@ -310,6 +310,7 @@ describe('AlertsTable', () => {
     onChangeVisibleColumns: () => {},
     browserFields,
     query: {},
+    hasAccessToLists: true,
   };
 
   const defaultBulkActionsState = {

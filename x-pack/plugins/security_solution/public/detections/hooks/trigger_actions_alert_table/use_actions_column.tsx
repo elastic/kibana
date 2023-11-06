@@ -10,11 +10,12 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../../common/hooks/use_license';
-import type { TimelineItem } from '../../../../common/search_strategy';
 import { getAlertsDefaultModel } from '../../components/alerts_table/default_config';
 import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
@@ -42,6 +43,13 @@ export const getUseActionColumnHook =
       } = getAlertsDefaultModel(license),
     } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
+    const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+      useListsConfig();
+    const hasAccessToLists = useMemo(
+      () => !(listsConfigLoading || needsListsConfiguration),
+      [listsConfigLoading, needsListsConfiguration]
+    );
+
     const renderCustomActionsRow = useCallback(
       ({
         rowIndex,
@@ -66,6 +74,7 @@ export const getUseActionColumnHook =
             controlColumn={leadingControlColumn}
             data={timelineItem}
             disabled={false}
+            hasAccessToLists={hasAccessToLists}
             index={rowIndex}
             isDetails={cveProps.isDetails}
             isExpanded={cveProps.isExpanded}

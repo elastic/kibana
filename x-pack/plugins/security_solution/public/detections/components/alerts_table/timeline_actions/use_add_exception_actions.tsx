@@ -68,14 +68,20 @@ export const useExceptionActions = ({
 
 export const useAlertExceptionActions = ({
   isEndpointAlert,
+  hasAccessToLists = false,
   onAddExceptionTypeClick,
-}: UseExceptionActionProps) => {
+}: UseExceptionActionProps & { hasAccessToLists?: boolean }) => {
   const { exceptionActionItems } = useExceptionActions({
     isEndpointAlert,
     onAddExceptionTypeClick,
   });
 
-  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
+  const canCrudEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
+  const canWriteEndpointExceptions = useMemo(
+    () => canCrudEndpointExceptions && hasAccessToLists,
+    [canCrudEndpointExceptions, hasAccessToLists]
+  );
+
   // Endpoint exceptions are available for:
   // Serverless Endpoint Essentials/Complete PLI and
   // on ESS Security Kibana sub-feature Endpoint Exceptions (enabled when Security feature is enabled)

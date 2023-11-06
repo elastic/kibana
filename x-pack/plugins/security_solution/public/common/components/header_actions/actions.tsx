@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { TableId, TimelineTabs } from '@kbn/securitysolution-data-table';
 import {
   eventHasNotes,
   getEventType,
@@ -53,6 +53,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   ecsData,
   eventId,
   eventIdToNoteIds,
+  hasAccessToLists,
   isEventPinned = false,
   isEventViewer = false,
   loadingEventIds,
@@ -64,7 +65,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   timelineId,
   toggleShowNotes,
   refetch,
-  setEventsLoading,
 }) => {
   const dispatch = useDispatch();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
@@ -298,6 +298,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
           ariaRowindex={ariaRowindex}
           columnValues={columnValues}
+          hasAccessToLists={hasAccessToLists}
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}

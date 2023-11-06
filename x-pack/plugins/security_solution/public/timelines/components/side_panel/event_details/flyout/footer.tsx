@@ -6,14 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useListsConfig } from '../../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { isActiveTimeline } from '../../../../../helpers';
 import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
-import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import { useExceptionFlyout } from '../../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { AddExceptionFlyoutWrapper } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { EventFiltersFlyout } from '../../../../../management/pages/event_filters/view/components/event_filters_flyout';
@@ -23,6 +24,7 @@ import type { Status } from '../../../../../../common/api/detection_engine';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
+
 interface FlyoutFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   detailsEcsData: Ecs | null;
@@ -128,6 +130,13 @@ export const FlyoutFooterComponent = React.memo(
     const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
       useEventFilterModal();
 
+    const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+      useListsConfig();
+    const hasAccessToLists = useMemo(
+      () => !(listsConfigLoading || needsListsConfiguration),
+      [listsConfigLoading, needsListsConfiguration]
+    );
+
     const [isOsqueryFlyoutOpenWithAgentId, setOsqueryFlyoutOpenWithAgentId] = useState<
       null | string
     >(null);
@@ -150,6 +159,7 @@ export const FlyoutFooterComponent = React.memo(
                   detailsData={detailsData}
                   ecsData={detailsEcsData}
                   handleOnEventClosed={handleOnEventClosed}
+                  hasAccessToLists={hasAccessToLists}
                   isHostIsolationPanelOpen={isHostIsolationPanelOpen}
                   loadingEventDetails={loadingEventDetails}
                   onAddEventFilterClick={onAddEventFilterClick}

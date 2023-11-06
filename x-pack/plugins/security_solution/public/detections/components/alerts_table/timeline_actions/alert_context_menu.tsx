@@ -58,6 +58,7 @@ interface AlertContextMenuProps {
   columnValues: string;
   disabled: boolean;
   ecsRowData: Ecs;
+  hasAccessToLists?: boolean;
   onRuleChange?: () => void;
   scopeId: string;
   refetch: (() => void) | undefined;
@@ -69,6 +70,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   columnValues,
   disabled,
   ecsRowData,
+  hasAccessToLists,
   onRuleChange,
   scopeId,
   globalQuery,
@@ -199,6 +201,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const { exceptionActionItems } = useAlertExceptionActions({
     isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
+    hasAccessToLists,
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,

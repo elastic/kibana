@@ -179,6 +179,7 @@ describe('AlertsTable.BulkActions', () => {
     onChangeVisibleColumns: () => {},
     browserFields: {},
     query: {},
+    hasAccessToLists: true,
   };
 
   const tablePropsWithBulkActions = {

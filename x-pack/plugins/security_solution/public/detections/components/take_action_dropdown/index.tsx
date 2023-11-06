@@ -48,6 +48,7 @@ export interface TakeActionDropdownProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   ecsData?: Ecs;
   handleOnEventClosed: () => void;
+  hasAccessToLists: boolean;
   isHostIsolationPanelOpen: boolean;
   loadingEventDetails: boolean;
   onAddEventFilterClick: () => void;
@@ -65,6 +66,7 @@ export const TakeActionDropdown = React.memo(
     detailsData,
     ecsData,
     handleOnEventClosed,
+    hasAccessToLists,
     isHostIsolationPanelOpen,
     loadingEventDetails,
     onAddEventFilterClick,
@@ -160,6 +162,7 @@ export const TakeActionDropdown = React.memo(
     const { exceptionActionItems } = useAlertExceptionActions({
       isEndpointAlert: isAlertFromEndpointAlert({ ecsData }),
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
+      hasAccessToLists,
     });
 
     const handleOnAddEventFilterClick = useCallback(() => {

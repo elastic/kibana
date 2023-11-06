@@ -94,6 +94,7 @@ export type ColumnHeaderOptions = Pick<
   subType?: IFieldSubType;
   type?: string;
 };
+
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;
@@ -133,6 +134,7 @@ export interface ActionProps {
   ecsData: Ecs;
   eventId: string;
   eventIdToNoteIds?: Readonly<Record<string, string[]>>;
+  hasAccessToLists?: boolean;
   index: number;
   isEventPinned?: boolean;
   isEventViewer?: boolean;
@@ -159,6 +161,7 @@ interface AdditionalControlColumnProps {
   checked: boolean;
   onRowSelected: OnRowSelected;
   eventId: string;
+  hasAccessToLists: boolean;
   id: string;
   columnId: string;
   loadingEventIds: Readonly<string[]>;

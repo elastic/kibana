@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
-  EuiProgress,
-  EuiDataGridSorting,
-  EuiEmptyPrompt,
   EuiDataGridProps,
+  EuiDataGridSorting,
   EuiDataGridToolBarVisibilityOptions,
+  EuiEmptyPrompt,
+  EuiProgress,
 } from '@elastic/eui';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import type {
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type {
   BrowserFields,
   RuleRegistrySearchRequestPagination,
 } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type {
-  QueryDslQueryContainer,
-  SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
@@ -61,6 +61,7 @@ const DefaultPagination = {
 export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   configurationId: string;
+  hasAccessToLists?: boolean;
   id: string;
   featureIds: ValidFeatureId[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -143,6 +144,7 @@ const AlertsTableState = (props: AlertsTableStateProps) => {
 const AlertsTableStateWithQueryProvider = ({
   alertsTableConfigurationRegistry,
   configurationId,
+  hasAccessToLists,
   id,
   featureIds,
   query,
@@ -383,6 +385,7 @@ const AlertsTableStateWithQueryProvider = ({
       disabledCellActions: [],
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
+      hasAccessToLists,
       id,
       leadingControlColumns: leadingControlColumns ?? [],
       showAlertStatusWithFlapping,
@@ -412,6 +415,7 @@ const AlertsTableStateWithQueryProvider = ({
       memoizedMaintenanceWindows,
       columns,
       pagination.pageSize,
+      hasAccessToLists,
       id,
       leadingControlColumns,
       showAlertStatusWithFlapping,

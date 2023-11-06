@@ -126,6 +126,7 @@ const testProps: AlertsTableComponentProps = {
     query: 'query',
     language: 'language',
   },
+  hasAccessToLists: true,
   hasIndexMaintenance: true,
   hasIndexWrite: true,
   loading: false,

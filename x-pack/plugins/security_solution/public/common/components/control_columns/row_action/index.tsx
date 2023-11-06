@@ -11,25 +11,26 @@ import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import type { TimelineItem, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 import { RightPanelKey } from '../../../../flyout/document_details/right';
 import type {
-  SetEventsDeleted,
-  SetEventsLoading,
   ControlColumnProps,
   ExpandedDetailType,
+  SetEventsDeleted,
+  SetEventsLoading,
 } from '../../../../../common/types';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
-import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types';
+import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
   data: TimelineItem;
   disabled: boolean;
+  hasAccessToLists?: boolean;
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
@@ -51,6 +52,7 @@ const RowActionComponent = ({
   controlColumn,
   data,
   disabled,
+  hasAccessToLists,
   index,
   isEventViewer,
   loadingEventIds,
@@ -154,6 +156,7 @@ const RowActionComponent = ({
           disabled={disabled}
           ecsData={ecsData}
           eventId={eventId}
+          hasAccessToLists={hasAccessToLists}
           index={index}
           isEventViewer={isEventViewer}
           loadingEventIds={loadingEventIds}

@@ -35,6 +35,7 @@ export interface UseRuleDetailsTabsProps {
   rule: Rule | null;
   ruleId: string;
   isExistingRule: boolean;
+  hasAccessToLists: boolean;
   hasIndexRead: boolean | null;
 }
 
@@ -42,6 +43,7 @@ export const useRuleDetailsTabs = ({
   rule,
   ruleId,
   isExistingRule,
+  hasAccessToLists,
   hasIndexRead,
 }: UseRuleDetailsTabsProps) => {
   const ruleDetailTabs = useMemo(
@@ -83,7 +85,11 @@ export const useRuleDetailsTabs = ({
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
   const ruleExecutionSettings = useRuleExecutionSettings();
 
-  const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canShowEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canReadEndpointExceptions = useMemo(
+    () => canShowEndpointExceptions && hasAccessToLists,
+    [canShowEndpointExceptions, hasAccessToLists]
+  );
 
   useEffect(() => {
     const hiddenTabs = [];

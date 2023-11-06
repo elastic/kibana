@@ -6,17 +6,17 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiDataGridStyle,
-  EuiSkeletonText,
   EuiDataGridRefProps,
+  EuiDataGridStyle,
   EuiFlexGroup,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
+import { useActionsColumn, useBulkActions, usePagination, useSorting } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
@@ -233,6 +233,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   ecsAlert: ecsAlertsData[visibleRowIndex],
                   nonEcsData: oldAlertsData[visibleRowIndex],
                   rowIndex: visibleRowIndex,
+                  hasAccessToLists: props.hasAccessToLists,
                   setFlyoutAlert: handleFlyoutAlert,
                   id: props.id,
                   cveProps,
@@ -254,19 +255,20 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
     return controlColumns;
   }, [
+    props.leadingControlColumns,
+    props.hasAccessToLists,
+    props.id,
+    renderCustomActionsRow,
+    isBulkActionsColumnActive,
     actionsColumnWidth,
+    ecsAlertsData,
     alerts,
     oldAlertsData,
-    ecsAlertsData,
-    getBulkActionsLeadingControlColumn,
     handleFlyoutAlert,
-    isBulkActionsColumnActive,
-    props.id,
-    props.leadingControlColumns,
-    renderCustomActionsRow,
     getSetIsActionLoadingCallback,
     refresh,
     clearSelection,
+    getBulkActionsLeadingControlColumn,
   ]);
 
   useEffect(() => {

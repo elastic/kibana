@@ -10,11 +10,11 @@
 // TODO: Refactor code - component can be broken apart
 import {
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiWindowEvent,
-  EuiHorizontalRule,
-  EuiFlexItem,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
@@ -84,6 +84,7 @@ import { GroupedAlertsTable } from '../../components/alerts_table/alerts_groupin
 import { AlertsTableComponent } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
+
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -134,6 +135,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+  const hasAccessToLists = useMemo(
+    () => !(listsConfigLoading || needsListsConfiguration),
+    [listsConfigLoading, needsListsConfiguration]
+  );
 
   const arePageFiltersEnabled = useIsExperimentalFeatureEnabled('alertsPageFiltersEnabled');
 
@@ -478,6 +483,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               from={from}
               globalFilters={filters}
               globalQuery={query}
+              hasAccessToLists={hasAccessToLists}
               hasIndexMaintenance={hasIndexMaintenance ?? false}
               hasIndexWrite={hasIndexWrite ?? false}
               loading={isAlertTableLoading}

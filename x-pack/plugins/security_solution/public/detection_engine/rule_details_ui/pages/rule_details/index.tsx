@@ -217,6 +217,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
+  const hasAccessToLists = useMemo(
+    () => !(listsConfigLoading || needsListsConfiguration),
+    [listsConfigLoading, needsListsConfiguration]
+  );
+
   const {
     sourcererDataView,
     runtimeMappings,
@@ -247,7 +252,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [rule, startMlJobs]);
 
-  const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, hasIndexRead });
+  const pageTabs = useRuleDetailsTabs({
+    rule,
+    ruleId,
+    isExistingRule,
+    hasAccessToLists,
+    hasIndexRead,
+  });
 
   const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
     useBoolState();
@@ -712,6 +723,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         from={from}
                         globalFilters={filters}
                         globalQuery={query}
+                        hasAccessToLists={hasAccessToLists}
                         hasIndexMaintenance={hasIndexMaintenance ?? false}
                         hasIndexWrite={hasIndexWrite ?? false}
                         loading={loading}

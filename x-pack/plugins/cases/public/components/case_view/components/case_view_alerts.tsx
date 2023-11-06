@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
@@ -16,9 +16,11 @@ import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
 import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
 import { CaseViewTabs } from '../case_view_tabs';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+
 interface CaseViewAlertsProps {
   caseData: CaseUI;
 }
+
 export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
   const { triggersActionsUi } = useKibana().services;
 
@@ -49,6 +51,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     featureIds: alertFeatureIds ?? [],
     query: alertIdsQuery,
     showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
+    hasAccessToLists: false,
   };
 
   if (alertIdsQuery.ids.values.length === 0) {
