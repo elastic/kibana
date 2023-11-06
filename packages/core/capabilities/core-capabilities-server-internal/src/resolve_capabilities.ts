@@ -40,16 +40,13 @@ export const getCapabilitiesResolver = (
   const getSwitcherForPath: ForPathSwitcherResolver = memoize(getSwitchersToUseForPath);
   let getAggregatedSwitchers: AggregatedSwitchersResolver;
 
-  // memoize is on the first argument only by default, which is what we want here
-  // getSwitchersToUseForPath
-  // (path: string, switchers: SwitcherWithId[]): string[]
-
   return async ({
     request,
     capabilityPath,
     applications,
     useDefaultCapabilities,
   }): Promise<Capabilities> => {
+    // initialize on first call (can't do it before as we need to wait plugins start to complete)
     if (!initialized) {
       capabilities = getCapabilities();
       switchers = new Map();
