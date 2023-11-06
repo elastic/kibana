@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -108,17 +108,25 @@ export function ApmMainTemplate({
 
   const rightSideItems = [
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
-    ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
   ];
+
+  const pageHeaderTitle = (
+    <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
+      {pageHeader?.pageTitle ?? pageTitle}
+      <EuiFlexItem grow={false}>
+        {environmentFilter && <ApmEnvironmentFilter />}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   const pageTemplate = (
     <ObservabilityPageTemplate
       noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
       isPageDataLoaded={isLoading === false}
       pageHeader={{
-        pageTitle,
         rightSideItems,
         ...pageHeader,
+        pageTitle: pageHeaderTitle,
         children:
           showServiceGroupsNav && selectedNavButton ? (
             <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
