@@ -545,6 +545,9 @@ export class ModelsProvider {
       await this._client.asInternalUser.ml.getTrainedModels({ model_id: modelId });
       esModelExists = true;
     } catch (error) {
+      if (error.statusCode !== 404) {
+        throw error;
+      }
       // model doesn't exist, ignore error
     }
 
