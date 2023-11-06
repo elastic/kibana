@@ -19,6 +19,21 @@ export interface LogDocument extends DataTableRecord {
     '@timestamp': string;
     'log.level'?: string;
     message?: string;
+
+    'host.name'?: string;
+    'service.name'?: string;
+    'trace.id'?: string;
+    'agent.name'?: string;
+    'orchestrator.cluster.name'?: string;
+    'orchestrator.resource.id'?: string;
+    'cloud.provider'?: string;
+    'cloud.region'?: string;
+    'cloud.availability_zone'?: string;
+    'cloud.project.id'?: string;
+    'cloud.instance.id'?: string;
+    'log.file.path'?: string;
+    'data_stream.namespace': string;
+    'data_stream.dataset': string;
   };
 }
 
@@ -26,6 +41,21 @@ export interface FlyoutDoc {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
+
+  'host.name'?: string;
+  'service.name'?: string;
+  'trace.id'?: string;
+  'agent.name'?: string;
+  'orchestrator.cluster.name'?: string;
+  'orchestrator.resource.id'?: string;
+  'cloud.provider'?: string;
+  'cloud.region'?: string;
+  'cloud.availability_zone'?: string;
+  'cloud.project.id'?: string;
+  'cloud.instance.id'?: string;
+  'log.file.path'?: string;
+  'data_stream.namespace': string;
+  'data_stream.dataset': string;
 }
 
 export interface FlyoutHighlightField {

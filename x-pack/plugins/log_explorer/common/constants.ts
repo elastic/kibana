@@ -13,6 +13,19 @@ export const HOST_NAME_FIELD = 'host.name';
 export const LOG_LEVEL_FIELD = 'log.level';
 export const MESSAGE_FIELD = 'message';
 export const SERVICE_NAME_FIELD = 'service.name';
+export const TRACE_ID = 'trace.id';
+
+export const AGENT_NAME = 'agent.name';
+export const ORCHESTRATOR_CLUSTER_NAME = 'orchestrator.cluster.name';
+export const ORCHESTRATOR_RESOURCE_ID = 'orchestrator.resource.id';
+export const CLOUD_PROVIDER = 'cloud.provider';
+export const CLOUD_REGION = 'cloud.region';
+export const CLOUD_AVAILABILITY_ZONE = 'cloud.availability_zone';
+export const CLOUD_PROJECT_ID = 'cloud.project.id';
+export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
+export const LOG_FILE_PATH = 'log.file.path';
+export const DATASTREAM_NAMESPACE = 'data_stream.namespace';
+export const DATASTREAM_DATASET = 'data_stream.dataset';
 
 // Sizing
 export const DATA_GRID_COLUMN_WIDTH_SMALL = 240;

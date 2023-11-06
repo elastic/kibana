@@ -6,42 +6,24 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { LogLevel } from './sub_components/log_level';
-import { Timestamp } from './sub_components/timestamp';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { FlyoutProps, LogDocument } from './types';
-import { getDocDetailRenderFlags, useDocDetail } from './use_doc_detail';
-import { Message } from './sub_components/message';
+import { useDocDetail } from './use_doc_detail';
+import { FlyoutHeader } from './fylout_header';
+import { FlyoutHighlights } from './flyout_highlights';
 
-export function FlyoutDetail({ dataView, doc }: Pick<FlyoutProps, 'dataView' | 'doc' | 'actions'>) {
+export function FlyoutDetail({
+  dataView,
+  doc,
+  actions,
+}: Pick<FlyoutProps, 'dataView' | 'doc' | 'actions'>) {
   const parsedDoc = useDocDetail(doc as LogDocument, { dataView });
 
-  const { hasTimestamp, hasLogLevel, hasMessage, hasBadges, hasFlyoutHeader } =
-    getDocDetailRenderFlags(parsedDoc);
-
-  return hasFlyoutHeader ? (
-    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="logExplorerFlyoutDetail">
-      <EuiFlexItem grow={false}>
-        {hasBadges && (
-          <EuiFlexGroup responsive={false} gutterSize="m">
-            {hasLogLevel && (
-              <EuiFlexItem grow={false}>
-                <LogLevel level={parsedDoc['log.level']} />
-              </EuiFlexItem>
-            )}
-            {hasTimestamp && (
-              <EuiFlexItem grow={false}>
-                <Timestamp timestamp={parsedDoc['@timestamp']} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        )}
-      </EuiFlexItem>
-      {hasMessage && (
-        <EuiFlexItem grow={false}>
-          <Message message={parsedDoc.message} />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  ) : null;
+  return (
+    <>
+      <FlyoutHeader doc={parsedDoc} />
+      <EuiHorizontalRule margin="xs" />
+      <FlyoutHighlights formattedDoc={parsedDoc} flattenedDoc={doc.flattened} actions={actions} />
+    </>
+  );
 }
