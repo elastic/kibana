@@ -54,7 +54,7 @@ export const storedPackagePolicyToAgentInputs = (
       data_stream: {
         namespace: packagePolicy.namespace || 'default',
       },
-      use_output: outputId,
+      use_output: packagePolicy.output_id || outputId,
       package_policy_id: packagePolicy.id,
       ...(input.compiled_input || {}),
       ...(input.streams.length

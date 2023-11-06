@@ -215,7 +215,8 @@ export async function getFullAgentPolicy(
         Object.assign(permissions, monitoringPermissions);
       }
 
-      if (outputId === getOutputIdForAgentPolicy(dataOutput)) {
+      if (true) {
+        // TODO just for testing
         Object.assign(permissions, dataPermissions);
       }
 

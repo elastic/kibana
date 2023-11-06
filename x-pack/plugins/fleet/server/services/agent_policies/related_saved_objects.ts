@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniq } from 'lodash';
 
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy, PackagePolicy } from '../../types';
 import { outputService } from '../output';
 
 import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
@@ -25,9 +25,15 @@ export async function fetchRelatedSavedObjects(
     outputService.getDefaultDataOutputId(soClient),
     outputService.getDefaultMonitoringOutputId(soClient),
   ]);
-
   if (!defaultDataOutputId) {
     throw new Error('Default output is not setup');
+  }
+
+  const outputIds = new Set<string>();
+  for (const policy of agentPolicy.package_policies as PackagePolicy[]) {
+    if (policy.output_id) {
+      outputIds.add(policy.output_id);
+    }
   }
 
   const dataOutputId = agentPolicy.data_output_id || defaultDataOutputId;
@@ -36,9 +42,13 @@ export async function fetchRelatedSavedObjects(
 
   const [outputs, { host: downloadSourceUri, proxy_id: downloadSourceProxyId }, fleetServerHosts] =
     await Promise.all([
-      outputService.bulkGet(soClient, uniq([dataOutputId, monitoringOutputId]), {
-        ignoreNotFound: true,
-      }),
+      outputService.bulkGet(
+        soClient,
+        uniq([dataOutputId, monitoringOutputId, ...outputIds.values()]),
+        {
+          ignoreNotFound: true,
+        }
+      ),
       getSourceUriForAgentPolicy(soClient, agentPolicy),
       getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
         appContextService

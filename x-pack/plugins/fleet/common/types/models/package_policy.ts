@@ -78,6 +78,7 @@ export interface NewPackagePolicy {
   enabled: boolean;
   is_managed?: boolean;
   policy_id: string;
+  output_id?: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;

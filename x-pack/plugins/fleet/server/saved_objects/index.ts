@@ -324,6 +324,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         enabled: { type: 'boolean' },
         is_managed: { type: 'boolean' },
         policy_id: { type: 'keyword' },
+        output_id: { type: 'keyword' },
         package: {
           properties: {
             name: { type: 'keyword' },
