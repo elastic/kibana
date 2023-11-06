@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { navigateTo } from '../../tasks/navigation';
+import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { triggerLoadData } from '../../tasks/inventory';
@@ -29,7 +29,7 @@ describe('ALL - Inventory', { tags: ['@ess'] }, () => {
   describe('', () => {
     beforeEach(() => {
       cy.login(ServerlessRoleName.SOC_MANAGER);
-      navigateTo('/app/osquery');
+      navigateToWithoutWaitForReact('/app/osquery');
     });
 
     it('should be able to run the query', () => {

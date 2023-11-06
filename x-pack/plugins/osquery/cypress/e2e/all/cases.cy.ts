@@ -11,7 +11,7 @@ import {
   checkActionItemsInResults,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
-import { navigateTo } from '../../tasks/navigation';
+import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -39,7 +39,7 @@ describe('Add to Cases', () => {
         caseTitle = caseInfo.title;
       });
       cy.login(ServerlessRoleName.SOC_MANAGER);
-      navigateTo('/app/osquery');
+      navigateToWithoutWaitForReact('/app/osquery');
     });
 
     afterEach(() => {
@@ -71,7 +71,7 @@ describe('Add to Cases', () => {
         caseTitle = caseInfo.title;
       });
       cy.login(ServerlessRoleName.SOC_MANAGER);
-      navigateTo('/app/osquery');
+      navigateToWithoutWaitForReact('/app/osquery');
     });
 
     afterEach(() => {
