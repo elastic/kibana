@@ -15,7 +15,8 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiTab,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +27,7 @@ import {
   ShareMenuItem,
   UrlParamExtension,
 } from '../../types';
+import { TabContent } from './tab_content';
 
 export interface ShareModalProps {
   allowEmbed: boolean;
@@ -50,39 +52,45 @@ export interface ShareModalProps {
   disabledShareUrl?: boolean;
 }
 
-const getTabs = (
-  shareMenuItems: ShareMenuItem[],
-  objectTypeTitle: string | undefined,
-  objectType: string,
-  disabledShareUrl: boolean,
-  allowEmbed: boolean
-) => {
+const getTabs = (props: ShareModalProps) => {
+  const {
+    shareMenuItems,
+    objectTypeTitle,
+    objectType,
+    disabledShareUrl = true,
+    allowEmbed,
+    allowShortUrl,
+    objectId = '',
+    urlService,
+    shareableUrl,
+    shareableUrlForSavedObject,
+    shareableUrlLocatorParams,
+    embedUrlParamExtensions,
+    anonymousAccess,
+    showPublicUrlSwitch,
+    snapshotShareWarning,
+  } = props;
   const tabs: EuiContextMenuPanelDescriptor[] = [];
   const menuItems: ShareContextMenuPanelItem[] = [];
 
   const permalinkPanel = {
     id: tabs.length + 1,
-    title: i18n.translate('share.contextMenu.permalinkPanelTitle', {
-      defaultMessage: 'Get link',
+    title: i18n.translate('share.contextModal.permalinkPanelTitle', {
+      defaultMessage: 'Links',
     }),
-    // content: (
-    // <UrlPanelContent
-    //   allowShortUrl={this.props.allowShortUrl}
-    //   objectId={this.props.objectId}
-    //   objectType={this.props.objectType}
-    //   shareableUrl={this.props.shareableUrl}
-    //   shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
-    //   shareableUrlLocatorParams={this.props.shareableUrlLocatorParams}
-    //   anonymousAccess={this.props.anonymousAccess}
-    //   showPublicUrlSwitch={this.props.showPublicUrlSwitch}
-    //   urlService={this.props.urlService}
-    //   snapshotShareWarning={this.props.snapshotShareWarning}
-    // />
-    // ),
+    content: (
+      <TabContent
+        allowShortUrl={allowShortUrl}
+        isEmbedded
+        objectId={objectId}
+        objectType={objectType}
+        urlService={urlService}
+      />
+    ),
   };
   menuItems.push({
-    name: i18n.translate('share.contextMenu.permalinksLabel', {
-      defaultMessage: 'Get links',
+    name: i18n.translate('share.contextModal.permalinksLabel', {
+      defaultMessage: 'Links',
     }),
     icon: 'link',
     panel: permalinkPanel.id,
@@ -95,30 +103,30 @@ const getTabs = (
   if (allowEmbed) {
     const embedPanel = {
       id: tabs.length + 1,
-      title: i18n.translate('share.contextMenu.embedCodePanelTitle', {
-        defaultMessage: 'Embed Code',
+      title: i18n.translate('share.contextModal.embedCodePanelTitle', {
+        defaultMessage: 'Embed',
       }),
-      // content: (
-      //   <UrlPanelContent
-      //     allowShortUrl={this.props.allowShortUrl}
-      //     isEmbedded
-      //     objectId={this.props.objectId}
-      //     objectType={this.props.objectType}
-      //     shareableUrl={this.props.shareableUrl}
-      //     shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
-      //     shareableUrlLocatorParams={this.props.shareableUrlLocatorParams}
-      //     urlParamExtensions={this.props.embedUrlParamExtensions}
-      //     anonymousAccess={this.props.anonymousAccess}
-      //     showPublicUrlSwitch={this.props.showPublicUrlSwitch}
-      //     urlService={this.props.urlService}
-      //     snapshotShareWarning={this.props.snapshotShareWarning}
-      //   />
-      // ),
+      content: (
+        <TabContent
+          allowShortUrl={allowShortUrl}
+          isEmbedded
+          objectId={objectId}
+          objectType={objectType}
+          urlService={urlService}
+          shareableUrl={shareableUrl}
+          shareableUrlForSavedObject={shareableUrlForSavedObject}
+          shareableUrlLocatorParams={shareableUrlLocatorParams}
+          urlParamExtensions={embedUrlParamExtensions}
+          anonymousAccess={anonymousAccess}
+          showPublicUrlSwitch={showPublicUrlSwitch}
+          snapshotShareWarning={snapshotShareWarning}
+        />
+      ),
     };
     tabs.push(embedPanel);
     menuItems.push({
-      name: i18n.translate('share.contextMenu.embedCodeLabel', {
-        defaultMessage: 'Embed code',
+      name: i18n.translate('share.contextModal.embedCodeLabel', {
+        defaultMessage: 'Embed',
       }),
       icon: 'console',
       panel: embedPanel.id,
@@ -139,7 +147,7 @@ const getTabs = (
   if (menuItems.length > 1) {
     const topLevelMenuPanel = {
       id: tabs.length + 1,
-      title: i18n.translate('share.contextMenuTitle', {
+      title: i18n.translate('share.contextModalTitle', {
         defaultMessage: 'Share this {objectType}',
         values: {
           objectType: objectTypeTitle || objectType,
@@ -171,50 +179,42 @@ const getTabs = (
     };
     tabs.push(topLevelMenuPanel);
   }
-  const initialTabId = tabs[tabs.length - 1].title;
-  return { tabs, initialTabId };
+  const initialTabTitle = tabs[tabs.length - 1].title;
+  return { tabs, initialTabTitle };
 };
 
 export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
-  const {
-    shareMenuItems,
-    objectTypeTitle,
-    objectType,
-    disabledShareUrl = true,
-    allowEmbed,
-  } = props;
   const [_, setIsModalVisible] = useState(false);
   const closeModal = () => setIsModalVisible(false);
-  const [selectedTabId, setSelectedTabId] = useState('');
-  const onSelectedTab = (id: any) => {
-    setSelectedTabId(id);
+
+  const { tabs, initialTabTitle } = getTabs(props);
+
+  const formattedTabs: any = [];
+  tabs.map((t) => {
+    formattedTabs.push({
+      name: t.title,
+      title: t.title,
+    });
+  });
+  const [selectedTab, setSelectedTab] = useState(formattedTabs[0]);
+
+  const onTabClick = (selectTab: EuiTabbedContentTab) => {
+    setSelectedTab(selectTab);
   };
-  const { tabs, initialTabId } = getTabs(
-    shareMenuItems,
-    objectTypeTitle,
-    objectType,
-    disabledShareUrl,
-    allowEmbed
-  );
 
   return (
     <I18nProvider>
       <EuiOverlayMask>
         <EuiModal onClose={closeModal} data-test-subject="shareContextModal">
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{initialTabId}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>{initialTabTitle}</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            {' '}
-            {tabs.map((t, i) => {
-              <EuiTab
-                onClick={() => onSelectedTab(t.id)}
-                isSelected={t.id === selectedTabId}
-                key={i}
-              >
-                {t.title}
-              </EuiTab>;
-            })}
+            <EuiTabbedContent
+              tabs={formattedTabs}
+              selectedTab={selectedTab}
+              onTabClick={onTabClick}
+            />
           </EuiModalBody>
         </EuiModal>
       </EuiOverlayMask>
