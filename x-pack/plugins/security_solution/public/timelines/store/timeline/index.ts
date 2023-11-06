@@ -15,7 +15,7 @@ export { timelineActions, timelineSelectors };
 
 export interface TimelinePluginState {
   timeline: TimelineState;
-  discover: SecuritySolutionDiscoverstate;
+  discover: SecuritySolutionDiscoverState;
 }
 
 export interface TimelinePluginReducer {
