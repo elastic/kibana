@@ -66,7 +66,7 @@ export class ManagementService {
   }
 
   start({ capabilities, uiConfig }: StartParams) {
-    this.licenseFeaturesSubscription = this.license.features$.subscribe(async (features) => {
+    this.licenseFeaturesSubscription = this.license.features$.subscribe((features) => {
       const securitySection = this.securitySection!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
