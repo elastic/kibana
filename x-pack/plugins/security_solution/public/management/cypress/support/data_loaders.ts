@@ -7,6 +7,8 @@
 
 // / <reference types="cypress" />
 
+// eslint-disable-next-line import/no-nodejs-modules
+import { userInfo } from 'os';
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
@@ -61,6 +63,18 @@ import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_d
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
+import {
+  installSentinelOneAgent,
+  S1Client,
+} from '../../../../scripts/endpoint/sentinelone_host/common';
+import {
+  addSentinelOneIntegrationToAgentPolicy,
+  deleteAgentPolicy,
+  fetchAgentPolicyEnrollmentKey,
+  getOrCreateDefaultAgentPolicy,
+} from '../../../../scripts/endpoint/common/fleet_services';
+import { startElasticAgentWithDocker } from '../../../../scripts/endpoint/common/elastic_agent_service';
+import { createVm } from '../../../../scripts/endpoint/common/vm_services';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   deleteIndexedFleetEndpointPolicies,
@@ -328,6 +342,83 @@ export const dataLoadersForRealEndpoints = (
   });
 
   on('task', {
+    createSentinelOneHost: async () => {
+      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
+        throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
+      }
+
+      const { log } = await stackServicesPromise;
+      const s1Client = new S1Client({
+        url: process.env.CYPRESS_SENTINELONE_URL,
+        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
+        log,
+      });
+
+      const vmName = `${userInfo()
+        .username.toLowerCase()
+        .replaceAll('.', '-')}-sentinelone-${Math.random().toString().substring(2, 6)}`;
+
+      const hostVm = await createVm({
+        type: 'multipass',
+        name: vmName,
+        log,
+        memory: '2G',
+        disk: '10G',
+      });
+
+      const s1Info = await installSentinelOneAgent({
+        hostVm,
+        log,
+        s1Client,
+      });
+
+      log.info(`Done!
+
+${hostVm.info()}
+
+SentinelOne Agent Status:
+${s1Info.status}
+`);
+
+      return hostVm;
+    },
+
+    createSentinelOneAgentPolicy: async () => {
+      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
+        throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
+      }
+
+      const { log, kbnClient } = await stackServicesPromise;
+      const agentPolicyId = (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
+
+      await addSentinelOneIntegrationToAgentPolicy({
+        kbnClient,
+        log,
+        agentPolicyId,
+        consoleUrl: process.env.CYPRESS_SENTINELONE_URL,
+        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
+      });
+
+      const enrollmentToken = await fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId);
+
+      const elasticAgent = await startElasticAgentWithDocker({
+        kbnClient,
+        logger: log,
+        enrollmentToken,
+      });
+
+      return {
+        ...elasticAgent,
+        policyId: agentPolicyId,
+      };
+    },
+
+    deleteAgentPolicy: async (agentPolicyId: string) => {
+      const { kbnClient } = await stackServicesPromise;
+
+      await deleteAgentPolicy(kbnClient, agentPolicyId);
+    },
+
     createEndpointHost: async (
       options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostResponse> => {

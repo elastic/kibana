@@ -6,10 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { find } from 'lodash/fp';
-import type { Maybe } from '@kbn/observability-plugin/common/typings';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { IsolateSentinelOneHost } from './isolate_sentinelone';
+import { UnisolateSentinelOneHost } from './unisolate_sentinelone';
+import { getFieldValue } from './helpers';
 import { IsolateHost } from './isolate';
 import { UnisolateHost } from './unisolate';
 
@@ -20,27 +21,56 @@ export const HostIsolationPanel = React.memo(
     successCallback,
     isolateAction,
   }: {
-    details: Maybe<TimelineEventsDetailsItem[]>;
+    details: TimelineEventsDetailsItem[] | null;
     cancelCallback: () => void;
     successCallback?: () => void;
     isolateAction: string;
   }) => {
-    const endpointId = useMemo(() => {
-      const findEndpointId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
-      return findEndpointId ? findEndpointId[0] : '';
-    }, [details]);
+    const endpointId = useMemo(
+      () => getFieldValue({ category: 'agent', field: 'agent.id' }, details),
+      [details]
+    );
 
-    const hostName = useMemo(() => {
-      const findHostName = find({ category: 'host', field: 'host.name' }, details)?.values;
-      return findHostName ? findHostName[0] : '';
-    }, [details]);
+    const sentinelOneAgentId = useMemo(
+      () =>
+        getFieldValue({ category: 'sentinel_one', field: 'sentinel_one.agent.uuid' }, details) ||
+        getFieldValue(
+          { category: 'sentinel_one', field: 'sentinel_one.activity.data.uuid' },
+          details
+        ) ||
+        undefined,
+      [details]
+    );
 
-    const alertId = useMemo(() => {
-      const findAlertId = find({ category: '_id', field: '_id' }, details)?.values;
-      return findAlertId ? findAlertId[0] : '';
-    }, [details]);
+    const hostName = useMemo(
+      () => getFieldValue({ category: 'host', field: 'host.name' }, details),
+      [details]
+    );
+
+    const alertId = useMemo(
+      () => getFieldValue({ category: '_id', field: '_id' }, details),
+      [details]
+    );
 
     const { casesInfo } = useCasesFromAlerts({ alertId });
+
+    if (sentinelOneAgentId) {
+      return isolateAction === 'isolateHost' ? (
+        <IsolateSentinelOneHost
+          sentinelOneAgentId={sentinelOneAgentId}
+          hostName={hostName}
+          cancelCallback={cancelCallback}
+          successCallback={successCallback}
+        />
+      ) : (
+        <UnisolateSentinelOneHost
+          sentinelOneAgentId={sentinelOneAgentId}
+          hostName={hostName}
+          cancelCallback={cancelCallback}
+          successCallback={successCallback}
+        />
+      );
+    }
 
     return isolateAction === 'isolateHost' ? (
       <IsolateHost

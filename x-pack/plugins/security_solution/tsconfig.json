@@ -99,7 +99,6 @@
     "@kbn/expect",
     "@kbn/share-plugin",
     "@kbn/analytics",
-    "@kbn/observability-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/doc-links",
     "@kbn/react-field",
@@ -178,5 +177,6 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/shared-ux-error-boundary",
     "@kbn/zod-helpers",
+    "@kbn/stack-connectors-plugin"
   ]
 }

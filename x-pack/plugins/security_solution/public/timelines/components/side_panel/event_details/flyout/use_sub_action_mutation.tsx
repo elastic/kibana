@@ -20,7 +20,6 @@ export const useSubActionMutation = <P, R>({
   connectorId,
   subAction,
   subActionParams,
-  disabled = false,
 }: UseSubActionParams<P>) => {
   const { http } = useKibana().services;
 

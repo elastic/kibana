@@ -53,7 +53,7 @@ export function getConnectorType(): ConnectorTypeModel<
       // The internal "subAction" param should always be valid, ensure it is only if "subActionParams" are valid
       if (!subAction) {
         errors.subAction.push(translations.ACTION_REQUIRED);
-      } else if (!(subAction in SUB_ACTION)) {
+      } else if (!Object.values(SUB_ACTION).includes(subAction)) {
         errors.subAction.push(translations.INVALID_ACTION);
       }
       return { errors };

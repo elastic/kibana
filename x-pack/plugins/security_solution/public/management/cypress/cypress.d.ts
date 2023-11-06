@@ -41,6 +41,8 @@ import type {
 } from '../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import type { LoadedRoleAndUser } from '../../../scripts/endpoint/common/role_and_user_loader';
 
+declare module 'cypress-data-session/src/plugin';
+
 declare global {
   namespace Cypress {
     interface SuiteConfigOverrides {

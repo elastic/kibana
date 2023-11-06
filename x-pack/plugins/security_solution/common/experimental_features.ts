@@ -114,6 +114,11 @@ export const allowedExperimentalValues = Object.freeze({
    * This flag is used to disable the tour in cypress tests.
    */
   disableTimelineSaveTour: false,
+
+  /**
+   * Enables SentinelOne manual host manipulation actions
+   */
+  sentinelOneManualHostActionsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
