@@ -11,7 +11,6 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -31,7 +30,6 @@ interface CreateTestConfigOptions {
   useDedicatedTaskRunner: boolean;
   enableFooterInEmail?: boolean;
   maxScheduledPerMinute?: number;
-  experimentalFeatures?: ExperimentalConfigKeys;
 }
 
 // test.not-enabled is specifically not enabled
@@ -72,6 +70,7 @@ const enabledActionTypes = [
   'test.capped',
   'test.system-action',
   'test.system-action-kibana-privileges',
+  'test.sub-action-connector-with-privileged-sub-actions',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -89,7 +88,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     useDedicatedTaskRunner,
     enableFooterInEmail = true,
     maxScheduledPerMinute,
-    experimentalFeatures = [],
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -350,7 +348,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.task_manager.allow_reading_invalid_state=false',
           '--xpack.task_manager.requeue_invalid_tasks.enabled=true',
           '--xpack.actions.queued.max=500',
-          `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
+          `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
+            'sentinelOneConnectorOn',
+          ])}`,
         ],
       },
     };

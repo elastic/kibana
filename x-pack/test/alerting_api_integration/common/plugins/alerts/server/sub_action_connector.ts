@@ -110,3 +110,39 @@ export const getTestSubActionConnectorWithoutSubActions = (
     getService: (params) => new TestNoSubActions(params),
   };
 };
+
+export const getTestSubActionConnectorWithPrivilegedSubActions = (
+  actions: ActionsPluginSetup
+): SubActionConnectorType<TestConfig, TestSecrets> => {
+  const SubActionConnector = actions.getSubActionConnectorClass<TestConfig, TestSecrets>();
+
+  class TestNoSubActions extends SubActionConnector {
+    constructor(params: ServiceParams<TestConfig, TestSecrets>) {
+      super(params);
+
+      this.registerSubAction({
+        name: 'authzRequired',
+        method: 'authRequired',
+        schema: null,
+      });
+    }
+
+    protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
+      return `Message: ${error.response?.data.errorMessage}. Code: ${error.response?.data.errorCode}`;
+    }
+
+    public authzRequired() {}
+  }
+
+  return {
+    id: 'test.sub-action-connector-with-privileged-sub-actions',
+    name: 'Test: Sub action Authz connector',
+    minimumLicenseRequired: 'enterprise' as const,
+    supportedFeatureIds: ['alerting'],
+    schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
+    getService: (params) => new TestNoSubActions(params),
+    getSubActionPrivileges: ({ subActionName }) => {
+      return ['api:subActionsExecute'];
+    },
+  };
+};

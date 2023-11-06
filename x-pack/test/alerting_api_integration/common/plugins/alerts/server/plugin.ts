@@ -160,6 +160,32 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
 
+    features.registerKibanaFeature({
+      id: 'subActionsFixture',
+      name: 'Execute Sub-Actions',
+      app: ['kibana'],
+      category: { id: 'foo', label: 'foo' },
+      privileges: {
+        all: {
+          app: ['kibana'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          api: ['subActionsExecute'],
+          ui: [],
+        },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
+
     defineActionTypes(core, { actions });
     defineAlertTypes(core, { alerting, ruleRegistry }, this.logger);
     defineRoutes(core, this.taskManagerStart, this.notificationsStart, { logger: this.logger });

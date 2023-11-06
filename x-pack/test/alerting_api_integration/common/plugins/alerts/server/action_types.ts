@@ -12,6 +12,7 @@ import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
   getTestSubActionConnector,
   getTestSubActionConnectorWithoutSubActions,
+  getTestSubActionConnectorWithPrivilegedSubActions,
 } from './sub_action_connector';
 
 export function defineActionTypes(
@@ -85,6 +86,9 @@ export function defineActionTypes(
 
   actions.registerSubActionConnectorType(getTestSubActionConnector(actions));
   actions.registerSubActionConnectorType(getTestSubActionConnectorWithoutSubActions(actions));
+  actions.registerSubActionConnectorType(
+    getTestSubActionConnectorWithPrivilegedSubActions(actions)
+  );
 }
 
 function getIndexRecordActionType() {
