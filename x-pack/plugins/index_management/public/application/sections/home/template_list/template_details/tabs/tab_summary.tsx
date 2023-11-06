@@ -206,7 +206,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {getLifecycleValue(serializeAsESLifecycle(templateDetails.lifecycle), INFINITE_AS_ICON)}
+                  {getLifecycleValue(
+                    serializeAsESLifecycle(templateDetails.lifecycle),
+                    INFINITE_AS_ICON
+                  )}
                 </EuiDescriptionListDescription>
               </>
             )}

@@ -38,12 +38,6 @@ export const saveTemplate = async ({
     ? serializeLegacyTemplate(template)
     : serializeTemplate(template);
 
-  console.log('=========== WILL SAVE TEMPLATE ===============');
-  console.log(JSON.stringify(template, null, 2));
-  console.log('#########');
-  console.log('#########');
-  console.log(JSON.stringify(serializedTemplate, null, 2));
-
   if (isLegacy) {
     const {
       order,

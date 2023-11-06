@@ -28,7 +28,7 @@ import {
   JsonEditorField,
   NumericField,
 } from '../../../../shared_imports';
-import { UnitField, timeUnits } from '../../../components/shared';
+import { UnitField, timeUnits } from '../../shared';
 import { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
@@ -119,9 +119,13 @@ function getFieldsMeta(esDocsBase: string) {
       title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.dataRetentionTitle', {
         defaultMessage: 'Data retention',
       }),
-      description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.dataRetentionDescription', {
-        defaultMessage: 'Data will be kept at least this long before being automatically deleted.',
-      }),
+      description: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionDescription',
+        {
+          defaultMessage:
+            'Data will be kept at least this long before being automatically deleted.',
+        }
+      ),
       valueTestSubject: 'valueDataRetentionField',
       unitTestSubject: 'unitDataRetentionField',
     },
@@ -177,9 +181,18 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       getFormData,
     } = form;
 
-    const [{ addMeta, doCreateDataStream, lifecycle }] = useFormData<{ addMeta: boolean, lifecycle: DataRetention, doCreateDataStream: boolean }>({
+    const [{ addMeta, doCreateDataStream, lifecycle }] = useFormData<{
+      addMeta: boolean;
+      lifecycle: DataRetention;
+      doCreateDataStream: boolean;
+    }>({
       form,
-      watch: ['addMeta', 'lifecycle.enabled', 'lifecycle.infiniteDataRetention', 'doCreateDataStream'],
+      watch: [
+        'addMeta',
+        'lifecycle.enabled',
+        'lifecycle.infiniteDataRetention',
+        'doCreateDataStream',
+      ],
     });
 
     /**
@@ -198,9 +211,8 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
     }, [onChange, isFormValid, validate, getFormData]);
 
-    const { name, indexPatterns, createDataStream, order, priority, version, dataRetention } = getFieldsMeta(
-      documentationService.getEsDocsBase()
-    );
+    const { name, indexPatterns, createDataStream, order, priority, version, dataRetention } =
+      getFieldsMeta(documentationService.getEsDocsBase());
 
     return (
       <>
@@ -293,17 +305,17 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 <UseField
                   path="lifecycle.value"
                   component={NumericField}
-                  labelAppend={(
+                  labelAppend={
                     <UseField
                       path="lifecycle.infiniteDataRetention"
                       data-test-subj="infiniteDataRetentionToggle"
                       componentProps={{
                         euiFieldProps: {
-                          compressed: true
-                        }
+                          compressed: true,
+                        },
                       }}
                     />
-                  )}
+                  }
                   componentProps={{
                     euiFieldProps: {
                       disabled: lifecycle?.infiniteDataRetention,
@@ -359,7 +371,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               }}
             />
           </FormRow>
-
 
           {/* _meta */}
           {isLegacy === false && (

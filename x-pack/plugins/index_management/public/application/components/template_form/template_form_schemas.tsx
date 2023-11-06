@@ -175,9 +175,12 @@ export const schemas: Record<string, FormSchema> = {
     },
     'lifecycle.value': {
       type: FIELD_TYPES.TEXT,
-      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionValueLabel', {
-        defaultMessage: 'Data Retention',
-      }),
+      label: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionValueLabel',
+        {
+          defaultMessage: 'Data Retention',
+        }
+      ),
       formatters: [toInt],
       validations: [
         {
@@ -214,9 +217,12 @@ export const schemas: Record<string, FormSchema> = {
     },
     'lifecycle.unit': {
       type: FIELD_TYPES.TEXT,
-      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionUnitLabel', {
-        defaultMessage: 'Time unit',
-      }),
+      label: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionUnitLabel',
+        {
+          defaultMessage: 'Time unit',
+        }
+      ),
       defaultValue: 'd',
     },
 

@@ -89,7 +89,7 @@ export const serializeAsESLifecycle = (lifecycle?: DataRetention): DataStream['l
     return undefined;
   }
 
-  const { infiniteDataRetention, value, unit  } = lifecycle;
+  const { infiniteDataRetention, value, unit } = lifecycle;
 
   if (infiniteDataRetention) {
     return {
@@ -120,6 +120,6 @@ export const deserializeESLifecycle = (lifecycle?: DataStream['lifecycle']): Dat
   return {
     enabled: true,
     value: Number(size),
-    unit: unit,
+    unit,
   };
 };
