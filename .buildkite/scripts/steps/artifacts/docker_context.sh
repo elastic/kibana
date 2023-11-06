@@ -11,20 +11,31 @@ KIBANA_DOCKER_CONTEXT="${KIBANA_DOCKER_CONTEXT:="default"}"
 
 echo "--- Create contexts"
 mkdir -p target
-node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact "${BUILD_ARGS[@]}"
+node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact
 
 echo "--- Setup context"
 DOCKER_BUILD_FOLDER=$(mktemp -d)
+DOCKER_BUILD_ARGS=''
+case $KIBANA_DOCKER_CONTEXT in
+  default)
+    DOCKER_CONTEXT_FILE="kibana-$FULL_VERSION-docker-build-context.tar.gz"
+  ;;
+  cloud)
+    DOCKER_CONTEXT_FILE="kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
+  ;;
+  ubi8)
+    DOCKER_CONTEXT_FILE="kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
+  ;;
+  ubi9)
+    DOCKER_CONTEXT_FILE="kibana-ubi9-$FULL_VERSION-docker-build-context.tar.gz"
+  ;;
+  ironbank)
+    DOCKER_CONTEXT_FILE="kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"
+    DOCKER_BUILD_ARGS='--build-arg BASE_REGISTRY=docker.elastic.co --build-arg BASE_IMAGE=ubi9/ubi --build-arg BASE_TAG=latest'
+    echo "Warning: this will build an approximation of the Iron Bank context, using a swapped base image"
+  ;;
+esac
 
-if [[ "$KIBANA_DOCKER_CONTEXT" == "default" ]]; then
-  DOCKER_CONTEXT_FILE="kibana-$FULL_VERSION-docker-build-context.tar.gz"
-elif [[ "$KIBANA_DOCKER_CONTEXT" == "cloud" ]]; then
-  DOCKER_CONTEXT_FILE="kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
-elif [[ "$KIBANA_DOCKER_CONTEXT" == "ubi8" ]]; then
-  DOCKER_CONTEXT_FILE="kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
-elif [[ "$KIBANA_DOCKER_CONTEXT" == "ubi9" ]]; then
-  DOCKER_CONTEXT_FILE="kibana-ubi9-$FULL_VERSION-docker-build-context.tar.gz"
-fi
 
 tar -xf "target/$DOCKER_CONTEXT_FILE" -C "$DOCKER_BUILD_FOLDER"
 cd $DOCKER_BUILD_FOLDER
@@ -32,4 +43,4 @@ cd $DOCKER_BUILD_FOLDER
 download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build context"
-docker build .
+docker build $DOCKER_BUILD_ARGS .
