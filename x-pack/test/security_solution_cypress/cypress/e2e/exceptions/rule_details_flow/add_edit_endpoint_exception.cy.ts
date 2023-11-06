@@ -26,7 +26,11 @@ import {
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import {
+  deleteAlertsAndRules,
+  deleteEndpointExceptionList,
+  deleteExceptionLists,
+} from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -47,7 +51,6 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-// FLAKY: https://github.com/elastic/kibana/issues/165736
 describe(
   'Add endpoint exception from rule details',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
@@ -58,14 +61,10 @@ describe(
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.type';
 
     beforeEach(() => {
-      cy.task('esArchiverResetKibana');
-      cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
+      deleteExceptionLists();
+      deleteEndpointExceptionList();
       login();
       deleteAlertsAndRules();
-    });
-
-    afterEach(() => {
-      cy.task('esArchiverUnload', 'auditbeat');
     });
 
     describe('without exception items', () => {

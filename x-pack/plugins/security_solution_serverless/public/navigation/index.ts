@@ -16,6 +16,7 @@ import { getSecuritySideNavComponent } from './side_navigation';
 import { SecuritySideNavComponent } from './project_navigation';
 import { projectAppLinksSwitcher } from './links/app_links';
 import { formatProjectDeepLinks } from './links/deep_links';
+import { enableManagementCardsLanding } from './management_cards';
 
 export const setupNavigation = (
   _core: CoreSetup,
@@ -29,7 +30,7 @@ export const startNavigation = (services: Services) => {
   const { serverless, management } = services;
   serverless.setProjectHome(APP_PATH);
 
-  management.setupCardsNavigation({ enabled: true });
+  enableManagementCardsLanding(services);
 
   const projectNavigationTree = new ProjectNavigationTree(services);
 
