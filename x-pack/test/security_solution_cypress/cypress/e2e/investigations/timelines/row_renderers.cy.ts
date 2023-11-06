@@ -16,7 +16,7 @@ import {
   TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
   TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON,
 } from '../../../screens/timeline';
-import { cleanKibana, deleteTimelines, waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
+import { deleteTimelines, waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
 import { login } from '../../../tasks/login';
@@ -27,10 +27,6 @@ import { addNameToTimelineAndSave, populateTimeline, saveTimeline } from '../../
 import { hostsUrl } from '../../../urls/navigation';
 
 describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     deleteTimelines();
     login();
