@@ -23,6 +23,8 @@ export const customActionRunSavedQuerySelector = (savedQueryName: string) =>
   `[aria-label="Run ${savedQueryName}"]`;
 
 export const formFieldInputSelector = (fieldName: string) => `input[name="${fieldName}"]`;
+export const activeStateSwitchComponentSelector = (packName: string) =>
+  `[aria-label="${packName}"]`;
 
 export const POLICY_SELECT_COMBOBOX = 'policyIdsComboBox';
 export const SAVED_QUERY_DROPDOWN_SELECT = 'savedQuerySelect';

@@ -97,13 +97,13 @@ describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'
     submitQuery();
     checkResults();
     navigateTo('/app/osquery');
-    cy.get('[aria-label="Run query"]').eq(0).should('be.visible').click();
+    cy.get('[aria-label="Run query"]').first().should('be.visible').click();
 
     cy.get(LIVE_QUERY_EDITOR).contains('select * from users;');
   });
 
   it('should open query details by clicking the details icon', () => {
-    cy.get('[aria-label="Details"]').eq(0).should('be.visible').click();
+    cy.get('[aria-label="Details"]').first().should('be.visible').click();
     cy.contains('Live query details');
     cy.contains('select * from users;');
   });

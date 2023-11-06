@@ -6,6 +6,7 @@
  */
 
 import {
+  activeStateSwitchComponentSelector,
   customActionEditSavedQuerySelector,
   customActionRunSavedQuerySelector,
   formFieldInputSelector,
@@ -82,8 +83,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
     cy.getBySel('tablePaginationPopoverButton').click();
     cy.getBySel('tablePagination-50-rows').click();
 
-    // activate status switch
-    cy.get(`[aria-label="${packName}"]`).should('be.disabled');
+    cy.get(activeStateSwitchComponentSelector(packName)).should('be.disabled');
 
     cy.contains(packName).click();
     cy.contains(`${packName} details`);
