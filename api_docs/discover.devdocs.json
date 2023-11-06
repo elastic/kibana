@@ -805,6 +805,163 @@
       },
       {
         "parentPluginId": "discover",
+        "id": "def-public.FlyoutContentActions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FlyoutContentActions",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentActions.addFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "addFilter",
+            "description": [],
+            "signature": [
+              "DocViewFilterFn",
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentActions.addColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "addColumn",
+            "description": [],
+            "signature": [
+              "(column: string) => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.FlyoutContentActions.addColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentActions.removeColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "removeColumn",
+            "description": [],
+            "signature": [
+              "(column: string) => void"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.FlyoutContentActions.removeColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-public.FlyoutContentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FlyoutContentProps",
+        "description": [],
+        "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentProps.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.FlyoutContentActions",
+                "text": "FlyoutContentActions"
+              }
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentProps.doc",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "DataTableRecord"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.FlyoutContentProps.renderDefaultContent",
+            "type": "Function",
+            "tags": [],
+            "label": "renderDefaultContent",
+            "description": [],
+            "signature": [
+              "() => React.ReactNode"
+            ],
+            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.FlyoutCustomization",
         "type": "Interface",
         "tags": [],
@@ -855,7 +1012,13 @@
             "description": [],
             "signature": [
               "React.ComponentType<",
-              "FlyoutContentProps",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.FlyoutContentProps",
+                "text": "FlyoutContentProps"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",

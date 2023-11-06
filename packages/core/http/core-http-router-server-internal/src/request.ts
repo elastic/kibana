@@ -59,15 +59,18 @@ export class CoreKibanaRequest<
    */
   public static from<P, Q, B>(
     req: RawRequest,
-    routeSchemas: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B> = {},
+    routeSchemas:
+      | RouteValidator<P, Q, B>
+      | RouteValidatorFullConfig<P, Q, B>
+      | undefined = undefined,
     withoutSecretHeaders: boolean = true
   ) {
-    const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
     let requestParts: { params: P; query: Q; body: B };
-    if (isFakeRawRequest(req)) {
+    if (routeSchemas === undefined || isFakeRawRequest(req)) {
       requestParts = { query: {} as Q, params: {} as P, body: {} as B };
     } else {
-      const rawParts = CoreKibanaRequest.sanitizeRequest(req);
+      const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
+      const rawParts = sanitizeRequest(req);
       requestParts = CoreKibanaRequest.validate(rawParts, routeValidator);
     }
     return new CoreKibanaRequest(
@@ -77,22 +80,6 @@ export class CoreKibanaRequest<
       requestParts.body,
       withoutSecretHeaders
     );
-  }
-
-  /**
-   * We have certain values that may be passed via query params that we want to
-   * exclude from further processing like validation. This method removes those
-   * internal values.
-   */
-  private static sanitizeRequest<P, Q, B>(
-    req: Request
-  ): { query: unknown; params: unknown; body: unknown } {
-    const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
-    return {
-      query,
-      params: req.params,
-      body: req.payload,
-    };
   }
 
   /**
@@ -156,14 +143,16 @@ export class CoreKibanaRequest<
     // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
     const appState = request.app as KibanaRequestState | undefined;
+    const isRealReq = isRealRawRequest(request);
+
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
 
     this.url = request.url ?? new URL('https://fake-request/url');
-    this.headers = isRealRawRequest(request) ? deepFreeze({ ...request.headers }) : request.headers;
+    this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
-    this.isFakeRequest = isFakeRawRequest(request);
+    this.isFakeRequest = !isRealReq;
     this.isInternalApiRequest =
       X_ELASTIC_INTERNAL_ORIGIN_REQUEST in this.headers ||
       Boolean(this.url?.searchParams?.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM));
@@ -174,7 +163,7 @@ export class CoreKibanaRequest<
     });
 
     this.route = deepFreeze(this.getRouteInfo(request));
-    this.socket = isRealRawRequest(request)
+    this.socket = isRealReq
       ? new KibanaSocket(request.raw.req.socket)
       : KibanaSocket.getFakeSocket();
     this.events = this.getEvents(request);
@@ -250,6 +239,7 @@ export class CoreKibanaRequest<
       options,
     };
   }
+
   /** set route access to internal if not declared */
   private getAccess(request: RawRequest): 'internal' | 'public' {
     return (
@@ -332,4 +322,18 @@ export function isRealRequest(request: unknown): request is KibanaRequest | Requ
 
 function isCompleted(request: Request) {
   return request.raw.res.writableFinished;
+}
+
+/**
+ * We have certain values that may be passed via query params that we want to
+ * exclude from further processing like validation. This method removes those
+ * internal values.
+ */
+function sanitizeRequest(req: Request): { query: unknown; params: unknown; body: unknown } {
+  const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
+  return {
+    query,
+    params: req.params,
+    body: req.payload,
+  };
 }
