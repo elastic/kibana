@@ -6,8 +6,9 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { LogExplorerCustomizations } from '@kbn/log-explorer-plugin/public';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
 import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
@@ -31,6 +32,15 @@ export const ObservablityLogExplorerMainRoute = ({
 
   const [state$] = useState(() => new BehaviorSubject({}));
 
+  const customizations: LogExplorerCustomizations = useMemo(
+    () => ({
+      flyout: {
+        renderContent: (renderPreviousContent) => renderPreviousContent(),
+      },
+    }),
+    []
+  );
+
   return (
     <>
       <LogExplorerTopNavMenu
@@ -41,7 +51,11 @@ export const ObservablityLogExplorerMainRoute = ({
       />
       <LazyOriginInterpreter history={history} toasts={core.notifications.toasts} />
       <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
-        <logExplorer.LogExplorer scopedHistory={history} state$={state$} />
+        <logExplorer.LogExplorer
+          customizations={customizations}
+          scopedHistory={history}
+          state$={state$}
+        />
       </ObservabilityLogExplorerPageTemplate>
     </>
   );
