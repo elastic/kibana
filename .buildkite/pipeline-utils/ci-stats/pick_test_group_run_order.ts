@@ -273,7 +273,12 @@ export async function pickTestGroupRunOrder() {
           ]
         : []),
       // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
-      ...(!prNumber && pipelineSlug !== 'kibana-on-merge'
+      // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
+      // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
+      // of too many ftr groups instead of potential timeouts.
+      ...(!prNumber &&
+      pipelineSlug !== 'kibana-on-merge' &&
+      pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
         ? [
             {
               branch: ownBranch,

@@ -27,12 +27,12 @@ import {
   savedObjectWith500Error,
   disabledRuleForBulkDisable1,
   disabledRuleForBulkDisable2,
-  returnedRuleForBulkEnableWithActions1,
-  returnedRuleForBulkEnableWithActions2,
+  returnedRuleForBulkDisableWithActions1,
+  returnedRuleForBulkDisableWithActions2,
   enabledRuleForBulkOps1,
   enabledRuleForBulkOps2,
-  enabledRuleForBulkOpsWithActions1,
-  enabledRuleForBulkOpsWithActions2,
+  disabledRuleForBulkOpsWithActions1,
+  disabledRuleForBulkOpsWithActions2,
   returnedRuleForBulkDisable1,
   returnedRuleForBulkDisable2,
   siemRuleForBulkOps1,
@@ -202,7 +202,7 @@ describe('bulkDisableRules', () => {
 
   test('should disable two rule and return right actions', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+      saved_objects: [disabledRuleForBulkOpsWithActions1, disabledRuleForBulkOpsWithActions2],
     });
 
     const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -228,7 +228,7 @@ describe('bulkDisableRules', () => {
 
     expect(result).toStrictEqual({
       errors: [],
-      rules: [returnedRuleForBulkEnableWithActions1, returnedRuleForBulkEnableWithActions2],
+      rules: [returnedRuleForBulkDisableWithActions1, returnedRuleForBulkDisableWithActions2],
       total: 2,
     });
   });

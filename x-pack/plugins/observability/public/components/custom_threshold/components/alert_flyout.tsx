@@ -39,6 +39,7 @@ export function AlertFlyout(props: Props) {
           series: props.series,
         },
         validConsumers: observabilityRuleCreationValidConsumers,
+        useRuleProducer: true,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [triggersActionsUI, onCloseFlyout]

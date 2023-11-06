@@ -49,7 +49,6 @@ describe(
     const ITEM_NAME = 'Sample Exception List Item';
 
     before(() => {
-      cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
       login();
       postDataView('exceptions-*');
