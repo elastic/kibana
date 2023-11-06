@@ -13,11 +13,11 @@ import { EuiWrappingPopover } from '@elastic/eui';
 
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
+import { ShareUxModal } from '../components/share_model/share_model';
 
 export class ShareMenuManager {
   private isOpen = false;
@@ -108,7 +108,7 @@ export class ShareMenuManager {
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
-            <ShareContextMenu
+            <ShareUxModal
               allowEmbed={allowEmbed}
               allowShortUrl={allowShortUrl}
               objectId={objectId}
@@ -127,6 +127,25 @@ export class ShareMenuManager {
               snapshotShareWarning={snapshotShareWarning}
               disabledShareUrl={disabledShareUrl}
             />
+            {/* <ShareContextMenu
+              allowEmbed={allowEmbed}
+              allowShortUrl={allowShortUrl}
+              objectId={objectId}
+              objectType={objectType}
+              objectTypeTitle={objectTypeTitle}
+              shareMenuItems={menuItems}
+              sharingData={sharingData}
+              shareableUrl={shareableUrl}
+              shareableUrlForSavedObject={shareableUrlForSavedObject}
+              shareableUrlLocatorParams={shareableUrlLocatorParams}
+              onClose={onClose}
+              embedUrlParamExtensions={embedUrlParamExtensions}
+              anonymousAccess={anonymousAccess}
+              showPublicUrlSwitch={showPublicUrlSwitch}
+              urlService={urlService}
+              snapshotShareWarning={snapshotShareWarning}
+              disabledShareUrl={disabledShareUrl}
+            /> */}
           </EuiWrappingPopover>
         </KibanaThemeProvider>
       </I18nProvider>
