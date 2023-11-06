@@ -203,31 +203,27 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
   describe('validate route', () => {
     it('returns a 200 and a validation error message if value is invalid', async () => {
-      const defaultIndex = chance.word({ length: 10 });
-
-      const { supertest } = await setup({
-        initialSettings: { defaultIndex },
-      });
+      const { supertest } = await setup();
 
       const { body } = await supertest('post', '/internal/kibana/settings/defaultIndex/validate')
         .send({
+          // The 'defaultIndex' setting expects a string
           value: 123,
         })
         .expect(200);
 
       expect(body).toMatchObject({
-        errorMessage: 'expected value of type [string] but got [number]',
+        errorMessage: expect.stringContaining('expected value of type [string] but got [number]'),
       });
     });
 
     it('returns a 200 and empty response body if value is valid', async () => {
       const { supertest } = await setup();
 
-      const defaultIndex = chance.integer();
-
       const { body } = await supertest('post', '/internal/kibana/settings/defaultIndex/validate')
         .send({
-          value: defaultIndex,
+          // The 'defaultIndex' setting expects a string
+          value: 'testValue',
         })
         .expect(200);
 

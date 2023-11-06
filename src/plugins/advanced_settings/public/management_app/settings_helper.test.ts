@@ -129,6 +129,7 @@ describe('Settings Helper', () => {
         ...imageSetting,
       };
     },
+    validateValue: (key: string, value: any) => Promise.resolve(null),
   };
 
   it('mapConfig', () => {
