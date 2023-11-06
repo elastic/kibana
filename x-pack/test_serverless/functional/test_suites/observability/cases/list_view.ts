@@ -176,22 +176,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         // by default filter by all
         await cases.casesTable.validateCasesTableHasNthRows(5);
 
-        // low
         await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
         await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
         await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
 
-        // high
         await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
         await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
         await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
 
-        // critical
         await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
         await cases.casesTable.validateCasesTableHasNthRows(1);
+        // to uncheck
         await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
 
-        // back to all
         await cases.casesTable.validateCasesTableHasNthRows(5);
       });
     });
