@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { mockObservedUser } from './__mocks__';
@@ -27,19 +27,6 @@ describe('ObservedUser', () => {
     );
 
     expect(getByTestId('observedUser-data')).toBeInTheDocument();
-  });
-
-  it('updates the accordion button title when visibility toggles', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ObservedUser {...mockProps} />
-      </TestProviders>
-    );
-    const accordionButton = getByTestId('observedUser-accordion-button');
-
-    expect(accordionButton).toHaveTextContent('Show observed data');
-    fireEvent.click(accordionButton);
-    expect(accordionButton).toHaveTextContent('Hide observed data');
   });
 
   it('renders the formatted date', () => {

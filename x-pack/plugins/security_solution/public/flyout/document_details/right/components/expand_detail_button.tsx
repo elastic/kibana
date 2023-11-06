@@ -44,14 +44,14 @@ export const ExpandDetailButton: FC = memo(() => {
       iconType="arrowEnd"
       data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
       aria-label={i18n.translate(
-        'xpack.securitySolution.flyout.right.header.collapseDetailButtonAriaLabel',
+        'xpack.securitySolution.flyout.entityDetails.header.collapseDetailButtonAriaLabel',
         {
           defaultMessage: 'Collapse details',
         }
       )}
     >
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.header.collapseDetailButtonLabel"
+        id="xpack.securitySolution.flyout.entityDetails.header.collapseDetailButtonLabel"
         defaultMessage="Collapse details"
       />
     </EuiButtonEmpty>
@@ -62,14 +62,14 @@ export const ExpandDetailButton: FC = memo(() => {
       iconType="arrowStart"
       data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
       aria-label={i18n.translate(
-        'xpack.securitySolution.flyout.right.header.expandDetailButtonAriaLabel',
+        'xpack.securitySolution.flyout.entityDetails.header.expandDetailButtonAriaLabel',
         {
           defaultMessage: 'Expand details',
         }
       )}
     >
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.header.expandDetailButtonLabel"
+        id="xpack.securitySolution.flyout.entityDetails.header.expandDetailButtonLabel"
         defaultMessage="Expand details"
       />
     </EuiButtonEmpty>

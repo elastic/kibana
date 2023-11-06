@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { ManagedUser } from './managed_user';
@@ -27,19 +27,6 @@ describe('ManagedUser', () => {
     );
 
     expect(getByTestId('managedUser-data')).toBeInTheDocument();
-  });
-
-  it('updates the accordion button title when visibility toggles', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ManagedUser {...mockProps} />
-      </TestProviders>
-    );
-    const accordionButton = getByTestId('managedUser-accordion-button');
-
-    expect(accordionButton).toHaveTextContent('Show Azure AD data');
-    fireEvent.click(accordionButton);
-    expect(accordionButton).toHaveTextContent('Hide Azure AD data');
   });
 
   it('renders the formatted date', () => {

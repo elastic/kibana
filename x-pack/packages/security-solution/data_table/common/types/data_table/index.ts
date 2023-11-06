@@ -54,6 +54,7 @@ export const tableEntity: Record<TableId, TableEntityType> = {
   [TableId.hostsPageSessions]: TableEntityType.session,
   [TableId.kubernetesPageSessions]: TableEntityType.session,
   [TableId.alertsRiskInputs]: TableEntityType.alert,
+  [TableId.riskInputs]: TableEntityType.alert,
 } as const;
 
 const TableIdLiteralRt = runtimeTypes.union([

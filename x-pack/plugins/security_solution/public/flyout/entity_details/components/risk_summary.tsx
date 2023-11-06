@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiTitle,

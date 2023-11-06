@@ -147,7 +147,6 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
                   operationType: 'static_value',
                   isStaticValue: true,
                   isBucketed: false,
-                  aaa: 1,
                   scale: 'ratio',
                   params: {
                     value: '70',

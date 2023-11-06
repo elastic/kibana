@@ -51,7 +51,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
             <EuiText size="xs">
               {pagination.totalItemCount <= 1 ? (
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.riskInputs.utilityBar.selectionText"
+                  id="xpack.securitySolution.flyout.riskInputs.utilityBar.selectionTextSingle"
                   defaultMessage="Showing {totalInputs} {riskInputs}"
                   values={{
                     totalInputs: pagination.totalItemCount,
@@ -67,7 +67,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.riskInputs.utilityBar.selectionText"
+                  id="xpack.securitySolution.flyout.riskInputs.utilityBar.selectionTextRange"
                   defaultMessage="Showing {displayedRange} of {totalInputs} {riskInputs}"
                   values={{
                     displayedRange: <b>{`${fromItem}-${toItem}`}</b>,
