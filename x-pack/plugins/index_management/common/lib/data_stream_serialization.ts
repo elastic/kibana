@@ -102,3 +102,24 @@ export const serializeAsESLifecycle = (lifecycle?: DataRetention): DataStream['l
     data_retention: `${value}${unit}`,
   };
 };
+
+export const deserializeESLifecycle = (lifecycle?: DataStream['lifecycle']): DataRetention => {
+  if (!lifecycle || !lifecycle?.enabled) {
+    return { enabled: false };
+  }
+
+  if (!lifecycle.data_retention) {
+    return {
+      enabled: true,
+      infiniteDataRetention: true,
+    };
+  }
+
+  const { size, unit } = splitSizeAndUnits(lifecycle.data_retention as string);
+
+  return {
+    enabled: true,
+    value: Number(size),
+    unit: unit,
+  };
+};

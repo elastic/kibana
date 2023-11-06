@@ -183,7 +183,7 @@ export const schemas: Record<string, FormSchema> = {
         {
           validator: ({ value, formData }) => {
             // If infiniteRetentionPeriod is set, we dont need to validate the data retention field
-            if (formData.dataRetentionInfiniteRetentionPeriod) {
+            if (formData['lifecycle.infiniteDataRetention']) {
               return undefined;
             }
 
