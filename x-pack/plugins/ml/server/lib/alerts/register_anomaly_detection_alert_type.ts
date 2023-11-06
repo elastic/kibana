@@ -141,7 +141,6 @@ export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAle
     },
   },
   shouldWrite: true,
-  isSpaceAware: true,
 };
 
 export const THRESHOLD_MET_GROUP: ActionGroup<AnomalyScoreMatchGroupId> = {
