@@ -7,7 +7,7 @@
 
 import dateMath from '@kbn/datemath';
 
-function convertISODateToNanoPrecision(date: string): string {
+export function convertISODateToNanoPrecision(date: string): string {
   const dateParts = date.split('.');
 
   const fractionSeconds = dateParts.length === 2 ? dateParts[1].replace('Z', '') : '';

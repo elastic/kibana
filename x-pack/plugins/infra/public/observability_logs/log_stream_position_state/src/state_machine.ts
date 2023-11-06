@@ -7,6 +7,7 @@
 
 import { IToasts } from '@kbn/core-notifications-browser';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { convertISODateToNanoPrecision } from '@kbn/logs-shared-plugin/common';
 import moment from 'moment';
 import { actions, ActorRefFrom, createMachine, EmittedFrom, SpecialTargets } from 'xstate';
 import { isSameTimeKey } from '../../../../common/time';
@@ -160,11 +161,19 @@ export const createPureLogStreamPositionStateMachine = (initialContext: LogStrea
         updatePositionsFromTimeChange: actions.assign((_context, event) => {
           if (!('timeRange' in event)) return {};
 
+          const {
+            timestamps: { startTimestamp, endTimestamp },
+          } = event;
+
           // Reset the target position if it doesn't fall within the new range.
+          const targetPositionNanoTime =
+            _context.targetPosition && convertISODateToNanoPrecision(_context.targetPosition.time);
+          const startNanoDate = convertISODateToNanoPrecision(moment(startTimestamp).toISOString());
+          const endNanoDate = convertISODateToNanoPrecision(moment(endTimestamp).toISOString());
+
           const targetPositionShouldReset =
-            _context.targetPosition &&
-            (moment(event.timestamps.startTimestamp).toISOString() > _context.targetPosition.time ||
-              moment(event.timestamps.endTimestamp).toISOString() < _context.targetPosition.time);
+            targetPositionNanoTime &&
+            (startNanoDate > targetPositionNanoTime || endNanoDate < targetPositionNanoTime);
 
           return {
             targetPosition: targetPositionShouldReset ? null : _context.targetPosition,

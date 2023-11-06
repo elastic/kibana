@@ -44,6 +44,8 @@ export {
 // eslint-disable-next-line @kbn/eslint/no_export_all
 export * from './log_entry';
 
+export { convertISODateToNanoPrecision } from './utils';
+
 export { DateFromStringOrNumber } from './time';
 
 // Http types
