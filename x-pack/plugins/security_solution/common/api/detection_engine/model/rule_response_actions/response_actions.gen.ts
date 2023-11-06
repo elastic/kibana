@@ -38,7 +38,6 @@ export const OsqueryQuery = z
      */
     query: z.string(),
     ecs_mapping: EcsMapping.optional(),
-    timeout: z.number().optional(),
     /**
      * Query version
      */
@@ -57,7 +56,6 @@ export const OsqueryParams = z
     queries: z.array(OsqueryQuery).optional(),
     pack_id: z.string().optional(),
     saved_query_id: z.string().optional(),
-    timeout: z.number().optional(),
   })
   .transform(requiredOptional);
 
@@ -69,7 +67,6 @@ export const OsqueryParamsCamelCase = z
     queries: z.array(OsqueryQuery).optional(),
     packId: z.string().optional(),
     savedQueryId: z.string().optional(),
-    timeout: z.number().optional(),
   })
   .transform(requiredOptional);
 
