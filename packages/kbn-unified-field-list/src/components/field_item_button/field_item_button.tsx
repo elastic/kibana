@@ -187,6 +187,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       size={size || 's'}
       className={classes}
       isActive={isActive}
+      isSelected={isSelected}
       buttonProps={{
         ['aria-label']: i18n.translate('unifiedFieldList.fieldItemButton.ariaLabel', {
           defaultMessage: 'Preview {fieldDisplayName}: {fieldType}',
