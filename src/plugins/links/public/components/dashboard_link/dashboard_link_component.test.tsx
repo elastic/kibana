@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { getEmbeddableParams } from '@kbn/dashboard-plugin/public';
+import { getDashboardLocatorParamsFromEmbeddable } from '@kbn/dashboard-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -28,7 +28,7 @@ jest.mock('@kbn/dashboard-plugin/public', () => {
   return {
     __esModule: true,
     ...originalModule,
-    getEmbeddableParams: jest.fn(),
+    getDashboardLocatorParamsFromEmbeddable: jest.fn(),
   };
 });
 
@@ -160,7 +160,7 @@ describe('Dashboard link component', () => {
     expect(window.open).toHaveBeenCalledWith('https://my-kibana.com/dashboard/123', '_blank');
   });
 
-  test('passes linkOptions to getEmbeddableParams', async () => {
+  test('passes linkOptions to getDashboardLocatorParamsFromEmbeddable', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
       options: {
@@ -182,7 +182,10 @@ describe('Dashboard link component', () => {
     );
     await waitFor(() => expect(onLoading).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    expect(getEmbeddableParams).toHaveBeenCalledWith(linksEmbeddable, linkInfo.options);
+    expect(getDashboardLocatorParamsFromEmbeddable).toHaveBeenCalledWith(
+      linksEmbeddable,
+      linkInfo.options
+    );
     await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
   });
 
