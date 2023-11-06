@@ -21,7 +21,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
-import { casesCustomFields } from '../../custom_fields';
+import { validateSearchCasesCustomFields } from './validators';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -45,7 +45,7 @@ export const search = async (
     const paramArgs = decodeWithExcessOrThrow(CasesSearchRequestRt)(params);
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
-    let customFieldsMapping = null;
+    let customFieldsConfiguration: CustomFieldsConfiguration = [];
 
     /**
      * Assign users to a case is only available to Platinum+
@@ -67,30 +67,15 @@ export const search = async (
      * Verify if custom field type is filterable
      */
     if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
-      let customFieldsConfiguration: CustomFieldsConfiguration = [];
-
       if (configurations.length) {
         customFieldsConfiguration = paramArgs.owner
           ? configurations[0].customFields
           : configurations.map((config) => config.customFields).flat();
       }
 
-      Object.keys(paramArgs.customFields).forEach((customFieldKey) => {
-        const customFieldConfig = customFieldsConfiguration.find(
-          (item) => item.key === customFieldKey
-        );
-
-        if (customFieldConfig) {
-          customFieldsMapping = casesCustomFields.get(customFieldConfig.type);
-
-          // validateCustomFields(customFieldsMapping, customFieldConfig, paramArgs.customFields);
-
-          if (!customFieldsMapping?.isFilterable) {
-            throw Boom.forbidden(
-              `Filtering by custom filed of type ${customFieldConfig.type} is not allowed.`
-            );
-          }
-        }
+      validateSearchCasesCustomFields({
+        customFieldsConfiguration,
+        customFields: paramArgs.customFields,
       });
     }
 
@@ -114,10 +99,15 @@ export const search = async (
     const statusStatsOptions = constructQueryOptions({
       ...options,
       status: undefined,
+      customFieldsConfiguration,
       authorizationFilter,
     });
 
-    const caseQueryOptions = constructQueryOptions({ ...options, authorizationFilter });
+    const caseQueryOptions = constructQueryOptions({
+      ...options,
+      customFieldsConfiguration,
+      authorizationFilter,
+    });
 
     const caseSearch = constructSearch(paramArgs.search, spaceId, savedObjectsSerializer);
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -18,10 +17,6 @@ export const findCaseRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-
-      if (!isEmpty(request.query) && request.query.customFields) {
-        throw new Error('Custom fields are not allowed in query params.');
-      }
 
       const options = request.query as caseApiV1.CasesFindRequest;
 

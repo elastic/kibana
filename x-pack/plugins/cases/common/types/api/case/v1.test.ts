@@ -26,7 +26,6 @@ import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CasesStatusRequestRt, CasesStatusResponseRt } from '../stats/v1';
 import type { CasePostRequest } from './v1';
-import { CasesSearchRequestRt } from './v1';
 import {
   AllReportersFindRequestRt,
   CasePatchRequestRt,
@@ -41,6 +40,7 @@ import {
   CasesFindRequestSortFieldsRt,
   CasesFindResponseRt,
   CasesPatchRequestRt,
+  CasesSearchRequestRt,
 } from './v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 
@@ -480,12 +480,8 @@ describe('CasesSearchRequestRt', () => {
     sortField: 'createdAt',
     owner: 'cases',
     customFields: {
-      toggle_custom_filed_key: {
-        value: [true],
-      },
-      another_custom_field: {
-        value: [false],
-      },
+      toggle_custom_filed_key: [true],
+      another_custom_field: [false],
     },
   };
 

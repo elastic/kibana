@@ -7,6 +7,7 @@
 import { v1 as uuidv1 } from 'uuid';
 
 import type { Case } from '../../../common/types/domain';
+import { CustomFieldTypes } from '../../../common/types/domain';
 
 import {
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -21,13 +22,30 @@ import { mockCases } from '../../mocks';
 import {
   createCasesClientMock,
   createCasesClientMockArgs,
-  createCasesClientMockFindRequest,
+  createCasesClientMockSearchRequest,
 } from '../mocks';
 import { search } from './search';
 
 describe('search', () => {
   const casesClientMock = createCasesClientMock();
-  casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+  casesClientMock.configure.get = jest.fn().mockResolvedValue([
+    {
+      customFields: [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'Text field',
+          required: true,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'Toggle field',
+          required: true,
+        },
+      ],
+    },
+  ]);
 
   describe('constructSearch', () => {
     const clientArgs = createCasesClientMockArgs();
@@ -54,45 +72,71 @@ describe('search', () => {
 
     it('search by uuid updates search term and adds rootSearchFields', async () => {
       const searchId = uuidv1();
-      const findRequest = createCasesClientMockFindRequest({ search: searchId });
+      const findRequest = createCasesClientMockSearchRequest({ search: searchId });
 
       await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
 
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
 
-      expect(call.caseOptions.search).toBe(`"${search}" "cases:${search}"`);
+      expect(call.caseOptions.search).toBe(`"${searchId}" "cases:${searchId}"`);
       expect(call.caseOptions).toHaveProperty('rootSearchFields', ['_id']);
     });
 
     it('regular search term does not cause rootSearchFields to be appended', async () => {
       const searchTerm = 'foobar';
-      const findRequest = createCasesClientMockFindRequest({ search: searchTerm });
+      const findRequest = createCasesClientMockSearchRequest({ search: searchTerm });
       await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
 
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
 
-      expect(call.caseOptions.search).toBe(search);
+      expect(call.caseOptions.search).toBe(searchTerm);
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
+    });
+
+    it('search with custom fields', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { second_key: [true] },
+      });
+      await search(findRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
     });
   });
 
   describe('errors', () => {
     const clientArgs = createCasesClientMockArgs();
+    casesClientMock.configure.get = jest.fn().mockResolvedValue([
+      {
+        customFields: [
+          {
+            key: 'first_key',
+            type: CustomFieldTypes.TEXT,
+            label: 'Text field',
+            required: true,
+          },
+          {
+            key: 'second_key',
+            type: CustomFieldTypes.TOGGLE,
+            label: 'Toggle field',
+            required: true,
+          },
+        ],
+      },
+    ]);
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
     it('when foo:bar attribute in request payload', async () => {
-      const search = 'sample_text';
-      const findRequest = createCasesClientMockFindRequest({ search });
+      const searchTerm = 'sample_text';
+      const findRequest = createCasesClientMockSearchRequest({ search: searchTerm });
       await expect(
         // @ts-expect-error foo is an invalid field
         search({ ...findRequest, foo: 'bar' }, clientArgs)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to search cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
+        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
       );
     });
 
@@ -100,7 +144,7 @@ describe('search', () => {
       const searchFields = ['foobar'];
 
       // @ts-expect-error
-      const findRequest = createCasesClientMockFindRequest({ searchFields });
+      const findRequest = createCasesClientMockSearchRequest({ searchFields });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "searchFields"'
@@ -111,7 +155,7 @@ describe('search', () => {
       const searchFields = 'foobar';
 
       // @ts-expect-error
-      const findRequest = createCasesClientMockFindRequest({ searchFields });
+      const findRequest = createCasesClientMockSearchRequest({ searchFields });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "searchFields"'
@@ -122,7 +166,7 @@ describe('search', () => {
       const sortField = 'foobar';
 
       // @ts-expect-error
-      const findRequest = createCasesClientMockFindRequest({ sortField });
+      const findRequest = createCasesClientMockSearchRequest({ sortField });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "sortField"'
@@ -132,7 +176,7 @@ describe('search', () => {
     it(`throws an error when the category array has ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
       const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
 
-      const findRequest = createCasesClientMockFindRequest({ category });
+      const findRequest = createCasesClientMockSearchRequest({ category });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
@@ -142,7 +186,7 @@ describe('search', () => {
     it(`throws an error when the tags array has ${MAX_TAGS_FILTER_LENGTH} items`, async () => {
       const tags = Array(MAX_TAGS_FILTER_LENGTH + 1).fill('foobar');
 
-      const findRequest = createCasesClientMockFindRequest({ tags });
+      const findRequest = createCasesClientMockSearchRequest({ tags });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
@@ -152,7 +196,7 @@ describe('search', () => {
     it(`throws an error when the assignees array has ${MAX_ASSIGNEES_FILTER_LENGTH} items`, async () => {
       const assignees = Array(MAX_ASSIGNEES_FILTER_LENGTH + 1).fill('foobar');
 
-      const findRequest = createCasesClientMockFindRequest({ assignees });
+      const findRequest = createCasesClientMockSearchRequest({ assignees });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
@@ -162,7 +206,7 @@ describe('search', () => {
     it(`throws an error when the reporters array has ${MAX_REPORTERS_FILTER_LENGTH} items`, async () => {
       const reporters = Array(MAX_REPORTERS_FILTER_LENGTH + 1).fill('foobar');
 
-      const findRequest = createCasesClientMockFindRequest({ reporters });
+      const findRequest = createCasesClientMockSearchRequest({ reporters });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
@@ -170,7 +214,7 @@ describe('search', () => {
     });
 
     it('Invalid total items results in error', async () => {
-      const findRequest = createCasesClientMockFindRequest({ page: 209, perPage: 100 });
+      const findRequest = createCasesClientMockSearchRequest({ page: 209, perPage: 100 });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
@@ -178,13 +222,54 @@ describe('search', () => {
     });
 
     it('Invalid perPage items results in error', async () => {
-      const findRequest = createCasesClientMockFindRequest({
+      const findRequest = createCasesClientMockSearchRequest({
         page: 1,
         perPage: MAX_CASES_PER_PAGE + 1,
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
+      );
+    });
+
+    it('throws error when no customField is not same as configuration', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { test_custom_field_key: [true] },
+      });
+
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+        ` Error: Invalid custom field key: test_custom_field_key.`
+      );
+    });
+
+    it('throws error when search with non filterable custom field', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { first_key: ['hello'] },
+      });
+
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+        ` Error: Filtering by custom filed of type text is not allowed.`
+      );
+    });
+
+    it('throws error when search with invalid value', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { second_key: ['hello'] },
+      });
+
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+        ` Error: The second_key custom field have the wrong value type string in the request.`
+      );
+    });
+
+    it('throws error when no customFields in configuration', async () => {
+      casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { second_key: [true] },
+      });
+
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+        ` Error: No custom fields configured.`
       );
     });
   });

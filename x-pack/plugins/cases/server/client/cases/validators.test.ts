@@ -7,10 +7,12 @@
 
 import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import type { CasesSearchRequest } from '../../../common/types/api';
 import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,
   validateRequiredCustomFields,
+  validateSearchCasesCustomFields,
 } from './validators';
 
 describe('validators', () => {
@@ -437,6 +439,110 @@ describe('validators', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Missing required custom fields: \\"missing field 1\\""`
+      );
+    });
+  });
+
+  describe('validateSearchCasesCustomFields', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const customFieldsConfiguration: CustomFieldsConfiguration = [
+      {
+        key: 'first_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'Text field',
+        required: true,
+      },
+      {
+        key: 'second_key',
+        type: CustomFieldTypes.TOGGLE,
+        label: 'Toggle field',
+        required: true,
+      },
+    ];
+
+    const customFields: CasesSearchRequest['customFields'] = {
+      second_key: [true],
+    };
+
+    it('does not throw when custom fields are correct', () => {
+      const newConfig = [
+        ...customFieldsConfiguration,
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'Another toggle field',
+          required: false,
+        },
+      ];
+
+      const newCustomFields = { ...customFields, third_key: [false] };
+
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration: newConfig,
+          customFields: newCustomFields,
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw when multiple custom fields', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields,
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw when custom fields are empty', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: {},
+        })
+      ).not.toThrow();
+    });
+
+    it('throws error when custom fields configurations is empty', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration: [],
+          customFields,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
+    });
+
+    it('throws error when custom fields key does not match with configuration', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: { random_key: [true] },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid custom field key: random_key."`);
+    });
+
+    it('throws error when custom field is not filterable', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: { first_key: ['hello'] },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Filtering by custom filed of type text is not allowed."`
+      );
+    });
+
+    it('throws error when custom field is searched with invalid value', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: { second_key: ['hello'] },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"The second_key custom field have the wrong value type string in the request."`
       );
     });
   });

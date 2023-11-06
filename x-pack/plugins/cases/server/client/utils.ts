@@ -13,12 +13,13 @@ import { validate as uuidValidate } from 'uuid';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 
-import { nodeBuilder, fromKueryExpression, escapeKuery, toKqlExpression } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import type {
   CaseSeverity,
   CaseStatuses,
+  CustomFieldsConfiguration,
   ExternalReferenceAttachmentPayload,
 } from '../../common/types/domain';
 import {
@@ -54,6 +55,8 @@ import {
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
+import type { ICasesCustomField } from '../custom_fields';
+import { casesCustomFields } from '../custom_fields';
 
 // TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
@@ -159,14 +162,10 @@ const addStatusFilter = (status: CaseStatuses): KueryNode => {
 };
 
 const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
-  const temp = nodeBuilder.is(
+  return nodeBuilder.is(
     `${CASE_SAVED_OBJECT}.attributes.severity`,
     `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`
   );
-
-  console.log({ severityFilter: toKqlExpression(temp) });
-
-  return temp;
 };
 
 const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNode | undefined => {
@@ -217,13 +216,9 @@ export const buildFilter = ({
     return;
   }
 
-  const tempFilter = nodeBuilder[operator](
+  return nodeBuilder[operator](
     filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
   );
-
-  console.log({ ownerFilter: toKqlExpression(tempFilter) });
-
-  return tempFilter;
 };
 
 /**
@@ -344,34 +339,38 @@ export const buildAssigneesFilter = ({
 
 export const buildCustomFieldsFilter = ({
   customFields,
+  customFieldsConfiguration,
 }: {
   customFields: CasesSearchParams['customFields'];
+  customFieldsConfiguration?: CustomFieldsConfiguration;
 }): KueryNode | undefined => {
   if (customFields === undefined) {
     return;
   }
 
-  if (customFields === null) {
+  if (customFields === null || !customFieldsConfiguration?.length) {
     return;
   }
 
-  const customFieldsFilter = Object.entries(customFields).map((filter) => {
-    const filterKey = filter[0];
+  const customFieldsFilter = Object.entries(customFields).map(([key, value]) => {
+    let customFieldsMapping: ICasesCustomField | null | undefined = null;
 
-    const customFieldValueFilter = Object.values(filter[1].value).map((filterValue) => {
-      return fromKueryExpression(
-        `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${filterKey}} AND ${CASE_SAVED_OBJECT}.attributes.customFields:{value.boolean: ${filterValue}}`
-      );
-    });
+    const customFieldConfig = customFieldsConfiguration.find((config) => config.key === key);
 
-    return nodeBuilder.or(customFieldValueFilter);
+    if (customFieldConfig) {
+      customFieldsMapping = casesCustomFields.get(customFieldConfig.type);
+    }
+
+    return nodeBuilder.or(
+      Object.values(value).map((filterValue) => {
+        return fromKueryExpression(
+          `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and value.${customFieldsMapping?.savedObjectMappingType}: ${filterValue}}`
+        );
+      })
+    );
   });
 
-  const finalFilter = nodeBuilder.and([...customFieldsFilter]);
-
-  console.log({ customFieldsFilter: toKqlExpression(finalFilter) });
-
-  return finalFilter;
+  return nodeBuilder.and([...customFieldsFilter]);
 };
 
 export const constructQueryOptions = ({
@@ -387,7 +386,10 @@ export const constructQueryOptions = ({
   assignees,
   category,
   customFields,
-}: CasesSearchParams): SavedObjectFindOptionsKueryNode => {
+  customFieldsConfiguration,
+}: CasesSearchParams & {
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+}): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
   const sortByField = convertSortField(sortField);
@@ -397,7 +399,7 @@ export const constructQueryOptions = ({
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
   const categoryFilter = buildCategoryFilter(category);
-  const customFieldsFilter = buildCustomFieldsFilter({ customFields });
+  const customFieldsFilter = buildCustomFieldsFilter({ customFields, customFieldsConfiguration });
 
   const filters = combineFilters([
     statusFilter,

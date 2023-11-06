@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { differenceWith, intersectionWith } from 'lodash';
+import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import type { CaseRequestCustomFields } from '../../../common/types/api';
+import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../common/types/api';
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
+import type { ICasesCustomField } from '../../custom_fields';
+import { casesCustomFields } from '../../custom_fields';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -132,4 +134,46 @@ export const validateRequiredCustomFields = ({
       `Missing required custom fields: ${missingRequiredCustomFields.join(', ')}`
     );
   }
+};
+
+export const validateSearchCasesCustomFields = ({
+  customFieldsConfiguration,
+  customFields,
+}: {
+  customFieldsConfiguration: CustomFieldsConfiguration;
+  customFields: CasesSearchRequest['customFields'];
+}) => {
+  let customFieldsMapping: ICasesCustomField | null | undefined = null;
+
+  if (!customFields || isEmpty(customFields)) {
+    return;
+  }
+
+  if (!customFieldsConfiguration.length) {
+    throw Boom.badRequest('No custom fields configured.');
+  }
+
+  Object.entries(customFields).forEach(([key, value]) => {
+    const customFieldConfig = customFieldsConfiguration.find((config) => config.key === key);
+
+    if (customFieldConfig) {
+      customFieldsMapping = casesCustomFields.get(customFieldConfig.type);
+
+      if (!customFieldsMapping?.isFilterable) {
+        throw Boom.forbidden(
+          `Filtering by custom filed of type ${customFieldConfig.type} is not allowed.`
+        );
+      }
+
+      value.forEach((item) => {
+        if (typeof item !== customFieldsMapping?.savedObjectMappingType) {
+          throw Boom.forbidden(
+            `The ${key} custom field have the wrong value type ${typeof item} in the request.`
+          );
+        }
+      });
+    } else {
+      throw Boom.badRequest(`Invalid custom field key: ${key}.`);
+    }
+  });
 };

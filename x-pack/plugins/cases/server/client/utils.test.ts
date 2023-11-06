@@ -20,7 +20,8 @@ import {
   convertSortField,
 } from './utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
-import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
+import type { CustomFieldsConfiguration } from '../../common/types/domain';
+import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
 
 describe('utils', () => {
   describe('buildFilter', () => {
@@ -666,6 +667,134 @@ describe('utils', () => {
                 },
               ],
               "function": "or",
+              "type": "function",
+            },
+          ],
+          "function": "and",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter with customFields', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'Text field',
+          required: true,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'Toggle field',
+          required: true,
+        },
+      ];
+      expect(
+        constructQueryOptions({
+          customFields: { second_key: [true], third_key: [false] },
+          customFieldsConfiguration,
+        }).filter
+      ).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.customFields",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "key",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "second_key",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "value.boolean",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": true,
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "and",
+                  "type": "function",
+                },
+              ],
+              "function": "nested",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.customFields",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "key",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "third_key",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "value.undefined",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": false,
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "and",
+                  "type": "function",
+                },
+              ],
+              "function": "nested",
               "type": "function",
             },
           ],

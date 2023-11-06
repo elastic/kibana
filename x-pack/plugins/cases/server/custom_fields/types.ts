@@ -16,3 +16,10 @@ export interface ICasesCustomField {
 export interface CasesCustomFieldsMap {
   get: (type: CustomFieldTypes) => ICasesCustomField | undefined | null;
 }
+
+interface CustomFieldMapping {
+  key: string;
+  mapping: ICasesCustomField | null | undefined;
+}
+
+export type CustomFieldsMappings = CustomFieldMapping[];
