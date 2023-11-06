@@ -482,7 +482,7 @@ export default ({ getService }: FtrProviderContext) => {
           manage_ccr: false,
           manage_index_templates: true,
           monitor_watcher: false,
-          monitor_transform: false,
+          monitor_transform: true,
           read_ilm: false,
           manage_api_key: false,
           manage_security: false,

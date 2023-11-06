@@ -22,11 +22,16 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   ALERTS_TABLE_ROW_LOADER,
+  ALERT_TAGGING_CONTEXT_MENU_ITEM,
   SELECTED_ALERT_TAG,
+  TAKE_ACTION_POPOVER_BTN,
   UNSELECTED_ALERT_TAG,
 } from '../../../../screens/alerts';
 
+const CANNOT_INTERACT_WITH_TAGS: SecurityRoleName[] = [ROLES.viewer];
+
 const CAN_INTERACT_WITH_TAGS: SecurityRoleName[] = [
+  ROLES.editor,
   ROLES.t1_analyst,
   ROLES.t2_analyst,
   // ROLES.t3_analyst,
@@ -76,6 +81,21 @@ describe('Alert tagging privileges', { tags: ['@ess', '@serverless'] }, () => {
         selectNumberOfAlerts(1);
         openAlertTaggingBulkActionMenu();
         cy.get(UNSELECTED_ALERT_TAG).first().contains('Duplicate');
+      });
+    });
+  });
+
+  describe('do not have privileges', () => {
+    CANNOT_INTERACT_WITH_TAGS.forEach((role) => {
+      it(`${role} cannot add and remove a tag using the alert bulk action menu`, () => {
+        login(role);
+        visitWithTimeRange(ALERTS_URL, { role });
+        waitForAlertsToPopulate();
+
+        // Add a tag to one alert
+        selectNumberOfAlerts(1);
+        cy.get(TAKE_ACTION_POPOVER_BTN).click();
+        cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).should('not.exist');
       });
     });
   });

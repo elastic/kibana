@@ -1,11 +1,117 @@
 {
+  "viewer": {
+    "name": "viewer",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": [".lists-*", ".siem-signals-*", ".items-*"],
+          "privileges": ["read", "view_index_metadata"]
+        },
+        {
+          "names": [".alerts*", ".preview.alerts*", ".internal.alerts-security.alerts-*"],
+          "privileges": ["read", "view_index_metadata"]
+        },
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*",
+            "metrics-endpoint.metadata_current_*",
+            ".fleet-agents*",
+            ".fleet-actions*",
+            "risk-score.risk-score-*"
+          ],
+          "privileges": ["read"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "siem": ["read", "read_alerts", "endpoint_list_read"],
+          "securitySolutionAssistant": ["all"],
+          "securitySolutionCases": ["read"],
+          "actions": ["read"],
+          "builtInAlerts": ["read"],
+          "osquery":["read"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
+  "editor": {
+    "name": "editor",
+    "elasticsearch": {
+      "cluster": [],
+      "indices": [
+        {
+          "names": [".lists-*", ".siem-signals-*", ".items-*"],
+          "privileges": ["read", "view_index_metadata", "write", "maintenance"]
+        },
+        {
+          "names": [".alerts*", ".preview.alerts*", ".internal.alerts*", "risk-score.risk-score-*"],
+          "privileges": ["read", "view_index_metadata", "write", "maintenance"]
+        },
+        {
+          "names": [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "privileges": ["read", "write"]
+        }
+      ],
+      "run_as": []
+    },
+    "kibana": [
+      {
+        "feature": {
+          "ml": ["read"],
+          "siem": ["all", "read_alerts", "crud_alerts", "endpoint_list_all", "trusted_applications_all", "event_filters_all", "host_isolation_exceptions_all", "blocklist_all", "policy_management_read", "host_isolation_all", "process_operations_all", "actions_log_management_all", "file_operations_all"],
+          "securitySolutionAssistant": ["all"],
+          "securitySolutionCases": ["all"],
+          "actions": ["read"],
+          "builtInAlerts": ["all"],
+          "osquery":["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "canvas": ["all"],
+          "graph": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
+        },
+        "spaces": ["*"],
+        "base": []
+      }
+    ]
+  },
   "t1_analyst": {
     "name": "t1_analyst",
     "elasticsearch": {
       "cluster": [],
       "indices": [
         {
-          "names": [".alerts-security*", ".siem-signals-*"],
+          "names": [".alerts-security*", ".siem-signals-*", ".internal.alerts-security.alerts-*"],
           "privileges": ["read", "write", "maintenance"]
         },
         {
@@ -56,7 +162,7 @@
       "cluster": [],
       "indices": [
         {
-          "names": [".alerts-security*", ".siem-signals-*"],
+          "names": [".alerts-security*", ".siem-signals-*", ".internal.alerts-security.alerts-*"],
           "privileges": ["read", "write", "maintenance"]
         },
         {
@@ -122,7 +228,7 @@
           "privileges": ["read", "write"]
         },
         {
-          "names": [".alerts-security*", ".siem-signals-*"],
+          "names": [".alerts-security*", ".siem-signals-*", ".internal.alerts-security.alerts-*"],
           "privileges": ["read", "write"]
         },
         {
@@ -178,7 +284,7 @@
       "cluster": [],
       "indices":[
         {
-          "names": [".alerts-security*", ".siem-signals-*"],
+          "names": [".alerts-security*", ".siem-signals-*", ".internal.alerts-security.alerts-*"],
           "privileges": ["read", "write", "maintenance"]
         },
         {
@@ -252,6 +358,7 @@
           "names": [
             ".alerts-security*",
             ".preview.alerts-security*",
+            ".internal.alerts-security.alerts-*",
             ".internal.preview.alerts-security*",
             ".siem-signals-*"
           ],
@@ -316,6 +423,7 @@
           "names": [
             ".alerts-security*",
             ".preview.alerts-security*",
+            ".internal.alerts-security.alerts-*",
             ".internal.preview.alerts-security*",
             ".siem-signals-*"
           ],
@@ -361,6 +469,7 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
+            ".internal.alerts-security.alerts-*",
             ".lists*",
             ".items*",
             "apm-*-transaction*",
@@ -436,6 +545,7 @@
           "names": [
             ".alerts-security*",
             ".preview.alerts-security*",
+            ".internal.alerts-security.alerts-*",
             ".internal.preview.alerts-security*",
             ".siem-signals-*"
           ],
@@ -498,6 +608,7 @@
           "names": [
             ".alerts-security*",
             ".preview.alerts-security*",
+            ".internal.alerts-security.alerts-*",
             ".internal.preview.alerts-security*",
             ".siem-signals-*"
           ],
@@ -559,6 +670,7 @@
           "names": [
             ".alerts-security*",
             ".preview.alerts-security*",
+            ".internal.alerts-security.alerts-*",
             ".internal.preview.alerts-security*",
             ".siem-signals-*"
           ],
