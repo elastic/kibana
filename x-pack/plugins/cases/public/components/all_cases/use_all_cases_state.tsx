@@ -13,7 +13,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import {
   removeLegacyValuesFromOptions,
-  removeNonStoreableFilters,
+  getStoreableFilters,
 } from './utils/sanitize_filter_options';
 import type {
   FilterOptions,
@@ -183,8 +183,7 @@ export function useAllCasesState(
         localStorageFilterOptions
       );
 
-      const newPersistedFilterOptions: PartialFilterOptions =
-        removeNonStoreableFilters(newFilterOptions);
+      const newPersistedFilterOptions: PartialFilterOptions = getStoreableFilters(newFilterOptions);
 
       const newLocalStorageFilterOptions: PartialFilterOptions = {
         ...localStorageFilterOptions,
@@ -207,7 +206,7 @@ export function useAllCasesState(
     const stateUrlParams = {
       ...parsedUrlParams,
       ...queryParams,
-      ...removeNonStoreableFilters(filterOptions),
+      ...getStoreableFilters(filterOptions),
       page: queryParams.page.toString(),
       perPage: queryParams.perPage.toString(),
     };

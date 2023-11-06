@@ -28,9 +28,8 @@ export const removeLegacyValuesFromOptions = ({
   };
 };
 
-export const removeNonStoreableFilters = (filterOptions: Partial<FilterOptions>) => {
-  const { assignees, category, owner, reporters, search, searchFields, tags, ...storableFilters } =
-    filterOptions;
+export const getStoreableFilters = (filterOptions: Partial<FilterOptions>) => {
+  const { status, severity } = filterOptions;
 
-  return storableFilters;
+  return { status, severity };
 };
