@@ -9,6 +9,6 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+  new Plugin();
 
 export { config } from '../common/config';
