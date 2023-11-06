@@ -40,7 +40,6 @@ export interface TemplateDeserialized {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
-    lifecycle?: DataRetention;
   };
   lifecycle?: DataRetention;
   composedOf?: string[]; // Composable template only
