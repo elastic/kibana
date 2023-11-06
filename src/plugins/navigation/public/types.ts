@@ -8,6 +8,7 @@
 
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { CloudStart } from '@kbn/cloud-plugin/public';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
@@ -28,4 +29,5 @@ export interface NavigationPublicPluginStart {
 
 export interface NavigationPluginStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  cloud: CloudStart;
 }

@@ -191,7 +191,7 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
-    const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
+    const chromeStyle$ = new BehaviorSubject<ChromeStyle>('project');
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -264,12 +264,12 @@ export class ChromeService {
     };
 
     const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
-      validateChromeStyle();
+      // validateChromeStyle();
       projectNavigation.setProjectSideNavComponent(component);
     };
 
     const setProjectNavigation = (config: ChromeProjectNavigation) => {
-      validateChromeStyle();
+      // validateChromeStyle();
       projectNavigation.setProjectNavigation(config);
     };
 

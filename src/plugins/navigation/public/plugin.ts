@@ -8,6 +8,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
@@ -15,6 +16,7 @@ import {
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import { createSearchSideNavComponent } from './nav_configs';
 
 export class NavigationPublicPlugin
   implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart>
@@ -34,8 +36,17 @@ export class NavigationPublicPlugin
 
   public start(
     core: CoreStart,
-    { unifiedSearch }: NavigationPluginStartDependencies
+    { unifiedSearch, cloud }: NavigationPluginStartDependencies
   ): NavigationPublicPluginStart {
+    const chrome = core.chrome as InternalChromeStart;
+
+    const serverless = {
+      ...chrome.project,
+      setProjectHome: chrome.project.setHome,
+    };
+
+    chrome.project.setSideNavComponent(createSearchSideNavComponent(core, { serverless, cloud }));
+
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
     /*
