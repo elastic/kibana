@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStream, EnhancedDataStreamFromEs, Health } from '../types';
+import { DataStream, EnhancedDataStreamFromEs, Health, DataRetention } from '../types';
 
 export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs): DataStream {
   const {
@@ -81,5 +81,24 @@ export const splitSizeAndUnits = (field: string): { size: string; unit: string }
   return {
     size,
     unit,
+  };
+};
+
+export const serializeAsESLifecycle = (lifecycle?: DataRetention): DataStream['lifecycle'] => {
+  if (!lifecycle || !lifecycle?.enabled) {
+    return undefined;
+  }
+
+  const { infiniteDataRetention, value, unit  } = lifecycle;
+
+  if (infiniteDataRetention) {
+    return {
+      enabled: true,
+    };
+  }
+
+  return {
+    enabled: true,
+    data_retention: `${value}${unit}`,
   };
 };

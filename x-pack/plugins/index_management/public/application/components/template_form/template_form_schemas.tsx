@@ -159,19 +159,21 @@ export const schemas: Record<string, FormSchema> = {
       formatters: [toInt],
     },
 
-    enableDataRetention: {
+    'lifecycle.enabled': {
       type: FIELD_TYPES.TOGGLE,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.enableDataRetentionLabel', {
         defaultMessage: 'Enable data retention',
       }),
+      defaultValue: false,
     },
-    infiniteDataRetention: {
+    'lifecycle.infiniteDataRetention': {
       type: FIELD_TYPES.TOGGLE,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.enableDataRetentionLabel', {
         defaultMessage: 'Keep data indefinitely',
       }),
+      defaultValue: false,
     },
-    dataRetentionValue: {
+    'lifecycle.value': {
       type: FIELD_TYPES.TEXT,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionValueLabel', {
         defaultMessage: 'Data Retention',
@@ -210,7 +212,7 @@ export const schemas: Record<string, FormSchema> = {
         },
       ],
     },
-    dataRetentionUnit: {
+    'lifecycle.unit': {
       type: FIELD_TYPES.TEXT,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldDataRetentionUnitLabel', {
         defaultMessage: 'Time unit',

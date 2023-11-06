@@ -29,6 +29,7 @@ import {
   NumericField,
 } from '../../../../shared_imports';
 import { UnitField, timeUnits } from '../../../components/shared';
+import { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
 
@@ -176,9 +177,9 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       getFormData,
     } = form;
 
-    const [{ addMeta, enableDataRetention, infiniteDataRetention }] = useFormData<{ addMeta: boolean, enableDataRetention: boolean, infiniteDataRetention: boolean }>({
+    const [{ addMeta, doCreateDataStream, lifecycle }] = useFormData<{ addMeta: boolean, lifecycle: DataRetention, doCreateDataStream: boolean }>({
       form,
-      watch: ['addMeta', 'enableDataRetention', 'infiniteDataRetention'],
+      watch: ['addMeta', 'lifecycle.enabled', 'lifecycle.infiniteDataRetention', 'doCreateDataStream'],
     });
 
     /**
@@ -272,6 +273,59 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             </FormRow>
           )}
 
+          {/* Data retention */}
+          {doCreateDataStream && (
+            <FormRow
+              title={dataRetention.title}
+              description={
+                <>
+                  {dataRetention.description}
+                  <EuiSpacer size="m" />
+                  <UseField
+                    path="lifecycle.enabled"
+                    data-test-subj="dataRetentionToggle"
+                    componentProps={{ 'data-test-subj': createDataStream.testSubject }}
+                  />
+                </>
+              }
+            >
+              {lifecycle?.enabled && (
+                <UseField
+                  path="lifecycle.value"
+                  component={NumericField}
+                  labelAppend={(
+                    <UseField
+                      path="lifecycle.infiniteDataRetention"
+                      data-test-subj="infiniteDataRetentionToggle"
+                      componentProps={{
+                        euiFieldProps: {
+                          compressed: true
+                        }
+                      }}
+                    />
+                  )}
+                  componentProps={{
+                    euiFieldProps: {
+                      disabled: lifecycle?.infiniteDataRetention,
+                      'data-test-subj': dataRetention.valueTestSubject,
+                      min: 1,
+                      append: (
+                        <UnitField
+                          path="lifecycle.unit"
+                          options={timeUnits}
+                          disabled={lifecycle?.infiniteDataRetention}
+                          euiFieldProps={{
+                            'data-test-subj': dataRetention.unitTestSubject,
+                          }}
+                        />
+                      ),
+                    },
+                  }}
+                />
+              )}
+            </FormRow>
+          )}
+
           {/* Order */}
           {isLegacy && (
             <FormRow title={order.title} description={order.description}>
@@ -306,52 +360,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             />
           </FormRow>
 
-          {/* Data retention */}
-          <FormRow
-            title={dataRetention.title}
-            description={
-              <>
-                {dataRetention.description}
-                <EuiSpacer size="m" />
-                <UseField path="enableDataRetention" data-test-subj="dataRetentionToggle" />
-              </>
-            }
-          >
-            {enableDataRetention && (
-              <UseField
-                path="dataRetentionValue"
-                component={NumericField}
-                labelAppend={(
-                  <UseField
-                    path="infiniteDataRetention"
-                    data-test-subj="infiniteDataRetentionToggle"
-                    componentProps={{
-                      euiFieldProps: {
-                        compressed: true
-                      }
-                    }}
-                  />
-                )}
-                componentProps={{
-                  euiFieldProps: {
-                    disabled: infiniteDataRetention,
-                    'data-test-subj': dataRetention.valueTestSubject,
-                    min: 1,
-                    append: (
-                      <UnitField
-                        path="dataRetentionUnit"
-                        options={timeUnits}
-                        disabled={infiniteDataRetention}
-                        euiFieldProps={{
-                          'data-test-subj': dataRetention.unitTestSubject,
-                        }}
-                      />
-                    ),
-                  },
-                }}
-              />
-            )}
-          </FormRow>
 
           {/* _meta */}
           {isLegacy === false && (
