@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { merge } from 'lodash';
@@ -41,9 +42,6 @@ export const getCypressBaseConfig = (
       experimentalStudio: true,
 
       env: {
-        'cypress-react-selector': {
-          root: '#security-solution-app',
-        },
         KIBANA_URL: 'http://localhost:5601',
         ELASTICSEARCH_URL: 'http://localhost:9200',
         FLEET_SERVER_URL: 'https://localhost:8220',
