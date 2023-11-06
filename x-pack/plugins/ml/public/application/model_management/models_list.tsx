@@ -45,6 +45,7 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useStorage } from '@kbn/ml-local-storage';
+import { AddModelFlyout } from './add_model_flyout';
 import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
@@ -165,6 +166,7 @@ export const ModelsList: FC<Props> = ({
   );
   const [modelToTest, setModelToTest] = useState<ModelItem | null>(null);
   const [dfaModelToTest, setDfaModelToTest] = useState<ModelItem | null>(null);
+  const [isAddModelFlyoutVisible, setIsAddModelFlyoutVisible] = useState(false);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -688,13 +690,23 @@ export const ModelsList: FC<Props> = ({
     <>
       <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
       <EuiFlexGroup justifyContent="spaceBetween">
-        {modelsStats && (
-          <>
-            <EuiFlexItem grow={false}>
-              <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
-            </EuiFlexItem>
-          </>
-        )}
+        {modelsStats ? (
+          <EuiFlexItem grow={false}>
+            <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType={'plusInCircle'}
+            color={'primary'}
+            onClick={setIsAddModelFlyoutVisible.bind(null, true)}
+          >
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
+              defaultMessage="Add trained model"
+            />
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
@@ -773,6 +785,12 @@ export const ModelsList: FC<Props> = ({
         <AddInferencePipelineFlyout
           onClose={setModelToDeploy.bind(null, undefined)}
           model={modelToDeploy}
+        />
+      ) : null}
+      {isAddModelFlyoutVisible ? (
+        <AddModelFlyout
+          onClose={setIsAddModelFlyoutVisible.bind(null, false)}
+          onSumbit={(modelIds) => {}}
         />
       ) : null}
     </>
