@@ -61,7 +61,7 @@ $response = $client->bulk(body: $body);
 echo $response->getStatusCode();
 echo (string) $response->getBody();
 `,
-  installClient: 'composer require elastic/elasticsearch-serverless:*@alpha',
+  installClient: 'composer require elastic/elasticsearch-serverless',
   name: i18n.translate('xpack.serverlessSearch.languages.php', {
     defaultMessage: 'PHP',
   }),
