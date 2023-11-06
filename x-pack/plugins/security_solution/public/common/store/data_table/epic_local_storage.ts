@@ -12,10 +12,12 @@ import { get } from 'lodash/fp';
 
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { updateTotalCount } from '../../../timelines/store/timeline/actions';
+import { updateTotalCount } from '@kbn/securitysolution-data-table/store/data_table/actions';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
 import type { TimelineEpicDependencies } from '../../../timelines/store/timeline/types';
+import { addDiscoverToStorage } from './discover';
+import { addTimelineToStorage } from './timeline';
 
 const {
   applyDeltaToColumnWidth,
@@ -52,18 +54,33 @@ const tableActionTypes = [
 
 export const createDataTableLocalStorageEpic =
   <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
-  (action$, state$, { tableByIdSelector, storage }) => {
+  (action$, state$, { tableByIdSelector, storage, timelineByIdSelector, discoverStateSeletor }) => {
     const table$ = state$.pipe(map(tableByIdSelector), filter(isNotNull));
+    const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
+    const discover$ = state$.pipe(map(discoverStateSeletor), filter(isNotNull));
+
     return action$.pipe(
       delay(500),
-      withLatestFrom(table$),
-      tap(([action, tableById]) => {
+      withLatestFrom(table$, timeline$, discover$),
+      tap(([action, tableById, timelineById, discoverState]) => {
         if (tableActionTypes.includes(action.type)) {
           if (storage) {
             const tableId: TableIdLiteral = get('payload.id', action);
             addTableInStorage(storage, tableId, tableById[tableId]);
           }
         }
+
+        addTimelineToStorage({
+          storage,
+          timelineById,
+          action,
+        });
+
+        addDiscoverToStorage({
+          storage,
+          action,
+          discoverState,
+        });
       }),
       ignoreElements()
     );

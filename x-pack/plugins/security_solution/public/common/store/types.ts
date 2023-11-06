@@ -23,21 +23,19 @@ import type { ManagementPluginState } from '../../management';
 import type { UsersPluginState } from '../../explore/users/store';
 import type { GlobalUrlParam } from './global_url_param';
 import type { GroupState } from './grouping/types';
-import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { AnalyzerState } from '../../resolver/types';
 
 export type State = HostsPluginState &
   UsersPluginState &
   NetworkPluginState &
   UsersPluginState &
-  TimelinePluginState &
+  TimelinePluginState & // includes discover state as well
   ManagementPluginState & {
     app: AppState;
     dragAndDrop: DragAndDropState;
     inputs: InputsState;
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
-    discover: SecuritySolutionDiscoverState;
   } & DataTableState &
   GroupState &
   AnalyzerState;

@@ -473,7 +473,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       overview: subPlugins.overview.start(),
       rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
-      timelines: subPlugins.timelines.start(),
+      timelines: subPlugins.timelines.start(storage),
       entityAnalytics: subPlugins.entityAnalytics.start(
         this.experimentalFeatures.riskScoringRoutesEnabled
       ),

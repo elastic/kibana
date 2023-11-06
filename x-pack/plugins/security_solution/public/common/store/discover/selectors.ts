@@ -7,6 +7,14 @@
 
 import { createSelector } from 'reselect';
 import type { State } from '../types';
+import type { SecuritySolutionDiscoverState } from './model';
+
+export const selectDiscoverState = (state: State): SecuritySolutionDiscoverState => state.discover;
+
+export const getDiscoverStateSelector = createSelector(
+  selectDiscoverState,
+  (discoverState) => discoverState
+);
 
 export const selectAppState = (state: State) => {
   const { discover } = state;

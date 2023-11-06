@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 // we don't have the types for waitFor just yet, so using "as waitFor" for when we do
-import { waitFor } from '@testing-library/react';
+import { waitFor, render } from '@testing-library/react';
 import '../../mock/match_media';
 import {
   mockGlobalState,
@@ -34,6 +34,10 @@ import { EntityType } from '@kbn/timelines-plugin/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { SourcererScopeName } from '../sourcerer/model';
 import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
+import { setSavedQueryId } from '../../../timelines/store/timeline/actions';
+import { TimelineId } from '../../../../common/types';
+import { updateDiscoverAppState } from '../discover/actions';
+import type { SecuritySolutionDiscoverState } from '../discover/model';
 
 const {
   applyDeltaToColumnWidth,
@@ -47,6 +51,12 @@ const {
 } = dataTableActions;
 
 jest.mock('../../../timelines/containers/local_storage');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    pathname: 'localhost:3000/example/path',
+  }),
+}));
 
 const addTableInStorageMock = addTableInStorage as jest.Mock;
 
@@ -78,108 +88,162 @@ describe('epicLocalStorage', () => {
     };
   });
 
-  it('persist adding / reordering of a column correctly', async () => {
-    shallow(
-      <TestProviders store={store}>
-        <StatefulEventsViewer {...testProps} />
-      </TestProviders>
-    );
-    store.dispatch(upsertColumn({ id: TableId.test, index: 1, column: defaultHeaders[0] }));
-    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+  describe('data table', () => {
+    it('persist adding / reordering of a column correctly', async () => {
+      shallow(
+        <TestProviders store={store}>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+      store.dispatch(upsertColumn({ id: TableId.test, index: 1, column: defaultHeaders[0] }));
+      await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+    });
+
+    it('persist timeline when removing a column ', async () => {
+      shallow(
+        <TestProviders store={store}>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+      store.dispatch(removeColumn({ id: TableId.test, columnId: '@timestamp' }));
+      await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+    });
+
+    it('persists resizing of a column', async () => {
+      shallow(
+        <TestProviders store={store}>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+      store.dispatch(
+        applyDeltaToColumnWidth({ id: TableId.test, columnId: '@timestamp', delta: 80 })
+      );
+      await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+    });
+
+    it('persist the resetting of the fields', async () => {
+      shallow(
+        <TestProviders store={store}>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+      store.dispatch(updateColumns({ id: TableId.test, columns: defaultHeaders }));
+      await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+    });
+
+    it('persist items per page', async () => {
+      shallow(
+        <TestProviders store={store}>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+      store.dispatch(updateItemsPerPage({ id: TableId.test, itemsPerPage: 50 }));
+      await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+    });
+
+    it('persist the sorting of a column', async () => {
+      shallow(
+        <TestProviders store={store}>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+      store.dispatch(
+        updateSort({
+          id: TableId.test,
+          sort: [
+            {
+              columnId: 'event.severity',
+              columnType: 'number',
+              esTypes: ['long'],
+              sortDirection: Direction.desc,
+            },
+          ],
+        })
+      );
+      await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+    });
+
+    it('persists updates to the column order to local storage', async () => {
+      shallow(
+        <TestProviders store={store}>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+      store.dispatch(
+        updateColumnOrder({
+          columnIds: ['event.severity', '@timestamp', 'event.category'],
+          id: TableId.test,
+        })
+      );
+      await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+    });
+
+    it('persists updates to the column width to local storage', async () => {
+      shallow(
+        <TestProviders store={store}>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+      store.dispatch(
+        updateColumnWidth({
+          columnId: 'event.severity',
+          id: TableId.test,
+          width: 123,
+        })
+      );
+      await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+    });
   });
 
-  it('persist timeline when removing a column ', async () => {
-    shallow(
-      <TestProviders store={store}>
-        <StatefulEventsViewer {...testProps} />
-      </TestProviders>
-    );
-    store.dispatch(removeColumn({ id: TableId.test, columnId: '@timestamp' }));
-    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+  describe('timeline', () => {
+    it('should persist savedQueryID', async () => {
+      render(<TestProviders store={store} />);
+
+      store.dispatch(
+        setSavedQueryId({
+          id: TimelineId.test,
+          savedQueryId: 'abc',
+        })
+      );
+
+      await waitFor(() => {
+        const actualResult = storage.get('securitySolution.timeline');
+        expect(actualResult).toMatchObject(
+          expect.objectContaining({
+            [TimelineId.test]: expect.objectContaining({
+              savedQueryId: 'abc',
+            }),
+          })
+        );
+      });
+    });
   });
 
-  it('persists resizing of a column', async () => {
-    shallow(
-      <TestProviders store={store}>
-        <StatefulEventsViewer {...testProps} />
-      </TestProviders>
-    );
-    store.dispatch(
-      applyDeltaToColumnWidth({ id: TableId.test, columnId: '@timestamp', delta: 80 })
-    );
-    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
-  });
+  describe('discover', () => {
+    it('should persist discover app state', async () => {
+      render(<TestProviders store={store} />);
+      store.dispatch(
+        updateDiscoverAppState({
+          newState: {
+            query: {
+              esql: 'some esql',
+            },
+          } as SecuritySolutionDiscoverState['app'],
+        })
+      );
 
-  it('persist the resetting of the fields', async () => {
-    shallow(
-      <TestProviders store={store}>
-        <StatefulEventsViewer {...testProps} />
-      </TestProviders>
-    );
-    store.dispatch(updateColumns({ id: TableId.test, columns: defaultHeaders }));
-    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
-  });
-
-  it('persist items per page', async () => {
-    shallow(
-      <TestProviders store={store}>
-        <StatefulEventsViewer {...testProps} />
-      </TestProviders>
-    );
-    store.dispatch(updateItemsPerPage({ id: TableId.test, itemsPerPage: 50 }));
-    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
-  });
-
-  it('persist the sorting of a column', async () => {
-    shallow(
-      <TestProviders store={store}>
-        <StatefulEventsViewer {...testProps} />
-      </TestProviders>
-    );
-    store.dispatch(
-      updateSort({
-        id: TableId.test,
-        sort: [
-          {
-            columnId: 'event.severity',
-            columnType: 'number',
-            esTypes: ['long'],
-            sortDirection: Direction.desc,
-          },
-        ],
-      })
-    );
-    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
-  });
-
-  it('persists updates to the column order to local storage', async () => {
-    shallow(
-      <TestProviders store={store}>
-        <StatefulEventsViewer {...testProps} />
-      </TestProviders>
-    );
-    store.dispatch(
-      updateColumnOrder({
-        columnIds: ['event.severity', '@timestamp', 'event.category'],
-        id: TableId.test,
-      })
-    );
-    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
-  });
-
-  it('persists updates to the column width to local storage', async () => {
-    shallow(
-      <TestProviders store={store}>
-        <StatefulEventsViewer {...testProps} />
-      </TestProviders>
-    );
-    store.dispatch(
-      updateColumnWidth({
-        columnId: 'event.severity',
-        id: TableId.test,
-        width: 123,
-      })
-    );
-    await waitFor(() => expect(addTableInStorageMock).toHaveBeenCalled());
+      await waitFor(() => {
+        const actualResult = storage.get('securitySolution.discover');
+        expect(actualResult).toMatchObject(
+          expect.objectContaining({
+            app: expect.objectContaining({
+              query: {
+                esql: 'some esql',
+              },
+            }),
+          })
+        );
+      });
+    });
   });
 });

@@ -36,6 +36,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getTimelineReducer: () => {
         return timelineReducer;
       },
+
       getLoadingPanel: (props: LoadingPanelProps) => {
         return getLoadingPanelLazy(props);
       },
