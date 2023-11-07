@@ -148,3 +148,7 @@ xpack.task_manager.requeue_invalid_tasks.enabled: true
 xpack.screenshotting.enabled: false
 xpack.reporting.roles.enabled: false
 xpack.reporting.statefulSettings.enabled: false
+
+
+# Disabled Observability plugins
+xpack.ux.enabled: false
