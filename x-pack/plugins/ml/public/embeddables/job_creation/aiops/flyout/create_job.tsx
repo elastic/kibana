@@ -119,9 +119,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
   }
 
   useEffect(() => {
-    if (enablePerPartitionCategorization) {
-      setSelectedPartitionFieldOptions([]);
-    }
+    setSelectedPartitionFieldOptions([]);
   }, [enablePerPartitionCategorization]);
 
   async function createADJob({
