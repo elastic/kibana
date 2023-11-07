@@ -31,7 +31,6 @@ import {
 import { QUERY_TAB_BUTTON, TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../../screens/timeline';
 import { waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { investigateDashboardItemInTimeline } from '../../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
@@ -47,7 +46,6 @@ const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 // FLAKY: https://github.com/elastic/kibana/issues/168771
 describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     createRule(getNewRule());
   });
 
