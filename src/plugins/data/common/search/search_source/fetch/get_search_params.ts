@@ -44,6 +44,7 @@ export function getSearchParamsFromRequest(
     body,
     // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
     track_total_hits,
+    ...(searchRequest.index?.allowHidden && { expand_wildcards: 'all' }),
     ...searchParams,
   };
 }

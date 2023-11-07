@@ -9,6 +9,7 @@
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
 import { getSearchParams, getSearchParamsFromRequest } from './get_search_params';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 function getConfigStub(config: any = {}): GetConfigFn {
   return (key) => config[key];
@@ -45,5 +46,49 @@ describe('getSearchParams', () => {
     expect(searchParams.body).toStrictEqual({
       query: 123,
     });
+  });
+
+  test('sets expand_wildcards=all if data view has allowHidden=true', () => {
+    const getConfig = getConfigStub({
+      [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
+      [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
+    });
+    const index = {
+      ...dataViewMock,
+      allowHidden: true,
+    };
+    const searchParams = getSearchParamsFromRequest(
+      {
+        index,
+        body: {
+          query: 123,
+          track_total_hits: true,
+        },
+      },
+      { getConfig }
+    );
+    expect(searchParams).toHaveProperty('expand_wildcards', 'all');
+  });
+
+  test('does not set expand_wildcards if data view has allowHidden=false', () => {
+    const getConfig = getConfigStub({
+      [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
+      [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
+    });
+    const index = {
+      ...dataViewMock,
+      allowHidden: false,
+    };
+    const searchParams = getSearchParamsFromRequest(
+      {
+        index,
+        body: {
+          query: 123,
+          track_total_hits: true,
+        },
+      },
+      { getConfig }
+    );
+    expect(searchParams).not.toHaveProperty('expand_wildcards', 'all');
   });
 });
