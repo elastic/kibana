@@ -15,15 +15,19 @@ import {
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { SIGNALS_TEMPLATE_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 import { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteMigrations,
   deleteAllAlerts,
   getIndexNameFromLoad,
   waitForIndexToPopulate,
-} from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+} from '../../../utils';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../../../../common/services/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 interface CreateResponse {
   index: string;
@@ -35,7 +39,6 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -58,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     afterEach(async () => {
