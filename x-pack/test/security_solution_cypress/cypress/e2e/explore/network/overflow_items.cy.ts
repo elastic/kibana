@@ -23,15 +23,10 @@ import { NETWORK_URL } from '../../../urls/navigation';
 const testDomainOne = 'myTest';
 const testDomainTwo = 'myTest2';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165692
-// Tracked by https://github.com/elastic/security-team/issues/7696
-describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Overflow items', { tags: ['@ess', '@serverless'] }, () => {
   context('Network stats and tables', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'network' });
-    });
-
-    beforeEach(() => {
       login();
       visitWithTimeRange(NETWORK_URL);
       cy.get(DESTINATION_DOMAIN).should('not.exist');
@@ -49,12 +44,10 @@ describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServer
       cy.task('esArchiverUnload', 'network');
     });
 
-    it('Shows more items in the popover', () => {
+    it('Shows more items and shows hover actions for more items in the popover', () => {
       cy.get(DESTINATION_DOMAIN).eq(0).should('have.text', testDomainOne);
       cy.get(DESTINATION_DOMAIN).eq(1).should('have.text', testDomainTwo);
-    });
 
-    it('Shows Hover actions for more items in the popover', () => {
       cy.get(FILTER_IN).should('exist');
       cy.get(FILTER_OUT).should('exist');
       cy.get(ADD_TO_TIMELINE).should('exist');
