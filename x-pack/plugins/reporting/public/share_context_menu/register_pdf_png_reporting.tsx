@@ -130,7 +130,7 @@ export const reportingScreenshotShareProvider = ({
     const requiresSavedState = !isV2Job;
     const reportingModalTitle = i18n.translate('xpack.reporting.shareContextModal.buttonLabel', {
       defaultMessage: 'Reports',
-    })
+    });
 
     const reportingModal = {
       shareMenuItem: {
@@ -155,10 +155,9 @@ export const reportingScreenshotShareProvider = ({
             onClose={onClose}
             theme={theme}
           />
-        )
-      }
-    }
-
+        ),
+      },
+    };
 
     shareActions.push(reportingModal);
     return shareActions;

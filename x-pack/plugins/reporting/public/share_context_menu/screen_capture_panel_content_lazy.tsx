@@ -18,9 +18,9 @@ const LazyComponent = lazy(() =>
 );
 
 const LazyModalComponent = lazy(() =>
-import('./screen_capture_modal_content').then(({ ScreenCaptureModalContent }) => ({
-  default: ScreenCaptureModalContent,
-}))
+  import('./screen_capture_modal_content').then(({ ScreenCaptureModalContent }) => ({
+    default: ScreenCaptureModalContent,
+  }))
 );
 
 export const ScreenCapturePanelContent: FC<Props> = (props) => {

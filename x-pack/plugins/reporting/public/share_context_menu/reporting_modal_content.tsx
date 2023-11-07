@@ -68,7 +68,7 @@ export const ReportingModalContent: FC<ReportingModalProps> = (props: ReportingM
   const [objectType, setObjectType] = useState(props.getJobParams());
   const [createReportingJob, isCreatingReportJob] = useState(false);
   const [radioIsSelected, setRadioIsSelected] = useState('pdf');
-  let mounted = useRef<boolean>();
+  const mounted = useRef<boolean>();
 
   const onChange = (label: string) => {
     setRadioIsSelected(label);
@@ -79,13 +79,13 @@ export const ReportingModalContent: FC<ReportingModalProps> = (props: ReportingM
       return;
     }
     absoluteUrl = getAbsoluteReportGenerationUrl(props);
-    setAbsoluteUrl(absoluteUrl)
+    setAbsoluteUrl(absoluteUrl);
   };
 
   const markAsStale = () => {
-    if(!mounted) return
-    setIsStale(true)
-  }
+    if (!mounted) return;
+    setIsStale(true);
+  };
 
   const getAbsoluteReportGenerationUrl = (props: ReportingModalProps) => {
     const relativePath = props.apiClient.getReportingPublicJobPath(
