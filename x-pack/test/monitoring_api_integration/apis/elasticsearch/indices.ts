@@ -42,8 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body).to.eql(nonSystemIndicesResponse);
     });
 
-    // @klacabane will handle un-skipping this test.
-    it.skip('should summarize all indices with stats', async () => {
+    it('should summarize all indices with stats', async () => {
       const { body } = await supertest
         .post(
           '/api/monitoring/v1/clusters/-8HHufEtS72rt344JzYofg/elasticsearch/indices?show_system_indices=true'
