@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   isIntegrationPolicyTemplate,
   isPackagePrerelease,
+  isRootPrivilegesRequired,
 } from '../../../../../../../../common/services';
 
 import {
@@ -278,9 +279,7 @@ export const OverviewPage: React.FC<Props> = memo(
       ];
     }, [h1, navItems]);
 
-    const requireAgentRootPrivileges =
-      packageInfo.agent?.privileges?.root ||
-      packageInfo.data_streams?.some((d) => d.agent?.privileges?.root); // TODO move to an util function that can be tested
+    const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
 
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
