@@ -13,22 +13,20 @@ interface LinksModalPageProps {
   isEmbedded: boolean;
   allowShortUrl: boolean;
   objectType: string;
-
 }
 
-const renderRadioButtons = () => {
-
-}
+const renderRadioButtons = () => {};
 
 export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
-//   const { isEmbedded, allowShortUrl, objectType } = props;
-  return ( //<Frame isEmbedded={isEmbedded} allowShortUrl={allowShortUrl} objectType={objectType} />
-  <EuiForm>
-  {renderRadioButtons()}
-  <EuiSpacer />
-  <EuiCodeBlock isCopyable>
-    <EuiIcon type="copy"/>
-    </EuiCodeBlock>
-  </EuiForm>
+  //   const { isEmbedded, allowShortUrl, objectType } = props;
+  return (
+    // <Frame isEmbedded={isEmbedded} allowShortUrl={allowShortUrl} objectType={objectType} />
+    <EuiForm>
+      {renderRadioButtons()}
+      <EuiSpacer />
+      <EuiCodeBlock isCopyable>
+        <EuiIcon type="copy" />
+      </EuiCodeBlock>
+    </EuiForm>
   );
 };
