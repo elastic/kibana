@@ -180,8 +180,17 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         ] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
       }
 
-      if (etag === request.headers.etag) {
-        return response.notModified({ headers });
+      // move to util
+      const ifNoneMatch = request.headers['if-none-match'];
+      if (ifNoneMatch) {
+        let requestHash = (ifNoneMatch as string).slice(1, -1);
+        if (requestHash.indexOf('-') > -1) {
+          requestHash = requestHash.split('-')[0];
+        }
+
+        if (etag === requestHash) {
+          return response.notModified({ headers });
+        }
       }
 
       return response.ok({

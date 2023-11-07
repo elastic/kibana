@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup, HttpResponse } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
@@ -34,12 +34,17 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     query?: {},
     body?: string,
     forceRefresh?: boolean
-  ): Promise<T | undefined> {
-    const cacheOptions = forceRefresh ? { cache: 'reload' as RequestCache } : {};
+  ): Promise<HttpResponse<T> | undefined> {
+    const asResponse = true;
+    // circle back to this, will likely need changes to any code that loads fields
+    // const rawResponse = true;
+    const rawResponse = false;
+    const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
 
     const request = body
-      ? this.http.post<T>(url, { query, body, version })
-      : this.http.fetch<T>(url, { query, version, ...cacheOptions });
+      ? this.http.post<T>(url, { query, body, version, asResponse })
+      : this.http.fetch<T>(url, { query, version, ...cacheOptions, asResponse, rawResponse });
+
     return request.catch((resp) => {
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
@@ -85,7 +90,11 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
       forceRefresh
     ).then((response) => {
-      return response || { fields: [], indices: [] };
+      return {
+        indices: response?.body?.indices || [],
+        fields: response?.body?.fields || [],
+        etag: response?.response?.headers?.get('etag') || '',
+      };
     });
   }
 
@@ -96,6 +105,9 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     const response = await this._request<{ result: boolean }>(
       this._getUrl(['has_user_index_pattern'])
     );
-    return response?.result ?? false;
+
+    // const body = await response?.response?.json();
+    // return body?.result ?? false;
+    return response?.body?.result ?? false;
   }
 }

@@ -483,6 +483,14 @@ export class SettingsPageObject extends FtrService {
     await customDataViewIdInput.type(value);
   }
 
+  async refreshDataViewFieldList(dataViewName: string) {
+    await this.navigateTo();
+    await this.clickKibanaIndexPatterns();
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click(`detail-link-${dataViewName}`);
+    await this.testSubjects.click('refreshDataViewButton');
+  }
+
   async createIndexPattern(
     indexPatternName: string,
     // null to bypass default value
