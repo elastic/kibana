@@ -73,7 +73,6 @@ const renderOptions = (
   return null;
 };
 
-
 export const ScreenCaptureModalContent: FC<ScreenCaptureModalProps> = (
   props: ScreenCaptureModalProps
 ) => {

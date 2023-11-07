@@ -63,20 +63,19 @@ const renderTitle = (
     : 'CSV reports can take a few minutes to generate based upon the size of your report';
 };
 
-
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
-  const [ , setIsStale] = useState(false);
+  const [, setIsStale] = useState(false);
   // const [layoutId, setLayoutId] = useState('');
-  const [objectType, ] = useState(props.getJobParams());
+  const [objectType] = useState(props.getJobParams());
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [radioIsSelected, setRadioIsSelected] = useState('pdf');
-  let [ absoluteUrl, setAbsoluteUrl ] = useState('')
+  let [absoluteUrl, setAbsoluteUrl] = useState('');
   const mounted = useRef<boolean>();
 
   const onChange = (label: string) => {
     setRadioIsSelected(label);
   };
-  const exportType = radioIsSelected === 'png' ? 'pngV2' : 'printablePdfV2'
+  const exportType = radioIsSelected === 'png' ? 'pngV2' : 'printablePdfV2';
 
   const getAbsoluteReportGenerationUrl = (props: ReportingModalProps) => {
     const relativePath = props.apiClient.getReportingPublicJobPath(
@@ -100,15 +99,15 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   };
 
   useEffect(() => {
-    setAbsoluteReportGenerationUrl()
-    markAsStale()
-  })
+    setAbsoluteReportGenerationUrl();
+    markAsStale();
+  });
 
-  // issue generating reports with locator params 
+  // issue generating reports with locator params
   const generateReportingJob = () => {
     const { intl } = props;
     const decoratedJobParams = props.apiClient.getDecoratedJobParams(props.getJobParams());
-    console.log({decoratedJobParams})
+    console.log({ decoratedJobParams });
     setCreatingReportJob(true);
     return props.apiClient
       .createReportingJob(exportType, decoratedJobParams)
