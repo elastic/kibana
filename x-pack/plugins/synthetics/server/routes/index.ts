@@ -90,10 +90,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
   deletePackagePolicyRoute,
-  addPrivateLocationRoute,
-  deletePrivateLocationRoute,
   getLocationMonitors,
-  getPrivateLocationsRoute,
   getSyntheticsFilters,
   inspectSyntheticsMonitorRoute,
   getAgentPoliciesRoute,
@@ -107,4 +104,7 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   editSyntheticsParamsRoute,
   addSyntheticsParamsRoute,
   deleteSyntheticsParamsRoute,
+  addPrivateLocationRoute,
+  deletePrivateLocationRoute,
+  getPrivateLocationsRoute,
 ];
