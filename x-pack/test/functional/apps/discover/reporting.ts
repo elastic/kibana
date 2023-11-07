@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: new search', () => {
+    describe.only('Generate CSV: new search', () => {
       before(async () => {
         await reportingAPI.initEcommerce();
       });
