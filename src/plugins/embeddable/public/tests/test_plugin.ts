@@ -18,6 +18,7 @@ import {
 import { Query } from '@kbn/es-query';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 export interface TestPluginReturn {
   plugin: EmbeddablePublicPlugin;
@@ -68,6 +69,7 @@ export const testPlugin = (
           savedObjectsManagementMock as unknown as SavedObjectsManagementPluginStart,
         usageCollection: { reportUiCounter: jest.fn() },
         contentManagement: contentManagementMock.createStartContract(),
+        spaces: spacesPluginMock.createStartContract(),
       });
       return start;
     },
