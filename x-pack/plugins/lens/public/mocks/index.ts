@@ -26,7 +26,7 @@ export {
   defaultState,
   makeLensStore,
   mountWithProvider,
-  getMountWithProviderParams,
+  renderWithReduxStore,
 } from './store_mocks';
 export { lensPluginMock } from './lens_plugin_mock';
 
