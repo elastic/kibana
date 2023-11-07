@@ -448,8 +448,9 @@ export default function (ctx: FtrProviderContext) {
       it('allows to access only via a permitted index alias', async () => {
         await globalNav.badgeExistsOrFail('Read only');
 
-        await PageObjects.settings.refreshDataViewFieldList('logstash-*');
-        await PageObjects.common.navigateToApp('discover');
+        // this doesn't work since the user doesn't have access
+        // await PageObjects.settings.refreshDataViewFieldList('logstash-*');
+        // await PageObjects.common.navigateToApp('discover');
 
         // can't access logstash index directly
         await PageObjects.discover.selectIndexPattern('logstash-*');
