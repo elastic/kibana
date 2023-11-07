@@ -26,7 +26,18 @@ export const openHoverActions = () => {
 };
 
 export const mouseoverOnToOverflowItem = () => {
-  cy.get(OVERFLOW_ITEM).first().realHover({ position: 'center' });
+  cy.waitUntil(
+    () => {
+      cy.get(OVERFLOW_ITEM).first().realHover({ position: 'center' });
+      return cy.root().then(($el) => {
+        return $el.find(FILTER_IN).length === 1;
+      });
+    },
+    {
+      timeout: 15000,
+      interval: 500,
+    }
+  );
 };
 
 export const clickOnFilterIn = () => {
