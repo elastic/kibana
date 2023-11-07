@@ -1395,7 +1395,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       await dashboardAddPanel.clickCreateNewLink();
 
-      if (ignoreTimeFilter === undefined || !ignoreTimeFilter) {
+      if (!ignoreTimeFilter) {
         await this.goToTimeRange();
       }
 
