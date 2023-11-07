@@ -14,7 +14,7 @@ export const cacheMaxAge = {
     name: i18n.translate('dataViews.advancedSettings.cacheMaxAgeTitle', {
       defaultMessage: 'Field cache max age',
     }),
-    value: 0,
+    value: 3000,
     description: i18n.translate('dataViews.advancedSettings.cacheMaxAgeText', {
       defaultMessage:
         "Sets the 'max-age' cache header value for data view fields API requests. A value of 0 will disable caching.",
