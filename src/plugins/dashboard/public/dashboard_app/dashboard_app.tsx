@@ -31,6 +31,7 @@ import {
 } from './url/search_sessions_integration';
 import { DashboardAPI, DashboardRenderer } from '..';
 import { type DashboardEmbedSettings } from './types';
+import { DASHBOARD_APP_LOCATOR } from './locator/locator';
 import { pluginServices } from '../services/plugin_services';
 import { AwaitingDashboardAPI } from '../dashboard_container';
 import { DashboardRedirect } from '../dashboard_container/types';
@@ -82,6 +83,7 @@ export function DashboardApp({
     settings: { uiSettings },
     data: { search },
     customBranding,
+    share: { url },
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
@@ -188,6 +190,8 @@ export function DashboardApp({
     return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
+  const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
+
   return (
     <>
       {showNoDataPage && (
@@ -206,6 +210,7 @@ export function DashboardApp({
           {getLegacyConflictWarning?.()}
 
           <DashboardRenderer
+            locator={locator}
             ref={setDashboardAPI}
             dashboardRedirect={redirectTo}
             savedObjectId={savedDashboardId}
