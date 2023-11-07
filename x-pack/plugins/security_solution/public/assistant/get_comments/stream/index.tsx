@@ -17,6 +17,7 @@ import { MessageText } from './message_text';
 interface Props {
   amendMessage: (message: string) => void;
   content?: string;
+  isError?: boolean;
   isFetching?: boolean;
   isLastComment: boolean;
   index: number;
@@ -29,6 +30,7 @@ export const StreamComment = ({
   amendMessage,
   content,
   index,
+  isError = false,
   isFetching = false,
   isLastComment,
   reader,
@@ -39,6 +41,7 @@ export const StreamComment = ({
     amendMessage,
     content,
     reader,
+    isError,
   });
 
   const currentState = useRef({ isStreaming, pendingMessage, amendMessage });

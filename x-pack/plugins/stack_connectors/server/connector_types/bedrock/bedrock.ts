@@ -8,10 +8,15 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import type { AxiosError } from 'axios';
+import { AxiosResponse } from 'axios/index';
+import { IncomingMessage } from 'http';
+import { PassThrough } from 'stream';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
   InvokeAIActionParamsSchema,
+  StreamActionParamsSchema,
+  StreamingResponseSchema,
 } from '../../../common/bedrock/schema';
 import type {
   Config,
@@ -20,8 +25,10 @@ import type {
   RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
+  StreamActionParams,
 } from '../../../common/bedrock/types';
 import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
+import { StreamingResponse } from '../../../common/bedrock/types';
 
 interface SignedRequest {
   host: string;
@@ -29,6 +36,20 @@ interface SignedRequest {
   body: string;
   path: string;
 }
+
+const pipeStreamingResponse = (response: AxiosResponse<IncomingMessage>) => {
+  // Streaming responses are compressed by the Hapi router by default
+  // Set content-type to something that's not recognized by Hapi in order to circumvent this
+  // response.data.headers = {
+  //   ['Content-Type']: 'dont-compress-this',
+  // };
+  return {
+    ...response.data,
+    headers: {
+      ['Content-Type']: 'dont-compress-this',
+    },
+  };
+};
 
 export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   private url;
@@ -54,6 +75,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.TEST,
       method: 'runApi',
       schema: RunActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.STREAM,
+      method: 'streamApi',
+      schema: StreamActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -88,8 +115,9 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       {
         host,
         headers: {
+          accept: 'application/vnd.amazon.eventstream',
           'Content-Type': 'application/json',
-          Accept: '*/*',
+          'x-amzn-bedrock-accept': '*/*',
         },
         body,
         path,
@@ -125,6 +153,71 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
+   *  responsible for making a POST request to a specified URL with a given request body.
+   *  The method can handle both regular API requests and streaming requests based on the stream parameter.
+   *  It uses helper functions getRequestWithStreamOption and getAxiosOptions to prepare the request body and headers respectively.
+   *  The response is then processed based on whether it is a streaming response or a regular response.
+   * @param body request body for the API request
+   * @param stream flag indicating whether it is a streaming request or not
+   */
+  public async streamApi({
+    body,
+    model: reqModel,
+  }: StreamActionParams): Promise<StreamingResponse> {
+    // set model on per request basis
+    const model = reqModel ? reqModel : this.model;
+    const formattedBody = formatBedrockBody(body);
+    const signed = this.signRequest(formattedBody, `/model/${model}/invoke-with-response-stream`);
+
+    const response = await this.request({
+      ...signed,
+      url: `${this.url}/model/${model}/invoke-with-response-stream`,
+      method: 'post',
+      responseSchema: StreamingResponseSchema,
+      data: formattedBody,
+      responseType: 'stream',
+    });
+
+    const bytes = response.data;
+    // const buffer = Buffer.from(bytes, 'base64');
+    //
+    // const message = new Readable();
+    // message.push(buffer);
+    // message.push(null);
+    //
+    // console.log('message', message);
+    return response.data.pipe(new PassThrough());
+
+    // const stream = new ReadableStream({
+    //   async start(controller) {
+    //     for await (const event of response.data) {
+    //       const chunk = event.chunk;
+    //       if (chunk) {
+    //         const bytes = atob(chunk.bytes);
+    //         const buffer = new Uint8Array(bytes.length);
+    //         for (let i = 0; i < bytes.length; i++) {
+    //           buffer[i] = bytes.charCodeAt(i);
+    //         }
+    //         controller.enqueue(buffer);
+    //       }
+    //     }
+    //
+    //     controller.close();
+    //   },
+    // });
+    // console.log('stream???', stream);
+    //
+    // return stream.pipe(new PassThrough());
+
+    // for await (const chunk of stream) {
+    //   const data = new TextDecoder().decode(chunk);
+    //   const json = JSON.parse(data);
+    //   console.log('$$$$$$$$$$$$$$$', json);
+    // }
+    // // return pipeStreamingResponse(response);
+  }
+
+  /**
    * takes in an array of messages and a model as input, and returns a promise that resolves to a string.
    * The method combines the messages into a single prompt formatted for bedrock,sends a request to the
    * runApi method with the prompt and model, and returns the trimmed completion from the response.
@@ -154,4 +247,43 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     const res = await this.runApi({ body: JSON.stringify(req), model });
     return { message: res.completion.trim() };
   }
+}
+
+const formatBedrockBody = (body: string) => {
+  const { messages } = JSON.parse(body);
+  const combinedMessages = messages.reduce((acc: string, message) => {
+    const { role, content } = message;
+    // Bedrock only has Assistant and Human, so 'system' and 'user' will be converted to Human
+    const bedrockRole = role === 'assistant' ? '\n\nAssistant:' : '\n\nHuman:';
+    return `${acc}${bedrockRole}${content}`;
+  }, '');
+
+  const req = {
+    // end prompt in "Assistant:" to avoid the model starting its message with "Assistant:"
+    prompt: `${combinedMessages} \n\nAssistant:`,
+    max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+    temperature: 0.5,
+    // prevent model from talking to itself
+    stop_sequences: ['\n\nHuman:'],
+  };
+
+  return JSON.stringify(req);
+};
+
+function parseJsonStream(stream) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+
+    stream.on('data', (chunk) => {
+      data += chunk;
+    });
+
+    stream.on('end', () => {
+      resolve(JSON.parse(data));
+    });
+
+    stream.on('error', (error) => {
+      reject(error);
+    });
+  });
 }

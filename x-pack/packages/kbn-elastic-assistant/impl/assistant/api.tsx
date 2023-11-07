@@ -59,7 +59,7 @@ export const fetchConnectorExecuteAction = async ({
   // My "Feature Flag", turn to false before merging
   // In part 2 I will make enhancements to invokeAI to make it work with both openA, but to keep it to a Security Soltuion only review on this PR,
   // I'm calling the stream action directly
-  const isStream = !assistantLangChain && false;
+  const isStream = !assistantLangChain && true;
   const requestBody = isStream
     ? {
         params: {
@@ -88,6 +88,7 @@ export const fetchConnectorExecuteAction = async ({
           rawResponse: isStream,
         }
       );
+      console.log('response???', response);
 
       const reader = response?.response?.body?.getReader();
 
@@ -140,10 +141,25 @@ export const fetchConnectorExecuteAction = async ({
       isStream: false,
     };
   } catch (error) {
+    console.log('error???', error);
+    console.log('error body???', error?.body);
+    console.log('error message???', error?.message);
+
+    console.log('error response???', error?.response);
+    const reader = error?.response?.body?.getReader();
+    console.log('error reader???', reader);
+
+    if (!reader) {
+      return {
+        response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
+        isError: true,
+        isStream: false,
+      };
+    }
     return {
-      response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
+      response: reader,
+      isStream: true,
       isError: true,
-      isStream: false,
     };
   }
 };

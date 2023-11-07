@@ -38,6 +38,12 @@ export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
 });
 
+export const StreamActionParamsSchema = schema.object({
+  body: schema.string(),
+  model: schema.maybe(schema.string()),
+  stream: schema.maybe(schema.boolean()),
+});
+
 export const RunActionResponseSchema = schema.object(
   {
     completion: schema.string(),
@@ -45,3 +51,5 @@ export const RunActionResponseSchema = schema.object(
   },
   { unknowns: 'ignore' }
 );
+
+export const StreamingResponseSchema = schema.any();
