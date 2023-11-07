@@ -7,7 +7,6 @@
 
 import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
-import { isServerless } from './serverless';
 import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
 
 export const DEFAULT_QUERY = 'select * from processes;';
@@ -80,9 +79,9 @@ export const findFormFieldByRowsLabelAndType = (label: string, text: string) => 
 };
 
 export const deleteAndConfirm = (type: string) => {
-  cy.react('EuiButton').contains(`Delete ${type}`).click();
+  cy.get('span').contains(`Delete ${type}`).click();
   cy.contains(`Are you sure you want to delete this ${type}?`);
-  cy.react('EuiButton').contains('Confirm').click();
+  cy.get('span').contains('Confirm').click();
   cy.get('[data-test-subj="globalToastList"]')
     .first()
     .contains('Successfully deleted')
@@ -146,10 +145,8 @@ export const checkActionItemsInResults = ({
   cases: boolean;
   timeline: boolean;
 }) => {
-  cy.contains('View in Discover').should(
-    isServerless ? 'not.exist' : discover ? 'exist' : 'not.exist'
-  );
-  cy.contains('View in Lens').should(isServerless ? 'not.exist' : lens ? 'exist' : 'not.exist');
+  cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
+  cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
   cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
   cy.contains('Add to timeline investigation').should(timeline ? 'exist' : 'not.exist');
 };

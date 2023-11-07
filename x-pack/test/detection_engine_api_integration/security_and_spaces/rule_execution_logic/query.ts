@@ -20,13 +20,16 @@ import {
   ALERT_LAST_DETECTED,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
   QueryRuleCreateProps,
-  AlertSuppressionMissingFieldsStrategy,
+  BulkActionType,
+  AlertSuppressionMissingFieldsStrategyEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
@@ -36,7 +39,11 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import {
@@ -51,6 +58,9 @@ import {
   getSimpleRule,
   previewRule,
   setSignalStatus,
+  getRuleSOById,
+  createRuleThroughAlertingEndpoint,
+  getRuleSavedObjectWithLegacyInvestigationFields,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { dataGeneratorFactory } from '../../utils/data_generator';
@@ -1468,7 +1478,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1539,7 +1549,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1594,7 +1604,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1648,7 +1658,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1746,7 +1756,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name', 'agent.version'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1825,7 +1835,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name', 'agent.version'],
-              missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             },
             from: 'now-1h',
             interval: '1h',
@@ -1896,7 +1906,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 300,
                   unit: 'm',
                 },
-                missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.Suppress,
+                missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
               },
               from: 'now-1h',
               interval: '1h',
@@ -1963,7 +1973,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 300,
                   unit: 'm',
                 },
-                missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+                missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
               },
               from: 'now-1h',
               interval: '1h',
@@ -2263,6 +2273,52 @@ export default ({ getService }: FtrProviderContext) => {
         // alert should have agent.name "test-a"  and agent.version "test-1" as per rule query
         expect(previewAlerts[1]._source?.agent).to.have.property('version', 'test-1');
         expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-3');
+      });
+    });
+
+    describe('legacy investigation_fields', () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('should generate alerts when rule includes legacy investigation_fields', async () => {
+        // enable rule
+        await supertest
+          .post(DETECTION_ENGINE_RULES_BULK_ACTION)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({ query: '', action: BulkActionType.enable })
+          .expect(200);
+
+        // Confirming that enabling did not migrate rule, so rule
+        // run/alerts generated here were from rule with legacy investigation field
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+
+        // fetch rule for format needed to pass into
+        const { body: ruleBody } = await supertest
+          .get(
+            `${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleWithLegacyInvestigationField.params.ruleId}`
+          )
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .expect(200);
+
+        const alertsAfterEnable = await getOpenSignals(supertest, log, es, ruleBody, 'succeeded');
+        expect(alertsAfterEnable.hits.hits.length > 0).eql(true);
       });
     });
   });

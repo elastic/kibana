@@ -74,6 +74,7 @@ export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 export const rulesLocatorID = 'RULES_LOCATOR';
 export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
+export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 
 import { paths } from './locators/paths';
 export const observabilityPaths = paths.observability;

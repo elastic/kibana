@@ -6,7 +6,6 @@
  */
 
 export {
-  notifyWhenSchema,
   actionFrequencySchema,
   actionAlertsFilterSchema,
   actionSchema,
@@ -23,7 +22,6 @@ export type {
 } from './types/latest';
 
 export {
-  notifyWhenSchema as notifyWhenSchemaV1,
   actionFrequencySchema as actionFrequencySchemaV1,
   actionAlertsFilterSchema as actionAlertsFilterSchemaV1,
   actionSchema as actionSchemaV1,

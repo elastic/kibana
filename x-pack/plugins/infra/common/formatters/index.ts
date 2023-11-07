@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { InventoryFormatterType } from '@kbn/metrics-data-access-plugin/common';
 import { createBytesFormatter } from './bytes';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
-import { InventoryFormatterType } from '../inventory_models/types';
 import { formatHighPrecision } from './high_precision';
 import { InfraWaffleMapDataFormat } from './types';
 
