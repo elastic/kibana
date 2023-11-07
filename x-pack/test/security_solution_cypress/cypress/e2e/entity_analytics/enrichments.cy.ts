@@ -42,6 +42,7 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   beforeEach(() => {
+    deleteAlertsAndRules();
     cy.task('esArchiverUnload', 'risk_hosts');
     cy.task('esArchiverUnload', 'risk_hosts_updated');
     cy.task('esArchiverUnload', 'risk_scores_new');
