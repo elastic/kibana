@@ -61,6 +61,25 @@ For information about the {kib} 8.11.0 release, review the following information
 
 
 [float]
+[[known-issues-8.11.0]]
+=== Known issues
+
+// tag::known-issue-169170[]
+[discrete]
+.Gatekeeper error on macOS
+[%collapsible]
+====
+*Details* +
+Due to a version upgrade of the server binary used by {kib} and an upstream notarization issue, a Gatekeeper error may display for "node"
+when starting {kib} in macOS environments.
+
+*Workaround* +
+More information can be found at <<install-darwin64>>.
+
+====
+// end::known-issue-169170[]
+
+[float]
 [[breaking-changes-8.11.0]]
 === Breaking changes
 

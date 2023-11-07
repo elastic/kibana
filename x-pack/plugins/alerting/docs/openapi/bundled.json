@@ -957,6 +957,17 @@
                               }
                             }
                           },
+                          "slo": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
                           "stackAlerts": {
                             "type": "object",
                             "properties": {
@@ -3217,8 +3228,19 @@
         "type": "integer"
       },
       "termfield": {
-        "description": "This property is required when `groupBy` is `top`. The name of the field that is used for grouping the aggregation.\n",
-        "type": "string"
+        "description": "The names of up to four fields that are used for grouping the aggregation. This property is required when `groupBy` is `top`.\n",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4
+          }
+        ]
       },
       "threshold": {
         "description": "The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.\n",

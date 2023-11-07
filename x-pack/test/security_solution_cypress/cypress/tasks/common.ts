@@ -29,15 +29,20 @@ export const API_AUTH = Object.freeze({
 export const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
   'x-elastic-internal-origin': 'security-solution',
+  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
 });
 
-export const rootRequest = <T = unknown>(
-  options: Partial<Cypress.RequestOptions>
-): Cypress.Chainable<Cypress.Response<T>> =>
+export const rootRequest = <T = unknown>({
+  headers: optionHeaders,
+  ...restOptions
+}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
   cy.request<T>({
     auth: API_AUTH,
-    headers: API_HEADERS,
-    ...options,
+    headers: {
+      ...API_HEADERS,
+      ...(optionHeaders || {}),
+    },
+    ...restOptions,
   });
 
 /** Starts dragging the subject */
@@ -90,17 +95,8 @@ const clearSessionStorage = () => {
   });
 };
 
-/** Clears the rules and monitoring tables state. Automatically called in `cleanKibana()`. */
 export const resetRulesTableState = () => {
   clearSessionStorage();
-};
-
-export const cleanKibana = () => {
-  resetRulesTableState();
-  deletePrebuiltRulesAssets();
-  deleteAlertsAndRules();
-  deleteAllCasesItems();
-  deleteTimelines();
 };
 
 export const deleteAlertsAndRules = () => {
@@ -118,7 +114,6 @@ export const deleteAlertsAndRules = () => {
     headers: {
       'kbn-xsrf': 'cypress-creds',
       'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
     },
     timeout: 300000,
   });
@@ -321,7 +316,6 @@ export const postDataView = (indexPattern: string, name?: string, id?: string) =
     headers: {
       'kbn-xsrf': 'cypress-creds',
       'x-elastic-internal-origin': 'security-solution',
-      [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
     },
     failOnStatusCode: false,
   });

@@ -21,7 +21,6 @@ import {
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import {
   clickAddElasticRulesButton,
@@ -39,13 +38,11 @@ import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
-      cleanKibana();
       login();
-
       visitRulesManagementTable();
     });
 

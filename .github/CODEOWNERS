@@ -1312,8 +1312,10 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/exceptions @elastic/security-detection-engine
 /x-pack/test/security_solution_cypress/cypress/e2e/overview @elastic/security-detection-engine
-x-pack/test/security_solution_api_integration/test_suites/detections_response/exceptions  @elastic/security-detection-engine
-x-pack/test/security_solution_api_integration/test_suites/detections_response/rule_creation @elastic/security-detection-engine
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions  @elastic/security-detection-engine
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation @elastic/security-detection-engine
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions @elastic/security-detection-engine
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
@@ -1361,14 +1363,10 @@ x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
 x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
 
 ## Security Solution sub teams - security-engineering-productivity
-x-pack/test/security_solution_cypress/cypress/README.md @elastic/security-engineering-productivity
-x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
-x-pack/test/security_solution_cypress/cli_config.ts @elastic/security-engineering-productivity
-x-pack/test/security_solution_cypress/config.ts @elastic/security-engineering-productivity
-x-pack/test/security_solution_cypress/runner.ts @elastic/security-engineering-productivity
-x-pack/test/security_solution_cypress/serverless_config.ts @elastic/security-engineering-productivity
-x-pack/test/security_solution_cypress/cypress/tags.ts @elastic/security-engineering-productivity
-x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @oatkiller @maximpn @banderror
+/x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity
+/x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
+/x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
+/x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @oatkiller @maximpn @banderror
 
 ## Security Solution sub teams - adaptive-workload-protection
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-cloud-security-posture
