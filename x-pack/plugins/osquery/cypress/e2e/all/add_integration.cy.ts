@@ -124,6 +124,8 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('epmList.searchBar').type('osquery');
       cy.getBySel('integration-card:epr:osquery_manager').click();
       cy.getBySel('addIntegrationPolicyButton').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+
       cy.getBySel('agentPolicySelect').within(() => {
         cy.contains(policyName);
       });
