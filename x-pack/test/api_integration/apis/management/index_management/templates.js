@@ -29,8 +29,14 @@ export default function ({ getService }) {
     after(() => Promise.all([cleanUpEsResources(), cleanUpTemplates()]));
 
     describe('get all', () => {
-      const indexTemplate = getTemplatePayload(`template-${getRandomString()}`, [getRandomString()]);
-      const legacyTemplate = getTemplatePayload(`template-${getRandomString()}`, [getRandomString()], true);
+      const indexTemplate = getTemplatePayload(`template-${getRandomString()}`, [
+        getRandomString(),
+      ]);
+      const legacyTemplate = getTemplatePayload(
+        `template-${getRandomString()}`,
+        [getRandomString()],
+        true
+      );
       const tmpTemplate = getTemplatePayload(`template-${getRandomString()}`, [getRandomString()]);
       const indexTemplateWithLifecycle = {
         ...tmpTemplate,
@@ -130,11 +136,9 @@ export default function ({ getService }) {
 
         if (!templateWithLifecycle) {
           throw new Error(
-            `Index template with lifecycle "${indexTemplateWithLifecycle.name}" not found in ${JSON.stringify(
-              allTemplates.templates,
-              null,
-              2
-            )}`
+            `Index template with lifecycle "${
+              indexTemplateWithLifecycle.name
+            }" not found in ${JSON.stringify(allTemplates.templates, null, 2)}`
           );
         }
 
