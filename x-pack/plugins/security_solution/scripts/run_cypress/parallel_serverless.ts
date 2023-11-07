@@ -376,8 +376,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               return process.exit(1);
             }
 
-            // Wait for 8 minutes in order for the environment to be ready
-            delay(480000);
+            // Wait for 15 minutes in order for the environment to be ready
+            delay(900000);
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = btoa(`${credentials.username}:${credentials.password}`);
