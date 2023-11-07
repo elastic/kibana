@@ -79,7 +79,7 @@ const PayloadSeveritySchema = schema.oneOf([
   schema.literal('info'),
 ]);
 
-const LinksSchema = schema.arrayOf(schema.object({ href: schema.uri(), text: schema.string() }));
+const LinksSchema = schema.arrayOf(schema.object({ href: schema.string(), text: schema.string() }));
 const customDetailsSchema = schema.recordOf(schema.string(), schema.any());
 
 const ParamsSchema = schema.object(
