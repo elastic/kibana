@@ -132,8 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await textInput.clearValue();
       });
 
-      // Flaky https://github.com/elastic/kibana/issues/112164
-      it.skip('generates a report from a new search with data: default', async () => {
+      it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.reporting.setTimepickerInEcommerceDataRange();
 
@@ -170,8 +169,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // match file length, the beginning and the end of the csv file contents
         const { text: csvFile } = await getReport();
         expect(csvFile.length).to.be(4826973);
-        expectSnapshot(csvFile.slice(0, 5000)).toMatch();
-        expectSnapshot(csvFile.slice(-5000)).toMatch();
+
+        /*
+         * NOTE: This test can not check against the snapshot. Data ingestion from
+         * the ES archive is concurrent and dynamic, and affects the search output
+         */
       });
     });
 
