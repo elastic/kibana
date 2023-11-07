@@ -128,7 +128,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
   return (
     <>
       <EuiFlexGrid columns={isLarge ? 2 : 1}>
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="policyPropertiesPanel">
           <EuiPanel>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
@@ -168,7 +168,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
         </EuiFlexItem>
         {ilm.step_info && ilm.step !== 'ERROR' && (
           // ILM is waiting for the step to complete
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="policyStepPanel">
             <EuiPanel>
               <EuiText>
                 <h3>
@@ -187,7 +187,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
         )}
         {ilm.step_info && ilm.step === 'ERROR' && (
           // there is an error
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="policyErrorPanel">
             <EuiPanel color="danger">
               <EuiText>
                 <h3>
@@ -209,7 +209,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
           </EuiFlexItem>
         )}
         {ilm.phase_execution && (
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="phaseDefinitionPanel">
             <EuiPanel>
               <EuiText>
                 <h3>
