@@ -2,11 +2,12 @@ openapi: 3.0.0
 info:
   title: Common Timeline Attributes
   version: '2023-10-31'
-paths: { }
+paths: {}
 components:
   schemas:
     PinnedEvent:
       type: object
+      required: [pinnedEventId, eventId, timelineId, version]
       properties:
         pinnedEventId:
           type: string
@@ -16,44 +17,63 @@ components:
           type: string
         created:
           type: number
+          nullable: true
         createdBy:
           type: string
+          nullable: true
         updated:
           type: number
+          nullable: true
         updatedBy:
           type: string
+          nullable: true
         version:
           type: string
         timelineVersion:
           type: string
+          nullable: true
     Sort:
       type: object
       properties:
         columnId:
           type: string
+          nullable: true
+        columnType:
+          type: string
+          nullable: true
         sortDirection:
           type: string
+          nullable: true
     BareNote:
       type: object
+      required: [timelineId]
       properties:
         eventId:
           type: string
+          nullable: true
         note:
           type: string
+          nullable: true
         timelineId:
           type: string
+          nullable: true
         created:
           type: number
+          nullable: true
         createdBy:
           type: string
+          nullable: true
         updated:
           type: number
+          nullable: true
         updatedBy:
           type: string
+          nullable: true
     Note:
       allOf:
         - $ref: '#/components/schemas/BareNote'
         - type: object
+          required: [noteId, version]
           properties:
             noteId:
               type: string
@@ -61,29 +81,36 @@ components:
               type: string
             timelineVersion:
               nullable: true
-              type: string  
+              type: string
     GlobalNote:
       type: object
+      required: [noteId, version]
       properties:
         noteId:
           type: string
         version:
           type: string
         timelineVersion:
+          type: string
           nullable: true
-          type: string  
         note:
           type: string
+          nullable: true
         timelineId:
           type: string
+          nullable: true
         created:
           type: number
+          nullable: true
         createdBy:
           type: string
+          nullable: true
         updated:
           type: number
+          nullable: true
         updatedBy:
-          type: string    
+          type: string
+          nullable: true
     TimelineStatus:
       type: string
       enum:
@@ -157,10 +184,13 @@ components:
       properties:
         fullName:
           type: string
+          nullable: true
         userName:
           type: string
+          nullable: true
         favoriteDate:
           type: number
+          nullable: true
     FilterTimelineResult:
       type: object
       properties:
@@ -217,17 +247,13 @@ components:
             serializedQuery:
               type: string
     SortFieldTimeline:
-      type: object
+      type: string
       description: The field to sort the timelines by.
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-        updated:
-          type: string
-        created:
-          type: string   
+      enum:
+        - title
+        - description
+        - updated
+        - created
     ColumnHeaderResult:
       type: object
       properties:
@@ -267,19 +293,25 @@ components:
       type: object
       properties:
         columns:
-           $ref: '#/components/schemas/ColumnHeaderResult'
+          $ref: '#/components/schemas/ColumnHeaderResult'
+          nullable: true
         created:
           type: number
+          nullable: true
         createdBy:
           type: string
+          nullable: true
         dataProviders:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/DataProviderResult'
         dataViewId:
           type: string
+          nullable: true
         dateRange:
           type: object
+          nullable: true
           properties:
             end:
               oneOf:
@@ -291,8 +323,10 @@ components:
                 - type: number
         description:
           type: string
+          nullable: true
         eqlOptions:
           type: object
+          nullable: true
           properties:
             eventCategoryField:
               type: string
@@ -302,55 +336,69 @@ components:
               type: string
         eventType:
           type: string
+          nullable: true
         excludedRowRendererIds:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/RowRendererId'
         favorite:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/FavoriteTimelineResult'
         filters:
           type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/FilterTimelineResult'
         kqlMode:
           type: string
+          nullable: true
         kqlQuery:
+          nullable: true
           $ref: '#/components/schemas/SerializedFilterQueryResult'
         indexNames:
           type: array
+          nullable: true
           items:
             type: string
         savedQueryId:
           type: string
+          nullable: true
         sort:
+          nullable: true
           $ref: '#/components/schemas/Sort'
         status:
           type: string
+          nullable: true
           enum:
             - active
             - draft
             - immutable
         title:
           type: string
+          nullable: true
         templateTimelineId:
           type: string
+          nullable: true
         templateTimelineVersion:
           type: number
+          nullable: true
         timelineType:
+          nullable: true
           $ref: '#/components/schemas/TimelineType'
         updated:
           type: number
+          nullable: true
         updatedBy:
           type: string
+          nullable: true
     TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
         - type: object
-          required:
-            - savedObjectId
-            - version
+          required: [savedObjectId, version]
           properties:
             eventIdToNoteIds:
               type: array
@@ -378,9 +426,7 @@ components:
               type: string
     FavoriteTimelineResponse:
       type: object
-      required:
-        - savedObjectId
-        - version
+      required: [savedObjectId, version]
       properties:
         savedObjectId:
           type: string
@@ -406,30 +452,30 @@ components:
             $ref: '#/components/schemas/FavoriteTimelineResult'
     ImportTimelines:
       allOf:
-          - $ref: '#/components/schemas/SavedTimeline'
-          - type: object
-            properties:
-              savedObjectId:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            savedObjectId:
+              type: string
+              nullable: true
+            version:
+              type: string
+              nullable: true
+            globalNotes:
+              nullable: true
+              type: array
+              items:
+                $ref: '#/components/schemas/BareNote'
+            eventNotes:
+              nullable: true
+              type: array
+              items:
+                $ref: '#/components/schemas/BareNote'
+            pinnedEventIds:
+              nullable: true
+              type: array
+              items:
                 type: string
-                nullable: true
-              version:
-                type: string
-                nullable: true
-              globalNotes:
-                nullable: true
-                type: array
-                items:
-                  $ref: '#/components/schemas/BareNote'
-              eventNotes:
-                nullable: true
-                type: array
-                items:
-                  $ref: '#/components/schemas/BareNote'
-              pinnedEventIds:
-                nullable: true
-                type: array
-                items:
-                  type: string
     ImportTimelineResult:
       type: object
       properties:
