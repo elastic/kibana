@@ -69,6 +69,7 @@ FORMATTED_ES_URL="${ES_URL/https:\/\//}"
 FORMATTED_KB_URL="${KB_URL/https:\/\//}"
 
 # Find a way to remove this in the future
+# This is used in order to wait for the environment to be ready. 
 sleep 150
 
 TEST_CLOUD=1 TEST_ES_URL="https://elastic:$PASSWORD@$FORMATTED_ES_URL:443" TEST_KIBANA_URL="https://elastic:$PASSWORD@$FORMATTED_KB_URL:443" yarn run $1
