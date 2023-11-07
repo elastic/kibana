@@ -13,15 +13,15 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiButtonEmpty,
-  EuiTextColor,
   useEuiTheme,
+  EuiTextColor,
 } from '@elastic/eui';
-import type { MouseEventHandler, MouseEvent } from 'react';
+import { FormattedRelative } from '@kbn/i18n-react';
+import type { MouseEventHandler } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n-react';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -35,7 +35,6 @@ import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 import type { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
-import { EditTimelineButton } from '../../timeline/header/edit_timeline_button';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
@@ -51,11 +50,12 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
-import { getTimelineStatusByIdSelector } from './selectors';
 import { TimelineKPIs } from './kpis';
 
 import { setActiveTabTimeline } from '../../../store/timeline/actions';
 import { useIsOverflow } from '../../../../common/hooks/use_is_overflow';
+import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
+import { TimelineSavePrompt } from '../../timeline/header/timeline_save_prompt';
 
 interface FlyoutHeaderProps {
   timelineId: string;
@@ -279,69 +279,64 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
 
 const TimelineName = React.memo(TimelineNameComponent);
 
-const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const description = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
-  );
+const TimelineDescriptionComponent: React.FC<{ timelineId: string; description?: string }> = ({
+  timelineId,
+  description,
+}) => {
   const dispatch = useDispatch();
 
-  const onReadMore: MouseEventHandler<HTMLButtonElement> = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      dispatch(
-        setActiveTabTimeline({
-          id: timelineId,
-          activeTab: TimelineTabs.notes,
-          scrollToTop: true,
-        })
-      );
-    },
-    [dispatch, timelineId]
-  );
+  const onReadMore = useCallback(() => {
+    dispatch(
+      setActiveTabTimeline({
+        id: timelineId,
+        activeTab: TimelineTabs.notes,
+        scrollToTop: true,
+      })
+    );
+  }, [dispatch, timelineId]);
 
-  return (
+  const hasDescription = !!description;
+  return hasDescription ? (
     <EuiText size="s" data-test-subj="timeline-description">
-      <ReadMoreButton description={description || commonI18n.DESCRIPTION} onclick={onReadMore} />
+      <ReadMoreButton description={description} onclick={onReadMore} />
     </EuiText>
-  );
+  ) : null;
 };
 
 const TimelineDescription = React.memo(TimelineDescriptionComponent);
 
-const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
-  const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    getTimelineStatus(state, timelineId)
-  );
+const TimelineStatusInfoComponent = React.memo<{
+  status: TimelineStatus;
+  updated?: number;
+  changed?: boolean;
+}>(({ status, updated, changed }) => {
+  const isUnsaved = status === TimelineStatus.draft;
 
-  const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
-
+  let statusContent: React.ReactNode = null;
   if (isUnsaved) {
-    return (
-      <EuiText size="xs">
-        <EuiTextColor color="warning" data-test-subj="timeline-status">
-          {i18n.UNSAVED}
-        </EuiTextColor>
-      </EuiText>
-    );
-  }
-
-  return (
-    <EuiText size="xs">
-      <EuiTextColor color="default">
-        {i18n.AUTOSAVED}{' '}
+    statusContent = <EuiTextColor color="warning">{i18n.UNSAVED}</EuiTextColor>;
+  } else if (changed) {
+    statusContent = <EuiTextColor color="warning">{i18n.UNSAVED_CHANGES}</EuiTextColor>;
+  } else {
+    statusContent = (
+      <>
+        {i18n.SAVED}{' '}
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           value={new Date(updated!)}
         />
-      </EuiTextColor>
+      </>
+    );
+  }
+  return (
+    <EuiText size="xs" data-test-subj="timeline-status">
+      {statusContent}
     </EuiText>
   );
-};
-
-const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
+});
+TimelineStatusInfoComponent.displayName = 'TimelineStatusInfoComponent';
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const { selectedPatterns, indexPattern, browserFields } = useSourcererDataView(
@@ -414,21 +409,23 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   });
 
   const userCasesPermissions = useGetUserCasesPermissions();
-
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="s">
       <EuiFlexItem>
         <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
           <RowFlexItem>
             <TimelineName timelineId={timelineId} />
-            <EditTimelineButton timelineId={timelineId} initialFocus="title" />
             <TimelineStatusInfoContainer>
-              <TimelineStatusInfo timelineId={timelineId} />
+              <TimelineStatusInfoComponent
+                status={timeline.status}
+                changed={timeline.changed}
+                updated={timeline.updated}
+              />
             </TimelineStatusInfoContainer>
+            <TimelineSavePrompt timelineId={timelineId} />
           </RowFlexItem>
           <RowFlexItem>
-            <TimelineDescription timelineId={timelineId} />
-            <EditTimelineButton timelineId={timelineId} initialFocus="description" />
+            <TimelineDescription timelineId={timelineId} description={timeline.description} />
           </RowFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -451,6 +448,9 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
               <AddToCaseButton timelineId={timelineId} />
             </EuiFlexItem>
           )}
+          <EuiFlexItem grow={false}>
+            <SaveTimelineButton timelineId={timelineId} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </StyledTimelineHeader>
