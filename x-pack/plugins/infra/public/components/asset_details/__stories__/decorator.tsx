@@ -28,6 +28,8 @@ import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/pu
 import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { MemoryRouter } from 'react-router-dom';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
+import { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public/types';
 import { PluginConfigProvider } from '../../../containers/plugin_config_context';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
@@ -196,7 +198,20 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       <MemoryRouter initialEntries={['/infra/metrics/hosts']}>
         <PluginConfigProvider value={config}>
           <KibanaContextProvider services={mockServices}>
-            <SourceProvider sourceId="default">{story()}</SourceProvider>
+            <ObservabilityAIAssistantProvider
+              value={
+                {
+                  isEnabled: () => true,
+                  callApi: () => {},
+                  getCurrentUser: () => {},
+                  getLicense: () => {},
+                  getLicenseManagementLocator: () => {},
+                  start: {},
+                } as unknown as ObservabilityAIAssistantService
+              }
+            >
+              <SourceProvider sourceId="default">{story()}</SourceProvider>
+            </ObservabilityAIAssistantProvider>
           </KibanaContextProvider>
         </PluginConfigProvider>
       </MemoryRouter>
