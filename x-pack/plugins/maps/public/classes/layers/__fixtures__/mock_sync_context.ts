@@ -17,7 +17,7 @@ export class MockSyncContext implements DataRequestContext {
   registerCancelCallback: (requestToken: symbol, callback: () => void) => void;
   startLoading: (dataId: string, requestToken: symbol, meta: DataRequestMeta) => void;
   stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataRequestMeta) => void;
-  onJoinError: (errorMessage: string) => void;
+  setJoinError: (joinIndex: number, errorMessage: string) => void;
   updateSourceData: (newData: unknown) => void;
   forceRefreshDueToDrawing: boolean;
   isForceRefresh: boolean;
@@ -44,7 +44,7 @@ export class MockSyncContext implements DataRequestContext {
     this.registerCancelCallback = sinon.spy();
     this.startLoading = sinon.spy();
     this.stopLoading = sinon.spy();
-    this.onJoinError = sinon.spy();
+    this.setJoinError = sinon.spy();
     this.updateSourceData = sinon.spy();
     this.forceRefreshDueToDrawing = false;
     this.isForceRefresh = false;

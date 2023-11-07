@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../tasks/common';
 import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT } from '../../../../screens/expandable_flyout/alert_details_left_panel_investigation_tab';
 import {
@@ -55,7 +56,6 @@ import {
   toggleOverviewTabResponseSection,
   toggleOverviewTabVisualizationsSection,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
-import { cleanKibana } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -75,7 +75,7 @@ describe(
     const rule = { ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } };
 
     beforeEach(() => {
-      cleanKibana();
+      deleteAlertsAndRules();
       login();
       createRule(rule);
       visit(ALERTS_URL);
