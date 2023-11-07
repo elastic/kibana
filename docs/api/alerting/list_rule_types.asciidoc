@@ -84,7 +84,10 @@ subscription.
 
 // `has_alerts_mappings`:: TBD
 
-// `has_fields_for_a_a_d`:: TBD
+`has_fields_for_a_a_d`::
+(boolean) Indicates whether the rule has fields for alerts as data.
+This property is specific to Observability rule types.
+It affects whether the rule supports actions that run only when an alert matches a KQL query.
 
 `id`::
 (string) The unique identifier for the rule type.
