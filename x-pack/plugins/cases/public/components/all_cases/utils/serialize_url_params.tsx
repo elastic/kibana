@@ -10,14 +10,16 @@ export function serializeUrlParams(urlParams: {
 }) {
   const urlSearchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(urlParams)) {
-    if (!value) {
-      break;
-    }
-
-    if (Array.isArray(value)) {
-      urlSearchParams.append(key, value.join(','));
-    } else {
-      urlSearchParams.append(key, value);
+    if (value) {
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          urlSearchParams.append(key, '');
+        } else {
+          value.forEach((v) => urlSearchParams.append(key, v));
+        }
+      } else {
+        urlSearchParams.append(key, value);
+      }
     }
   }
 

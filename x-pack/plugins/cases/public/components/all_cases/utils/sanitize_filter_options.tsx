@@ -23,12 +23,12 @@ export const removeLegacyValuesFromOptions = ({
   severity: Array<CaseSeverity | 'all'>;
 }): { status: CaseStatuses[]; severity: CaseSeverity[] } => {
   return {
-    status: legacyStatus?.filter(notAll).filter(Boolean) as CaseStatuses[],
-    severity: legacySeverity?.filter(notAll).filter(Boolean) as CaseSeverity[],
+    status: legacyStatus.filter(notAll).filter(Boolean) as CaseStatuses[],
+    severity: legacySeverity.filter(notAll).filter(Boolean) as CaseSeverity[],
   };
 };
 
-export const getStoreableFilters = (
+export const getStorableFilters = (
   filterOptions: Partial<FilterOptions>
 ): { status: CaseStatuses[] | undefined; severity: CaseSeverity[] | undefined } => {
   const { status, severity } = filterOptions;

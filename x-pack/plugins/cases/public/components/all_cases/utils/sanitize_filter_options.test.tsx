@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+// This file was contributed to by generative AI
+
 import { CaseStatuses, CaseSeverity } from '../../../../common/types/domain';
-import { removeLegacyValuesFromOptions } from './sanitize_filter_options';
+import { removeLegacyValuesFromOptions, getStorableFilters } from './sanitize_filter_options';
 
 describe('removeLegacyValuesFromOptions', () => {
   it('should remove legacy values from options', () => {
@@ -22,5 +24,23 @@ describe('removeLegacyValuesFromOptions', () => {
       status: ['open', 'in-progress'],
       severity: ['low'],
     });
+  });
+});
+
+describe('getStorableFilters', () => {
+  it('should return the filters if provided', () => {
+    expect(
+      getStorableFilters({
+        status: [CaseStatuses.open, CaseStatuses['in-progress']],
+        severity: [CaseSeverity.LOW],
+      })
+    ).toEqual({
+      status: [CaseStatuses.open, CaseStatuses['in-progress']],
+      severity: [CaseSeverity.LOW],
+    });
+  });
+
+  it('should return undefined if no filters are provided', () => {
+    expect(getStorableFilters({})).toEqual({ status: undefined, severity: undefined });
   });
 });

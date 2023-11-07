@@ -29,7 +29,7 @@ describe('multi select filter', () => {
     expect(screen.getByText('4 options')).toBeInTheDocument();
   });
 
-  it('should not show warning message when one of the tags deselected after reaching the limit', async () => {
+  it('hides the limit reached warning when a selected tag is removed', async () => {
     const onChange = jest.fn();
     const props = {
       id: 'tags' as keyof FilterOptions,
@@ -56,7 +56,7 @@ describe('multi select filter', () => {
     expect(screen.queryByText('Limit reached')).not.toBeInTheDocument();
   });
 
-  it('should show warning message when one of the tags deselected before reaching the limit', async () => {
+  it('displays the limit reached warning when the maximum number of tags is selected', async () => {
     const onChange = jest.fn();
     const props = {
       id: 'tags' as keyof FilterOptions,
@@ -81,6 +81,30 @@ describe('multi select filter', () => {
     rerender(<MultiSelectFilter {...props} selectedOptions={['tag a', 'tag b']} />);
 
     expect(screen.getByText('Limit reached')).toBeInTheDocument();
+  });
+
+  it('should not call onChange when the limit has been reached', async () => {
+    const onChange = jest.fn();
+    const props = {
+      id: 'tags' as keyof FilterOptions,
+      buttonLabel: 'Tags',
+      options: ['tag a', 'tag b'],
+      onChange,
+      selectedOptions: ['tag a'],
+      limit: 1,
+      limitReachedMessage: 'Limit reached',
+    };
+
+    render(<MultiSelectFilter {...props} />);
+
+    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    await waitForEuiPopoverOpen();
+
+    expect(screen.getByText('Limit reached')).toBeInTheDocument();
+
+    userEvent.click(screen.getByRole('option', { name: 'tag b' }));
+
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('should remove selected option if it suddenly disappeared from the list', async () => {

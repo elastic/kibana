@@ -47,7 +47,7 @@ describe('serializeUrlParams', () => {
     };
 
     expect(serializeUrlParams(urlParams).toString()).toEqual(
-      'page=1&perPage=5&sortField=createdAt&sortOrder=desc&status=open%2Cclosed&severity=low%2Chigh'
+      'page=1&perPage=5&sortField=createdAt&sortOrder=desc&status=open&status=closed&severity=low&severity=high'
     );
   });
 
@@ -56,6 +56,18 @@ describe('serializeUrlParams', () => {
       ...commonProps,
       status: undefined,
       severity: undefined,
+    };
+
+    expect(serializeUrlParams(urlParams).toString()).toEqual(
+      'page=1&perPage=5&sortField=createdAt&sortOrder=desc'
+    );
+  });
+
+  it('severity and status are undefined but there are more filters to serialize', () => {
+    const urlParams = {
+      status: undefined,
+      severity: undefined,
+      ...commonProps,
     };
 
     expect(serializeUrlParams(urlParams).toString()).toEqual(

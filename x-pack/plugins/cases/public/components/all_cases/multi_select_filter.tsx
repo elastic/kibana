@@ -127,7 +127,7 @@ export const MultiSelectFilter = <T extends EuiSelectableOption>({
       <EuiSelectable<T>
         options={options}
         searchable
-        searchProps={{ placeholder: id, compressed: false }}
+        searchProps={{ placeholder: buttonLabel, compressed: false }}
         emptyMessage={i18n.EMPTY_FILTER_MESSAGE}
         onChange={_onChange}
         singleSelection={false}

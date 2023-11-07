@@ -176,7 +176,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('takes into account legacy localStorage filter value all', () => {
-    const existingLocalStorageValues = { severity: ['all'], status: ['all'] };
+    const existingLocalStorageValues = { severity: 'all', status: 'all' };
 
     localStorage.setItem(
       LOCALSTORAGE_FILTER_OPTIONS_KEY,
