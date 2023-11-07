@@ -14,6 +14,7 @@ import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { RecoveredActionGroup } from '../../../../../common';
@@ -28,6 +29,10 @@ import {
   returnedRuleForBulkOps2,
   returnedRuleForBulkOps3,
   siemRuleForBulkOps1,
+  enabledRuleForBulkOpsWithActions1,
+  enabledRuleForBulkOpsWithActions2,
+  returnedRuleForBulkEnableWithActions1,
+  returnedRuleForBulkEnableWithActions2,
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
@@ -106,11 +111,12 @@ setGlobalDate();
 
 describe('bulkDelete', () => {
   let rulesClient: RulesClient;
+  let actionsClient: jest.Mocked<ActionsClient>;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = {
       saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2, enabledRuleForBulkOps3],
-    }
+    } as unknown
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -161,6 +167,48 @@ describe('bulkDelete', () => {
         params: schema.any(),
       },
       validLegacyConsumers: [],
+    });
+
+    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
+    rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
+  });
+
+  test('should successfully delete two rule and return right actions', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+    });
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
+
+    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith(
+      [enabledRuleForBulkOps1, enabledRuleForBulkOps2].map(({ id }) => ({
+        id,
+        type: 'alert',
+      })),
+      undefined
+    );
+
+    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
+      expect.anything(),
+      expect.anything()
+    );
+    expect(result).toStrictEqual({
+      rules: [returnedRuleForBulkEnableWithActions1, returnedRuleForBulkEnableWithActions2],
+      errors: [],
+      total: 2,
+      taskIdsFailedToBeDeleted: [],
     });
   });
 

@@ -206,7 +206,6 @@ describe('bulkEnableRulesRoute', () => {
       bulkEnableRulesRoute({ router, licenseState });
       const [_, handler] = router.patch.mock.calls[0];
 
-      // rulesClient.bulkDisableRules.mockResolvedValueOnce(bulkDisableActionsResult);
       rulesClient.bulkEnableRules.mockResolvedValueOnce(bulkEnableActionsResult);
 
       const [context, req, res] = mockHandlerArguments(
