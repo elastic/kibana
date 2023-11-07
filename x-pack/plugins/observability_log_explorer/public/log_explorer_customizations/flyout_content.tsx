@@ -19,7 +19,7 @@ const ObservabilityLogAIAssistant = ({ doc }: LogExplorerFlyoutContentProps) => 
 
   const mappedDoc = useMemo(() => mapDocToAIAssistantFormat(doc), [doc]);
 
-  return <LogAIAssistant doc={mappedDoc} />;
+  return <LogAIAssistant key={doc.id} doc={mappedDoc} />;
 };
 
 export const renderFlyoutContent: Required<LogExplorerCustomizations>['flyout']['renderContent'] = (
