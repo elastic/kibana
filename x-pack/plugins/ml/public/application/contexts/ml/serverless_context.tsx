@@ -18,7 +18,8 @@ export interface EnabledFeatures {
 }
 export const EnabledFeaturesContext = createContext({
   showNodeInfo: true,
-  showMLNavMenu: true,
+  // showMLNavMenu: true,
+  showMLNavMenu: false,
   showLicenseInfo: true,
   isADEnabled: true,
   isDFAEnabled: true,
@@ -37,7 +38,8 @@ export const EnabledFeaturesContextProvider: FC<Props> = ({
 }) => {
   const features: EnabledFeatures = {
     showNodeInfo: !isServerless,
-    showMLNavMenu: !isServerless,
+    // showMLNavMenu: !isServerless,
+    showMLNavMenu: false,
     showLicenseInfo: !isServerless,
     isADEnabled: mlFeatures.ad,
     isDFAEnabled: mlFeatures.dfa,

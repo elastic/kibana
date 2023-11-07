@@ -362,26 +362,29 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'services',
           title: servicesTitle,
           path: '/services',
-          navLinkStatus: config.serverless.enabled
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.default,
+          navLinkStatus: AppNavLinkStatus.visible,
+          // navLinkStatus: config.serverless.enabled
+          //   ? AppNavLinkStatus.visible
+          //   : AppNavLinkStatus.default,
         },
         {
           id: 'traces',
           title: tracesTitle,
           path: '/traces',
-          navLinkStatus: config.serverless.enabled
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.default,
+          navLinkStatus: AppNavLinkStatus.visible,
+          // navLinkStatus: config.serverless.enabled
+          //   ? AppNavLinkStatus.visible
+          //   : AppNavLinkStatus.default,
         },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
-          navLinkStatus: config.serverless.enabled
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.default,
+          navLinkStatus: AppNavLinkStatus.visible,
+          // navLinkStatus: config.serverless.enabled
+          //   ? AppNavLinkStatus.visible
+          //   : AppNavLinkStatus.default,
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
         {

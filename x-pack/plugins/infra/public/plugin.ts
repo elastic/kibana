@@ -247,9 +247,10 @@ export class Plugin implements InfraClientPluginClass {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
-      const serverlessNavLinkStatus = this.isServerlessEnv
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden;
+      const serverlessNavLinkStatus = AppNavLinkStatus.visible;
+      // const serverlessNavLinkStatus = this.isServerlessEnv
+      //   ? AppNavLinkStatus.visible
+      //   : AppNavLinkStatus.hidden;
 
       return [
         {

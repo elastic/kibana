@@ -21,6 +21,7 @@ function createDeepLinks(
     visible: boolean,
     showInServerless: boolean = true
   ): AppNavLinkStatus | undefined {
+    return AppNavLinkStatus.visible;
     if (showMLNavMenu === false) {
       // in serverless the status needs to be "visible" rather than "default"
       // for the links to appear in the nav menu.

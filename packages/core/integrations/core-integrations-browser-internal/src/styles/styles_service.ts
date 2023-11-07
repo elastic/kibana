@@ -29,7 +29,8 @@ export class StylesService implements CoreService {
     document.head.appendChild(disableAnimationsStyleTag);
 
     const setDisableAnimations = (disableAnimations: boolean) => {
-      disableAnimationsStyleTag.textContent = disableAnimations ? disableAnimationsCss : '';
+      // disableAnimationsStyleTag.textContent = disableAnimations ? disableAnimationsCss : '';
+      disableAnimationsStyleTag.textContent = disableAnimationsCss;
     };
 
     this.uiSettingsSubscription = uiSettings

@@ -52,6 +52,8 @@ export class ObservabilityLogExplorerPlugin
       title: logExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
+      // navLinkStatus: AppNavLinkStatus.visible,
+
       navLinkStatus: this.config.navigation.showAppLink
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
