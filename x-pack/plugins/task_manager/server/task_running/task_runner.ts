@@ -57,6 +57,7 @@ import {
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { createSkipError, isRetryableError, isSkipError, isUnrecoverableError } from './errors';
 import type { EventLoopDelayConfig, RequeueInvalidTasksConfig } from '../config';
+import { TaskValidator } from '../task_validator';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -109,6 +110,7 @@ type Opts = {
   usageCounter?: UsageCounter;
   eventLoopDelayConfig: EventLoopDelayConfig;
   requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
+  allowReadingInvalidState: boolean;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -158,6 +160,7 @@ export class TaskManagerRunner implements TaskRunner {
   private usageCounter?: UsageCounter;
   private eventLoopDelayConfig: EventLoopDelayConfig;
   private readonly requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
+  private readonly taskValidator: TaskValidator;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -182,6 +185,7 @@ export class TaskManagerRunner implements TaskRunner {
     usageCounter,
     eventLoopDelayConfig,
     requeueInvalidTasksConfig,
+    allowReadingInvalidState,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -196,6 +200,11 @@ export class TaskManagerRunner implements TaskRunner {
     this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
     this.requeueInvalidTasksConfig = requeueInvalidTasksConfig;
+    this.taskValidator = new TaskValidator({
+      logger: this.logger,
+      definitions: this.definitions,
+      allowReadingInvalidState,
+    });
   }
 
   /**
@@ -306,8 +315,11 @@ export class TaskManagerRunner implements TaskRunner {
       childOf: this.instance.task.traceparent,
     });
 
+    // Validate state
+    let taskValidation = this.validateTaskState(this.instance.task);
+
     const modifiedContext = await this.beforeRun({
-      taskInstance: this.instance.task,
+      taskInstance: { ...this.instance.task, state: taskValidation.state },
     });
 
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
@@ -329,16 +341,15 @@ export class TaskManagerRunner implements TaskRunner {
         description: 'run task',
       };
 
-      let taskParamsValidation;
-      if (this.requeueInvalidTasksConfig.enabled) {
-        taskParamsValidation = this.validateTaskParams(modifiedContext);
-        if (!taskParamsValidation.error) {
-          taskParamsValidation = await this.validateIndirectTaskParams(modifiedContext);
+      if (!taskValidation.error && this.requeueInvalidTasksConfig.enabled) {
+        taskValidation = this.validateTaskParams(modifiedContext);
+        if (!taskValidation.error) {
+          taskValidation = await this.validateIndirectTaskParams(modifiedContext);
         }
       }
 
-      const result = taskParamsValidation?.error
-        ? taskParamsValidation
+      const result = taskValidation?.error
+        ? taskValidation
         : await this.executionContext.withContext(ctx, () =>
             withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
           );
@@ -391,6 +402,27 @@ export class TaskManagerRunner implements TaskRunner {
     }
 
     return { ...(error ? { error } : {}), state };
+  }
+
+  private validateTaskState(taskInstance: ConcreteTaskInstance) {
+    let error;
+    const { state, taskType, id, numSkippedRuns = 0 } = taskInstance;
+    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
+    let validatedState = state;
+    try {
+      validatedState = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance).state;
+    } catch (err) {
+      this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
+      if (numSkippedRuns < maxAttempts) {
+        error = createSkipError(err);
+      } else {
+        this.logger.warn(
+          `Task Manager has reached the max skip attempts for task ${taskType}/${id}`
+        );
+      }
+    }
+
+    return { ...(error ? { error } : {}), state: validatedState };
   }
 
   private async validateIndirectTaskParams({ taskInstance }: RunContext) {
