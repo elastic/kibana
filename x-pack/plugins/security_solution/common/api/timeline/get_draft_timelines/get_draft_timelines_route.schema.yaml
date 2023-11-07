@@ -23,6 +23,7 @@ paths:
       parameters:
         - in: query
           name: timelineType
+          required: true
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
       responses:
@@ -32,12 +33,15 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [persistTimeline]
                     properties:
                       persistTimeline:
                         type: object
+                        required: [timeline]
                         properties:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'

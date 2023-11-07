@@ -18,12 +18,10 @@ export type ImportTimelinesRequestBody = z.infer<typeof ImportTimelinesRequestBo
 export const ImportTimelinesRequestBody = z.object({
   file: Readable.and(
     z.object({
-      hapi: z
-        .object({
-          filename: z.string().optional(),
-          headers: z.object({}).optional(),
-        })
-        .optional(),
+      hapi: z.object({
+        filename: z.string().optional(),
+        headers: z.object({}).optional(),
+      }),
     })
   ),
 });

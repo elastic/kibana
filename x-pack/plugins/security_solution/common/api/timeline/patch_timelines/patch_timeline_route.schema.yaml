@@ -25,11 +25,14 @@ paths:
           application/json:
             schema:
               type: object
+              required: [timelineId, version, timeline]
               properties:
                 timelineId:
                   type: string
+                  nullable: true
                 version:
                   type: string
+                  nullable: true
                 timeline:
                   $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
       responses:
@@ -39,17 +42,18 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [persistTimeline]
                     properties:
                       persistTimeline:
                         type: object
+                        required: [timeline]
                         properties:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                required:
-                  - data
         405:
           description: Indicates that the user does not have the required access to create a draft timeline.
           content:

@@ -19,11 +19,11 @@ export const GetTimelineRequestQuery = z.object({
   /**
    * The ID of the template timeline to retrieve
    */
-  template_timeline_id: z.string().optional(),
+  template_timeline_id: z.string(),
   /**
    * The ID of the timeline to retrieve
    */
-  id: z.string().optional(),
+  id: z.string(),
 });
 export type GetTimelineRequestQueryInput = z.input<typeof GetTimelineRequestQuery>;
 

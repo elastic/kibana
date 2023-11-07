@@ -27,8 +27,7 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - note
+              required: [note, overrideOwner, noteId, version]
               properties:
                 note:
                   $ref: '../model/components.schema.yaml#/components/schemas/BareNote'
@@ -48,12 +47,15 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [persistNote]
                     properties:
                       persistNote:
                         type: object
+                        required: [code, message, note]
                         properties:
                           code:
                             type: number
@@ -61,5 +63,3 @@ paths:
                             type: string
                           note:
                             $ref: '../model/components.schema.yaml#/components/schemas/Note'
-                required:
-                  - data

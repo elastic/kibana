@@ -28,7 +28,7 @@ paths:
             schema:
               type: object
               required:
-                - timeline
+                [status, timelineId, templateTimelineId, templateTimelineVersion, timelineType, version, timeline]
               properties:
                 status:
                   allOf:
@@ -59,17 +59,18 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [persistTimeline]
                     properties:
                       persistTimeline:
                         type: object
+                        required: [timeline]
                         properties:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                required:
-                  - data
         405:
           description: Indicates that there was an error in the timeline creation.
           content:

@@ -24,8 +24,7 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - eventId
+              required: [eventId, pinnedEventId, timelineId]
               properties:
                 eventId:
                   type: string
@@ -42,9 +41,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [persistPinnedEventOnTimeline]
                     properties:
                       persistPinnedEventOnTimeline:
                         allOf:
@@ -55,5 +56,3 @@ paths:
                                 type: number
                               message:
                                 type: string
-                required:
-                  - data

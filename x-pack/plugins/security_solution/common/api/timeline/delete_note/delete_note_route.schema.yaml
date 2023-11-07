@@ -24,6 +24,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: [noteId]
               properties:
                 noteId:
                   type: string

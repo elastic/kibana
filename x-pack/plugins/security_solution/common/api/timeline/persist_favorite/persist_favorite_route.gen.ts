@@ -16,16 +16,16 @@ import { TimelineType, FavoriteTimelineResponse } from '../model/components.gen'
 
 export type PersistFavoriteRequestBody = z.infer<typeof PersistFavoriteRequestBody>;
 export const PersistFavoriteRequestBody = z.object({
-  timelineId: z.string().nullable().optional(),
-  templateTimelineId: z.string().nullable().optional(),
-  templateTimelineVersion: z.number().nullable().optional(),
-  timelineType: TimelineType.nullable().optional(),
+  timelineId: z.string().nullable(),
+  templateTimelineId: z.string().nullable(),
+  templateTimelineVersion: z.number().nullable(),
+  timelineType: TimelineType.nullable(),
 });
 export type PersistFavoriteRequestBodyInput = z.input<typeof PersistFavoriteRequestBody>;
 
 export type PersistFavoriteResponse = z.infer<typeof PersistFavoriteResponse>;
 export const PersistFavoriteResponse = z.object({
   data: z.object({
-    persistFavorite: FavoriteTimelineResponse.optional(),
+    persistFavorite: FavoriteTimelineResponse,
   }),
 });
