@@ -8,10 +8,10 @@ import createContainer from 'constate';
 import { LogExplorerCustomizations } from '../components/log_explorer/types';
 
 interface UseLogExplorerCustomizationsDeps {
-  value: LogExplorerCustomizations;
+  value?: LogExplorerCustomizations;
 }
 
-const useLogExplorerCustomizations = ({ value }: UseLogExplorerCustomizationsDeps) => value;
+const useLogExplorerCustomizations = ({ value = {} }: UseLogExplorerCustomizationsDeps) => value;
 
 export const [LogExplorerCustomizationsProvider, useLogExplorerCustomizationsContext] =
   createContainer(useLogExplorerCustomizations);

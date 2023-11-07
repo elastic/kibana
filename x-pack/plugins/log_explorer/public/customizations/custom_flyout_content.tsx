@@ -26,18 +26,23 @@ export const CustomFlyoutContent = ({
         <EuiFlexItem>
           <FlyoutDetail actions={actions} dataView={dataView} doc={doc} />
         </EuiFlexItem>
-        {/* Restore default content */}
-        <EuiFlexItem>{renderDefaultContent()}</EuiFlexItem>
       </>
     ),
-    [actions, dataView, doc, renderDefaultContent]
+    [actions, dataView, doc]
   );
 
   const content = flyout?.renderContent
     ? flyout?.renderContent(renderPreviousContent, { doc })
     : renderPreviousContent();
 
-  return <EuiFlexGroup direction="column">{content}</EuiFlexGroup>;
+  return (
+    <EuiFlexGroup direction="column">
+      {/* Apply custom Log Explorer detail */}
+      {content}
+      {/* Restore default content */}
+      <EuiFlexItem>{renderDefaultContent()}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 // eslint-disable-next-line import/no-default-export
