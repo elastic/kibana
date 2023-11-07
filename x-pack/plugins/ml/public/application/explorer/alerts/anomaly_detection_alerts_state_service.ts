@@ -54,6 +54,10 @@ export interface AnomalyDetectionAlert {
 export type AlertsQuery = Exclude<RuleRegistrySearchRequest['query'], undefined>;
 
 export class AnomalyDetectionAlertsStateService extends StateService {
+  /**
+   * Subject that holds the anomaly detection alerts from the alert-as-data index.
+   * @private
+   */
   private readonly _aadAlerts$ = new BehaviorSubject<AnomalyDetectionAlert[]>([]);
 
   constructor(
@@ -120,6 +124,10 @@ export class AnomalyDetectionAlertsStateService extends StateService {
     this._init();
   }
 
+  /**
+   * Count the number of alerts by status.
+   * @param alerts
+   */
   public countAlertsByStatus(alerts: AnomalyDetectionAlert[]): Record<string, number> {
     return alerts.reduce(
       (acc, alert) => {
@@ -137,8 +145,14 @@ export class AnomalyDetectionAlertsStateService extends StateService {
   public readonly anomalyDetectionAlerts$: Observable<AnomalyDetectionAlert[]> =
     this._aadAlerts$.asObservable();
 
+  /**
+   * Query for fetching alerts data based on the job selection and time range.
+   */
   public readonly alertsQuery$: Observable<AlertsQuery>;
 
+  /**
+   * Observable for the alerts within the swim lane selection.
+   */
   public readonly selectedAlerts$: Observable<AnomalyDetectionAlert[] | null>;
 
   public readonly countByStatus$: Observable<Record<string, number>> = this._aadAlerts$.pipe(
