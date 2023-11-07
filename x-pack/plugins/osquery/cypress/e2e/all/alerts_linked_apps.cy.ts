@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/response_actions';
 import {
@@ -17,7 +18,8 @@ import {
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/170521
+describe.skip(
   'Alert Event Details',
   {
     tags: ['@ess', '@serverless'],
@@ -25,7 +27,9 @@ describe(
   () => {
     let ruleId: string;
     let ruleName: string;
-
+    before(() => {
+      initializeDataViews();
+    });
     beforeEach(() => {
       loadRule().then((data) => {
         ruleId = data.id;
@@ -39,15 +43,14 @@ describe(
     });
 
     it('should be able to add investigation guides to response actions', () => {
-      const investigationGuideNote =
-        'You have queries in the investigation guide. Add them as response actions?';
       cy.getBySel('editRuleSettingsLink').click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
 
-      cy.contains(investigationGuideNote);
+      cy.getBySel('osquery-investigation-guide-text').should('exist');
+      cy.getBySel('osqueryAddInvestigationGuideQueries').should('not.be.disabled');
       cy.getBySel('osqueryAddInvestigationGuideQueries').click();
-      cy.contains(investigationGuideNote).should('not.exist');
+      cy.getBySel('osquery-investigation-guide-text').should('not.exist');
 
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains("SELECT * FROM os_version where name='{{host.os.name}}';");
