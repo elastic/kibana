@@ -88,7 +88,6 @@ export interface VisualizationsAppExtension {
 export interface VisTypeAlias {
   aliasPath?: string;
   aliasApp: string;
-  // editor: { aliasPath: string; aliasApp: string } | { openEditor: () => void };
   name: string;
   title: string;
   icon: string;

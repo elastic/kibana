@@ -18,6 +18,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
+import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { LinksFactoryDefinition } from './embeddable';
 import { setKibanaServices } from './services/kibana_services';
@@ -54,11 +55,11 @@ export class LinksPlugin
 
       plugins.visualizations.registerAlias({
         aliasApp: CONTENT_ID,
-        disableCreate: true, // only creatable through the Dashboard app embeddable creation
+        disableCreate: true, // do not allow creation through visualization listing page
         name: CONTENT_ID,
         title: APP_NAME,
         icon: APP_ICON,
-        description: '', // TODO
+        description: LinksStrings.getDescription(),
         stage: 'experimental',
         appExtensions: {
           visualizations: {
@@ -75,9 +76,9 @@ export class LinksPlugin
                 description,
                 updatedAt,
                 icon: APP_ICON,
+                typeTitle: APP_NAME,
                 stage: 'experimental',
                 savedObjectType: type,
-                typeTitle: APP_NAME,
               };
             },
           },
