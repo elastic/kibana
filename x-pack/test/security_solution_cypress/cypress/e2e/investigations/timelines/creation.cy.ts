@@ -17,13 +17,14 @@ import {
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
   TIMELINE_PANEL,
+  TIMELINE_STATUS,
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
-  EDIT_TIMELINE_BTN,
-  EDIT_TIMELINE_TOOLTIP,
+  TIMELINE_SAVE_MODAL_OPEN_BUTTON,
+  SAVE_TIMELINE_BTN_TOOLTIP,
 } from '../../../screens/timeline';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
-import { cleanKibana, deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
@@ -35,10 +36,12 @@ import {
   clickingOnCreateTimelineFormTemplateBtn,
   closeTimeline,
   createNewTimeline,
+  executeTimelineKQL,
   expandEventAction,
   goToQueryTab,
   pinFirstEvent,
   populateTimeline,
+  addNameToTimelineAndSave,
 } from '../../../tasks/timeline';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
@@ -69,7 +72,7 @@ describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] },
 
 describe('Timelines', (): void => {
   before(() => {
-    cleanKibana();
+    deleteTimelines();
   });
 
   describe('Toggle create timeline from plus icon', () => {
@@ -95,10 +98,10 @@ describe('Timelines', (): void => {
       it('should not be able to create/update timeline ', () => {
         createNewTimeline();
         cy.get(TIMELINE_PANEL).should('be.visible');
-        cy.get(EDIT_TIMELINE_BTN).should('be.disabled');
-        cy.get(EDIT_TIMELINE_BTN).first().realHover();
-        cy.get(EDIT_TIMELINE_TOOLTIP).should('be.visible');
-        cy.get(EDIT_TIMELINE_TOOLTIP).should(
+        cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).should('be.disabled');
+        cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().realHover();
+        cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should('be.visible');
+        cy.get(SAVE_TIMELINE_BTN_TOOLTIP).should(
           'have.text',
           'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.'
         );
@@ -144,4 +147,35 @@ describe('Timelines', (): void => {
       });
     }
   );
+
+  describe('shows the different timeline states', () => {
+    before(() => {
+      login();
+      visitWithTimeRange(OVERVIEW_URL);
+      openTimelineUsingToggle();
+    });
+
+    it('should show the correct timeline status', { tags: ['@ess', '@serverless'] }, () => {
+      // Unsaved
+      cy.get(TIMELINE_PANEL).should('be.visible');
+      cy.get(TIMELINE_STATUS).should('be.visible');
+      cy.get(TIMELINE_STATUS).should('have.text', 'Unsaved');
+
+      addNameToTimelineAndSave('Test');
+
+      // Saved
+      cy.get(TIMELINE_STATUS).should('be.visible');
+      cy.get(TIMELINE_STATUS)
+        .invoke('text')
+        .should('match', /^Saved/);
+
+      executeTimelineKQL('agent.name : *');
+
+      // Saved but has unsaved changes
+      cy.get(TIMELINE_STATUS).should('be.visible');
+      cy.get(TIMELINE_STATUS)
+        .invoke('text')
+        .should('match', /^Has unsaved changes/);
+    });
+  });
 });
