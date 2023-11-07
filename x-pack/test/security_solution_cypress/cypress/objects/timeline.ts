@@ -131,6 +131,7 @@ export const expectedExportedTimeline = (timelineResponse: Cypress.Response<Time
       { id: 'event.category' },
       { id: 'event.action' },
       { id: 'host.name' },
+      { id: 'message' },
     ],
     kqlMode: 'filter',
     kqlQuery: {
