@@ -74,7 +74,7 @@ const ruleNameToAssert = 'Custom rule name with actions';
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-describe('Detection rules, bulk edit of rule actions', { tags: ['@ess', '@serverless'] }, () => {
+describe('Detection rules, bulk edit of rule actions -', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cleanKibana();
     login();
