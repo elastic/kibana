@@ -532,7 +532,7 @@ describe('validators', () => {
           customFields: { first_key: ['hello'] },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Filtering by custom filed of type text is not allowed."`
+        `"Filtering by custom field of type text is not allowed."`
       );
     });
 
@@ -540,7 +540,7 @@ describe('validators', () => {
       expect(() =>
         validateSearchCasesCustomFields({
           customFieldsConfiguration,
-          customFields: { second_key: ['hello'] },
+          customFields: { second_key: ['foobar', true, 1234] },
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"The second_key custom field have the wrong value type string in the request."`

@@ -232,7 +232,7 @@ describe('search', () => {
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        ` Error: Filtering by custom filed of type text is not allowed.`
+        ` Error: Filtering by custom field of type text is not allowed.`
       );
     });
 

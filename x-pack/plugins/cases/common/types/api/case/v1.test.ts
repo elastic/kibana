@@ -480,7 +480,7 @@ describe('CasesSearchRequestRt', () => {
     sortField: 'createdAt',
     owner: 'cases',
     customFields: {
-      toggle_custom_filed_key: [true],
+      toggle_custom_field_key: [true],
       another_custom_field: [false],
     },
   };

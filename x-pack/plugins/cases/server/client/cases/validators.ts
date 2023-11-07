@@ -155,9 +155,7 @@ export const validateSearchCasesCustomFields = ({
     throw Boom.badRequest('No custom fields configured.');
   }
 
-  const customFieldKeys = Object.keys(customFields);
-
-  if (customFieldKeys.length > MAX_CUSTOM_FIELDS_PER_CASE) {
+  if (Object.keys(customFields).length > MAX_CUSTOM_FIELDS_PER_CASE) {
     throw Boom.forbidden(`Maximum ${MAX_CUSTOM_FIELDS_PER_CASE} customFields are allowed.`);
   }
 
@@ -169,13 +167,9 @@ export const validateSearchCasesCustomFields = ({
 
       if (!customFieldsMapping?.isFilterable) {
         throw Boom.forbidden(
-          `Filtering by custom filed of type ${customFieldConfig.type} is not allowed.`
+          `Filtering by custom field of type ${customFieldConfig.type} is not allowed.`
         );
       }
-
-      // if(customFieldConfig.type === CustomFieldTypes.TOGGLE && value) {
-
-      // }
 
       value.forEach((item) => {
         if (typeof item !== customFieldsMapping?.savedObjectMappingType) {
