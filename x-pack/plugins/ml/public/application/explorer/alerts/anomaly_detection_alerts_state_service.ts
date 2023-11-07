@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject, combineLatest, type Observable, Subscription } from 'rxjs';
-import { map, startWith, switchMap } from 'rxjs/operators';
+import { debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   isRunningResponse,
@@ -60,6 +60,8 @@ export class AnomalyDetectionAlertsStateService extends StateService {
    */
   private readonly _aadAlerts$ = new BehaviorSubject<AnomalyDetectionAlert[]>([]);
 
+  private readonly _isLoading$ = new BehaviorSubject<boolean>(true);
+
   constructor(
     private readonly _anomalyTimelineStateServices: AnomalyTimelineStateService,
     private readonly data: DataPublicPluginStart,
@@ -82,17 +84,17 @@ export class AnomalyDetectionAlertsStateService extends StateService {
       })
     );
 
-    const timeBounds$ = this.timefilter.getTimeUpdate$().pipe(
+    const timeUpdates$ = this.timefilter.getTimeUpdate$().pipe(
       startWith(null),
-      map(() => this.timefilter.getBounds())
+      map(() => this.timefilter.getTime())
     );
 
     this.alertsQuery$ = combineLatest([
       this._anomalyTimelineStateServices.getSwimLaneJobs$(),
-      timeBounds$,
+      timeUpdates$,
     ]).pipe(
       // Create a result query from the input
-      map(([selectedJobs, timeBounds]) => {
+      map(([selectedJobs, timeRange]) => {
         return {
           bool: {
             filter: [
@@ -104,9 +106,8 @@ export class AnomalyDetectionAlertsStateService extends StateService {
               {
                 range: {
                   [ALERT_ANOMALY_TIMESTAMP]: {
-                    gte: timeBounds.min?.valueOf(),
-                    lte: timeBounds.max?.valueOf(),
-                    format: 'epoch_millis',
+                    gte: timeRange.from,
+                    lte: timeRange.to,
                   },
                 },
               },
@@ -150,6 +151,8 @@ export class AnomalyDetectionAlertsStateService extends StateService {
    */
   public readonly alertsQuery$: Observable<AlertsQuery>;
 
+  public readonly isLoading$: Observable<boolean> = this._isLoading$.asObservable();
+
   /**
    * Observable for the alerts within the swim lane selection.
    */
@@ -167,6 +170,10 @@ export class AnomalyDetectionAlertsStateService extends StateService {
     subscription.add(
       this.alertsQuery$
         .pipe(
+          tap(() => {
+            this._isLoading$.next(true);
+          }),
+          debounceTime(300),
           switchMap((query) => {
             return this.data.search.search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
               {
@@ -202,6 +209,7 @@ export class AnomalyDetectionAlertsStateService extends StateService {
                 })
                 .filter(isDefined)
             );
+            this._isLoading$.next(false);
           }
         })
     );

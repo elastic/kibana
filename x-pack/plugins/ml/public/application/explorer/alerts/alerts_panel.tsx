@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
+  EuiSpacer,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useState, type FC } from 'react';
+import React, { type FC, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
 import { CollapsiblePanel } from '../../components/collapsible_panel';
@@ -31,6 +38,7 @@ export const AlertsPanel: FC = () => {
 
   const countByStatus = useObservable(anomalyDetectionAlertsStateService.countByStatus$);
   const alertsQuery = useObservable(anomalyDetectionAlertsStateService.alertsQuery$, {});
+  const isLoading = useObservable(anomalyDetectionAlertsStateService.isLoading$, true);
 
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi!.alertsTableConfigurationRegistry,
@@ -62,7 +70,16 @@ export const AlertsPanel: FC = () => {
         isOpen={isOpen}
         onToggle={setIsOpen}
         header={
-          <FormattedMessage id="xpack.ml.explorer.alertsPanel.header" defaultMessage="Alerts" />
+          <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage id="xpack.ml.explorer.alertsPanel.header" defaultMessage="Alerts" />
+            </EuiFlexItem>
+            {isLoading ? (
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size={'m'} />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         }
         headerItems={Object.entries(countByStatus ?? {}).map(([status, count]) => {
           return (
