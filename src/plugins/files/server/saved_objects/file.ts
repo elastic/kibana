@@ -69,7 +69,7 @@ export const fileObjectType: SavedObjectsType<FileMetadata> = {
     getTitle(obj) {
       return `${obj.attributes.name}.${obj.attributes.extension}`;
     },
-    importableAndExportable: true,
+    importableAndExportable: false,
   },
   mappings: {
     dynamic: false,
