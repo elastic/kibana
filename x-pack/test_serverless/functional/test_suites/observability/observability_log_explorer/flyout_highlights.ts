@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const DATASET_NAME = 'flyout';
 const NAMESPACE = 'default';
@@ -35,7 +35,7 @@ const sharedDoc = {
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['observabilityLogExplorer']);
+  const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonPage']);
 
   describe('Flyout highlight customization', () => {
     let cleanupDataStreamSetup: () => Promise<void>;
@@ -58,9 +58,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           NAMESPACE
         );
         await PageObjects.observabilityLogExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
+        await PageObjects.svlCommonPage.login();
       });
 
       after('clean up DataStream', async () => {
+        await PageObjects.svlCommonPage.forceLogout();
         if (cleanupDataStreamSetup) {
           await cleanupDataStreamSetup();
         }
@@ -115,9 +117,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           NAMESPACE
         );
         await PageObjects.observabilityLogExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
+        await PageObjects.svlCommonPage.login();
       });
 
       after('clean up DataStream', async () => {
+        await PageObjects.svlCommonPage.forceLogout();
         if (cleanupDataStreamSetup) {
           await cleanupDataStreamSetup();
         }
@@ -177,9 +181,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           NAMESPACE
         );
         await PageObjects.observabilityLogExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
+        await PageObjects.svlCommonPage.login();
       });
 
       after('clean up DataStream', async () => {
+        await PageObjects.svlCommonPage.forceLogout();
         if (cleanupDataStreamSetup) {
           await cleanupDataStreamSetup();
         }
@@ -240,9 +246,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           NAMESPACE
         );
         await PageObjects.observabilityLogExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
+        await PageObjects.svlCommonPage.login();
       });
 
       after('clean up DataStream', async () => {
+        await PageObjects.svlCommonPage.forceLogout();
         if (cleanupDataStreamSetup) {
           await cleanupDataStreamSetup();
         }
