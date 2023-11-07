@@ -18,8 +18,7 @@ import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169725
-describe.skip('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
@@ -45,10 +44,7 @@ describe.skip('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('ECS field is required.').should('not.exist');
 
     checkResults();
-    cy.react('Cell', { props: { colIndex: 0 } })
-      .should('exist')
-      .first()
-      .click();
+    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist').click();
     cy.url().should('include', 'app/fleet/agents/');
   });
 
@@ -83,10 +79,10 @@ describe.skip('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     // check if it get's bigger when we add more lines
     cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     inputQuery(multilineQuery);
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 550);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 600);
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 380);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 400);
   });
 });

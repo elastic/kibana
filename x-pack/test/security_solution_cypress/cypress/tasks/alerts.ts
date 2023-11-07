@@ -171,7 +171,7 @@ export const refreshAlertPageFilter = () => {
 };
 
 export const togglePageFilterPopover = (filterIndex: number) => {
-  cy.get(OPTION_LIST_VALUES(filterIndex)).click({ force: true });
+  cy.get(OPTION_LIST_VALUES(filterIndex)).click();
 };
 
 export const openPageFilterPopover = (filterIndex: number) => {

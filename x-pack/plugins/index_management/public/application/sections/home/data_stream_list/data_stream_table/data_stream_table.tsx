@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -15,6 +15,7 @@ import {
   EuiLink,
   EuiIcon,
   EuiToolTip,
+  EuiTextColor,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
@@ -27,6 +28,12 @@ import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { DataStreamsBadges } from '../data_stream_badges';
+import { ConditionalWrap } from '../data_stream_detail_panel';
+import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
+
+interface TableDataStream extends DataStream {
+  isDataStreamFullyManagedByILM: boolean;
+}
 
 interface Props {
   dataStreams?: DataStream[];
@@ -49,7 +56,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
   const { config } = useAppContext();
 
-  const columns: Array<EuiBasicTableColumn<DataStream>> = [];
+  const data = useMemo(() => {
+    return (dataStreams || []).map((dataStream) => ({
+      ...dataStream,
+      isDataStreamFullyManagedByILM: isDataStreamFullyManagedByILM(dataStream),
+    }));
+  }, [dataStreams]);
+
+  const columns: Array<EuiBasicTableColumn<TableDataStream>> = [];
 
   columns.push({
     field: 'name',
@@ -137,8 +151,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     name: (
       <EuiToolTip
         content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
-          defaultMessage:
-            '[Technical preview] Data will be kept at least this long before it is automatically deleted. Only applies to data streams managed by a data stream lifecycle. This value might not apply to all data if the data stream also has an index lifecycle policy.',
+          defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.`,
         })}
       >
         <span>
@@ -151,7 +164,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
     truncateText: true,
     sortable: true,
-    render: (lifecycle: DataStream['lifecycle']) => getLifecycleValue(lifecycle, INFINITE_AS_ICON),
+    render: (lifecycle: DataStream['lifecycle'], dataStream) => (
+      <ConditionalWrap
+        condition={dataStream.isDataStreamFullyManagedByILM}
+        wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
+      >
+        <>{getLifecycleValue(lifecycle, INFINITE_AS_ICON)}</>
+      </ConditionalWrap>
+    ),
   });
 
   columns.push({
@@ -235,8 +255,8 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     <>
       {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
         <DeleteDataStreamConfirmationModal
-          onClose={(data) => {
-            if (data && data.hasDeletedDataStreams) {
+          onClose={(res) => {
+            if (res && res.hasDeletedDataStreams) {
               reload();
             } else {
               setDataStreamsToDelete([]);
@@ -246,7 +266,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         />
       ) : null}
       <EuiInMemoryTable
-        items={dataStreams || []}
+        items={data}
         itemId="name"
         columns={columns}
         search={searchConfig}
