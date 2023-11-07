@@ -43,7 +43,12 @@ export const createAgentPolicy = async (
   log.info(`Creating "${agentPolicyName}" agent policy`);
 
   // FIXME:PT Delete. only here for debug
-  const existing = await kbnClient.request({ method: 'GET', path: `/api/fleet/agent_policies` });
+  const existing = await kbnClient
+    .request({ method: 'GET', path: `/api/fleet/agent_policies` })
+    .catch((e) => {
+      Error.captureStackTrace(e);
+      throw e;
+    });
   Error.captureStackTrace(existing);
   log.info(JSON.stringify(existing));
   // FIXME:PT delete
@@ -52,20 +57,25 @@ export const createAgentPolicy = async (
     data: {
       item: { id: agentPolicyId },
     },
-  } = await kbnClient.request<CreateAgentPolicyResponse>({
-    method: 'POST',
-    path: `/api/fleet/agent_policies?sys_monitoring=true`,
-    headers: {
-      'elastic-api-version': API_VERSIONS.public.v1,
-    },
-    body: {
-      name: agentPolicyName,
-      description: '',
-      namespace: 'default',
-      monitoring_enabled: ['logs', 'metrics'],
-      inactivity_timeout: 1209600,
-    },
-  });
+  } = await kbnClient
+    .request<CreateAgentPolicyResponse>({
+      method: 'POST',
+      path: `/api/fleet/agent_policies?sys_monitoring=true`,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+      body: {
+        name: agentPolicyName,
+        description: '',
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        inactivity_timeout: 1209600,
+      },
+    })
+    .catch((e) => {
+      Error.captureStackTrace(e);
+      throw e;
+    });
 
   log.info(`Adding integration to ${agentPolicyId}`);
 
