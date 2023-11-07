@@ -100,6 +100,7 @@ export const SecuritySolutionFlyout = memo(() => {
     <ExpandableFlyout
       registeredPanels={expandableFlyoutDocumentsPanels}
       handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
+      paddingSize="none"
     />
   );
 });
