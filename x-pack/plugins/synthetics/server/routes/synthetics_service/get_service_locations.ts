@@ -42,7 +42,7 @@ export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
       const { locations: privateLocations, agentPolicies } =
         await getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient);
 
-      const result = toClientContract({ locations: privateLocations }, agentPolicies).locations;
+      const result = toClientContract({ locations: privateLocations }, agentPolicies);
       return {
         locations: result,
       };
