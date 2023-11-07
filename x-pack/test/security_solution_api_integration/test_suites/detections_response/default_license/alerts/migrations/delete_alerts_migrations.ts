@@ -13,9 +13,8 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllAlerts, getIndexNameFromLoad, waitFor } from '../../utils';
-import { createUserAndRole } from '../../../common/services/security_solution';
+import { createAlertsIndex, deleteAllAlerts, getIndexNameFromLoad, waitFor } from '../../../utils';
+import { createUserAndRole } from '../../../../../../common/services/security_solution';
 
 interface CreateResponse {
   index: string;
@@ -27,8 +26,8 @@ interface FinalizeResponse extends CreateResponse {
   completed?: boolean;
   error?: unknown;
 }
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -36,17 +35,17 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
-  describe('deleting signals migrations', () => {
-    let outdatedSignalsIndexName: string;
+  describe('@ess Deleting alerts migrations', () => {
+    let outdatedAlertsIndexName: string;
     let createdMigration: CreateResponse;
     let finalizedMigration: FinalizeResponse;
 
     beforeEach(async () => {
-      outdatedSignalsIndexName = getIndexNameFromLoad(
+      outdatedAlertsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
 
       ({
         body: {
@@ -55,7 +54,7 @@ export default ({ getService }: FtrProviderContext): void => {
       } = await supertest
         .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
-        .send({ index: [outdatedSignalsIndexName] })
+        .send({ index: [outdatedAlertsIndexName] })
         .expect(200));
 
       await waitFor(
@@ -91,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const deletedMigration = body.migrations[0];
       expect(deletedMigration.id).to.eql(createdMigration.migration_id);
-      expect(deletedMigration.sourceIndex).to.eql(outdatedSignalsIndexName);
+      expect(deletedMigration.sourceIndex).to.eql(outdatedAlertsIndexName);
     });
 
     it('marks the original index for deletion by applying our cleanup policy', async () => {
