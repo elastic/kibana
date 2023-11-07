@@ -52,7 +52,12 @@ export const createAgentPolicy = async (
       'elastic-api-version': API_VERSIONS.public.v1,
     },
   });
-  log.info(`called from: `, JSON.stringify(stacktrace, null, 2), 'data:', JSON.stringify(existing));
+  log.info(
+    `called from: `,
+    JSON.stringify(stacktrace, null, 2),
+    'data:',
+    JSON.stringify(existing.data)
+  );
   // FIXME:PT delete
 
   const {
