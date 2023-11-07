@@ -8,10 +8,12 @@
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import {} from '../../../common/types/domain';
 import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../common/types/api';
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
 import type { ICasesCustomField } from '../../custom_fields';
 import { casesCustomFields } from '../../custom_fields';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -153,6 +155,12 @@ export const validateSearchCasesCustomFields = ({
     throw Boom.badRequest('No custom fields configured.');
   }
 
+  const customFieldKeys = Object.keys(customFields);
+
+  if (customFieldKeys.length > MAX_CUSTOM_FIELDS_PER_CASE) {
+    throw Boom.forbidden(`Maximum ${MAX_CUSTOM_FIELDS_PER_CASE} customFields are allowed.`);
+  }
+
   Object.entries(customFields).forEach(([key, value]) => {
     const customFieldConfig = customFieldsConfiguration.find((config) => config.key === key);
 
@@ -164,6 +172,10 @@ export const validateSearchCasesCustomFields = ({
           `Filtering by custom filed of type ${customFieldConfig.type} is not allowed.`
         );
       }
+
+      // if(customFieldConfig.type === CustomFieldTypes.TOGGLE && value) {
+
+      // }
 
       value.forEach((item) => {
         if (typeof item !== customFieldsMapping?.savedObjectMappingType) {

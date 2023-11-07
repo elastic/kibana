@@ -8,6 +8,7 @@
 import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { CasesSearchRequest } from '../../../common/types/api';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,
@@ -543,6 +544,23 @@ describe('validators', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"The second_key custom field have the wrong value type string in the request."`
+      );
+    });
+
+    it('throws error when custom fields reach maximum', () => {
+      let customFieldsMax = {};
+
+      for (let i = 0; i < MAX_CUSTOM_FIELDS_PER_CASE + 2; i++) {
+        customFieldsMax = { ...customFieldsMax, [`test_key_${i}`]: [true] };
+      }
+
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: customFieldsMax,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Maximum ${MAX_CUSTOM_FIELDS_PER_CASE} customFields are allowed."`
       );
     });
   });

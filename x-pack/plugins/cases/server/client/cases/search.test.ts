@@ -27,8 +27,7 @@ import {
 import { search } from './search';
 
 describe('search', () => {
-  const casesClientMock = createCasesClientMock();
-  casesClientMock.configure.get = jest.fn().mockResolvedValue([
+  const configureMock = [
     {
       customFields: [
         {
@@ -45,7 +44,9 @@ describe('search', () => {
         },
       ],
     },
-  ]);
+  ];
+  const casesClientMock = createCasesClientMock();
+  casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
 
   describe('constructSearch', () => {
     const clientArgs = createCasesClientMockArgs();
@@ -106,24 +107,7 @@ describe('search', () => {
 
   describe('errors', () => {
     const clientArgs = createCasesClientMockArgs();
-    casesClientMock.configure.get = jest.fn().mockResolvedValue([
-      {
-        customFields: [
-          {
-            key: 'first_key',
-            type: CustomFieldTypes.TEXT,
-            label: 'Text field',
-            required: true,
-          },
-          {
-            key: 'second_key',
-            type: CustomFieldTypes.TOGGLE,
-            label: 'Toggle field',
-            required: true,
-          },
-        ],
-      },
-    ]);
+    casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
 
     beforeEach(() => {
       jest.clearAllMocks();
