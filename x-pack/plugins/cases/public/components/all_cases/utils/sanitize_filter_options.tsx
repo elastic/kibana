@@ -33,5 +33,5 @@ export const getStoreableFilters = (
 ): { status: CaseStatuses[] | undefined; severity: CaseSeverity[] | undefined } => {
   const { status, severity } = filterOptions;
 
-  return { status, severity };
+  return { severity, status };
 };
