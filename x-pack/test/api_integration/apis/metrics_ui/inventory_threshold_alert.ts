@@ -43,9 +43,6 @@ export default function ({ getService }: FtrProviderContext) {
       inventoryDefaultView: 'default',
       metricsExplorerDefaultView: 'default',
       anomalyThreshold: 70,
-      fields: {
-        message: ['message'],
-      },
       logColumns: [
         {
           timestampColumn: {
