@@ -12,7 +12,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
   const log = getService('log');
   const security = getService('security');
-  const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
   const INDEX_TEMPLATE_NAME = `test-index-template`;
