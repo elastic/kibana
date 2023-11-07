@@ -39,6 +39,7 @@ interface Props {
 async function getAvgLaunchTimeTimeseries({
   apmEventClient,
   serviceName,
+  transactionName,
   environment,
   start,
   end,
