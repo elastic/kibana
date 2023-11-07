@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isObject } from 'lodash';
+
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
