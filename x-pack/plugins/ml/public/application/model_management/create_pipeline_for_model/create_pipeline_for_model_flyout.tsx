@@ -22,18 +22,18 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { ModelItem } from '../models_list';
 import type { AddInferencePipelineSteps } from '../../components/ml_inference/types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from '../../components/ml_inference/constants';
-import { AddInferencePipelineFooter } from '../../components/ml_inference/components/add_inference_pipeline_footer';
-import { AddInferencePipelineHorizontalSteps } from '../../components/ml_inference/components/add_inference_pipeline_horizontal_steps';
+import { AddInferencePipelineFooter } from '../../components/shared';
+import { AddInferencePipelineHorizontalSteps } from '../../components/shared';
 import { getInitialState } from './state';
 import { PipelineDetails } from './pipeline_details';
-import { OnFailureConfiguration } from '../../components/ml_inference/components/on_failure_configuration';
-import { ReviewAndCreatePipeline } from '../../components/ml_inference/components/review_and_create_pipeline';
+import { OnFailureConfiguration } from '../../components/shared';
+import { ReviewAndCreatePipeline } from '../../components/shared';
 import { useMlApiContext } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import { validateInferencePipelineConfigurationStep } from '../../components/ml_inference/validation';
 import { type InferecePipelineCreationState } from './state';
 import { useFetchPipelines } from '../../components/ml_inference/hooks/use_fetch_pipelines';
-import { ModelsListContext } from '../test_models/models_list_context';
+import { TestTrainedModelsContext } from '../test_models/test_trained_models_context';
 import { TestTrainedModelFlyoutContent } from '../test_models/test_flyout';
 
 export interface CreatePipelineForModelFlyoutProps {
@@ -45,7 +45,7 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
   onClose,
   model,
 }) => {
-  const currentContext = useContext(ModelsListContext);
+  const currentContext = useContext(TestTrainedModelsContext);
   const pipelineConfig = currentContext?.currentContext.pipelineConfig ?? {};
 
   const initialState = useMemo(

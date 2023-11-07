@@ -22,7 +22,7 @@ import {
 import { TextEmbeddingInference } from './models/text_embedding';
 
 import { useMlApiContext } from '../../contexts/kibana';
-import { ModelsListContext } from './models_list_context';
+import { TestTrainedModelsContext } from './test_trained_models_context';
 import { InferenceInputForm } from './models/inference_input_form';
 import { InferrerType } from './models';
 import { INPUT_TYPE } from './models/inference_base';
@@ -36,7 +36,7 @@ interface Props {
 
 export const SelectedModel: FC<Props> = ({ model, inputType, deploymentId }) => {
   const { trainedModels } = useMlApiContext();
-  const currentContext = useContext(ModelsListContext);
+  const currentContext = useContext(TestTrainedModelsContext);
   const pipeline =
     (currentContext?.currentContext.createPipelineFlyoutOpen &&
       currentContext?.currentContext.pipelineConfig) ||

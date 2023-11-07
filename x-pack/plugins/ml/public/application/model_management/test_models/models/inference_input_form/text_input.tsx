@@ -27,7 +27,7 @@ import type { InferrerType } from '..';
 import { OutputLoadingContent } from '../../output_loading';
 import { RUNNING_STATE } from '../inference_base';
 import { RawOutput } from '../raw_output';
-import { ModelsListContext } from '../../models_list_context';
+import { TestTrainedModelsContext } from '../../test_trained_models_context';
 
 interface Props {
   inferrer: InferrerType;
@@ -48,7 +48,7 @@ export const TextInputForm: FC<Props> = ({ inferrer }) => {
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
 
-  const currentContext = useContext(ModelsListContext);
+  const currentContext = useContext(TestTrainedModelsContext);
 
   const run: FormEventHandler<HTMLFormElement> = useCallback(
     async (event) => {

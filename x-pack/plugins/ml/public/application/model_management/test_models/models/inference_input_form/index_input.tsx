@@ -28,7 +28,7 @@ import { ErrorMessage } from '../../inference_error';
 import type { InferrerType } from '..';
 import { useIndexInput, InferenceInputFormIndexControls } from '../index_input';
 import { RUNNING_STATE } from '../inference_base';
-import { ModelsListContext } from '../../models_list_context';
+import { TestTrainedModelsContext } from '../../test_trained_models_context';
 
 interface Props {
   inferrer: InferrerType;
@@ -45,7 +45,7 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
 
-  const currentContext = useContext(ModelsListContext);
+  const currentContext = useContext(TestTrainedModelsContext);
 
   const run: FormEventHandler<HTMLFormElement> = useCallback(
     async (event) => {

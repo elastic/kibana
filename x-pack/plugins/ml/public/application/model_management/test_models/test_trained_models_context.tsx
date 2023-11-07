@@ -8,14 +8,14 @@
 import { createContext, Dispatch } from 'react';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export interface ModelsListContextType {
+export interface TestTrainedModelsContextType {
   pipelineConfig: estypes.IngestPipeline | undefined;
   createPipelineFlyoutOpen: boolean;
 }
-export const ModelsListContext = createContext<
+export const TestTrainedModelsContext = createContext<
   | {
-      currentContext: ModelsListContextType;
-      setCurrentContext: Dispatch<ModelsListContextType>;
+      currentContext: TestTrainedModelsContextType;
+      setCurrentContext: Dispatch<TestTrainedModelsContextType>;
     }
   | undefined
 >(undefined);

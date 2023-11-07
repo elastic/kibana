@@ -9,8 +9,8 @@ import React, { FC, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiStepsHorizontal, EuiStepsHorizontalProps } from '@elastic/eui';
-import type { AddInferencePipelineSteps } from '../types';
-import { ADD_INFERENCE_PIPELINE_STEPS } from '../constants';
+import type { AddInferencePipelineSteps } from '../ml_inference/types';
+import { ADD_INFERENCE_PIPELINE_STEPS } from '../ml_inference/constants';
 
 const steps = Object.values(ADD_INFERENCE_PIPELINE_STEPS);
 

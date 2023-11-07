@@ -7,7 +7,10 @@
 
 import React, { FC, useState } from 'react';
 
-import { type ModelsListContextType, ModelsListContext } from './models_list_context';
+import {
+  type TestTrainedModelsContextType,
+  TestTrainedModelsContext,
+} from './test_trained_models_context';
 import type { ModelItem } from '../models_list';
 import { TestTrainedModelFlyout } from './test_flyout';
 import { CreatePipelineForModelFlyout } from '../create_pipeline_for_model/create_pipeline_for_model_flyout';
@@ -17,19 +20,19 @@ interface Props {
   onClose: () => void;
 }
 export const TestFlyoutWrapper: FC<Props> = ({ model, onClose }) => {
-  const [currentContext, setCurrentContext] = useState<ModelsListContextType>({
+  const [currentContext, setCurrentContext] = useState<TestTrainedModelsContextType>({
     pipelineConfig: undefined,
     createPipelineFlyoutOpen: false,
   });
 
   return (
-    <ModelsListContext.Provider value={{ currentContext, setCurrentContext }}>
+    <TestTrainedModelsContext.Provider value={{ currentContext, setCurrentContext }}>
       {currentContext.createPipelineFlyoutOpen === false ? (
         <TestTrainedModelFlyout model={model} onClose={onClose} />
       ) : null}
       {currentContext.createPipelineFlyoutOpen ? (
         <CreatePipelineForModelFlyout model={model} onClose={onClose} />
       ) : null}
-    </ModelsListContext.Provider>
+    </TestTrainedModelsContext.Provider>
   );
 };

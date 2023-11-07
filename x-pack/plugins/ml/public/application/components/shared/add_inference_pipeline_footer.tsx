@@ -9,14 +9,14 @@ import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { AddInferencePipelineSteps } from '../types';
+import type { AddInferencePipelineSteps } from '../ml_inference/types';
 import {
   BACK_BUTTON_LABEL,
   CANCEL_BUTTON_LABEL,
   CLOSE_BUTTON_LABEL,
   CONTINUE_BUTTON_LABEL,
-} from '../constants';
-import { getSteps } from '../get_steps';
+} from '../ml_inference/constants';
+import { getSteps } from '../ml_inference/get_steps';
 
 interface Props {
   isDetailsStepValid: boolean;
