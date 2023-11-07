@@ -127,7 +127,7 @@ export function MobileStats({
       icon: getIcon('visGauge'),
       value: data?.currentPeriod?.launchTimes?.value ?? NaN,
       valueFormatter: (value: number) =>
-        Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(value),
+        Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(value, 'ms'),
       trend: data?.currentPeriod?.launchTimes?.timeseries,
       extra: getComparisonValueFormatter(
         data?.previousPeriod.launchTimes?.value
