@@ -21,12 +21,11 @@ export const resultStatuses = {
 export function getResultState(
   fetchStatus: FetchStatus,
   foundDocuments: boolean = false,
-  isPlainRecord?: boolean
 ) {
   if (fetchStatus === FetchStatus.UNINITIALIZED) {
     return resultStatuses.UNINITIALIZED;
   }
-  if (isPlainRecord && fetchStatus === FetchStatus.ERROR) return resultStatuses.NO_RESULTS;
+  if (fetchStatus === FetchStatus.ERROR) return resultStatuses.NO_RESULTS;
 
   if (!foundDocuments && fetchStatus === FetchStatus.LOADING) return resultStatuses.LOADING;
   else if (foundDocuments) return resultStatuses.READY;
