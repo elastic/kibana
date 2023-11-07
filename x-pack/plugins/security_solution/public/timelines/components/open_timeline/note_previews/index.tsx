@@ -30,7 +30,6 @@ import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { EditTimelineButton } from '../../timeline/header/edit_timeline_button';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -227,7 +226,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                     size="l"
                   />
                 ),
-                actions: <EditTimelineButton timelineId={timelineId} initialFocus="description" />,
+                actions: null,
               },
             ]
           : [],
