@@ -40,15 +40,12 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
 
   useEffect(() => setNewName(connector.name), [connector.name]);
 
-  const { isLoading, isSuccess, mutate } = useMutation({
+  const { isLoading, mutate } = useMutation({
     mutationFn: async (inputName: string) => {
       const body = { name: inputName };
-      const result = await http.post(
-        `/internal/serverless_search/connectors/${connector.id}/name`,
-        {
-          body: JSON.stringify(body),
-        }
-      );
+      await http.post(`/internal/serverless_search/connectors/${connector.id}/name`, {
+        body: JSON.stringify(body),
+      });
       return inputName;
     },
     onError: (error) =>

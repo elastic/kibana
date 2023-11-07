@@ -20,7 +20,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { copyToClipboard } from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
 import {
   CONNECTOR_LABEL,
   COPY_CONNECTOR_ID_LABEL,
@@ -45,8 +44,7 @@ export const EditConnector: React.FC = () => {
     application: { navigateToUrl },
   } = useKibanaServices();
 
-  const { data, isLoading, queryKey } = useConnector(id);
-  const queryClient = useQueryClient();
+  const { data, isLoading } = useConnector(id);
 
   if (isLoading) {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">
