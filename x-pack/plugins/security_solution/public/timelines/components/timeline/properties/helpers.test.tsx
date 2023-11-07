@@ -44,7 +44,7 @@ describe('NewTimeline', () => {
   const mockGetButton = jest.fn().mockReturnValue('<></>');
 
   const props: NewTimelineProps = {
-    closeGearMenu: jest.fn(),
+    onClick: jest.fn(),
     timelineId: 'mockTimelineId',
     title: 'mockTitle',
   };

@@ -14,6 +14,7 @@ import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { FieldHook } from '../../../../shared_imports';
 import { FilterBar } from '../../../../common/components/filter_bar';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -30,10 +31,33 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 const TextArea = styled(EuiTextArea)`
   display: block;
-  border: ${({ theme }) => theme.eui.euiBorderThin};
-  border-bottom: 0;
+  border: 0;
   box-shadow: none;
+  border-radius: 0px;
   min-height: ${({ theme }) => theme.eui.euiFormControlHeight};
+  &:focus {
+    box-shadow: none;
+  }
+`;
+
+const StyledFormRow = styled(EuiFormRow)`
+  border: ${({ theme }) => theme.eui.euiBorderThin};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+  .euiFormRow__labelWrapper {
+    background: ${({ theme }) => theme.eui.euiColorLightestShade};
+    border-top-left-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+    border-top-right-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+    padding: 8px 10px;
+    margin-bottom: 0px;
+    label {
+      color: ${euiThemeVars.euiTextSubduedColor};
+      &.euiFormLabel-isInvalid {
+        color: ${euiThemeVars.euiColorDangerText};
+      }
+    }
+  }
+  .euiFormRow__fieldWrapper {
+  }
 `;
 
 export interface FieldValueQueryBar {
@@ -157,7 +181,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   );
 
   return (
-    <EuiFormRow
+    <StyledFormRow
       label={field.label}
       labelAppend={field.labelAppend}
       helpText={field.helpText}
@@ -199,6 +223,6 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           </>
         )}
       </>
-    </EuiFormRow>
+    </StyledFormRow>
   );
 };

@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
@@ -44,9 +43,11 @@ export interface Props {
 
 type SizeVoidFunc = (newSize: string) => void;
 
-const Container = styled(EuiPanel)`
+const Container = styled(EuiFlexGroup)`
   border-radius: 0;
-  background: ${({ theme }) => theme.eui.euiPageBackgroundColor};
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  background: ${({ theme }) => theme.eui.euiColorLightestShade};
   padding: ${({ theme }) => theme.eui.euiSizeXS} ${({ theme }) => theme.eui.euiSizeS};
 `;
 
@@ -173,6 +174,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
             <EqlOverviewLink />
           </EuiFlexItem>
         )}
+
         {onOptionsChange && (
           <>
             <FlexItemWithMarginRight grow={false}>

@@ -6,17 +6,12 @@
  */
 
 import React from 'react';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
+import { SaveTimelineButton } from './save_timeline_button';
 
 interface SaveTimelineActionProps {
   timelineId: string;
 }
 
 export const SaveTimelineAction = ({ timelineId }: SaveTimelineActionProps) => {
-  const {
-    kibanaSecuritySolutionsPrivileges: { crud: hasKibanaCrud },
-  } = useUserPrivileges();
-
   return <SaveTimelineButton timelineId={timelineId} />;
 };

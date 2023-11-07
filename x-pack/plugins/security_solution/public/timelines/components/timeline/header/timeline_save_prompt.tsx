@@ -13,8 +13,8 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions } from '../../../store/timeline';
 import { getTimelineSaveModalByIdSelector } from './selectors';
-import { SaveTimelineModal } from './save_timeline_modal';
 import { TimelineStatus } from '../../../../../common/api/timeline';
+import { SaveTimelineModal } from '../../flyout/action_menu/save_timeline_modal';
 
 interface TimelineSavePromptProps {
   timelineId: string;

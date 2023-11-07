@@ -26,13 +26,13 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
-import { useCreateTimeline } from '../properties/use_create_timeline';
-import * as commonI18n from '../properties/translations';
+import * as commonI18n from '../../timeline/properties/translations';
 import * as i18n from './translations';
-import { formSchema } from './schema';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useCreateTimeline } from '../../timeline/properties/use_create_timeline';
+import { formSchema } from '../../timeline/header/schema';
+import { NOTES_PANEL_WIDTH } from '../../timeline/properties/notes_size';
 
 const CommonUseField = getUseField({ component: Field });
 interface SaveTimelineModalProps {

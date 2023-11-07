@@ -1256,7 +1256,6 @@ describe('Missing index patterns', () => {
     },
   };
 
-  let wrapper: ReactWrapper;
   beforeEach(() => {
     const pollForSignalIndexMock = jest.fn();
     (useSignalHelpers as jest.Mock).mockReturnValue({

@@ -18,7 +18,7 @@ jest.mock('../../../../common/hooks/use_selector', () => ({
   useDeepEqualSelector: jest.fn(),
 }));
 
-jest.mock('../properties/use_create_timeline', () => ({
+jest.mock('../../timeline/properties/use_create_timeline', () => ({
   useCreateTimeline: jest.fn(),
 }));
 

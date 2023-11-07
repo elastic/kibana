@@ -22,6 +22,7 @@ import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -58,7 +59,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 
 const TimelineHeaderContainer = styled.div`
-  margin-top: 6px;
+  margin-top: ${euiThemeVars.euiSizeS};
   width: 100%;
 `;
 
@@ -260,7 +261,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             hasBorder={false}
           >
             <EuiFlexGroup
-              alignItems="center"
+              alignItems="flexStart"
               gutterSize="s"
               data-test-subj="timeline-date-picker-container"
             >
@@ -270,22 +271,22 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <EuiFlexItem grow={10}>
-                <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TimelineDatePickerLock />
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {activeTab === TimelineTabs.eql && (
                   <Sourcerer scope={SourcererScopeName.timeline} />
                 )}
               </EuiFlexItem>
+              <EuiFlexItem>
+                <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TimelineDatePickerLock />
+              </EuiFlexItem>
             </EuiFlexGroup>
-            <TimelineHeaderContainer data-test-subj="timelineHeader">
-              <EqlQueryBarTimeline timelineId={timelineId} />
-            </TimelineHeaderContainer>
           </StyledEuiFlyoutHeader>
+          <TimelineHeaderContainer data-test-subj="timelineHeader">
+            <EqlQueryBarTimeline timelineId={timelineId} />
+          </TimelineHeaderContainer>
 
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody

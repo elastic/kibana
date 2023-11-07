@@ -15,6 +15,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
+import { createGlobalStyle } from 'styled-components';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -76,6 +77,17 @@ const SearchBarContainer = styled.div`
   [data-test-subj='globalQueryBar'] [class$='filter_bar-styles--group'] {
     display: none;
   }
+`;
+
+const SearchBarFullScreenVisibilityStyle = createGlobalStyle`
+.euiDataGrid__restrictBody {
+  .search_bar_container {
+    .headerGlobalNav,
+    .kbnQueryBar {
+      display: flex;
+    }
+  }
+}
 `;
 
 export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
@@ -296,7 +308,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     );
 
     return (
-      <SearchBarContainer>
+      <SearchBarContainer className="search_bar_container">
+        <SearchBarFullScreenVisibilityStyle />
         <QueryBar
           dateRangeFrom={dateRangeFrom}
           dateRangeTo={dateRangeTo}

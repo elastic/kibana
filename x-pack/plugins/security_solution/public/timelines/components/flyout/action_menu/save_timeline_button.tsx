@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip, EuiTourStep, EuiCode, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getTimelineStatusByIdSelector } from '../../flyout/header/selectors';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineStatus } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -18,6 +17,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as timelineTranslations from './translations';
+import { getTimelineStatusByIdSelector } from '../header/selectors';
 
 export interface SaveTimelineButtonProps {
   timelineId: string;
