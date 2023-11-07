@@ -126,6 +126,7 @@ export const ErrorCallout = ({
               )}
             </div>
           }
+          actions={overrideDisplay?.actions ?? []}
           data-test-subj={dataTestSubj}
         />
       )}

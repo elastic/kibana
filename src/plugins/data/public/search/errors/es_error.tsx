@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from '@kbn/core/public';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
@@ -44,5 +44,15 @@ export class EsError extends KbnError {
         </EuiCodeBlock>
       </>
     );
+  }
+
+  public getActions() {
+    return [
+      <EuiButton color="primary" onClick={this.openInInspector}>
+        {i18n.translate('data.esError.viewDetailsButtonLabel', {
+          defaultMessage: 'View details',
+        })}
+      </EuiButton>
+    ];
   }
 }
