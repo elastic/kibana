@@ -8,6 +8,8 @@
 
 import { createReduceStream } from './reduce_stream';
 
+// merge-queue-test-2
+
 /**
  *  Creates a Transform stream that consumes all provided
  *  values and concatenates them using each values `concat`
