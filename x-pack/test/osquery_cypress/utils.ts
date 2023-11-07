@@ -44,7 +44,13 @@ export const createAgentPolicy = async (
 
   // FIXME:PT Delete. only here for debug
   const existing = await kbnClient
-    .request({ method: 'GET', path: `/api/fleet/agent_policies` })
+    .request({
+      method: 'GET',
+      path: `/api/fleet/agent_policies`,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+    })
     .catch((e) => {
       Error.captureStackTrace(e);
       throw e;
