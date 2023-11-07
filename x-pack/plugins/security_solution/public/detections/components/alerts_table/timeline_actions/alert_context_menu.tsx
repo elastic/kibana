@@ -37,7 +37,13 @@ import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useAlertExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type {
+  DataViewId,
+  IndexPatternArray,
+  RuleObjectId,
+  RuleSignatureId,
+  Status,
+} from '../../../../../common/api/detection_engine';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
@@ -345,10 +351,10 @@ type AddExceptionFlyoutWrapperProps = Omit<
   | 'showAlertCloseOptions'
 > & {
   eventId?: string;
-  ruleId: Rule['id'];
-  ruleRuleId: Rule['rule_id'];
-  ruleIndices: Rule['index'];
-  ruleDataViewId: Rule['data_view_id'];
+  ruleId: RuleObjectId;
+  ruleRuleId: RuleSignatureId;
+  ruleIndices: IndexPatternArray | undefined;
+  ruleDataViewId: DataViewId | undefined;
   ruleName: Rule['name'];
   exceptionListType: ExceptionListTypeEnum | null;
 };

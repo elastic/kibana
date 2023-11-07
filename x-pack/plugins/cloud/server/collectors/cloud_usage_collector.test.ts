@@ -37,6 +37,7 @@ describe('createCloudUsageCollector', () => {
         trialEndDate: undefined,
         deploymentId: undefined,
         projectId: undefined,
+        projectType: undefined,
       });
     });
 
@@ -53,6 +54,7 @@ describe('createCloudUsageCollector', () => {
         inTrial: false,
         deploymentId: undefined,
         projectId: undefined,
+        projectType: undefined,
       });
     });
 
@@ -63,6 +65,7 @@ describe('createCloudUsageCollector', () => {
         isElasticStaffOwned: true,
         deploymentId: 'a-deployment-id',
         projectId: 'a-project-id',
+        projectType: 'security',
       });
 
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
@@ -72,6 +75,7 @@ describe('createCloudUsageCollector', () => {
         isElasticStaffOwned: true,
         deploymentId: 'a-deployment-id',
         projectId: 'a-project-id',
+        projectType: 'security',
       });
     });
   });

@@ -26,6 +26,8 @@ export type {
   DiscoverCustomization,
   DiscoverCustomizationService,
   FlyoutCustomization,
+  FlyoutContentActions,
+  FlyoutContentProps,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
   TopNavCustomization,

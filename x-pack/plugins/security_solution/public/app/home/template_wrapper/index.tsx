@@ -17,11 +17,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { GlobalKQLHeader } from './global_kql_header';
-import {
-  BOTTOM_BAR_CLASSNAME,
-  SecuritySolutionBottomBar,
-  SecuritySolutionBottomBarProps,
-} from './bottom_bar';
+import { SecuritySolutionBottomBar } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 
 /**
@@ -38,14 +34,6 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   .kbnSolutionNav {
     background-color: ${({ theme }) => theme.colors.emptyShade};
   }
-
-  .${BOTTOM_BAR_CLASSNAME} {
-    animation: 'none !important'; // disable the default bottom bar slide animation
-    background: ${({ theme }) => theme.colors.emptyShade}; // Override bottom bar black background
-    color: inherit; // Necessary to override the bottom bar 'white text'
-    transform: ${(
-      { $isShowingTimelineOverlay } // Since the bottom bar wraps the whole overlay now, need to override any transforms when it is open
-    ) => ($isShowingTimelineOverlay ? 'none' : 'translateY(calc(100% - 50px))')};
 
     .${IS_DRAGGING_CLASS_NAME} & {
       // When a drag is in process the bottom flyout should slide up to allow a drop
@@ -95,7 +83,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
             {children}
           </KibanaPageTemplate.Section>
           {isTimelineBottomBarVisible && (
-            <KibanaPageTemplate.BottomBar {...SecuritySolutionBottomBarProps}>
+            <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
               <EuiThemeProvider colorMode={globalColorMode}>
                 <SecuritySolutionBottomBar />
               </EuiThemeProvider>
