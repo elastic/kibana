@@ -23,7 +23,7 @@ const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'))
 
 export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
-  customizations?: LogExplorerCustomizations;
+  customizations: LogExplorerCustomizations;
   plugins: LogExplorerStartDeps;
   state$?: BehaviorSubject<LogExplorerStateContainer>;
 }
