@@ -112,3 +112,4 @@ export * from './prebuilt_rules/install_prebuilt_rules';
 export * from './prebuilt_rules/upgrade_prebuilt_rules';
 export * from './prebuilt_rules/install_mock_prebuilt_rules';
 export * from './prebuilt_rules/install_prebuilt_rules_and_timelines';
+export * from './prebuilt_rules/get_prebuilt_rules_and_timelines_status';

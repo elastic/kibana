@@ -12,7 +12,7 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
 } from '../../utils';
 import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_all_prebuilt_rule_assets';
-import { installPrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/install_prebuilt_rules_fleet_package';
+import { installPrebuiltRulesPackageViaFleetAPI } from '../../utils/prebuilt_rules/install_fleet_package_by_url';
 import { installPrebuiltRulesAndTimelines } from '../../utils/prebuilt_rules/install_prebuilt_rules_and_timelines';
 import { deletePrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/delete_prebuilt_rules_fleet_package';
 
@@ -41,11 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusBeforePackageInstallation.rules_not_installed).toBe(0);
       expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
 
-      await installPrebuiltRulesFleetPackage({
-        es,
-        supertest,
-        overrideExistingPackage: true,
-      });
+      await installPrebuiltRulesPackageViaFleetAPI(es, supertest);
 
       // Verify that status is updated after package installation
       const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
