@@ -36,7 +36,7 @@ const {
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
-const tableActionTypes = [
+const tableActionTypes = new Set([
   removeColumn.type,
   upsertColumn.type,
   applyDeltaToColumnWidth.type,
@@ -50,7 +50,7 @@ const tableActionTypes = [
   updateTotalCount.type,
   updateIsLoading.type,
   toggleDetailPanel.type,
-];
+]);
 
 export const createDataTableLocalStorageEpic =
   <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
