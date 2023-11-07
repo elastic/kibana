@@ -192,9 +192,7 @@ export const registerFieldForWildcard = async (
   const configuredHandler = handler(isRollupsEnabled);
 
   // handler
-  router.versioned
-    .put({ path, access, options: {} })
-    .addVersion({ version, validate }, configuredHandler);
+  router.versioned.put({ path, access }).addVersion({ version, validate }, configuredHandler);
   router.versioned.post({ path, access }).addVersion({ version, validate }, configuredHandler);
   router.versioned
     .get({ path, access })
