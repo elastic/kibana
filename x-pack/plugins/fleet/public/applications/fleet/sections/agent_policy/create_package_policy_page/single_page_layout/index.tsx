@@ -456,7 +456,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               title={
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.requireRootCalloutTitle"
-                  defaultMessage="Require root privileges"
+                  defaultMessage="Requires root privileges"
                 />
               }
             >
