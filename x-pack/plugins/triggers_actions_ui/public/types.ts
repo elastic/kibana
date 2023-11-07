@@ -702,10 +702,10 @@ export type OpenAlertFlyout = ({
 }:
   | {
       alertId: string;
-      alertIndex?: number;
+      alertIndex?: never;
     }
   | {
-      alertId?: string;
+      alertId?: never;
       alertIndex: number;
     }) => void;
 export interface AlertsTableStateActions {
