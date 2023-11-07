@@ -5,31 +5,39 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiSearchBar } from '@elastic/eui';
+import { EuiBadge, Query } from '@elastic/eui';
 
-export const renderBadges = (index, filterChanged, extensionsService) => {
-  const badgeLabels = [];
+import { ExtensionsService } from '../../services';
+import { Index } from '../..';
+
+export const renderBadges = (
+  index: Index,
+  extensionsService: ExtensionsService,
+  onFilterChange?: (query: Query) => void
+) => {
+  const badgeLabels: ReactNode[] = [];
   extensionsService.badges.forEach(({ matchIndex, label, color, filterExpression }) => {
     if (matchIndex(index)) {
       const clickHandler = () => {
-        filterChanged &&
-          filterExpression &&
-          filterChanged(EuiSearchBar.Query.parse(filterExpression));
+        if (onFilterChange && filterExpression) {
+          onFilterChange(Query.parse(filterExpression));
+        }
       };
       const ariaLabel = i18n.translate('xpack.idxMgmt.badgeAriaLabel', {
         defaultMessage: '{label}. Select to filter on this.',
         values: { label },
       });
-      badgeLabels.push(
-        <Fragment key={label}>
-          {' '}
+      const badge =
+        onFilterChange && filterExpression ? (
           <EuiBadge color={color} onClick={clickHandler} onClickAriaLabel={ariaLabel}>
             {label}
           </EuiBadge>
-        </Fragment>
-      );
+        ) : (
+          <EuiBadge color={color}>{label}</EuiBadge>
+        );
+      badgeLabels.push(<Fragment key={label}> {badge}</Fragment>);
     }
   });
   return <Fragment>{badgeLabels}</Fragment>;
