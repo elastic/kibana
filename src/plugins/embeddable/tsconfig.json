@@ -35,7 +35,6 @@
     "@kbn/unified-search-plugin",
     "@kbn/data-views-plugin",
     "@kbn/spaces-plugin",
-    "@kbn/dashboard-plugin",
   ],
   "exclude": ["target/**/*"]
 }

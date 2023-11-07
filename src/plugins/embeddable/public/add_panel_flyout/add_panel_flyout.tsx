@@ -18,7 +18,6 @@ import {
   SavedObjectFinderProps,
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
-import { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 import {
   core,
@@ -26,7 +25,6 @@ import {
   usageCollection,
   savedObjectsTaggingOss,
   contentManagement,
-  spaces,
 } from '../kibana_services';
 import {
   IContainer,
@@ -80,10 +78,6 @@ export const AddPanelFlyout = ({
       }, {} as FactoryMap);
   }, []);
 
-  const { spacesManager } = spaces.ui.useSpaces();
-
-  const namespaces = (container as DashboardAPI).select((state) => state.componentState.namespaces);
-
   const metaData = useMemo(
     () =>
       Object.values(factoriesBySavedObjectType)
@@ -107,19 +101,6 @@ export const AddPanelFlyout = ({
         throw new EmbeddableFactoryNotFoundError(type);
       }
 
-      const shareableRefs = await spacesManager.getShareableReferences([{ type, id }]);
-      // TODO: toast this, warn users before auto sharing nested SOs to other spaces?
-      const updateSpacesResult = await spacesManager.updateSavedObjectsSpaces(
-        shareableRefs.objects.map(
-          ({ type: objectType, id: objectId }: { type: string; id: string }) => ({
-            type: objectType,
-            id: objectId,
-          })
-        ),
-        namespaces || [],
-        []
-      );
-
       const embeddable = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
         factoryForSavedObjectType.type,
         { savedObjectId: id },
@@ -130,7 +111,7 @@ export const AddPanelFlyout = ({
       showSuccessToast(name);
       runAddTelemetry(container.type, factoryForSavedObjectType, savedObject);
     },
-    [container, factoriesBySavedObjectType, namespaces, onAddPanel, spacesManager]
+    [container, factoriesBySavedObjectType, onAddPanel]
   );
 
   return (
