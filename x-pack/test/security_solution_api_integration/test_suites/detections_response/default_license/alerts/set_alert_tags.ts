@@ -13,28 +13,34 @@ import {
   DETECTION_ENGINE_ALERT_TAGS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllAlerts,
-  getQuerySignalIds,
+  getQueryAlertIds,
   deleteAllRules,
   createRule,
-  waitForSignalsToBePresent,
-  getSignalsByIds,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
   waitForRuleSuccess,
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
+  setAlertTags,
 } from '../../utils';
-import { setAlertTags } from '../../utils/set_alert_tags';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('set_alert_tags', () => {
+  describe('@ess @serverless set_alert_tags', () => {
     describe('validation checks', () => {
       it('should give errors when no alert ids are provided', async () => {
         const { body } = await supertest
@@ -65,19 +71,18 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // Test is failing after changing refresh to false
-    describe.skip('tests with auditbeat data', () => {
+    describe('tests with auditbeat data', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(path);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(path);
       });
 
       beforeEach(async () => {
         await deleteAllRules(supertest, log);
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -86,13 +91,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able to add tags to multiple alerts', async () => {
         const rule = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 10, [id]);
-        const alerts = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        const alerts = await getAlertsByIds(supertest, log, [id]);
         const alertIds = alerts.hits.hits.map((alert) => alert._id);
 
         await supertest
@@ -110,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(alertIds))
+          .send(getQueryAlertIds(alertIds))
           .expect(200);
 
         body.hits.hits.map((alert) => {
@@ -120,13 +125,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able to add tags to alerts that have tags already and not duplicate them', async () => {
         const rule = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 10, [id]);
-        const alerts = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        const alerts = await getAlertsByIds(supertest, log, [id]);
         const alertIds = alerts.hits.hits.map((alert) => alert._id);
 
         await supertest
@@ -156,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(alertIds))
+          .send(getQueryAlertIds(alertIds))
           .expect(200);
 
         body.hits.hits.map((alert) => {
@@ -166,13 +171,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able to remove tags', async () => {
         const rule = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 10, [id]);
-        const alerts = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        const alerts = await getAlertsByIds(supertest, log, [id]);
         const alertIds = alerts.hits.hits.map((alert) => alert._id);
 
         await supertest
@@ -202,7 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(alertIds))
+          .send(getQueryAlertIds(alertIds))
           .expect(200);
 
         body.hits.hits.map((alert) => {
@@ -212,13 +217,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able to remove tags that do not exist without breaking', async () => {
         const rule = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 10, [id]);
-        const alerts = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        const alerts = await getAlertsByIds(supertest, log, [id]);
         const alertIds = alerts.hits.hits.map((alert) => alert._id);
 
         await supertest
@@ -236,7 +241,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body }: { body: estypes.SearchResponse<DetectionAlert> } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(alertIds))
+          .send(getQueryAlertIds(alertIds))
           .expect(200);
 
         body.hits.hits.map((alert) => {

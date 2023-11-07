@@ -9,11 +9,14 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllAlerts, getIndexNameFromLoad } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { createAlertsIndex, deleteAllAlerts, getIndexNameFromLoad } from '../../../utils';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../../../../common/services/security_solution';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -21,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
 
-  const getSignalsMigrationStatus = async (query: any) => {
+  const getAlertsMigrationStatus = async (query: any) => {
     const { body } = await supertest
       .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
       .query(query)
@@ -34,13 +37,13 @@ export default ({ getService }: FtrProviderContext): void => {
     return filteredIndices;
   };
 
-  describe('Signals migration status', () => {
-    let legacySignalsIndexName: string;
+  describe('Alerts migration status', () => {
+    let legacyAlertsIndexName: string;
     beforeEach(async () => {
-      legacySignalsIndexName = getIndexNameFromLoad(
+      legacyAlertsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     afterEach(async () => {
@@ -48,26 +51,26 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllAlerts(supertest, log, es);
     });
 
-    it('returns no indexes if no signals exist in the specified range', async () => {
-      const indices = await getSignalsMigrationStatus({ from: '2020-10-20' });
+    it('returns no indexes if no alerts exist in the specified range', async () => {
+      const indices = await getAlertsMigrationStatus({ from: '2020-10-20' });
       expect(indices).to.eql([]);
     });
 
-    it('includes an index if its signals are within the specified range', async () => {
-      const indices = await getSignalsMigrationStatus({ from: '2020-10-10' });
+    it('includes an index if its alerts are within the specified range', async () => {
+      const indices = await getAlertsMigrationStatus({ from: '2020-10-10' });
       expect(indices).length(1);
-      expect(indices[0].index).to.eql(legacySignalsIndexName);
+      expect(indices[0].index).to.eql(legacyAlertsIndexName);
     });
 
-    it("returns the mappings version and a breakdown of signals' version", async () => {
+    it("returns the mappings version and a breakdown of alerts' version", async () => {
       const outdatedIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
-      const indices = await getSignalsMigrationStatus({ from: '2020-10-10' });
+      const indices = await getAlertsMigrationStatus({ from: '2020-10-10' });
       expect(indices).to.eql([
         {
-          index: legacySignalsIndexName,
+          index: legacyAlertsIndexName,
           is_outdated: true,
           migrations: [],
           signal_versions: [
