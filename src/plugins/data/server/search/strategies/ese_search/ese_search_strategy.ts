@@ -12,6 +12,7 @@ import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -43,14 +44,14 @@ export const enhancedEsSearchStrategyProvider = (
   logger: Logger,
   usage?: SearchUsage,
   useInternalUser: boolean = false
-): ISearchStrategy => {
+): ISearchStrategy<IEsSearchRequest<IAsyncSearchRequestParams>> => {
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     return client.asyncSearch.delete({ id });
   }
 
   function asyncSearch(
-    { id, ...request }: IEsSearchRequest,
+    { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
@@ -60,7 +61,10 @@ export const enhancedEsSearchStrategyProvider = (
       const params = id
         ? {
             ...getDefaultAsyncGetParams(searchConfig, options),
-            ...request.params,
+            ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
+            ...(request.params?.wait_for_completion_timeout
+              ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
+              : {}),
           }
         : {
             ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
