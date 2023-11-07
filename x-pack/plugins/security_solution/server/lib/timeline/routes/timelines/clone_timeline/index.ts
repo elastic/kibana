@@ -10,7 +10,6 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 import { cloneTimelineSchema } from '../../../../../../common/api/timeline';
-import type { TimelineResponse } from '../../../../../../common/api/timeline';
 import { cloneTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
@@ -56,7 +55,7 @@ export const cloneTimelineRoute = async (
             searchSourceClient
           );
 
-          return response.ok<TimelineResponse>({
+          return response.ok({
             body: { data: { persistTimeline: clonedTimeline } },
           });
         } catch (err) {

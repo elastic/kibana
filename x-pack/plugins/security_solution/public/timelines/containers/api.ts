@@ -15,6 +15,7 @@ import { throwErrors } from '@kbn/cases-plugin/common';
 import type {
   TimelineResponse,
   TimelineErrorResponse,
+  CloneTimelineResponse,
   ImportTimelineResultSchema,
   ResponseFavoriteTimeline,
   AllTimelinesResponse,
@@ -24,6 +25,7 @@ import type {
 } from '../../../common/api/timeline';
 import {
   TimelineResponseType,
+  CloneTimelineResponseType,
   TimelineStatus,
   TimelineErrorResponseType,
   importTimelineResultSchema,
@@ -69,6 +71,14 @@ const createToasterPlainError = (message: string) => new ToasterError([message])
 const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorResponse) =>
   pipe(
     TimelineResponseType.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+const decodeCloneTimelineResponse = (
+  respTimeline?: CloneTimelineResponse | TimelineErrorResponse
+) =>
+  pipe(
+    CloneTimelineResponseType.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
@@ -157,8 +167,7 @@ const patchTimeline = async ({
 export const cloneTimeline = async ({
   timelineId,
   timeline,
-  version,
-}: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
+}: RequestPersistTimeline): Promise<CloneTimelineResponse | TimelineErrorResponse> => {
   let response = null;
   let requestBody = null;
   try {
@@ -167,7 +176,7 @@ export const cloneTimeline = async ({
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
   try {
-    response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_CLONE_URL, {
+    response = await KibanaServices.get().http.post<CloneTimelineResponse>(TIMELINE_CLONE_URL, {
       method: 'POST',
       body: requestBody,
       version: '2023-10-31',
@@ -178,7 +187,7 @@ export const cloneTimeline = async ({
     // the issue we were not able to pass the right object to it so we did manage the error in the success
     return Promise.resolve(decodeTimelineErrorResponse(err.body));
   }
-  return decodeTimelineResponse(response);
+  return decodeCloneTimelineResponse(response);
 };
 
 export const persistTimeline = async ({

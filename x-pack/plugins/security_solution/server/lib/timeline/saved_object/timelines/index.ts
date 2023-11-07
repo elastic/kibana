@@ -13,7 +13,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
-import { getSavedSearch, plugin } from '@kbn/saved-search-plugin/server';
+// import { getSavedSearch, plugin } from '@kbn/saved-search-plugin/server';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
@@ -26,6 +26,7 @@ import type {
   ResponseTimelines,
   ResponseFavoriteTimeline,
   ResponseTimeline,
+  ResponseCloneTimeline,
   SortTimeline,
   TimelineResult,
   TimelineTypeLiteralWithNull,
@@ -593,20 +594,21 @@ export const cloneTimeline = async (
   timeline: SavedTimeline,
   timelineId: string,
   searchSource: ISearchStartSearchSource
-) => {
+): Promise<ResponseCloneTimeline> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
+  const originalTimeline = await getTimeline(request, timelineId, timeline.timelineType);
 
   // Fetch all objects that need to be cloned
   // TODO: How to clone saved search?
-  const [notes, pinnedEvents, savedSearch] = await Promise.all([
+  const [notes, pinnedEvents] = await Promise.all([
     note.getNotesByTimelineId(request, timelineId),
     pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
-    timeline.savedSearchId
-      ? getSavedSearch(timeline.savedSearchId, {
-          searchSourceStart: searchSource,
-          savedObjects: savedObjectsClient,
-        })
-      : Promise.resolve(undefined),
+    // timeline.savedSearchId
+    //   ? getSavedSearch(timeline.savedSearchId, {
+    //       searchSourceStart: searchSource,
+    //       savedObjects: savedObjectsClient,
+    //     })
+    //   : Promise.resolve(undefined),
   ]);
 
   const isImmutable = timeline.status === TimelineStatus.immutable;
@@ -646,7 +648,12 @@ export const cloneTimeline = async (
 
   await Promise.all([cloneNotes, clonePinnedEvents]);
 
-  return resolveSavedTimeline(request, newTimelineId);
+  return {
+    code: 200,
+    message: 'success',
+    timeline: await getSavedTimeline(request, newTimelineId),
+    originalTimeline,
+  };
 };
 
 const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {

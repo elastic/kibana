@@ -441,6 +441,21 @@ export const TimelineResponseType = runtimeTypes.type({
   }),
 });
 
+export const CloneTimelineResponseType = runtimeTypes.type({
+  data: runtimeTypes.type({
+    persistTimeline: runtimeTypes.intersection([
+      runtimeTypes.partial({
+        code: unionWithNullType(runtimeTypes.number),
+        message: unionWithNullType(runtimeTypes.string),
+      }),
+      runtimeTypes.type({
+        timeline: TimelineSavedToReturnObjectRuntimeType,
+        originalTimeline: TimelineSavedToReturnObjectRuntimeType,
+      }),
+    ]),
+  }),
+});
+
 export const TimelineErrorResponseType = runtimeTypes.type({
   status_code: runtimeTypes.number,
   message: runtimeTypes.string,
@@ -448,6 +463,7 @@ export const TimelineErrorResponseType = runtimeTypes.type({
 
 export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
+export type CloneTimelineResponse = runtimeTypes.TypeOf<typeof CloneTimelineResponseType>;
 
 export enum SortFieldTimeline {
   title = 'title',
@@ -676,6 +692,13 @@ export interface ResponseTimeline {
   code?: Maybe<number>;
   message?: Maybe<string>;
   timeline: TimelineResult;
+}
+
+export interface ResponseCloneTimeline {
+  code: Maybe<number>;
+  message: Maybe<string>;
+  timeline: TimelineResult;
+  originalTimeline: TimelineResult;
 }
 
 export interface SortTimeline {
