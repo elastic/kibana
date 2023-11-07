@@ -7,19 +7,18 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getRuleForSignalTesting,
-  getSignalsById,
+  getRuleForAlertTesting,
+  getAlertsById,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
+  waitForAlertsToBePresent,
 } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -30,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
     name: string;
   }
 
-  describe('Tests involving aliases of source indexes and the signals index', () => {
+  describe('@ess Tests involving aliases of source indexes and the alerts index', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
     });
@@ -40,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     afterEach(async () => {
@@ -49,25 +48,25 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {
-      const rule = getRuleForSignalTesting(['host_alias']);
+      const rule = getRuleForAlertTesting(['host_alias']);
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccess({ supertest, log, id });
-      await waitForSignalsToBePresent(supertest, log, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, log, id);
-      const hits = signalsOpen.hits.hits
-        .map((signal) => (signal._source?.host_alias as HostAlias).name)
+      await waitForAlertsToBePresent(supertest, log, 4, [id]);
+      const alertsOpen = await getAlertsById(supertest, log, id);
+      const hits = alertsOpen.hits.hits
+        .map((alert) => (alert._source?.host_alias as HostAlias).name)
         .sort();
       expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
     });
 
-    it('should copy alias data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
-      const rule = getRuleForSignalTesting(['host_alias']);
+    it('should copy alias data from a source index into the alerts index in the same position when the target is ECS compatible', async () => {
+      const rule = getRuleForAlertTesting(['host_alias']);
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccess({ supertest, log, id });
-      await waitForSignalsToBePresent(supertest, log, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, log, id);
-      const hits = signalsOpen.hits.hits
-        .map((signal) => (signal._source?.host as HostAlias).name)
+      await waitForAlertsToBePresent(supertest, log, 4, [id]);
+      const alertsOpen = await getAlertsById(supertest, log, id);
+      const hits = alertsOpen.hits.hits
+        .map((alert) => (alert._source?.host as HostAlias).name)
         .sort();
       expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
     });

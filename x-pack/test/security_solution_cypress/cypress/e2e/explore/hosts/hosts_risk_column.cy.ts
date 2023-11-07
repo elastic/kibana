@@ -9,7 +9,6 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { hostsUrl } from '../../../urls/navigation';
-import { cleanKibana } from '../../../tasks/common';
 import { TABLE_CELL } from '../../../screens/alerts_details';
 import { kqlSearch } from '../../../tasks/security_header';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
@@ -18,7 +17,6 @@ import { enableRiskEngine } from '../../../tasks/entity_analytics';
 describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
-      cleanKibana();
       // illegal_argument_exception: unknown setting [index.lifecycle.name]
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
@@ -43,7 +41,6 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with new risk score', () => {
     before(() => {
-      cleanKibana();
       // illegal_argument_exception: unknown setting [index.lifecycle.name]
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });
