@@ -62,11 +62,6 @@ export const allowedExperimentalValues = Object.freeze({
   endpointResponseActionsEnabled: true,
 
   /**
-   * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
-   */
-  alertDetailsPageEnabled: false,
-
-  /**
    * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: true,
@@ -113,6 +108,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
+
+  /**
+   * Disables the timeline save tour.
+   * This flag is used to disable the tour in cypress tests.
+   */
+  disableTimelineSaveTour: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

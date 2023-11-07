@@ -7,11 +7,13 @@
 
 import { createBurnRateRule } from '../fixtures/rule';
 import { buildQuery } from './build_query';
-import { createKQLCustomIndicator, createSLO } from '../../../../services/slo/fixtures/slo';
-import { getBurnRateWindows } from '../executor';
+import {
+  createKQLCustomIndicator,
+  createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+} from '../../../../services/slo/fixtures/slo';
 
-const DATE_START = '2022-12-29T00:00:00.000Z';
-const DATE_END = '2023-01-01T00:00:00.000Z';
+const STARTED_AT = new Date('2023-01-01T00:00:00.000Z');
 
 describe('buildQuery()', () => {
   it('should return a valid query for occurrences', () => {
@@ -20,8 +22,7 @@ describe('buildQuery()', () => {
       indicator: createKQLCustomIndicator(),
     });
     const rule = createBurnRateRule(slo);
-    const burnRateWindows = getBurnRateWindows(rule.windows);
-    expect(buildQuery(slo, DATE_START, DATE_END, burnRateWindows)).toMatchSnapshot();
+    expect(buildQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
   });
   it('should return a valid query with afterKey', () => {
     const slo = createSLO({
@@ -29,21 +30,14 @@ describe('buildQuery()', () => {
       indicator: createKQLCustomIndicator(),
     });
     const rule = createBurnRateRule(slo);
-    const burnRateWindows = getBurnRateWindows(rule.windows);
-    expect(
-      buildQuery(slo, DATE_START, DATE_END, burnRateWindows, {
-        instanceId: 'example',
-      })
-    ).toMatchSnapshot();
+    expect(buildQuery(STARTED_AT, slo, rule, { instanceId: 'example' })).toMatchSnapshot();
   });
   it('should return a valid query for timeslices', () => {
-    const slo = createSLO({
+    const slo = createSLOWithTimeslicesBudgetingMethod({
       id: 'test-slo',
       indicator: createKQLCustomIndicator(),
-      budgetingMethod: 'timeslices',
     });
     const rule = createBurnRateRule(slo);
-    const burnRateWindows = getBurnRateWindows(rule.windows);
-    expect(buildQuery(slo, DATE_START, DATE_END, burnRateWindows)).toMatchSnapshot();
+    expect(buildQuery(STARTED_AT, slo, rule)).toMatchSnapshot();
   });
 });

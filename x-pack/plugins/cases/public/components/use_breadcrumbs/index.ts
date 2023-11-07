@@ -20,8 +20,8 @@ const casesBreadcrumbTitle: Record<ICasesDeepLinkId, string> = {
   [CasesDeepLinkId.casesCreate]: i18n.translate('xpack.cases.breadcrumbs.create_case', {
     defaultMessage: 'Create',
   }),
-  [CasesDeepLinkId.casesConfigure]: i18n.translate('xpack.cases.breadcrumbs.configure_cases', {
-    defaultMessage: 'Configure',
+  [CasesDeepLinkId.casesConfigure]: i18n.translate('xpack.cases.breadcrumbs.settings', {
+    defaultMessage: 'Settings',
   }),
 };
 

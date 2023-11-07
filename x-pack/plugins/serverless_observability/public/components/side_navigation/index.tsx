@@ -25,9 +25,7 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Observability',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
-      accordionProps: {
-        arrowProps: { css: { display: 'none' } },
-      },
+      isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
         {
@@ -35,6 +33,14 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Log Explorer',
           }),
           link: 'observability-log-explorer',
+          renderAs: 'item',
+          children: [
+            {
+              // This is to show "discover" breadcrumbs when navigating from "log explorer" to "discover"
+              link: 'discover',
+              sideNavStatus: 'hidden',
+            },
+          ],
         },
         {
           title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
@@ -63,6 +69,15 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           link: 'observability-overview:cases',
+          renderAs: 'item',
+          children: [
+            {
+              link: 'observability-overview:cases_configure',
+            },
+            {
+              link: 'observability-overview:cases_create',
+            },
+          ],
         },
         {
           link: 'observability-overview:slos',
@@ -70,15 +85,26 @@ const navigationTree: NavigationTreeDefinition = {
         {
           id: 'aiops',
           title: 'AIOps',
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
+          renderAs: 'accordion',
+          spaceBefore: null,
           children: [
             {
               title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
                 defaultMessage: 'Anomaly detection',
               }),
               link: 'ml:anomalyDetection',
+              renderAs: 'item',
+              children: [
+                {
+                  link: 'ml:singleMetricViewer',
+                },
+                {
+                  link: 'ml:anomalyExplorer',
+                },
+                {
+                  link: 'ml:settings',
+                },
+              ],
             },
             {
               title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
@@ -107,17 +133,11 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          id: 'groups-spacer-1',
-          isGroupTitle: true,
-        },
-        {
           id: 'apm',
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
+          renderAs: 'accordion',
           children: [
             {
               link: 'apm:services',
@@ -145,9 +165,7 @@ const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
+          renderAs: 'accordion',
           children: [
             {
               link: 'metrics:inventory',
@@ -163,10 +181,6 @@ const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
-        {
-          id: 'groups-spacer-2',
-          isGroupTitle: true,
-        },
       ],
     },
   ],
@@ -174,10 +188,9 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navItem',
       title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-        defaultMessage: 'Get Started',
+        defaultMessage: 'Get started',
       }),
       link: 'observabilityOnboarding',
-      isGroupTitle: true,
       icon: 'launch',
     },
     {

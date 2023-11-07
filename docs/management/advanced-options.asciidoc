@@ -463,6 +463,8 @@ A custom image to use in the footer of the PDF.
 [[kibana-rollups-settings]]
 ==== Rollup
 
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
+
 [horizontal]
 [[rollups-enableindexpatterns]]`rollups:enableIndexPatterns`::
 Enables the creation of data views that capture rollup indices, which in

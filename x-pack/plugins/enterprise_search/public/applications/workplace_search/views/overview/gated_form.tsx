@@ -30,6 +30,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../shared/doc_links';
+
 import { WorkplaceSearchGateLogic } from './gated_form_logic';
 
 const getFeature = (id: string) => {
@@ -593,7 +595,7 @@ export const WorkplaceSearchGate: React.FC = () => {
                     details or to opt-out at any time."
                   values={{
                     contact: (
-                      <EuiLink href="#">
+                      <EuiLink href={docLinks.workplaceSearchGatedFormDataUse}>
                         <FormattedMessage
                           id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.contact"
                           defaultMessage="contact you"
@@ -601,7 +603,7 @@ export const WorkplaceSearchGate: React.FC = () => {
                       </EuiLink>
                     ),
                     privacyStatementLink: (
-                      <EuiLink href="#">
+                      <EuiLink href={docLinks.workplaceSearchGatedFormPrivacyStatement}>
                         <FormattedMessage
                           id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readDataPrivacyStatementLink"
                           defaultMessage="Elastic’s Privacy Statement"
@@ -609,7 +611,7 @@ export const WorkplaceSearchGate: React.FC = () => {
                       </EuiLink>
                     ),
                     termsOfService: (
-                      <EuiLink href="#">
+                      <EuiLink href={docLinks.workplaceSearchGatedFormTermsOfService}>
                         <FormattedMessage
                           id="xpack.enterpriseSearch.workplaceSearch.gateForm.additionalFeedback.readTermsOfService"
                           defaultMessage="Terms of Service"

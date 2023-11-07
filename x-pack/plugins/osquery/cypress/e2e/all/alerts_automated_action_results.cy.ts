@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { checkActionItemsInResults, loadRuleAlerts } from '../../tasks/live_query';
 
@@ -12,6 +13,10 @@ const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-
 
 describe('Alert Flyout Automated Action Results', () => {
   let ruleId: string;
+
+  before(() => {
+    initializeDataViews();
+  });
 
   beforeEach(() => {
     loadRule(true).then((data) => {
@@ -106,7 +111,7 @@ describe('Alert Flyout Automated Action Results', () => {
           });
       });
     cy.contains(timelineRegex);
-    cy.getBySel('securitySolutionFlyoutHeaderCollapseDetailButton').click();
+    cy.getBySel('securitySolutionFlyoutNavigationCollapseDetailButton').click();
     cy.getBySel('flyoutBottomBar').contains('Untitled timeline').click();
     cy.contains(filterRegex);
   });

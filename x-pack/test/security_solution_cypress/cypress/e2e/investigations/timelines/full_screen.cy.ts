@@ -6,7 +6,6 @@
  */
 
 import { TIMELINE_HEADER, TIMELINE_TABS } from '../../../screens/timeline';
-import { cleanKibana } from '../../../tasks/common';
 
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
@@ -21,10 +20,6 @@ import { hostsUrl } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165638
 describe('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
