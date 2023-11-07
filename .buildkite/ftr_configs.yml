@@ -224,7 +224,6 @@ enabled:
   - x-pack/test/detection_engine_api_integration/basic/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group4/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/group5/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group10/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/rule_execution_logic/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/prebuilt_rules/config.ts
