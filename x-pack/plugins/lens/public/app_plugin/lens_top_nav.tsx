@@ -16,6 +16,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import moment from 'moment';
+import { EuiToolTipProps } from '@elastic/eui';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
@@ -129,7 +130,13 @@ function getLensTopNavConfig(options: {
     savingToLibraryPermitted ||
     (allowByValue && savingToDashboardPermitted && !isByValueMode && !showSaveAndReturn);
 
-  const saveButtonLabel = isByValueMode
+  const isManaged = true;
+
+  const saveButtonLabel = isManaged
+    ? i18n.translate('xpack.lens.app.saveAs', {
+        defaultMessage: 'Save as',
+      })
+    : isByValueMode
     ? i18n.translate('xpack.lens.app.addToLibrary', {
         defaultMessage: 'Save to library',
       })
@@ -240,6 +247,8 @@ function getLensTopNavConfig(options: {
       defaultMessage: 'Save the current lens visualization',
     }),
     disableButton: !enableSaveButton,
+    tooltip:
+      'This visualization is managed by Elastic. You must save any changes to a new visualization.',
   });
 
   const saveButtonMeta = getSaveButtonMeta({
@@ -1059,6 +1068,20 @@ export const LensTopNavMenu = ({
           ? 'allowed_by_app_privilege'
           : 'globally_managed'
       }
+      badges={[
+        {
+          'data-test-subj': 'managedContentBadge',
+          badgeText: 'Managed',
+          title: '',
+          color: 'primary',
+          iconType: 'glasses',
+          toolTipProps: {
+            content:
+              'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
+            position: 'bottom',
+          } as EuiToolTipProps,
+        },
+      ]}
       savedQuery={savedQuery}
       onQuerySubmit={onQuerySubmitWrapped}
       onSaved={onSavedWrapped}

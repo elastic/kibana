@@ -25,6 +25,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiTextArea,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -44,6 +45,8 @@ interface Props {
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
+  mustCopyOnSave?: boolean;
+  mustCopyOnSaveTooltip?: string;
   onCopyOnSaveChange?: (copyOnChange: boolean) => void;
   initialCopyOnSave?: boolean;
   objectType: string;
@@ -173,7 +176,19 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
         <EuiModalFooter>
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            {this.props.showCopyOnSave && <EuiFlexItem grow>{this.renderCopyOnSave()}</EuiFlexItem>}
+            {this.props.showCopyOnSave && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    position="top"
+                    content="This visualization is managed by Elastic. Changes made here must be saved in a new visualization."
+                  >
+                    <div>{this.renderCopyOnSave()}</div>
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem grow={true} />
+              </>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
                 <FormattedMessage
@@ -357,7 +372,8 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     return (
       <EuiSwitch
         data-test-subj="saveAsNewCheckbox"
-        checked={this.state.copyOnSave}
+        checked={this.props.mustCopyOnSave || this.state.copyOnSave}
+        disabled={this.props.mustCopyOnSave}
         onChange={this.onCopyOnSaveChange}
         label={
           <FormattedMessage
