@@ -17,4 +17,5 @@ export {
   TemplateContentIndicator,
 } from './components';
 
-export { timeUnits, UnitField } from './fields/unit_field';
+export { UnitField } from './fields/unit_field';
+export { timeUnits } from '../../constants/time_units';

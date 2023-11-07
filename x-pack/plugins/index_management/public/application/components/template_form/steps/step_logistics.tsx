@@ -284,7 +284,10 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             </FormRow>
           )}
 
-          {/* Data retention */}
+          {/*
+            Since data stream and data retention are settings that are only allowed for non legacy,
+            we only need to check if data stream is set to true to show the data retention.
+          */}
           {doCreateDataStream && (
             <FormRow
               title={dataRetention.title}
