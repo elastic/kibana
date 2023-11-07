@@ -20,11 +20,7 @@ import {
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../tasks/api_calls/prebuilt_rules';
-import {
-  cleanKibana,
-  deleteAlertsAndRules,
-  deletePrebuiltRulesAssets,
-} from '../../../../tasks/common';
+import { deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import {
   enableAllDisabledRules,
@@ -49,10 +45,6 @@ const prebuiltRules = [
 ];
 
 describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
