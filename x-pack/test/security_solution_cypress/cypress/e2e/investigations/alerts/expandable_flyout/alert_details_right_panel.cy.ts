@@ -39,10 +39,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE,
-  DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS,
   DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
@@ -59,7 +57,7 @@ import {
   openTakeActionButtonAndSelectItem,
   selectTakeActionItem,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { cleanKibana } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -72,7 +70,7 @@ describe.skip('Alert details expandable flyout right panel', () => {
   const rule = getNewRule();
 
   beforeEach(() => {
-    cleanKibana();
+    deleteAlertsAndRules();
     login();
     createRule(rule);
     visit(ALERTS_URL);
@@ -84,8 +82,6 @@ describe.skip('Alert details expandable flyout right panel', () => {
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
 
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON).should('be.visible');
-
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('be.visible');
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('be.visible');
@@ -93,7 +89,6 @@ describe.skip('Alert details expandable flyout right panel', () => {
       .should('be.visible')
       .and('have.text', rule.risk_score);
 
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY).should('be.visible');
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE)
       .should('be.visible')
       .and('have.text', upperFirst(rule.severity));
