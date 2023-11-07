@@ -29205,7 +29205,7 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchIndexForbiddenError": "索引模式不能是{forbiddenString}。请选择更具体的索引模式。",
     "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.invalidMustacheTemplateErrorMessage": "{key} 不是有效的 Mustache 模板",
     "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozeDescription": "选择执行操作的时间，或暂停这些操作。没有为已暂停操作创建通知。{docs}。",
-    "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail": "{essence} {indexPrivileges} {featurePrivileges} 相关文档：{docs}",
+    "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail": "{essence} {clusterPrivileges} {indexPrivileges} {featurePrivileges} 相关文档：{docs}",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges": "缺失 {privileges} 权限，无法使用 {index} 功能。{explanation}",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingIndexPrivileges": "缺失 {privileges} 权限，无法使用 {index} 索引。{explanation}",
     "xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageBody": "{summary} 相关文档：{docs}",
