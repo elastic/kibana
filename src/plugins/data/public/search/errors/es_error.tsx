@@ -17,7 +17,7 @@ import { getRootCause } from './utils';
 export class EsError extends KbnError {
   readonly attributes: IEsError['attributes'];
 
-  constructor(protected readonly err: IEsError) {
+  constructor(protected readonly err: IEsError, private readonly openInInspector: () => void) {
     super(
       `EsError: ${
         getRootCause(err?.attributes?.error)?.reason ||

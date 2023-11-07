@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
 import {
   BehaviorSubject,
@@ -29,9 +30,11 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
+import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
 import {
   ApplicationStart,
@@ -73,13 +76,14 @@ import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash, getSearchErrorOverrideDisplay } from './utils';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchConfigSchema } from '../../../config';
+import type { DataStartDependencies } from '../../types';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
   http: HttpSetup;
   executionContext: ExecutionContextSetup;
   uiSettings: IUiSettingsClient;
-  startServices: Promise<[CoreStart, any, unknown]>;
+  startServices: Promise<[CoreStart, DataStartDependencies, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
@@ -114,6 +118,7 @@ export class SearchInterceptor {
     { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse
   >;
+  private inspector!: InspectorStart;
 
   /*
    * @internal
@@ -121,9 +126,10 @@ export class SearchInterceptor {
   constructor(private readonly deps: SearchInterceptorDeps) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
-    this.deps.startServices.then(([coreStart]) => {
+    this.deps.startServices.then(([coreStart, depsStart]) => {
       this.application = coreStart.application;
       this.docLinks = coreStart.docLinks;
+      this.inspector = depsStart.inspector;
     });
 
     this.batchedFetch = deps.bfetch.batchedFunction({
@@ -184,6 +190,7 @@ export class SearchInterceptor {
    */
   private handleSearchError(
     e: KibanaServerError | AbortError,
+    requestBody: estypes.SearchRequest,
     options?: ISearchOptions,
     isTimeout?: boolean
   ): Error {
@@ -202,8 +209,39 @@ export class SearchInterceptor {
       return e;
     }
 
+    if (isPainlessError(e)) {
+      new PainlessError(e, options?.indexPattern);
+    }
+
     if (isEsError(e)) {
-      return isPainlessError(e) ? new PainlessError(e, options?.indexPattern) : new EsError(e);
+      const requestId = options.inspector?.id ?? uuidv4();
+      const requestAdapter = options.inspector?.adapter ?? new RequestAdapter();
+      if (!options.inspector?.adapter) {
+        const requestResponder = requestAdapter.start(
+          i18n.translate('data.searchService.anonymousRequestTitle', {
+            defaultMessage: 'Request',
+          }),
+          {
+            id: requestId,
+          });
+        requestResponder.json(requestBody);
+        requestResponder.error({ json: e.attributes });
+      }
+      return new EsError(
+        e,
+        () => {
+          this.inspector.open(
+            {
+              requests: requestAdapter,
+            },
+            {
+              options: {
+                initialRequestId: requestId,
+                initialTabs: ['clusters', 'response'],
+              },
+            }
+          );
+        });
     }
 
     return e instanceof Error ? e : new Error(e.message);
@@ -473,7 +511,7 @@ export class SearchInterceptor {
           takeUntil(aborted$),
           catchError((e) => {
             return throwError(
-              this.handleSearchError(e, searchOptions, searchAbortController.isTimeout())
+              this.handleSearchError(e, request.params.body, searchOptions, searchAbortController.isTimeout())
             );
           }),
           tap((response) => {
