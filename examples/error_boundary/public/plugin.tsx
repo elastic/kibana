@@ -46,8 +46,10 @@ export const FatalComponent = () => {
 export const RecoverableComponent = () => {
   const [hasError, setHasError] = useErrors();
 
-  // TODO: test this with network interception that causes actual chunk errors?
   if (hasError) {
+    // FIXME: use network interception to disable responses
+    // for chunk requests and attempt to lazy-load a component
+    // https://github.com/elastic/kibana/issues/170777
     const upgradeError = new Error('ChunkLoadError');
     upgradeError.name = 'ChunkLoadError';
     throw upgradeError;
