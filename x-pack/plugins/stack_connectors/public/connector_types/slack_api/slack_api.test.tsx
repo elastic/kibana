@@ -8,13 +8,15 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registerConnectorTypes } from '..';
-import { registrationServicesMock } from '../../mocks';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 let connectorTypeModel: ConnectorTypeModel;
 
 beforeAll(async () => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
+  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
   const getResult = connectorTypeRegistry.get(SLACK_API_CONNECTOR_ID);
   if (getResult !== null) {
@@ -44,6 +46,20 @@ describe('Slack action params validation', () => {
     });
   });
 
+  test('should succeed when action params include valid message and channels and channel ids', async () => {
+    const actionParams = {
+      subAction: 'postMessage',
+      subActionParams: { channels: ['general'], channelIds: ['general'], text: 'some text' },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        text: [],
+        channels: [],
+      },
+    });
+  });
+
   test('should fail when channels field is missing in action params', async () => {
     const actionParams = {
       subAction: 'postMessage',
@@ -53,7 +69,7 @@ describe('Slack action params validation', () => {
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         text: [],
-        channels: ['Channel is required.'],
+        channels: ['Channel ID is required.'],
       },
     });
   });

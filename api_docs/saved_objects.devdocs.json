@@ -81,6 +81,14 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/plugins/links/public/content_management/save_to_library.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/plugins/links/public/content_management/save_to_library.tsx"
           }
         ],
         "children": [

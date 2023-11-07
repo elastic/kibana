@@ -27,6 +27,7 @@ import {
   isAWSLambdaAgent,
   isAzureFunctionsAgent,
   isServerlessAgent,
+  isRumOrMobileAgent,
 } from '../../../../../common/agent_name';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -62,7 +63,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'service-map'
     | 'logs'
     | 'alerts'
-    | 'profiling';
+    | 'profiling'
+    | 'dashboards';
   hidden?: boolean;
 };
 
@@ -90,7 +92,7 @@ function TemplateWithContext({
   const {
     path: { serviceName },
     query,
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, environment },
   } = useApmParams('/services/{serviceName}/*');
   const history = useHistory();
   const location = useLocation();
@@ -140,6 +142,7 @@ function TemplateWithContext({
                 <EuiFlexItem grow={false}>
                   <ServiceIcons
                     serviceName={serviceName}
+                    environment={environment}
                     start={start}
                     end={end}
                   />
@@ -403,7 +406,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.profilingTabLabel', {
         defaultMessage: 'Universal Profiling',
       }),
-      hidden: !isProfilingAvailable,
+      hidden:
+        !isProfilingAvailable ||
+        isRumOrMobileAgent(agentName) ||
+        isAWSLambdaAgent(serverlessType),
       append: (
         <EuiBadge color="accent">
           {i18n.translate('xpack.apm.universalProfiling.newLabel', {
@@ -411,6 +417,17 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
           })}
         </EuiBadge>
       ),
+    },
+    {
+      key: 'dashboards',
+      href: router.link('/services/{serviceName}/dashboards', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.dashboardsTabLabel', {
+        defaultMessage: 'Dashboards',
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
     },
   ];
 

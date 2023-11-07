@@ -22,6 +22,7 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
       AppFeatureKey.investigationGuide,
       AppFeatureKey.threatIntelligence,
       AppFeatureKey.casesConnectors,
+      AppFeatureKey.externalRuleActions,
     ],
   },
   endpoint: {
@@ -33,6 +34,7 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
     complete: [
       AppFeatureKey.endpointResponseActions,
       AppFeatureKey.osqueryAutomatedResponseActions,
+      AppFeatureKey.endpointExceptions,
     ],
   },
   cloud: {

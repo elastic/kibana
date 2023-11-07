@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
@@ -51,6 +52,7 @@ export const registerSyntheticsStatusCheckRule = (
 
   return createLifecycleRuleType({
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
     name: STATUS_RULE_NAME,
     validate: {

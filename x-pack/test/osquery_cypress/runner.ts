@@ -7,6 +7,7 @@
 
 import Url from 'url';
 
+import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
 import { FtrProviderContext } from './ftr_provider_context';
 
@@ -29,6 +30,9 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
 
+  await verifyDockerInstalled(log);
+  await maybeCreateDockerNetwork(log);
+
   await startRuntimeServices({
     log,
     elasticUrl,
@@ -44,12 +48,10 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, 'Default policy');
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
 
-  await new AgentManager(policyEnrollmentKey, config.get('servers.fleetserver.port'), log).setup();
-  await new AgentManager(
-    policyEnrollmentKeyTwo,
-    config.get('servers.fleetserver.port'),
-    log
-  ).setup();
+  const port = config.get('servers.fleetserver.port');
+
+  await new AgentManager(policyEnrollmentKey, port, log, kbnClient).setup();
+  await new AgentManager(policyEnrollmentKeyTwo, port, log, kbnClient).setup();
 }
 
 export async function startOsqueryCypress(context: FtrProviderContext) {

@@ -158,6 +158,9 @@ export const RULE_NAME_INPUT =
 
 export const RULE_NAME_OVERRIDE = '[data-test-subj="detectionEngineStepAboutRuleRuleNameOverride"]';
 
+export const RULE_NAME_OVERRIDE_FOR_ESQL =
+  '[data-test-subj="detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType"]';
+
 export const RULE_STATUS = '[data-test-subj="ruleStatus"]';
 
 export const RULE_TIMESTAMP_OVERRIDE =
@@ -201,11 +204,24 @@ export const TAGS_INPUT =
 export const TAGS_CLEAR_BUTTON =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxClearButton"]';
 
+export const INVESTIGATIONS_INPUT =
+  '[data-test-subj="detectionEngineStepAboutRuleInvestigationFields"] [data-test-subj="comboBoxSearchInput"]';
+
 export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';
 
 export const THRESHOLD_TYPE = '[data-test-subj="thresholdRuleType"]';
 
 export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
+
+export const ESQL_TYPE = '[data-test-subj="esqlRuleType"]';
+
+export const ESQL_QUERY_BAR_INPUT_AREA =
+  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] textarea';
+
+export const ESQL_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"]';
+
+export const ESQL_QUERY_BAR_EXPAND_BTN =
+  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] [data-test-subj="TextBasedLangEditor-expand"]';
 
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 

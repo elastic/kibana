@@ -7,9 +7,9 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
+import { DashboardLocatorParams } from '../../../dashboard_container';
 import { convertPanelMapToSavedPanels, DashboardContainerInput } from '../../../../common';
 
-import { DashboardAppLocatorParams } from '../../..';
 import { pluginServices } from '../../../services/plugin_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 
@@ -56,7 +56,7 @@ describe('showPublicUrlSwitch', () => {
 
 describe('ShowShareModal', () => {
   const unsavedStateKeys = ['query', 'filters', 'options', 'savedQuery', 'panels'] as Array<
-    keyof DashboardAppLocatorParams
+    keyof DashboardLocatorParams
   >;
   const toggleShareMenuSpy = jest.spyOn(
     pluginServices.getServices().share,
@@ -70,9 +70,7 @@ describe('ShowShareModal', () => {
   const getPropsAndShare = (
     unsavedState?: Partial<DashboardContainerInput>
   ): ShowShareModalProps => {
-    pluginServices.getServices().dashboardSessionStorage.getState = jest
-      .fn()
-      .mockReturnValue(unsavedState);
+    pluginServices.getServices().dashboardBackup.getState = jest.fn().mockReturnValue(unsavedState);
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),
@@ -85,7 +83,7 @@ describe('ShowShareModal', () => {
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
       toggleShareMenuSpy.mock.calls[0][0].sharingData as {
-        locatorParams: { params: DashboardAppLocatorParams };
+        locatorParams: { params: DashboardLocatorParams };
       }
     ).locatorParams.params;
     unsavedStateKeys.forEach((key) => {
@@ -127,7 +125,7 @@ describe('ShowShareModal', () => {
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
       toggleShareMenuSpy.mock.calls[0][0].sharingData as {
-        locatorParams: { params: DashboardAppLocatorParams };
+        locatorParams: { params: DashboardLocatorParams };
       }
     ).locatorParams.params;
     const rawDashboardState = {
@@ -136,7 +134,7 @@ describe('ShowShareModal', () => {
     };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(
-        (rawDashboardState as unknown as Partial<DashboardAppLocatorParams>)[key]
+        (rawDashboardState as unknown as Partial<DashboardLocatorParams>)[key]
       );
     });
   });

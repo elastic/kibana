@@ -8,16 +8,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiBreadcrumbs,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageTemplate, EuiTitle, EuiBreadcrumbs } from '@elastic/eui';
 
 interface PageProps {
   title: string;
@@ -48,19 +39,14 @@ export const Page: React.FC<PageProps> = (props) => {
   }
 
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{title}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiBreadcrumbs responsive={false} breadcrumbs={breadcrumbs} />
-      <EuiSpacer />
-      <EuiPageContent>
-        <EuiPageContentBody>{children}</EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+    <EuiPageTemplate offset={0}>
+      <EuiPageTemplate.Header>
+        <EuiTitle size="l">
+          <h1>{title}</h1>
+        </EuiTitle>
+        <EuiBreadcrumbs responsive={false} breadcrumbs={breadcrumbs} />
+      </EuiPageTemplate.Header>
+      <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

@@ -6,48 +6,10 @@
  */
 import type { HttpServiceSetup } from '@kbn/core/server';
 
-import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { i18n } from '@kbn/i18n';
 
 import { ConfigType } from '.';
-
-interface WorkplaceSearchIntegration {
-  id: string;
-  title: string;
-  description: string;
-  categories: IntegrationCategory[];
-  uiInternalPath?: string;
-}
-
-const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
-  {
-    id: 'box',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.boxName', {
-      defaultMessage: 'Box',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.boxDescription',
-      {
-        defaultMessage: 'Search over your files and folders stored on Box with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'workplace_search_content_source'],
-  },
-  {
-    id: 'zendesk',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.zendeskName', {
-      defaultMessage: 'Zendesk',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.zendeskDescription',
-      {
-        defaultMessage: 'Search over your tickets on Zendesk with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'workplace_search_content_source'],
-  },
-];
 
 export const registerEnterpriseSearchIntegrations = (
   config: ConfigType,
@@ -57,23 +19,6 @@ export const registerEnterpriseSearchIntegrations = (
 ) => {
   const nativeSearchTag = config.hasNativeConnectors && isCloud ? ['native_search'] : [];
   if (config.canDeployEntSearch) {
-    workplaceSearchIntegrations.forEach((integration) => {
-      customIntegrations.registerCustomIntegration({
-        uiInternalPath: `/app/enterprise_search/workplace_search/sources/add/${integration.id}`,
-        icons: [
-          {
-            type: 'svg',
-            src: http.basePath.prepend(
-              `/plugins/enterpriseSearch/assets/source_icons/${integration.id}.svg`
-            ),
-          },
-        ],
-        isBeta: false,
-        shipper: 'enterprise_search',
-        ...integration,
-      });
-    });
-
     customIntegrations.registerCustomIntegration({
       id: 'app_search_json',
       title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonName', {
@@ -934,6 +879,131 @@ export const registerEnterpriseSearchIntegrations = (
           src: http.basePath.prepend(
             '/plugins/enterpriseSearch/assets/source_icons/jira_server.svg'
           ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'outlook',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.outlookTitle', {
+        defaultMessage: 'Outlook',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.outlookDescription',
+        {
+          defaultMessage: 'Search over your content on Outlook.',
+        }
+      ),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'connector',
+        'connector_client',
+        'outlook',
+        ...nativeSearchTag,
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=outlook',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/outlook.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'zoom',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.zoomTitle', {
+        defaultMessage: 'Zoom',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.zoomDescription',
+        {
+          defaultMessage: 'Search over your content on Zoom.',
+        }
+      ),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'connector',
+        'connector_client',
+        'zoom',
+        ...nativeSearchTag,
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=zoom',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/zoom.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'teams',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.teamsTitle', {
+        defaultMessage: 'Teams',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.teamsDescription',
+        {
+          defaultMessage: 'Search over your content on Teams.',
+        }
+      ),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'connector',
+        'connector_client',
+        'teams',
+        ...nativeSearchTag,
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=teams',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/teams.svg'),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'box',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.boxTitle', {
+        defaultMessage: 'Box',
+      }),
+      description: i18n.translate('xpack.enterpriseSearch.integrations.connectors.boxDescription', {
+        defaultMessage: 'Search over your content on Box.',
+      }),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'connector',
+        'connector_client',
+        'box',
+        ...nativeSearchTag,
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=box',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/box.svg'),
         },
       ],
       shipper: 'enterprise_search',

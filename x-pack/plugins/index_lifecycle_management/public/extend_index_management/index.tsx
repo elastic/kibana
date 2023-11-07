@@ -11,20 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
 
-import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { Index, IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 
 import { retryLifecycleForIndex } from '../application/services/api';
-import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
+import { indexLifecycleTab } from './components/index_lifecycle_summary';
 
 import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
 import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
-import { Index } from '../../common/types';
 
 const stepPath = 'ilm.step';
 
 export const retryLifecycleActionExtension = ({ indices }: { indices: Index[] }) => {
   const allHaveErrors = every(indices, (index) => {
-    return index.ilm && index.ilm.failed_step;
+    return index.ilm?.managed && index.ilm.failed_step;
   });
   if (!allHaveErrors) {
     return null;
@@ -144,13 +143,6 @@ export const ilmBannerExtension = (indices: Index[]) => {
   };
 };
 
-export const ilmSummaryExtension = (
-  index: Index,
-  getUrlForApp: ApplicationStart['getUrlForApp']
-) => {
-  return <IndexLifecycleSummary index={index} getUrlForApp={getUrlForApp} />;
-};
-
 export const ilmFilterExtension = (indices: Index[]) => {
   const hasIlm = some(indices, (index) => index.ilm && index.ilm.managed);
   if (!hasIlm) {
@@ -231,6 +223,7 @@ export const addAllExtensions = (
   extensionsService.addAction(addLifecyclePolicyActionExtension);
 
   extensionsService.addBanner(ilmBannerExtension);
-  extensionsService.addSummary(ilmSummaryExtension);
   extensionsService.addFilter(ilmFilterExtension);
+
+  extensionsService.addIndexDetailsTab(indexLifecycleTab);
 };

@@ -93,7 +93,7 @@ type CustomTableViewProps = Pick<
   | 'editItem'
   | 'contentEditor'
   | 'emptyPrompt'
-  | 'showEditActionForItem'
+  | 'itemIsEditable'
 >;
 
 const useTableListViewProps = (
@@ -109,6 +109,7 @@ const useTableListViewProps = (
       overlays,
       toastNotifications,
       visualizeCapabilities,
+      contentManagement,
     },
   } = useKibana<VisualizeServices>();
 
@@ -176,11 +177,16 @@ const useTableListViewProps = (
             description: args.description ?? '',
             tags: args.tags,
           },
-          { overlays, savedObjectsTagging }
+          {
+            overlays,
+            savedObjectsTagging,
+            typesService: getTypes(),
+            contentManagement,
+          }
         );
       }
     },
-    [overlays, savedObjectsTagging]
+    [overlays, savedObjectsTagging, contentManagement]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -251,8 +257,7 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    showEditActionForItem: ({ attributes: { readOnly } }) =>
-      visualizeCapabilities.save && !readOnly,
+    itemIsEditable: ({ attributes: { readOnly } }) => visualizeCapabilities.save && !readOnly,
   };
 
   return props;

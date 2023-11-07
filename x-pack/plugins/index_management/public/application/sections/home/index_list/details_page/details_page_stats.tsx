@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent, useState, useCallback, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -27,22 +26,19 @@ import { css } from '@emotion/react';
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SectionLoading, Error } from '../../../../../shared_imports';
 import { loadIndexStatistics, documentationService } from '../../../../services';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 
-interface Props {
-  isIndexOpen: boolean;
-}
-
-export const DetailsPageStats: FunctionComponent<
-  RouteComponentProps<{ indexName: string }> & Props
-> = ({
-  match: {
-    params: { indexName },
-  },
+export const DetailsPageStats: FunctionComponent<{ indexName: string; isIndexOpen: boolean }> = ({
+  indexName,
   isIndexOpen,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>();
   const [indexStats, setIndexStats] = useState<IndicesStatsResponse | null>();
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsStats);
+  }, []);
 
   const fetchIndexStats = useCallback(async () => {
     setIsLoading(true);
@@ -73,7 +69,7 @@ export const DetailsPageStats: FunctionComponent<
           <h2>
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.stats.statsNotAvailableTitle"
-              defaultMessage="Index stats not available"
+              defaultMessage="Index statistics not available"
             />
           </h2>
         }
@@ -81,7 +77,7 @@ export const DetailsPageStats: FunctionComponent<
           <p>
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.stats.statsNotAvailableDescription"
-              defaultMessage="To view index stats, verify your index is open."
+              defaultMessage="To view index statistics, verify your index is open."
             />
           </p>
         }
@@ -94,7 +90,7 @@ export const DetailsPageStats: FunctionComponent<
       <SectionLoading>
         <FormattedMessage
           id="xpack.idxMgmt.indexDetails.stats.loadingIndexStats"
-          defaultMessage="Loading index stats…"
+          defaultMessage="Loading index statistics…"
         />
       </SectionLoading>
     );
@@ -110,7 +106,7 @@ export const DetailsPageStats: FunctionComponent<
           <h2>
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.stats.errorTitle"
-              defaultMessage="Unable to load index stats"
+              defaultMessage="Unable to load index statistics"
             />
           </h2>
         }
@@ -119,7 +115,7 @@ export const DetailsPageStats: FunctionComponent<
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.stats.errorDescription"
-                defaultMessage="We encountered an error loading the stats for index {indexName}."
+                defaultMessage="We encountered an error loading statistics for index {indexName}. Make sure that the index name in the URL is correct and try again."
                 values={{
                   indexName,
                 }}
@@ -172,7 +168,7 @@ export const DetailsPageStats: FunctionComponent<
                   <h2>
                     <FormattedMessage
                       id="xpack.idxMgmt.indexDetails.stats.indexStatsTitle"
-                      defaultMessage="About index stats"
+                      defaultMessage="About index statistics"
                     />
                   </h2>
                 </EuiTitle>
@@ -185,7 +181,7 @@ export const DetailsPageStats: FunctionComponent<
               <p>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexDetails.stats.indexStatsDescription"
-                  defaultMessage="Index stats contain high-level aggregation and statistics for an index. The {primariesField} field represents the values for only primary shards, while the {totalField} field contains the accumulated values for both primary and replica shards."
+                  defaultMessage="Index stats contain high-level aggregation and statistics for an index. The {primariesField} field represents the values for only primary shards, and the {totalField} field contains the accumulated values for both primary and replica shards."
                   values={{
                     primariesField: <EuiCode>primaries</EuiCode>,
                     totalField: <EuiCode>total</EuiCode>,
@@ -203,7 +199,7 @@ export const DetailsPageStats: FunctionComponent<
             >
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.stats.learnMoreLink"
-                defaultMessage="Learn more"
+                defaultMessage="Learn more about statistics"
               />
             </EuiLink>
           </EuiPanel>

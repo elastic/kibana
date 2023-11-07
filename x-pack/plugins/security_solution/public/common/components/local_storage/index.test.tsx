@@ -39,7 +39,7 @@ jest.mock('../../lib/kibana', () => {
 
 describe('useLocalStorage', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   test('it returns the expected value from local storage', async () => {

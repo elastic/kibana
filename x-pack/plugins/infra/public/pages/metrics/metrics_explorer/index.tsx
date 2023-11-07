@@ -23,6 +23,7 @@ import { MetricsPageTemplate } from '../page_template';
 import { metricsExplorerTitle } from '../../../translations';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { SavedViews } from './components/saved_views';
+
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
   derivedIndexPattern: DerivedIndexPattern;

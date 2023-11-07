@@ -49,14 +49,15 @@ export default function ({
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
 
       await browser.setWindowSize(1300, 900);
     });
 
-    describe('default URL params', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/163207
+    describe.skip('default URL params', () => {
       it('hides the chrome', async () => {
         const globalNavShown = await globalNav.exists();
         expect(globalNavShown).to.be(true);
@@ -90,7 +91,8 @@ export default function ({
       });
     });
 
-    describe('non-default URL params', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168648
+    describe.skip('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = [currentUrl].concat(urlParamExtensions).join('&');

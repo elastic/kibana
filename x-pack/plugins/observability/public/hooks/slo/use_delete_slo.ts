@@ -8,8 +8,11 @@
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useDeleteSlo() {
   const {
@@ -20,7 +23,7 @@ export function useDeleteSlo() {
 
   return useMutation<
     string,
-    string,
+    ServerError,
     { id: string; name: string },
     { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
@@ -42,10 +45,14 @@ export function useDeleteSlo() {
         });
         const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
+        // taking into account partitioned slo
+        const matchingSloCount =
+          previousData?.results?.filter((result) => result.id === slo.id)?.length ?? 0;
+
         const optimisticUpdate = {
           page: previousData?.page ?? 1,
           perPage: previousData?.perPage ?? 25,
-          total: previousData?.total ? previousData.total - 1 : 0,
+          total: previousData?.total ? previousData.total - matchingSloCount : 0,
           results: previousData?.results?.filter((result) => result.id !== slo.id) ?? [],
         };
 
@@ -56,17 +63,17 @@ export function useDeleteSlo() {
         return { previousData, queryKey };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, { name }, context) => {
+      onError: (error, { name }, context) => {
         if (context?.previousData && context?.queryKey) {
           queryClient.setQueryData(context.queryKey, context.previousData);
         }
 
-        toasts.addDanger(
-          i18n.translate('xpack.observability.slo.slo.delete.errorNotification', {
+        toasts.addError(new Error(error.body?.message ?? error.message), {
+          title: i18n.translate('xpack.observability.slo.slo.delete.errorNotification', {
             defaultMessage: 'Failed to delete {name}',
             values: { name },
-          })
-        );
+          }),
+        });
       },
       onSuccess: (_data, { name }) => {
         toasts.addSuccess(

@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import {
+  AttachmentType,
+  CaseSeverity,
+  CaseStatuses,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -27,6 +32,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const security = getPageObject('security');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+
+  const hasFocus = async (testSubject: string) => {
+    const targetElement = await testSubjects.find(testSubject);
+    const activeElement = await find.activeElement();
+    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
+  };
 
   describe('View case', () => {
     describe('page', () => {
@@ -117,6 +128,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await desc.getVisibleText()).equal('Description with space');
       });
 
+      it('comment area does not have focus on page load', async () => {
+        browser.refresh();
+        expect(await hasFocus('euiMarkdownEditorTextArea')).to.be(false);
+      });
+
       it('adds a comment to a case', async () => {
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -130,7 +146,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const newComment = await find.byCssSelector(
           '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
+
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
+      });
+
+      it('quotes a comment on a case', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await testSubjects.click('property-actions-user-action-ellipses');
+        await testSubjects.click('property-actions-user-action-quote');
+
+        expect(await commentArea.getVisibleText()).equal('> Test comment from automation ');
+        expect(await hasFocus('euiMarkdownEditorTextArea')).to.be(true);
       });
 
       it('adds a category to a case', async () => {
@@ -1146,6 +1175,100 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(casesAllUserText).to.be('cases all_user');
         expect(elasticUserText).to.be('elastic');
         expect(testUserText).to.be('test user');
+      });
+    });
+
+    describe('customFields', () => {
+      const customFields = [
+        {
+          key: 'valid_key_1',
+          label: 'Summary',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+        },
+        {
+          key: 'valid_key_2',
+          label: 'Sync',
+          type: CustomFieldTypes.TOGGLE,
+          required: true,
+        },
+      ];
+
+      before(async () => {
+        await cases.navigation.navigateToApp();
+        await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
+        await cases.api.createCase({
+          customFields: [
+            {
+              key: 'valid_key_1',
+              type: CustomFieldTypes.TEXT,
+              value: 'this is a text field value',
+            },
+            {
+              key: 'valid_key_2',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ],
+        });
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      afterEach(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      it('updates a custom field correctly', async () => {
+        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        expect(await textField.getVisibleText()).equal('this is a text field value');
+
+        const toggle = await testSubjects.find(
+          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        );
+        expect(await toggle.getAttribute('aria-checked')).equal('true');
+
+        await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
+
+        await retry.waitFor('custom field edit form to exist', async () => {
+          return await testSubjects.exists(
+            `case-text-custom-field-form-field-${customFields[0].key}`
+          );
+        });
+
+        const inputField = await testSubjects.find(
+          `case-text-custom-field-form-field-${customFields[0].key}`
+        );
+
+        await inputField.type(' edited!!');
+
+        await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
+
+        await header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('update toast exist', async () => {
+          return await testSubjects.exists('toastCloseButton');
+        });
+
+        await testSubjects.click('toastCloseButton');
+
+        await header.waitUntilLoadingHasFinished();
+
+        await toggle.click();
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
+
+        expect(await toggle.getAttribute('aria-checked')).equal('false');
+
+        // validate user action
+        const userActions = await find.allByCssSelector(
+          '[data-test-subj*="customFields-update-action"]'
+        );
+
+        expect(userActions).length(2);
       });
     });
   });

@@ -86,6 +86,8 @@ export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceI
   showInspector?: boolean;
 };
 
+export type EmbeddableComponent = React.ComponentType<EmbeddableComponentProps>;
+
 interface PluginsStartDependencies {
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;

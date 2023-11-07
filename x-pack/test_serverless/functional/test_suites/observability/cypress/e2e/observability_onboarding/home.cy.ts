@@ -13,7 +13,7 @@ describe.skip('[Serverless Observability onboarding] Landing page', () => {
 
   it('when user navigates to observability onboarding landing page is showed', () => {
     cy.visitKibana('/app/observabilityOnboarding');
-    cy.contains('Get started with Observability');
+    cy.contains('Collect and analyze logs');
   });
 
   describe('Entry point', () => {

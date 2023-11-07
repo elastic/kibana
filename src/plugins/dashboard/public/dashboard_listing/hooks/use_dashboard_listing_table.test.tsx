@@ -46,15 +46,13 @@ describe('useDashboardListingTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    getPluginServices.dashboardSessionStorage.dashboardHasUnsavedEdits = jest
-      .fn()
-      .mockReturnValue(true);
+    getPluginServices.dashboardBackup.dashboardHasUnsavedEdits = jest.fn().mockReturnValue(true);
 
-    getPluginServices.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = jest
+    getPluginServices.dashboardBackup.getDashboardIdsWithUnsavedChanges = jest
       .fn()
       .mockReturnValue([]);
 
-    getPluginServices.dashboardSessionStorage.clearState = clearStateMock;
+    getPluginServices.dashboardBackup.clearState = clearStateMock;
     getPluginServices.dashboardCapabilities.showWriteControls = true;
     getPluginServices.dashboardContentManagement.deleteDashboards = deleteDashboards;
     getPluginServices.settings.uiSettings.get = getUiSettingsMock;
@@ -149,6 +147,7 @@ describe('useDashboardListingTable', () => {
       initialPageSize: 5,
       listingLimit: 20,
       onFetchSuccess: expect.any(Function),
+      itemIsEditable: expect.any(Function),
       setPageDataTestSubject: expect.any(Function),
       title: 'Dashboard List',
       urlStateEnabled: false,

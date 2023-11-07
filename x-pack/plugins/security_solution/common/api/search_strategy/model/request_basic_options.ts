@@ -7,20 +7,16 @@
 
 import { z } from 'zod';
 import { filterQuery } from './filter_query';
+import { timerange } from './timerange';
 
 export const requestBasicOptionsSchema = z.object({
-  timerange: z.object({
-    interval: z.string(),
-    from: z.string(),
-    to: z.string(),
-  }),
+  timerange: timerange.optional(),
   filterQuery,
-  defaultIndex: z.array(z.string()),
-
-  // This comes from the IKibanaSearchRequest
-  factoryQueryType: z.union([z.string(), z.undefined()]),
-  id: z.union([z.string(), z.undefined()]),
-  params: z.union([z.object({}), z.undefined()]),
+  defaultIndex: z.array(z.string()).optional(),
+  id: z.string().optional(),
+  params: z.any().optional(),
 });
+
+export type RequestBasicOptionsInput = z.input<typeof requestBasicOptionsSchema>;
 
 export type RequestBasicOptions = z.infer<typeof requestBasicOptionsSchema>;

@@ -7,7 +7,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
+
+import { getFieldInputValue } from '@kbn/management-settings-utilities';
+import { useUpdate } from '@kbn/management-settings-utilities';
 
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
@@ -23,19 +26,24 @@ const REGEX = /,\s+/g;
  * Component for manipulating an `array` field.
  */
 export const ArrayInput = ({
-  id,
-  name,
-  onChange: onChangeProp,
-  ariaLabel,
-  isDisabled = false,
-  value: valueProp,
-  ariaDescribedBy,
+  field,
+  unsavedChange,
+  isSavingEnabled,
+  onInputChange,
 }: ArrayInputProps) => {
-  const [value, setValue] = useState(valueProp?.join(', '));
+  const [inputValue] = getFieldInputValue(field, unsavedChange) || [];
+  const [value, setValue] = useState(inputValue?.join(', '));
+
+  const onChange: EuiFieldTextProps['onChange'] = (event) => {
+    const newValue = event.target.value;
+    setValue(newValue);
+  };
+
+  const onUpdate = useUpdate({ onInputChange, field });
 
   useEffect(() => {
-    setValue(valueProp?.join(', '));
-  }, [valueProp]);
+    setValue(inputValue?.join(', '));
+  }, [inputValue]);
 
   // In the past, each keypress would invoke the `onChange` callback.  This
   // is likely wasteful, so we've switched it to `onBlur` instead.
@@ -44,19 +52,21 @@ export const ArrayInput = ({
       .replace(REGEX, ',')
       .split(',')
       .filter((v) => v !== '');
-    onChangeProp({ value: blurValue });
+    onUpdate({ type: field.type, unsavedValue: blurValue });
     setValue(blurValue.join(', '));
   };
+
+  const { id, name, ariaAttributes } = field;
+  const { ariaLabel, ariaDescribedBy } = ariaAttributes;
 
   return (
     <EuiFieldText
       fullWidth
       data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
-      disabled={isDisabled}
+      disabled={!isSavingEnabled}
       aria-label={ariaLabel}
       aria-describedby={ariaDescribedBy}
-      onChange={(event) => setValue(event.target.value)}
-      {...{ name, onBlur, value }}
+      {...{ name, onBlur, onChange, value }}
     />
   );
 };

@@ -14,6 +14,7 @@ import { getParser, ROOT_STATEMENT } from '../antlr_facade';
 
 import { isDynamicAutocompleteItem } from './dymanic_item';
 import { getDurationItemsWithQuantifier } from './helpers';
+import { mathCommandDefinition } from './autocomplete_definitions/functions_commands';
 
 describe('autocomplete_listener', () => {
   const getAutocompleteSuggestions = (text: string) => {
@@ -177,34 +178,7 @@ describe('autocomplete_listener', () => {
   });
 
   describe('eval', () => {
-    const functionSuggestions = [
-      'round',
-      'abs',
-      'pow',
-      'log10',
-      'concat',
-      'substring',
-      'trim',
-      'starts_with',
-      'split',
-      'to_string',
-      'to_boolean',
-      'to_datetime',
-      'to_double',
-      'to_integer',
-      'to_long',
-      'to_unsigned_long',
-      'to_ip',
-      'to_version',
-      'date_format',
-      'date_trunc',
-      'date_parse',
-      'auto_bucket',
-      'is_finite',
-      'is_infinite',
-      'case',
-      'length',
-    ];
+    const functionSuggestions = mathCommandDefinition.map(({ label }) => String(label));
 
     testSuggestions('from a | eval ', ['var0']);
     testSuggestions('from a | eval a ', ['=']);

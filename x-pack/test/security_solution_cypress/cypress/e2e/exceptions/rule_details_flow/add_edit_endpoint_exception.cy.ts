@@ -8,11 +8,12 @@
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
 import {
   openEditException,
   openExceptionFlyoutFromEmptyViewerPrompt,
   searchForExceptionItem,
+  visitRuleDetailsPage,
   waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
 } from '../../../tasks/rule_details';
 import {
@@ -25,8 +26,11 @@ import {
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 
-import { ruleDetailsUrl } from '../../../urls/navigation';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import {
+  deleteAlertsAndRules,
+  deleteEndpointExceptionList,
+  deleteExceptionLists,
+} from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -47,7 +51,6 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-// FLAKY: https://github.com/elastic/kibana/issues/165736
 describe(
   'Add endpoint exception from rule details',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
@@ -58,14 +61,10 @@ describe(
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.type';
 
     beforeEach(() => {
-      cy.task('esArchiverResetKibana');
-      cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
+      deleteExceptionLists();
+      deleteEndpointExceptionList();
       login();
       deleteAlertsAndRules();
-    });
-
-    afterEach(() => {
-      cy.task('esArchiverUnload', 'auditbeat');
     });
 
     describe('without exception items', () => {
@@ -86,9 +85,7 @@ describe(
               rule_id: '2',
               enabled: false,
             })
-          ).then((rule) =>
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions'))
-          );
+          ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'endpoint_exceptions' }));
         });
       });
 
@@ -170,7 +167,7 @@ describe(
               enabled: false,
             })
           ).then((rule) => {
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions'));
+            visitRuleDetailsPage(rule.body.id, { tab: 'endpoint_exceptions' });
             waitForRuleDetailsPageToBeLoaded('Rule with exceptions');
           });
         });

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const cpuUsage: FormulaValueConfig = {
-  label: 'CPU Usage',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.cpuUsage', {
+    defaultMessage: 'CPU Usage',
+  }),
   value: '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
   format: {
     id: 'percent',

@@ -1,0 +1,10 @@
+{
+  "author": "Elastic",
+  "name": "@kbn/elastic-assistant-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "evaluate-model": "node ./scripts/model_evaluator"
+  }
+}

@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanel,
   EuiCopy,
   EuiDataGridCellValueElementProps,
+  EuiNotificationBadge,
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
@@ -196,11 +197,18 @@ export function DataTableDocumentToolbarBtn({
             'euiDataGrid__controlBtn--active': isFilterActive,
           })}
         >
-          <FormattedMessage
-            id="unifiedDataTable.selectedDocumentsNumber"
-            defaultMessage="{nr} documents selected"
-            values={{ nr: selectedDocs.length }}
-          />
+          <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="unifiedDataTable.selectedRowsButtonLabel"
+                defaultMessage="Selected"
+                description="Selected documents"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge color="subdued">{selectedDocs.length}</EuiNotificationBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiButtonEmpty>
       }
     >

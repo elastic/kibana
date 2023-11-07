@@ -32,6 +32,7 @@ const PAGE_VARS_KEYS = [
   'buildNum', // May be useful for Serverless
   'cloudId',
   'deploymentId',
+  'projectId', // projectId and deploymentId are mutually exclusive. They shouldn't be sent in the same offering.
   'cluster_name',
   'cluster_uuid',
   'cluster_version',

@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['canvas', 'common', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['canvas', 'header', 'visualize']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // open canvas home
-      await PageObjects.common.navigateToApp('canvas');
+      await PageObjects.canvas.goToListingPage();
       // create new workpad
       await PageObjects.canvas.createNewWorkpad();
       await PageObjects.canvas.setWorkpadName('visualization tests');

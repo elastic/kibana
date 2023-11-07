@@ -12,9 +12,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
@@ -35,12 +36,15 @@ export interface LogCategorizationAppStateProps {
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
+  /** Optional flag to indicate whether kibana is running in serverless */
+  showFrozenDataTierChoice?: boolean;
 }
 
 export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
+  showFrozenDataTierChoice = true,
 }) => {
   if (!dataView) return null;
 
@@ -50,9 +54,10 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
     return <>{warning}</>;
   }
 
-  const datePickerDeps = {
+  const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    showFrozenDataTierChoice,
   };
 
   return (
@@ -61,7 +66,7 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
             <DatePickerContextProvider {...datePickerDeps}>
-              <LogCategorizationPage />
+              <LogCategorizationPage embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE} />
             </DatePickerContextProvider>
           </StorageContextProvider>
         </DataSourceContext.Provider>

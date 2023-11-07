@@ -53,6 +53,7 @@ export interface PartitionedFieldMetadata {
   custom: EnrichedFieldMetadata[];
   ecsCompliant: EnrichedFieldMetadata[];
   incompatible: EnrichedFieldMetadata[];
+  sameFamily: EnrichedFieldMetadata[];
 }
 
 export interface PartitionedFieldMetadataStats {
@@ -60,6 +61,7 @@ export interface PartitionedFieldMetadataStats {
   custom: number;
   ecsCompliant: number;
   incompatible: number;
+  sameFamily: number;
 }
 
 export interface UnallowedValueRequestItem {
@@ -103,6 +105,7 @@ export interface DataQualityCheckResult {
   incompatible: number | undefined;
   indexName: string;
   markdownComments: string[];
+  sameFamily: number | undefined;
   pattern: string;
 }
 

@@ -18,7 +18,10 @@ export const RRuleFrequencyMap = {
   '3': Frequency.DAILY,
 };
 
-export type MaintenanceWindow = Pick<MaintenanceWindowServerSide, 'title' | 'duration' | 'rRule'>;
+export type MaintenanceWindow = Pick<
+  MaintenanceWindowServerSide,
+  'title' | 'duration' | 'rRule' | 'categoryIds'
+>;
 
 export type MaintenanceWindowFindResponse = MaintenanceWindowServerSide &
   MaintenanceWindowModificationMetadata & {

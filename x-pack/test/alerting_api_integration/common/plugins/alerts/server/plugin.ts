@@ -88,6 +88,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.exceedsAlertLimit',
         'test.always-firing-alert-as-data',
         'test.patternFiringAad',
+        'test.waitingRule',
       ],
       privileges: {
         all: {
@@ -117,6 +118,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.exceedsAlertLimit',
                 'test.always-firing-alert-as-data',
                 'test.patternFiringAad',
+                'test.waitingRule',
               ],
             },
           },
@@ -149,6 +151,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.exceedsAlertLimit',
                 'test.always-firing-alert-as-data',
                 'test.patternFiringAad',
+                'test.waitingRule',
               ],
             },
           },

@@ -182,6 +182,20 @@
           },
           {
             "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
+            "id": "def-common.UserContentCommonSchema.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
             "id": "def-common.UserContentCommonSchema.references",
             "type": "Array",
             "tags": [],

@@ -22,6 +22,7 @@ import { sourcererActions, sourcererSelectors } from '../../../../common/store/s
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { appActions } from '../../../../common/store/app';
 import type { TimeRange } from '../../../../common/store/inputs/model';
+import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 
 interface Props {
   timelineId?: string;
@@ -30,6 +31,10 @@ interface Props {
   timeRange?: TimeRange;
 }
 
+/**
+ * Creates a new empty timeline at the given id.
+ * Can be used to create new timelines or to reset timeline state.
+ */
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
   const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
@@ -38,6 +43,8 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
+
+  const { resetDiscoverAppState } = useDiscoverInTimelineContext();
 
   const createTimeline = useCallback(
     ({ id, show, timeRange: timeRangeParam }) => {
@@ -61,15 +68,10 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
           indexNames: selectedPatterns,
           show,
           timelineType,
-        })
-      );
-
-      dispatch(
-        timelineActions.setTimelineUpdatedAt({
-          id: TimelineId.active,
           updated: undefined,
         })
       );
+
       dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
       dispatch(appActions.addNotes({ notes: [] }));
 
@@ -110,8 +112,9 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       if (typeof closeGearMenu === 'function') {
         closeGearMenu();
       }
+      resetDiscoverAppState();
     },
-    [createTimeline, timelineId, timelineType, closeGearMenu]
+    [createTimeline, timelineId, timelineType, closeGearMenu, resetDiscoverAppState]
   );
 
   return handleCreateNewTimeline;
@@ -134,13 +137,11 @@ export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMen
       title,
       iconType = 'plusInCircle',
       fill = true,
-      isDisabled = false,
     }: {
       outline?: boolean;
       title?: string;
       iconType?: string;
       fill?: boolean;
-      isDisabled?: boolean;
     }) => {
       const buttonProps = {
         iconType,

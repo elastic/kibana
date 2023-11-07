@@ -35,6 +35,9 @@ describe('createCloudUsageCollector', () => {
         isCloudEnabled: true,
         isElasticStaffOwned: undefined,
         trialEndDate: undefined,
+        deploymentId: undefined,
+        projectId: undefined,
+        projectType: undefined,
       });
     });
 
@@ -49,6 +52,30 @@ describe('createCloudUsageCollector', () => {
         isElasticStaffOwned: undefined,
         trialEndDate: '2020-10-01T14:30:16Z',
         inTrial: false,
+        deploymentId: undefined,
+        projectId: undefined,
+        projectType: undefined,
+      });
+    });
+
+    it('pass-through properties are copied as expected', async () => {
+      const collector = createCloudUsageCollector(usageCollection, {
+        isCloudEnabled: true,
+        trialEndDate: '2020-10-01T14:30:16Z',
+        isElasticStaffOwned: true,
+        deploymentId: 'a-deployment-id',
+        projectId: 'a-project-id',
+        projectType: 'security',
+      });
+
+      expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
+        isCloudEnabled: true,
+        trialEndDate: '2020-10-01T14:30:16Z',
+        inTrial: false,
+        isElasticStaffOwned: true,
+        deploymentId: 'a-deployment-id',
+        projectId: 'a-project-id',
+        projectType: 'security',
       });
     });
   });

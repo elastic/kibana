@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const cpuUsageNice: FormulaValueConfig = {
-  label: 'nice',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.cpuUsage.niceLabel', {
+    defaultMessage: 'nice',
+  }),
   value: 'average(system.cpu.nice.norm.pct) / max(system.cpu.cores)',
   format: {
     id: 'percent',

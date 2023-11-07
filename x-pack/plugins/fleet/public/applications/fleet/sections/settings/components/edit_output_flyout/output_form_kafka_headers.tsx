@@ -38,8 +38,15 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
 
   const handleKeyValuePairChange = useCallback(
     (index: number, field: 'key' | 'value', value: string) => {
-      const updatedPairs = [...keyValuePairs];
-      updatedPairs[index][field] = value;
+      const updatedPairs = keyValuePairs.map((pair, i) => {
+        if (i === index) {
+          return {
+            ...pair,
+            [field]: value,
+          };
+        }
+        return pair;
+      });
       onChange(updatedPairs);
     },
     [keyValuePairs, onChange]

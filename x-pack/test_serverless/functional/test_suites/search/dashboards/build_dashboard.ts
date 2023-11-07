@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'header',
     'lens',
+    'svlCommonPage',
   ]);
 
   const pieChart = getService('pieChart');
@@ -27,6 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Building a new dashboard', function () {
     before(async () => {
+      await PageObjects.svlCommonPage.login();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
@@ -42,6 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('can add a lens panel by value', async () => {

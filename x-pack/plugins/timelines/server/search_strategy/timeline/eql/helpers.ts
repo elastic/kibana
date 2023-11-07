@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy/timeline/eql';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import {
   EqlSearchResponse,
@@ -14,10 +15,7 @@ import {
   EventHit,
   TimelineEdges,
 } from '../../../../common/search_strategy';
-import {
-  TimelineEqlRequestOptions,
-  TimelineEqlResponse,
-} from '../../../../common/search_strategy/timeline/events/eql';
+import { TimelineEqlResponse } from '../../../../common/search_strategy/timeline/events/eql';
 import { inspectStringifyObject } from '../../../utils/build_query';
 import { TIMELINE_EVENTS_FIELDS } from '../factory/helpers/constants';
 import { formatTimelineData } from '../factory/helpers/format_timeline_data';
@@ -107,14 +105,19 @@ export const parseEqlResponse = async (
   options: TimelineEqlRequestOptions,
   response: EqlSearchStrategyResponse<EqlSearchResponse<unknown>>
 ): Promise<TimelineEqlResponse> => {
-  const { activePage, querySize } = options.pagination;
+  const {
+    pagination: { activePage, querySize } = {
+      activePage: 0,
+      querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
+    },
+  } = options;
   let edges: TimelineEdges[] = [];
 
-  if (response.rawResponse.body.hits.sequences !== undefined) {
-    edges = await parseSequences(response.rawResponse.body.hits.sequences, options.fieldRequested);
-  } else if (response.rawResponse.body.hits.events !== undefined) {
+  if (response.rawResponse.hits.sequences !== undefined) {
+    edges = await parseSequences(response.rawResponse.hits.sequences, options.fieldRequested);
+  } else if (response.rawResponse.hits.events !== undefined) {
     edges = await Promise.all(
-      response.rawResponse.body.hits.events.map(async (event) =>
+      response.rawResponse.hits.events.map(async (event) =>
         formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, event as EventHit)
       )
     );

@@ -7,11 +7,11 @@
 import { HttpFetchQuery } from '@kbn/core/public';
 import {
   createFlameGraph,
+  TopNFunctions,
   type BaseFlameGraph,
   type ElasticFlameGraph,
 } from '@kbn/profiling-utils';
 import { getRoutePaths } from '../common';
-import { TopNFunctions } from '../common/functions';
 import type {
   IndexLifecyclePhaseSelectOption,
   IndicesStorageDetailsAPIResponse,
@@ -19,13 +19,14 @@ import type {
   StorageHostDetailsAPIResponse,
 } from '../common/storage_explorer';
 import { TopNResponse } from '../common/topn';
-import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
+import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
 export interface ProfilingSetupStatus {
   has_setup: boolean;
   has_data: boolean;
   pre_8_9_1_data: boolean;
+  has_required_role: boolean;
   unauthorized?: boolean;
 }
 

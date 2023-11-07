@@ -14,6 +14,7 @@ export type {
   ILogsSharedLogEntriesDomain,
 } from './lib/domains/log_entries_domain';
 
+export { config } from './config';
 export { logViewSavedObjectName } from './saved_objects';
 
 export function plugin(context: PluginInitializerContext) {

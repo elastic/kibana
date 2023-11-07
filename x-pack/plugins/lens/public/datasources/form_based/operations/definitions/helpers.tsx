@@ -138,11 +138,17 @@ export function getSafeName(name: string, indexPattern: IndexPattern | undefined
       });
 }
 
+function areDecimalsValid(inputValue: string | number, digits: number) {
+  const [, decimals = ''] = `${inputValue}`.split('.');
+  return decimals.length <= digits;
+}
+
 export function isValidNumber(
   inputValue: string | number | null | undefined,
   integer?: boolean,
   upperBound?: number,
-  lowerBound?: number
+  lowerBound?: number,
+  digits: number = 2
 ) {
   const inputValueAsNumber = Number(inputValue);
   return (
@@ -152,7 +158,8 @@ export function isValidNumber(
     Number.isFinite(inputValueAsNumber) &&
     (!integer || Number.isInteger(inputValueAsNumber)) &&
     (upperBound === undefined || inputValueAsNumber <= upperBound) &&
-    (lowerBound === undefined || inputValueAsNumber >= lowerBound)
+    (lowerBound === undefined || inputValueAsNumber >= lowerBound) &&
+    areDecimalsValid(inputValue, integer ? 0 : digits)
   );
 }
 

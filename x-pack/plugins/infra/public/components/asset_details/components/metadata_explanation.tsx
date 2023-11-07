@@ -10,7 +10,7 @@ import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { Popover } from '../tabs/common/popover';
-import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
+import { useMetadataStateContext } from '../hooks/use_metadata_state';
 
 const HOSTNAME_DOCS_LINK =
   'https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-name';
@@ -21,7 +21,7 @@ const MetadataExplanationTooltipContent = React.memo(() => {
   };
 
   return (
-    <EuiText size="s" onClick={onClick} style={{ width: 200 }}>
+    <EuiText size="xs" onClick={onClick} style={{ width: 200 }}>
       <FormattedMessage
         id="xpack.infra.assetDetails.metadata.tooltip.documentationLabel"
         defaultMessage="{metadata} is populated from the last event detected for this {hostName} for the selected date period."
@@ -53,12 +53,12 @@ const MetadataExplanationTooltipContent = React.memo(() => {
 });
 
 export const MetadataExplanationMessage = () => {
-  const { metadata, loading } = useMetadataStateProviderContext();
+  const { metadata, loading } = useMetadataStateContext();
 
-  return loading ? (
+  return loading && !metadata ? (
     <EuiLoadingSpinner />
   ) : metadata?.info?.timestamp ? (
-    <EuiFlexGroup gutterSize="xs" alignItems="baseline">
+    <EuiFlexGroup gutterSize="xs" alignItems="baseline" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           <FormattedMessage
@@ -91,7 +91,6 @@ export const MetadataExplanationMessage = () => {
           iconSize="s"
           iconColor="subdued"
           icon="iInCircle"
-          panelPaddingSize="m"
           data-test-subj="infraAssetDetailsMetadataPopoverButton"
         >
           <MetadataExplanationTooltipContent />

@@ -7,16 +7,20 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientLlm } from './actions_client_llm';
-import { mockActionResultData } from '../../../__mocks__/action_result_data';
+import { mockActionResponse } from '../../../__mocks__/action_result_data';
+import { RequestBody } from '../types';
 
 const connectorId = 'mock-connector-id';
 
 const mockExecute = jest.fn().mockImplementation(() => ({
-  data: mockActionResultData,
+  data: mockActionResponse,
   status: 'ok',
 }));
+
+const mockLogger = loggerMock.create();
 
 const mockActions = {
   getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
@@ -24,19 +28,32 @@ const mockActions = {
   })),
 } as unknown as ActionsPluginStart;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockRequest: KibanaRequest<unknown, unknown, any, any> = {
+const mockRequest: KibanaRequest<unknown, unknown, RequestBody> = {
   params: { connectorId },
   body: {
     params: {
       subActionParams: {
-        body: '{"messages":[{"role":"user","content":"\\n\\n\\n\\nWhat is my name?"},{"role":"assistant","content":"I\'m sorry, but I don\'t have the information about your name. You can tell me your name if you\'d like, and we can continue our conversation from there."},{"role":"user","content":"\\n\\nMy name is Andrew"},{"role":"assistant","content":"Hello, Andrew! It\'s nice to meet you. What would you like to talk about today?"},{"role":"user","content":"\\n\\nDo you know my name?"}]}',
+        messages: [
+          { role: 'user', content: '\\n\\n\\n\\nWhat is my name?' },
+          {
+            role: 'assistant',
+            content:
+              "I'm sorry, but I don't have the information about your name. You can tell me your name if you'd like, and we can continue our conversation from there.",
+          },
+          { role: 'user', content: '\\n\\nMy name is Andrew' },
+          {
+            role: 'assistant',
+            content:
+              "Hello, Andrew! It's nice to meet you. What would you like to talk about today?",
+          },
+          { role: 'user', content: '\\n\\nDo you know my name?' },
+        ],
       },
-      subAction: 'test',
+      subAction: 'invokeAI',
     },
+    assistantLangChain: true,
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as KibanaRequest<unknown, unknown, any, any>;
+} as KibanaRequest<unknown, unknown, RequestBody>;
 
 const prompt = 'Do you know my name?';
 
@@ -50,12 +67,13 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: mockActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
       await actionsClientLlm._call(prompt); // ignore the result
 
-      expect(actionsClientLlm.getActionResultData()).toEqual(mockActionResultData);
+      expect(actionsClientLlm.getActionResultData()).toEqual(mockActionResponse.message);
     });
   });
 
@@ -64,10 +82,23 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: mockActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
       expect(actionsClientLlm._llmType()).toEqual('ActionsClientLlm');
+    });
+
+    it('returns the expected LLM type when overridden', () => {
+      const actionsClientLlm = new ActionsClientLlm({
+        actions: mockActions,
+        connectorId,
+        llmType: 'special-llm-type',
+        logger: mockLogger,
+        request: mockRequest,
+      });
+
+      expect(actionsClientLlm._llmType()).toEqual('special-llm-type');
     });
   });
 
@@ -76,6 +107,7 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: mockActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
@@ -100,6 +132,7 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: badActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
@@ -109,23 +142,7 @@ describe('ActionsClientLlm', () => {
     });
 
     it('rejects with the expected error the message has invalid content', async () => {
-      const invalidContent = {
-        id: 'chatcmpl-7sFVvksgFtMUac3pY5bTypFAKaGX1',
-        object: 'chat.completion',
-        created: 1693163703,
-        model: 'gpt-4',
-        choices: [
-          {
-            index: 0,
-            finish_reason: 'stop',
-            message: {
-              role: 'assistant',
-              content: 1234, // <-- invalid content
-            },
-          },
-        ],
-        usage: { completion_tokens: 16, prompt_tokens: 140, total_tokens: 156 },
-      };
+      const invalidContent = { message: 1234 };
 
       mockExecute.mockImplementation(() => ({
         data: invalidContent,
@@ -135,37 +152,12 @@ describe('ActionsClientLlm', () => {
       const actionsClientLlm = new ActionsClientLlm({
         actions: mockActions,
         connectorId,
+        logger: mockLogger,
         request: mockRequest,
       });
 
       expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
-        'ActionsClientLlm: choices[0] message content should be a string, but it had an unexpected type: number'
-      );
-    });
-
-    it('rejects with the expected error when choices is empty', async () => {
-      const invalidContent = {
-        id: 'chatcmpl-7sFVvksgFtMUac3pY5bTypFAKaGX1',
-        object: 'chat.completion',
-        created: 1693163703,
-        model: 'gpt-4',
-        choices: [], // <-- empty choices
-        usage: { completion_tokens: 16, prompt_tokens: 140, total_tokens: 156 },
-      };
-
-      mockExecute.mockImplementation(() => ({
-        data: invalidContent,
-        status: 'ok',
-      }));
-
-      const actionsClientLlm = new ActionsClientLlm({
-        actions: mockActions,
-        connectorId,
-        request: mockRequest,
-      });
-
-      expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
-        'ActionsClientLlm: choices is expected to be an non-empty array'
+        'ActionsClientLlm: content should be a string, but it had an unexpected type: number'
       );
     });
   });

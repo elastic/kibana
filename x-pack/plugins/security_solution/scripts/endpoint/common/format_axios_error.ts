@@ -22,7 +22,11 @@ export class FormattedAxiosError extends Error {
   };
 
   constructor(axiosError: AxiosError) {
-    super(axiosError.message);
+    super(
+      `${axiosError.message}${
+        axiosError?.response?.data ? `: ${JSON.stringify(axiosError?.response?.data)}` : ''
+      }`
+    );
 
     this.request = {
       method: axiosError.config?.method ?? '?',

@@ -20,6 +20,8 @@ Object {
   "projectsUrl": "https://cloud.elastic.co/projects/",
   "serverless": Object {
     "projectId": undefined,
+    "projectName": undefined,
+    "projectType": undefined,
   },
   "trialEndDate": undefined,
 }

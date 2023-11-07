@@ -8,11 +8,6 @@
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { HostEcs, GeoEcs } from '@kbn/securitysolution-ecs';
 import type { Inspect, Maybe, TotalValue, Hit, ShardsResponse } from '../../../common';
-import type { RequestBasicOptions } from '../..';
-
-export interface NetworkDetailsRequestOptions extends Omit<RequestBasicOptions, 'timerange'> {
-  ip: string;
-}
 
 export interface NetworkDetailsStrategyResponse extends IEsSearchResponse {
   networkDetails: {

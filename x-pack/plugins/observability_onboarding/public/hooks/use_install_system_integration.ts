@@ -48,12 +48,16 @@ export const useInstallSystemIntegration = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
+        const options = {
+          headers: { 'Elastic-Api-Version': '2023-10-31' },
+        };
+
         const { item: systemIntegration } = await http.get<{
           item: { version: string; status: IntegrationInstallStatus };
-        }>('/api/fleet/epm/packages/system');
+        }>('/api/fleet/epm/packages/system', options);
 
         if (systemIntegration.status !== 'installed') {
-          await http.post('/api/fleet/epm/packages/system');
+          await http.post('/api/fleet/epm/packages/system', options);
         }
 
         return {

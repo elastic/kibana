@@ -22,7 +22,8 @@ import {
   closeFieldsBrowser,
   filterFieldsBrowser,
 } from '../../../tasks/fields_browser';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openEvents } from '../../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
@@ -32,7 +33,7 @@ import {
 } from '../../../tasks/hosts/events';
 import { kqlSearch } from '../../../tasks/security_header';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { resetFields } from '../../../tasks/timeline';
 
 const defaultHeadersInDefaultEcsCategory = [
@@ -45,7 +46,7 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Events Viewer', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
   });
@@ -57,7 +58,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Fields rendering', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -82,7 +83,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Events viewer fields behaviour', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -110,7 +111,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Events behavior', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       waitsForEventsToBeLoaded();
     });

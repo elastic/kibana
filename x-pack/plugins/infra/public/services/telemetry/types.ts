@@ -19,6 +19,7 @@ export enum InfraTelemetryEventTypes {
   HOST_FLYOUT_FILTER_ADDED = 'Host Flyout Filter Added',
   HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED = 'Host View Total Host Count Retrieved',
   ASSET_DETAILS_FLYOUT_VIEWED = 'Asset Details Flyout Viewed',
+  ASSET_DETAILS_PAGE_VIEWED = 'Asset Details Page Viewed',
 }
 
 export interface HostsViewQuerySubmittedParams {
@@ -47,6 +48,9 @@ export interface AssetDetailsFlyoutViewedParams {
   componentName: string;
   tabId?: string;
 }
+export interface AssetDetailsPageViewedParams extends AssetDetailsFlyoutViewedParams {
+  integrations?: string[];
+}
 
 export type InfraTelemetryEventParams =
   | HostsViewQuerySubmittedParams
@@ -62,6 +66,7 @@ export interface ITelemetryClient {
   reportHostsViewTotalHostCountRetrieved(params: HostsViewQueryHostsCountRetrievedParams): void;
   reportHostsViewQuerySubmitted(params: HostsViewQuerySubmittedParams): void;
   reportAssetDetailsFlyoutViewed(params: AssetDetailsFlyoutViewedParams): void;
+  reportAssetDetailsPageViewed(params: AssetDetailsPageViewedParams): void;
 }
 
 export type InfraTelemetryEvent =
@@ -88,4 +93,8 @@ export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED;
       schema: RootSchema<AssetDetailsFlyoutViewedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED;
+      schema: RootSchema<AssetDetailsPageViewedParams>;
     };

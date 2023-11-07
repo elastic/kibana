@@ -22,7 +22,8 @@ import {
   waitForCallOutToBeShown,
   MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
-import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
 // TODO: https://github.com/elastic/kibana/issues/161540
@@ -33,8 +34,8 @@ describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServer
   });
 
   beforeEach(() => {
-    login(ROLES.reader);
-    visitSecurityDetectionRulesPage(ROLES.reader);
+    login(ROLES.t1_analyst);
+    visitRulesManagementTable(ROLES.t1_analyst);
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 

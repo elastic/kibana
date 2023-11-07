@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useImperativeHandle, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFilePicker, EuiImage } from '@elastic/eui';
+import { EuiFilePicker, EuiFilePickerProps, EuiImage } from '@elastic/eui';
+
+import { ResetInputRef } from '@kbn/management-settings-types';
+import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import type { InputProps } from '../types';
 import { useServices } from '../services';
@@ -17,12 +20,7 @@ import { TEST_SUBJ_PREFIX_FIELD } from '.';
 /**
  * Props for a {@link ImageInput} component.
  */
-export interface ImageInputProps extends InputProps<'image'> {
-  /** Indicate if the image has changed from the saved setting in the UI. */
-  hasChanged: boolean;
-  /** Indicate if the image value is the default value in Kibana. */
-  isDefaultValue: boolean;
-}
+export type ImageInputProps = InputProps<'image'>;
 
 const getImageAsBase64 = async (file: Blob): Promise<string | ArrayBuffer> => {
   const reader = new FileReader();
@@ -45,26 +43,21 @@ const errorMessage = i18n.translate('management.settings.field.imageChangeErrorM
 /**
  * Component for manipulating an `image` field.
  */
-export const ImageInput = React.forwardRef<EuiFilePicker, ImageInputProps>(
-  (
-    {
-      ariaDescribedBy,
-      ariaLabel,
-      id,
-      isDisabled,
-      isDefaultValue,
-      onChange: onChangeProp,
-      name,
-      value,
-      hasChanged,
-    },
-    ref
-  ) => {
+export const ImageInput = React.forwardRef<ResetInputRef, ImageInputProps>(
+  ({ field, unsavedChange, isSavingEnabled, onInputChange }, ref) => {
+    const inputRef = useRef<EuiFilePicker>(null);
+
+    useImperativeHandle(ref, () => ({
+      reset: () => inputRef.current?.removeFiles(),
+    }));
+
     const { showDanger } = useServices();
 
-    const onChange = async (files: FileList | null) => {
+    const onUpdate = useUpdate({ onInputChange, field });
+
+    const onChange: EuiFilePickerProps['onChange'] = async (files: FileList | null) => {
       if (files === null || !files.length) {
-        onChangeProp({ value: '' });
+        onUpdate();
         return null;
       }
 
@@ -77,12 +70,16 @@ export const ImageInput = React.forwardRef<EuiFilePicker, ImageInputProps>(
           base64Image = String(await getImageAsBase64(file));
         }
 
-        onChangeProp({ value: base64Image });
+        onUpdate({ type: field.type, unsavedValue: base64Image });
       } catch (err) {
         showDanger(errorMessage);
-        onChangeProp({ value: '', error: errorMessage });
+        onUpdate({ type: field.type, unsavedValue: '', error: errorMessage, isInvalid: true });
       }
     };
+
+    const { id, name, ariaAttributes } = field;
+    const { ariaLabel, ariaDescribedBy } = ariaAttributes;
+    const [value] = getFieldInputValue(field, unsavedChange);
 
     const a11yProps = {
       'aria-label': ariaLabel,
@@ -91,16 +88,20 @@ export const ImageInput = React.forwardRef<EuiFilePicker, ImageInputProps>(
 
     // TODO: this check will be a bug, if a default image is ever actually
     // defined in Kibana.
-    if (value && !isDefaultValue && !hasChanged) {
+    //
+    // see: https://github.com/elastic/kibana/issues/166578
+    //
+    if (value) {
       return <EuiImage allowFullScreen url={value} alt={name} {...a11yProps} />;
     } else {
       return (
         <EuiFilePicker
           accept=".jpg,.jpeg,.png"
           data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
-          disabled={isDisabled}
+          disabled={!isSavingEnabled}
+          ref={inputRef}
           fullWidth
-          {...{ onChange, ref, ...a11yProps }}
+          {...{ onChange, ...a11yProps }}
         />
       );
     }

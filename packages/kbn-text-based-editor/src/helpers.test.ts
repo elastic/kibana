@@ -5,8 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { parseErrors, parseWarning, getInlineEditorText, getWrappedInPipesCode } from './helpers';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import {
+  parseErrors,
+  parseWarning,
+  getInlineEditorText,
+  getWrappedInPipesCode,
+  getIndicesForAutocomplete,
+} from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -108,6 +114,73 @@ describe('helpers', function () {
         },
       ]);
     });
+
+    it('should return the correct array of warnings if multiple warnins are detected without line indicators', function () {
+      const warning =
+        '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Field [geo.coordinates] cannot be retrieved, it is unsupported or not indexed; returning null.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Field [ip_range] cannot be retrieved, it is unsupported or not indexed; returning null.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Field [timestamp_range] cannot be retrieved, it is unsupported or not indexed; returning null."';
+      expect(parseWarning(warning)).toEqual([
+        {
+          endColumn: 10,
+          endLineNumber: 1,
+          message:
+            'Field [geo.coordinates] cannot be retrieved, it is unsupported or not indexed; returning null.',
+          severity: 8,
+          startColumn: 1,
+          startLineNumber: 1,
+        },
+        {
+          endColumn: 10,
+          endLineNumber: 1,
+          message:
+            'Field [ip_range] cannot be retrieved, it is unsupported or not indexed; returning null.',
+          severity: 8,
+          startColumn: 1,
+          startLineNumber: 1,
+        },
+        {
+          endColumn: 10,
+          endLineNumber: 1,
+          message:
+            'Field [timestamp_range] cannot be retrieved, it is unsupported or not indexed; returning null.',
+          severity: 8,
+          startColumn: 1,
+          startLineNumber: 1,
+        },
+      ]);
+    });
+    it('should return the correct array of warnings if multiple warnins of different types', function () {
+      const warning =
+        '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Field [geo.coordinates] cannot be retrieved, it is unsupported or not indexed; returning null.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Field [ip_range] cannot be retrieved, it is unsupported or not indexed; returning null.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded."';
+      expect(parseWarning(warning)).toEqual([
+        {
+          endColumn: 10,
+          endLineNumber: 1,
+          message:
+            'Field [geo.coordinates] cannot be retrieved, it is unsupported or not indexed; returning null.',
+          severity: 8,
+          startColumn: 1,
+          startLineNumber: 1,
+        },
+        {
+          endColumn: 10,
+          endLineNumber: 1,
+          message:
+            'Field [ip_range] cannot be retrieved, it is unsupported or not indexed; returning null.',
+          severity: 8,
+          startColumn: 1,
+          startLineNumber: 1,
+        },
+        {
+          endColumn: 138,
+          endLineNumber: 1,
+          message:
+            'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
+          severity: 8,
+          startColumn: 52,
+          startLineNumber: 1,
+        },
+      ]);
+    });
   });
 
   describe('getInlineEditorText', function () {
@@ -157,6 +230,27 @@ describe('helpers', function () {
         true
       );
       expect(code).toEqual('FROM index1 | keep field1, field2 | order field1');
+    });
+  });
+
+  describe('getIndicesForAutocomplete', function () {
+    it('should not return system indices', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: '.system1',
+            title: 'system1',
+          },
+          {
+            name: 'logs',
+            title: 'logs',
+          },
+        ]),
+      };
+      const indices = await getIndicesForAutocomplete(updatedDataViewsMock);
+      expect(indices).toStrictEqual(['logs']);
     });
   });
 });

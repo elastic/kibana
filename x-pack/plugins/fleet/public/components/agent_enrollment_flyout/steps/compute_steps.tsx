@@ -14,7 +14,11 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import {
+  fullAgentPolicyToYaml,
+  agentPolicyRouteService,
+  getGcpIntegrationDetailsFromAgentPolicy,
+} from '../../../services';
 
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
@@ -38,6 +42,7 @@ import {
   InstallManagedAgentStep,
   InstallCloudFormationManagedAgentStep,
   InstallGoogleCloudShellManagedAgentStep,
+  InstallAzureArmTemplateManagedAgentStep,
   IncomingDataConfirmationStep,
 } from '.';
 
@@ -220,11 +225,19 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
   const agentVersion = useAgentVersion();
 
+  const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
+    getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
+
+  const fleetServerHost = fleetServerHosts?.[0];
+
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
     fleetServerHosts,
     fleetProxy,
     agentVersion: agentVersion || '',
+    gcpProjectId,
+    gcpOrganizationId,
+    gcpAccountType,
   });
 
   const instructionsSteps = useMemo(() => {
@@ -260,6 +273,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           enrollToken,
           cloudSecurityIntegration,
+          fleetServerHost,
         })
       );
     } else if (cloudSecurityIntegration?.cloudShellUrl) {
@@ -269,6 +283,17 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           cloudShellUrl: cloudSecurityIntegration.cloudShellUrl,
           cloudShellCommand: installManagedCommands.googleCloudShell,
+          projectId: gcpProjectId,
+        })
+      );
+    } else if (cloudSecurityIntegration?.isAzureArmTemplate) {
+      steps.push(
+        InstallAzureArmTemplateManagedAgentStep({
+          selectedApiKeyId,
+          apiKeyData,
+          enrollToken,
+          cloudSecurityIntegration,
+          agentPolicy,
         })
       );
     } else {
@@ -279,7 +304,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           isK8s,
           cloudSecurityIntegration,
-          fleetServerHost: fleetServerHosts?.[0],
+          fleetServerHost,
           enrollToken,
         })
       );
@@ -324,12 +349,13 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     enrollToken,
     installManagedCommands,
     isK8s,
-    fleetServerHosts,
+    fleetServerHost,
     onClickViewAgents,
     link,
     enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
+    gcpProjectId,
   ]);
 
   if (!agentVersion) {

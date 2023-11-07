@@ -90,7 +90,7 @@ const getWrapperWithTooltip = (
         position="top"
         content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
           defaultMessage:
-            'Date range selection for {language} queries requires the presence of an @timestamp field in the dataset.',
+            'Date range selection for {language} queries requires an @timestamp field in the dataset.',
           values: { language: displayName },
         })}
       >
@@ -145,6 +145,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
+  hideTextBasedRunQueryLabel?: boolean;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
@@ -664,6 +665,7 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
+            hideRunQueryText={props.hideTextBasedRunQueryLabel}
             data-test-subj="unifiedTextLangEditor"
           />
         )

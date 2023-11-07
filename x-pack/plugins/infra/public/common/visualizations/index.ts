@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-export type {
-  HostsLensFormulas,
-  HostsLensMetricChartFormulas,
-  HostsLensLineChartFormulas,
-} from './types';
-
 export * from './lens/dashboards';
-export { hostLensFormulas } from './constants';
+export * from './lens/formulas';

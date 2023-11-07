@@ -37,10 +37,11 @@ const useIntegrations = ({ datasetsClient }: IntegrationsContextDeps) => {
 
   const error = useSelector(integrationsStateService, (state) => state.context.error);
 
-  const isLoading = useSelector(
+  const isLoading = useSelector(integrationsStateService, (state) => state.matches('loading'));
+
+  const isSearching = useSelector(
     integrationsStateService,
     (state) =>
-      state.matches('loading') ||
       state.matches({ loaded: 'loadingMore' }) ||
       state.matches({ loaded: 'debounceSearchingIntegrations' }) ||
       state.matches({ loaded: 'debounceSearchingIntegrationsStreams' })
@@ -95,16 +96,13 @@ const useIntegrations = ({ datasetsClient }: IntegrationsContextDeps) => {
   return {
     // Underlying state machine
     integrationsStateService,
-
     // Failure states
     error,
-
     // Loading states
     isLoading,
-
+    isSearching,
     // Data
     integrations,
-
     // Actions
     loadMore,
     reloadIntegrations,

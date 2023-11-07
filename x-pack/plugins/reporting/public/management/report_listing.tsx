@@ -109,7 +109,7 @@ class ReportListingUi extends Component<Props, State> {
           }
         />
 
-        <MigrateIlmPolicyCallOut toasts={toasts} />
+        {config.statefulSettings.enabled ? <MigrateIlmPolicyCallOut toasts={toasts} /> : null}
 
         <EuiSpacer size={'l'} />
         <div>{this.renderTable()}</div>
@@ -326,7 +326,7 @@ class ReportListingUi extends Component<Props, State> {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
               <EuiLink
-                data-test-subj={`viewReportingLink${job.id}`}
+                data-test-subj={`viewReportingLink-${job.id}`}
                 onClick={() => this.setState({ selectedJob: job })}
               >
                 {objectTitle ||

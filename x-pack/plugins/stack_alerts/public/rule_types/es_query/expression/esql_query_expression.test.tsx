@@ -25,6 +25,7 @@ jest.mock('@kbn/text-based-editor', () => ({
   fetchFieldsFromESQL: jest.fn(),
 }));
 const { fetchFieldsFromESQL } = jest.requireMock('@kbn/text-based-editor');
+const { getFields } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
 const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
   <I18nProvider>{children}</I18nProvider>
@@ -133,6 +134,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         },
       ],
     });
+    getFields.mockResolvedValue([]);
     const result = render(
       <EsqlQueryExpression
         unifiedSearch={unifiedSearchMock}

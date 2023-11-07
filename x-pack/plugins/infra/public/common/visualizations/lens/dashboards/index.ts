@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { assetDetailsDashboards, type KPIChartProps } from './asset_details';
+export { assetDetailsDashboards } from './asset_details';
 export { hostsViewDashboards } from './hosts_view';
 export { AVERAGE_SUBTITLE, METRICS_TOOLTIP } from './translations';
 export { XY_MISSING_VALUE_DOTTED_LINE_CONFIG, KPI_CHART_HEIGHT } from './constants';
+export * from './types';

@@ -10,7 +10,6 @@ import {
   SearchRequest,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { merge } from 'lodash';
 import {
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -33,6 +32,7 @@ import {
 } from '../types';
 import { SummarizedAlertsChunk } from '../..';
 import { FormatAlert } from '../../types';
+import { expandFlattenedAlert } from './format_alert';
 
 const MAX_ALERT_DOCS_TO_RETURN = 100;
 enum AlertTypes {
@@ -270,20 +270,6 @@ const getQueryByTimeRange = ({
   };
 };
 
-const expandFlattenedAlert = (alert: object) => {
-  return Object.entries(alert).reduce(
-    (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
-    {}
-  );
-};
-const expandDottedField = (dottedFieldName: string, val: unknown): object => {
-  const parts = dottedFieldName.split('.');
-  if (parts.length === 1) {
-    return { [parts[0]]: val };
-  } else {
-    return { [parts[0]]: expandDottedField(parts.slice(1).join('.'), val) };
-  }
-};
 const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryContainer[] => {
   const filter: QueryDslQueryContainer[] = [];
 
@@ -426,9 +412,4 @@ const getContinualAlertsQuery = ({
   return queryBody;
 };
 
-export {
-  getHitsWithCount,
-  expandFlattenedAlert,
-  getLifecycleAlertsQueries,
-  getContinualAlertsQuery,
-};
+export { getHitsWithCount, getLifecycleAlertsQueries, getContinualAlertsQuery };

@@ -6,10 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { statusColors } from '../../../common/constants';
+import { useCspIntegrationLink } from '../../../common/navigation/use_csp_integration_link';
 import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
@@ -56,6 +56,8 @@ export const SummarySection = ({
 }) => {
   const navToFindings = useNavigateFindings();
   const navToFindingsByResource = useNavigateFindingsByResource();
+  const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
+  const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
   const handleEvalCounterClick = (evaluation: Evaluation) => {
     navToFindings({ 'result.evaluation': evaluation, ...getPolicyTemplateQuery(dashboardType) });
@@ -87,12 +89,26 @@ export const SummarySection = ({
                 'xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedDescription',
                 { defaultMessage: 'Accounts Evaluated' }
               ),
-        title:
-          dashboardType === KSPM_POLICY_TEMPLATE ? (
-            <CompactFormattedNumber number={complianceData.clusters.length} />
-          ) : (
-            <AccountsEvaluatedWidget clusters={complianceData.clusters} />
-          ),
+        title: <AccountsEvaluatedWidget clusters={complianceData.clusters} />,
+        button: (
+          <EuiButtonEmpty
+            iconType="listAdd"
+            target="_blank"
+            href={
+              dashboardType === KSPM_POLICY_TEMPLATE ? kspmIntegrationLink : cspmIntegrationLink
+            }
+          >
+            {dashboardType === KSPM_POLICY_TEMPLATE
+              ? i18n.translate(
+                  'xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedButtonTitle',
+                  { defaultMessage: 'Enroll more clusters' }
+                )
+              : i18n.translate(
+                  'xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedButtonTitle',
+                  { defaultMessage: 'Enroll more accounts' }
+                )}
+          </EuiButtonEmpty>
+        ),
       },
       {
         id: DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED,
@@ -101,32 +117,27 @@ export const SummarySection = ({
           { defaultMessage: 'Resources Evaluated' }
         ),
         title: <CompactFormattedNumber number={complianceData.stats.resourcesEvaluated || 0} />,
-        onClick: () => {
-          navToFindingsByResource(getPolicyTemplateQuery(dashboardType));
-        },
-      },
-      {
-        id: DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS,
-        description: i18n.translate(
-          'xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription',
-          { defaultMessage: 'Failing Findings' }
+        button: (
+          <EuiButtonEmpty
+            iconType="search"
+            onClick={() => {
+              navToFindingsByResource(getPolicyTemplateQuery(dashboardType));
+            }}
+          >
+            {i18n.translate(
+              'xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedButtonTitle',
+              { defaultMessage: 'View all resources' }
+            )}
+          </EuiButtonEmpty>
         ),
-        title: <CompactFormattedNumber number={complianceData.stats.totalFailed} />,
-        titleColor: complianceData.stats.totalFailed > 0 ? statusColors.failed : 'text',
-        onClick: () => {
-          navToFindings({
-            'result.evaluation': RULE_FAILED,
-            ...getPolicyTemplateQuery(dashboardType),
-          });
-        },
       },
     ],
     [
       complianceData.clusters,
       complianceData.stats.resourcesEvaluated,
-      complianceData.stats.totalFailed,
+      cspmIntegrationLink,
       dashboardType,
-      navToFindings,
+      kspmIntegrationLink,
       navToFindingsByResource,
     ]
   );

@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
-import { GenAiLogo } from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 
@@ -41,7 +41,7 @@ export const ConnectorButton: React.FC<ConnectorButtonProps> = React.memo<Connec
           <EuiCard
             data-test-subj="connectorButton"
             layout="horizontal"
-            icon={<EuiIcon size="xl" type={GenAiLogo} />}
+            icon={<EuiIcon size="xl" type={OpenAILogo} />}
             title={title}
             description={description}
             onClick={assistantAvailability.hasConnectorsAllPrivilege ? onClick : undefined}

@@ -68,6 +68,7 @@ describe('#setupSavedObjects', () => {
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
+        namespaces: ['some-ns'],
       };
       mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
@@ -101,6 +102,7 @@ describe('#setupSavedObjects', () => {
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
+        namespaces: ['some-ns2', 'some-ns'],
       };
       mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(false);
@@ -154,6 +156,7 @@ describe('#setupSavedObjects', () => {
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
+        namespaces: ['some-ns'],
       };
       mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
         close: jest.fn(),
@@ -319,6 +322,52 @@ describe('#setupSavedObjects', () => {
 
       await finder.close();
       expect(mockClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('includes `namespace` for * find option', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+        namespaces: ['some-ns'],
+      };
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockSavedObject] };
+        },
+      });
+
+      mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
+
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
+        type: 'known-type',
+        namespaces: ['*'],
+      });
+
+      for await (const res of finder.find()) {
+        expect(res).toEqual({
+          saved_objects: [
+            {
+              ...mockSavedObject,
+              attributes: { attrOne: 'one', attrSecret: 'secret' },
+            },
+          ],
+        });
+      }
+
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledWith(
+        { type: mockSavedObject.type, id: mockSavedObject.id, namespace: 'some-ns' },
+        mockSavedObject.attributes
+      );
+
+      expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledWith(
+        { type: 'known-type', namespaces: ['*'] },
+        undefined
+      );
     });
   });
 });

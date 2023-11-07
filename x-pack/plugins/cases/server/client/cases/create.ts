@@ -16,18 +16,24 @@ import { decodeWithExcessOrThrow } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
-import type { CasesClientArgs } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
+import {} from '../utils';
+import { validateCustomFields } from './validators';
+import { fillMissingCustomFields } from './utils';
 
 /**
  * Creates a new case.
  *
- * @ignore
  */
-export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs): Promise<Case> => {
+export const create = async (
+  data: CasePostRequest,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<Case> => {
   const {
     services: { caseService, userActionService, licensingService, notificationService },
     user,
@@ -37,6 +43,15 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
 
   try {
     const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const configurations = await casesClient.configure.get({ owner: data.owner });
+    const customFieldsConfiguration = configurations[0]?.customFields;
+
+    const customFieldsValidationParams = {
+      requestCustomFields: data.customFields,
+      customFieldsConfiguration,
+    };
+
+    validateCustomFields(customFieldsValidationParams);
 
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -62,21 +77,27 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     }
 
     /**
-     * Trim title, category, description and tags before saving to ES
+     * Trim title, category, description and tags
+     * and fill out missing custom fields
+     * before saving to ES
      */
 
-    const trimmedQuery = {
+    const normalizedQuery = {
       ...query,
       title: query.title.trim(),
       description: query.description.trim(),
       category: query.category?.trim() ?? null,
       tags: query.tags?.map((tag) => tag.trim()) ?? [],
+      customFields: fillMissingCustomFields({
+        customFields: query.customFields,
+        customFieldsConfiguration,
+      }),
     };
 
     const newCase = await caseService.postNewCase({
       attributes: transformNewCase({
         user,
-        newCase: trimmedQuery,
+        newCase: normalizedQuery,
       }),
       id: savedObjectID,
       refresh: false,
@@ -91,6 +112,7 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
         severity: query.severity ?? CaseSeverity.LOW,
         assignees: query.assignees ?? [],
         category: query.category ?? null,
+        customFields: query.customFields ?? [],
       },
       owner: newCase.attributes.owner,
     });

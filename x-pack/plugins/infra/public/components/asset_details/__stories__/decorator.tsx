@@ -159,13 +159,10 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
 export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
   return (
     <ContextProviders
-      props={{
-        ...assetDetailsProps,
-        dateRange: {
-          from: '2023-04-09T11:07:49Z',
-          to: '2023-04-09T11:23:49Z',
-          mode: 'absolute',
-        },
+      {...assetDetailsProps}
+      dateRange={{
+        from: '2023-04-09T11:07:49Z',
+        to: '2023-04-09T11:23:49Z',
       }}
     >
       <DataViewsProvider metricAlias="metrics-*">{story()}</DataViewsProvider>

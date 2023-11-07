@@ -33,6 +33,7 @@ interface CreateTestConfigOptions {
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.bedrock',
   '.cases-webhook',
   '.email',
   '.index',

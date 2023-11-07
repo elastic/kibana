@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const cpuUsageSoftirq: FormulaValueConfig = {
-  label: 'softirq',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.cpuUsage.softirqLabel', {
+    defaultMessage: 'softirq',
+  }),
   value: 'average(system.cpu.softirq.pct) / max(system.cpu.cores)',
   format: {
     id: 'percent',

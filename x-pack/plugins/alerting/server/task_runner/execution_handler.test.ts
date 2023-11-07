@@ -28,7 +28,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../../common';
+import { AlertInstanceState, AlertInstanceContext, RuleNotifyWhen } from '../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
 import { mockAAD } from './fixtures';
@@ -72,6 +72,7 @@ const ruleType: NormalizedRuleType<
     name: 'Recovered',
   },
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   validate: {
     params: schema.any(),
@@ -81,6 +82,7 @@ const ruleType: NormalizedRuleType<
     mappings: { fieldMap: { field: { type: 'fieldType', required: false } } },
   },
   autoRecoverAlerts: false,
+  validLegacyConsumers: [],
 };
 const rule = {
   id: '1',
@@ -155,6 +157,7 @@ const generateAlert = ({
   throttledActions = {},
   lastScheduledActionsGroup = 'default',
   maintenanceWindowIds,
+  pendingRecoveredCount,
 }: {
   id: number;
   group?: ActiveActionGroup | 'recovered';
@@ -164,6 +167,7 @@ const generateAlert = ({
   throttledActions?: ThrottledActions;
   lastScheduledActionsGroup?: string;
   maintenanceWindowIds?: string[];
+  pendingRecoveredCount?: number;
 }) => {
   const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>(
     String(id),
@@ -176,6 +180,7 @@ const generateAlert = ({
           group: lastScheduledActionsGroup,
           actions: throttledActions,
         },
+        pendingRecoveredCount,
       },
     }
   );
@@ -1776,6 +1781,157 @@ describe('Execution Handler', () => {
       3,
       'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-3.'
     );
+  });
+
+  test('does not schedule actions with notifyWhen not set to "on status change" for alerts that are flapping', async () => {
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              ...defaultExecutionParams.rule.actions[0],
+              frequency: {
+                summary: false,
+                notifyWhen: RuleNotifyWhen.ACTIVE,
+                throttle: null,
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 2, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 3, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+  });
+
+  test('does schedule actions with notifyWhen is set to "on status change" for alerts that are flapping', async () => {
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions: [
+            {
+              ...defaultExecutionParams.rule.actions[0],
+              frequency: {
+                summary: false,
+                notifyWhen: RuleNotifyWhen.CHANGE,
+                throttle: null,
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 2, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+      ...generateAlert({ id: 3, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 3 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   describe('rule url', () => {

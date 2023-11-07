@@ -6,8 +6,6 @@
  */
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import type { NetworkUsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
-
 import * as buildQuery from './query.users_network.dsl';
 import { networkUsers } from '.';
 import {
@@ -15,6 +13,7 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
+import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
 
 describe('networkUsers search strategy', () => {
   const buildUsersQuery = jest.spyOn(buildQuery, 'buildUsersQuery');

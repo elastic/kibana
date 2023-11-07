@@ -60,9 +60,9 @@ export function MachineLearningTestResourcesProvider(
       objectType: SavedObjectType,
       space?: string
     ): Promise<boolean> {
-      const response = await supertest.get(
-        `${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`
-      );
+      const response = await supertest
+        .get(`${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`)
+        .set(getCommonRequestHeader('1'));
       return response.status === 200;
     },
 
@@ -640,6 +640,12 @@ export function MachineLearningTestResourcesProvider(
 
     async clearAdvancedSettingProperty(propertyName: string) {
       await kibanaServer.uiSettings.unset(propertyName);
+    },
+
+    async assertModuleExists(moduleId: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await mlApi.getModule(moduleId);
+      });
     },
   };
 }

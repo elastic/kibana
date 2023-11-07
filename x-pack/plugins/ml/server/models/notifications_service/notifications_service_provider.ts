@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlFeatures } from '../../../common/constants/app';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { NotificationItem, NotificationSource } from '../../../common/types/notifications';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
@@ -19,7 +20,6 @@ import type {
   NotificationsCountResponse,
   NotificationsSearchResponse,
 } from '../../../common/types/notifications';
-import type { MlFeatures } from '../../types';
 
 const MAX_NOTIFICATIONS_SIZE = 10000;
 

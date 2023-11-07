@@ -7,7 +7,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSelect } from '@elastic/eui';
+import { EuiSelect, EuiSelectProps } from '@elastic/eui';
+
+import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
+
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
@@ -25,14 +28,12 @@ export interface SelectInputProps extends InputProps<'select'> {
  * Component for manipulating a `select` field.
  */
 export const SelectInput = ({
-  ariaDescribedBy,
-  ariaLabel,
-  id,
-  isDisabled = false,
-  onChange: onChangeProp,
+  field,
+  unsavedChange,
+  onInputChange,
   optionLabels = {},
   optionValues: optionsProp,
-  value: valueProp,
+  isSavingEnabled,
 }: SelectInputProps) => {
   if (optionsProp.length === 0) {
     throw new Error('non-empty `optionValues` are required for `SelectInput`.');
@@ -47,23 +48,23 @@ export const SelectInput = ({
     [optionsProp, optionLabels]
   );
 
-  const onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    onChangeProp({ value: event.target.value });
+  const onChange: EuiSelectProps['onChange'] = (event) => {
+    const inputValue = event.target.value;
+    onUpdate({ type: field.type, unsavedValue: inputValue });
   };
 
-  // nit: we have to do this because, while the `UiSettingsService` might return
-  // `null`, the {@link EuiSelect} component doesn't accept `null` as a value.
-  //
-  // @see packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts
-  //
-  const value = valueProp === null ? undefined : valueProp;
+  const onUpdate = useUpdate({ onInputChange, field });
+
+  const { id, ariaAttributes } = field;
+  const { ariaLabel, ariaDescribedBy } = ariaAttributes;
+  const [value] = getFieldInputValue(field, unsavedChange);
 
   return (
     <EuiSelect
       aria-describedby={ariaDescribedBy}
       aria-label={ariaLabel}
       data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
-      disabled={isDisabled}
+      disabled={!isSavingEnabled}
       fullWidth
       {...{ onChange, options, value }}
     />

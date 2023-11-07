@@ -9,9 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
+import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq, uniqBy } from 'lodash';
@@ -19,10 +20,9 @@ import type { Query } from '@kbn/data-plugin/common';
 import { SearchRequest } from '@kbn/data-plugin/common';
 
 import {
-  SearchResponseWarning,
-  ShardFailureOpenModalButton,
-  ShardFailureRequest,
-} from '@kbn/data-plugin/public';
+  type SearchResponseWarning,
+  SearchResponseWarningsBadgePopoverContent,
+} from '@kbn/search-response-warnings';
 
 import { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
@@ -260,7 +260,7 @@ const accuracyModeEnabledWarning = (
   ),
 });
 
-export function getShardFailuresWarningMessages(
+export function getSearchWarningMessages(
   state: FormBasedPersistedState,
   warning: SearchResponseWarning,
   request: SearchRequest,
@@ -268,10 +268,9 @@ export function getShardFailuresWarningMessages(
   theme: ThemeServiceStart
 ): UserMessage[] {
   if (state) {
-    if (warning.type === 'shard_failure') {
-      switch (warning.reason.type) {
-        case 'unsupported_aggregation_on_downsampled_index':
-          return Object.values(state.layers).flatMap((layer) =>
+    if (warning.type === 'incomplete') {
+      return hasUnsupportedDownsampledAggregationFailure(warning)
+        ? Object.values(state.layers).flatMap((layer) =>
             uniq(
               Object.values(layer.columns)
                 .filter((col) =>
@@ -302,40 +301,22 @@ export function getShardFailuresWarningMessages(
                   }),
                 } as UserMessage)
             )
-          );
-        default:
-          return [
+          )
+        : [
             {
-              uniqueId: `shard_failure`,
+              uniqueId: `incomplete`,
               severity: 'warning',
               fixableInEditor: true,
               displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
               shortMessage: '',
-              longMessage: (
-                <>
-                  <EuiText size="s">
-                    <strong>{warning.message}</strong>
-                    <p>{warning.text}</p>
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                  {warning.text ? (
-                    <ShardFailureOpenModalButton
-                      theme={theme}
-                      title={warning.message}
-                      size="m"
-                      getRequestMeta={() => ({
-                        request: request as ShardFailureRequest,
-                        response,
-                      })}
-                      color="primary"
-                      isButtonEmpty={true}
-                    />
-                  ) : null}
-                </>
+              longMessage: (closePopover) => (
+                <SearchResponseWarningsBadgePopoverContent
+                  onViewDetailsClick={closePopover}
+                  warnings={[warning]}
+                />
               ),
             } as UserMessage,
           ];
-      }
     }
   }
   return [];

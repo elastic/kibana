@@ -48,30 +48,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await a11y.testAppSnapshot();
           });
 
-          describe('index panel', async () => {
-            it('index panel - summary', async () => {
+          describe('index details', async () => {
+            it('index details - overview', async () => {
               await PageObjects.settings.clickIndexManagement();
               await PageObjects.indexManagement.clickIndexAt(0);
               await a11y.testAppSnapshot();
             });
 
-            it('index panel - settings', async () => {
-              await PageObjects.indexManagement.clickDetailPanelTabAt(0);
+            it('index details - settings', async () => {
+              await PageObjects.indexManagement.clickIndexDetailsTab('settings');
               await a11y.testAppSnapshot();
             });
 
-            it('index panel - mappings', async () => {
-              await PageObjects.indexManagement.clickDetailPanelTabAt(1);
+            it('index details - edit settings', async () => {
+              await PageObjects.indexManagement.clickIndexDetailsTab('settings');
+              await PageObjects.indexManagement.clickIndexDetailsEditSettingsSwitch();
               await a11y.testAppSnapshot();
             });
 
-            it('index panel - stats', async () => {
-              await PageObjects.indexManagement.clickDetailPanelTabAt(2);
+            it('index details - mappings', async () => {
+              await PageObjects.indexManagement.clickIndexDetailsTab('mappings');
               await a11y.testAppSnapshot();
             });
 
-            it('index panel - edit settings', async () => {
-              await PageObjects.indexManagement.clickDetailPanelTabAt(3);
+            it('index details - stats', async () => {
+              await PageObjects.indexManagement.clickIndexDetailsTab('stats');
               await a11y.testAppSnapshot();
             });
           });

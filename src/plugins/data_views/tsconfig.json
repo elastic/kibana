@@ -32,6 +32,7 @@
     "@kbn/content-management-utils",
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-server",
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",

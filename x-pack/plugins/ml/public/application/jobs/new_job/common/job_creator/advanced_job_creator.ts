@@ -11,14 +11,14 @@ import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 import { JobCreator } from './job_creator';
-import {
+import type {
   Job,
   Datafeed,
   Detector,
   CustomRule,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../../common/util/validation_utils';
 
@@ -41,6 +41,7 @@ export class AdvancedJobCreator extends JobCreator {
 
   constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
+    this.createdBy = CREATED_BY_LABEL.ADVANCED;
 
     this._queryString = JSON.stringify(this._datafeed_config.query);
 
@@ -182,6 +183,7 @@ export class AdvancedJobCreator extends JobCreator {
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
+    this.createdBy = CREATED_BY_LABEL.ADVANCED;
     const detectors = getRichDetectors(job, datafeed, this.additionalFields, true);
 
     // keep track of the custom rules for each detector

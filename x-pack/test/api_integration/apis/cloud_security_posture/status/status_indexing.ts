@@ -41,6 +41,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Test policy',

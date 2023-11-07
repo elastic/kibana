@@ -235,13 +235,13 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab indexDataVisualizer',
           },
           {
-            id: 'data_comparison',
-            pathId: ML_PAGES.DATA_COMPARISON_INDEX_SELECT,
+            id: 'data_drift',
+            pathId: ML_PAGES.DATA_DRIFT_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
-              defaultMessage: 'Data Comparison',
+              defaultMessage: 'Data Drift',
             }),
             disabled: disableLinks,
-            testSubj: 'mlMainTab dataComparison',
+            testSubj: 'mlMainTab dataDrift',
           },
         ],
       },

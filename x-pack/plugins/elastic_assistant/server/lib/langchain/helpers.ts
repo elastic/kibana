@@ -31,27 +31,3 @@ export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content
   content: prompt,
   role: 'user',
 });
-
-export interface ResponseBody {
-  status: string;
-  data: Record<string, unknown>;
-  connector_id: string;
-}
-
-/** An unsafe, temporary stub that parses assistant messages from the request with no validation */
-export const unsafeGetAssistantMessagesFromRequest = (
-  rawSubActionParamsBody: string | undefined
-): Array<Pick<Message, 'content' | 'role'>> => {
-  try {
-    if (rawSubActionParamsBody == null) {
-      return [];
-    }
-
-    const subActionParamsBody = JSON.parse(rawSubActionParamsBody); // TODO: unsafe, no validation
-    const messages = subActionParamsBody?.messages;
-
-    return Array.isArray(messages) ? messages : [];
-  } catch {
-    return [];
-  }
-};

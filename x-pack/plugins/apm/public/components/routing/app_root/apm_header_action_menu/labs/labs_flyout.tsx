@@ -24,8 +24,11 @@ import {
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import {
+  useEditableSettings,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmEditableSettings } from '../../../../../hooks/use_apm_editable_settings';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 
 interface Props {
@@ -33,6 +36,7 @@ interface Props {
 }
 
 export function LabsFlyout({ onClose }: Props) {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications } = useApmPluginContext().core;
 
   const { data, status } = useFetcher(
@@ -48,7 +52,7 @@ export function LabsFlyout({ onClose }: Props) {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useApmEditableSettings(labsItems);
+  } = useEditableSettings('apm', labsItems);
 
   async function handleSave() {
     try {
@@ -56,7 +60,8 @@ export function LabsFlyout({ onClose }: Props) {
         return settingsEditableConfig[key].requiresPageReload;
       });
 
-      await saveAll({ trackMetricName: 'labs_save' });
+      await saveAll();
+      trackApmEvent({ metric: 'labs_save' });
 
       if (reloadPage) {
         window.location.reload();

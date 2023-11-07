@@ -92,6 +92,10 @@ export const buildDataViewMock = ({
     return dataViewFields.find((field) => field.name === fieldName);
   };
 
+  dataViewFields.getByType = (type: string) => {
+    return dataViewFields.filter((field) => field.type === type);
+  };
+
   dataViewFields.getAll = () => {
     return dataViewFields;
   };

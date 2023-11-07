@@ -6,79 +6,82 @@
  */
 
 import type { GuideConfig } from '@kbn/guided-onboarding';
-import { i18n } from '@kbn/i18n';
+import * as i18n from './translations';
 
 export const siemGuideId = 'siem';
-export const siemGuideConfig: GuideConfig = {
-  title: i18n.translate('xpack.securitySolution.guideConfig.title', {
-    defaultMessage: 'Detect threats in my data with SIEM',
-  }),
+
+export const defaultGuideTranslations = {
+  title: i18n.TITLE,
+  description: i18n.DESCRIPTION,
+  docs: i18n.DOCS,
+  steps: {
+    add_data: {
+      title: i18n.ADD_DATA_TITLE,
+      description: i18n.ADD_DATA_DESCRIPTION,
+    },
+    rules: {
+      title: i18n.RULES_TITLE,
+      description: i18n.RULES_DESCRIPTION,
+      manualCompletion: {
+        title: i18n.RULES_MANUAL_TITLE,
+        description: i18n.RULES_MANUAL_DESCRIPTION,
+      },
+    },
+    alertsCases: {
+      title: i18n.CASES_TITLE,
+      description: i18n.CASES_DESCRIPTION,
+      manualCompletion: {
+        title: i18n.CASES_MANUAL_TITLE,
+        description: i18n.CASES_MANUAL_DESCRIPTION,
+      },
+    },
+  },
+};
+
+export const getSiemGuideConfig = (launchDarkly = defaultGuideTranslations): GuideConfig => ({
+  // check each launchDarkly property in case data is misformatted
+  title: launchDarkly.title ?? defaultGuideTranslations.title,
   guideName: 'Security',
-  telemetryId: 'siem',
+  telemetryId: siemGuideId,
   completedGuideRedirectLocation: {
     appID: 'securitySolutionUI',
     path: '/dashboards',
   },
-  description: i18n.translate('xpack.securitySolution.guideConfig.description', {
-    defaultMessage: `There are many ways to get your SIEM data into Elastic. In this guide, we'll help you get set up quickly using the Elastic Defend integration.`,
-  }),
+  description: launchDarkly.description ?? defaultGuideTranslations.description,
   docs: {
-    text: i18n.translate('xpack.securitySolution.guideConfig.documentationLink', {
-      defaultMessage: 'Learn more',
-    }),
+    text: launchDarkly.docs ?? defaultGuideTranslations.docs,
     url: 'https://www.elastic.co/guide/en/security/current/ingest-data.html',
   },
   steps: [
     {
       id: 'add_data',
-      title: i18n.translate('xpack.securitySolution.guideConfig.addDataStep.title', {
-        defaultMessage: 'Add data with Elastic Defend',
-      }),
+      title: launchDarkly.steps?.add_data?.title ?? defaultGuideTranslations.steps.add_data.title,
       description: {
-        descriptionText: i18n.translate(
-          'xpack.securitySolution.guideConfig.addDataStep.description',
-          {
-            defaultMessage:
-              'Install Elastic Agent and its Elastic Defend integration on one of your computers to get SIEM data flowing.',
-          }
-        ),
+        descriptionText:
+          launchDarkly.steps?.add_data?.description ??
+          defaultGuideTranslations.steps.add_data.description,
         linkUrl: 'https://docs.elastic.co/en/integrations/endpoint',
         isLinkExternal: true,
-        linkText: i18n.translate(
-          'xpack.securitySolution.guideConfig.addDataStep.description.linkText',
-          {
-            defaultMessage: 'Learn more',
-          }
-        ),
+        linkText: i18n.LINK_TEXT,
       },
       integration: 'endpoint',
       location: {
         appID: 'integrations',
-        path: '/browse/security',
+        path: '/detail/endpoint/overview',
       },
     },
     {
       id: 'rules',
-      title: i18n.translate('xpack.securitySolution.guideConfig.rulesStep.title', {
-        defaultMessage: 'Turn on rules',
-      }),
-      description: i18n.translate('xpack.securitySolution.guideConfig.rulesStep.description', {
-        defaultMessage:
-          'Load the Elastic prebuilt rules, select the rules you want, and enable them to generate alerts.',
-      }),
+      title: launchDarkly.steps?.rules?.title ?? defaultGuideTranslations.steps.rules.title,
+      description:
+        launchDarkly.steps?.rules?.description ?? defaultGuideTranslations.steps.rules.description,
       manualCompletion: {
-        title: i18n.translate(
-          'xpack.securitySolution.guideConfig.rulesStep.manualCompletion.title',
-          {
-            defaultMessage: 'Continue with the guide',
-          }
-        ),
-        description: i18n.translate(
-          'xpack.securitySolution.guideConfig.rulesStep.manualCompletion.description',
-          {
-            defaultMessage: `After you've enabled the rules you need, continue.`,
-          }
-        ),
+        title:
+          launchDarkly.steps?.rules?.manualCompletion?.title ??
+          defaultGuideTranslations.steps.rules.manualCompletion.title,
+        description:
+          launchDarkly.steps?.rules?.manualCompletion?.description ??
+          defaultGuideTranslations.steps.rules.manualCompletion.description,
       },
       location: {
         appID: 'securitySolutionUI',
@@ -87,30 +90,23 @@ export const siemGuideConfig: GuideConfig = {
     },
     {
       id: 'alertsCases',
-      title: i18n.translate('xpack.securitySolution.guideConfig.alertsStep.title', {
-        defaultMessage: 'Manage alerts and cases',
-      }),
-      description: i18n.translate('xpack.securitySolution.guideConfig.alertsStep.description', {
-        defaultMessage: 'Learn how to view and triage alerts with cases.',
-      }),
+      title:
+        launchDarkly.steps?.alertsCases?.title ?? defaultGuideTranslations.steps.alertsCases.title,
+      description:
+        launchDarkly.steps?.alertsCases?.description ??
+        defaultGuideTranslations.steps.alertsCases.description,
       location: {
         appID: 'securitySolutionUI',
         path: '/alerts',
       },
       manualCompletion: {
-        title: i18n.translate(
-          'xpack.securitySolution.guideConfig.alertsStep.manualCompletion.title',
-          {
-            defaultMessage: 'Continue the guide',
-          }
-        ),
-        description: i18n.translate(
-          'xpack.securitySolution.guideConfig.alertsStep.manualCompletion.description',
-          {
-            defaultMessage: `After you've explored the case, continue.`,
-          }
-        ),
+        title:
+          launchDarkly.steps?.alertsCases?.manualCompletion?.title ??
+          defaultGuideTranslations.steps.alertsCases.manualCompletion.title,
+        description:
+          launchDarkly.steps?.alertsCases?.manualCompletion?.description ??
+          defaultGuideTranslations.steps.alertsCases.manualCompletion.description,
       },
     },
   ],
-};
+});

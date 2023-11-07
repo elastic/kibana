@@ -34,6 +34,7 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   e2e: {
     baseUrl: 'http://localhost:5601',
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     experimentalMemoryManagement: true,
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {

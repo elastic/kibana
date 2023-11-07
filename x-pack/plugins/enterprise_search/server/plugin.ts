@@ -87,14 +87,14 @@ interface PluginsSetup {
   customIntegrations?: CustomIntegrationsPluginSetup;
   features: FeaturesPluginSetup;
   globalSearch: GlobalSearchPluginSetup;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
-interface PluginsStart {
+export interface PluginsStart {
   data: DataPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
@@ -192,7 +192,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchEsre: showEnterpriseSearch,
+          enterpriseSearchAISearch: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
           enterpriseSearchElasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,
@@ -204,7 +204,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchEsre: showEnterpriseSearch,
+          enterpriseSearchAISearch: showEnterpriseSearch,
           enterpriseSearchVectorSearch: showEnterpriseSearch,
           enterpriseSearchElasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,
@@ -294,13 +294,13 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register a config for the search guide
      */
     if (config.canDeployEntSearch) {
-      guidedOnboarding.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
     }
     if (config.hasWebCrawler) {
-      guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
     if (config.hasConnectors) {
-      guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }
 
     /**

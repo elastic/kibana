@@ -141,6 +141,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
@@ -152,6 +153,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     context: 'test',
     mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
   },
+  validLegacyConsumers: [],
 };
 
 export const mockRunNowResponse = {

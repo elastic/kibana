@@ -333,6 +333,7 @@ export class VisualizationsPlugin
           unifiedSearch: pluginsStart.unifiedSearch,
           serverless: pluginsStart.serverless,
           noDataPage: pluginsStart.noDataPage,
+          contentManagement: pluginsStart.contentManagement,
         };
 
         params.element.classList.add('visAppWrapper');
