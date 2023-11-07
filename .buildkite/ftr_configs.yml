@@ -225,7 +225,6 @@ enabled:
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group4/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group5/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/group6/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group10/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/rule_execution_logic/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/prebuilt_rules/config.ts
@@ -461,6 +460,8 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts/configs/ess.config.ts
  
 
 
