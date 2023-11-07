@@ -14,7 +14,7 @@ import {
   createAgentPolicyTask,
   enableAgentTamperProtectionFeatureFlagInPolicy,
   unenrollAgent,
-  changeAgentPolicy,
+  reAssignFleetAgentToPolicy,
 } from '../../../tasks/fleet';
 
 import { login } from '../../../tasks/login';
@@ -81,10 +81,9 @@ describe(
     it('should unenroll from fleet without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       // Change agent policy and wait for action to be completed
-      changeAgentPolicy(
+      reAssignFleetAgentToPolicy(
         createdHost.agentId,
-        secondPolicyWithAgentTamperProtectionEnabled.policy_id,
-        3
+        secondPolicyWithAgentTamperProtectionEnabled.policy_id
       ).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
         unenrollAgent(createdHost.agentId).then((isUnenrolled) => {

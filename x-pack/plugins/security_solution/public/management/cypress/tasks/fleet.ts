@@ -10,6 +10,7 @@ import type {
   GetAgentsResponse,
   GetInfoResponse,
   GetPackagePoliciesResponse,
+  GetOneAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   agentRouteService,
@@ -134,21 +135,33 @@ export const unenrollAgent = (agentId: string): Cypress.Chainable<boolean> => {
   });
 };
 
-export const changeAgentPolicy = (
+export const fetchFleetAgentPolicy = (
+  agentPolicyId: string
+): Cypress.Chainable<GetOneAgentPolicyResponse['item']> => {
+  return request<GetOneAgentPolicyResponse>({
+    method: 'GET',
+    url: agentPolicyRouteService.getInfoPath(agentPolicyId),
+  }).then((res) => res.body.item);
+};
+
+export const reAssignFleetAgentToPolicy = (
   agentId: string,
-  policyId: string,
-  policyRevision: number
+  policyId: string
 ): Cypress.Chainable<boolean> => {
-  return request({
-    method: 'POST',
-    url: agentRouteService.getReassignPath(agentId),
-    body: {
-      policy_id: policyId,
-    },
-    headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
-  }).then(() => {
-    return waitForHasAgentPolicyChanged(agentId, policyId, policyRevision);
-  });
+  return fetchFleetAgentPolicy(policyId)
+    .then((agentPolicy) => {
+      return request({
+        method: 'POST',
+        url: agentRouteService.getReassignPath(agentId),
+        body: {
+          policy_id: policyId,
+        },
+        headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+      }).then(() => agentPolicy);
+    })
+    .then((agentPolicy) => {
+      return waitForHasAgentPolicyChanged(agentId, policyId, agentPolicy.revision);
+    });
 };
 
 // only used in "real" endpoint tests not in mocked ones
@@ -201,6 +214,7 @@ const waitForIsAgentUnenrolled = (agentId: string): Cypress.Chainable<boolean> =
 const waitForHasAgentPolicyChanged = (
   agentId: string,
   policyId: string,
+  /** The minimum revision number that the agent must report before it is considered "changed" */
   policyRevision: number
 ): Cypress.Chainable<boolean> => {
   let isPolicyUpdated = false;
@@ -222,7 +236,7 @@ const waitForHasAgentPolicyChanged = (
 
           if (
             status !== 'updating' &&
-            policy_revision === policyRevision &&
+            (policy_revision ?? 0) >= policyRevision &&
             policy_id === policyId
           ) {
             isPolicyUpdated = true;
