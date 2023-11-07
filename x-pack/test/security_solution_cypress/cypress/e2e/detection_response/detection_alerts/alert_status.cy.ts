@@ -38,7 +38,7 @@ import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/169091
-describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
   });
@@ -88,8 +88,7 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
         });
     });
 
-    // TODO: Fix flaky test - https://github.com/elastic/kibana/issues/169091#issuecomment-1770502101
-    it.skip('can bulk open alerts', () => {
+    it('can bulk open alerts', () => {
       waitForAlertsToPopulate();
       cy.get(ALERTS_COUNT)
         .invoke('text')
