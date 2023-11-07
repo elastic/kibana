@@ -114,6 +114,7 @@ export const QueryMatchResult = z.object({
   operator: z.string().optional(),
 });
 
+export type DataProviderResult = z.infer<typeof DataProviderResult>;
 export const DataProviderResult = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
@@ -121,11 +122,9 @@ export const DataProviderResult = z.object({
   excluded: z.boolean().optional(),
   kqlQuery: z.string().optional(),
   queryMatch: QueryMatchResult.optional(),
-  and: z.lazy(() => DataProviderResult.array()).optional(),
+  and: z.array(DataProviderResult).optional(),
   type: DataProviderType.optional(),
 });
-
-export type IDataProviderResult = z.infer<typeof DataProviderResult>;
 
 export type FavoriteTimelineResult = z.infer<typeof FavoriteTimelineResult>;
 export const FavoriteTimelineResult = z.object({
