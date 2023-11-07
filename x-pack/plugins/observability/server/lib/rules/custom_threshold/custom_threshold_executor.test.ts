@@ -15,11 +15,9 @@ import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_so
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import {
-  createMetricThresholdExecutor,
-  MetricThresholdAlertContext,
-} from './custom_threshold_executor';
-import { FIRED_ACTIONS, NO_DATA_ACTIONS } from './translations';
+import { createCustomThresholdExecutor } from './custom_threshold_executor';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { CustomThresholdAlertContext } from './types';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -237,7 +235,7 @@ describe('The metric threshold alert type', () => {
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBeUndefined();
       expect(action.reason).toBe(
-        'test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedIndexPattern)'
+        'test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName)'
       );
     });
   });
@@ -997,7 +995,7 @@ describe('The metric threshold alert type', () => {
       const { action } = mostRecentAction(instanceID);
       const reasons = action.reason;
       expect(reasons).toBe(
-        'test.metric.1 is 1, above the threshold of 1; test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedIndexPattern)'
+        'test.metric.1 is 1, above the threshold of 1; test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedDataViewName)'
       );
     });
   });
@@ -1742,12 +1740,13 @@ const mockLibs: any = {
   },
 };
 
-const executor = createMetricThresholdExecutor(mockLibs);
+const executor = createCustomThresholdExecutor(mockLibs);
 
 const alertsServices = alertsMock.createRuleExecutorServices();
 const mockedIndex = {
   id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
   title: 'metrics-fake_hosts',
+  name: 'mockedDataViewName',
   fieldFormatMap: {},
   typeMeta: {},
   timeFieldName: '@timestamp',
@@ -1760,7 +1759,7 @@ const mockedSearchSource = {
   getField: jest.fn(() => mockedDataView),
 } as any as ISearchSource;
 const services: RuleExecutorServicesMock &
-  LifecycleAlertServices<AlertState, MetricThresholdAlertContext, string> = {
+  LifecycleAlertServices<AlertState, CustomThresholdAlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
   searchSourceClient: {
@@ -1828,7 +1827,7 @@ interface Action {
 
 expect.extend({
   toBeAlertAction(action?: Action) {
-    const pass = action?.id === FIRED_ACTIONS.id && !action?.action.reason.includes('no data');
+    const pass = action?.id === FIRED_ACTION.id && !action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be an ALERT action`;
     return {
       message,
@@ -1836,7 +1835,7 @@ expect.extend({
     };
   },
   toBeNoDataAction(action?: Action) {
-    const pass = action?.id === NO_DATA_ACTIONS.id && action?.action.reason.includes('no data');
+    const pass = action?.id === NO_DATA_ACTION.id && action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be a NO DATA action`;
     return {
       message,

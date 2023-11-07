@@ -36,7 +36,11 @@ export const createSavedQuery = (
         },
       ],
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      [ELASTIC_HTTP_VERSION_HEADER]: '1',
+      'x-elastic-internal-origin': 'security-solution',
+    },
   });
 
 export const deleteSavedQueries = () => {

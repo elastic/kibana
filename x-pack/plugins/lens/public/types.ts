@@ -821,6 +821,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
   labels?: { buttonAriaLabel: string; buttonLabel: string };
+  isHidden?: boolean;
 };
 
 export interface VisualizationDimensionChangeProps<T> {

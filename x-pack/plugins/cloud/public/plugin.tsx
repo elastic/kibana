@@ -32,6 +32,7 @@ export interface CloudConfigType {
   serverless?: {
     project_id: string;
     project_name?: string;
+    project_type?: string;
   };
 }
 
@@ -93,6 +94,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       serverless: {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
+        projectType: this.config.serverless?.project_type,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
@@ -148,6 +150,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       serverless: {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
+        projectType: this.config.serverless?.project_type,
       },
       performanceUrl,
       usersAndRolesUrl,

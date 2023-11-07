@@ -10,6 +10,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { first } from 'lodash';
 import { useEffect, useMemo, useCallback } from 'react';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
@@ -19,10 +20,6 @@ import {
   SnapshotRequest,
   InfraTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
-import type {
-  InventoryItemType,
-  SnapshotMetricType,
-} from '../../../../../common/inventory_models/types';
 
 const ONE_MINUTE = 60;
 const ONE_HOUR = ONE_MINUTE * 60;
