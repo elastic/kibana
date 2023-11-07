@@ -88,7 +88,6 @@ export const fetchConnectorExecuteAction = async ({
           rawResponse: isStream,
         }
       );
-      console.log('response???', response);
 
       const reader = response?.response?.body?.getReader();
 
@@ -141,13 +140,7 @@ export const fetchConnectorExecuteAction = async ({
       isStream: false,
     };
   } catch (error) {
-    console.log('error???', error);
-    console.log('error body???', error?.body);
-    console.log('error message???', error?.message);
-
-    console.log('error response???', error?.response);
     const reader = error?.response?.body?.getReader();
-    console.log('error reader???', reader);
 
     if (!reader) {
       return {

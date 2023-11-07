@@ -81,14 +81,6 @@ export const postActionsConnectorExecuteRoute = (
       } catch (err) {
         logger.error(err);
         const error = transformError(err);
-        console.log('error cautch', {
-          body: error.message,
-          statusCode: error.statusCode,
-          actual: resp.error({
-            body: error.message,
-            statusCode: error.statusCode,
-          }),
-        });
 
         return resp.error({
           body: error.message,
