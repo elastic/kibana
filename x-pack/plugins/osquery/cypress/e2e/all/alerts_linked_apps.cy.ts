@@ -18,8 +18,7 @@ import {
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170521
-describe.skip(
+describe(
   'Alert Event Details',
   {
     tags: ['@ess', '@serverless'],
@@ -50,7 +49,6 @@ describe.skip(
       cy.getBySel('osquery-investigation-guide-text').should('exist');
       cy.getBySel('osqueryAddInvestigationGuideQueries').should('not.be.disabled');
       cy.getBySel('osqueryAddInvestigationGuideQueries').click();
-      cy.getBySel('osquery-investigation-guide-text').should('not.exist');
 
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains("SELECT * FROM os_version where name='{{host.os.name}}';");
@@ -60,6 +58,8 @@ describe.skip(
       cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
         cy.contains('select * from users');
       });
+      cy.getBySel('osquery-investigation-guide-text').should('not.exist');
+
       cy.contains('Save changes').click();
       cy.contains(`${ruleName} was saved`).should('exist');
       closeToastIfVisible();
