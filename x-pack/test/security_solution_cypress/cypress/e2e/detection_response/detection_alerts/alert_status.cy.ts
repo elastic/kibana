@@ -88,6 +88,7 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
         });
     });
 
+    // TODO: Fix flaky test - https://github.com/elastic/kibana/issues/169091#issuecomment-1770502101
     it.skip('can bulk open alerts', () => {
       waitForAlertsToPopulate();
       cy.get(ALERTS_COUNT)
