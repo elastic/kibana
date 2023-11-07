@@ -3,7 +3,7 @@
   "id": "@kbn/ai-assistant-management-observability-plugin",
   "owner": "@elastic/obs-ai-assistant",
   "plugin": {
-    "id": "aiAssistantManagementObservabilityObservability",
+    "id": "aiAssistantManagementObservability",
     "server": true,
     "browser": true,
     "requiredPlugins": ["management", "data", "dataViews"],
