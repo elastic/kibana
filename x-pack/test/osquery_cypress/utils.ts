@@ -42,6 +42,12 @@ export const createAgentPolicy = async (
 ) => {
   log.info(`Creating "${agentPolicyName}" agent policy`);
 
+  // FIXME:PT Delete. only here for debug
+  const existing = await kbnClient.request({ method: 'GET', path: `/api/fleet/agent_policies` });
+  Error.captureStackTrace(existing);
+  log.info(JSON.stringify(existing));
+  // FIXME:PT delete
+
   const {
     data: {
       item: { id: agentPolicyId },
