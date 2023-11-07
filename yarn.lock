@@ -13788,13 +13788,6 @@ cypress-multi-reporters@^1.6.3:
     debug "^4.3.4"
     lodash "^4.17.21"
 
-cypress-react-selector@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/cypress-react-selector/-/cypress-react-selector-3.0.0.tgz#e86018fffea07ba40c7a1f467a89b475a83cbcae"
-  integrity sha512-AQCgwbcMDkIdYcf6knvLxqzBnejahIbJPHqUhARi8k+QbM8sgUBDds98PaHJVMdPiX2J8RJjXHmUMPD8VerPSw==
-  dependencies:
-    resq "1.10.2"
-
 cypress-real-events@^1.10.3:
   version "1.10.3"
   resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.10.3.tgz#e2e949ea509cc4306df6c238de1a9982d67360e5"
@@ -26426,13 +26419,6 @@ responselike@^2.0.0:
   integrity sha512-xH48u3FTB9VsZw7R+vvgaKeLKzT6jOogbQhEe/jewwnZgzPcnyWui2Av6JpoYZF/91uueC+lqhWqeURw5/qhCw==
   dependencies:
     lowercase-keys "^2.0.0"
-
-resq@1.10.2:
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/resq/-/resq-1.10.2.tgz#cedf4f20d53f6e574b1e12afbda446ad9576c193"
-  integrity sha512-HmgVS3j+FLrEDBTDYysPdPVF9/hioDMJ/otOiQDKqk77YfZeeLOj0qi34yObumcud1gBpk+wpBTEg4kMicD++A==
-  dependencies:
-    fast-deep-equal "^2.0.1"
 
 restore-cursor@^2.0.0:
   version "2.0.0"
