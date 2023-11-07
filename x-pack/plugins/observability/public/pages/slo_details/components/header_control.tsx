@@ -198,7 +198,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
           ]
             .concat(
-              !!slo && isApmIndicatorType(slo.indicator.type) ? (
+              !!slo && isApmIndicatorType(slo.indicator.type) && hasWriteCapabilities ? (
                 <EuiContextMenuItem
                   key="exploreInApm"
                   icon="bullseye"
