@@ -9,6 +9,17 @@ source .buildkite/scripts/steps/artifacts/docker_image.sh
 
 deploy() {
   PROJECT_TYPE=$1
+  case $PROJECT_TYPE in
+    elasticsearch)
+      PROJECT_TYPE_LABEL='Elasticsearch Serverless'
+    ;;
+    observability)
+      PROJECT_TYPE_LABEL='Observability'
+    ;;
+    security)
+      PROJECT_TYPE_LABEL='Security'
+    ;;
+  esac
 
   PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE"
   PROJECT_CREATE_CONFIGURATION='{
@@ -29,7 +40,7 @@ deploy() {
     }
   }'
 
-  echo "--- Create project"
+  echo "--- Create $PROJECT_TYPE_LABEL project"
   DEPLOY_LOGS=$(mktemp --suffix ".json")
 
   echo "Checking if project already exists..."
@@ -74,19 +85,6 @@ deploy() {
   PROJECT_KIBANA_URL=$(jq -r --slurp '.[1].endpoints.kibana' $DEPLOY_LOGS)
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
   PROJECT_ELASTICSEARCH_URL=$(jq -r --slurp '.[1].endpoints.elasticsearch' $DEPLOY_LOGS)
-
-
-  case $PROJECT_TYPE in
-    elasticsearch)
-      PROJECT_TYPE_LABEL='Elasticsearch Serverless'
-    ;;
-    observability)
-      PROJECT_TYPE_LABEL='Observability'
-    ;;
-    security)
-      PROJECT_TYPE_LABEL='Security'
-    ;;
-  esac
 
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
     ### $PROJECT_TYPE_LABEL Deployment
