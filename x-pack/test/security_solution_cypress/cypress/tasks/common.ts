@@ -95,17 +95,8 @@ const clearSessionStorage = () => {
   });
 };
 
-/** Clears the rules and monitoring tables state. Automatically called in `cleanKibana()`. */
 export const resetRulesTableState = () => {
   clearSessionStorage();
-};
-
-export const cleanKibana = () => {
-  resetRulesTableState();
-  deletePrebuiltRulesAssets();
-  deleteAlertsAndRules();
-  deleteAllCasesItems();
-  deleteTimelines();
 };
 
 export const deleteAlertsAndRules = () => {
