@@ -45,11 +45,12 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       packId = data.saved_object_id;
       packName = data.name;
     });
-    afterEach(() => {
-      cleanupPack(packId);
-      cleanupPack(multiQueryPackId);
-      cleanupRule(ruleId);
-    });
+  });
+  afterEach(() => {
+    cleanupPack(packId);
+    cleanupPack(multiQueryPackId);
+    cleanupRule(ruleId);
+  });
 
   it('adds response actions with osquery with proper validation and form values', () => {
     cy.visit('/app/security/rules');
@@ -69,13 +70,12 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('Run a set of queries in a pack').click();
     });
-    cy.getBySel('response-actions-error')
-      .within(() => {
-        cy.contains('Pack is a required field');
-        cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
-      });
+    cy.getBySel('response-actions-error').within(() => {
+      cy.contains('Pack is a required field');
+      cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
+    });
 
-      cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
+    cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
 
     cy.getBySel(RESPONSE_ACTIONS_ITEM_2)
       .within(() => {
@@ -88,9 +88,9 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       })
       .clickOutside();
 
-      cy.getBySel('ruleEditSubmitButton').click();
-      cy.contains(`${ruleName} was saved`).should('exist');
-      closeToastIfVisible();
+    cy.getBySel('ruleEditSubmitButton').click();
+    cy.contains(`${ruleName} was saved`).should('exist');
+    closeToastIfVisible();
 
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.getBySel('editRuleSettingsLink').click();
@@ -139,31 +139,30 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
     });
 
-      cy.contains(`${ruleName} was saved`).should('exist');
-      closeToastIfVisible();
+    cy.contains(`${ruleName} was saved`).should('exist');
+    closeToastIfVisible();
 
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.getBySel('editRuleSettingsLink').click();
     cy.getBySel('globalLoadingIndicator').should('not.exist');
 
     cy.getBySel('edit-rule-actions-tab').click();
-    cy.getBySel(RESPONSE_ACTIONS_ITEM_0)
-      .within(() => {
-        cy.contains(packName);
-        cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
-        checkActionItemsInResults({
-          cases: false,
-          lens: false,
-          discover: false,
-          timeline: false,
-        });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
+      cy.contains(packName);
+      cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
+      checkActionItemsInResults({
+        cases: false,
+        lens: false,
+        discover: false,
+        timeline: false,
       });
-      cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
-        cy.contains('select * from uptime');
-        cy.contains('Log message optimized for viewing in a log viewer');
-        cy.contains('Days of uptime');
-      });
-      cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesTwo');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
+      cy.contains('select * from uptime');
+      cy.contains('Log message optimized for viewing in a log viewer');
+      cy.contains('Days of uptime');
+    });
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleChangesTwo');
 
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1)
       .within(() => {

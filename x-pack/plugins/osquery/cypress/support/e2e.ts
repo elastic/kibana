@@ -32,15 +32,11 @@ import registerCypressGrep from '@cypress/grep';
 registerCypressGrep();
 
 import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
-<<<<<<< HEAD
-=======
 import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
 
->>>>>>> a15a9484e67 ([EDR Workflows] Verify flaky osquery tests (#169749))
 import type { ServerlessRoleName } from './roles';
 
 import 'cypress-react-selector';
-import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 import { waitUntil } from '../tasks/wait_until';
 
 declare global {
