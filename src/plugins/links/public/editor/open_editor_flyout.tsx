@@ -40,7 +40,8 @@ export async function openEditorFlyout(
   const { attributes } = await attributeService.unwrapAttributes(initialInput);
   const isByReference = attributeService.inputIsRefType(initialInput);
   const initialLinks = attributes?.links;
-  const overlayTracker = tracksOverlays(parentDashboard) ? parentDashboard : undefined;
+  const overlayTracker =
+    parentDashboard && tracksOverlays(parentDashboard) ? parentDashboard : undefined;
 
   if (!initialLinks) {
     /**
@@ -74,7 +75,11 @@ export async function openEditorFlyout(
         attributes: newAttributes,
       });
       parentDashboard?.reload();
-      if (overlayTracker) overlayTracker.clearOverlays();
+      if (overlayTracker) {
+        overlayTracker.clearOverlays();
+      } else {
+        editorFlyout.close();
+      }
     };
 
     const onAddToDashboard = (newLinks: Link[], newLayout: LinksLayoutType) => {
@@ -94,12 +99,20 @@ export async function openEditorFlyout(
         attributes: newAttributes,
       });
       parentDashboard?.reload();
-      if (overlayTracker) overlayTracker.clearOverlays();
+      if (overlayTracker) {
+        overlayTracker.clearOverlays();
+      } else {
+        editorFlyout.close();
+      }
     };
 
     const onCancel = () => {
       reject();
-      if (overlayTracker) overlayTracker.clearOverlays();
+      if (overlayTracker) {
+        overlayTracker.clearOverlays();
+      } else {
+        editorFlyout.close();
+      }
     };
 
     const editorFlyout = coreServices.overlays.openFlyout(

@@ -6,22 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import { APP_NAME } from '../common';
+import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
+import { LinksCrudTypes } from '../common/content_management';
+import { getLinksClient } from './content_management/links_content_management_client';
 import { LinksFactoryDefinition } from './embeddable';
-import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { setKibanaServices } from './services/kibana_services';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
+  visualizations: VisualizationsSetup;
   contentManagement: ContentManagementPublicSetup;
 }
 
@@ -47,6 +50,38 @@ export class LinksPlugin
           latest: LATEST_VERSION,
         },
         name: APP_NAME,
+      });
+
+      plugins.visualizations.registerAlias({
+        aliasApp: CONTENT_ID,
+        disableCreate: true, // only creatable through the Dashboard app embeddable creation
+        name: CONTENT_ID,
+        title: APP_NAME,
+        icon: APP_ICON,
+        description: '', // TODO
+        stage: 'experimental',
+        appExtensions: {
+          visualizations: {
+            docTypes: [CONTENT_ID],
+            searchFields: ['title^3'],
+            client: getLinksClient,
+            toListItem(linkItem: LinksCrudTypes['Item']) {
+              const { id, type, updatedAt, attributes } = linkItem;
+              const { title, description } = attributes;
+
+              return {
+                id,
+                title,
+                description,
+                updatedAt,
+                icon: APP_ICON,
+                stage: 'experimental',
+                savedObjectType: type,
+                typeTitle: APP_NAME,
+              };
+            },
+          },
+        },
       });
     });
   }

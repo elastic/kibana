@@ -36,6 +36,8 @@ import {
   TableListViewProps,
 } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
@@ -52,6 +54,7 @@ import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry
 interface VisualizeUserContent extends VisualizationListItem, UserContentCommonSchema {
   type: string;
   attributes: {
+    id: string;
     title: string;
     description?: string;
     editApp: string;
@@ -76,6 +79,7 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
     title: (savedObject.title as string) ?? '',
     error: (savedObject.error as string) ?? '',
     attributes: {
+      id: savedObject.id as string,
       title: (savedObject.title as string) ?? '',
       description: savedObject.description as string,
       editApp: savedObject.editApp as string,
@@ -110,6 +114,7 @@ const useTableListViewProps = (
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
+      embeddable,
     },
   } = useKibana<VisualizeServices>();
 
@@ -120,7 +125,18 @@ const useTableListViewProps = (
   }, [closeNewVisModal]);
 
   const editItem = useCallback(
-    ({ attributes: { editUrl, editApp } }: VisualizeUserContent) => {
+    async ({ type, attributes: { editUrl, editApp, id } }: VisualizeUserContent) => {
+      if (!editApp && !editUrl) {
+        // this means this is an embeddable **without** an editor app - so, use the factory editing method
+        const factory = embeddable.getEmbeddableFactory(type);
+        try {
+          await factory?.getExplicitInput({ savedObjectId: id } as Partial<EmbeddableInput>);
+        } catch {
+          // error means that the user cancelled editing - so, just swallow it
+        }
+        return;
+      }
+
       if (editApp) {
         application.navigateToApp(editApp, { path: editUrl });
         return;
@@ -128,7 +144,7 @@ const useTableListViewProps = (
       // for visualizations the edit and view URLs are the same
       history.push(editUrl);
     },
-    [application, history]
+    [application, history, embeddable]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);

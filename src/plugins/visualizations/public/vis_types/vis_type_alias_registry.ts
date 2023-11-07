@@ -19,7 +19,7 @@ import { BaseVisType } from './base_vis_type';
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
 export interface VisualizationListItem {
-  editUrl: string;
+  editUrl?: string;
   editApp?: string;
   error?: string;
   icon: string;
@@ -86,8 +86,9 @@ export interface VisualizationsAppExtension {
 }
 
 export interface VisTypeAlias {
-  aliasPath: string;
+  aliasPath?: string;
   aliasApp: string;
+  // editor: { aliasPath: string; aliasApp: string } | { openEditor: () => void };
   name: string;
   title: string;
   icon: string;
