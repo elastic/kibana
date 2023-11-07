@@ -3036,11 +3036,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-data-access-plugin@link:x-pack/plugins/apm_data_access":
+"@kbn/apm-data-access-plugin@link:x-pack/plugins/observability_solution/apm_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-plugin@link:x-pack/plugins/apm":
+"@kbn/apm-plugin@link:x-pack/plugins/observability_solution/apm":
   version "0.0.0"
   uid ""
 
@@ -4392,7 +4392,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/exploratory-view-plugin@link:x-pack/plugins/exploratory_view":
+"@kbn/exploratory-view-plugin@link:x-pack/plugins/observability_solution/exploratory_view":
   version "0.0.0"
   uid ""
 
@@ -4672,7 +4672,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/infra-plugin@link:x-pack/plugins/infra":
+"@kbn/infra-plugin@link:x-pack/plugins/observability_solution/infra":
   version "0.0.0"
   uid ""
 
@@ -4812,7 +4812,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/log-explorer-plugin@link:x-pack/plugins/log_explorer":
+"@kbn/log-explorer-plugin@link:x-pack/plugins/observability_solution/log_explorer":
   version "0.0.0"
   uid ""
 
@@ -4824,7 +4824,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-shared-plugin@link:x-pack/plugins/logs_shared":
+"@kbn/logs-shared-plugin@link:x-pack/plugins/observability_solution/logs_shared":
   version "0.0.0"
   uid ""
 
@@ -4916,7 +4916,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/metrics-data-access-plugin@link:x-pack/plugins/metrics_data_access":
+"@kbn/metrics-data-access-plugin@link:x-pack/plugins/observability_solution/metrics_data_access":
   version "0.0.0"
   uid ""
 
@@ -5056,7 +5056,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
   version "0.0.0"
   uid ""
 
@@ -5072,19 +5072,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-log-explorer-plugin@link:x-pack/plugins/observability_log_explorer":
+"@kbn/observability-log-explorer-plugin@link:x-pack/plugins/observability_solution/observability_log_explorer":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_onboarding":
+"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_solution/observability_onboarding":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-plugin@link:x-pack/plugins/observability":
+"@kbn/observability-plugin@link:x-pack/plugins/observability_solution/observability":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-shared-plugin@link:x-pack/plugins/observability_shared":
+"@kbn/observability-shared-plugin@link:x-pack/plugins/observability_solution/observability_shared":
   version "0.0.0"
   uid ""
 
@@ -5160,11 +5160,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-data-access-plugin@link:x-pack/plugins/profiling_data_access":
+"@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
   version "0.0.0"
   uid ""
 
-"@kbn/profiling-plugin@link:x-pack/plugins/profiling":
+"@kbn/profiling-plugin@link:x-pack/plugins/observability_solution/profiling":
   version "0.0.0"
   uid ""
 
@@ -5528,7 +5528,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
+"@kbn/serverless-observability@link:x-pack/plugins/observability_solution/serverless_observability":
   version "0.0.0"
   uid ""
 
@@ -5844,7 +5844,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-plugin@link:x-pack/plugins/synthetics":
+"@kbn/synthetics-plugin@link:x-pack/plugins/observability_solution/synthetics":
   version "0.0.0"
   uid ""
 
@@ -6044,7 +6044,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/uptime-plugin@link:x-pack/plugins/uptime":
+"@kbn/uptime-plugin@link:x-pack/plugins/observability_solution/uptime":
   version "0.0.0"
   uid ""
 
@@ -6096,7 +6096,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ux-plugin@link:x-pack/plugins/ux":
+"@kbn/ux-plugin@link:x-pack/plugins/observability_solution/ux":
   version "0.0.0"
   uid ""
 
