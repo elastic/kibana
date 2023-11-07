@@ -40,6 +40,7 @@ export function ApmMainTemplate({
   environmentFilter = true,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
+  environmentFilterInTemplate = true,
   selectedNavButton,
   ...pageTemplateProps
 }: {
@@ -138,11 +139,9 @@ export function ApmMainTemplate({
     </ObservabilityPageTemplate>
   );
 
-  if (environmentFilter) {
-    return (
-      <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>
-    );
-  }
+  return (
+    <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>
+  );
 
   return pageTemplate;
 }
