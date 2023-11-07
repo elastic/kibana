@@ -8,7 +8,10 @@
 import { CoreSetup } from '@kbn/core/public';
 import React from 'react';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ReportingModalContent, ReportingModalProps } from '../share_context_menu/reporting_modal_content';
+import {
+  ReportingModalContent,
+  ReportingModalProps,
+} from '../share_context_menu/reporting_modal_content';
 
 /**
  * Properties for displaying a share menu with Reporting features.
@@ -40,10 +43,7 @@ export interface ApplicationProps {
  * This is not planned to expand, as work is to be done on moving the export-type implementations out of Reporting
  * Related Discuss issue: https://github.com/elastic/kibana/issues/101422
  */
-export const getSharedComponents = (
-  core: CoreSetup,
-  apiClient: ReportingAPIClient,
-) =>  {
+export const getSharedComponents = (core: CoreSetup, apiClient: ReportingAPIClient) => {
   return (
     <ReportingModalContent
       requiresSavedState={false}
@@ -53,4 +53,4 @@ export const getSharedComponents = (
       theme={core.theme}
     />
   );
-}
+};

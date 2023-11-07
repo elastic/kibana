@@ -21,7 +21,7 @@ const renderOptions = (
   usePrintLayout: boolean,
   handlePrintLayoutChange: (evt: EuiSwitchEvent) => void,
   useCanvasLayout: boolean,
-  handleCanvasLayoutChange: (evt: EuiSwitchEvent) => void,
+  handleCanvasLayoutChange: (evt: EuiSwitchEvent) => void
 ) => {
   if (props.layoutOption === 'print') {
     return (
