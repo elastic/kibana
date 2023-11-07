@@ -13,17 +13,17 @@ import {
 
 import { SIGNALS_FIELD_ALIASES_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllAlerts } from '../../utils';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
 
-  describe('create_index', () => {
+  describe('@ess create_index', () => {
     afterEach(async () => {
       await deleteAllAlerts(supertest, log, es);
     });
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // This fails and should be investigated or removed if it no longer applies
-        it.skip('should report that signals index does not exist', async () => {
+        it.skip('should report that alerts index does not exist', async () => {
           const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
           expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
         });
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('with an outdated signals index', () => {
+      describe('with an outdated alerts index', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
         });
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
         });
 
-        it('should report that signals index is outdated', async () => {
+        it('should report that alerts index is outdated', async () => {
           const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(200);
           expect(body).to.eql({
             index_mapping_outdated: true,
