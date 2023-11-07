@@ -33,7 +33,7 @@ KB_URL=$(echo $ENVIRONMENT_DETAILS | jq -r '.endpoints.kibana')
 sleep 5
 
 # Resetting the credentials of the elastic user in the project
-CREDS_BODY=$(curl --location --request POST "https://global.qa.cld.elstc.co/api/v1/serverless/projects/security/$ID/_reset-credentials" \
+CREDS_BODY=$(curl -s --location --request POST "https://global.qa.cld.elstc.co/api/v1/serverless/projects/security/$ID/_reset-credentials" \
   --header "Authorization: ApiKey $QA_API_KEY" \
   --header 'Content-Type: application/json' | jq '.')
 USERNAME=$(echo $CREDS_BODY | jq -r '.username')
