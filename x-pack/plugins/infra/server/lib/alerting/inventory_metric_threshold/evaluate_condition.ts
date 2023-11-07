@@ -8,9 +8,9 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import type { Logger } from '@kbn/logging';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { InfraTimerangeInput } from '../../../../common/http_api';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { LogQueryFields } from '../../metrics/types';
 import { InfraSource } from '../../sources';
 import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';

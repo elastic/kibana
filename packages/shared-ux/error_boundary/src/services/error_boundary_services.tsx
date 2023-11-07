@@ -8,39 +8,49 @@
 
 import React, { FC, useContext, useMemo } from 'react';
 
-import { KibanaErrorBoundaryServices } from '../../types';
+import { KibanaErrorBoundaryProviderDeps, KibanaErrorBoundaryServices } from '../../types';
 import { KibanaErrorService } from './error_service';
 
 const Context = React.createContext<KibanaErrorBoundaryServices | null>(null);
 
 /**
  * A Context Provider for Jest and Storybooks
+ * @internal
  */
 export const KibanaErrorBoundaryDepsProvider: FC<KibanaErrorBoundaryServices> = ({
   children,
   onClickRefresh,
   errorService,
-}) => {
-  return <Context.Provider value={{ onClickRefresh, errorService }}>{children}</Context.Provider>;
-};
+}) => <Context.Provider value={{ onClickRefresh, errorService }}>{children}</Context.Provider>;
 
 /**
- * Kibana-specific Provider that maps dependencies to services.
+ * Provider that uses dependencies to give context to the KibanaErrorBoundary component
+ * This provider is aware if services were already created from a higher level of the component tree
+ * @public
  */
-export const KibanaErrorBoundaryProvider: FC = ({ children }) => {
-  const value: KibanaErrorBoundaryServices = useMemo(
-    () => ({
+export const KibanaErrorBoundaryProvider: FC<KibanaErrorBoundaryProviderDeps> = ({
+  children,
+  analytics,
+}) => {
+  const parentContext = useContext(Context);
+  const value: KibanaErrorBoundaryServices = useMemo(() => {
+    // FIXME: analytics dep is optional - know when not to overwrite
+    if (parentContext) {
+      return parentContext;
+    }
+
+    return {
       onClickRefresh: () => window.location.reload(),
-      errorService: new KibanaErrorService(),
-    }),
-    []
-  );
+      errorService: new KibanaErrorService({ analytics }),
+    };
+  }, [parentContext, analytics]);
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
 /**
- * React hook for accessing pre-wired services.
+ * Utility that provides context
+ * @internal
  */
 export function useErrorBoundary(): KibanaErrorBoundaryServices {
   const context = useContext(Context);

@@ -163,6 +163,10 @@ export const SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID = 'securitySolution:ipRepu
 export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableCcsWarning';
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
+export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
+/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
+export const SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING =
+  'securitySolution:enableExpandableFlyout' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
