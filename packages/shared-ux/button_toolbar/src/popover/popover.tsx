@@ -12,7 +12,7 @@ import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/po
 
 import { ToolbarButtonProps, ToolbarButton } from '../buttons';
 
-type AllowedButtonProps = Omit<ToolbarButtonProps, 'iconSide' | 'onClick' | 'fill'>;
+type AllowedButtonProps = Omit<ToolbarButtonProps, 'iconSide' | 'onClick' | 'fill' | 'label'>;
 type AllowedPopoverProps = Omit<
   EuiPopoverProps,
   'button' | 'isOpen' | 'closePopover' | 'anchorPosition'
@@ -24,6 +24,7 @@ type AllowedPopoverProps = Omit<
 export type Props = AllowedButtonProps &
   AllowedPopoverProps & {
     children: (arg: { closePopover: () => void }) => React.ReactNode;
+    label: NonNullable<ToolbarButtonProps['label']>;
   };
 
 /**

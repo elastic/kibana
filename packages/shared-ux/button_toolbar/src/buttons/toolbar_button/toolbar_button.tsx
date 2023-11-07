@@ -23,15 +23,7 @@ type ButtonRenderStyle = 'regular' | 'iconButton';
 interface AbstractToolbarButtonProps
   extends Pick<
     EuiButtonPropsForButton,
-    | 'onClick'
-    | 'iconType'
-    | 'iconSide'
-    | 'size'
-    | 'data-test-subj'
-    | 'isDisabled'
-    | 'fullWidth'
-    | 'size'
-    | 'isLoading'
+    'onClick' | 'iconType' | 'iconSide' | 'size' | 'data-test-subj' | 'isDisabled'
   > {
   /**
    * Render style of the toolbar button
@@ -57,13 +49,13 @@ interface AbstractToolbarButtonProps
  */
 export type Props = AbstractToolbarButtonProps &
   (
-    | {
+    | ({
         as?: Extract<ButtonRenderStyle, 'regular'>;
         /**
          * Label prop is required when {@link as} is specified as a regular which is the default
          */
         label: NonNullable<AbstractToolbarButtonProps['label']>;
-      }
+      } & Pick<EuiButtonPropsForButton, 'fullWidth' | 'isLoading'>)
     | {
         /*
          * Specifying a render style of iconButton through the prop {@link as}, requires that a {@link IconType} be provided
