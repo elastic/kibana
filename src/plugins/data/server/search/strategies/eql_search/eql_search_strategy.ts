@@ -89,15 +89,17 @@ export const eqlSearchStrategyProvider = (
         );
       };
 
-      const cancel = () => {
+      const cancel = async () => {
         if (!id) return;
-        cancelAsyncSearch(id, esClient).catch((e) => {
+        try {
+          await cancelAsyncSearch(id, esClient);
+        } catch (e) {
           // A 404 means either this search request does not exist, or that it is already cancelled
           if (e.meta?.statusCode === 404) return;
 
           // Log all other (unexpected) error messages
           logger.error(`cancelEqlSearch error: ${e.message}`);
-        });
+        }
       };
 
       return pollSearch(search, cancel, {
