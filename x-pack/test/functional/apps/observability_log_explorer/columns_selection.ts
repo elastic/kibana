@@ -13,7 +13,7 @@ const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message']
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer']);
+  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'settings']);
 
   describe('Columns selection initialization and update', () => {
     before(async () => {
@@ -30,6 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('when the log explorer loads', () => {
       it("should initialize the table columns to logs' default selection", async () => {
+        // did this work?
+        PageObjects.settings.refreshDataViewFieldList('All logs');
         await PageObjects.observabilityLogExplorer.navigateTo();
 
         await retry.try(async () => {

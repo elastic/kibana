@@ -570,10 +570,10 @@ export class DataViewsService {
       forceRefresh
     );
 
-    if (etag === indexPattern.getEtag()) {
+    if (indexPattern.getEtag() && etag === indexPattern.getEtag()) {
       return;
     } else {
-      indexPattern.setEtag(etag);
+      indexPattern.setEtag(etag!);
     }
 
     fields.forEach((field) => (field.isMapped = true));

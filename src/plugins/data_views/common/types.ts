@@ -319,7 +319,7 @@ export interface GetFieldsOptions {
 export interface FieldsForWildcardResponse {
   fields: FieldSpec[];
   indices: string[];
-  etag: string;
+  etag?: string;
 }
 
 /**
