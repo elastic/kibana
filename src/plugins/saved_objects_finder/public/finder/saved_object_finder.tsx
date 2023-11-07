@@ -237,6 +237,7 @@ export class SavedObjectFinderUi extends React.Component<
               namespaces: item.namespaces!,
               displayLimit: 5,
               behaviorContext: 'outside-space',
+              cursorStyle: 'default',
             });
           },
         }
