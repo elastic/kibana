@@ -23,7 +23,6 @@ import {
   FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL, CASES_URL } from '../../../urls/navigation';
@@ -109,7 +108,6 @@ const assertFilterControlsWithFilterObject = (
 
 describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
   });
 
@@ -236,7 +234,6 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
 
   context('with data modificiation', () => {
     after(() => {
-      cleanKibana();
       createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
     });
 
