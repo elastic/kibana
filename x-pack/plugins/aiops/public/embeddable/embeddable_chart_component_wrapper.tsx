@@ -21,7 +21,10 @@ import type {
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput,
 } from './embeddable_change_point_chart';
-import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+import {
+  EmbeddableChangePointChartProps,
+  RelatedEventsFilter,
+} from './embeddable_change_point_chart_component';
 import { FilterQueryContextProvider, useFilerQueryUpdates } from '../hooks/use_filters_query';
 import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
@@ -99,6 +102,7 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
               onChange={input.onChange}
               emptyState={input.emptyState}
               style={input.style}
+              relatedEventsFilter={input.relatedEventsFilter}
             />
           </FilterQueryContextProvider>
         </ChangePointDetectionControlsContextProvider>
@@ -136,6 +140,7 @@ export const ChartGridEmbeddableWrapper: FC<
   onChange,
   emptyState,
   style,
+  relatedEventsFilter,
 }) => {
   const { filters, query, timeRange } = useFilerQueryUpdates();
 
@@ -172,6 +177,10 @@ export const ChartGridEmbeddableWrapper: FC<
       },
     });
 
+    mergedQuery.bool!.filter.push(
+      ...(relatedEventsFilter?.filter((item) => item !== null) as RelatedEventsFilter[])
+    );
+
     if (partitions && fieldConfig.splitField) {
       mergedQuery.bool?.filter.push({
         terms: {
@@ -190,6 +199,7 @@ export const ChartGridEmbeddableWrapper: FC<
     timeRange.from,
     timeRange.to,
     uiSettings,
+    relatedEventsFilter,
   ]);
 
   const requestParams = useMemo<ChangePointDetectionRequestParams>(() => {

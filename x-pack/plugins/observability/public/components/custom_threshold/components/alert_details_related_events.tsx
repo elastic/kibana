@@ -13,6 +13,7 @@ import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { ChangePointAnnotation } from '@kbn/aiops-plugin/public/components/change_point_detection/change_point_detection_context';
+import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -52,6 +53,17 @@ export default function AlertDetailsRelatedEvents({
   const [metricAggType, setMetricAggType] = useState<string>('avg');
   const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
+
+  const relatedEventsFilter = ruleParams.groupBy
+    ? [...ruleParams.groupBy]
+        .map((groupByField) => {
+          const groupByValue = (
+            alert.fields[ALERT_GROUP] as Array<{ field: string; value: string }>
+          )?.find((fieldObj) => fieldObj.field === groupByField)?.value;
+          return groupByValue ? { term: { [groupByField]: groupByValue } } : null;
+        })
+        .filter((termFilter) => termFilter)
+    : [];
 
   let changePointDataAll: ChangePointAnnotation[] = predefinedMetrics.map((metricName) => {
     return {
@@ -193,6 +205,7 @@ export default function AlertDetailsRelatedEvents({
                   onChange={onChangePointDataChange}
                   style={{ marginTop: 10 }}
                   lastReloadRequestTime={lastReloadRequestTime}
+                  relatedEventsFilter={relatedEventsFilter}
                 />
               )
           )}

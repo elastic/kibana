@@ -20,6 +20,12 @@ import type { AiopsPluginStartDeps } from '../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';
 
+export interface RelatedEventsFilter {
+  term: {
+    [x: string]: string;
+  };
+}
+
 export interface EmbeddableChangePointChartProps {
   dataViewId: string;
   timeRange: TimeRange;
@@ -44,6 +50,7 @@ export interface EmbeddableChangePointChartProps {
    * Style the chart embeddable
    */
   style?: CSSProperties;
+  relatedEventsFilter?: Array<RelatedEventsFilter | null>;
 }
 
 export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPluginStartDeps) {
