@@ -23,6 +23,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiCopy,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { errorMessageStrings as strings } from './message_strings';
@@ -40,41 +41,47 @@ const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props)
     prefix: 'simpleFlyoutTitle',
   });
 
-  const errorMessage = errorComponentName
-    ? strings.fatal.callout.details.componentName(errorComponentName)
-    : error.message;
+  const errorName =
+    errorComponentName && strings.fatal.callout.details.componentName(errorComponentName);
   const errorTrace = errorInfo?.componentStack ?? error.stack ?? error.toString();
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId} paddingSize="s">
+    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId} paddingSize="none">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{strings.fatal.callout.details.title()}</h2>
-        </EuiTitle>
+        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+          <EuiTitle size="m">
+            <h2>{strings.fatal.callout.details.title()}</h2>
+          </EuiTitle>
+        </EuiPanel>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiCodeBlock>
-          <p>{errorMessage}</p>
-          <p>{errorTrace}</p>
+          <p>{(error.stack ?? error.toString()) + '\n\n'}</p>
+          <p>
+            {errorName}
+            {errorTrace}
+          </p>
         </EuiCodeBlock>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} flush="left">
-              {strings.fatal.callout.details.closeButton()}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={errorMessage + '\n\n' + errorTrace}>
-              {(copy) => (
-                <EuiButton onClick={copy} fill iconType="copyClipboard">
-                  {strings.fatal.callout.details.copyToClipboardButton()}
-                </EuiButton>
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} flush="left">
+                {strings.fatal.callout.details.closeButton()}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy textToCopy={errorName + '\n\n' + errorTrace}>
+                {(copy) => (
+                  <EuiButton onClick={copy} fill iconType="copyClipboard">
+                    {strings.fatal.callout.details.copyToClipboardButton()}
+                  </EuiButton>
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

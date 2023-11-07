@@ -28,11 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('nameInput', 'Slack api test connector');
       await testSubjects.setValue('secrets.token-input', 'xoxb-XXXX-XXXX-XXXX');
       await commonScreenshots.takeScreenshot('slack-api-connector', screenshotDirectories);
-      await testSubjects.click('create-connector-flyout-save-test-btn');
-      await testSubjects.click('toastCloseButton');
-      await pageObjects.common.closeToast();
-      await commonScreenshots.takeScreenshot('slack-api-params', screenshotDirectories);
-      await testSubjects.click('euiFlyoutCloseButton');
+      await testSubjects.click('create-connector-flyout-back-btn');
     });
 
     it('slack webhook connector screenshots', async () => {
