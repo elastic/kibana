@@ -10,6 +10,6 @@ import { createTestConfig } from '../../../../../config/serverless/config.base';
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'Entity Analytics Serverless/Risk Engine API Integration Tests',
+    reportName: 'Entity Analytics API Integration Tests -  Serverless - Risk Engine',
   },
 });

@@ -19,11 +19,6 @@ import type { NotesById } from '../../../common/store/app/model';
 
 import type { TimelineModel } from './model';
 
-export interface AutoSavedWarningMsg {
-  timelineId: string | null;
-  newTimelineModel: TimelineModel | null;
-}
-
 /** A map of id to timeline  */
 export interface TimelineById {
   [id: string]: TimelineModel;
@@ -41,7 +36,6 @@ export const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 /** The state of all timelines is stored here */
 export interface TimelineState {
   timelineById: TimelineById;
-  autoSavedWarningMsg: AutoSavedWarningMsg;
   showCallOutUnauthorizedMsg: boolean;
   insertTimeline: InsertTimeline | null;
 }

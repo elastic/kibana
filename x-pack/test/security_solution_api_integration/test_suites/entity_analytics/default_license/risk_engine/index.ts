@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Entity Analytics/Risk Engine', function () {
+  describe('Entity Analytics - Risk Engine', function () {
     loadTestFile(require.resolve('./init_and_status_apis'));
     loadTestFile(require.resolve('./risk_score_calculation'));
     loadTestFile(require.resolve('./risk_score_preview'));
