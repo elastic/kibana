@@ -9,15 +9,16 @@ import { act } from '@testing-library/react-hooks';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { AlertActions, Props } from './alert_actions';
-import { inventoryThresholdAlert } from '../../../rules/fixtures/example_alerts';
+import { AlertActions, AlertActionsProps } from './alert_actions';
+import { inventoryThresholdAlertEs } from '../../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import * as pluginContext from '../../../hooks/use_plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../plugin';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { noop } from 'lodash';
+import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -89,13 +90,14 @@ describe('ObservabilityActions component', () => {
       },
     });
 
-    const props: Props = {
+    const props: AlertActionsProps = {
       config,
-      data: inventoryThresholdAlert as unknown as TimelineNonEcsData[],
-      ecsData: {
-        _id: '6d4c6d74-d51a-495c-897d-88ced3b95e30',
-        _index: '.internal.alerts-observability.metrics.alerts-default-000001',
-      },
+      alert: inventoryThresholdAlertEs,
+      ecsAlert: [],
+      nonEcsData: [],
+      rowIndex: 1,
+      cveProps: {} as unknown as EuiDataGridCellValueElementProps,
+      clearSelection: noop,
       id: pageId,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       setFlyoutAlert: jest.fn(),

@@ -6,8 +6,11 @@
  */
 
 import { createContext } from 'react';
+import { noop } from 'lodash';
 import { AlertsTableContextType } from '../types';
 
 export const AlertsTableContext = createContext<AlertsTableContextType>({
   mutedAlerts: {},
+  onMutedAlertsChange: noop,
+  bulkActions: [] as unknown as AlertsTableContextType['bulkActions'],
 });

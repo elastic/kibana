@@ -41,7 +41,7 @@ import type { ConfigSchema } from '../../../plugin';
 
 const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
 
-export interface Props {
+export interface AlertActionsProps extends RenderCustomActionsRowArgs {
   config: ConfigSchema;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }
@@ -50,7 +50,7 @@ export function AlertActions({
   config,
   observabilityRuleTypeRegistry,
   ...customActionsProps
-}: RenderCustomActionsRowArgs & Props) {
+}: AlertActionsProps) {
   const { alert, id: pageId, refresh, setFlyoutAlert } = customActionsProps;
   const {
     cases: {

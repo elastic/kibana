@@ -6,7 +6,7 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMuteAlert } from '../hooks/use_mute_alert';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
@@ -15,23 +15,24 @@ import { MUTE, UNMUTE } from '../hooks/translations';
 import { useUnmuteAlert } from '../hooks/use_unmute_alert';
 
 /**
- * Action to mute/unmute the selected alert
+ * Alerts table row action to mute/unmute the selected alert
  */
 export const ToggleAction = ({ alert }: RenderCustomActionsRowArgs) => {
-  const { mutedAlerts } = useContext(AlertsTableContext);
+  const { mutedAlerts, onMutedAlertsChange } = useContext(AlertsTableContext);
   const alertInstanceId = alert['kibana.alert.instance.id']![0];
   const ruleId = alert['kibana.alert.rule.uuid']![0];
   const rule = mutedAlerts[ruleId];
   const isMuted = rule?.includes(alertInstanceId);
-  const { mutate: muteAlert } = useMuteAlert();
-  const { mutate: unmuteAlert } = useUnmuteAlert();
+  const { mutateAsync: muteAlert } = useMuteAlert();
+  const { mutateAsync: unmuteAlert } = useUnmuteAlert();
 
-  const toggleAlert = () => {
+  const toggleAlert = useCallback(() => {
     if (isMuted) {
-      unmuteAlert({ ruleId, alertInstanceId });
+      unmuteAlert({ ruleId, alertInstanceId }).then(onMutedAlertsChange);
+    } else {
+      muteAlert({ ruleId, alertInstanceId }).then(onMutedAlertsChange);
     }
-    muteAlert({ ruleId, alertInstanceId });
-  };
+  }, [alertInstanceId, isMuted, muteAlert, onMutedAlertsChange, ruleId, unmuteAlert]);
 
   return (
     <EuiContextMenuItem

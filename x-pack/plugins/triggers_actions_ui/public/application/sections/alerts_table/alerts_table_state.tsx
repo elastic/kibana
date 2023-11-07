@@ -28,18 +28,16 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
-import { BulkActionsContext } from './bulk_actions/context';
 import { EmptyState } from './empty_state';
 import {
   Alert,
   Alerts,
   AlertsTableConfigurationRegistry,
   AlertsTableProps,
-  BulkActionsReducerAction,
-  BulkActionsState,
   RowSelectionState,
   TableUpdateHandlerArgs,
 } from '../../../types';
@@ -52,6 +50,8 @@ import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
+import { useGetMutedAlerts } from './hooks/use_get_muted_alerts';
+import { AlertsTableContext } from './contexts/alerts_table_context';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -88,17 +88,6 @@ const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   sort: [],
   getRenderCellValue: () => () => null,
 };
-
-const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
-  tableProps: AlertsTableProps;
-  initialBulkActionsState: [BulkActionsState, React.Dispatch<BulkActionsReducerAction>];
-}> = ({ tableProps, initialBulkActionsState }) => (
-  <BulkActionsContext.Provider value={initialBulkActionsState}>
-    <AlertsTable {...tableProps} />
-  </BulkActionsContext.Provider>
-);
-
-const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
 
 type AlertWithCaseIds = Alert & Required<Pick<Alert, typeof ALERT_CASE_IDS>>;
 type AlertWithMaintenanceWindowIds = Alert &
@@ -160,6 +149,7 @@ const AlertsTableStateWithQueryProvider = ({
   shouldHighlightRow,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
+  const queryClient = useQueryClient();
 
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
@@ -257,6 +247,14 @@ const AlertsTableStateWithQueryProvider = ({
     sort,
     skip: false,
   });
+
+  const { data: mutedAlerts } = useGetMutedAlerts([
+    ...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0])),
+  ]);
+
+  const onMutedAlertsChange = useCallback(() => {
+    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts());
+  }, [queryClient]);
 
   useEffect(() => {
     alertsTableConfigurationRegistry.update(configurationId, {
@@ -436,7 +434,13 @@ const AlertsTableStateWithQueryProvider = ({
   );
 
   return hasAlertsTableConfiguration ? (
-    <>
+    <AlertsTableContext.Provider
+      value={{
+        mutedAlerts: mutedAlerts ?? {},
+        onMutedAlertsChange,
+        bulkActions: initialBulkActionsState,
+      }}
+    >
       {!isLoading && alertsCount === 0 && (
         <InspectButtonContainer>
           <EmptyState
@@ -455,19 +459,11 @@ const AlertsTableStateWithQueryProvider = ({
           permissions={casesPermissions}
           features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
         >
-          <AlertsTableWithBulkActionsContext
-            tableProps={tableProps}
-            initialBulkActionsState={initialBulkActionsState}
-          />
+          <AlertsTable {...tableProps} />
         </CasesContext>
       )}
-      {alertsCount !== 0 && !isCasesContextAvailable && (
-        <AlertsTableWithBulkActionsContext
-          tableProps={tableProps}
-          initialBulkActionsState={initialBulkActionsState}
-        />
-      )}
-    </>
+      {alertsCount !== 0 && !isCasesContextAvailable && <AlertsTable {...tableProps} />}
+    </AlertsTableContext.Provider>
   ) : (
     <EuiEmptyPrompt
       data-test-subj="alertsTableNoConfiguration"

@@ -16,8 +16,6 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useGetMutedAlerts } from './hooks/use_get_muted_alerts';
-import { AlertsTableContext } from './contexts/alerts_table_context';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
@@ -80,9 +78,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     refresh: alertsRefresh,
     getInspectQuery,
   } = alertsData;
-  const { data: mutedAlerts } = useGetMutedAlerts([
-    ...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0])),
-  ]);
   const queryClient = useQueryClient();
   const { data: cases, isLoading: isLoadingCases } = props.cases;
   const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
@@ -114,7 +109,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const refreshData = useCallback(() => {
     alertsRefresh();
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.cases());
-    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.getMutedAlerts());
+    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts());
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.maintenanceWindows());
   }, [alertsRefresh, queryClient]);
 
@@ -448,50 +443,48 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
 
   return (
-    <AlertsTableContext.Provider value={{ mutedAlerts: mutedAlerts ?? {} }}>
-      <InspectButtonContainer>
-        <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-          <Suspense fallback={null}>
-            {flyoutAlertIndex > -1 && (
-              <AlertsFlyout
-                alert={alerts[flyoutAlertIndex]}
-                alertsCount={alertsCount}
-                onClose={handleFlyoutClose}
-                alertsTableConfiguration={props.alertsTableConfiguration}
-                flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
-                onPaginate={onPaginateFlyout}
-                isLoading={isLoading}
-                id={props.id}
-              />
-            )}
-          </Suspense>
-          {alertsCount > 0 && (
-            <EuiDataGrid
-              aria-label="Alerts table"
-              data-test-subj="alertsTable"
-              columns={columnsWithCellActions}
-              columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
-              trailingControlColumns={props.trailingControlColumns}
-              leadingControlColumns={leadingControlColumns}
-              rowCount={alertsCount}
-              renderCellValue={handleRenderCellValue}
-              gridStyle={actualGridStyle}
-              sorting={{ columns: sortingColumns, onSort }}
-              toolbarVisibility={toolbarVisibility}
-              pagination={{
-                ...pagination,
-                pageSizeOptions: props.pageSizeOptions,
-                onChangeItemsPerPage: onChangePageSize,
-                onChangePage: onChangePageIndex,
-              }}
-              rowHeightsOptions={props.rowHeightsOptions}
-              onColumnResize={onColumnResize}
-              ref={dataGridRef}
+    <InspectButtonContainer>
+      <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+        <Suspense fallback={null}>
+          {flyoutAlertIndex > -1 && (
+            <AlertsFlyout
+              alert={alerts[flyoutAlertIndex]}
+              alertsCount={alertsCount}
+              onClose={handleFlyoutClose}
+              alertsTableConfiguration={props.alertsTableConfiguration}
+              flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+              onPaginate={onPaginateFlyout}
+              isLoading={isLoading}
+              id={props.id}
             />
           )}
-        </section>
-      </InspectButtonContainer>
-    </AlertsTableContext.Provider>
+        </Suspense>
+        {alertsCount > 0 && (
+          <EuiDataGrid
+            aria-label="Alerts table"
+            data-test-subj="alertsTable"
+            columns={columnsWithCellActions}
+            columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
+            trailingControlColumns={props.trailingControlColumns}
+            leadingControlColumns={leadingControlColumns}
+            rowCount={alertsCount}
+            renderCellValue={handleRenderCellValue}
+            gridStyle={actualGridStyle}
+            sorting={{ columns: sortingColumns, onSort }}
+            toolbarVisibility={toolbarVisibility}
+            pagination={{
+              ...pagination,
+              pageSizeOptions: props.pageSizeOptions,
+              onChangeItemsPerPage: onChangePageSize,
+              onChangePage: onChangePageIndex,
+            }}
+            rowHeightsOptions={props.rowHeightsOptions}
+            onColumnResize={onColumnResize}
+            ref={dataGridRef}
+          />
+        )}
+      </section>
+    </InspectButtonContainer>
   );
 };
 

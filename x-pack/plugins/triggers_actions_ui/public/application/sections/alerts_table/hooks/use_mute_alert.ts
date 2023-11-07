@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
 import { muteAlertInstance } from '../../../lib/rule_api/mute_alert';
 import { useKibana } from '../../../..';
 import { ServerError, ToggleAlertParams } from '../types';
@@ -21,7 +20,6 @@ export const useMuteAlert = () => {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const queryClient = useQueryClient();
   return useMutation(
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       muteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
@@ -32,7 +30,6 @@ export const useMuteAlert = () => {
             defaultMessage: 'Alert muted',
           })
         );
-        return queryClient.invalidateQueries(triggersActionsUiQueriesKeys.getMutedAlerts());
       },
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {

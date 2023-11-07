@@ -28,7 +28,6 @@ import {
   Alerts,
 } from '../../../types';
 import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
-import { BulkActionsContext } from './bulk_actions/context';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
@@ -37,6 +36,8 @@ import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';
 import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
+import { AlertsTableContext } from './contexts/alerts_table_context';
+import { noop } from 'lodash';
 
 const mockCaseService = createCasesServiceMock();
 
@@ -335,9 +336,15 @@ describe('AlertsTable', () => {
 
     return (
       <AppWrapper>
-        <BulkActionsContext.Provider value={initialBulkActionsState}>
+        <AlertsTableContext.Provider
+          value={{
+            mutedAlerts: {},
+            onMutedAlertsChange: noop,
+            bulkActions: initialBulkActionsState,
+          }}
+        >
           <AlertsTable {...props} />
-        </BulkActionsContext.Provider>
+        </AlertsTableContext.Provider>
       </AppWrapper>
     );
   };

@@ -8,7 +8,6 @@ import React, { useMemo, useReducer } from 'react';
 
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { BulkActionsContext } from './context';
 import { AlertsTable } from '../alerts_table';
 import {
   Alerts,
@@ -25,6 +24,8 @@ import { createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
 import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import { createCasesServiceMock } from '../index.mock';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
+import { noop } from 'lodash';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -254,9 +255,15 @@ describe('AlertsTable.BulkActions', () => {
 
     return (
       <AppWrapper>
-        <BulkActionsContext.Provider value={initialBulkActionsState}>
+        <AlertsTableContext.Provider
+          value={{
+            mutedAlerts: {},
+            onMutedAlertsChange: noop,
+            bulkActions: initialBulkActionsState,
+          }}
+        >
           <AlertsTable {...props} />
-        </BulkActionsContext.Provider>
+        </AlertsTableContext.Provider>
       </AppWrapper>
     );
   };

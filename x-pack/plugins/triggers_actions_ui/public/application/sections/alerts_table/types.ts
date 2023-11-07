@@ -11,7 +11,9 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { Dispatch, ReducerAction, ReducerState } from 'react';
 import { Alert, AlertsTableProps } from '../../../types';
+import type { bulkActionsReducer } from './bulk_actions/reducer';
 
 export interface Consumer {
   id: AlertConsumers;
@@ -79,4 +81,9 @@ export interface ToggleAlertParams {
 
 export interface AlertsTableContextType {
   mutedAlerts: MutedAlerts;
+  onMutedAlertsChange: () => void;
+  bulkActions: [
+    ReducerState<typeof bulkActionsReducer>,
+    Dispatch<ReducerAction<typeof bulkActionsReducer>>
+  ];
 }

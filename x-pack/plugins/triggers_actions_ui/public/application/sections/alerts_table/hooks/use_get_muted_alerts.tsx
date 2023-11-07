@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMutedAlerts } from './apis/get_rules_muted_alerts';
 import { useKibana } from '../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
@@ -21,9 +21,10 @@ export const useGetMutedAlerts = (ruleIds: string[], enabled = true) => {
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const queryClient = useQueryClient();
 
   return useQuery(
-    triggersActionsUiQueriesKeys.getMutedAlerts(),
+    triggersActionsUiQueriesKeys.mutedAlerts(),
     ({ signal }) =>
       getMutedAlerts(http, { ids: ruleIds }, signal).then(({ data: rules }) =>
         rules?.reduce((mutedAlerts, rule) => {

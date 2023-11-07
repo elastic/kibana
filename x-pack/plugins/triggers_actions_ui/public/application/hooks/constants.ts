@@ -12,7 +12,6 @@ export const triggersActionsUiQueriesKeys = {
   mutedAlerts: () => [...triggersActionsUiQueriesKeys.alertsTable(), 'mutedAlerts'] as const,
   casesBulkGet: (caseIds: string[]) =>
     [...triggersActionsUiQueriesKeys.cases(), 'bulkGet', caseIds] as const,
-  getMutedAlerts: () => [...triggersActionsUiQueriesKeys.mutedAlerts(), 'get'] as const,
   maintenanceWindows: () =>
     [...triggersActionsUiQueriesKeys.alertsTable(), 'maintenanceWindows'] as const,
   maintenanceWindowsBulkGet: (maintenanceWindowIds: string[]) =>
