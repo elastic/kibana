@@ -517,9 +517,9 @@ export const selectCoverageOverviewSourceFilterOption = (option: string) => {
 };
 
 export const filterCoverageOverviewBySearchBar = (searchTerm: string) => {
-  cy.get(COVERAGE_OVERVIEW_SEARCH_BAR).type(searchTerm);
-  cy.get(COVERAGE_OVERVIEW_SEARCH_BAR).type('{enter}');
-  cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.get(COVERAGE_OVERVIEW_SEARCH_BAR).type(`${searchTerm}`);
+  cy.get(COVERAGE_OVERVIEW_SEARCH_BAR).focus();
+  cy.get(COVERAGE_OVERVIEW_SEARCH_BAR).realType('{enter}');
 };
 
 export const enableAllDisabledRules = () => {

@@ -49,26 +49,6 @@ describe('handleCoverageOverviewRequest', () => {
       })
     );
   });
-
-  describe('filters', () => {
-    beforeEach(() => {
-      (findRules as jest.Mock).mockResolvedValue({
-        total: 25555,
-        page: 3,
-        perPage: 10000,
-        data: generateRules(1),
-      });
-    });
-    it('no filters present', async () => {
-      await handleCoverageOverviewRequest({
-        params: {},
-        deps: {
-          rulesClient: rulesClientMock.create(),
-        },
-      });
-      expect(findRules).toHaveBeenCalledWith({});
-    });
-  });
 });
 
 function generateRules(count: number): Rule[] {

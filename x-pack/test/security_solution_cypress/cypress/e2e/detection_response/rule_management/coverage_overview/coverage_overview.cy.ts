@@ -28,6 +28,7 @@ import {
 import { login } from '../../../../tasks/login';
 import {
   enableAllDisabledRules,
+  filterCoverageOverviewBySearchBar,
   openTechniquePanel,
   selectCoverageOverviewActivityFilterOption,
   selectCoverageOverviewSourceFilterOption,
@@ -134,6 +135,23 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
       .should('not.exist');
     cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled custom rule');
     cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+
+    // filtering for search term
+    selectCoverageOverviewSourceFilterOption('Elastic rules');
+    filterCoverageOverviewBySearchBar('Enabled custom rule');
+
+    openTechniquePanel(getMockThreatData().technique.name);
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+      .contains('Enabled prebuilt rule')
+      .should('not.exist');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+      .contains('Disabled prebuilt rule')
+      .should('not.exist');
+    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+      .contains('Disabled custom rule')
+      .should('not.exist');
+    cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('be.disabled');
   });
 
   it('enables all disabled rules', () => {

@@ -19,6 +19,7 @@ import {
   deleteAllRules,
   getSimpleRule,
   installPrebuiltRulesAndTimelines,
+  installPrebuiltRules,
 } from '../../utils';
 import { createNonSecurityRule } from '../../utils/create_non_security_rule';
 
@@ -465,6 +466,101 @@ export default ({ getService }: FtrProviderContext): void => {
             unmapped_rule_ids: [],
             rules_data: {
               [expectedRule.id]: {
+                activity: 'disabled',
+                name: 'Simple Rule Query',
+              },
+            },
+          });
+        });
+
+        it('returns response filtered by prebuilt rules', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({
+              rule_id: 'prebuilt-rule-1',
+              threat: generateThreatArray(1),
+            }),
+          ]);
+          const {
+            results: { created },
+          } = await installPrebuiltRules(es, supertest);
+          const expectedRule = created[0];
+
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            threat: generateThreatArray(2),
+          });
+
+          const { body } = await supertest
+            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
+            .send({
+              filter: {
+                source: ['prebuilt'],
+              },
+            })
+            .expect(200);
+
+          expect(body).to.eql({
+            coverage: {
+              T001: [expectedRule.id],
+              TA001: [expectedRule.id],
+              'T001.001': [expectedRule.id],
+            },
+            unmapped_rule_ids: [],
+            rules_data: {
+              [expectedRule.id]: {
+                activity: 'disabled',
+                name: 'Query with a rule id',
+              },
+            },
+          });
+        });
+
+        it('returns all rules if both custom and prebuilt filters are specified in the request', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({
+              rule_id: 'prebuilt-rule-1',
+              threat: generateThreatArray(1),
+            }),
+          ]);
+          const {
+            results: { created },
+          } = await installPrebuiltRules(es, supertest);
+          const expectedPrebuiltRule = created[0];
+
+          const expectedCustomRule = await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            threat: generateThreatArray(2),
+          });
+
+          const { body } = await supertest
+            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
+            .send({
+              filter: {
+                source: ['prebuilt', 'custom'],
+              },
+            })
+            .expect(200);
+
+          expect(body).to.eql({
+            coverage: {
+              T001: [expectedPrebuiltRule.id],
+              TA001: [expectedPrebuiltRule.id],
+              'T001.001': [expectedPrebuiltRule.id],
+              T002: [expectedCustomRule.id],
+              TA002: [expectedCustomRule.id],
+              'T002.002': [expectedCustomRule.id],
+            },
+            unmapped_rule_ids: [],
+            rules_data: {
+              [expectedPrebuiltRule.id]: {
+                activity: 'disabled',
+                name: 'Query with a rule id',
+              },
+              [expectedCustomRule.id]: {
                 activity: 'disabled',
                 name: 'Simple Rule Query',
               },
