@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import {
   Filter,
@@ -34,6 +35,7 @@ import {
   UI_SETTINGS,
 } from '@kbn/data-plugin/common';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
@@ -327,7 +329,7 @@ export function QueryBarMenuPanels({
   const luceneLabel = strings.getLuceneLanguageName();
   const kqlLabel = strings.getKqlLanguageName();
 
-  const filtersRelatedPanels = [
+  const filtersRelatedPanels: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: strings.getOptionsAddFilterButtonLabel(),
       icon: 'plus',
@@ -344,13 +346,12 @@ export function QueryBarMenuPanels({
     },
   ];
 
-  const queryAndFiltersRelatedPanels = [
+  const queryAndFiltersRelatedPanels: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: savedQuery
         ? strings.getLoadOtherFilterSetLabel()
         : strings.getLoadCurrentFilterSetLabel(),
       panel: 4,
-      width: 350,
       icon: 'filter',
       'data-test-subj': 'saved-query-management-load-button',
       disabled: !hasSavedQueries,
@@ -366,7 +367,7 @@ export function QueryBarMenuPanels({
     { isSeparator: true },
   ];
 
-  const items = [];
+  const items: EuiContextMenuPanelItemDescriptor[] = [];
   // apply to all actions are only shown when there are filters
   if (showFilterBar) {
     items.push(...filtersRelatedPanels);
@@ -406,7 +407,7 @@ export function QueryBarMenuPanels({
     });
   }
 
-  let panels = [
+  let panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
       title: savedQuery?.attributes.title ? (
@@ -444,8 +445,7 @@ export function QueryBarMenuPanels({
     {
       id: 1,
       title: strings.getSaveCurrentFilterSetLabel(),
-      disabled: !Boolean(showSaveQuery),
-      content: <div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>,
+      content: <div css={{ padding: euiThemeVars.euiSize }}>{saveAsNewQueryFormComponent}</div>,
     },
     {
       id: 2,
@@ -520,7 +520,7 @@ export function QueryBarMenuPanels({
       width: 400,
       content: <div>{manageFilterSetComponent}</div>,
     },
-  ] as EuiContextMenuPanelDescriptor[];
+  ];
 
   if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {
     panels = panels.map((panel) => ({

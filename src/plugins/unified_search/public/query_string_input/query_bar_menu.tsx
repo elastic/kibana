@@ -15,15 +15,14 @@ import {
   useGeneratedHtmlId,
   EuiButtonIconProps,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { QueryBarMenuPanels, QueryBarMenuPanelsProps } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
-import { popoverDragAndDropCss } from './add_filter_popover.styles';
 import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
@@ -107,8 +106,6 @@ function QueryBarMenuComponent({
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
 
-  const euiTheme = useEuiTheme();
-
   useEffect(() => {
     if (openQueryBarMenu) {
       setRenderedComponent('menu');
@@ -140,7 +137,7 @@ function QueryBarMenuComponent({
         onClick={onButtonClick}
         isDisabled={isDisabled}
         {...buttonProps}
-        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+        css={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
         iconType="filter"
         aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"
@@ -177,19 +174,38 @@ function QueryBarMenuComponent({
       case 'menu':
       default:
         return (
-          <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="queryBarMenuPanel" />
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={panels}
+            data-test-subj="queryBarMenuPanel"
+            css={{
+              // Add width to transition properties to smooth
+              // the animation when the panel width changes
+              transitionProperty: 'width, height !important',
+              // Add a white background to panels since panels
+              // of different widths can overlap each other
+              // when transitioning, but the background colour
+              // ensures the incoming panel always overlays
+              // the outgoing panel which improves the effect
+              '.euiContextMenuPanel': {
+                backgroundColor: euiThemeVars.euiColorEmptyShade,
+              },
+            }}
+          />
         );
       case 'saveForm':
         return (
           <EuiContextMenuPanel
             title={strings.getSavedQueryPopoverSaveChangesButtonText()}
-            items={[<div style={{ padding: 16 }}>{saveFormComponent}</div>]}
+            items={[<div css={{ padding: euiThemeVars.euiSize }}>{saveFormComponent}</div>]}
           />
         );
       case 'saveAsNewForm':
         return (
           <EuiContextMenuPanel
-            items={[<div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>]}
+            items={[
+              <div css={{ padding: euiThemeVars.euiSize }}>{saveAsNewQueryFormComponent}</div>,
+            ]}
           />
         );
       case 'addFilter':
@@ -226,9 +242,7 @@ function QueryBarMenuComponent({
         anchorPosition="downLeft"
         repositionOnScroll
         data-test-subj="queryBarMenuPopover"
-        panelProps={{
-          css: popoverDragAndDropCss(euiTheme),
-        }}
+        hasDragDrop
       >
         {renderComponent()}
       </EuiPopover>
