@@ -6,20 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RuleActionParams, RuleTypeParams, SanitizedRule } from '../types';
+import { RuleActionParams } from '../types';
 import { RuleUrl } from './execution_handler';
 
 export interface InjectActionParamsOpts {
   actionTypeId: string;
   actionParams: RuleActionParams;
   ruleUrl?: RuleUrl;
-  rule?: SanitizedRule<RuleTypeParams>;
+  ruleName?: string;
 }
 
 export function injectActionParams({
   actionTypeId,
   actionParams,
-  rule,
+  ruleName,
   ruleUrl = {},
 }: InjectActionParamsOpts) {
   // Inject kibanaFooterLink if action type is email. This is used by the email action type
@@ -48,8 +48,7 @@ export function injectActionParams({
       return actionParams;
     }
 
-    const links = (actionParams.links ?? []) as Array<{ href: string; text: string }>;
-    const ruleName = rule?.name ?? 'Unknown';
+    const links = Array.isArray(actionParams.links) ? actionParams.links : [];
 
     return {
       ...actionParams,
@@ -58,7 +57,7 @@ export function injectActionParams({
           href: path,
           text: i18n.translate('xpack.alerting.injectActionParams.pagerduty.kibanaLinkText', {
             defaultMessage: 'Elastic Rule "{ruleName}"',
-            values: { ruleName },
+            values: { ruleName: ruleName ?? 'Unknown' },
           }),
         },
         ...links,
