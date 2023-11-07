@@ -33,6 +33,7 @@ import type {
   ChromeHelpExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
+  Workflows,
 } from '@kbn/core-chrome-browser';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -76,6 +77,8 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   customBranding$: Observable<CustomBranding>;
+  workflows$: Observable<Workflows>;
+  onWorkflowChange: (id: string) => void;
 }
 
 export function Header({
@@ -89,6 +92,7 @@ export function Header({
   breadcrumbsAppendExtension$,
   globalHelpExtensionMenuLinks$,
   customBranding$,
+  onWorkflowChange,
   ...observables
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -99,7 +103,13 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
-  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />;
+  const Breadcrumbs = (
+    <HeaderBreadcrumbs
+      breadcrumbs$={observables.breadcrumbs$}
+      workflows$={observables.workflows$}
+      onWorkflowChange={onWorkflowChange}
+    />
+  );
 
   return (
     <>

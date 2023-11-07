@@ -31,12 +31,12 @@ import type {
   ChromeStyle,
   ChromeProjectNavigation,
   ChromeSetProjectBreadcrumbsParams,
-} from '@kbn/core-chrome-browser';
-import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type {
   SideNavComponent as ISideNavComponent,
   ChromeHelpMenuLink,
+  Workflows,
+  Workflow,
 } from '@kbn/core-chrome-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -49,6 +49,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
+const WORKFLOW_ID = 'core.chrome.workflowId';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
@@ -176,6 +177,16 @@ export class ChromeService {
     notifications,
     customBranding,
   }: StartDeps): Promise<InternalChromeStart> {
+    // eslint-disable-next-line prefer-const
+    let projectNavigation: ReturnType<ProjectNavigationService['start']> | undefined;
+
+    const getProjectNavigation = (): ReturnType<ProjectNavigationService['start']> => {
+      if (!projectNavigation) {
+        throw new Error(`Accessing [projectNavigation] before it is defined.`);
+      }
+      return projectNavigation;
+    };
+
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
 
@@ -191,7 +202,43 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
-    const chromeStyle$ = new BehaviorSubject<ChromeStyle>('project');
+    const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
+
+    const workflows$ = new BehaviorSubject<Workflows>({});
+    const activeWorkflowId$ = new BehaviorSubject<string>(localStorage.getItem(WORKFLOW_ID) ?? '');
+    let workflowInitiated = false;
+
+    const onWorkflowChange = (id: string) => {
+      const workflow: Workflow = workflows$.getValue()[id];
+      if (!workflow) {
+        throw new Error(`Workflow with id [${id}] does not exist.`);
+      }
+
+      if (workflow.navigation) {
+        getProjectNavigation().setProjectSideNavComponent(workflow.navigation);
+      }
+
+      chromeStyle$.next(workflow.style);
+      activeWorkflowId$.next(id);
+      localStorage.setItem(WORKFLOW_ID, id);
+    };
+
+    const updateWorkflows = (workflows: Workflows, replace: boolean = false) => {
+      if (replace) {
+        workflows$.next(workflows);
+      } else {
+        workflows$.next({
+          ...workflows$.getValue(),
+          ...workflows,
+        });
+      }
+
+      if (!workflowInitiated && activeWorkflowId$.getValue()) {
+        onWorkflowChange(activeWorkflowId$.getValue());
+      }
+
+      workflowInitiated = true;
+    };
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -223,11 +270,13 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const projectNavigation = this.projectNavigation.start({
+    projectNavigation = this.projectNavigation.start({
       application,
       navLinks,
       http,
       chromeBreadcrumbs$: breadcrumbs$,
+      workflows$,
+      onWorkflowChange,
     });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
@@ -265,39 +314,39 @@ export class ChromeService {
 
     const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
       // validateChromeStyle();
-      projectNavigation.setProjectSideNavComponent(component);
+      getProjectNavigation().setProjectSideNavComponent(component);
     };
 
     const setProjectNavigation = (config: ChromeProjectNavigation) => {
       // validateChromeStyle();
-      projectNavigation.setProjectNavigation(config);
+      getProjectNavigation().setProjectNavigation(config);
     };
 
     const setProjectBreadcrumbs = (
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: ChromeSetProjectBreadcrumbsParams
     ) => {
-      projectNavigation.setProjectBreadcrumbs(breadcrumbs, params);
+      getProjectNavigation().setProjectBreadcrumbs(breadcrumbs, params);
     };
 
     const setProjectHome = (homeHref: string) => {
       validateChromeStyle();
-      projectNavigation.setProjectHome(homeHref);
+      getProjectNavigation().setProjectHome(homeHref);
     };
 
     const setProjectsUrl = (projectsUrl: string) => {
       validateChromeStyle();
-      projectNavigation.setProjectsUrl(projectsUrl);
+      getProjectNavigation().setProjectsUrl(projectsUrl);
     };
 
     const setProjectName = (projectName: string) => {
       validateChromeStyle();
-      projectNavigation.setProjectName(projectName);
+      getProjectNavigation().setProjectName(projectName);
     };
 
     const setProjectUrl = (projectUrl: string) => {
       validateChromeStyle();
-      projectNavigation.setProjectUrl(projectUrl);
+      getProjectNavigation().setProjectUrl(projectUrl);
     };
 
     const isIE = () => {
@@ -341,8 +390,15 @@ export class ChromeService {
     }
 
     const getHeaderComponent = () => {
+      const defaultChromeStyle = chromeStyle$.getValue();
+      const defaultActiveWorkflowId = Object.values(workflows$.getValue())
+        .filter(({ isDefault }) => isDefault)
+        .map(({ id }) => id)[0];
+
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
+        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
+        useObservable(activeWorkflowId$, defaultActiveWorkflowId);
 
         if (!isVisible) {
           return (
@@ -354,12 +410,12 @@ export class ChromeService {
         }
 
         // render header
-        if (chromeStyle$.getValue() === 'project') {
-          const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
-          const projectBreadcrumbs$ = projectNavigation
+        if (chromeStyle === 'project') {
+          const projectNavigationComponent$ = getProjectNavigation().getProjectSideNavComponent$();
+          const projectBreadcrumbs$ = getProjectNavigation()
             .getProjectBreadcrumbs$()
             .pipe(takeUntil(this.stop$));
-          const activeNodes$ = projectNavigation.getActiveNodes$();
+          const activeNodes$ = getProjectNavigation().getActiveNodes$();
 
           const ProjectHeaderWithNavigationComponent = () => {
             const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
@@ -391,7 +447,7 @@ export class ChromeService {
                 navControlsRight$={navControls.getRight$()}
                 loadingCount$={http.getLoadingCount$()}
                 headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
-                homeHref$={projectNavigation.getProjectHome$()}
+                homeHref$={getProjectNavigation().getProjectHome$()}
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
@@ -435,6 +491,8 @@ export class ChromeService {
             onIsLockedUpdate={setIsNavDrawerLocked}
             isLocked$={getIsNavDrawerLocked$}
             customBranding$={customBranding$}
+            workflows$={workflows$}
+            onWorkflowChange={onWorkflowChange}
           />
         );
       };
@@ -529,8 +587,10 @@ export class ChromeService {
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
-        getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
+        getActiveNavigationNodes$: () => getProjectNavigation().getActiveNodes$(),
       },
+
+      updateWorkflows,
     };
   }
 

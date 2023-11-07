@@ -15,6 +15,7 @@ import {
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
+  Workflows,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -39,6 +40,8 @@ interface StartDeps {
   navLinks: ChromeNavLinks;
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  workflows$: Observable<Workflows>;
+  onWorkflowChange: (id: string) => void;
 }
 
 export class ProjectNavigationService {
@@ -62,7 +65,14 @@ export class ProjectNavigationService {
   private http?: InternalHttpStart;
   private unlistenHistory?: () => void;
 
-  public start({ application, navLinks, http, chromeBreadcrumbs$ }: StartDeps) {
+  public start({
+    application,
+    navLinks,
+    http,
+    chromeBreadcrumbs$,
+    workflows$,
+    onWorkflowChange,
+  }: StartDeps) {
     this.application = application;
     this.http = http;
     this.onHistoryLocationChange(application.history.location);
@@ -144,6 +154,7 @@ export class ProjectNavigationService {
           this.projectsUrl$,
           this.projectUrl$,
           this.projectName$,
+          workflows$,
         ]).pipe(
           map(
             ([
@@ -153,6 +164,7 @@ export class ProjectNavigationService {
               projectsUrl,
               projectUrl,
               projectName,
+              workflows,
             ]) => {
               return buildBreadcrumbs({
                 projectUrl,
@@ -161,6 +173,8 @@ export class ProjectNavigationService {
                 projectBreadcrumbs,
                 activeNodes,
                 chromeBreadcrumbs,
+                workflows,
+                onWorkflowChange,
               });
             }
           )

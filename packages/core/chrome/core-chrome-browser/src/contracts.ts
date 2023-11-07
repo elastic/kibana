@@ -15,6 +15,7 @@ import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
+import type { Workflows } from './workflows';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -176,4 +177,6 @@ export interface ChromeStart {
    * Get an observable of the current collapsed state of the side nav.
    */
   getIsSideNavCollapsed$(): Observable<boolean>;
+
+  updateWorkflows(workflows: Workflows, replace?: boolean): void;
 }

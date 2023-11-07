@@ -44,4 +44,6 @@ export type {
   NodeDefinitionWithChildren,
   NodeRenderAs,
   EuiThemeSize,
+  Workflow,
+  Workflows,
 } from './src';

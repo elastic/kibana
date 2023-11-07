@@ -44,3 +44,5 @@ export type {
   RenderAs as NodeRenderAs,
   EuiThemeSize,
 } from './project_navigation';
+
+export type { Workflow, Workflows } from './workflows';

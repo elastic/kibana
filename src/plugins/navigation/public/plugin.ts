@@ -16,7 +16,7 @@ import {
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
-import { createSearchSideNavComponent } from './nav_configs';
+import { getWorkflows } from './workflows';
 
 export class NavigationPublicPlugin
   implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart>
@@ -45,7 +45,8 @@ export class NavigationPublicPlugin
       setProjectHome: chrome.project.setHome,
     };
 
-    chrome.project.setSideNavComponent(createSearchSideNavComponent(core, { serverless, cloud }));
+    const workflows = getWorkflows({ core, serverless, cloud });
+    chrome.updateWorkflows(workflows);
 
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 

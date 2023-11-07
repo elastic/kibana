@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import React from 'react';
 import {
   DefaultNavigation,
   NavigationKibanaProvider,
   type NavigationTreeDefinition,
 } from '@kbn/shared-ux-chrome-navigation';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { Workflow } from '@kbn/core-chrome-browser';
+import type { WorkflowDeps } from '.';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
@@ -220,11 +219,8 @@ const navigationTree: NavigationTreeDefinition = {
   ],
 };
 
-export const createSideNavComponent =
-  (
-    core: CoreStart,
-    { serverless, cloud }: { serverless: ServerlessPluginStart; cloud: CloudStart }
-  ) =>
+const createSideNavComponent =
+  ({ core, serverless, cloud }: WorkflowDeps) =>
   () => {
     return (
       <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
@@ -232,3 +228,13 @@ export const createSideNavComponent =
       </NavigationKibanaProvider>
     );
   };
+
+export const getWorkflow = (deps: WorkflowDeps): Workflow => {
+  return {
+    id: 'search',
+    title: 'Search',
+    style: 'project',
+    icon: 'logoElasticsearch',
+    navigation: createSideNavComponent(deps),
+  };
+};

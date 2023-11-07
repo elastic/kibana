@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import {
   AppDeepLinkId,
   ChromeProjectBreadcrumb,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeBreadcrumb,
+  Workflows,
 } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { getWorkspaceSwitcherBreadCrumb } from '../ui/workspace_switcher_breadcrumb';
 
 export function buildBreadcrumbs({
   projectsUrl,
@@ -25,6 +23,8 @@ export function buildBreadcrumbs({
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
+  workflows,
+  onWorkflowChange,
 }: {
   projectsUrl?: string;
   projectName?: string;
@@ -35,8 +35,16 @@ export function buildBreadcrumbs({
   };
   chromeBreadcrumbs: ChromeBreadcrumb[];
   activeNodes: ChromeProjectNavigationNode[][];
+  workflows: Workflows;
+  onWorkflowChange: (id: string) => void;
 }): ChromeProjectBreadcrumb[] {
-  const rootCrumb = buildRootCrumb({ projectsUrl, projectName, projectUrl });
+  const rootCrumb = buildRootCrumb({
+    projectsUrl,
+    projectName,
+    projectUrl,
+    workflows,
+    onWorkflowChange,
+  });
 
   if (projectBreadcrumbs.params.absolute) {
     return [rootCrumb, ...projectBreadcrumbs.breadcrumbs];
@@ -85,42 +93,12 @@ export function buildBreadcrumbs({
   }
 }
 
-function buildRootCrumb({
-  projectsUrl,
-  projectName,
-  projectUrl,
-}: {
+function buildRootCrumb(options: {
   projectsUrl?: string;
   projectName?: string;
   projectUrl?: string;
+  workflows: Workflows;
+  onWorkflowChange: (id: string) => void;
 }): ChromeProjectBreadcrumb {
-  return {
-    text:
-      projectName ??
-      i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
-        defaultMessage: 'Project',
-      }),
-    // increase the max-width of the root breadcrumb to not truncate too soon
-    style: { maxWidth: '320px' },
-    popoverContent: (
-      <EuiContextMenuPanel
-        size="s"
-        items={[
-          <EuiContextMenuItem key="project" href={projectUrl} icon={'gear'}>
-            <FormattedMessage
-              id="core.ui.primaryNav.cloud.linkToProject"
-              defaultMessage="Manage project"
-            />
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem key="projects" href={projectsUrl} icon={'grid'}>
-            <FormattedMessage
-              id="core.ui.primaryNav.cloud.linkToAllProjects"
-              defaultMessage="View all projects"
-            />
-          </EuiContextMenuItem>,
-        ]}
-      />
-    ),
-    popoverProps: { panelPaddingSize: 'none' },
-  };
+  return getWorkspaceSwitcherBreadCrumb(options);
 }

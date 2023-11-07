@@ -6,20 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { EuiHeaderBreadcrumbs } from '@elastic/eui';
+import { EuiBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumb, Workflows } from '@kbn/core-chrome-browser';
+import { getWorkspaceSwitcherBreadCrumb } from '../workspace_switcher_breadcrumb';
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  workflows$: Observable<Workflows>;
+  onWorkflowChange: (id: string) => void;
 }
 
-export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
+export function HeaderBreadcrumbs({ breadcrumbs$, workflows$, onWorkflowChange }: Props) {
   const breadcrumbs = useObservable(breadcrumbs$, []);
-  let crumbs = breadcrumbs;
+  const workflows = useObservable(workflows$, {});
+  let crumbs = [getWorkspaceSwitcherBreadCrumb({ workflows, onWorkflowChange }), ...breadcrumbs];
 
   if (breadcrumbs.length === 0) {
     crumbs = [{ text: 'Kibana' }];
@@ -43,5 +47,5 @@ export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
     };
   });
 
-  return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
+  return <EuiBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
 }
