@@ -445,7 +445,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('filter multiple status', async () => {
         await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
+        await cases.casesTable.refreshTable();
         await cases.casesTable.changeStatus(CaseStatuses.closed, 1);
+        await cases.casesTable.refreshTable();
 
         // by default filter by all
         await cases.casesTable.validateCasesTableHasNthRows(4);

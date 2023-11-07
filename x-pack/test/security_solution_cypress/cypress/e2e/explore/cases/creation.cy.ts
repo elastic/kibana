@@ -84,7 +84,7 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', '1');
     cy.get(ALL_CASES_CLOSED_CASES_STATS).should('have.text', '0');
     cy.get(ALL_CASES_IN_PROGRESS_CASES_STATS).should('have.text', '0');
-    cy.get(ALL_CASES_STATUS_FILTER).should('have.text', 'Status');
+    cy.get(ALL_CASES_STATUS_FILTER).should('have.text', 'Status1');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
     (this.mycase as TestCase).tags.forEach((CaseTag) => {
