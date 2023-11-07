@@ -29,15 +29,20 @@ export const API_AUTH = Object.freeze({
 export const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
   'x-elastic-internal-origin': 'security-solution',
+  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
 });
 
-export const rootRequest = <T = unknown>(
-  options: Partial<Cypress.RequestOptions>
-): Cypress.Chainable<Cypress.Response<T>> =>
+export const rootRequest = <T = unknown>({
+  headers: optionHeaders,
+  ...restOptions
+}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
   cy.request<T>({
     auth: API_AUTH,
-    headers: API_HEADERS,
-    ...options,
+    headers: {
+      ...API_HEADERS,
+      ...(optionHeaders || {}),
+    },
+    ...restOptions,
   });
 
 /** Starts dragging the subject */
@@ -118,7 +123,6 @@ export const deleteAlertsAndRules = () => {
     headers: {
       'kbn-xsrf': 'cypress-creds',
       'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
     },
     timeout: 300000,
   });
@@ -305,33 +309,38 @@ export const deletePrebuiltRulesAssets = () => {
   });
 };
 
-export const postDataView = (dataSource: string) => {
+export const postDataView = (indexPattern: string, name?: string, id?: string) => {
   rootRequest({
     method: 'POST',
     url: DATA_VIEW_PATH,
     body: {
       data_view: {
-        id: dataSource,
-        name: dataSource,
+        id: id || indexPattern,
+        name: name || indexPattern,
         fieldAttrs: '{}',
-        title: dataSource,
+        title: indexPattern,
         timeFieldName: '@timestamp',
       },
     },
     headers: {
       'kbn-xsrf': 'cypress-creds',
       'x-elastic-internal-origin': 'security-solution',
-      [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
     },
     failOnStatusCode: false,
   });
 };
 
-export const deleteDataView = (dataSource: string) => {
+export const deleteDataView = (dataViewId: string) => {
   rootRequest({
-    method: 'DELETE',
-    url: `api/data_views/data_view/${dataSource}`,
+    method: 'POST',
+    url: 'api/content_management/rpc/delete',
     headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    body: {
+      contentTypeId: 'index-pattern',
+      id: dataViewId,
+      options: { force: true },
+      version: 1,
+    },
     failOnStatusCode: false,
   });
 };
