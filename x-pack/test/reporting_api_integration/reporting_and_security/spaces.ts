@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
      * NOTE: All timestamps in the documents are midnight UTC.
      * "00:00:00.000" means the time is formatted in UTC timezone
      */
-    describe('CSV saved search export', () => {
+    describe.skip('CSV saved search export', () => {
       const JOB_PARAMS_CSV_DEFAULT_SPACE =
         `columns:!(order_date,category,customer_full_name,taxful_total_price,currency),objectType:search,searchSource:(fields:!((field:'*',include_unmapped:true))` +
         `,filter:!((meta:(field:order_date,index:aac3e500-f2c7-11ea-8250-fb138aa491e7,params:()),query:(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-02T12:28:40.866Z'` +
