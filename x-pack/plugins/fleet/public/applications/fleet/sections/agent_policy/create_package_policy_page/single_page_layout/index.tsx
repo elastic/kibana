@@ -462,7 +462,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             >
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.requireRootCalloutDescription"
-                defaultMessage="Elastic Agent need to be run with root/administrator privileges for this integration."
+                defaultMessage="Elastic Agent needs to be run with root/administrator privileges for this integration."
               />
             </EuiCallOut>
             <EuiSpacer size="m" />
