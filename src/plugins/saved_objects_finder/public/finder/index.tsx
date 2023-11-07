@@ -8,6 +8,7 @@
 
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -29,10 +30,14 @@ const SavedObjectFinder = (props: SavedObjectFinderProps) => (
 export const getSavedObjectFinder = (
   contentClient: ContentClient,
   uiSettings: IUiSettingsClient,
-  savedObjectsTagging?: SavedObjectsTaggingApi
+  savedObjectsTagging?: SavedObjectsTaggingApi,
+  spaces?: SpacesApi
 ) => {
   return (props: SavedObjectFinderProps) => (
-    <SavedObjectFinder {...props} services={{ savedObjectsTagging, contentClient, uiSettings }} />
+    <SavedObjectFinder
+      {...props}
+      services={{ savedObjectsTagging, contentClient, uiSettings, spaces }}
+    />
   );
 };
 

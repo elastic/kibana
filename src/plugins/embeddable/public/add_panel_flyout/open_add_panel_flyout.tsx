@@ -10,11 +10,11 @@ import React, { Suspense } from 'react';
 
 import { OverlayRef } from '@kbn/core/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { SpacesApi, SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { IContainer } from '../lib';
-import { core, spaces } from '../kibana_services';
+import { core } from '../kibana_services';
 
 const LazyAddPanelFlyout = React.lazy(async () => {
   const module = await import('./add_panel_flyout');
@@ -27,19 +27,23 @@ export const openAddPanelFlyout = ({
   container,
   onAddPanel,
   onClose,
+  spaces,
 }: {
   container: IContainer;
   onAddPanel?: (id: string) => void;
   onClose?: () => void;
+  spaces?: SpacesApi;
 }): OverlayRef => {
-  const SpacesContextWrapper =
-    spaces.ui.components.getSpacesContextProvider ?? getEmptyFunctionComponent;
+  const SpacesContextWrapper = spaces
+    ? spaces.ui.components.getSpacesContextProvider
+    : getEmptyFunctionComponent;
+
   // send the overlay ref to the root embeddable if it is capable of tracking overlays
   const flyoutSession = core.overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner />}>
         <SpacesContextWrapper>
-          <LazyAddPanelFlyout container={container} onAddPanel={onAddPanel} />
+          <LazyAddPanelFlyout container={container} onAddPanel={onAddPanel} spaces={spaces} />
         </SpacesContextWrapper>
       </Suspense>,
       { theme$: core.theme.theme$ }

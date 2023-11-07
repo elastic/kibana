@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { FinderAttributes, SavedObjectCommon, LISTING_LIMIT_SETTING } from '../../common';
 
@@ -59,6 +60,7 @@ interface SavedObjectFinderState {
 
 interface SavedObjectFinderServices {
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  spaces?: SpacesApi;
   contentClient: ContentClient;
   uiSettings: IUiSettingsClient;
 }
@@ -211,6 +213,7 @@ export class SavedObjectFinderUi extends React.Component<
   public render() {
     const { onChoose, savedObjectMetaData } = this.props;
     const taggingApi = this.props.services.savedObjectsTagging;
+    const spaces = this.props.services.spaces;
     const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
     const tagColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined = originalTagColumn
       ? {
@@ -220,6 +223,22 @@ export class SavedObjectFinderUi extends React.Component<
               ? originalTagColumn.sortable(item) ?? ''
               : '',
           ['data-test-subj']: 'savedObjectFinderTags',
+        }
+      : undefined;
+    const spacesColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined = spaces
+      ? {
+          field: 'spaces',
+          name: i18n.translate('savedObjectsFinder.spacesColumnName', {
+            defaultMessage: 'Spaces',
+          }),
+          width: '20%',
+          render: (_, item) => {
+            return spaces.ui.components.getSpaceList({
+              namespaces: item.namespaces!,
+              displayLimit: 5,
+              behaviorContext: 'outside-space',
+            });
+          },
         }
       : undefined;
     const typeColumn: EuiTableFieldDataColumnType<SavedObjectFinderItem> | undefined =
@@ -266,6 +285,7 @@ export class SavedObjectFinderUi extends React.Component<
             },
           }
         : undefined;
+
     const columns: Array<EuiTableFieldDataColumnType<SavedObjectFinderItem>> = [
       ...(typeColumn ? [typeColumn] : []),
       {
@@ -306,6 +326,7 @@ export class SavedObjectFinderUi extends React.Component<
         },
       },
       ...(tagColumn ? [tagColumn] : []),
+      ...(spacesColumn ? [spacesColumn] : []),
     ];
     const pagination = {
       initialPageSize: this.props.initialPageSize || this.props.fixedPageSize || 10,

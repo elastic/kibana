@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { Toast } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import {
   SavedObjectFinder,
   SavedObjectFinderProps,
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
-import { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 import {
   core,
@@ -26,7 +26,6 @@ import {
   usageCollection,
   savedObjectsTaggingOss,
   contentManagement,
-  spaces,
 } from '../kibana_services';
 import {
   IContainer,
@@ -67,9 +66,11 @@ const runAddTelemetry = (
 export const AddPanelFlyout = ({
   container,
   onAddPanel,
+  spaces,
 }: {
   container: IContainer;
   onAddPanel?: (id: string) => void;
+  spaces?: SpacesApi;
 }) => {
   const factoriesBySavedObjectType: FactoryMap = useMemo(() => {
     return [...embeddableStart.getEmbeddableFactories()]
@@ -79,10 +80,6 @@ export const AddPanelFlyout = ({
         return acc;
       }, {} as FactoryMap);
   }, []);
-
-  const { spacesManager } = spaces.ui.useSpaces();
-
-  const namespaces = (container as DashboardAPI).select((state) => state.componentState.namespaces);
 
   const metaData = useMemo(
     () =>
@@ -107,19 +104,6 @@ export const AddPanelFlyout = ({
         throw new EmbeddableFactoryNotFoundError(type);
       }
 
-      const shareableRefs = await spacesManager.getShareableReferences([{ type, id }]);
-      // TODO: toast this, warn users before auto sharing nested SOs to other spaces?
-      const updateSpacesResult = await spacesManager.updateSavedObjectsSpaces(
-        shareableRefs.objects.map(
-          ({ type: objectType, id: objectId }: { type: string; id: string }) => ({
-            type: objectType,
-            id: objectId,
-          })
-        ),
-        namespaces || [],
-        []
-      );
-
       const embeddable = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
         factoryForSavedObjectType.type,
         { savedObjectId: id },
@@ -130,7 +114,7 @@ export const AddPanelFlyout = ({
       showSuccessToast(name);
       runAddTelemetry(container.type, factoryForSavedObjectType, savedObject);
     },
-    [container, factoriesBySavedObjectType, namespaces, onAddPanel, spacesManager]
+    [container, factoriesBySavedObjectType, onAddPanel]
   );
 
   return (
@@ -148,6 +132,7 @@ export const AddPanelFlyout = ({
             contentClient: contentManagement.client,
             savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
             uiSettings: core.uiSettings,
+            spaces,
           }}
           onChoose={onChoose}
           savedObjectMetaData={metaData}

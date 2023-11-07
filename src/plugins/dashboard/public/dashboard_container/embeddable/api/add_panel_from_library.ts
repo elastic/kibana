@@ -8,8 +8,12 @@
 
 import { isErrorEmbeddable, openAddPanelFlyout } from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../../../services/plugin_services';
 
 export function addFromLibrary(this: DashboardContainer) {
+  const {
+    spaces: { spacesApi },
+  } = pluginServices.getServices();
   if (isErrorEmbeddable(this)) return;
   this.openOverlay(
     openAddPanelFlyout({
@@ -21,6 +25,7 @@ export function addFromLibrary(this: DashboardContainer) {
       onClose: () => {
         this.clearOverlays();
       },
+      spaces: spacesApi,
     })
   );
 }
