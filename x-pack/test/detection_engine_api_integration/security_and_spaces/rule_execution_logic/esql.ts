@@ -11,6 +11,7 @@ import { orderBy } from 'lodash';
 
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
@@ -20,8 +21,6 @@ import {
   previewRule,
   createRule,
   getOpenSignals as getOpenAlerts,
-  waitForEventLogExecuteComplete,
-  getSignalsByIds as getAlertsByIds,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
@@ -730,7 +729,6 @@ export default ({ getService }: FtrProviderContext) => {
           max_signals: 100,
           enabled: true,
         };
-        const createdRule = await createRule(supertest, log, rule);
 
         // docs fall in first rule executions
         await indexGeneratedDocuments({
@@ -780,18 +778,27 @@ export default ({ getService }: FtrProviderContext) => {
           }),
         });
 
+        const createdRule = await createRule(supertest, log, rule);
+
         // first rule run should generate 100 alerts from first 3 batches of index documents
-        await waitForEventLogExecuteComplete(es, log, createdRule.id, 1);
+        const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+          supertest,
+          log,
+          es,
+          createdRule,
+          // rule has warning, alerts were truncated, thus "partial failure" status
+          RuleExecutionStatusEnum['partial failure'],
+          200
+        );
 
-        // refresh alerts index, so we can get all created alerts
-        await es.indices.refresh({ index: '.alerts-security.alerts-*' });
+        // should return 100 alerts
+        expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
+        // re-trigger rule execution with new interval
         await patchRule(supertest, log, {
           id: createdRule.id,
           enabled: false,
         });
-
-        // re-trigger rule execution with new interval
         await patchRule(supertest, log, {
           id: createdRule.id,
           from: '2020-10-28T05:45:00.000Z',
@@ -799,13 +806,15 @@ export default ({ getService }: FtrProviderContext) => {
           enabled: true,
         });
 
-        // second rule run should generate only 60 new alerts, the rest should be deduplicated
-        await waitForEventLogExecuteComplete(es, log, createdRule.id, 2);
-
-        // refresh alerts index, so we can get all created alerts
-        await es.indices.refresh({ index: '.alerts-security.alerts-*' });
-
-        const alertsResponse = await getAlertsByIds(supertest, log, [createdRule.id], 200);
+        const alertsResponse = await getOpenAlerts(
+          supertest,
+          log,
+          es,
+          createdRule,
+          RuleExecutionStatusEnum.succeeded,
+          200,
+          new Date()
+        );
 
         // should return 160 alerts
         expect(alertsResponse.hits.hits.length).toBe(160);
