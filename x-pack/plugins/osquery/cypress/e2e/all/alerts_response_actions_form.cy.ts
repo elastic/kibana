@@ -10,7 +10,6 @@ import {
   cleanupPack,
   cleanupRule,
   loadPack,
-  loadRule,
   multiQueryPackFixture,
   packFixture,
 } from '../../tasks/api_fixtures';
