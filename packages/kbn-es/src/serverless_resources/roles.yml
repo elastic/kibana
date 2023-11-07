@@ -210,6 +210,7 @@ t3_analyst:
       privileges:
         - read
         - write
+        - maintenance
     - names:
         - .lists*
         - .items*
@@ -573,6 +574,7 @@ endpoint_operations_analyst:
       privileges:
         - read
         - write
+        - maintenance
   applications:
     - application: "kibana-.kibana"
       privileges:
