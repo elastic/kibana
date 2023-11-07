@@ -16,7 +16,7 @@ import {
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';
-import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -231,11 +231,10 @@ const DataLayerHeaderTrigger = function ({
   return (
     <ToolbarButton
       data-test-subj="lns_layer_settings"
-      title={currentVisType.fullLabel || currentVisType.label}
+      aria-label={currentVisType.fullLabel || currentVisType.label}
       onClick={onClick}
       fullWidth
       size="s"
-      textProps={{ style: { lineHeight: '100%' } }}
     >
       <>
         <EuiIcon type={currentVisType.icon} />
