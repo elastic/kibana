@@ -136,6 +136,13 @@ get:
                           type: boolean
                         read:
                           type: boolean
+                    slo:
+                      type: object
+                      properties:
+                        all:
+                          type: boolean
+                        read:
+                          type: boolean
                     stackAlerts:
                       type: object
                       properties:
