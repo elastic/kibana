@@ -569,6 +569,24 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
     });
+
+    describe('error cases', async () => {
+      it('throws error when request body is not valid', async () => {
+        const { body } = await supertest
+          .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .send({ filter: { source: ['give me all the rules'] } })
+          .expect(400);
+
+        expect(body).to.eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message:
+            '[request body]: Invalid value "give me all the rules" supplied to "filter,source"',
+        });
+      });
+    });
   });
 };
 
