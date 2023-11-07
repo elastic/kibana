@@ -18,6 +18,8 @@ import type {
   AllReportersFindRequest,
   GetRelatedCasesByAlertResponse,
   CasesBulkGetResponse,
+  BulkCreateCasesRequest,
+  BulkCreateCasesResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -31,6 +33,7 @@ import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories }
 import type { PushParams } from './push';
 import { push } from './push';
 import { update } from './update';
+import { bulkCreate } from './bulk_create';
 
 /**
  * API for interacting with the cases entities.
@@ -40,6 +43,10 @@ export interface CasesSubClient {
    * Creates a case.
    */
   create(data: CasePostRequest): Promise<Case>;
+  /**
+   * Bulk create cases.
+   */
+  bulkCreate(data: BulkCreateCasesRequest): Promise<BulkCreateCasesResponse>;
   /**
    * Returns cases that match the search criteria.
    *
@@ -103,6 +110,7 @@ export const createCasesSubClient = (
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
     create: (data: CasePostRequest) => create(data, clientArgs, casesClient),
+    bulkCreate: (data: BulkCreateCasesRequest) => bulkCreate(data, clientArgs, casesClient),
     find: (params: CasesFindRequest) => find(params, clientArgs),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),

@@ -57,7 +57,7 @@ import {
   openTakeActionButtonAndSelectItem,
   selectTakeActionItem,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { cleanKibana } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -70,7 +70,7 @@ describe.skip('Alert details expandable flyout right panel', () => {
   const rule = getNewRule();
 
   beforeEach(() => {
-    cleanKibana();
+    deleteAlertsAndRules();
     login();
     createRule(rule);
     visit(ALERTS_URL);
