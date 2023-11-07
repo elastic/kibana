@@ -17,6 +17,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
       >
         <span
           class="eui-textTruncate"
+          style="line-height: 100%;"
         >
           test
         </span>

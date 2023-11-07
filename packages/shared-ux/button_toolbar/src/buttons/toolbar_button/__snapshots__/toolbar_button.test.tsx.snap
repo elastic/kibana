@@ -11,6 +11,7 @@ exports[`<ToolbarButton /> is rendered - default 1`] = `
   >
     <span
       class="eui-textTruncate"
+      style="line-height: 100%;"
     >
       Create chart
     </span>
@@ -20,7 +21,7 @@ exports[`<ToolbarButton /> is rendered - default 1`] = `
 
 exports[`<ToolbarButton /> is rendered - primary 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
   intl="[object Object]"
   type="button"
 >
@@ -29,6 +30,7 @@ exports[`<ToolbarButton /> is rendered - primary 1`] = `
   >
     <span
       class="eui-textTruncate"
+      style="line-height: 100%;"
     >
       Create chart
     </span>
