@@ -9,6 +9,8 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { ChromeBreadcrumb } from '@kbn/core/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { AssetDetailPage } from './asset_detail_page';
 import { MetricDetailPage } from './metric_detail_page';
@@ -19,11 +21,25 @@ export const NodeDetail = () => {
     params: { type: nodeType, node: nodeName },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
-  useMetricsBreadcrumbs([
-    {
-      text: nodeName,
-    },
-  ]);
+  const breadCrumbs: ChromeBreadcrumb[] = [];
+
+  const hostsLinkProps = useLinkProps({
+    app: 'metrics',
+    pathname: 'hosts',
+  });
+
+  if (nodeType === 'host') {
+    breadCrumbs.push({
+      ...hostsLinkProps,
+      text: 'Hosts',
+    });
+  }
+
+  breadCrumbs.push({
+    text: nodeName,
+  });
+
+  useMetricsBreadcrumbs(breadCrumbs);
 
   return (
     <EuiErrorBoundary>
