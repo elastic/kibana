@@ -18,10 +18,7 @@ export const resultStatuses = {
  * Returns the current state of the result, depends on fetchStatus and the given fetched rows
  * Determines what is displayed in Discover main view (loading view, data view, empty data view, ...)
  */
-export function getResultState(
-  fetchStatus: FetchStatus,
-  foundDocuments: boolean = false,
-) {
+export function getResultState(fetchStatus: FetchStatus, foundDocuments: boolean = false) {
   if (fetchStatus === FetchStatus.UNINITIALIZED) {
     return resultStatuses.UNINITIALIZED;
   }

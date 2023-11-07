@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -22,10 +18,7 @@ export interface ErrorCalloutProps {
   error: Error;
 }
 
-export const ErrorCallout = ({
-  title,
-  error,
-}: ErrorCalloutProps) => {
+export const ErrorCallout = ({ title, error }: ErrorCalloutProps) => {
   const { core } = useDiscoverServices();
   const { euiTheme } = useEuiTheme();
 
