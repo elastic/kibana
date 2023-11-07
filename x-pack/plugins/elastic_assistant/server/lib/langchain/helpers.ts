@@ -13,13 +13,13 @@ export const getLangChainMessage = (
 ): BaseMessage => {
   switch (assistantMessage.role) {
     case 'system':
-      return new SystemMessage(assistantMessage.content);
+      return new SystemMessage(assistantMessage.content ?? '');
     case 'user':
-      return new HumanMessage(assistantMessage.content);
+      return new HumanMessage(assistantMessage.content ?? '');
     case 'assistant':
-      return new AIMessage(assistantMessage.content);
+      return new AIMessage(assistantMessage.content ?? '');
     default:
-      return new HumanMessage(assistantMessage.content);
+      return new HumanMessage(assistantMessage.content ?? '');
   }
 };
 

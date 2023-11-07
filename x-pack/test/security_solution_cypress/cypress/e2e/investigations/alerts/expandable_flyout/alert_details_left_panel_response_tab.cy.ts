@@ -9,7 +9,6 @@ import { DOCUMENT_DETAILS_FLYOUT_RESPONSE_EMPTY } from '../../../../screens/expa
 import { openResponseTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_response_tab';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { cleanKibana } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -22,7 +21,6 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
       login();
       createRule(getNewRule());
       visit(ALERTS_URL);
