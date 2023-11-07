@@ -13,6 +13,7 @@ interface Config {
   isElasticStaffOwned?: boolean;
   deploymentId?: string;
   projectId?: string;
+  projectType?: string;
 }
 
 interface CloudUsage {
@@ -22,10 +23,18 @@ interface CloudUsage {
   isElasticStaffOwned?: boolean;
   deploymentId?: string;
   projectId?: string;
+  projectType?: string;
 }
 
 export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, config: Config) {
-  const { isCloudEnabled, trialEndDate, isElasticStaffOwned, deploymentId, projectId } = config;
+  const {
+    isCloudEnabled,
+    trialEndDate,
+    isElasticStaffOwned,
+    deploymentId,
+    projectId,
+    projectType,
+  } = config;
   const trialEndDateMs = trialEndDate ? new Date(trialEndDate).getTime() : undefined;
   return usageCollection.makeUsageCollector<CloudUsage>({
     type: 'cloud',
@@ -43,6 +52,10 @@ export function createCloudUsageCollector(usageCollection: UsageCollectionSetup,
         type: 'keyword',
         _meta: { description: 'The Serverless Project ID' },
       },
+      projectType: {
+        type: 'keyword',
+        _meta: { description: 'The Serverless Project type' },
+      },
     },
     fetch: () => {
       return {
@@ -52,6 +65,7 @@ export function createCloudUsageCollector(usageCollection: UsageCollectionSetup,
         ...(trialEndDateMs ? { inTrial: Date.now() <= trialEndDateMs } : {}),
         deploymentId,
         projectId,
+        projectType,
       };
     },
   });
