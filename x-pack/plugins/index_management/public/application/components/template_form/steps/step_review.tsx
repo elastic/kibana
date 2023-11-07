@@ -270,7 +270,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                       defaultMessage="Data retention"
                     />
                   </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
+                  <EuiDescriptionListDescription data-test-subj="lifecycleValue">
                     {getLifecycleValue(serializedLifecycle, INFINITE_AS_ICON)}
                   </EuiDescriptionListDescription>
                 </>
