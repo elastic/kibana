@@ -67,6 +67,7 @@ const OLDEST_DATE = moment('2019-01-19T16:22:56.217Z').format(DATE_FORMAT);
 
 describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
+    login();
     deleteRiskEngineConfiguration();
   });
 
