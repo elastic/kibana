@@ -461,8 +461,4 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/ess.config.ts
- 
-
-
-
-
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_license/rule_management/configs/ess.config.ts
