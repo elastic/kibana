@@ -17,7 +17,7 @@ import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
-import { ShareUxModal } from '../components/share_model/share_model';
+import { ShareUxModal } from '../components/share_modal/share_modal';
 
 export class ShareMenuManager {
   private isOpen = false;

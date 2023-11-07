@@ -28,6 +28,7 @@ import {
   UrlParamExtension,
 } from '../../types';
 import { TabContent } from './tab_content';
+import { LinksModalPage } from './links_modal_page';
 
 export interface ShareModalProps {
   allowEmbed: boolean;
@@ -215,6 +216,7 @@ export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
               selectedTab={selectedTab}
               onTabClick={onTabClick}
             />
+            {initialTabTitle === 'Links' && <LinksModalPage />}
           </EuiModalBody>
         </EuiModal>
       </EuiOverlayMask>
