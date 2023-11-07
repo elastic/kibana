@@ -218,6 +218,39 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
   return pRetry(fetchKibanaStatusAttempt, retryOptions);
 }
 
+// Wait until Project is initialized
+function waitForProject(projectId: string, apiKey: string): Promise<void> {
+  const fetchProjectStatusAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if project is initialized.`);
+    const response = await axios.get(
+      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/status`,
+      {
+        headers: {
+          Authorization: `ApiKey ${apiKey}`,
+        },
+      }
+    );
+    if (response.data.phase !== 'initialized') {
+      throw new Error('Project is not initialized. Retrying in 20s...');
+    } else {
+      log.info('Project is initialized');
+    }
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info('Project is not reachable. Retrying in 20s...');
+      } else {
+        log.info(error);
+      }
+    },
+    retries: 100,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+  return pRetry(fetchProjectStatusAttempt, retryOptions);
+}
+
 export const cli = () => {
   run(
     async () => {
@@ -376,8 +409,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               return process.exit(1);
             }
 
-            // Wait for 15 minutes in order for the environment to be ready
-            delay(900000);
+            await waitForProject(environment.id, API_KEY);
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = btoa(`${credentials.username}:${credentials.password}`);
@@ -387,6 +419,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
             // Wait until Kibana is available
             await waitForKibanaAvailable(environment.kb_url, auth, id);
+
+            delay(480000);
 
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
