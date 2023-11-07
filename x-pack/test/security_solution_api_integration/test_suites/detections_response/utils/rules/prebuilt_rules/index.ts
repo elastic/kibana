@@ -8,3 +8,4 @@ export * from './create_prebuilt_rule_saved_objects';
 export * from './get_prebuilt_rules_and_timelines_status';
 export * from './install_mock_prebuilt_rules';
 export * from './install_prebuilt_rules_and_timelines';
+export * from './install_prebuilt_rules';
