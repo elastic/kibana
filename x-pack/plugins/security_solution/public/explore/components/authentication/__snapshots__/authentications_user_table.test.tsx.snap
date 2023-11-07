@@ -374,32 +374,28 @@ exports[`Authentication User Table Component rendering it renders the user authe
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
-        class="euiPopover emotion-euiPopover"
+        class="euiPopover emotion-euiPopover-inline-block"
         data-test-subj="loadingMoreSizeRowPopover"
         id="customizablePagination"
       >
-        <div
-          class="euiPopover__anchor css-16vtueo-render"
+        <button
+          class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+          type="button"
         >
-          <button
-            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
-            type="button"
+          <span
+            class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
           >
             <span
-              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              class="eui-textTruncate euiButtonEmpty__text"
             >
-              <span
-                class="eui-textTruncate euiButtonEmpty__text"
-              >
-                Rows per page: 10
-              </span>
-              <span
-                color="inherit"
-                data-euiicon-type="arrowDown"
-              />
+              Rows per page: 10
             </span>
-          </button>
-        </div>
+            <span
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
       </div>
     </div>
     <div
