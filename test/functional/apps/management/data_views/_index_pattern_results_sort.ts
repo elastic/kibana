@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('index result field sort', function describeIndexTests() {
@@ -68,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const EXPECTED_FIELD_COUNT = 85;
       it('makelogs data should have expected number of fields', async function () {
         // did this work?
-        await this.testSubjects.click('refreshDataViewButton');
+        await testSubjects.click('refreshDataViewButton');
         await retry.try(async function () {
           const TabCount = await PageObjects.settings.getFieldsTabCount();
           expect(TabCount).to.be('' + EXPECTED_FIELD_COUNT);
