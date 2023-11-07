@@ -9,6 +9,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface CloudUsageCollectorConfig {
   isCloudEnabled: boolean;
+  // Using * | undefined instead of ?: to force the calling code to list all the options (even when they can be undefined)
   trialEndDate: string | undefined;
   isElasticStaffOwned: boolean | undefined;
   deploymentId: string | undefined;
