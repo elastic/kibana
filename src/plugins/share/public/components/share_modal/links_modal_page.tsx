@@ -6,15 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, Fragment } from 'react';
+import { EuiCodeBlock, EuiForm, EuiIcon, EuiSpacer } from '@elastic/eui';
+import React, { FC } from 'react';
 
 interface LinksModalPageProps {
-  // radio: boolean;
-  // checkbox: boolean;
-  // toggle: boolean;
+  isEmbedded: boolean;
+  allowShortUrl: boolean;
+  objectType: string;
+
+}
+
+const renderRadioButtons = () => {
+
 }
 
 export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
-  const {} = props;
-  return <Fragment />;
+//   const { isEmbedded, allowShortUrl, objectType } = props;
+  return ( //<Frame isEmbedded={isEmbedded} allowShortUrl={allowShortUrl} objectType={objectType} />
+  <EuiForm>
+  {renderRadioButtons()}
+  <EuiSpacer />
+  <EuiCodeBlock isCopyable>
+    <EuiIcon type="copy"/>
+    </EuiCodeBlock>
+  </EuiForm>
+  );
 };

@@ -40,7 +40,6 @@ export const TabContent: FC<TabContentProps> = () => {
         {urlRow} */}
         <EuiSpacer size="m" />
         {/* {copyButton} */}
-        Hello this is a test
       </EuiForm>
     </I18nProvider>
   );

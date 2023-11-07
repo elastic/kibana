@@ -139,7 +139,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
         {(copy) => (
           <EuiButton
             color={isUnsaved ? 'warning' : 'primary'}
-            fullWidth
             onClick={copy}
             size="s"
             data-test-subj="shareReportingCopyURL"
@@ -230,7 +229,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return (
       <EuiButton
         disabled={isDisabled || this.state.isCreatingReportJob}
-        fullWidth
         fill
         onClick={this.createReportingJob}
         data-test-subj="generateReportButton"

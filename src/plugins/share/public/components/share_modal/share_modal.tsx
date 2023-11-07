@@ -29,6 +29,7 @@ import {
 } from '../../types';
 import { TabContent } from './tab_content';
 import { LinksModalPage } from './links_modal_page';
+import { EmbedModalPage } from './embed_modal_page';
 
 export interface ShareModalProps {
   allowEmbed: boolean;
@@ -80,13 +81,13 @@ const getTabs = (props: ShareModalProps) => {
       defaultMessage: 'Links',
     }),
     content: (
-      <TabContent
-        allowShortUrl={allowShortUrl}
-        isEmbedded
-        objectId={objectId}
-        objectType={objectType}
-        urlService={urlService}
-      />
+      <>
+        <LinksModalPage
+          isEmbedded={props.allowEmbed}
+          allowShortUrl={props.allowShortUrl}
+          objectType={props.objectType}
+        />
+      </>
     ),
   };
   menuItems.push({
@@ -108,20 +109,23 @@ const getTabs = (props: ShareModalProps) => {
         defaultMessage: 'Embed',
       }),
       content: (
-        <TabContent
-          allowShortUrl={allowShortUrl}
-          isEmbedded
-          objectId={objectId}
-          objectType={objectType}
-          urlService={urlService}
-          shareableUrl={shareableUrl}
-          shareableUrlForSavedObject={shareableUrlForSavedObject}
-          shareableUrlLocatorParams={shareableUrlLocatorParams}
-          urlParamExtensions={embedUrlParamExtensions}
-          anonymousAccess={anonymousAccess}
-          showPublicUrlSwitch={showPublicUrlSwitch}
-          snapshotShareWarning={snapshotShareWarning}
-        />
+        <>
+          <EmbedModalPage />
+          <TabContent
+            allowShortUrl={allowShortUrl}
+            isEmbedded
+            objectId={objectId}
+            objectType={objectType}
+            urlService={urlService}
+            shareableUrl={shareableUrl}
+            shareableUrlForSavedObject={shareableUrlForSavedObject}
+            shareableUrlLocatorParams={shareableUrlLocatorParams}
+            urlParamExtensions={embedUrlParamExtensions}
+            anonymousAccess={anonymousAccess}
+            showPublicUrlSwitch={showPublicUrlSwitch}
+            snapshotShareWarning={snapshotShareWarning}
+          />
+        </>
       ),
     };
     tabs.push(embedPanel);
@@ -189,14 +193,19 @@ export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
   const closeModal = () => setIsModalVisible(false);
 
   const { tabs, initialTabTitle } = getTabs(props);
-
+  console.log({ tabs });
   const formattedTabs: any = [];
-  tabs.map((t) => {
+  tabs.map((t, i) => {
+    // if (i < tabs.length -1){
     formattedTabs.push({
       name: t.title,
       title: t.title,
+      id: i,
+      content: t.content,
     });
+    // }
   });
+
   const [selectedTab, setSelectedTab] = useState(formattedTabs[0]);
 
   const onTabClick = (selectTab: EuiTabbedContentTab) => {
@@ -206,7 +215,7 @@ export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
   return (
     <I18nProvider>
       <EuiOverlayMask>
-        <EuiModal onClose={closeModal} data-test-subject="shareContextModal">
+        <EuiModal onClose={closeModal} data-test-subject="shareContextModal" maxWidth>
           <EuiModalHeader>
             <EuiModalHeaderTitle>{initialTabTitle}</EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -215,8 +224,8 @@ export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
               tabs={formattedTabs}
               selectedTab={selectedTab}
               onTabClick={onTabClick}
+              data-test-subject="shareModalTabs"
             />
-            {initialTabTitle === 'Links' && <LinksModalPage />}
           </EuiModalBody>
         </EuiModal>
       </EuiOverlayMask>
