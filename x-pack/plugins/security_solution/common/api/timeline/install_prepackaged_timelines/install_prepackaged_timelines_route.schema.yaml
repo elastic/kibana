@@ -24,6 +24,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: [timelinesToInstall, timelinesToUpdate, prepackagedTimelines]
               properties:
                 timelinesToInstall:
                   type: array
@@ -48,11 +49,10 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
-                required:
-                  - data
         500:
           description: Indicates the installation of prepackaged timelines was unsuccessful.
           content:

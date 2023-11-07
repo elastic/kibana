@@ -16,19 +16,15 @@ import { TimelineType, TimelineResponse } from '../model/components.gen';
 
 export type GetDraftTimelinesRequestQuery = z.infer<typeof GetDraftTimelinesRequestQuery>;
 export const GetDraftTimelinesRequestQuery = z.object({
-  timelineType: TimelineType.optional(),
+  timelineType: TimelineType,
 });
 export type GetDraftTimelinesRequestQueryInput = z.input<typeof GetDraftTimelinesRequestQuery>;
 
 export type GetDraftTimelinesResponse = z.infer<typeof GetDraftTimelinesResponse>;
 export const GetDraftTimelinesResponse = z.object({
-  data: z
-    .object({
-      persistTimeline: z
-        .object({
-          timeline: TimelineResponse.optional(),
-        })
-        .optional(),
-    })
-    .optional(),
+  data: z.object({
+    persistTimeline: z.object({
+      timeline: TimelineResponse,
+    }),
+  }),
 });

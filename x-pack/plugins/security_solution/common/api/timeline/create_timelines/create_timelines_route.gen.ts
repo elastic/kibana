@@ -21,12 +21,12 @@ import {
 
 export type CreateTimelinesRequestBody = z.infer<typeof CreateTimelinesRequestBody>;
 export const CreateTimelinesRequestBody = z.object({
-  status: TimelineStatus.nullable().optional(),
-  timelineId: z.string().nullable().optional(),
-  templateTimelineId: z.string().nullable().optional(),
-  templateTimelineVersion: z.number().nullable().optional(),
-  timelineType: TimelineType.nullable().optional(),
-  version: z.string().nullable().optional(),
+  status: TimelineStatus.nullable(),
+  timelineId: z.string().nullable(),
+  templateTimelineId: z.string().nullable(),
+  templateTimelineVersion: z.number().nullable(),
+  timelineType: TimelineType.nullable(),
+  version: z.string().nullable(),
   timeline: SavedTimeline,
 });
 export type CreateTimelinesRequestBodyInput = z.input<typeof CreateTimelinesRequestBody>;
@@ -34,10 +34,8 @@ export type CreateTimelinesRequestBodyInput = z.input<typeof CreateTimelinesRequ
 export type CreateTimelinesResponse = z.infer<typeof CreateTimelinesResponse>;
 export const CreateTimelinesResponse = z.object({
   data: z.object({
-    persistTimeline: z
-      .object({
-        timeline: TimelineResponse.optional(),
-      })
-      .optional(),
+    persistTimeline: z.object({
+      timeline: TimelineResponse,
+    }),
   }),
 });

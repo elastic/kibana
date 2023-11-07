@@ -17,21 +17,19 @@ import { BareNote, Note } from '../model/components.gen';
 export type PersistNoteRequestBody = z.infer<typeof PersistNoteRequestBody>;
 export const PersistNoteRequestBody = z.object({
   note: BareNote,
-  overrideOwner: z.boolean().nullable().nullable().optional(),
-  noteId: z.string().nullable().optional(),
-  version: z.string().nullable().optional(),
+  overrideOwner: z.boolean().nullable().nullable(),
+  noteId: z.string().nullable(),
+  version: z.string().nullable(),
 });
 export type PersistNoteRequestBodyInput = z.input<typeof PersistNoteRequestBody>;
 
 export type PersistNoteResponse = z.infer<typeof PersistNoteResponse>;
 export const PersistNoteResponse = z.object({
   data: z.object({
-    persistNote: z
-      .object({
-        code: z.number().optional(),
-        message: z.string().optional(),
-        note: Note.optional(),
-      })
-      .optional(),
+    persistNote: z.object({
+      code: z.number(),
+      message: z.string(),
+      note: Note,
+    }),
   }),
 });

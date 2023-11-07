@@ -23,11 +23,13 @@ paths:
       parameters:
         - in: query
           name: template_timeline_id
+          required: true
           schema:
             type: string
           description: The ID of the template timeline to retrieve
         - in: query
           name: id
+          required: true
           schema:
             type: string
           description: The ID of the timeline to retrieve
@@ -38,13 +40,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [getOnetimeline]
                     properties:
                       getOneTimeline:
                         oneOf:
                         $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
                         nullable: true
-                required:
-                  - data

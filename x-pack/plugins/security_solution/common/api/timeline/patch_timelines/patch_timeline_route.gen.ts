@@ -16,19 +16,17 @@ import { SavedTimeline, TimelineResponse } from '../model/components.gen';
 
 export type PatchTimelineRequestBody = z.infer<typeof PatchTimelineRequestBody>;
 export const PatchTimelineRequestBody = z.object({
-  timelineId: z.string().optional(),
-  version: z.string().optional(),
-  timeline: SavedTimeline.optional(),
+  timelineId: z.string().nullable(),
+  version: z.string().nullable(),
+  timeline: SavedTimeline,
 });
 export type PatchTimelineRequestBodyInput = z.input<typeof PatchTimelineRequestBody>;
 
 export type PatchTimelineResponse = z.infer<typeof PatchTimelineResponse>;
 export const PatchTimelineResponse = z.object({
   data: z.object({
-    persistTimeline: z
-      .object({
-        timeline: TimelineResponse.optional(),
-      })
-      .optional(),
+    persistTimeline: z.object({
+      timeline: TimelineResponse,
+    }),
   }),
 });

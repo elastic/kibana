@@ -17,8 +17,8 @@ import { PinnedEvent } from '../model/components.gen';
 export type PersistPinnedEventRequestBody = z.infer<typeof PersistPinnedEventRequestBody>;
 export const PersistPinnedEventRequestBody = z.object({
   eventId: z.string(),
-  pinnedEventId: z.string().nullable().optional(),
-  timelineId: z.string().nullable().optional(),
+  pinnedEventId: z.string().nullable(),
+  timelineId: z.string().nullable(),
 });
 export type PersistPinnedEventRequestBodyInput = z.input<typeof PersistPinnedEventRequestBody>;
 

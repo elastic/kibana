@@ -26,6 +26,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: [timelineType]
               properties:
                 timelineType:
                   $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
@@ -36,17 +37,18 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [persistTimeline]
                     properties:
                       persistTimeline:
                         type: object
+                        required: [timeline]
                         properties:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                required:
-                  - data
         403:
           description: Indicates that the user does not have the required permissions to create a draft timeline.
           content:

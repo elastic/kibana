@@ -17,12 +17,12 @@ export const ExportTimelinesRequestQuery = z.object({
   /**
    * The name of the file to export
    */
-  file_name: z.string().optional(),
+  file_name: z.string(),
 });
 export type ExportTimelinesRequestQueryInput = z.input<typeof ExportTimelinesRequestQuery>;
 
 export type ExportTimelinesRequestBody = z.infer<typeof ExportTimelinesRequestBody>;
 export const ExportTimelinesRequestBody = z.object({
-  ids: z.array(z.string()).nullable().optional(),
+  ids: z.array(z.string()).nullable(),
 });
 export type ExportTimelinesRequestBodyInput = z.input<typeof ExportTimelinesRequestBody>;

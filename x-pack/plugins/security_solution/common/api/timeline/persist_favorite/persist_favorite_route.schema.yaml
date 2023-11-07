@@ -24,6 +24,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: [timelineId, templateTimelineId, templateTimelineVersion, timelineType]
               properties:
                 timelineId:
                   type: string
@@ -45,14 +46,14 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [persistFavorite]
                     properties:
                       persistFavorite:
                         $ref: '../model/components.schema.yaml#/components/schemas/FavoriteTimelineResponse'
-                required:
-                  - data
         403:
           description: Indicates the user does not have the required permissions to persist the favorite status.
           content:

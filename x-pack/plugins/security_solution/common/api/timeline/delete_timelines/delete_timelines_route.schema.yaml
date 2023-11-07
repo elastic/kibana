@@ -27,8 +27,7 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - savedObjectIds
+              required: [savedObjectIds]
               properties:
                 savedObjectIds:
                   type: array
@@ -41,11 +40,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [deleteTimeline]
                     properties:
                       deleteTimeline:
                         type: boolean
-                required:
-                  - data

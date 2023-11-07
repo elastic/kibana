@@ -27,11 +27,13 @@ paths:
           application/json:
             schema:
               type: object
+              required: [file]
               properties:
                 file:
                   allOf:
                     - $ref: '../model/components.schema.yaml#/components/schemas/Readable'
                     - type: object
+                      required: [hapi]
                       properties:
                         hapi:
                           type: object
@@ -47,11 +49,10 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
-                required:
-                  - data
 
         400:
           description: Indicates the import of timelines was unsuccessful because of an invalid file extension.
