@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_STATUS, ALERT_END } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_RULE_NAME,
+  ALERT_STATUS,
+  ALERT_END,
+  ALERT_START,
+} from '@kbn/rule-data-utils';
 import { groupBy } from 'lodash';
 import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 
@@ -15,20 +21,29 @@ export interface RuleSummary {
   activeCount: number;
   totalCount: number;
   lastDuration: number;
+  startedAt: number;
   recoveredAt: number | undefined;
 }
 
 export function getAlertsSummary(alertsData: AnomalyDetectionAlert[]): RulesSummary {
   return Object.entries(groupBy(alertsData, ALERT_RULE_NAME) ?? [])
-    .map<[string, RuleSummary]>(([ruleName, alerts]) => [
-      ruleName,
-      {
-        totalCount: alerts.length,
-        activeCount: alerts.filter((alert) => alert[ALERT_STATUS] === 'active').length,
-        recoveredAt: alerts[alerts.length - 1]?.[ALERT_END],
-        lastDuration: alerts[alerts.length - 1]?.[ALERT_DURATION],
-      },
-    ])
+    .map<[string, RuleSummary]>(([ruleName, alerts]) => {
+      // Find the latest alert for each rule
+      const latestAlert: AnomalyDetectionAlert = alerts.reduce((latest, alert) => {
+        return alert[ALERT_START] > latest[ALERT_START] ? alert : latest;
+      });
+
+      return [
+        ruleName,
+        {
+          totalCount: alerts.length,
+          activeCount: alerts.filter((alert) => alert[ALERT_STATUS] === 'active').length,
+          recoveredAt: latestAlert[ALERT_END],
+          startedAt: latestAlert[ALERT_START],
+          lastDuration: latestAlert[ALERT_DURATION],
+        },
+      ];
+    })
     .sort(([, alertsA], [, alertsB]) => {
       // 1. Prioritize rules with the highest number of active alerts
       if (alertsA.activeCount > alertsB.activeCount) return -1;
