@@ -84,10 +84,13 @@ describe('ColumnsPopover', () => {
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
     userEvent.click(await screen.findByTestId('column-selection-popover-show-all-button'));
 
+    const onSelectedColumnsChangeCallParams = selectedColumns.map((column) => ({
+      ...column,
+      isChecked: true,
+    }));
+
     await waitFor(() => {
-      expect(onSelectedColumnsChange).toHaveBeenCalledWith(
-        selectedColumns.map((column) => ({ ...column, isChecked: true }))
-      );
+      expect(onSelectedColumnsChange).toHaveBeenCalledWith(onSelectedColumnsChangeCallParams);
     });
   });
 

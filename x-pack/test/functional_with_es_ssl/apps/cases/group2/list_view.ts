@@ -725,7 +725,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const input = await testSubjects.find('column-selection-popover-search');
         await input.type('Name');
-        await input.pressKeys(browser.keys.ENTER);
 
         await testSubjects.existOrFail(`column-selection-switch-title`);
 

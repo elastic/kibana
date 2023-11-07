@@ -9,9 +9,11 @@ import type { ChangeEvent } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { DropResult } from '@elastic/eui';
+
 import {
+  EuiFieldSearch,
+  EuiHighlight,
   EuiPopoverFooter,
-  EuiFieldText,
   EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -113,7 +115,7 @@ export const ColumnsPopover: React.FC<Props> = ({
       }
     >
       <EuiPopoverTitle>
-        <EuiFieldText
+        <EuiFieldSearch
           compressed
           placeholder={i18n.SEARCH}
           aria-label={i18n.SEARCH_COLUMNS}
@@ -156,7 +158,11 @@ export const ColumnsPopover: React.FC<Props> = ({
                     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
-                          label={name}
+                          label={
+                            <EuiHighlight search={columnSearchText} title={name}>
+                              {name}
+                            </EuiHighlight>
+                          }
                           checked={isChecked}
                           data-test-subj={`column-selection-switch-${field}`}
                           onChange={(e) => toggleColumns({ field, isChecked: e.target.checked })}
@@ -168,7 +174,6 @@ export const ColumnsPopover: React.FC<Props> = ({
                               width: '190px',
                               overflow: 'hidden',
                             },
-                            title: name,
                           }}
                         />
                       </EuiFlexItem>
