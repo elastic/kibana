@@ -35,18 +35,19 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 const CommonUseField = getUseField({ component: Field });
-interface EditTimelineModalProps {
-  closeEditTimeline: () => void;
-  initialFocus: 'title' | 'description';
+interface SaveTimelineModalProps {
+  closeSaveTimeline: () => void;
+  initialFocusOn?: 'title' | 'save';
   timelineId: string;
+  /**
+   * When showWarning is true, the modal is used as a reminder
+   * for users to save / discard the unsaved timeline / template.
+   */
   showWarning?: boolean;
 }
 
-// when showWarning equals to true,
-// the modal is used as a reminder for users to save / discard
-// the unsaved timeline / template
-export const EditTimelineModal = React.memo<EditTimelineModalProps>(
-  ({ closeEditTimeline, initialFocus, timelineId, showWarning }) => {
+export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
+  ({ closeSaveTimeline, initialFocusOn, timelineId, showWarning }) => {
     const { startTransaction } = useStartTransaction();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const {
@@ -63,7 +64,8 @@ export const EditTimelineModal = React.memo<EditTimelineModalProps>(
     );
     const prevIsSaving = usePrevious(isSaving);
     const dispatch = useDispatch();
-    const handleCreateNewTimeline = useCreateTimeline({
+    // Resetting the timeline by replacing the active one with a new empty one
+    const resetTimeline = useCreateTimeline({
       timelineId: TimelineId.active,
       timelineType: TimelineType.default,
     });
@@ -77,6 +79,7 @@ export const EditTimelineModal = React.memo<EditTimelineModalProps>(
               ...titleAndDescription,
             })
           );
+          dispatch(timelineActions.saveTimeline({ id: timelineId }));
         }
 
         return Promise.resolve();
@@ -108,12 +111,14 @@ export const EditTimelineModal = React.memo<EditTimelineModalProps>(
       submit();
     }, [submit, startTransaction]);
 
+    // When the form is cancelled and we're showing the discard warning,
+    // reset the timeline and close the modal.
     const handleCancel = useCallback(() => {
       if (showWarning) {
-        handleCreateNewTimeline();
+        resetTimeline();
       }
-      closeEditTimeline();
-    }, [closeEditTimeline, handleCreateNewTimeline, showWarning]);
+      closeSaveTimeline();
+    }, [closeSaveTimeline, resetTimeline, showWarning]);
 
     const closeModalText = useMemo(() => {
       if (status === TimelineStatus.draft && showWarning) {
@@ -132,7 +137,7 @@ export const EditTimelineModal = React.memo<EditTimelineModalProps>(
             : i18n.SAVE_TIMELINE
           : timelineType === TimelineType.template
           ? i18n.NAME_TIMELINE_TEMPLATE
-          : i18n.NAME_TIMELINE,
+          : i18n.SAVE_TIMELINE,
       [status, timelineType]
     );
 
@@ -156,8 +161,8 @@ export const EditTimelineModal = React.memo<EditTimelineModalProps>(
     const titleFieldProps = useMemo(
       () => ({
         'aria-label': i18n.TIMELINE_TITLE,
-        autoFocus: initialFocus === 'title',
-        'data-test-subj': 'edit-timeline-title',
+        autoFocus: initialFocusOn === 'title',
+        'data-test-subj': 'save-timeline-title',
         disabled: isSaving,
         spellCheck: true,
         placeholder:
@@ -165,31 +170,30 @@ export const EditTimelineModal = React.memo<EditTimelineModalProps>(
             ? commonI18n.UNTITLED_TEMPLATE
             : commonI18n.UNTITLED_TIMELINE,
       }),
-      [initialFocus, isSaving, timelineType]
+      [initialFocusOn, isSaving, timelineType]
     );
 
     const descriptionFieldProps = useMemo(
       () => ({
         'aria-label': i18n.TIMELINE_DESCRIPTION,
-        autoFocus: initialFocus === 'description',
-        'data-test-subj': 'edit-timeline-description',
+        'data-test-subj': 'save-timeline-description',
         disabled: isSaving,
         placeholder: commonI18n.DESCRIPTION,
       }),
-      [initialFocus, isSaving]
+      [isSaving]
     );
 
     useEffect(() => {
       if (isSubmitted && !isSaving && prevIsSaving) {
-        closeEditTimeline();
+        closeSaveTimeline();
       }
-    }, [isSubmitted, isSaving, prevIsSaving, closeEditTimeline]);
+    }, [isSubmitted, isSaving, prevIsSaving, closeSaveTimeline]);
 
     return (
       <EuiModal
-        data-test-subj="edit-timeline-modal"
+        data-test-subj="save-timeline-modal"
         maxWidth={NOTES_PANEL_WIDTH}
-        onClose={closeEditTimeline}
+        onClose={closeSaveTimeline}
       >
         {isSaving && (
           <EuiProgress size="s" color="primary" position="absolute" data-test-subj="progress-bar" />
@@ -242,6 +246,7 @@ export const EditTimelineModal = React.memo<EditTimelineModalProps>(
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} component="span">
                   <EuiButton
+                    autoFocus={initialFocusOn === 'save'}
                     size="s"
                     isDisabled={isSaving || isSubmitting}
                     fill={true}
@@ -260,4 +265,4 @@ export const EditTimelineModal = React.memo<EditTimelineModalProps>(
   }
 );
 
-EditTimelineModal.displayName = 'EditTimelineModal';
+SaveTimelineModal.displayName = 'SaveTimelineModal';
