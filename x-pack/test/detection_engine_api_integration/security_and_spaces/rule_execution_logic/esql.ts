@@ -20,12 +20,15 @@ import {
   previewRule,
   createRule,
   getOpenSignals as getOpenAlerts,
+  waitForEventLogExecuteComplete,
+  getSignalsByIds as getAlertsByIds,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { dataGeneratorFactory } from '../../utils/data_generator';
 import { removeRandomValuedProperties } from './utils';
+import { patchRule } from '../../utils/patch_rule';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -710,19 +713,24 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(150);
       });
 
-      // as per https://github.com/elastic/kibana/pull/170034, test is failing on CI and flaky locally
-      // skipping it for now for further investigation
-      it.skip('should generate alerts when docs overlap execution intervals and alerts number reached max_signals in one of the executions', async () => {
+      // we use actual rule executions, not preview, because for preview API alerts index refresh=false for non suppressed alerts
+      // first rule execution catches 130 documents and generates 100 alerts
+      // second rule execution catches 150 docs, 120 of which were captured during the first execution and generates only 60 alerts. Because rest are deduplicated
+      // so in total we 160 alerts should be generated
+      it.only('should generate alerts when docs overlap execution intervals and alerts number reached max_signals in one of the real executions', async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
-          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
           query: `from ecs_compliant [metadata _id] ${internalIdPipe(
             id
           )} | keep _id, agent.name | sort agent.name`,
-          from: 'now-45m',
-          interval: '30m',
+          from: '2020-10-28T05:15:00.000Z',
+          to: '2020-10-28T06:00:00.000Z',
+          interval: '45m',
           max_signals: 100,
+          enabled: true,
         };
+        const createdRule = await createRule(supertest, log, rule);
 
         // docs fall in first rule executions
         await indexGeneratedDocuments({
@@ -772,20 +780,35 @@ export default ({ getService }: FtrProviderContext) => {
           }),
         });
 
-        const { previewId } = await previewRule({
-          supertest,
-          rule,
-          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-          invocationCount: 2,
-        });
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          size: 200,
+        // first rule run should generate 100 alerts from first 3 batches of index documents
+        await waitForEventLogExecuteComplete(es, log, createdRule.id, 1);
+
+        // refresh alerts index, so we can get all created alerts
+        await es.indices.refresh({ index: '.alerts-security.alerts-*' });
+
+        await patchRule(supertest, log, {
+          id: createdRule.id,
+          enabled: false,
         });
 
-        // should generate 160 alerts
-        expect(previewAlerts.length).toBe(160);
+        // re-trigger rule execution with new interval
+        await patchRule(supertest, log, {
+          id: createdRule.id,
+          from: '2020-10-28T05:45:00.000Z',
+          to: '2020-10-28T06:30:00.000Z',
+          enabled: true,
+        });
+
+        // second rule run should generate only 60 new alerts, the rest should be deduplicated
+        await waitForEventLogExecuteComplete(es, log, createdRule.id, 2);
+
+        // refresh alerts index, so we can get all created alerts
+        await es.indices.refresh({ index: '.alerts-security.alerts-*' });
+
+        const alertsResponse = await getAlertsByIds(supertest, log, [createdRule.id], 200);
+
+        // should return 160 alerts
+        expect(alertsResponse.hits.hits.length).toBe(160);
       });
     });
 
