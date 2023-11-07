@@ -112,7 +112,7 @@ export const MultiSelectFilter = <T extends EuiSelectableOption>({
       panelPaddingSize="none"
       repositionOnScroll
     >
-      {isInvalid ? (
+      {isInvalid && (
         <>
           <EuiHorizontalRule margin="none" />
           <EuiCallOut
@@ -123,7 +123,7 @@ export const MultiSelectFilter = <T extends EuiSelectableOption>({
           />
           <EuiHorizontalRule margin="none" />
         </>
-      ) : null}
+      )}
       <EuiSelectable<T>
         options={options}
         searchable
