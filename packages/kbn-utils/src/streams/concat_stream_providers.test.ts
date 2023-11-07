@@ -13,6 +13,8 @@ import { createListStream } from './list_stream';
 import { createConcatStream } from './concat_stream';
 import { createPromiseFromStreams } from './promise_from_streams';
 
+// merge-queue-test-3
+
 describe('concatStreamProviders() helper', () => {
   test('writes the data from an array of stream providers into a destination stream in order', async () => {
     const results = await createPromiseFromStreams([
