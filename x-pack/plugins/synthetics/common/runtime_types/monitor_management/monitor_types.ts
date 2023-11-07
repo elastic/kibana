@@ -329,6 +329,7 @@ const HeartbeatFieldsCodec = t.intersection([
     run_once: t.boolean,
     test_run_id: t.string,
     'monitor.project.name': t.string,
+    'monitor.id': t.string,
     'monitor.project.id': t.string,
     'monitor.fleet_managed': t.boolean,
     meta: t.record(t.string, t.string),

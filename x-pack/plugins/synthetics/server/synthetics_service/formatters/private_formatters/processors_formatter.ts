@@ -18,7 +18,7 @@ interface FieldProcessor {
 export const processorsFormatter = (config: Partial<MonitorFields & ProcessorFields>) => {
   const fields: HeartbeatFields = {
     'monitor.fleet_managed': true,
-    config_id: config.config_id,
+    config_id: config.config_id!,
     meta: {
       space_id: config.spaceId!,
     },
