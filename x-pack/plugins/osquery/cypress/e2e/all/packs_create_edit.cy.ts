@@ -20,9 +20,10 @@ import {
   TABLE_ROWS,
   formFieldInputSelector,
   FLYOUT_SAVED_QUERY_CANCEL_BUTTON,
+  customActionRunSavedQuerySelector,
 } from '../../screens/packs';
 import { API_VERSIONS } from '../../../common/constants';
-import { navigateToWithoutWaitForReact } from '../../tasks/navigation';
+import { navigateTo } from '../../tasks/navigation';
 import { deleteAndConfirm, inputQuery } from '../../tasks/live_query';
 import { changePackActiveStatus, preparePack } from '../../tasks/packs';
 import {
@@ -96,7 +97,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
-    navigateToWithoutWaitForReact('/app/osquery');
+    navigateTo('/app/osquery');
   });
 
   after(() => {
@@ -470,9 +471,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
       it('', () => {
         preparePack(packName);
-        cy.react('CustomItemAction', {
-          props: { index: 0, item: { id: savedQueryName } },
-        })
+        cy.get(customActionRunSavedQuerySelector(savedQueryName))
           .should('exist')
           .within(() => {
             cy.get('a')
