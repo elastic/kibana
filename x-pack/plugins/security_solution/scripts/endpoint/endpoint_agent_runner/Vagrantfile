@@ -4,6 +4,7 @@ cachedAgentFilename = ENV["CACHED_AGENT_FILENAME"] || ''
 
 Vagrant.configure("2") do |config|
   config.vm.hostname = hostname
+  config.vm.box.check_update = false
   config.vm.box = 'ubuntu/jammy64'
 
   config.vm.provider :virtualbox do |vb|
