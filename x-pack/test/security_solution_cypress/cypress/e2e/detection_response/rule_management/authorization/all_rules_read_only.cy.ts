@@ -15,7 +15,6 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../../../screens/lists';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../../tasks/common';
 import {
   dismissCallOut,
   getCallOut,
@@ -29,7 +28,6 @@ import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
-    cleanKibana();
     createRule(getNewRule({ rule_id: '1', enabled: false }));
   });
 
