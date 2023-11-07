@@ -9,7 +9,7 @@
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
 import { getSearchParams, getSearchParamsFromRequest } from './get_search_params';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 function getConfigStub(config: any = {}): GetConfigFn {
   return (key) => config[key];
@@ -53,10 +53,11 @@ describe('getSearchParams', () => {
       [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
       [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
     });
-    const index = {
-      ...dataViewMock,
-      allowHidden: true,
-    };
+    const index = createStubDataView({
+      spec: {
+        allowHidden: true,
+      },
+    });
     const searchParams = getSearchParamsFromRequest(
       {
         index,
@@ -75,10 +76,11 @@ describe('getSearchParams', () => {
       [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
       [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
     });
-    const index = {
-      ...dataViewMock,
-      allowHidden: false,
-    };
+    const index = createStubDataView({
+      spec: {
+        allowHidden: false,
+      },
+    });
     const searchParams = getSearchParamsFromRequest(
       {
         index,
