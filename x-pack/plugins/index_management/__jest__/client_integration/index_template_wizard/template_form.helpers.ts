@@ -194,7 +194,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       component.update();
 
       act(() => {
-        form.setInputValue('valueDataRetentionField', lifecycle.value);
+        form.setInputValue('valueDataRetentionField', String(lifecycle.value));
       });
     }
 
