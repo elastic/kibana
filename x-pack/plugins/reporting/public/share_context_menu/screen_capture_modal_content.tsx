@@ -7,6 +7,7 @@
 
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import React from 'react';
 import { FC, useState } from 'react';
 import { ReportingModalContent, ReportingModalProps } from './reporting_modal_content';
@@ -72,30 +73,6 @@ const renderOptions = (
   return null;
 };
 
-const getLayout = (
-  props: ScreenCaptureModalProps,
-  usePrintLayout: boolean,
-  useCanvasLayout: boolean
-) => {
-  const { layout: outerLayout } = props.getJobParams();
-  let dimensions = outerLayout?.dimensions;
-  if (!dimensions) {
-    const el = document.querySelector('[data-shared-items-container]');
-    const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-    dimensions = { height, width };
-  }
-
-  if (usePrintLayout) {
-    return { id: 'print', dimensions };
-  }
-
-  if (useCanvasLayout) {
-    return { id: 'canvas', dimensions };
-  }
-
-  return { id: 'preserve_layout', dimensions };
-};
-
 
 export const ScreenCaptureModalContent: FC<ScreenCaptureModalProps> = (
   props: ScreenCaptureModalProps
@@ -106,15 +83,45 @@ export const ScreenCaptureModalContent: FC<ScreenCaptureModalProps> = (
     setPrintLayout(evt.target.checked);
     setCanvasLayout(false);
   };
+
   const handleCanvasLayoutChange = (evt: EuiSwitchEvent) => {
     setPrintLayout(false);
     setCanvasLayout(evt.target.checked);
   };
 
+  const getLayout = (): LayoutParams => {
+    const { layout: outerLayout } = props.getJobParams();
+
+    let dimensions = outerLayout?.dimensions;
+    if (!dimensions) {
+      const el = document.querySelector('[data-shared-items-container]');
+      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+      dimensions = { height, width };
+    }
+
+    if (usePrintLayout) {
+      return { id: 'print', dimensions };
+    }
+
+    if (useCanvasLayout) {
+      return { id: 'canvas', dimensions };
+    }
+
+    return { id: 'preserve_layout', dimensions };
+  };
+
+  const getJobParams = () => {
+    return {
+      ...props.getJobParams(),
+      layout: getLayout(),
+    };
+  };
+
   return (
     <ReportingModalContent
       {...props}
-      layoutId={getLayout(props, usePrintLayout, useCanvasLayout).id}
+      layoutId={getLayout().id}
+      getJobParams={getJobParams}
       options={renderOptions(
         props,
         usePrintLayout,

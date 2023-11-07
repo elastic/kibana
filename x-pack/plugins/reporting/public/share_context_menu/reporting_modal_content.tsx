@@ -9,8 +9,9 @@ import { EuiButton, EuiForm, EuiFormRow, EuiRadioGroup, EuiSpacer, EuiText } fro
 import { ToastsSetup } from '@kbn/core-notifications-browser';
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import { LayoutType } from '@kbn/screenshotting-plugin/common';
 import { LayoutSelectorDictionary } from '@kbn/screenshotting-plugin/common/layout';
@@ -43,7 +44,7 @@ const renderTitle = (
         {
           layout?:
             | {
-                id?: LayoutType | undefined;
+                id?: LayoutType;
                 dimensions?: { width: number; height: number } | undefined;
                 selectors?: Partial<LayoutSelectorDictionary> | undefined;
                 zoom?: number | undefined;
@@ -62,16 +63,27 @@ const renderTitle = (
     : 'CSV reports can take a few minutes to generate based upon the size of your report';
 };
 
-export const ReportingModalContent: FC<ReportingModalProps> = (props: ReportingModalProps) => {
-  const [isStale, setIsStale] = useState(false);
-  const [layoutId, setLayoutId] = useState('');
-  const [objectType, setObjectType] = useState(props.getJobParams());
-  const [createReportingJob, isCreatingReportJob] = useState(false);
+
+export const ReportingModalContentUI: FC<Props> = (props: Props) => {
+  const [ , setIsStale] = useState(false);
+  // const [layoutId, setLayoutId] = useState('');
+  const [objectType, ] = useState(props.getJobParams());
+  const [createReportingJob, setCreatingReportJob] = useState(false);
   const [radioIsSelected, setRadioIsSelected] = useState('pdf');
-  let mounted = useRef<boolean>();
+  let [ absoluteUrl, setAbsoluteUrl ] = useState('')
+  const mounted = useRef<boolean>();
 
   const onChange = (label: string) => {
     setRadioIsSelected(label);
+  };
+  const exportType = radioIsSelected === 'png' ? 'pngV2' : 'printablePdfV2'
+
+  const getAbsoluteReportGenerationUrl = (props: ReportingModalProps) => {
+    const relativePath = props.apiClient.getReportingPublicJobPath(
+      exportType,
+      props.apiClient.getDecoratedJobParams(props.getJobParams())
+    );
+    return url.resolve(window.location.href, relativePath);
   };
 
   const setAbsoluteReportGenerationUrl = () => {
@@ -79,32 +91,78 @@ export const ReportingModalContent: FC<ReportingModalProps> = (props: ReportingM
       return;
     }
     absoluteUrl = getAbsoluteReportGenerationUrl(props);
-    setAbsoluteUrl(absoluteUrl)
+    setAbsoluteUrl(absoluteUrl);
   };
 
   const markAsStale = () => {
-    if(!mounted) return
-    setIsStale(true)
-  }
-
-  const getAbsoluteReportGenerationUrl = (props: ReportingModalProps) => {
-    const relativePath = props.apiClient.getReportingPublicJobPath(
-      radioIsSelected,
-      props.apiClient.getDecoratedJobParams(props.getJobParams(true))
-    );
-    return url.resolve(window.location.href, relativePath);
+    if (!mounted) return;
+    setIsStale(true);
   };
 
   useEffect(() => {
-    if (!mounted.current) {
-      window.addEventListener('hashchange', markAsStale, false);
-      window.addEventListener('resize', setAbsoluteReportGenerationUrl);
-      mounted.current = true;
-    } else {
-      // do componentDidUpdate logic
-    }
-  });
-  let [absoluteUrl, setAbsoluteUrl] = useState(getAbsoluteReportGenerationUrl(props));
+    setAbsoluteReportGenerationUrl()
+    markAsStale()
+  })
+
+  // issue generating reports with locator params 
+  const generateReportingJob = () => {
+    const { intl } = props;
+    const decoratedJobParams = props.apiClient.getDecoratedJobParams(props.getJobParams());
+    console.log({decoratedJobParams})
+    setCreatingReportJob(true);
+    return props.apiClient
+      .createReportingJob(exportType, decoratedJobParams)
+      .then(() => {
+        props.toasts.addSuccess({
+          title: intl.formatMessage(
+            {
+              id: 'xpack.reporting.modalContent.successfullyQueuedReportNotificationTitle',
+              defaultMessage: 'Queued report for {objectType}',
+            },
+            { objectType: objectType.objectType }
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
+              defaultMessage="Track its progress in {path}."
+              values={{
+                path: (
+                  <a href={props.apiClient.getManagementLink()}>
+                    <FormattedMessage
+                      id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      defaultMessage="Stack Management &gt; Reporting"
+                    />
+                  </a>
+                ),
+              }}
+            />,
+            { theme$: props.theme.theme$ }
+          ),
+          'data-test-subj': 'queueReportSuccess',
+        });
+        if (props.onClose) {
+          props.onClose();
+        }
+        if (mounted) {
+          setCreatingReportJob(false);
+        }
+      })
+      .catch((error) => {
+        props.toasts.addError(error, {
+          title: intl.formatMessage({
+            id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
+            defaultMessage: 'Unable to create report',
+          }),
+          toastMessage: (
+            // eslint-disable-next-line react/no-danger
+            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+          ) as unknown as string,
+        });
+        if (mounted) {
+          setCreatingReportJob(false);
+        }
+      });
+  };
 
   return (
     <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
@@ -129,12 +187,12 @@ export const ReportingModalContent: FC<ReportingModalProps> = (props: ReportingM
         }
       >
         <EuiButton
-          disabled={Boolean(isCreatingReportJob)}
+          disabled={Boolean(createReportingJob)}
           fill
-          onClick={() => createReportingJob}
+          onClick={() => generateReportingJob()}
           data-test-subj="generateReportButton"
           size="s"
-          isLoading={Boolean(isCreatingReportJob)}
+          isLoading={Boolean(createReportingJob)}
         >
           <FormattedMessage
             id="xpack.reporting.panelContent.generateButtonLabel"
@@ -146,3 +204,5 @@ export const ReportingModalContent: FC<ReportingModalProps> = (props: ReportingM
     </EuiForm>
   );
 };
+
+export const ReportingModalContent = injectI18n(ReportingModalContentUI);

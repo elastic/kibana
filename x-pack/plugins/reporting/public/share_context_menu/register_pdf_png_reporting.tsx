@@ -18,7 +18,7 @@ const getJobParams =
   (
     apiClient: ReportingAPIClient,
     opts: JobParamsProviderOptions,
-    type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
+    type?: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
   ) =>
   () => {
     const {
