@@ -98,7 +98,7 @@ Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$PROJECT_NAME\`
 Kibana image: \`$KIBANA_IMAGE\`
 EOF
 
-  buildkite-agent meta-data set pr_comment:deploy_project:head "* [$PROJECT_TYPE_LABEL Deployment](${PROJECT_KIBANA_LOGIN_URL})"
+  buildkite-agent meta-data set "pr_comment:deploy_project_$PROJECT_TYPE:head" "* [$PROJECT_TYPE_LABEL Deployment](${PROJECT_KIBANA_LOGIN_URL})"
   buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
 }
 
