@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, type Observable, Subscription } from 'rxjs';
-import { debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, EMPTY, type Observable, Subscription } from 'rxjs';
+import { catchError, debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   isRunningResponse,
@@ -175,13 +175,20 @@ export class AnomalyDetectionAlertsStateService extends StateService {
           }),
           debounceTime(300),
           switchMap((query) => {
-            return this.data.search.search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
-              {
-                featureIds: [AlertConsumers.ML],
-                query,
-              },
-              { strategy: 'privateRuleRegistryAlertsSearchStrategy' }
-            );
+            return this.data.search
+              .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
+                {
+                  featureIds: [AlertConsumers.ML],
+                  query,
+                },
+                { strategy: 'privateRuleRegistryAlertsSearchStrategy' }
+              )
+              .pipe(
+                catchError((error) => {
+                  // Catch error to prevent the observable from completing
+                  return EMPTY;
+                })
+              );
           })
         )
         .subscribe((response) => {
