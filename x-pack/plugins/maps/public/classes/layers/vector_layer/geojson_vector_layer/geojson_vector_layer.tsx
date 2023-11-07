@@ -28,7 +28,7 @@ import { DataRequestContext } from '../../../../actions';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { AbstractLayer, LayerIcon } from '../../layer';
+import { AbstractLayer, LayerError, LayerIcon } from '../../layer';
 import {
   AbstractVectorLayer,
   noResultsIcon,
@@ -152,6 +152,24 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       await this.getSource().getSupportedShapeTypes(),
       this.getCurrentStyle().getDynamicPropertiesArray()
     );
+  }
+
+  getErrors(): LayerError[] {
+    const errors = super.getErrors();
+
+    this.getValidJoins().forEach((join) => {
+      const joinDescriptor = join.toDescriptor();
+      if (joinDescriptor.error) {
+        errors.push({
+          title: i18n.translate('xpack.maps.geojsonVectorLayer.joinErrorTitle', {
+            defaultMessage: `An error occurred when adding join metrics to layer features`,
+          }),
+          error: joinDescriptor.error,
+        });
+      }
+    });
+
+    return errors;
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap) {
@@ -288,7 +306,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         sourceResult,
         joinStates,
         syncContext.updateSourceData,
-        syncContext.onJoinError
+        syncContext.setJoinError
       );
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
