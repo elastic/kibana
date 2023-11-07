@@ -25,10 +25,6 @@ export const CALL_OUT_IMMUTABLE = i18n.translate(
   }
 );
 
-export const EDIT = i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.button', {
-  defaultMessage: 'Edit timeline name and description',
-});
-
 export const SAVE_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.header',
   {
@@ -46,13 +42,6 @@ export const SAVE_TIMELINE_TEMPLATE = i18n.translate(
 export const SAVE = i18n.translate('xpack.securitySolution.timeline.nameTimeline.save.title', {
   defaultMessage: 'Save',
 });
-
-export const NAME_TIMELINE = i18n.translate(
-  'xpack.securitySolution.timeline.nameTimeline.modal.header',
-  {
-    defaultMessage: 'Name Timeline',
-  }
-);
 
 export const NAME_TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.timeline.nameTimelineTemplate.modal.header',
@@ -115,5 +104,19 @@ export const OPTIONAL = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.optionalLabel',
   {
     defaultMessage: 'Optional',
+  }
+);
+
+export const SAVE_TOUR_CLOSE = i18n.translate(
+  'xpack.securitySolution.timeline.flyout.saveTour.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const SAVE_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.flyout.saveTour.title',
+  {
+    defaultMessage: 'Timeline changes now require manual saves',
   }
 );

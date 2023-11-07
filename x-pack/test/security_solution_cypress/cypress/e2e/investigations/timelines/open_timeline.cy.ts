@@ -18,11 +18,8 @@ import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
-import { cleanKibana } from '../../../tasks/common';
-
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   markAsFavorite,
   openTimelineById,
@@ -36,10 +33,8 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
   describe('Open timeline modal', () => {
     before(function () {
-      cleanKibana();
       login();
       visit(TIMELINES_URL);
-
       createTimeline(getTimeline())
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
@@ -60,15 +55,9 @@ describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
         });
     });
 
-    beforeEach(function () {
-      login();
-      visit(TIMELINES_URL);
-      openTimelineUsingToggle();
+    it('should display timeline info', function () {
       openTimelineFromSettings();
       openTimelineById(this.timelineId);
-    });
-
-    it('should display timeline info', () => {
       cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
       cy.contains(getTimeline().title).should('exist');
       cy.get(TIMELINES_DESCRIPTION).last().should('have.text', getTimeline().description);

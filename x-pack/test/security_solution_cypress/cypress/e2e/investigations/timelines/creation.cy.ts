@@ -16,6 +16,7 @@ import {
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
   TIMELINE_PANEL,
+  TIMELINE_STATUS,
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
   SAVE_TIMELINE_ACTION_BTN,
   SAVE_TIMELINE_TOOLTIP,
@@ -34,10 +35,12 @@ import {
   clickingOnCreateTimelineFormTemplateBtn,
   closeTimeline,
   createNewTimeline,
+  executeTimelineKQL,
   expandEventAction,
   goToQueryTab,
   pinFirstEvent,
   populateTimeline,
+  addNameToTimelineAndSave,
 } from '../../../tasks/timeline';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
@@ -86,8 +89,8 @@ describe('Timelines', (): void => {
 
     context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
-        login(ROLES.reader);
-        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.reader });
+        login(ROLES.t1_analyst);
+        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.t1_analyst });
       });
 
       it('should not be able to create/update timeline ', () => {
@@ -143,4 +146,35 @@ describe('Timelines', (): void => {
       });
     }
   );
+
+  describe('shows the different timeline states', () => {
+    before(() => {
+      login();
+      visitWithTimeRange(OVERVIEW_URL);
+      openTimelineUsingToggle();
+    });
+
+    it('should show the correct timeline status', { tags: ['@ess', '@serverless'] }, () => {
+      // Unsaved
+      cy.get(TIMELINE_PANEL).should('be.visible');
+      cy.get(TIMELINE_STATUS).should('be.visible');
+      cy.get(TIMELINE_STATUS).should('have.text', 'Unsaved');
+
+      addNameToTimelineAndSave('Test');
+
+      // Saved
+      cy.get(TIMELINE_STATUS).should('be.visible');
+      cy.get(TIMELINE_STATUS)
+        .invoke('text')
+        .should('match', /^Saved/);
+
+      executeTimelineKQL('agent.name : *');
+
+      // Saved but has unsaved changes
+      cy.get(TIMELINE_STATUS).should('be.visible');
+      cy.get(TIMELINE_STATUS)
+        .invoke('text')
+        .should('match', /^Has unsaved changes/);
+    });
+  });
 });

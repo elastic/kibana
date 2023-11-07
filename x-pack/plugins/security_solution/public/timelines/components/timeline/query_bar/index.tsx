@@ -252,6 +252,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             isInvalid: false,
             isQuickSelection,
             timelineId,
+            hasRangeChanged: true,
           });
         }
       },

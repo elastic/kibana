@@ -277,22 +277,24 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     );
   }, [dispatch, filterManager, timelineId]);
 
-  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
-    useTimelineEvents({
-      dataViewId,
-      endDate: end,
-      fields: getTimelineQueryFields(),
-      filterQuery: combinedQueries?.filterQuery,
-      id: timelineId,
-      indexNames: selectedPatterns,
-      language: kqlQuery.language,
-      limit: itemsPerPage,
-      runtimeMappings,
-      skip: !canQueryTimeline,
-      sort: timelineQuerySortField,
-      startDate: start,
-      timerangeKind,
-    });
+  const [
+    isQueryLoading,
+    { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
+  ] = useTimelineEvents({
+    dataViewId,
+    endDate: end,
+    fields: getTimelineQueryFields(),
+    filterQuery: combinedQueries?.filterQuery,
+    id: timelineId,
+    indexNames: selectedPatterns,
+    language: kqlQuery.language,
+    limit: itemsPerPage,
+    runtimeMappings,
+    skip: !canQueryTimeline,
+    sort: timelineQuerySortField,
+    startDate: start,
+    timerangeKind,
+  });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
@@ -406,7 +408,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 <Footer
                   activePage={pageInfo?.activePage ?? 0}
                   data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
+                  updatedAt={refreshedAt}
                   height={footerHeight}
                   id={timelineId}
                   isLive={isLive}

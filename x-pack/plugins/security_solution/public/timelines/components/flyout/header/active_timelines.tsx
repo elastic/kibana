@@ -73,7 +73,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
     }
     return (
       <>
-        {i18n.AUTOSAVED}{' '}
+        {i18n.SAVED}{' '}
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"

@@ -56,8 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonPage.forceLogout();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168904
-    describe.skip('Kubernetes Dashboard', () => {
+    describe('Kubernetes Dashboard', () => {
       it('displays accurate summary compliance score', async () => {
         const scoreElement = await dashboard.getKubernetesComplianceScore();
 
