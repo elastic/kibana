@@ -6,6 +6,7 @@
  */
 
 import { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { TelemetryUsageCounter } from '../typings';
 import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
@@ -18,11 +19,13 @@ export async function syncAgentConfigsToApmPackagePolicies({
   coreStartPromise,
   fleetPluginStart,
   internalESClient,
+  apmIndices,
   telemetryUsageCounter,
 }: {
   coreStartPromise: Promise<CoreStart>;
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
   internalESClient: APMInternalESClient;
+  apmIndices: APMIndices;
   telemetryUsageCounter?: TelemetryUsageCounter;
 }) {
   if (telemetryUsageCounter) {
@@ -36,7 +39,7 @@ export async function syncAgentConfigsToApmPackagePolicies({
   const [savedObjectsClient, agentConfigurations, packagePolicies] =
     await Promise.all([
       getInternalSavedObjectsClient(coreStart),
-      listConfigurations(internalESClient),
+      listConfigurations(internalESClient, apmIndices),
       getApmPackagePolicies({ coreStart, fleetPluginStart }),
     ]);
 

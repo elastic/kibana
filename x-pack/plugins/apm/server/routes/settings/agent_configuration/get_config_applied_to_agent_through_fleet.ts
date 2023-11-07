@@ -7,14 +7,17 @@
 
 import { termQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import datemath from '@kbn/datemath';
+import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function getConfigsAppliedToAgentsThroughFleet(
-  internalESClient: APMInternalESClient
+  internalESClient: APMInternalESClient,
+  apmIndices: APMIndices
 ) {
   const params = {
-    index: internalESClient.apmIndices.metric,
+    index: apmIndices.metric,
+    track_total_hits: 0,
     size: 0,
     body: {
       query: {

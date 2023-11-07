@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
@@ -12,7 +13,8 @@ import { APMInternalESClient } from '../../../lib/helpers/create_es_client/creat
 import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 
 export async function listConfigurations(
-  internalESClient: APMInternalESClient
+  internalESClient: APMInternalESClient,
+  apmIndices: APMIndices
 ) {
   const params = {
     index: APM_AGENT_CONFIGURATION_INDEX,
@@ -24,7 +26,7 @@ export async function listConfigurations(
       'list_agent_configuration',
       params
     ),
-    getConfigsAppliedToAgentsThroughFleet(internalESClient),
+    getConfigsAppliedToAgentsThroughFleet(internalESClient, apmIndices),
   ]);
 
   return agentConfigs.hits.hits

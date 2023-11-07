@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { APMPluginStartDependencies } from '../../types';
@@ -19,13 +20,15 @@ export async function decoratePackagePolicyWithAgentConfigAndSourceMap({
   packagePolicy,
   internalESClient,
   fleetPluginStart,
+  apmIndices,
 }: {
   packagePolicy: NewPackagePolicy;
   internalESClient: APMInternalESClient;
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
+  apmIndices: APMIndices;
 }) {
   const [agentConfigurations, { artifacts }] = await Promise.all([
-    listConfigurations(internalESClient),
+    listConfigurations(internalESClient, apmIndices),
     listSourceMapArtifacts({ fleetPluginStart }),
   ]);
 
