@@ -16,7 +16,7 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
 
-describe('risk score calculation route', () => {
+describe('risk score disable route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
@@ -95,7 +95,7 @@ describe('risk score calculation route', () => {
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message:
-          'Task Manager is unavailable, but is required to disable the risk engine. Please enable the taskManager plugin and try again.',
+          'Task Manager is unavailable, but is required by the risk engine. Please enable the taskManager plugin and try again.',
         status_code: 400,
       });
     });
