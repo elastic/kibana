@@ -146,6 +146,9 @@ export const schema = Joi.object()
         slow: Joi.number().default(30000),
         timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
         ui: Joi.string().default('bdd'),
+        rootHooks: Joi.object().keys({
+          beforeAll: Joi.func(),
+        }),
       })
       .default(),
 

@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-import { setTimeout } from 'timers/promises';
+import { setTimeout, scheduler } from 'timers/promises';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -68,6 +68,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       }
 
       const config = await readConfigFile(log, options.esVersion, path, settingOverrides);
+      const serverless = config.get('serverless') as boolean;
 
       const hasTests = await checkForEnabledTestsInFtrConfig({
         config,
@@ -111,6 +112,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
           if (abortCtrl.signal.aborted) {
             return;
+          }
+
+          if (serverless) {
+            // A dirty temporary solution to wait for ES to process Kibana privileges.
+            // Stateless ES takes 30-35 seconds to process privileges request sent by Kibana
+            await scheduler.wait(35000);
           }
 
           await runFtr({

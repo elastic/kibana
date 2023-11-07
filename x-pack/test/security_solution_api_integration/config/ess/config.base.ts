@@ -8,6 +8,8 @@
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
 import { services } from '../../../api_integration/services';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { setupUsers } from './setup_users';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -107,6 +109,10 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
       },
       mochaOpts: {
         grep: '/^(?!.*@brokenInEss).*@ess.*/',
+        rootHooks: {
+          beforeAll: async ({ getService }: FtrProviderContext) =>
+            setupUsers(getService('security')),
+        },
       },
     };
   };

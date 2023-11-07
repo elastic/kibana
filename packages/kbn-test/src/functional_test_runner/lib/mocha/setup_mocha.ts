@@ -20,6 +20,7 @@ import { Lifecycle } from '../lifecycle';
 import { Config } from '../config';
 import { ProviderCollection } from '../providers';
 import { EsVersion } from '../es_version';
+import { GenericFtrProviderContext } from '../../public_types';
 
 import { MochaReporterProvider } from './reporter';
 import { validateCiGroupTags } from './validate_ci_group_tags';
@@ -47,9 +48,24 @@ export async function setupMocha({
   reporter,
   reporterOptions,
 }: Options) {
+  const mochaRootHooks = config.get('mochaOpts.rootHooks');
+  const rootHookCtx: GenericFtrProviderContext<any, any> = {
+    loadTestFile: () => {
+      throw new Error('loadTestFile is unsupported in root hooks');
+    },
+    getService: providers.getService as any,
+    hasService: providers.hasService as any,
+    getPageObject: providers.getPageObject as any,
+    getPageObjects: providers.getPageObjects as any,
+    updateBaselines: config.get('updateBaselines'),
+  };
+
   // configure mocha
   const mocha = new Mocha({
     ...config.get('mochaOpts'),
+    rootHooks: {
+      beforeAll: () => mochaRootHooks?.beforeAll?.(rootHookCtx),
+    },
     reporter:
       reporter || (await providers.loadExternalService('mocha reporter', MochaReporterProvider)),
     reporterOptions,
