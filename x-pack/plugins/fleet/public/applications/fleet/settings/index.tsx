@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import z from 'zod';
+import { z } from 'zod';
 import React, { useState } from 'react';
-import { EuiDescribedFormGroup, EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import {
+  EuiDescribedFormGroup,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
+} from '@elastic/eui';
 
 import { useAgentPolicyFormContext } from '../sections/agent_policy/components/agent_policy_form';
 
@@ -54,7 +60,14 @@ settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
     <EuiDescribedFormGroup
       fullWidth
       title={<h4>{settingsConfig.title}</h4>}
-      description={settingsConfig.description}
+      description={
+        <>
+          {settingsConfig.description}.{' '}
+          <EuiLink href={settingsConfig.learnMoreLink} external>
+            Learn more.
+          </EuiLink>
+        </>
+      }
     >
       <EuiFormRow fullWidth key={fieldKey} error={error} isInvalid={!!error}>
         <EuiFieldNumber
@@ -72,6 +85,56 @@ settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
   );
 });
 
+settingComponentRegistry.set(z.string()._def.typeName, (settingsConfig) => {
+  const [error, setError] = useState('');
+  const agentPolicyFormContext = useAgentPolicyFormContext();
+
+  const fieldKey = `configuredSetting-${settingsConfig.name}`;
+  const defaultValue: number =
+    settingsConfig.schema instanceof z.ZodDefault
+      ? settingsConfig.schema._def.defaultValue()
+      : undefined;
+  const coercedSchema = settingsConfig.schema as z.ZodString;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const validationResults = coercedSchema.safeParse(e.target.value);
+
+    if (!validationResults.success) {
+      setError(validationResults.error.issues[0].message);
+      return;
+    }
+
+    agentPolicyFormContext?.updateAgentPolicy({ [settingsConfig.name]: e.target.value });
+    setError('');
+  };
+
+  return (
+    <EuiDescribedFormGroup
+      fullWidth
+      title={<h4>{settingsConfig.title}</h4>}
+      description={
+        <>
+          {settingsConfig.description}.{' '}
+          <EuiLink href={settingsConfig.learnMoreLink} external>
+            Learn more.
+          </EuiLink>
+        </>
+      }
+    >
+      <EuiFormRow fullWidth key={fieldKey} error={error} isInvalid={!!error}>
+        <EuiFieldText
+          fullWidth
+          data-test-subj={fieldKey}
+          value={agentPolicyFormContext?.agentPolicy[settingsConfig.name]}
+          defaultValue={defaultValue}
+          onChange={handleChange}
+          isInvalid={!!error}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  );
+});
+
 export function ConfiguredSettings({
   configuredSettings,
 }: {
@@ -80,7 +143,11 @@ export function ConfiguredSettings({
   return (
     <>
       {configuredSettings.map((configuredSetting) => {
-        const Component = settingComponentRegistry.get(configuredSetting.schema._def.typeName);
+        const Component = settingComponentRegistry.get(
+          configuredSetting.schema instanceof z.ZodDefault
+            ? configuredSetting.schema._def.innerType._def.typeName
+            : configuredSetting.schema._def.typeName
+        );
 
         if (!Component) {
           throw new Error(`Unknown setting type: ${configuredSetting.schema._type}}`);

@@ -12,6 +12,7 @@ import {
   EuiForm,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -139,6 +140,10 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
 
         <EuiSpacer size="xl" />
 
+        <EuiTitle>
+          <h2>Advanced settings</h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
         <ConfiguredSettings configuredSettings={AGENT_POLICY_SETTINGS} />
       </EuiForm>
 
