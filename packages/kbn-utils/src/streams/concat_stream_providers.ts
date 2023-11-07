@@ -18,6 +18,8 @@ import { Readable, PassThrough, TransformOptions } from 'stream';
  *  @param {PassThroughOptions} options options passed to the PassThrough constructor
  *  @return {WritableStream} combined stream
  */
+
+// merge-queue-test-4
 export function concatStreamProviders(
   sourceProviders: Array<() => Readable>,
   options?: TransformOptions
