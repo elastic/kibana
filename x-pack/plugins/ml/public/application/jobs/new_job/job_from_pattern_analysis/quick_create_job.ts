@@ -6,17 +6,19 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MLCATEGORY, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
-import { CreateState, QuickJobCreatorBase } from './quick_create_job_base';
+import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
+import { CreateState, QuickJobCreatorBase } from '../job_from_dashboard/quick_create_job_base';
 import { MlApiServices } from '../../../services/ml_api_service';
 import { createEmptyDatafeed, createEmptyJob } from '../common/job_creator/util/default_configs';
+import { stashJobForCloning } from '../common/job_creator/util/general';
+import { JobCreatorType } from '../common/job_creator';
 
 // export enum CATEGORIZATION_TYPE {
 //   COUNT,
@@ -35,6 +37,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
     dashboardService: DashboardStart,
+    private data: DataPublicPluginStart,
     mlApiServices: MlApiServices
   ) {
     super(kibanaConfig, timeFilter, dashboardService, mlApiServices);
@@ -46,6 +49,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     bucketSpan: string,
     dataView: DataView,
     field: DataViewField,
+    partitionField: DataViewField | null,
     query: QueryDslQueryContainer,
     timeRange: TimeRange,
     startJob: boolean,
@@ -64,10 +68,10 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
       categorizationType,
       dataView,
       field,
+      partitionField,
       timeRange,
       query,
-      bucketSpan,
-      layerIndex
+      bucketSpan
     );
     const createdByLabel = CREATED_BY_LABEL.CATEGORIZATION_FROM_PATTERN_ANALYSIS;
 
@@ -85,14 +89,65 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     return result;
   }
 
+  public async createAndStashADJob(
+    categorizationType: CategorizationType,
+    dataViewId: string,
+    fieldName: string,
+    partitionFieldName: string | null,
+    startString: string,
+    endString: string,
+    query: QueryDslQueryContainer
+  ) {
+    try {
+      const dataView = await this.data.dataViews.get(dataViewId);
+      const field = dataView.getFieldByName(fieldName);
+      const partitionField = partitionFieldName
+        ? dataView.getFieldByName(partitionFieldName) ?? null
+        : null;
+
+      if (field === undefined) {
+        throw new Error('Cannot create job, field is undefined');
+      }
+
+      const { jobConfig, datafeedConfig, start, end, includeTimeRange } = await this.createJob(
+        categorizationType,
+        dataView,
+        field,
+        partitionField,
+        { from: startString, to: endString },
+        query,
+        DEFAULT_BUCKET_SPAN
+      );
+
+      // add job config and start and end dates to the
+      // job cloning stash, so they can be used
+      // by the new job wizards
+      stashJobForCloning(
+        {
+          jobConfig,
+          datafeedConfig,
+          createdBy: CREATED_BY_LABEL.CATEGORIZATION_FROM_PATTERN_ANALYSIS,
+          start,
+          end,
+        } as JobCreatorType,
+        true,
+        includeTimeRange,
+        !includeTimeRange
+      );
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
+
   private async createJob(
     categorizationType: CategorizationType,
     dataView: DataView,
     field: DataViewField,
+    partitionField: DataViewField | null,
     timeRange: TimeRange,
     query: QueryDslQueryContainer,
-    bucketSpan: string,
-    layerIndex: number | undefined
+    bucketSpan: string
   ) {
     // const { jobConfig, datafeedConfig, jobType } = await this.createADJobFromLensSavedObject(
     //   chartInfo,
@@ -115,7 +170,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     jobConfig.analysis_config = {
       categorization_field_name: field.name,
       per_partition_categorization: {
-        enabled: false,
+        enabled: partitionField !== null,
         stop_on_warn: false,
       },
       influencers: [MLCATEGORY],
@@ -123,6 +178,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
         {
           function: categorizationType,
           by_field_name: MLCATEGORY,
+          ...(partitionField ? { partition_field_name: partitionField.name } : {}),
         },
       ],
       bucket_span: bucketSpan,

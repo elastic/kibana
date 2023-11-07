@@ -278,8 +278,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         <EuiButtonEmpty
           data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
           onClick={() => createADJob()}
+          flush="left"
         >
-          AD job
+          Find anomalies in patterns
         </EuiButtonEmpty>
         <FieldValidationCallout validationResults={fieldValidationResult} />
 

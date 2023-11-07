@@ -78,8 +78,8 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
-            defaultMessage="Select a compatible layer from the visualization {title} to create an anomaly detection job."
-            values={{ title: '' /* embeddable.getTitle()*/ }}
+            defaultMessage="Create a categorization job for {field}"
+            values={{ field: field.name }}
           />
         </EuiText>
       </EuiFlyoutHeader>

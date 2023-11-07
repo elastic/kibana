@@ -17,7 +17,7 @@ import { getGeoFields, filterCategoryFields } from '../../../../common/util/fiel
 import { ml } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
-class NewJobCapsService extends NewJobCapabilitiesServiceBase {
+export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   private _catFields: Field[] = [];
   private _dateFields: Field[] = [];
   private _geoFields: Field[] = [];

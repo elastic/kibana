@@ -27,8 +27,8 @@ interface Dependencies {
 export async function resolver(
   deps: Dependencies,
   lensSavedObjectRisonString: string | undefined,
-  fromRisonStrong: string,
-  toRisonStrong: string,
+  fromRisonString: string,
+  toRisonString: string,
   queryRisonString: string,
   filtersRisonString: string,
   layerIndexRisonString: string
@@ -59,12 +59,12 @@ export async function resolver(
   let from: string;
   let to: string;
   try {
-    from = rison.decode(fromRisonStrong) as string;
+    from = rison.decode(fromRisonString) as string;
   } catch (error) {
     from = '';
   }
   try {
-    to = rison.decode(toRisonStrong) as string;
+    to = rison.decode(toRisonString) as string;
   } catch (error) {
     to = '';
   }
