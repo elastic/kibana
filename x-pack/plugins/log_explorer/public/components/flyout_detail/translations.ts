@@ -51,10 +51,10 @@ export const otherAccordionTitle = i18n.translate(
   }
 );
 
-export const flyoutOrchestratorClusterIdLabel = i18n.translate(
-  'xpack.logExplorer.flyoutDetail.label.orchestratorClusterId',
+export const flyoutOrchestratorClusterNameLabel = i18n.translate(
+  'xpack.logExplorer.flyoutDetail.label.orchestratorClusterName',
   {
-    defaultMessage: 'Orchestrator cluster ID',
+    defaultMessage: 'Orchestrator cluster Name',
   }
 );
 

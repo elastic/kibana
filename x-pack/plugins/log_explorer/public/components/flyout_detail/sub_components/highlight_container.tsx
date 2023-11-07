@@ -43,6 +43,7 @@ export function HighlightSection({
         buttonContent={accordionTitle}
         paddingSize="s"
         initialIsOpen={true}
+        data-test-subj={title}
       >
         <EuiFlexGrid columns={3}>{children}</EuiFlexGrid>
       </EuiAccordion>

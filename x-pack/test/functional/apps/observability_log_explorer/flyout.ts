@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    after('clean up archives', async () => {
+    after('clean up DataStream', async () => {
       if (cleanupDataStreamSetup) {
         cleanupDataStreamSetup();
       }

@@ -22,7 +22,7 @@ import {
   flyoutHostNameLabel,
   flyoutLogPathFileLabel,
   flyoutNamespaceLabel,
-  flyoutOrchestratorClusterIdLabel,
+  flyoutOrchestratorClusterNameLabel,
   flyoutOrchestratorResourceIdLabel,
   flyoutServiceLabel,
   flyoutShipperLabel,
@@ -86,11 +86,11 @@ export function FlyoutHighlights({
           {formattedDoc[constants.ORCHESTRATOR_CLUSTER_NAME] && (
             <EuiFlexItem>
               <HighlightField
-                label={flyoutOrchestratorClusterIdLabel}
+                label={flyoutOrchestratorClusterNameLabel}
                 field={constants.ORCHESTRATOR_CLUSTER_NAME}
                 value={flattenedDoc[constants.ORCHESTRATOR_CLUSTER_NAME]}
                 formattedValue={formattedDoc[constants.ORCHESTRATOR_CLUSTER_NAME]}
-                dataTestSubj="logExplorerFlyoutClusterId"
+                dataTestSubj="logExplorerFlyoutClusterName"
               />
             </EuiFlexItem>
           )}
