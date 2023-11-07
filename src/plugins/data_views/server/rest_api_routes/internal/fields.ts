@@ -11,6 +11,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
 // import { FullValidationConfig } from '@kbn/core-http-server';
+import { unwrapEtag } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
   DataViewsServerPluginStart,
@@ -144,7 +145,6 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     try {
       const { fields, indices } = await indexPatterns.getFieldsForWildcard({
         pattern,
-        // todo should these be added elsewhere?
         metaFields: parsedMetaFields,
         type,
         rollupIndex,
@@ -162,15 +162,9 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
       const etag = calculateHash(Buffer.from(JSON.stringify(body)));
 
-      // todo are these needed?
-      const headers: Record<string, string> = {
-        'content-type': 'application/json',
-        // 'If-None-Match': '123456',
-        etag,
-        // Expires
-      };
+      const headers: Record<string, string> = { 'content-type': 'application/json', etag };
 
-      // todo consider running in parallel with the request
+      // todo examine how long this takes
       const cacheMaxAge = await uiSettings.get<number>('data_views:cache_max_age');
 
       if (cacheMaxAge) {
@@ -180,14 +174,11 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         ] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
       }
 
-      // move to util
       const ifNoneMatch = request.headers['if-none-match'];
-      if (ifNoneMatch) {
-        let requestHash = (ifNoneMatch as string).slice(1, -1);
-        if (requestHash.indexOf('-') > -1) {
-          requestHash = requestHash.split('-')[0];
-        }
+      const ifNoneMatchString = Array.isArray(ifNoneMatch) ? ifNoneMatch[0] : ifNoneMatch;
 
+      if (ifNoneMatchString) {
+        const requestHash = unwrapEtag(ifNoneMatchString);
         if (etag === requestHash) {
           return response.notModified({ headers });
         }
@@ -225,14 +216,5 @@ export const registerFields = async (
   >,
   isRollupsEnabled: () => boolean
 ) => {
-  // handler
-  /* This seems to fail due to lack of custom headers on cache requests
-  router.versioned
-    .get({ path, access })
-    .addVersion(
-      { version, validate: { request: { query: querySchema }, response: validate.response } },
-      handler(isRollupsEnabled)
-    );
-    */
   router.get({ path, validate: { query: querySchema } }, handler(isRollupsEnabled));
 };

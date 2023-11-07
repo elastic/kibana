@@ -37,6 +37,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
   ): Promise<HttpResponse<T> | undefined> {
     const asResponse = true;
     // circle back to this, will likely need changes to any code that loads fields
+    // setting to true skips automatic json parsing
     // const rawResponse = true;
     const rawResponse = false;
     const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
