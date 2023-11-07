@@ -126,7 +126,6 @@ function getFieldsMeta(esDocsBase: string) {
             'Data will be kept at least this long before being automatically deleted.',
         }
       ),
-      valueTestSubject: 'valueDataRetentionField',
       unitTestSubject: 'unitDataRetentionField',
     },
   };
@@ -295,8 +294,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                   <EuiSpacer size="m" />
                   <UseField
                     path="lifecycle.enabled"
-                    data-test-subj="dataRetentionToggle"
-                    componentProps={{ 'data-test-subj': createDataStream.testSubject }}
+                    componentProps={{ 'data-test-subj': 'dataRetentionToggle' }}
                   />
                 </>
               }
@@ -319,7 +317,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                   componentProps={{
                     euiFieldProps: {
                       disabled: lifecycle?.infiniteDataRetention,
-                      'data-test-subj': dataRetention.valueTestSubject,
+                      'data-test-subj': 'valueDataRetentionField',
                       min: 1,
                       append: (
                         <UnitField
@@ -327,7 +325,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                           options={timeUnits}
                           disabled={lifecycle?.infiniteDataRetention}
                           euiFieldProps={{
-                            'data-test-subj': dataRetention.unitTestSubject,
+                            'data-test-subj': 'unitDataRetentionField',
                           }}
                         />
                       ),
