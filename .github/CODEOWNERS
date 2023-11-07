@@ -1315,7 +1315,6 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/de
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
-x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
