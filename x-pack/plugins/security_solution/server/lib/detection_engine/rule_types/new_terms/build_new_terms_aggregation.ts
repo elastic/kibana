@@ -45,6 +45,8 @@ const PAGE_SIZE = 10000;
 /**
  * Creates an aggregation that pages through all terms. Used to find the terms that have appeared recently,
  * without regard to whether or not they're actually new.
+ * @param param.pageSize - defines size of composite aggregation results. default value is 10,000, arguments values used ofr cases when composite aggregations calls split in batches
+ * refer to multiTermsCompositeNonRetryable method to more details
  */
 export const buildRecentTermsAgg = ({
   fields,

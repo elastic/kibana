@@ -25,6 +25,11 @@ import type {
 import { getMaxSignalsWarning } from '../utils/utils';
 
 import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
+
+/**
+ * composite aggregation page batch size set to 500 as it shows th best performance(refer https://github.com/elastic/kibana/pull/157413) and
+ * allows to be scaled down below when max_clause_count error is encountered
+ */
 const BATCH_SIZE = 500;
 
 interface MultiTermsCompositeArgsBase {
@@ -51,7 +56,7 @@ interface MultiTermsCompositeArgs extends MultiTermsCompositeArgsBase {
 /**
  * This helper does phase2/phase3(look README) got multiple new terms
  * It takes full page of results from phase 1 (10,000)
- * Splits it in chunks (starts from 1000) and applies it as a filter in new composite aggregation request
+ * Splits it in chunks (starts from 500) and applies it as a filter in new composite aggregation request
  * It pages through though all 10,000 results from phase1 until maxSize alerts found
  */
 const multiTermsCompositeNonRetryable = async ({
@@ -111,7 +116,7 @@ const multiTermsCompositeNonRetryable = async ({
         timestampField: aggregatableTimestampField,
         fields: params.newTermsFields,
         after: internalAfterKey,
-        pageSize: BATCH_SIZE,
+        pageSize: batchSize,
       }),
       runtimeMappings,
       searchAfterSortIds: undefined,
@@ -152,7 +157,7 @@ const multiTermsCompositeNonRetryable = async ({
           timestampField: aggregatableTimestampField,
           fields: params.newTermsFields,
           after: internalAfterKey,
-          pageSize: BATCH_SIZE,
+          pageSize: batchSize,
         }),
         runtimeMappings,
         searchAfterSortIds: undefined,
@@ -212,7 +217,8 @@ export const multiTermsComposite = async (args: MultiTermsCompositeArgsBase): Pr
             'Query contains too many nested clauses;',
           ].some((errMessage) => e.message.includes(errMessage))
         ) {
-          throw new AbortError(e.message);
+          args.result.errors.push(e.message);
+          return args.result;
         }
 
         retryBatchSize = retryBatchSize / 2;
