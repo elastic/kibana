@@ -15,7 +15,7 @@ import {
   updateAlertAssignees,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -28,10 +28,6 @@ import {
 } from '../../../tasks/alert_assignees';
 
 describe('Alert assigning', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
