@@ -42,7 +42,6 @@ export const rawAlertInstanceSchema = schema.object({
 });
 
 export const versionSchema = schema.object({
-  foo: schema.string(),
   alertTypeState: schema.maybe(ruleStateSchema),
   // tracks the active alerts
   alertInstances: schema.maybe(schema.recordOf(schema.string(), rawAlertInstanceSchema)),
