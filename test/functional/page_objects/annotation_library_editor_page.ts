@@ -10,6 +10,7 @@ import { FtrService } from '../ftr_provider_context';
 
 export class AnnotationEditorPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
 
   /**
@@ -58,10 +59,15 @@ export class AnnotationEditorPageObject extends FtrService {
 
     await this.testSubjects.setValue('lnsXYThickness', '' + config.lineThickness);
 
-    await this.testSubjects.setValue(
-      'euiColorPickerAnchor indexPattern-dimension-colorPicker',
-      config.color
-    );
+    const firstTitle = await this.find.byCssSelector('.euiFlyoutBody .euiTitle');
+
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue(
+        'euiColorPickerAnchor indexPattern-dimension-colorPicker',
+        config.color
+      );
+      await firstTitle.click(); // close color picker popover (sometimes it obscures the input if it opens during a scroll)
+    });
 
     await this.retry.waitFor('annotation editor UI to close', async () => {
       await this.testSubjects.click('backToGroupSettings');
