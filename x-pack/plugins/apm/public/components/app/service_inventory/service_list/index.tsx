@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
+import { ApmDocumentType } from '../../../../../common/document_type';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   ServiceInventoryFieldName,
@@ -33,6 +34,8 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
@@ -326,9 +329,22 @@ export function ServiceList({
     },
   } = useApmParams('/services');
 
-  const { kuery } = query;
+  const { kuery, rangeFrom, rangeTo } = query;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    type: ApmDocumentType.TransactionMetric,
+    numBuckets: 20,
+  });
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
+    documentType: preferred?.source.documentType,
+    rollupInterval: preferred?.source.rollupInterval,
   });
 
   const serviceColumns = useMemo(

@@ -6,7 +6,6 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
@@ -16,6 +15,9 @@ import {
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
+import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 
 const ERROR_SAMPLES_SIZE = 10000;
 
@@ -43,7 +45,12 @@ export async function getErrorGroupSampleIds({
 }): Promise<ErrorGroupSampleIdsResponse> {
   const params = {
     apm: {
-      events: [ProcessorEvent.error as const],
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: ERROR_SAMPLES_SIZE,
@@ -72,7 +79,10 @@ export async function getErrorGroupSampleIds({
     'get_error_group_sample_ids',
     params
   );
-  const errorSampleIds = resp.hits.hits.map((item) => item._source.error.id);
+  const errorSampleIds = resp.hits.hits.map((item) => {
+    const source = item._source as APMError;
+    return source.error.id;
+  });
 
   return {
     errorSampleIds,

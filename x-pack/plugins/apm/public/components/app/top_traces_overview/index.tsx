@@ -14,16 +14,28 @@ import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 
 export function TopTracesOverview() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/traces');
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
     kuery,
+    type: ApmDocumentType.TransactionMetric,
+    numBuckets: 100,
   });
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+    documentType: preferred?.source.documentType,
+    rollupInterval: preferred?.source.rollupInterval,
+  });
 
   const response = useProgressiveFetcher(
     (callApmApi) => {

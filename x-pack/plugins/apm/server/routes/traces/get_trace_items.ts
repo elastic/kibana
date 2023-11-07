@@ -55,6 +55,9 @@ import {
 } from '../../../common/waterfall/typings';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
+import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 
 export interface TraceItems {
   exceedsMax: boolean;
@@ -87,7 +90,12 @@ export async function getTraceItems({
 
   const errorResponsePromise = apmEventClient.search('get_errors_docs', {
     apm: {
-      events: [ProcessorEvent.error],
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,
@@ -133,7 +141,9 @@ export async function getTraceItems({
   const traceDocsTotal = traceResponse.total;
   const exceedsMax = traceDocsTotal > maxTraceItems;
   const traceDocs = traceResponse.hits.map((hit) => hit._source);
-  const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
+  const errorDocs = errorResponse.hits.hits.map(
+    (hit) => hit._source as APMError
+  );
 
   return {
     exceedsMax,

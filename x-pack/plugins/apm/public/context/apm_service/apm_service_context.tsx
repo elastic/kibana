@@ -95,6 +95,8 @@ export function ApmServiceContextProvider({
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
+    documentType: preferred?.source.documentType,
+    rollupInterval: preferred?.source.rollupInterval,
   });
 
   return (
