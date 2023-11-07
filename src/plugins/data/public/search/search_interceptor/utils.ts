@@ -30,8 +30,8 @@ export function getSearchErrorOverrideDisplay({
       title: i18n.translate('data.search.esErrorTitle', {
         defaultMessage: 'Cannot retrieve search results',
       }),
-      body: error.getErrorMessage(application),
-      actions: error.getActions(),
+      body: error.getErrorMessage(),
+      actions: error.getActions(application),
     };
   }
 

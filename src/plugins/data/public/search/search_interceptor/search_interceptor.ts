@@ -209,39 +209,34 @@ export class SearchInterceptor {
       return e;
     }
 
-    if (isPainlessError(e)) {
-      new PainlessError(e, options?.indexPattern);
-    }
-
     if (isEsError(e)) {
-      const requestId = options.inspector?.id ?? uuidv4();
-      const requestAdapter = options.inspector?.adapter ?? new RequestAdapter();
-      if (!options.inspector?.adapter) {
-        const requestResponder = requestAdapter.start(
-          i18n.translate('data.searchService.anonymousRequestTitle', {
-            defaultMessage: 'Request',
-          }),
+      const openInInspector = () => {
+        const requestId = options.inspector?.id ?? uuidv4();
+        const requestAdapter = options.inspector?.adapter ?? new RequestAdapter();
+        if (!options.inspector?.adapter) {
+          const requestResponder = requestAdapter.start(
+            i18n.translate('data.searchService.anonymousRequestTitle', {
+              defaultMessage: 'Request',
+            }),
+            {
+              id: requestId,
+            });
+          requestResponder.json(requestBody);
+          requestResponder.error({ json: e.attributes });
+        }
+        this.inspector.open(
           {
-            id: requestId,
-          });
-        requestResponder.json(requestBody);
-        requestResponder.error({ json: e.attributes });
-      }
-      return new EsError(
-        e,
-        () => {
-          this.inspector.open(
-            {
-              requests: requestAdapter,
+            requests: requestAdapter,
+          },
+          {
+            options: {
+              initialRequestId: requestId,
+              initialTabs: ['clusters', 'response'],
             },
-            {
-              options: {
-                initialRequestId: requestId,
-                initialTabs: ['clusters', 'response'],
-              },
-            }
-          );
-        });
+          }
+        );
+      };
+      return isPainlessError(e) ? new PainlessError(e, openInInspector, options?.indexPattern) : new EsError(e, openInInspector);
     }
 
     return e instanceof Error ? e : new Error(e.message);
