@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
@@ -30,12 +31,14 @@ export async function createAnomalyDetectionJobs({
   indices,
   environments,
   logger,
+  esCapabilities,
 }: {
   mlClient?: MlClient;
   esClient: ElasticsearchClient;
   indices: APMIndices;
   environments: Environment[];
   logger: Logger;
+  esCapabilities: ElasticsearchCapabilities;
 }) {
   if (!mlClient) {
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
@@ -68,6 +71,7 @@ export async function createAnomalyDetectionJobs({
             esClient,
             environment,
             apmMetricIndex,
+            esCapabilities,
           })
         );
       } catch (e) {
@@ -97,12 +101,16 @@ async function createAnomalyDetectionJob({
   esClient,
   environment,
   apmMetricIndex,
+  esCapabilities,
 }: {
   mlClient: Required<MlClient>;
   esClient: ElasticsearchClient;
   environment: string;
   apmMetricIndex: string;
+  esCapabilities: ElasticsearchCapabilities;
 }) {
+  const { serverless } = esCapabilities;
+
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuidv4().substr(-4);
 
@@ -136,12 +144,16 @@ async function createAnomalyDetectionJob({
       ],
     });
 
-    await waitForIndexStatus({
-      client: esClient,
-      index: '.ml-*',
-      timeout: DEFAULT_TIMEOUT,
-      status: 'yellow',
-    })();
+    // Waiting for the index is not enabled in serverless, this could potentially cause
+    // problems when creating jobs in parallels
+    if (!serverless) {
+      await waitForIndexStatus({
+        client: esClient,
+        index: '.ml-*',
+        timeout: DEFAULT_TIMEOUT,
+        status: 'yellow',
+      })();
+    }
 
     return anomalyDetectionJob;
   });

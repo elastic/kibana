@@ -492,10 +492,19 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         <EuiSkeletonText data-test-subj="loadingAddExceptionFlyout" lines={4} isLoading={isLoading}>
           {errorSubmitting != null && (
             <>
-              <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="warning">
+              <EuiCallOut
+                data-test-subj="addExceptionErrorCallOut"
+                title={i18n.SUBMIT_ERROR_TITLE}
+                color="danger"
+                iconType="warning"
+              >
                 <EuiText>{i18n.SUBMIT_ERROR_DISMISS_MESSAGE}</EuiText>
                 <EuiSpacer size="s" />
-                <EuiButton color="danger" onClick={handleDismissError}>
+                <EuiButton
+                  data-test-subj="addExceptionErrorDismissButton"
+                  color="danger"
+                  onClick={handleDismissError}
+                >
                   {i18n.SUBMIT_ERROR_DISMISS_BUTTON}
                 </EuiButton>
               </EuiCallOut>

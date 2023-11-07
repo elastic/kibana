@@ -10,6 +10,9 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Common', function () {
+    /**
+     * Public routes
+     */
     loadTestFile(require.resolve('./client/update_alert_status'));
     loadTestFile(require.resolve('./comments/delete_comment'));
     loadTestFile(require.resolve('./comments/delete_comments'));
@@ -46,7 +49,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     /**
      * Internal routes
      */
-
     loadTestFile(require.resolve('./internal/bulk_create_attachments'));
     loadTestFile(require.resolve('./internal/bulk_get_cases'));
     loadTestFile(require.resolve('./internal/bulk_get_attachments'));
@@ -60,6 +62,11 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
     loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
+
+    /**
+     * Cases client
+     */
+    loadTestFile(require.resolve('./cases/bulk_create_cases'));
 
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those

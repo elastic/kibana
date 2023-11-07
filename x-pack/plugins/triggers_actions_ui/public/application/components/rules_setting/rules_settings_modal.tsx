@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState, useRef } from 'react';
 import {
   RulesSettingsFlappingProperties,
   RulesSettingsProperties,
@@ -60,6 +60,26 @@ export const RulesSettingsErrorPrompt = memo(() => {
   );
 });
 
+const useResettableState: <T>(
+  initialValue?: T
+) => [T | undefined, boolean, (next: T, shouldUpdateInitialValue?: boolean) => void, () => void] = (
+  initalValue
+) => {
+  const initialValueRef = useRef(initalValue);
+  const [value, setValue] = useState(initalValue);
+  const [hasChanged, setHasChanged] = useState(false);
+  const reset = () => {
+    setValue(initialValueRef.current);
+    setHasChanged(false);
+  };
+  const updateValue = (next: typeof value, shouldUpdateInitialValue = false) => {
+    setValue(next);
+    setHasChanged(true);
+    if (shouldUpdateInitialValue) initialValueRef.current = next;
+  };
+  return [value, hasChanged, updateValue, reset];
+};
+
 export interface RulesSettingsModalProps {
   isVisible: boolean;
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
@@ -72,6 +92,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
 
   const {
     application: { capabilities },
+    isServerless,
   } = useKibana().services;
   const {
     rulesSettings: {
@@ -84,21 +105,24 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     },
   } = capabilities;
 
-  const [flappingSettings, setFlappingSettings] = useState<RulesSettingsFlappingProperties>();
-  const [hasFlappingChanged, setHasFlappingChanged] = useState<boolean>(false);
+  const [flappingSettings, hasFlappingChanged, setFlappingSettings, resetFlappingSettings] =
+    useResettableState<RulesSettingsFlappingProperties>();
 
-  const [queryDelaySettings, setQueryDelaySettings] = useState<RulesSettingsQueryDelayProperties>();
-  const [hasQueryDelayChanged, setHasQueryDelayChanged] = useState<boolean>(false);
+  const [queryDelaySettings, hasQueryDelayChanged, setQueryDelaySettings, resetQueryDelaySettings] =
+    useResettableState<RulesSettingsQueryDelayProperties>();
 
   const { isLoading: isFlappingLoading, isError: hasFlappingError } = useGetFlappingSettings({
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
       if (!flappingSettings) {
-        setFlappingSettings({
-          enabled: fetchedSettings.enabled,
-          lookBackWindow: fetchedSettings.lookBackWindow,
-          statusChangeThreshold: fetchedSettings.statusChangeThreshold,
-        });
+        setFlappingSettings(
+          {
+            enabled: fetchedSettings.enabled,
+            lookBackWindow: fetchedSettings.lookBackWindow,
+            statusChangeThreshold: fetchedSettings.statusChangeThreshold,
+          },
+          true // Update the initial value so we don't need to fetch it from the server again
+        );
       }
     },
   });
@@ -107,12 +131,21 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     enabled: isVisible,
     onSuccess: (fetchedSettings) => {
       if (!queryDelaySettings) {
-        setQueryDelaySettings({
-          delay: fetchedSettings.delay,
-        });
+        setQueryDelaySettings(
+          {
+            delay: fetchedSettings.delay,
+          },
+          true
+        );
       }
     },
   });
+
+  const onCloseModal = useCallback(() => {
+    resetFlappingSettings();
+    resetQueryDelaySettings();
+    onClose();
+  }, [onClose, resetFlappingSettings, resetQueryDelaySettings]);
 
   const { mutate } = useUpdateRuleSettings({
     onSave,
@@ -148,7 +181,6 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
           newSettings.statusChangeThreshold
         ),
       });
-      setHasFlappingChanged(true);
     }
 
     if (setting === 'queryDelay') {
@@ -160,7 +192,6 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
         [key]: value,
       };
       setQueryDelaySettings(newSettings);
-      setHasQueryDelayChanged(true);
     }
   };
 
@@ -168,9 +199,11 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     const updatedSettings: RulesSettingsProperties = {};
     if (canWriteFlappingSettings && hasFlappingChanged) {
       updatedSettings.flapping = flappingSettings;
+      setFlappingSettings(flappingSettings!, true);
     }
     if (canWriteQueryDelaySettings && hasQueryDelayChanged) {
       updatedSettings.queryDelay = queryDelaySettings;
+      setQueryDelaySettings(queryDelaySettings!, true);
     }
     mutate(updatedSettings);
   };
@@ -197,7 +230,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
             hasError={hasFlappingError}
           />
         )}
-        {queryDelaySettings && (
+        {isServerless && queryDelaySettings && (
           <>
             <EuiSpacer />
             <RulesSettingsQueryDelaySection
@@ -214,7 +247,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   };
 
   return (
-    <EuiModal data-test-subj="rulesSettingsModal" onClose={onClose} maxWidth={880}>
+    <EuiModal data-test-subj="rulesSettingsModal" onClose={onCloseModal} maxWidth={880}>
       <EuiModalHeader>
         <EuiModalHeaderTitle component="h3">
           <FormattedMessage
@@ -236,7 +269,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
         <EuiHorizontalRule margin="none" />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onClose}>
+        <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onCloseModal}>
           <FormattedMessage
             id="xpack.triggersActionsUI.rulesSettings.modal.cancelButton"
             defaultMessage="Cancel"

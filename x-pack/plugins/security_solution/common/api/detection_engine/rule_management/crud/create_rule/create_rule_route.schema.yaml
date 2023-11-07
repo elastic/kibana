@@ -6,7 +6,7 @@ paths:
   /api/detection_engine/rules:
     post:
       operationId: CreateRule
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       description: Create a single detection rule
       tags:
         - Rules API

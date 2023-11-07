@@ -50,6 +50,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     ilmPolicy,
     _meta,
     _kbnMeta: { isLegacy, hasDatastream },
+    allowAutoCreate,
   } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
@@ -192,6 +193,21 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             <EuiDescriptionListDescription>
               {version || version === 0 ? version : i18nTexts.none}
             </EuiDescriptionListDescription>
+
+            {/* Allow auto create */}
+            {isLegacy !== true && (
+              <>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateDetails.summaryTab.allowAutoCreateDescriptionListTitle"
+                    defaultMessage="Allow auto create"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {allowAutoCreate ? i18nTexts.yes : i18nTexts.no}
+                </EuiDescriptionListDescription>
+              </>
+            )}
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>

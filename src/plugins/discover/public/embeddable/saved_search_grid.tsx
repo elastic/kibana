@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, ROW_HEIGHT_OPTION, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
   type UnifiedDataTableProps,
@@ -27,7 +27,7 @@ export interface DiscoverGridEmbeddableProps
   sampleSizeState: number; // a required prop
   totalHitCount?: number;
   query?: AggregateQuery | Query;
-  interceptedWarnings?: SearchResponseInterceptedWarning[];
+  interceptedWarnings?: SearchResponseWarning[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   savedSearchId?: string;

@@ -8,7 +8,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '../../../test/global_mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
@@ -533,6 +532,7 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
+        allowAutoCreate: true,
       });
       // Component templates
       await actions.completeStepTwo('test_component_template_1');
@@ -559,6 +559,7 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
+            allowAutoCreate: true,
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,
@@ -632,6 +633,7 @@ describe('<TemplateCreate />', () => {
         body: JSON.stringify({
           index_patterns: DEFAULT_INDEX_PATTERNS,
           data_stream: {},
+          allow_auto_create: false,
         }),
       })
     );

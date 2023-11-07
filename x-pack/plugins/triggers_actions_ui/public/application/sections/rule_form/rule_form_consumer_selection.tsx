@@ -14,7 +14,7 @@ import { IErrorObject, RuleCreationValidConsumer } from '../../../types';
 const SELECT_LABEL: string = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.selectLabel',
   {
-    defaultMessage: 'Select role visibility',
+    defaultMessage: 'Role visibility',
   }
 );
 
@@ -121,13 +121,15 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
   }, []);
 
   useEffect(() => {
-    if (formattedSelectOptions.length === 1) {
-      onChange(formattedSelectOptions[0].value as RuleCreationValidConsumer);
+    if (consumers.length === 1) {
+      onChange(consumers[0] as RuleCreationValidConsumer);
+    } else if (consumers.includes(AlertConsumers.OBSERVABILITY)) {
+      onChange(AlertConsumers.OBSERVABILITY as RuleCreationValidConsumer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formattedSelectOptions]);
+  }, [consumers]);
 
-  if (formattedSelectOptions.length <= 1) {
+  if (consumers.length <= 1 || consumers.includes(AlertConsumers.OBSERVABILITY)) {
     return null;
   }
   return (

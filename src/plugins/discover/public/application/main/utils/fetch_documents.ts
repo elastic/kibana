@@ -11,7 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
 import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import { FetchDeps } from './fetch_all';
@@ -72,12 +72,13 @@ export const fetchDocuments = (
 
   return lastValueFrom(fetch$).then((records) => {
     const adapter = inspectorAdapters.requests;
-    const interceptedWarnings = adapter
-      ? getSearchResponseInterceptedWarnings({
-          services,
-          adapter,
-        })
-      : [];
+    const interceptedWarnings: SearchResponseWarning[] = [];
+    if (adapter) {
+      services.data.search.showWarnings(adapter, (warning) => {
+        interceptedWarnings.push(warning);
+        return true; // suppress the default behaviour
+      });
+    }
 
     return {
       records,

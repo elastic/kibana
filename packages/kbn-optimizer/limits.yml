@@ -30,7 +30,7 @@ pageLoadAssetSize:
   data: 454087
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
-  dataViewManagement: 5000
+  dataViewManagement: 5100
   dataViews: 48300
   dataVisualizer: 27530
   devTools: 38637
@@ -94,6 +94,7 @@ pageLoadAssetSize:
   management: 46112
   maps: 90000
   mapsEms: 26072
+  metricsDataAccess: 60000
   ml: 82187
   monitoring: 80000
   navigation: 37269
