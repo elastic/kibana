@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pRetry, { AbortError } from 'p-retry';
+import pRetry from 'p-retry';
 import type { Moment } from 'moment';
 import type { Logger } from '@kbn/logging';
 import type { NewTermsRuleParams } from '../../rule_schema';
