@@ -35,6 +35,7 @@ import {
   shimHitsTotal,
 } from '../es_search';
 import { SearchConfigSchema } from '../../../../config';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
@@ -65,7 +66,7 @@ export const enhancedEsSearchStrategyProvider = (
             ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
             ...request.params,
           };
-      const { body, headers } = id
+      const { body, headers, meta } = id
         ? await client.asyncSearch.get(
             { ...params, id },
             { ...options.transport, signal: options.abortSignal, meta: true }
@@ -78,7 +79,12 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
+      return toAsyncKibanaSearchResponse(
+        { ...body, response },
+        headers?.warning,
+        // do not return requestParams on polling calls
+        id ? undefined : meta?.request?.params
+      );
     };
 
     const cancel = () => {
@@ -138,6 +144,9 @@ export const enhancedEsSearchStrategyProvider = (
       const response = esResponse.body as estypes.SearchResponse<any>;
       return {
         rawResponse: shimHitsTotal(response, options),
+        ...(esResponse.meta?.request?.params
+          ? { requestParams: sanitizeRequestParams(esResponse.meta?.request?.params) }
+          : {}),
         ...getTotalLoaded(response),
       };
     } catch (e) {

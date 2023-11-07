@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -38,6 +40,11 @@ export interface ISearchClient {
    */
   extend: ISearchExtendGeneric;
 }
+
+export type SanitizedConnectionRequestParams = Pick<
+  ConnectionRequestParams,
+  'method' | 'path' | 'querystring'
+>;
 
 export interface IKibanaSearchResponse<RawResponse = any> {
   /**
@@ -86,6 +93,17 @@ export interface IKibanaSearchResponse<RawResponse = any> {
    * The raw response returned by the internal search method (usually the raw ES response)
    */
   rawResponse: RawResponse;
+
+  /**
+   * HTTP request parameters from elasticsearch transport client t
+   */
+  requestParams?: SanitizedConnectionRequestParams;
+}
+
+export interface IEsErrorAttributes {
+  error?: estypes.ErrorCause;
+  rawResponse?: estypes.SearchResponseBody;
+  requestParams?: SanitizedConnectionRequestParams;
 }
 
 export interface IKibanaSearchRequest<Params = any> {

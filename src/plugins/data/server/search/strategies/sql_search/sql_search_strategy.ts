@@ -9,6 +9,7 @@
 import type { IncomingHttpHeaders } from 'http';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
+import type { DiagnosticResult } from '@elastic/transport';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { getKbnSearchError } from '../../report_search_error';
@@ -45,9 +46,10 @@ export const sqlSearchStrategyProvider = (
       const { keep_cursor: keepCursor, ...params } = request.params ?? {};
       let body: SqlQueryResponse;
       let headers: IncomingHttpHeaders;
+      let meta: DiagnosticResult['meta'];
 
       if (id) {
-        ({ body, headers } = await client.sql.getAsync(
+        ({ body, headers, meta } = await client.sql.getAsync(
           {
             format: params?.format ?? 'json',
             ...getDefaultAsyncGetParams(searchConfig, options),
@@ -56,7 +58,7 @@ export const sqlSearchStrategyProvider = (
           { ...options.transport, signal: options.abortSignal, meta: true }
         ));
       } else {
-        ({ headers, body } = await client.sql.query(
+        ({ headers, body, meta } = await client.sql.query(
           {
             format: params.format ?? 'json',
             ...getDefaultAsyncSubmitParams(searchConfig, options),
@@ -76,7 +78,13 @@ export const sqlSearchStrategyProvider = (
         }
       }
 
-      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning);
+      return toAsyncKibanaSearchResponse(
+        body,
+        startTime,
+        headers?.warning,
+        // do not return requestParams on polling calls
+        id ? undefined : meta?.request?.params
+      );
     };
 
     const cancel = () => {

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FunctionComponent } from 'react';
 import { ApplicationStart } from '@kbn/core-application-browser';
+import { EuiBadgeProps } from '@elastic/eui';
 import type { IndexDetailsTab } from '../../common/constants';
 import { Index } from '..';
 
@@ -18,11 +19,19 @@ export interface IndexOverviewContent {
   }) => ReturnType<FunctionComponent>;
 }
 
+export interface IndexBadge {
+  matchIndex: (index: Index) => boolean;
+  label: string;
+  // a parseable search bar filter expression, for example "isFollowerIndex:true"
+  filterExpression?: string;
+  color: EuiBadgeProps['color'];
+}
+
 export interface ExtensionsSetup {
   addAction(action: any): void;
   addBanner(banner: any): void;
   addFilter(filter: any): void;
-  addBadge(badge: any): void;
+  addBadge(badge: IndexBadge): void;
   addToggle(toggle: any): void;
   addIndexDetailsTab(tab: IndexDetailsTab): void;
   setIndexOverviewContent(content: IndexOverviewContent): void;
@@ -32,7 +41,7 @@ export class ExtensionsService {
   private _actions: any[] = [];
   private _banners: any[] = [];
   private _filters: any[] = [];
-  private _badges: any[] = [
+  private _badges: IndexBadge[] = [
     {
       matchIndex: (index: { isFrozen: boolean }) => {
         return index.isFrozen;
@@ -75,7 +84,7 @@ export class ExtensionsService {
     this._filters.push(filter);
   }
 
-  private addBadge(badge: any) {
+  private addBadge(badge: IndexBadge) {
     this._badges.push(badge);
   }
 
