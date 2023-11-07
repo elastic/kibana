@@ -22,32 +22,31 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   createRule,
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  finalizeSignalsMigration,
-  getEqlRuleForSignalTesting,
-  getRuleForSignalTesting,
-  getSavedQueryRuleForSignalTesting,
-  getSignalsByIds,
-  getThreatMatchRuleForSignalTesting,
-  getThresholdRuleForSignalTesting,
-  startSignalsMigration,
+  finalizeAlertsMigration,
+  getEqlRuleForAlertTesting,
+  getRuleForAlertTesting,
+  getSavedQueryRuleForAlertTesting,
+  getAlertsByIds,
+  getThreatMatchRuleForAlertTesting,
+  getThresholdRuleForAlertTesting,
+  startAlertsMigration,
   waitFor,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
-} from '../../../utils';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { removeRandomValuedProperties } from '../../rule_execution_logic/utils';
+  waitForAlertsToBePresent,
+  removeRandomValuedProperties,
+} from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('Alerts Compatibility', function () {
+  describe('@ess Alerts Compatibility', function () {
     describe('CTI', () => {
       const expectedDomain = 'elastic.local';
       const expectedProvider = 'provider1';
@@ -63,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -124,14 +123,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect(indices.length).to.eql(1);
         expect(indices[0].is_outdated).to.eql(true);
 
-        const [migration] = await startSignalsMigration({
+        const [migration] = await startAlertsMigration({
           indices: [indices[0].index],
           supertest,
           log,
         });
         await waitFor(
           async () => {
-            const [{ completed }] = await finalizeSignalsMigration({
+            const [{ completed }] = await finalizeAlertsMigration({
               migrationIds: [migration.migration_id],
               supertest,
               log,
@@ -183,26 +182,26 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const rule: ThreatMatchRuleCreateProps = getThreatMatchRuleForSignalTesting([
+        const rule: ThreatMatchRuleCreateProps = getThreatMatchRuleForAlertTesting([
           '.siem-signals-*',
         ]);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: ThreatMatchRuleCreateProps = getThreatMatchRuleForSignalTesting([
+        const rule: ThreatMatchRuleCreateProps = getThreatMatchRuleForAlertTesting([
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
@@ -212,7 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Query', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -224,11 +223,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const rule: QueryRuleCreateProps = getRuleForSignalTesting([`.siem-signals-*`]);
+        const rule: QueryRuleCreateProps = getRuleForAlertTesting([`.siem-signals-*`]);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
@@ -384,13 +383,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: QueryRuleCreateProps = getRuleForSignalTesting([
+        const rule: QueryRuleCreateProps = getRuleForAlertTesting([
           `.alerts-security.alerts-default`,
         ]);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
@@ -549,7 +548,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Saved Query', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -562,13 +561,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: SavedQueryRuleCreateProps = {
-          ...getSavedQueryRuleForSignalTesting([`.siem-signals-*`]),
+          ...getSavedQueryRuleForAlertTesting([`.siem-signals-*`]),
           query: 'agent.name: "security-linux-1.example.dev"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
@@ -576,13 +575,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
         const rule: SavedQueryRuleCreateProps = {
-          ...getSavedQueryRuleForSignalTesting([`.alerts-security.alerts-default`]),
+          ...getSavedQueryRuleForAlertTesting([`.alerts-security.alerts-default`]),
           query: 'agent.name: "security-linux-1.example.dev"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
@@ -592,7 +591,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('EQL', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -605,13 +604,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForSignalTesting(['.siem-signals-*']),
+          ...getEqlRuleForAlertTesting(['.siem-signals-*']),
           query: 'any where agent.name == "security-linux-1.example.dev"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
@@ -619,13 +618,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
         const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForSignalTesting([`.alerts-security.alerts-default`]),
+          ...getEqlRuleForAlertTesting([`.alerts-security.alerts-default`]),
           query: 'any where agent.name == "security-linux-1.example.dev"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
@@ -635,7 +634,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Threshold', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -647,7 +646,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const baseRule: ThresholdRuleCreateProps = getThresholdRuleForSignalTesting([
+        const baseRule: ThresholdRuleCreateProps = getThresholdRuleForAlertTesting([
           '.siem-signals-*',
         ]);
         const rule: ThresholdRuleCreateProps = {
@@ -660,15 +659,15 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const baseRule: ThresholdRuleCreateProps = getThresholdRuleForSignalTesting([
+        const baseRule: ThresholdRuleCreateProps = getThresholdRuleForAlertTesting([
           `.alerts-security.alerts-default`,
         ]);
         const rule: ThresholdRuleCreateProps = {
@@ -681,8 +680,8 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getAlertsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
