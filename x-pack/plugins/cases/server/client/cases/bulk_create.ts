@@ -8,9 +8,10 @@
 import Boom from '@hapi/boom';
 import { partition } from 'lodash';
 
+import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Case, CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { Case, CustomFieldsConfiguration, User } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 
@@ -30,11 +31,8 @@ import { validateCustomFields } from './validators';
 import { normalizeCreateCaseRequest } from './utils';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
+import type { CaseTransformedAttributes } from '../../common/types/case';
 
-/**
- * Bulk create new case.
- *
- */
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
   clientArgs: CasesClientArgs,
@@ -55,10 +53,7 @@ export const bulkCreate = async (
       configurations.map((conf) => [conf.owner, conf.customFields])
     );
 
-    const casesWithIds = decodedData.cases.map((theCase) => ({
-      ...theCase,
-      id: theCase.id ?? SavedObjectsUtils.generateId(),
-    }));
+    const casesWithIds = getCaseWithIds(decodedData);
 
     await auth.ensureAuthorized({
       operation: Operations.createCase,
@@ -72,42 +67,11 @@ export const bulkCreate = async (
     for (const theCase of casesWithIds) {
       const customFieldsConfiguration = customFieldsConfigurationMap.get(theCase.owner);
 
-      const customFieldsValidationParams = {
-        requestCustomFields: theCase.customFields,
-        customFieldsConfiguration,
-      };
+      validateRequest({ theCase, customFieldsConfiguration, hasPlatinumLicenseOrGreater });
 
-      validateCustomFields(customFieldsValidationParams);
-
-      /**
-       * Assign users to a case is only available to Platinum+
-       */
-
-      if (theCase.assignees && theCase.assignees.length !== 0) {
-        if (!hasPlatinumLicenseOrGreater) {
-          throw Boom.forbidden(
-            'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
-          );
-        }
-      }
-
-      /**
-       * Trim title, category, description and tags
-       * and fill out missing custom fields
-       * before saving to ES
-       */
-
-      const { id, ...caseWithoutId } = theCase;
-
-      const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
-
-      bulkCreateRequest.push({
-        id,
-        ...transformNewCase({
-          user,
-          newCase: normalizedCase,
-        }),
-      });
+      bulkCreateRequest.push(
+        createBulkCreateCaseRequest({ theCase, user, customFieldsConfiguration })
+      );
     }
 
     const bulkCreateResponse = await caseService.bulkCreateCases({
@@ -130,26 +94,7 @@ export const bulkCreate = async (
     }
 
     for (const theCase of casesSOs) {
-      const userActionPayload: CasePostRequest = {
-        title: theCase.attributes.title,
-        tags: theCase.attributes.tags,
-        connector: theCase.attributes.connector,
-        settings: theCase.attributes.settings,
-        owner: theCase.attributes.owner,
-        description: theCase.attributes.description,
-        severity: theCase.attributes.severity ?? CaseSeverity.LOW,
-        assignees: theCase.attributes.assignees ?? [],
-        category: theCase.attributes.category ?? null,
-        customFields: theCase.attributes.customFields ?? [],
-      };
-
-      userActions.push({
-        type: UserActionTypes.create_case,
-        caseId: theCase.id,
-        user,
-        payload: userActionPayload,
-        owner: theCase.attributes.owner,
-      });
+      userActions.push(createBulkCreateUserActionsRequest({ theCase, user }));
 
       if (theCase.attributes.assignees && theCase.attributes.assignees.length !== 0) {
         const assigneesWithoutCurrentUser = theCase.attributes.assignees.filter(
@@ -177,4 +122,107 @@ export const bulkCreate = async (
   } catch (error) {
     throw createCaseError({ message: `Failed to bulk create cases: ${error}`, error, logger });
   }
+};
+
+const getCaseWithIds = (
+  req: BulkCreateCasesRequest
+): Array<{ id: string } & BulkCreateCasesRequest['cases'][number]> =>
+  req.cases.map((theCase) => ({
+    ...theCase,
+    id: theCase.id ?? SavedObjectsUtils.generateId(),
+  }));
+
+const validateRequest = ({
+  theCase,
+  customFieldsConfiguration,
+  hasPlatinumLicenseOrGreater,
+}: {
+  theCase: BulkCreateCasesRequest['cases'][number];
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+  hasPlatinumLicenseOrGreater: boolean;
+}) => {
+  const customFieldsValidationParams = {
+    requestCustomFields: theCase.customFields,
+    customFieldsConfiguration,
+  };
+
+  validateCustomFields(customFieldsValidationParams);
+  validateAssigneesUsage({ assignees: theCase.assignees, hasPlatinumLicenseOrGreater });
+};
+
+const validateAssigneesUsage = ({
+  assignees,
+  hasPlatinumLicenseOrGreater,
+}: {
+  assignees?: BulkCreateCasesRequest['cases'][number]['assignees'];
+  hasPlatinumLicenseOrGreater: boolean;
+}) => {
+  /**
+   * Assign users to a case is only available to Platinum+
+   */
+
+  if (assignees && assignees.length !== 0) {
+    if (!hasPlatinumLicenseOrGreater) {
+      throw Boom.forbidden(
+        'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+      );
+    }
+  }
+};
+
+const createBulkCreateCaseRequest = ({
+  theCase,
+  customFieldsConfiguration,
+  user,
+}: {
+  theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+  user: User;
+}): BulkCreateCasesArgs['cases'][number] => {
+  const { id, ...caseWithoutId } = theCase;
+
+  /**
+   * Trim title, category, description and tags
+   * and fill out missing custom fields
+   * before saving to ES
+   */
+
+  const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
+
+  return {
+    id,
+    ...transformNewCase({
+      user,
+      newCase: normalizedCase,
+    }),
+  };
+};
+
+const createBulkCreateUserActionsRequest = ({
+  theCase,
+  user,
+}: {
+  theCase: SavedObject<CaseTransformedAttributes>;
+  user: User;
+}) => {
+  const userActionPayload: CasePostRequest = {
+    title: theCase.attributes.title,
+    tags: theCase.attributes.tags,
+    connector: theCase.attributes.connector,
+    settings: theCase.attributes.settings,
+    owner: theCase.attributes.owner,
+    description: theCase.attributes.description,
+    severity: theCase.attributes.severity ?? CaseSeverity.LOW,
+    assignees: theCase.attributes.assignees ?? [],
+    category: theCase.attributes.category ?? null,
+    customFields: theCase.attributes.customFields ?? [],
+  };
+
+  return {
+    type: UserActionTypes.create_case,
+    caseId: theCase.id,
+    user,
+    payload: userActionPayload,
+    owner: theCase.attributes.owner,
+  };
 };
