@@ -12,7 +12,7 @@ import { isJobV2Params } from '../../common/job_utils';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
-import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
+import { ScreenCaptureModalContent } from './screen_capture_panel_content_lazy';
 
 const getJobParams =
   (
@@ -116,9 +116,9 @@ export const reportingScreenshotShareProvider = ({
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
     const shareActions = [];
 
-    const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
-      defaultMessage: 'PNG Reports',
-    });
+    // const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
+    //   defaultMessage: 'PNG Reports',
+    // });
 
     const jobProviderOptions: JobParamsProviderOptions = {
       shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
@@ -128,76 +128,39 @@ export const reportingScreenshotShareProvider = ({
 
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
+    const reportingModalTitle = i18n.translate('xpack.reporting.shareContextModal.buttonLabel', {
+      defaultMessage: 'Reports',
+    })
 
-    const pngReportType = isV2Job ? 'pngV2' : 'png';
-
-    const panelPng = {
+    const reportingModal = {
       shareMenuItem: {
-        name: pngPanelTitle,
-        icon: 'document',
+        name: reportingModalTitle,
         toolTipContent: licenseToolTipContent,
         disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'PNGReports',
+        ['data-test-subj']: 'Reports',
         sortOrder: 10,
       },
       panel: {
-        id: 'reportingPngPanel',
-        title: pngPanelTitle,
+        id: 'reportingModal',
+        title: reportingModalTitle,
         content: (
-          <ScreenCapturePanelContent
+          <ScreenCaptureModalContent
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType={pngReportType}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
+            getJobParams={getJobParams(apiClient, jobProviderOptions)}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}
           />
-        ),
-      },
-    };
+        )
+      }
+    }
 
-    const pdfPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
-      defaultMessage: 'PDF Reports',
-    });
 
-    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
-
-    const panelPdf = {
-      shareMenuItem: {
-        name: pdfPanelTitle,
-        icon: 'document',
-        toolTipContent: licenseToolTipContent,
-        disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'PDFReports',
-        sortOrder: 10,
-      },
-      panel: {
-        id: 'reportingPdfPanel',
-        title: pdfPanelTitle,
-        content: (
-          <ScreenCapturePanelContent
-            apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
-            reportType={pdfReportType}
-            objectId={objectId}
-            requiresSavedState={requiresSavedState}
-            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
-            isDirty={isDirty}
-            onClose={onClose}
-            theme={theme}
-          />
-        ),
-      },
-    };
-
-    shareActions.push(panelPng);
-    shareActions.push(panelPdf);
+    shareActions.push(reportingModal);
     return shareActions;
   };
 

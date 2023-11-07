@@ -193,7 +193,6 @@ export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
   const closeModal = () => setIsModalVisible(false);
 
   const { tabs, initialTabTitle } = getTabs(props);
-  console.log({ tabs });
   const formattedTabs: any = [];
   tabs.map((t, i) => {
     // if (i < tabs.length -1){

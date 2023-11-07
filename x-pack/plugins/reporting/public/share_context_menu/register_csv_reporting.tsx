@@ -12,7 +12,7 @@ import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
 import { ExportPanelShareOpts } from '.';
-import { ReportingPanelContent } from './reporting_panel_content_lazy';
+import { ReportingModalContent } from './reporting_panel_content_lazy';
 
 export const reportingCsvShareProvider = ({
   apiClient,
@@ -85,7 +85,19 @@ export const reportingCsvShareProvider = ({
           id: 'csvReportingPanel',
           title: panelTitle,
           content: (
-            <ReportingPanelContent
+            // <ReportingPanelContent
+            //   requiresSavedState={false}
+            //   apiClient={apiClient}
+            //   toasts={toasts}
+            //   uiSettings={uiSettings}
+            //   reportType={CSV_JOB_TYPE}
+            //   layoutId={undefined}
+            //   objectId={objectId}
+            //   getJobParams={getJobParams}
+            //   onClose={onClose}
+            //   theme={theme}
+            // />
+            <ReportingModalContent
               requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
