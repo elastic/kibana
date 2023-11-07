@@ -22,11 +22,11 @@ export const waitForIpsTableToBeLoaded = () => {
 };
 
 export const openHoverActions = () => {
-  cy.get(EXPAND_OVERFLOW_ITEMS).first().click({ scrollBehavior: 'center' });
+  cy.get(EXPAND_OVERFLOW_ITEMS).first().click();
 };
 
 export const mouseoverOnToOverflowItem = () => {
-  cy.get(OVERFLOW_ITEM).first().realHover();
+  cy.get(OVERFLOW_ITEM).first().realHover({ position: 'center' });
 };
 
 export const clickOnFilterIn = () => {
