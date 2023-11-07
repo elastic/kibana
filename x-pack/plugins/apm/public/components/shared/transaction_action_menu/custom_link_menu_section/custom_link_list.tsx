@@ -15,6 +15,9 @@ import { CustomLink } from '../../../../../common/custom_link/custom_link_types'
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { unit } from '../../../../utils/style';
 
+// override the mustache.js escape function to not escape special characters
+Mustache.escape = (text) => text;
+
 export function CustomLinkList({
   customLinks,
   transaction,
@@ -25,7 +28,7 @@ export function CustomLinkList({
   return (
     <SectionLinks style={{ maxHeight: unit * 10, overflowY: 'auto' }}>
       {customLinks.map((link) => {
-        const href = getHref(link, transaction);
+        const href = getParsedCustomLinkUrl(link, transaction);
         return (
           <SectionLink
             key={link.id}
@@ -39,7 +42,10 @@ export function CustomLinkList({
   );
 }
 
-function getHref(link: CustomLink, transaction?: Transaction) {
+export function getParsedCustomLinkUrl(
+  link: CustomLink,
+  transaction?: Transaction
+) {
   try {
     return encodeURI(Mustache.render(link.url, transaction));
   } catch (e) {

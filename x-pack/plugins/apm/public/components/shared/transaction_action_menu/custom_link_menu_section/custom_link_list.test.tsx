@@ -13,7 +13,7 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../utils/test_helpers';
-import { CustomLinkList } from './custom_link_list';
+import { CustomLinkList, getParsedCustomLinkUrl } from './custom_link_list';
 
 describe('CustomLinkList', () => {
   const customLinks = [
@@ -24,9 +24,22 @@ describe('CustomLinkList', () => {
       url: 'http://elastic.co?service.name={{service.name}}',
     },
   ] as CustomLink[];
+
   const transaction = {
     service: { name: 'foo.bar' },
   } as unknown as Transaction;
+
+  const customLinkWithTemplateVars = {
+    id: '3',
+    label: 'foo/bar',
+    url: 'http://elastic.co?service.name={{service.name}}/transactions?transactionName={{transaction.name}}',
+  };
+
+  const transactionWithUnsafeCharacters = {
+    service: { name: 'foo bar' },
+    transaction: { name: '#/foo bar/%25c' },
+  } as unknown as Transaction;
+
   it('shows links', () => {
     const component = render(
       <CustomLinkList customLinks={customLinks} transaction={transaction} />
@@ -39,5 +52,16 @@ describe('CustomLinkList', () => {
       <CustomLinkList customLinks={[]} transaction={transaction} />
     );
     expectTextsNotInDocument(component, ['foo', 'bar']);
+  });
+
+  it('urlencode custom links with unsafe characters', () => {
+    const parsedLink = getParsedCustomLinkUrl(
+      customLinkWithTemplateVars,
+      transactionWithUnsafeCharacters
+    );
+
+    expect(parsedLink).toBe(
+      'http://elastic.co?service.name=foo%20bar/transactions?transactionName=#/foo%20bar/%2525c'
+    );
   });
 });
