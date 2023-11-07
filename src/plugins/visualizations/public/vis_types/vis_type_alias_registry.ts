@@ -85,9 +85,20 @@ export interface VisualizationsAppExtension {
   toListItem: (savedObject: SimpleSavedObject<any>) => VisualizationListItem;
 }
 
+export const INLINE_EDITING_ALIAS = 'none';
+
 export interface VisTypeAlias {
-  aliasPath?: string;
-  aliasApp: string;
+  alias:
+    | {
+        app: string;
+        path: string;
+      }
+    /**
+     * Use `INLINE_EDITING_ALIAS` when your visualization uses inline editing and does
+     * not have a specific app to redirect to. This will default to the embeddable factory's
+     * editing method (`getExplicitInput`), which should handle the inline editing.
+     */
+    | typeof INLINE_EDITING_ALIAS;
   name: string;
   title: string;
   icon: string;

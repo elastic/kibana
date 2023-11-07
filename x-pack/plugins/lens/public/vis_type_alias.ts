@@ -11,8 +11,10 @@ import { getBasePath, getEditPath } from '../common/constants';
 import { getLensClient } from './persistence/lens_client';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
-  aliasPath: getBasePath(),
-  aliasApp: 'lens',
+  alias: {
+    path: getBasePath(),
+    app: 'lens',
+  },
   name: 'lens',
   promotion: true,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {

@@ -24,8 +24,10 @@ export function getMapsVisTypeAlias() {
   });
 
   return {
-    aliasApp: APP_ID,
-    aliasPath: `/${MAP_PATH}`,
+    alias: {
+      app: APP_ID,
+      path: `/${MAP_PATH}`,
+    },
     name: APP_ID,
     title: APP_NAME,
     description: appDescription,

@@ -20,6 +20,7 @@ import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';
 import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
 import './dialog.scss';
+import { INLINE_EDITING_ALIAS } from '../vis_types/vis_type_alias_registry';
 
 interface TypeSelectionProps {
   contentClient: ContentClient;
@@ -119,7 +120,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private onVisTypeSelected = (visType: BaseVisType | VisTypeAlias) => {
-    if (!('aliasPath' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
+    if (!('alias' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
         visType,
@@ -143,10 +144,12 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     }
 
     let params;
-    if ('aliasPath' in visType) {
-      params = visType.aliasPath;
-      this.props.onClose();
-      this.navigate(visType.aliasApp, visType.aliasPath);
+    if ('alias' in visType) {
+      if (visType.alias !== INLINE_EDITING_ALIAS) {
+        params = visType.alias.path;
+        this.props.onClose();
+        this.navigate(visType.alias.app, visType.alias.path);
+      }
       return;
     }
 

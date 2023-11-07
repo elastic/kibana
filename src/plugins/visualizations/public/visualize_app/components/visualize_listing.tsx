@@ -127,12 +127,15 @@ const useTableListViewProps = (
   const editItem = useCallback(
     async ({ type, attributes: { editUrl, editApp, id } }: VisualizeUserContent) => {
       if (!editApp && !editUrl) {
-        // this means this is an embeddable **without** an editor app - so, use the factory editing method
+        /*
+         * This is a visualization alias **without** an editor app - so, use the embeddable
+         * factory to edit the visualized saved object instead.
+         */
         const factory = embeddable.getEmbeddableFactory(type);
         try {
           await factory?.getExplicitInput({ savedObjectId: id } as Partial<EmbeddableInput>);
         } catch {
-          // error means that the user cancelled editing - so, just swallow it
+          // swallow any errors - this just means that the user cancelled editing
         }
         return;
       }

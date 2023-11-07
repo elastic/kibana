@@ -20,7 +20,7 @@ export const getVisualizeListItemLink = (
   editUrl: string | undefined,
   error: string | undefined = undefined
 ) => {
-  if (error || !(editApp || editUrl)) {
+  if (error || (!editApp && !editUrl)) {
     return undefined;
   }
 
