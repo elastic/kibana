@@ -206,7 +206,6 @@ const waitForHasAgentPolicyChanged = (
 
   return cy
     .waitUntil(
-      `Wait for Fleet Agent to report policy revision ${policyRevision}`,
       () => {
         return request<GetOneAgentResponse>({
           method: 'GET',
@@ -217,8 +216,6 @@ const waitForHasAgentPolicyChanged = (
         }).then((response) => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           const { status, policy_revision, policy_id } = response.body.item;
-
-          cy.log('Checking Agent data:', { status, policy_revision, policy_id });
 
           if (
             status !== 'updating' &&
@@ -231,7 +228,8 @@ const waitForHasAgentPolicyChanged = (
           return cy.wrap(isPolicyUpdated);
         });
       },
-      { timeout: 120000 }
+      { timeout: 120000 },
+      `Wait for Fleet Agent to report policy id [${policyId}] with revision [${policyRevision}]`
     )
     .then(() => {
       return isPolicyUpdated;

@@ -84,24 +84,17 @@ declare global {
       /**
        * Continuously call provided callback function until it either return `true`
        * or fail if `timeout` is reached.
-       * @param message
        * @param fn
        * @param options
+       * @param message
        */
       waitUntil(
-        message: string,
         fn: (subject?: any) => boolean | Promise<boolean> | Chainable<boolean>,
         options?: Partial<{
           interval: number;
           timeout: number;
-        }>
-      ): Chainable<Subject>;
-      waitUntil(
-        fn: (subject?: any) => boolean | Promise<boolean> | Chainable<boolean>,
-        options?: Partial<{
-          interval: number;
-          timeout: number;
-        }>
+        }>,
+        message?: string
       ): Chainable<Subject>;
 
       task(
