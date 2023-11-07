@@ -48,19 +48,31 @@ export default function ({ getService }: FtrProviderContext) {
   const getCounter = (
     savedObjects: UsageCountersSavedObject[],
     eventName: string,
-    counterType: UiCounterMetricType,
+    counterType: UiCounterMetricType
   ): UsageCountersSavedObject[] => {
-    const matchingEventName = savedObjects.filter(({ attributes }) => attributes.counterName === `${APP_NAME}:${eventName}`);
+    const matchingEventName = savedObjects.filter(
+      ({ attributes }) => attributes.counterName === `${APP_NAME}:${eventName}`
+    );
     if (!matchingEventName.length) {
-      throw new Error(`Unable to find savedObject with Event Name ${eventName}, got ${JSON.stringify(savedObjects)}`);
+      throw new Error(
+        `Unable to find savedObject with Event Name ${eventName}, got ${JSON.stringify(
+          savedObjects
+        )}`
+      );
     }
 
-    const matchingCounterType = matchingEventName.filter(({ attributes }) => attributes.counterType === counterType);
+    const matchingCounterType = matchingEventName.filter(
+      ({ attributes }) => attributes.counterType === counterType
+    );
     if (!matchingCounterType.length) {
-      throw new Error(`Unable to find savedObject with matching Counter type ${counterType}, got ${JSON.stringify(savedObjects)}`);
+      throw new Error(
+        `Unable to find savedObject with matching Counter type ${counterType}, got ${JSON.stringify(
+          savedObjects
+        )}`
+      );
     }
 
-    return matchingCounterType;    
+    return matchingCounterType;
   };
 
   describe('UI Counters API', () => {
@@ -68,23 +80,16 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('stores ui counter events in usage counters savedObjects', async () => {
       const reportManager = new ReportManager();
-      const eventName = 'my_event'
+      const eventName = 'my_event';
       const counterEvent = createUiCounterEvent(eventName, METRIC_TYPE.COUNT);
 
-      const { report } = reportManager.assignReports([
-        counterEvent,
-      ]);
+      const { report } = reportManager.assignReports([counterEvent]);
 
       await sendReport(report);
-
       await retry.waitForWithTimeout('reported events to be stored into ES', 8000, async () => {
         const savedObjects = await fetchUsageCountersObjects();
 
-        const countTypeEvents = getCounter(
-          savedObjects,
-          eventName,
-          METRIC_TYPE.COUNT
-        );
+        const countTypeEvents = getCounter(savedObjects, eventName, METRIC_TYPE.COUNT);
 
         expect(countTypeEvents.length).to.eql(1);
         expect(countTypeEvents[0].attributes.count).to.eql(1);
@@ -118,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
         const firstEventWithClickTypeEvents = getCounter(
           savedObjects,
           firstUniqueEventName,
-          METRIC_TYPE.CLICK,
+          METRIC_TYPE.CLICK
         );
         expect(firstEventWithClickTypeEvents.length).to.eql(1);
         expect(firstEventWithClickTypeEvents[0].attributes.count).to.eql(2);
@@ -126,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
         const secondEventWithCountTypeEvents = getCounter(
           savedObjects,
           secondUniqueEventName,
-          METRIC_TYPE.COUNT,
+          METRIC_TYPE.COUNT
         );
         expect(secondEventWithCountTypeEvents.length).to.eql(1);
         expect(secondEventWithCountTypeEvents[0].attributes.count).to.eql(1);
