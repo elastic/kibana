@@ -11,13 +11,13 @@ import JSON5 from 'json5';
 import expect from 'expect';
 import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   deleteAllRules,
   deleteAllPrebuiltRuleAssets,
   getPrebuiltRulesStatus,
   installPrebuiltRulesPackageByVersion,
-} from '../../utils';
+} from '../../../utils';
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');

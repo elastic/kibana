@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../config/serverless/config.base';
+import { createTestConfig } from '../../../../../../config/serverless/config.base';
 
 export default createTestConfig({
-  testFiles: [require.resolve('../update_prebuilt_rules_package.ts')],
+  testFiles: [require.resolve('..')],
   junit: {
-    reportName:
-      'Detection Engine Serverless / Update Prebuilt Rules Package - API Integration Tests',
+    reportName: 'Detection Engine Serverless / Prebuilt Rules Management API Integration Tests',
   },
 });

@@ -9,14 +9,14 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../config/ess/config.base.trial')
+    require.resolve('../../../../../../config/ess/config.base.trial')
   );
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('../update_prebuilt_rules_package.ts')],
+    testFiles: [require.resolve('..')],
     junit: {
-      reportName: 'Detection Engine ESS / Update Prebuilt Rules Package - API Integration Tests',
+      reportName: 'Detection Engine ESS / Prebuilt Rules Management API Integration Tests',
     },
   };
 }

@@ -463,17 +463,11 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/ess.config.ts
 
- 
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/bundled_prebuilt_rules_package/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/bundled_prebuilt_rules_package/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/large_prebuilt_rules_package/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/large_prebuilt_rules_package/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/update_prebuilt_rules_package/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/update_prebuilt_rules_package/configs/ess.config.ts
-
-
-
-
-
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/management/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/management/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/bundled_prebuilt_rules_package/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/bundled_prebuilt_rules_package/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/large_prebuilt_rules_package/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/large_prebuilt_rules_package/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/update_prebuilt_rules_package/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/update_prebuilt_rules_package/configs/ess.config.ts

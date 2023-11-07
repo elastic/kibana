@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
   deleteAllRules,
@@ -21,7 +21,7 @@ import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
-} from '../../utils';
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

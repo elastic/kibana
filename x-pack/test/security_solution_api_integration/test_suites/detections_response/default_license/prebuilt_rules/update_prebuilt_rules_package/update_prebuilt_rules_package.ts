@@ -12,7 +12,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import JSON5 from 'json5';
 import expect from 'expect';
 import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
   deleteAllRules,
@@ -23,7 +23,7 @@ import {
   upgradePrebuiltRules,
   reviewPrebuiltRulesToInstall,
   reviewPrebuiltRulesToUpgrade,
-} from '../../utils';
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

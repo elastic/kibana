@@ -15,12 +15,12 @@ export const BUNDLED_PACKAGE_DIR = path.join(
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../config/ess/config.base.trial')
+    require.resolve('../../../../../../config/ess/config.base.trial')
   );
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('../install_large_prebuilt_rules_package.ts')],
+    testFiles: [require.resolve('..')],
     junit: {
       reportName:
         'Detection Engine ESS / Large Prebuilt Rules Package Installation API Integration Tests',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   deleteAllRules,
   deleteAllTimelines,
@@ -20,7 +20,7 @@ import {
   installPrebuiltRules,
   getInstalledRules,
   upgradePrebuiltRules,
-} from '../../utils';
+} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

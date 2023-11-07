@@ -6,17 +6,14 @@
  */
 
 import path from 'path';
-import { createTestConfig } from '../../../../../config/serverless/config.base';
+import { createTestConfig } from '../../../../../../config/serverless/config.base';
 
 export const BUNDLED_PACKAGE_DIR = path.join(
   path.dirname(__filename),
   './../fleet_bundled_packages/fixtures'
 );
 export default createTestConfig({
-  testFiles: [
-    require.resolve('../install_latest_bundled_prebuilt_rules.ts'),
-    require.resolve('../prerelease_packages.ts'),
-  ],
+  testFiles: [require.resolve('..')],
   junit: {
     reportName:
       'Detection Engine Serverless / Bundled Prebuilte Rules Package API Integration Tests',
