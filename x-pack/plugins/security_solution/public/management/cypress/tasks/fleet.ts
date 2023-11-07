@@ -26,6 +26,7 @@ import type {
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services/routes';
 import type { GetUninstallTokensMetadataResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import type { UninstallToken } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
+import { logger } from './logger';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { request } from './common';
 
@@ -216,6 +217,8 @@ const waitForHasAgentPolicyChanged = (
         }).then((response) => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           const { status, policy_revision, policy_id } = response.body.item;
+
+          logger.debug('Checking policy data:', { status, policy_revision, policy_id });
 
           if (
             status !== 'updating' &&

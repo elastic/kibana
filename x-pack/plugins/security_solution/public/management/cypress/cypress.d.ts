@@ -24,6 +24,7 @@ import type {
   CreateUserAndRoleCyTaskOptions,
   UninstallAgentFromHostTaskOptions,
   IsAgentAndEndpointUninstalledFromHostTaskOptions,
+  LogItTaskOptions,
 } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
@@ -219,6 +220,12 @@ declare global {
         arg: IsAgentAndEndpointUninstalledFromHostTaskOptions,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<boolean>;
+
+      task(
+        name: 'logIt',
+        arg: LogItTaskOptions,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<null>;
     }
   }
 }

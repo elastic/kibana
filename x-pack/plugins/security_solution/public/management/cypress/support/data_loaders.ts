@@ -46,6 +46,7 @@ import type {
   IndexEndpointHostsCyTaskOptions,
   LoadUserAndRoleCyTaskOptions,
   CreateUserAndRoleCyTaskOptions,
+  LogItTaskOptions,
 } from '../types';
 import type {
   DeletedIndexedEndpointRuleAlerts,
@@ -134,6 +135,14 @@ export const dataLoaders = (
   );
 
   on('task', {
+    logIt: async ({ level = 'info', data }: LogItTaskOptions): Promise<null> => {
+      return stackServicesPromise
+        .then(({ log }) => {
+          log[level](data);
+        })
+        .then(() => null);
+    },
+
     indexFleetEndpointPolicy: async ({
       policyName,
       endpointPackageVersion,

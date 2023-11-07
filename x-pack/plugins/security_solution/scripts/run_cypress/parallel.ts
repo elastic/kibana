@@ -29,7 +29,7 @@ import pRetry from 'p-retry';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { createKbnClient } from '../endpoint/common/stack_services';
 import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
-import { startFleetServerIfNecessary } from '../endpoint/common/fleet_server/fleet_server_services';
+import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { renderSummaryTable } from './print_run';
 import { isSkipped, parseTestFileConfig } from './utils';
 import { getFTRConfig } from './get_ftr_config';
@@ -366,12 +366,15 @@ ${JSON.stringify(
                 log,
               });
 
-              fleetServer = await startFleetServerIfNecessary({
+              fleetServer = await startFleetServer({
                 kbnClient,
                 logger: log,
                 port: config.has('servers.fleetserver.port')
                   ? (config.get('servers.fleetserver.port') as number)
                   : undefined,
+                // `force` is needed to ensure that any currently running fleet server (perhaps left
+                // over from an interrupted run) is killed and a new one restarted
+                force: true,
               });
             }
 
