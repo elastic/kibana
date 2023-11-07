@@ -14,54 +14,55 @@ import { z } from 'zod';
 
 export type PinnedEvent = z.infer<typeof PinnedEvent>;
 export const PinnedEvent = z.object({
-  pinnedEventId: z.string().optional(),
-  eventId: z.string().optional(),
-  timelineId: z.string().optional(),
-  created: z.number().optional(),
-  createdBy: z.string().optional(),
-  updated: z.number().optional(),
-  updatedBy: z.string().optional(),
-  version: z.string().optional(),
-  timelineVersion: z.string().optional(),
+  pinnedEventId: z.string(),
+  eventId: z.string(),
+  timelineId: z.string(),
+  created: z.number().nullable().optional(),
+  createdBy: z.string().nullable().optional(),
+  updated: z.number().nullable().optional(),
+  updatedBy: z.string().nullable().optional(),
+  version: z.string(),
+  timelineVersion: z.string().nullable().optional(),
 });
 
 export type Sort = z.infer<typeof Sort>;
 export const Sort = z.object({
-  columnId: z.string().optional(),
-  sortDirection: z.string().optional(),
+  columnId: z.string().nullable().optional(),
+  columnType: z.string().nullable().optional(),
+  sortDirection: z.string().nullable().optional(),
 });
 
 export type BareNote = z.infer<typeof BareNote>;
 export const BareNote = z.object({
-  eventId: z.string().optional(),
-  note: z.string().optional(),
-  timelineId: z.string().optional(),
-  created: z.number().optional(),
-  createdBy: z.string().optional(),
-  updated: z.number().optional(),
-  updatedBy: z.string().optional(),
+  eventId: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  timelineId: z.string().nullable(),
+  created: z.number().nullable().optional(),
+  createdBy: z.string().nullable().optional(),
+  updated: z.number().nullable().optional(),
+  updatedBy: z.string().nullable().optional(),
 });
 
 export type Note = z.infer<typeof Note>;
 export const Note = BareNote.and(
   z.object({
-    noteId: z.string().optional(),
-    version: z.string().optional(),
+    noteId: z.string(),
+    version: z.string(),
     timelineVersion: z.string().nullable().optional(),
   })
 );
 
 export type GlobalNote = z.infer<typeof GlobalNote>;
 export const GlobalNote = z.object({
-  noteId: z.string().optional(),
-  version: z.string().optional(),
+  noteId: z.string(),
+  version: z.string(),
   timelineVersion: z.string().nullable().optional(),
-  note: z.string().optional(),
-  timelineId: z.string().optional(),
-  created: z.number().optional(),
-  createdBy: z.string().optional(),
-  updated: z.number().optional(),
-  updatedBy: z.string().optional(),
+  note: z.string().nullable().optional(),
+  timelineId: z.string().nullable().optional(),
+  created: z.number().nullable().optional(),
+  createdBy: z.string().nullable().optional(),
+  updated: z.number().nullable().optional(),
+  updatedBy: z.string().nullable().optional(),
 });
 
 /**
@@ -113,7 +114,6 @@ export const QueryMatchResult = z.object({
   operator: z.string().optional(),
 });
 
-export type DataProviderResult = z.infer<typeof DataProviderResult>;
 export const DataProviderResult = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
@@ -121,15 +121,17 @@ export const DataProviderResult = z.object({
   excluded: z.boolean().optional(),
   kqlQuery: z.string().optional(),
   queryMatch: QueryMatchResult.optional(),
-  and: z.array(DataProviderResult).optional(),
+  and: z.lazy(() => DataProviderResult.array()).optional(),
   type: DataProviderType.optional(),
 });
 
+export type IDataProviderResult = z.infer<typeof DataProviderResult>;
+
 export type FavoriteTimelineResult = z.infer<typeof FavoriteTimelineResult>;
 export const FavoriteTimelineResult = z.object({
-  fullName: z.string().optional(),
-  userName: z.string().optional(),
-  favoriteDate: z.number().optional(),
+  fullName: z.string().nullable().optional(),
+  userName: z.string().nullable().optional(),
+  favoriteDate: z.number().nullable().optional(),
 });
 
 export type FilterTimelineResult = z.infer<typeof FilterTimelineResult>;
@@ -176,12 +178,9 @@ export const SerializedFilterQueryResult = z.object({
  * The field to sort the timelines by.
  */
 export type SortFieldTimeline = z.infer<typeof SortFieldTimeline>;
-export const SortFieldTimeline = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  updated: z.string().optional(),
-  created: z.string().optional(),
-});
+export const SortFieldTimeline = z.enum(['title', 'description', 'updated', 'created']);
+export type SortFieldTimelineEnum = typeof SortFieldTimeline.enum;
+export const SortFieldTimelineEnum = SortFieldTimeline.enum;
 
 export type ColumnHeaderResult = z.infer<typeof ColumnHeaderResult>;
 export const ColumnHeaderResult = z.object({
@@ -208,41 +207,43 @@ export const TimelineTypeEnum = TimelineType.enum;
 
 export type SavedTimeline = z.infer<typeof SavedTimeline>;
 export const SavedTimeline = z.object({
-  columns: ColumnHeaderResult.optional(),
-  created: z.number().optional(),
-  createdBy: z.string().optional(),
-  dataProviders: z.array(DataProviderResult).optional(),
-  dataViewId: z.string().optional(),
+  columns: ColumnHeaderResult.nullable().optional(),
+  created: z.number().nullable().optional(),
+  createdBy: z.string().nullable().optional(),
+  dataProviders: z.array(DataProviderResult).nullable().optional(),
+  dataViewId: z.string().nullable().optional(),
   dateRange: z
     .object({
       end: z.union([z.string(), z.number()]).optional(),
       start: z.union([z.string(), z.number()]).optional(),
     })
+    .nullable()
     .optional(),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   eqlOptions: z
     .object({
       eventCategoryField: z.string().optional(),
       tiebreakerField: z.string().optional(),
       timestampField: z.string().optional(),
     })
+    .nullable()
     .optional(),
-  eventType: z.string().optional(),
-  excludedRowRendererIds: z.array(RowRendererId).optional(),
-  favorite: z.array(FavoriteTimelineResult).optional(),
-  filters: z.array(FilterTimelineResult).optional(),
-  kqlMode: z.string().optional(),
-  kqlQuery: SerializedFilterQueryResult.optional(),
-  indexNames: z.array(z.string()).optional(),
-  savedQueryId: z.string().optional(),
-  sort: Sort.optional(),
-  status: z.enum(['active', 'draft', 'immutable']).optional(),
-  title: z.string().optional(),
-  templateTimelineId: z.string().optional(),
-  templateTimelineVersion: z.number().optional(),
-  timelineType: TimelineType.optional(),
-  updated: z.number().optional(),
-  updatedBy: z.string().optional(),
+  eventType: z.string().nullable().optional(),
+  excludedRowRendererIds: z.array(RowRendererId).nullable().optional(),
+  favorite: z.array(FavoriteTimelineResult).nullable().optional(),
+  filters: z.array(FilterTimelineResult).nullable().optional(),
+  kqlMode: z.string().nullable().optional(),
+  kqlQuery: SerializedFilterQueryResult.nullable().optional(),
+  indexNames: z.array(z.string()).nullable().optional(),
+  savedQueryId: z.string().nullable().optional(),
+  sort: Sort.nullable().optional(),
+  status: z.enum(['active', 'draft', 'immutable']).nullable().optional(),
+  title: z.string().nullable().optional(),
+  templateTimelineId: z.string().nullable().optional(),
+  templateTimelineVersion: z.number().nullable().optional(),
+  timelineType: TimelineType.nullable().optional(),
+  updated: z.number().nullable().optional(),
+  updatedBy: z.string().nullable().optional(),
 });
 
 export type TimelineResponse = z.infer<typeof TimelineResponse>;
