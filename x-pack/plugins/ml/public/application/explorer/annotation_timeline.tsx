@@ -29,7 +29,7 @@ const ANNOTATION_CONTAINER_HEIGHT = 12;
 const ANNOTATION_MIN_WIDTH = 8;
 
 /**
- * Reusable component for rendering annotaiton-like items on a timeline.
+ * Reusable component for rendering annotation-like items on a timeline.
  */
 export const AnnotationTimeline = <T extends { timestamp: number; end_timestamp?: number }>({
   data,
