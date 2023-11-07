@@ -301,6 +301,7 @@ describe('Execution Handler', () => {
         foo: true,
         stateVal: 'My  goes here',
       },
+      rule,
     });
 
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
@@ -1988,6 +1989,34 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
+            "rule": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "group": "default",
+                  "id": "1",
+                  "params": Object {
+                    "val": "rule url: {{rule.url}}",
+                  },
+                },
+              ],
+              "id": "1",
+              "mutedInstanceIds": Array [],
+              "name": "name-of-alert",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "contextVal": "My other {{context.value}} goes here",
+                "foo": true,
+                "stateVal": "My other {{state.value}} goes here",
+              },
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [
+                "tag-A",
+                "tag-B",
+              ],
+            },
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
               "basePathname": "",
@@ -2060,6 +2089,39 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/basePath/s/test1/app/test/rule/1?start=30000&end=90000",
             },
             "actionTypeId": "test",
+            "rule": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "frequency": Object {
+                    "notifyWhen": "onActiveAlert",
+                    "summary": true,
+                    "throttle": null,
+                  },
+                  "group": null,
+                  "id": "1",
+                  "params": Object {
+                    "val": "rule url: {{rule.url}}",
+                  },
+                },
+              ],
+              "id": "1",
+              "mutedInstanceIds": Array [],
+              "name": "name-of-alert",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "contextVal": "My other {{context.value}} goes here",
+                "foo": true,
+                "stateVal": "My other {{state.value}} goes here",
+              },
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [
+                "tag-A",
+                "tag-B",
+              ],
+            },
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/basePath/s/test1/app/test/rule/1?start=30000&end=90000",
               "basePathname": "/basePath",
@@ -2095,6 +2157,34 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
+            "rule": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "group": "default",
+                  "id": "1",
+                  "params": Object {
+                    "val": "rule url: {{rule.url}}",
+                  },
+                },
+              ],
+              "id": "1",
+              "mutedInstanceIds": Array [],
+              "name": "name-of-alert",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "contextVal": "My other {{context.value}} goes here",
+                "foo": true,
+                "stateVal": "My other {{state.value}} goes here",
+              },
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [
+                "tag-A",
+                "tag-B",
+              ],
+            },
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
               "basePathname": "",
@@ -2127,6 +2217,34 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
+            "rule": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "group": "default",
+                  "id": "1",
+                  "params": Object {
+                    "val": "rule url: {{rule.url}}",
+                  },
+                },
+              ],
+              "id": "1",
+              "mutedInstanceIds": Array [],
+              "name": "name-of-alert",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "contextVal": "My other {{context.value}} goes here",
+                "foo": true,
+                "stateVal": "My other {{state.value}} goes here",
+              },
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [
+                "tag-A",
+                "tag-B",
+              ],
+            },
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
               "basePathname": "",
@@ -2159,6 +2277,34 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
+            "rule": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "group": "default",
+                  "id": "1",
+                  "params": Object {
+                    "val": "rule url: {{rule.url}}",
+                  },
+                },
+              ],
+              "id": "1",
+              "mutedInstanceIds": Array [],
+              "name": "name-of-alert",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "contextVal": "My other {{context.value}} goes here",
+                "foo": true,
+                "stateVal": "My other {{state.value}} goes here",
+              },
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [
+                "tag-A",
+                "tag-B",
+              ],
+            },
             "ruleUrl": undefined,
           },
         ]
@@ -2188,6 +2334,34 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
+            "rule": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "group": "default",
+                  "id": "1",
+                  "params": Object {
+                    "val": "rule url: {{rule.url}}",
+                  },
+                },
+              ],
+              "id": "1",
+              "mutedInstanceIds": Array [],
+              "name": "name-of-alert",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "contextVal": "My other {{context.value}} goes here",
+                "foo": true,
+                "stateVal": "My other {{state.value}} goes here",
+              },
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [
+                "tag-A",
+                "tag-B",
+              ],
+            },
             "ruleUrl": undefined,
           },
         ]
@@ -2217,6 +2391,34 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
+            "rule": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "group": "default",
+                  "id": "1",
+                  "params": Object {
+                    "val": "rule url: {{rule.url}}",
+                  },
+                },
+              ],
+              "id": "1",
+              "mutedInstanceIds": Array [],
+              "name": "name-of-alert",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "contextVal": "My other {{context.value}} goes here",
+                "foo": true,
+                "stateVal": "My other {{state.value}} goes here",
+              },
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [
+                "tag-A",
+                "tag-B",
+              ],
+            },
             "ruleUrl": undefined,
           },
         ]
@@ -2249,6 +2451,34 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/some/other/place",
             },
             "actionTypeId": "test",
+            "rule": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "group": "default",
+                  "id": "1",
+                  "params": Object {
+                    "val": "rule url: {{rule.url}}",
+                  },
+                },
+              ],
+              "id": "1",
+              "mutedInstanceIds": Array [],
+              "name": "name-of-alert",
+              "notifyWhen": "onActiveAlert",
+              "params": Object {
+                "contextVal": "My other {{context.value}} goes here",
+                "foo": true,
+                "stateVal": "My other {{state.value}} goes here",
+              },
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [
+                "tag-A",
+                "tag-B",
+              ],
+            },
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/s/test1/app/management/some/other/place",
               "basePathname": "",

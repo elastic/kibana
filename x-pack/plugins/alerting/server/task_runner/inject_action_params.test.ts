@@ -82,7 +82,42 @@ describe('injectActionParams', () => {
         "links": Array [
           Object {
             "href": "http://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/1",
-            "text": "Elastic Rule",
+            "text": "Elastic Rule \\"Unknown\\"",
+          },
+        ],
+        "summary": "My summary",
+      }
+    `);
+  });
+
+  test('adds the rule name if the rule is defined', () => {
+    const actionParams = {
+      summary: 'My summary',
+    };
+
+    const ruleUrl = {
+      absoluteUrl:
+        'http://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/1',
+      kibanaBaseUrl: 'http://localhost:5601',
+      basePathname: '',
+      spaceIdSegment: '',
+      relativePath: '/app/management/insightsAndAlerting/triggersActions/rule/1',
+    };
+
+    const result = injectActionParams({
+      actionParams,
+      actionTypeId: '.pagerduty',
+      ruleUrl,
+      // @ts-expect-error: Not all attributes are needed
+      rule: { name: 'My rule' },
+    });
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "links": Array [
+          Object {
+            "href": "http://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/1",
+            "text": "Elastic Rule \\"My rule\\"",
           },
         ],
         "summary": "My summary",
@@ -116,7 +151,7 @@ describe('injectActionParams', () => {
         "links": Array [
           Object {
             "href": "http://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/1",
-            "text": "Elastic Rule",
+            "text": "Elastic Rule \\"Unknown\\"",
           },
           Object {
             "href": "https://example.com",
