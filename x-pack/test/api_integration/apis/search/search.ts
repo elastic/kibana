@@ -233,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
-        let err: Error;
+        let err: Error | undefined;
         try {
           await req;
         } catch (e) {
