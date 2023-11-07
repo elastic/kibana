@@ -87,15 +87,15 @@ deploy() {
   PROJECT_ELASTICSEARCH_URL=$(jq -r --slurp '.[1].endpoints.elasticsearch' $DEPLOY_LOGS)
 
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
-    ### $PROJECT_TYPE_LABEL Deployment
+### $PROJECT_TYPE_LABEL Deployment
 
-    Kibana: $PROJECT_KIBANA_LOGIN_URL
+Kibana: $PROJECT_KIBANA_LOGIN_URL
 
-    Elasticsearch: $PROJECT_ELASTICSEARCH_URL
+Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
-    Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$PROJECT_NAME\`
+Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$PROJECT_NAME\`
 
-    Kibana image: \`$KIBANA_IMAGE\`
+Kibana image: \`$KIBANA_IMAGE\`
 EOF
 
   buildkite-agent meta-data set pr_comment:deploy_project:head "* [$PROJECT_TYPE_LABEL Deployment](${PROJECT_KIBANA_LOGIN_URL})"
@@ -104,4 +104,4 @@ EOF
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-observability" && deploy "observability"
-is_pr_with_label "ci:project-deploy-security" && deploy "security
+is_pr_with_label "ci:project-deploy-security" && deploy "security"
