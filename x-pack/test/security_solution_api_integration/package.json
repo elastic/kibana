@@ -41,6 +41,11 @@
     "alerts:runner:serverless": "npm run run-tests:dr:default alerts serverless serverlessEnv",
     "alerts:qa:serverless": "npm run run-tests:dr:default alerts serverless qaEnv",
     "alerts:server:ess": "npm run initialize-server:dr:default alerts ess",
-    "alerts:runner:ess": "npm run run-tests:dr:default alerts ess essEnv"
+    "alerts:runner:ess": "npm run run-tests:dr:default alerts ess essEnv",
+    "rule_execution_login:server:serverless": "npm run initialize-server:dr:default rule_execution_logic serverless",
+    "rule_execution_login:runner:serverless": "npm run run-tests:dr:default rule_execution_logic serverless serverlessEnv",
+    "rule_execution_login:qa:serverless": "npm run run-tests:dr:default rule_execution_logic serverless qaEnv",
+    "rule_execution_login:server:ess": "npm run initialize-server:dr:default rule_execution_logic ess",
+    "rule_execution_login:runner:ess": "npm run run-tests:dr:default rule_execution_logic ess essEnv"
   }
 }
