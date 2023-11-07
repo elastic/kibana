@@ -65,8 +65,10 @@ const getLegacyPackageTagId = (pkgName: string) => pkgName;
   In that case return id `security-solution-default`
 */
 export const getPackageSpecTagId = (spaceId: string, pkgName: string, tagName: string) => {
-  if (tagName.toLowerCase() === SECURITY_SOLUTION_TAG_NAME.toLowerCase())
-    return SECURITY_SOLUTION_TAG_ID;
+  if (tagName.toLowerCase() === SECURITY_SOLUTION_TAG_NAME.toLowerCase()) {
+    return `${SECURITY_SOLUTION_TAG_ID}-${spaceId}`;
+  }
+
   // UUID v5 needs a namespace (uuid.DNS) to generate a predictable uuid
   const uniqueId = uuidv5(`${tagName.toLowerCase()}`, uuidv5.DNS);
   return `fleet-shared-tag-${pkgName}-${uniqueId}-${spaceId}`;
