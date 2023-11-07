@@ -782,7 +782,8 @@
                 "docId": "kibGuidedOnboardingPluginApi",
                 "section": "def-public.GuidedOnboardingPluginStart",
                 "text": "GuidedOnboardingPluginStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/plugin.ts",
             "deprecated": false,

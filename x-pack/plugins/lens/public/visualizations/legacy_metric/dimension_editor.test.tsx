@@ -26,19 +26,6 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
 import { DatasourcePublicAPI } from '../..';
 
-// mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    htmlIdGenerator: (fn: unknown) => {
-      let counter = 0;
-      return () => counter++;
-    },
-  };
-});
-
 function paletteParamsContaining(paramsToCheck: PaletteOutput<CustomPaletteParams>['params']) {
   return expect.objectContaining({
     palette: expect.objectContaining({

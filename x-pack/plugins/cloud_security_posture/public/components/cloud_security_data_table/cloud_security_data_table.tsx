@@ -9,11 +9,7 @@ import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
 import { type DataView } from '@kbn/data-views-plugin/common';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import {
-  ROW_HEIGHT_OPTION,
-  SHOW_MULTIFIELDS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { EuiDataGridCellValueElementProps, EuiDataGridStyle, EuiProgress } from '@elastic/eui';
 import { AddFieldFilterHandler } from '@kbn/unified-field-list';
@@ -223,8 +219,7 @@ export const CloudSecurityDataTable = ({
     height: `calc(100vh - ${filters.length > 0 ? 443 : 403}px)`,
   };
 
-  const rowHeightState =
-    uiSettings.get(ROW_HEIGHT_OPTION) === -1 ? 0 : uiSettings.get(ROW_HEIGHT_OPTION);
+  const rowHeightState = 0;
 
   const loadingStyle = {
     opacity: isLoading ? 1 : 0,

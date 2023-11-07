@@ -111,6 +111,11 @@ export interface CloudSetup {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectName?: string;
+    /**
+     * The serverless project type.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectType?: string;
   };
 }
 
@@ -185,6 +190,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       serverless: {
         projectId,
         projectName: this.config.serverless?.project_name,
+        projectType: this.config.serverless?.project_type,
       },
     };
   }
