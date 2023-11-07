@@ -9,13 +9,7 @@ import semver from 'semver';
 import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -169,9 +163,9 @@ export class ManifestManager {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
       if (
-        (listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID &&
+        (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
           this.appFeaturesService.isEnabled(AppFeatureKey.endpointResponseActions)) ||
-        (listId !== ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID &&
+        (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
           this.appFeaturesService.isEnabled(AppFeatureKey.endpointArtifactManagement))
       ) {
         itemsByListId = await getAllItemsFromEndpointExceptionList({
@@ -284,7 +278,7 @@ export class ManifestManager {
   protected async buildTrustedAppsArtifacts(allPolicyIds: string[]): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       name: ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME,
     };
 
@@ -312,7 +306,7 @@ export class ManifestManager {
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       name: ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME,
     };
 
@@ -338,7 +332,7 @@ export class ManifestManager {
   protected async buildBlocklistArtifacts(allPolicyIds: string[]): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_BLOCKLISTS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       name: ArtifactConstants.GLOBAL_BLOCKLISTS_NAME,
     };
 
@@ -367,7 +361,7 @@ export class ManifestManager {
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
       name: ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME,
     };
 

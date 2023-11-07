@@ -6,13 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
@@ -383,10 +377,12 @@ describe('ManifestManager', () => {
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-        [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
-        [ENDPOINT_EVENT_FILTERS_LIST_ID]: { linux: [eventFiltersListItem] },
-        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: { linux: [hostIsolationExceptionsItem] },
-        [ENDPOINT_BLOCKLISTS_LIST_ID]: { linux: [blocklistsListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
       });
       context.savedObjectsClient.create = jest
         .fn()
@@ -474,10 +470,12 @@ describe('ManifestManager', () => {
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-        [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
-        [ENDPOINT_EVENT_FILTERS_LIST_ID]: { linux: [eventFiltersListItem] },
-        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: { linux: [hostIsolationExceptionsItem] },
-        [ENDPOINT_BLOCKLISTS_LIST_ID]: { linux: [blocklistsListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
       });
 
       const manifest = await manifestManager.buildNewManifest(oldManifest);
@@ -557,17 +555,21 @@ describe('ManifestManager', () => {
           macos: [exceptionListItem, exceptionListItem],
           windows: [duplicatedEndpointExceptionInDifferentOS],
         },
-        [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem, trustedAppListItem] },
-        [ENDPOINT_EVENT_FILTERS_LIST_ID]: {
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: {
+          linux: [trustedAppListItem, trustedAppListItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: {
           windows: [eventFiltersListItem, duplicatedEventFilterInDifferentPolicy],
         },
-        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: {
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
           linux: [
             hostIsolationExceptionsItem,
             { ...hostIsolationExceptionsItem, tags: [`policy:${TEST_POLICY_ID_2}`] },
           ],
         },
-        [ENDPOINT_BLOCKLISTS_LIST_ID]: { macos: [blocklistsListItem, blocklistsListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: {
+          macos: [blocklistsListItem, blocklistsListItem],
+        },
       });
       context.savedObjectsClient.create = jest
         .fn()
@@ -673,7 +675,7 @@ describe('ManifestManager', () => {
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-        [ENDPOINT_TRUSTED_APPS_LIST_ID]: {
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: {
           linux: [trustedAppListItem, trustedAppListItemPolicy2],
         },
       });
@@ -789,10 +791,12 @@ describe('ManifestManager', () => {
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-        [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
-        [ENDPOINT_EVENT_FILTERS_LIST_ID]: { linux: [eventFiltersListItem] },
-        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: { linux: [hostIsolationExceptionsItem] },
-        [ENDPOINT_BLOCKLISTS_LIST_ID]: { linux: [blocklistsListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
       });
       context.savedObjectsClient.create = jest
         .fn()
@@ -870,10 +874,12 @@ describe('ManifestManager', () => {
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-        [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
-        [ENDPOINT_EVENT_FILTERS_LIST_ID]: { linux: [eventFiltersListItem] },
-        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: { linux: [hostIsolationExceptionsItem] },
-        [ENDPOINT_BLOCKLISTS_LIST_ID]: { linux: [blocklistsListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
       });
       context.savedObjectsClient.create = jest
         .fn()
@@ -950,10 +956,12 @@ describe('ManifestManager', () => {
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
-        [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
-        [ENDPOINT_EVENT_FILTERS_LIST_ID]: { linux: [eventFiltersListItem] },
-        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: { linux: [hostIsolationExceptionsItem] },
-        [ENDPOINT_BLOCKLISTS_LIST_ID]: { linux: [blocklistsListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
       });
       context.savedObjectsClient.create = jest
         .fn()
