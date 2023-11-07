@@ -20,7 +20,6 @@ import {
   getAvailablePrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
 } from '../../../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
@@ -38,10 +37,6 @@ describe(
   'Rules table: selection',
   { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       login();
       /* Create and install two mock rules */
