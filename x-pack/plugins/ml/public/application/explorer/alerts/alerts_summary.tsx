@@ -56,12 +56,23 @@ export const AlertsSummary: React.FC = () => {
                   }),
                   description: ruleSummary.totalCount,
                 },
-                {
-                  title: i18n.translate('xpack.ml.explorer.alertsPanel.summary.recoveredAt', {
-                    defaultMessage: 'Recovered at: ',
-                  }),
-                  description: formatter(ALERT_END, ruleSummary.recoveredAt),
-                },
+                ...(ruleSummary.activeCount > 0
+                  ? [
+                      {
+                        title: i18n.translate('xpack.ml.explorer.alertsPanel.summary.startedAt', {
+                          defaultMessage: 'Started at: ',
+                        }),
+                        description: formatter(ALERT_END, ruleSummary.startedAt),
+                      },
+                    ]
+                  : [
+                      {
+                        title: i18n.translate('xpack.ml.explorer.alertsPanel.summary.recoveredAt', {
+                          defaultMessage: 'Recovered at: ',
+                        }),
+                        description: formatter(ALERT_END, ruleSummary.recoveredAt),
+                      },
+                    ]),
                 {
                   title: i18n.translate('xpack.ml.explorer.alertsPanel.summary.lastDuration', {
                     defaultMessage: 'Last duration: ',
