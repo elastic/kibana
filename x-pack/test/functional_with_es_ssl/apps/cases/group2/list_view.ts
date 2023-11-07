@@ -660,6 +660,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Column Selection', () => {
       afterEach(async () => {
         await toasts.dismissAllToastsWithChecks();
+
+        // closes the popover
+        await browser.pressKeys(browser.keys.ESCAPE);
       });
 
       before(async () => {
