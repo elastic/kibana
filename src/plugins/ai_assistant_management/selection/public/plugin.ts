@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ServerlessPluginSetup } from '@kbn/serverless/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAssistantManagementPluginSetup {}
@@ -20,6 +21,7 @@ export interface AiAssistantManagementPluginStart {}
 export interface SetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
+  serverless?: ServerlessPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -36,8 +38,10 @@ export class AiAssistantManagementPlugin
 {
   public setup(
     core: CoreSetup<StartDependencies, AiAssistantManagementPluginStart>,
-    { home, management }: SetupDependencies
+    { home, management, serverless }: SetupDependencies
   ): AiAssistantManagementPluginSetup {
+    if (serverless) return {};
+
     if (home) {
       home.featureCatalogue.register({
         id: 'ai_assistant',
@@ -54,9 +58,7 @@ export class AiAssistantManagementPlugin
       });
     }
 
-    const kibanaSection = management.sections.section.kibana;
-
-    kibanaSection.registerApp({
+    management.sections.section.kibana.registerApp({
       id: 'aiAssistantManagement',
       title: i18n.translate('aiAssistantManagement.managementSectionLabel', {
         defaultMessage: 'AI Assistants',

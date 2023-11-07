@@ -24,26 +24,39 @@ import {
 import { useAppContext } from '../../app_context';
 
 export function SettingsPage() {
-  const { setBreadcrumbs, navigateToApp } = useAppContext();
+  const { setBreadcrumbs, navigateToApp, serverless } = useAppContext();
 
   useEffect(() => {
-    setBreadcrumbs([
-      {
-        text: i18n.translate('aiAssistantManagmentObservability.breadcrumb.index', {
-          defaultMessage: 'AI Assistants',
-        }),
-        onClick: (e) => {
-          e.preventDefault();
-          navigateToApp('management', { path: '/kibana/aiAssistantManagement' });
+    if (serverless) {
+      serverless.setBreadcrumbs([
+        {
+          text: i18n.translate(
+            'aiAssistantManagmentObservability.breadcrumb.serverless.observability',
+            {
+              defaultMessage: 'AI Assistant for Observability Settings',
+            }
+          ),
         },
-      },
-      {
-        text: i18n.translate('aiAssistantManagmentObservability.breadcrumb.observability', {
-          defaultMessage: 'Observability',
-        }),
-      },
-    ]);
-  }, [navigateToApp, setBreadcrumbs]);
+      ]);
+    } else {
+      setBreadcrumbs([
+        {
+          text: i18n.translate('aiAssistantManagmentObservability.breadcrumb.index', {
+            defaultMessage: 'AI Assistants',
+          }),
+          onClick: (e) => {
+            e.preventDefault();
+            navigateToApp('management', { path: '/kibana/aiAssistantManagement' });
+          },
+        },
+        {
+          text: i18n.translate('aiAssistantManagmentObservability.breadcrumb.observability', {
+            defaultMessage: 'Observability',
+          }),
+        },
+      ]);
+    }
+  }, [navigateToApp, serverless, setBreadcrumbs]);
 
   const handleNavigateToConnectors = () => {
     navigateToApp('management', {
