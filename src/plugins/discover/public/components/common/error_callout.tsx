@@ -13,12 +13,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
-export interface ErrorCalloutProps {
+interface Props {
   title: string;
   error: Error;
 }
 
-export const ErrorCallout = ({ title, error }: ErrorCalloutProps) => {
+export const ErrorCallout = ({ title, error }: Props) => {
   const { core } = useDiscoverServices();
   const { euiTheme } = useEuiTheme();
 
