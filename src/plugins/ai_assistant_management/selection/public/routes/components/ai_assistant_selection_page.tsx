@@ -8,8 +8,6 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   EuiCard,
   EuiFlexGrid,
@@ -20,20 +18,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { useAppContext } from '../../app_context';
 
-const AiAssistantSelectionPage = ({
-  coreStart,
-  dataStart,
-  setBreadcrumbs,
-}: {
-  coreStart: CoreStart;
-  dataStart: DataPublicPluginStart;
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-}) => {
+export function AiAssistantSelectionPage() {
+  const { setBreadcrumbs, navigateToApp } = useAppContext();
+
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: i18n.translate('aiAssistantManagment.breadcrumb.index', {
+        text: i18n.translate('aiAssistantManagement.breadcrumb.index', {
           defaultMessage: 'AI Assistant',
         }),
       },
@@ -61,7 +54,7 @@ const AiAssistantSelectionPage = ({
 
       <EuiSpacer size="l" />
 
-      <EuiFlexGrid columns={4}>
+      <EuiFlexGrid columns={2}>
         <EuiFlexItem grow>
           <EuiCard
             description={
@@ -81,9 +74,14 @@ const AiAssistantSelectionPage = ({
             hasBorder
             icon={<EuiIcon size="l" type="logoObservability" />}
             layout="horizontal"
-            title={`Elastic AI Assistant for Observability`}
+            title={i18n.translate(
+              'aiAssistantManagement.aiAssistantSelectionPage.observabilityLabel.',
+              { defaultMessage: 'Elastic AI Assistant for Observability' }
+            )}
             titleSize="xs"
-            onClick={() => {}}
+            onClick={() =>
+              navigateToApp('management', { path: 'kibana/aiAssistantManagementObservability' })
+            }
           />
         </EuiFlexItem>
 
@@ -104,16 +102,16 @@ const AiAssistantSelectionPage = ({
             }
             display="plain"
             hasBorder
+            href={'/security'}
             icon={<EuiIcon size="l" type="logoSecurity" />}
             layout="horizontal"
-            title={`Elastic AI Assistant for Security`}
+            title={i18n.translate('aiAssistantManagement.aiAssistantSelectionPage.securityLabel', {
+              defaultMessage: 'Elastic AI Assistant for Security',
+            })}
             titleSize="xs"
-            onClick={() => {}}
           />
         </EuiFlexItem>
       </EuiFlexGrid>
     </>
   );
-};
-// eslint-disable-next-line import/no-default-export
-export { AiAssistantSelectionPage as default };
+}

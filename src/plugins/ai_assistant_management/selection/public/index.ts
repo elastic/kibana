@@ -9,10 +9,7 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { AiAssistantManagementPlugin as AiAssistantManagementPlugin } from './plugin';
 
-export type {
-  AiAssistantManagementPluginSetup as SavedObjectsManagementPluginSetup,
-  AiAssistantManagementPluginStart as SavedObjectsManagementPluginStart,
-} from './plugin';
+export type { AiAssistantManagementPluginSetup, AiAssistantManagementPluginStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new AiAssistantManagementPlugin();

@@ -134,4 +134,12 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     }),
     icon: 'gear',
   },
+
+  [AppIds.AI_ASSISTANTS]: {
+    category: appCategories.OTHER,
+    description: i18n.translate('management.landing.withCardNavigation.aiAssistantsDescription', {
+      defaultMessage: 'Manage your AI assistants.',
+    }),
+    icon: 'gear',
+  },
 };

@@ -7,10 +7,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { AiAssistantManagementPlugin } from './plugin';
+import { AiAssistantManagementObservabilityPlugin } from './plugin';
 
 export const plugin = (context: PluginInitializerContext) =>
-  new AiAssistantManagementPlugin(context);
+  new AiAssistantManagementObservabilityPlugin(context);
 
 export type {
   AiAssistantManagementPluginSetup as SavedObjectsManagementPluginSetup,

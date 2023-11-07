@@ -7,11 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -25,11 +22,8 @@ export interface SetupDependencies {
   home?: HomePublicPluginSetup;
 }
 
-export interface StartDependencies {
-  data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
-  spaces?: SpacesPluginStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartDependencies {}
 
 export class AiAssistantManagementPlugin
   implements
@@ -61,6 +55,7 @@ export class AiAssistantManagementPlugin
     }
 
     const kibanaSection = management.sections.section.kibana;
+
     kibanaSection.registerApp({
       id: 'aiAssistantManagement',
       title: i18n.translate('aiAssistantManagement.managementSectionLabel', {
@@ -68,7 +63,8 @@ export class AiAssistantManagementPlugin
       }),
       order: 1,
       mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./management_section');
+        const { mountManagementSection } = await import('./management_section/mount_section');
+
         return mountManagementSection({
           core,
           mountParams,
@@ -79,7 +75,7 @@ export class AiAssistantManagementPlugin
     return {};
   }
 
-  public start(_core: CoreStart, { spaces: spacesApi }: StartDependencies) {
+  public start() {
     return {};
   }
 }

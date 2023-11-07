@@ -1,13 +1,9 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -28,9 +24,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
-    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-server"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

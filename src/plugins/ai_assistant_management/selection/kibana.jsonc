@@ -4,10 +4,10 @@
   "owner": "@elastic/obs-ai-assistant",
   "plugin": {
     "id": "aiAssistantManagement",
-    "server": true,
+    "server": false,
     "browser": true,
-    "requiredPlugins": ["management", "data", "dataViews"],
-    "optionalPlugins": ["home", "spaces"],
+    "requiredPlugins": ["management"],
+    "optionalPlugins": ["home", "serverless", "spaces"],
     "requiredBundles": ["kibanaReact"]
   }
 }

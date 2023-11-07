@@ -9,7 +9,7 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { AiAssistantManagementPluginSetup, AiAssistantManagementPluginStart } from './types';
 
-export class AiAssistantManagementPlugin
+export class AiAssistantManagementObservabilityPlugin
   implements Plugin<AiAssistantManagementPluginSetup, AiAssistantManagementPluginStart, {}, {}>
 {
   private readonly logger: Logger;
@@ -19,13 +19,13 @@ export class AiAssistantManagementPlugin
   }
 
   public setup({ http, capabilities }: CoreSetup) {
-    this.logger.debug('Setting up AiAssistantManagement plugin');
+    this.logger.debug('Setting up AiAssistantManagement for Observability plugin');
 
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('Starting up AiAssistantManagement plugin');
+    this.logger.debug('Starting up AiAssistantManagement for Observability plugin');
 
     return {};
   }
