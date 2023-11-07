@@ -371,6 +371,7 @@ export type TestSubjects =
   | 'aliasesEditor'
   | 'settingsEditor'
   | 'versionField.input'
+  | 'valueDataRetentionField'
   | 'mappingsEditor.formTab'
   | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle'
   | 'previewIndexTemplate';
