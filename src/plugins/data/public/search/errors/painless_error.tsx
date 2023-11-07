@@ -53,7 +53,9 @@ export class PainlessError extends EsError {
           </EuiCodeBlock>
         ) : null}
         {humanReadableError ? (
-          <EuiText size="s" data-test-subj="painlessHumanReadableError">{humanReadableError}</EuiText>
+          <EuiText size="s" data-test-subj="painlessHumanReadableError">
+            {humanReadableError}
+          </EuiText>
         ) : null}
       </>
     );

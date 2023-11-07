@@ -220,7 +220,8 @@ export class SearchInterceptor {
             }),
             {
               id: requestId,
-            });
+            }
+          );
           requestResponder.json(requestBody);
           requestResponder.error({ json: e.attributes });
         }
@@ -236,7 +237,9 @@ export class SearchInterceptor {
           }
         );
       };
-      return isPainlessError(e) ? new PainlessError(e, openInInspector, options?.indexPattern) : new EsError(e, openInInspector);
+      return isPainlessError(e)
+        ? new PainlessError(e, openInInspector, options?.indexPattern)
+        : new EsError(e, openInInspector);
     }
 
     return e instanceof Error ? e : new Error(e.message);
@@ -506,7 +509,12 @@ export class SearchInterceptor {
           takeUntil(aborted$),
           catchError((e) => {
             return throwError(
-              this.handleSearchError(e, request.params.body, searchOptions, searchAbortController.isTimeout())
+              this.handleSearchError(
+                e,
+                request.params.body,
+                searchOptions,
+                searchAbortController.isTimeout()
+              )
             );
           }),
           tap((response) => {

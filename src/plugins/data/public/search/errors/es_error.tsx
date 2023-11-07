@@ -52,7 +52,7 @@ export class EsError extends KbnError {
         {i18n.translate('data.esError.viewDetailsButtonLabel', {
           defaultMessage: 'View details',
         })}
-      </EuiButton>
+      </EuiButton>,
     ];
   }
 }
