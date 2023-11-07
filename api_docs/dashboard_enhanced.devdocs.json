@@ -514,8 +514,8 @@
                 "pluginId": "dashboard",
                 "scope": "public",
                 "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardAppLocatorParams",
-                "text": "DashboardAppLocatorParams"
+                "section": "def-public.DashboardLocatorParams",
+                "text": "DashboardLocatorParams"
               },
               ">"
             ],

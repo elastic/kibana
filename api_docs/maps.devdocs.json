@@ -157,6 +157,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.DataRequest.getError",
+            "type": "Function",
+            "tags": [],
+            "label": "getError",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4604,7 +4620,7 @@
         "signature": [
           "{ __dataRequests?: ",
           "DataRequestDescriptor",
-          "[] | undefined; __isInErrorState?: boolean | undefined; __isPreviewLayer?: boolean | undefined; __errorMessage?: string | undefined; __trackedLayerDescriptor?: ",
+          "[] | undefined; __isPreviewLayer?: boolean | undefined; __trackedLayerDescriptor?: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -4612,8 +4628,10 @@
             "section": "def-common.LayerDescriptor",
             "text": "LayerDescriptor"
           },
-          " | undefined; __areTilesLoaded?: boolean | undefined; __metaFromTiles?: ",
+          " | undefined; __areTilesLoaded?: boolean | undefined; __tileMetaFeatures?: ",
           "TileMetaFeature",
+          "[] | undefined; __tileErrors?: ",
+          "TileError",
           "[] | undefined; alpha?: number | undefined; attribution?: ",
           "Attribution",
           " | undefined; id: string; label?: string | null | undefined; locale?: string | null | undefined; areLabelsOnTop?: boolean | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; sourceDescriptor: ",

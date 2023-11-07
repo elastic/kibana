@@ -264,6 +264,38 @@
       },
       {
         "parentPluginId": "logsShared",
+        "id": "def-public.LogAIAssistant",
+        "type": "Function",
+        "tags": [],
+        "label": "LogAIAssistant",
+        "description": [],
+        "signature": [
+          "(props: any) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/logs_shared/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogAIAssistant.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-public.LogColumnHeader",
         "type": "Function",
         "tags": [],
@@ -2548,6 +2580,55 @@
     "interfaces": [
       {
         "parentPluginId": "logsShared",
+        "id": "def-public.LogAIAssistantProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogAIAssistantProps",
+        "description": [],
+        "path": "x-pack/plugins/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogAIAssistantProps.aiAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "aiAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPluginStart",
+                "text": "ObservabilityAIAssistantPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogAIAssistantProps.doc",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "LogAIAssistantDocument",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-public.LogEntryColumnWidths",
         "type": "Interface",
         "tags": [],
@@ -2735,6 +2816,26 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-public.DataViewsServicePublic",
                 "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "x-pack/plugins/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.observabilityAIAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAIAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPluginStart",
+                "text": "ObservabilityAIAssistantPluginStart"
               }
             ],
             "path": "x-pack/plugins/logs_shared/public/types.ts",
