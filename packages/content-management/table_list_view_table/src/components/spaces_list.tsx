@@ -9,10 +9,10 @@
 import React, { FC, useState } from 'react';
 
 import type { Capabilities } from '@kbn/core/public';
-import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
+import type { SpacesApi, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
 
 interface Props {
-  spacesApi: SpacesPluginStart;
+  spacesApi: SpacesApi;
   capabilities: Capabilities | undefined;
   spaceIds: string[];
   type: string;
@@ -38,6 +38,11 @@ export const SpacesList: FC<Props> = ({
     setShowFlyout(false);
   }
 
+  // TODO Check the namespaceType and disable column if not multiple
+  // See src/plugins/saved_objects_management/public/services/columns/share_saved_objects_to_space_column.tsx
+
+  // TODO Disable for Serverless
+
   const LazySpaceList = spacesApi.ui.components.getSpaceList;
   const LazyShareToSpaceFlyout = spacesApi.ui.components.getShareToSpaceFlyout;
 
@@ -49,6 +54,7 @@ export const SpacesList: FC<Props> = ({
       title,
       noun,
     },
+    behaviorContext: 'outside-space',
     onUpdate: refresh,
     onClose,
   };
