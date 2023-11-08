@@ -32,7 +32,7 @@ describe('CardItemComponent', () => {
   const finishedCards = new Set([QuickStart.createFirstProject]);
 
   it('should render card', () => {
-    const { getByText, queryByText } = render(
+    const { getByText } = render(
       <CardItem card={card} euiTheme={mockEuiTheme} finishedCards={finishedCards} />
     );
 
