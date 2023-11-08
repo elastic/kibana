@@ -38,7 +38,6 @@ import type {
   ResolvedCase,
   CaseUserActionsStats,
 } from '../../../common/ui/types';
-import { SeverityAll } from '../../../common/ui/types';
 import type {
   SingleCaseMetricsResponse,
   CasePostRequest,
@@ -87,7 +86,7 @@ export const getCaseUserActionsStats = async (
 
 export const getCases = async ({
   filterOptions = {
-    severity: [SeverityAll],
+    severity: [],
     search: '',
     searchFields: [],
     assignees: [],

@@ -31,7 +31,7 @@ export const parseURLWithFilterOptions = (search: string) => {
     if (paramKeysWithTypeArray.includes(key)) {
       if (!parsedUrlParams[key]) parsedUrlParams[key] = [];
       // only applies if the value is separated by commas (e.g., "foo,bar")
-      const splittedValues = value.split(',');
+      const splittedValues = value.split(',').filter(Boolean);
       (parsedUrlParams[key] as string[]).push(...splittedValues);
     } else {
       parsedUrlParams[key] = value;

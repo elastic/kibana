@@ -10812,7 +10812,6 @@
     "xpack.cases.server.viewCaseInKibana": "有关详细信息，请在 Kibana 中查看此案例",
     "xpack.cases.settings.syncAlertsSwitchLabelOff": "关闭",
     "xpack.cases.settings.syncAlertsSwitchLabelOn": "开启",
-    "xpack.cases.severity.all": "所有严重性",
     "xpack.cases.severity.critical": "紧急",
     "xpack.cases.severity.high": "高",
     "xpack.cases.severity.low": "低",

@@ -6,7 +6,7 @@
  */
 
 import type { FilterOptions, QueryParams, SingleCaseMetricsFeature } from './types';
-import { SeverityAll, SortFieldCase, StatusAll } from './types';
+import { SortFieldCase } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 10;
@@ -69,10 +69,10 @@ const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   searchFields: DEFAULT_SEARCH_FIELDS,
-  severity: [SeverityAll],
+  severity: [],
   assignees: [],
   reporters: [],
-  status: [StatusAll],
+  status: [],
   tags: [],
   owner: [],
   category: [],

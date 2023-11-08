@@ -157,7 +157,7 @@ describe('useAllCasesQueryParams', () => {
     expect(result.current.filterOptions).toMatchObject(existingLocalStorageValues);
   });
 
-  it('takes into account legacy localStorage filter values', () => {
+  it('takes into account legacy localStorage filter values as string', () => {
     const existingLocalStorageValues = { severity: 'critical', status: 'open' };
 
     localStorage.setItem(
@@ -172,6 +172,24 @@ describe('useAllCasesQueryParams', () => {
     expect(result.current.filterOptions).toMatchObject({
       severity: ['critical'],
       status: ['open'],
+    });
+  });
+
+  it('takes into account legacy localStorage filter value all', () => {
+    const existingLocalStorageValues = { severity: 'all', status: 'all' };
+
+    localStorage.setItem(
+      LOCALSTORAGE_FILTER_OPTIONS_KEY,
+      JSON.stringify(existingLocalStorageValues)
+    );
+
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.filterOptions).toMatchObject({
+      severity: [],
+      status: [],
     });
   });
 
@@ -207,6 +225,24 @@ describe('useAllCasesQueryParams', () => {
     });
   });
 
+  it('takes into account legacy url filter option "all"', () => {
+    const nonDefaultUrlParams = new URLSearchParams();
+    nonDefaultUrlParams.append('severity', 'all');
+    nonDefaultUrlParams.append('status', 'all');
+    nonDefaultUrlParams.append('status', 'open');
+    nonDefaultUrlParams.append('severity', 'low');
+
+    mockLocation.search = stringifyToURL(nonDefaultUrlParams);
+
+    renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(useHistory().replace).toHaveBeenCalledWith({
+      search: 'severity=low&status=open&page=1&perPage=10&sortField=createdAt&sortOrder=desc',
+    });
+  });
+
   it('preserves other url parameters', () => {
     const nonDefaultUrlParams = {
       foo: 'bar',
@@ -219,8 +255,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(useHistory().replace).toHaveBeenCalledWith({
-      search:
-        'foo=bar&page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=all&status=all',
+      search: 'foo=bar&page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=&status=',
     });
   });
 
@@ -288,7 +323,7 @@ describe('useAllCasesQueryParams', () => {
       });
 
       expect(useHistory().replace).toHaveBeenCalledWith({
-        search: 'perPage=100&page=1&sortField=createdAt&sortOrder=desc&severity=all&status=all',
+        search: 'perPage=100&page=1&sortField=createdAt&sortOrder=desc&severity=&status=',
       });
 
       mockLocation.search = '';
@@ -314,7 +349,7 @@ describe('useAllCasesQueryParams', () => {
       });
 
       expect(useHistory().replace).toHaveBeenCalledWith({
-        search: 'sortOrder=desc&page=1&perPage=10&sortField=createdAt&severity=all&status=all',
+        search: 'sortOrder=desc&page=1&perPage=10&sortField=createdAt&severity=&status=',
       });
     });
   });
