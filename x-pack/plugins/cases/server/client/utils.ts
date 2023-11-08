@@ -363,6 +363,12 @@ export const buildCustomFieldsFilter = ({
 
     return nodeBuilder.or(
       Object.values(value).map((filterValue) => {
+        if (filterValue === null) {
+          return fromKueryExpression(
+            `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and (not value:*)}`
+          );
+        }
+
         return fromKueryExpression(
           `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and value.${customFieldsMapping?.savedObjectMappingType}: ${filterValue}}`
         );

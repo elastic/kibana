@@ -676,7 +676,86 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter with customFields', () => {
+    it('creates a filter with single customField', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'Text field',
+          required: true,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'Toggle field',
+          required: true,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'another toggle field',
+          required: false,
+        },
+      ];
+      expect(
+        constructQueryOptions({
+          customFields: { second_key: [true] },
+          customFieldsConfiguration,
+        }).filter
+      ).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.customFields",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "key",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "second_key",
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "value.boolean",
+                    },
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": true,
+                    },
+                  ],
+                  "function": "is",
+                  "type": "function",
+                },
+              ],
+              "function": "and",
+              "type": "function",
+            },
+          ],
+          "function": "nested",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter with multiple customFields', () => {
       const customFieldsConfiguration: CustomFieldsConfiguration = [
         {
           key: 'first_key',
@@ -752,6 +831,200 @@ describe('utils', () => {
                 },
               ],
               "function": "nested",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.customFields",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "key",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "third_key",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "value.boolean",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": false,
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "and",
+                  "type": "function",
+                },
+              ],
+              "function": "nested",
+              "type": "function",
+            },
+          ],
+          "function": "and",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a filter with multiple customFields values', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'Text field',
+          required: true,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'Toggle field',
+          required: true,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'another toggle field',
+          required: false,
+        },
+      ];
+      expect(
+        constructQueryOptions({
+          customFields: { second_key: [true, null], third_key: [false] },
+          customFieldsConfiguration,
+        }).filter
+      ).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.customFields",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "arguments": Array [
+                            Object {
+                              "isQuoted": false,
+                              "type": "literal",
+                              "value": "key",
+                            },
+                            Object {
+                              "isQuoted": false,
+                              "type": "literal",
+                              "value": "second_key",
+                            },
+                          ],
+                          "function": "is",
+                          "type": "function",
+                        },
+                        Object {
+                          "arguments": Array [
+                            Object {
+                              "isQuoted": false,
+                              "type": "literal",
+                              "value": "value.boolean",
+                            },
+                            Object {
+                              "isQuoted": false,
+                              "type": "literal",
+                              "value": true,
+                            },
+                          ],
+                          "function": "is",
+                          "type": "function",
+                        },
+                      ],
+                      "function": "and",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "nested",
+                  "type": "function",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.customFields",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "arguments": Array [
+                            Object {
+                              "isQuoted": false,
+                              "type": "literal",
+                              "value": "key",
+                            },
+                            Object {
+                              "isQuoted": false,
+                              "type": "literal",
+                              "value": "second_key",
+                            },
+                          ],
+                          "function": "is",
+                          "type": "function",
+                        },
+                        Object {
+                          "arguments": Array [
+                            Object {
+                              "arguments": Array [
+                                Object {
+                                  "isQuoted": false,
+                                  "type": "literal",
+                                  "value": "value",
+                                },
+                                Object {
+                                  "type": "wildcard",
+                                  "value": "@kuery-wildcard@",
+                                },
+                              ],
+                              "function": "is",
+                              "type": "function",
+                            },
+                          ],
+                          "function": "not",
+                          "type": "function",
+                        },
+                      ],
+                      "function": "and",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "nested",
+                  "type": "function",
+                },
+              ],
+              "function": "or",
               "type": "function",
             },
             Object {

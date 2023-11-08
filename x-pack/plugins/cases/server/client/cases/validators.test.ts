@@ -507,6 +507,15 @@ describe('validators', () => {
       ).not.toThrow();
     });
 
+    it('does not throw when custom field value is null', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: { second_key: [null] },
+        })
+      ).not.toThrow();
+    });
+
     it('throws error when custom fields configurations is empty', () => {
       expect(() =>
         validateSearchCasesCustomFields({

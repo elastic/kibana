@@ -103,6 +103,14 @@ describe('search', () => {
       await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
     });
+
+    it('search with null custom fields', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { second_key: [null] },
+      });
+      await search(findRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+    });
   });
 
   describe('errors', () => {

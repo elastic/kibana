@@ -289,7 +289,10 @@ export const CasesSearchRequestRt = rt.intersection([
       /**
        * custom fields of the case
        */
-      customFields: rt.record(rt.string, rt.array(rt.union([rt.string, rt.boolean, rt.number]))),
+      customFields: rt.record(
+        rt.string,
+        rt.array(rt.union([rt.string, rt.boolean, rt.number, rt.null]))
+      ),
     })
   ),
   CasesFindRequestRt,
