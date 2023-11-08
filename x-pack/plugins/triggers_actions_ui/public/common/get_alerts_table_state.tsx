@@ -6,20 +6,20 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import React, { lazy, Suspense } from 'react';
-import { LazyLoadProps } from '../types';
+import React, { forwardRef, lazy, Suspense } from 'react';
+import { AlertsTableStateActions, LazyLoadProps } from '../types';
 
 import type { AlertsTableStateProps } from '../application/sections/alerts_table/alerts_table_state';
 
-const AlertsTableStateLazy: React.FC<AlertsTableStateProps> = lazy(
+const AlertsTableStateLazy = lazy(
   () => import('../application/sections/alerts_table/alerts_table_state')
 );
 
-export const getAlertsTableStateLazy = ({
-  hideLazyLoader,
-  ...props
-}: AlertsTableStateProps & LazyLoadProps) => (
+export const getAlertsTableStateLazy = forwardRef<
+  AlertsTableStateActions,
+  AlertsTableStateProps & LazyLoadProps
+>(({ hideLazyLoader, ...props }, ref) => (
   <Suspense fallback={hideLazyLoader ? null : <EuiLoadingSpinner />}>
-    <AlertsTableStateLazy {...props} />
+    <AlertsTableStateLazy {...props} ref={ref} />
   </Suspense>
-);
+));

@@ -171,7 +171,7 @@ const AlertsTable = forwardRef<ForwardRefAlertTable, AlertsTableProps>((props, r
     ({ alertId, alertIdx }) => {
       let idx = alertIdx ?? -1;
       if (alertId) {
-        idx = alerts.findIndex((a) => (a as any)[ALERT_UUID].includes(alertId));
+        idx = alerts.findIndex((a) => a._id === alertId);
       }
       if (idx >= 0) {
         setFlyoutAlertIndex(idx);
