@@ -169,17 +169,23 @@ class BrowserService extends FtrService {
   /**
    * Gets the URL that is loaded in the focused window/frame.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#getCurrentUrl
-   *
+   * @param relativeUrl (optional) set to true to return the relative URL (without the hostname and protocol)
    * @return {Promise<string>}
    */
-  public async getCurrentUrl() {
+  public async getCurrentUrl(relativeUrl: boolean = false) {
     // strip _t=Date query param when url is read
     const current = await this.driver.getCurrentUrl();
     const currentWithoutTime = modifyUrl(current, (parsed) => {
       delete (parsed.query as any)._t;
       return void 0;
     });
-    return currentWithoutTime;
+
+    if (relativeUrl) {
+      const { path, search, hash } = Url.parse(currentWithoutTime);
+      return `${path}${search ?? ''}${hash ?? ''}`;
+    } else {
+      return currentWithoutTime;
+    }
   }
 
   /**
@@ -193,15 +199,22 @@ class BrowserService extends FtrService {
     const retry = await this.ctx.getService('retry');
     const log = this.ctx.getService('log');
 
-    return retry.waitFor(`URL to be ${expectedPath}`, async () => {
-      const currentUrl = await this.getCurrentUrl();
-      const { path, search, hash } = Url.parse(currentUrl);
-      const currentPath = `${path}${search ?? ''}${hash ?? ''}`;
+    await retry.waitForWithTimeout(`URL to be ${expectedPath}`, 5000, async () => {
+      const currentPath = await this.getCurrentUrl(true);
 
       if (currentPath !== expectedPath)
         log.debug(`Expected URL to be ${expectedPath}, got ${currentPath}`);
       return currentPath === expectedPath;
     });
+
+    // wait some time before checking the URL again
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // ensure the URL stays the same and we did not go through any redirects
+    const currentPath = await this.getCurrentUrl(true);
+    if (currentPath !== expectedPath) {
+      throw new Error(`Expected URL to continue to be ${expectedPath}, got ${currentPath}`);
+    }
   }
 
   /**
