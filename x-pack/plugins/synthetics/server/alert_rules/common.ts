@@ -15,7 +15,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../common/constants/synthetics_alerts';
-import { uptimeRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
+import { syntheticsRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
 import {
   getUptimeIndexPattern,
   IndexPatternTitleAndFields,
@@ -340,10 +340,13 @@ export const generateFilterDSL = async (
   return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
 };
 
-export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+export const syntheticsRuleTypeFieldMap = {
+  ...syntheticsRuleFieldMap,
+  ...legacyExperimentalFieldMap,
+};
 
-export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
+export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-  mappings: { fieldMap: uptimeRuleTypeFieldMap },
+  mappings: { fieldMap: syntheticsRuleTypeFieldMap },
   useLegacyAlerts: true,
 };
