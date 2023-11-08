@@ -5,20 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
-import { LensAppServices } from '../app_plugin/types';
+import { RenderOptions, render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+// imported to prevent a type error from testing library https://github.com/testing-library/react-testing-library/issues/587
+import * as ___ from '@testing-library/dom';
 
-import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
+import { LensAppServices } from '../app_plugin/types';
+import {
+  makeConfigureStore,
+  LensAppState,
+  LensState,
+  LensStoreDeps,
+  LensRootStore,
+} from '../state_management';
 import { getResolvedDateRange } from '../utils';
 import { DatasourceMap, VisualizationMap } from '../types';
 import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
+
+// preventing a type error from testing library https://github.com/testing-library/react-testing-library/issues/587
+export const unusedFn = () => ___;
 
 export const mockStoreDeps = (deps?: {
   lensServices?: LensAppServices;
@@ -60,6 +73,35 @@ export const defaultState = {
     indexPatterns: {},
     indexPatternRefs: [],
   },
+};
+
+export const renderWithReduxStore = (
+  ui: ReactElement,
+  options?: RenderOptions,
+  {
+    preloadedState,
+    storeDeps,
+  }: { preloadedState: Partial<LensAppState>; storeDeps?: LensStoreDeps } = {
+    preloadedState: {},
+    storeDeps: mockStoreDeps(),
+  }
+): ReturnType<typeof render> & { store: LensRootStore } => {
+  const { store } = makeLensStore({ preloadedState, storeDeps });
+
+  const Wrapper: React.FC<{
+    children: React.ReactNode;
+  }> = ({ children }) => (
+    <Provider store={store}>
+      <I18nProvider>{children}</I18nProvider>
+    </Provider>
+  );
+
+  const rtlRender = render(ui, { wrapper: Wrapper, ...options });
+
+  return {
+    store,
+    ...rtlRender,
+  };
 };
 
 export function makeLensStore({
@@ -114,7 +156,7 @@ export const mountWithProvider = async (
   return { instance, lensStore, deps };
 };
 
-export const getMountWithProviderParams = (
+const getMountWithProviderParams = (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {

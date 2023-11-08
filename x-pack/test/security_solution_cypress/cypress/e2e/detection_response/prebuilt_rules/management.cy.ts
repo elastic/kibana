@@ -35,11 +35,7 @@ import {
   getAvailablePrebuiltRulesCount,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../tasks/api_calls/prebuilt_rules';
-import {
-  cleanKibana,
-  deleteAlertsAndRules,
-  deletePrebuiltRulesAssets,
-} from '../../../tasks/common';
+import { deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
@@ -51,11 +47,7 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
