@@ -10,6 +10,7 @@ export { CancellationToken } from './cancellation_token';
 export type { TaskRunMetrics, CsvMetrics, TaskRunResult, PdfMetrics } from './metrics';
 export { buildKibanaPath } from './build_kibana_path';
 export * from './constants';
+export * from './errors';
 export * from './schema_utils';
 export * from './schema';
 export type {
