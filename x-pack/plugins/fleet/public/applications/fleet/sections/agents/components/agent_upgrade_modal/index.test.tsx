@@ -96,7 +96,7 @@ describe('AgentUpgradeAgentModal', () => {
       agentCount: 1,
     });
 
-    const container = utils.getByTestId('agentUpgradeModal.VersionCombobox')
+    const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
     const input = within(container).getByRole<HTMLInputElement>('combobox');
 
     await waitFor(() => {
