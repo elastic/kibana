@@ -28,7 +28,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
   try {
     const pipeline = [];
 
-    pipeline.push(getPipeline('.buildkite/pipelines/security_solution/security_solution_cypress.yml', false));
+    pipeline.push(
+      getPipeline('.buildkite/pipelines/security_solution/security_solution_cypress.yml', false)
+    );
     // remove duplicated steps
     uploadPipeline([...new Set(pipeline)].join('\n'));
   } catch (ex) {
