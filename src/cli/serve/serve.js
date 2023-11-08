@@ -120,6 +120,13 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
         description: 'Continue as Test User',
         hint: 'Allows testing serverless user roles',
       });
+      // Add basic realm since defaults won't be applied when a provider has been configured
+      if (!has('xpack.security.authc.providers.basic')) {
+        set('xpack.security.authc.providers.basic.basic', {
+          order: 0,
+          enabled: true,
+        });
+      }
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
