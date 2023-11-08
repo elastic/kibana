@@ -9,37 +9,30 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { ChromeBreadcrumb } from '@kbn/core/public';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { AssetDetailPage } from './asset_detail_page';
 import { MetricDetailPage } from './metric_detail_page';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
+import { useParentBreadCrumbResolver } from './hooks/use_parent_breadcrumb_resolver';
 
 export const NodeDetail = () => {
   const {
     params: { type: nodeType, node: nodeName },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
-  const breadCrumbs: ChromeBreadcrumb[] = [];
+  const parentBreadCrumbResolver = useParentBreadCrumbResolver();
 
-  const hostsLinkProps = useLinkProps({
-    app: 'metrics',
-    pathname: 'hosts',
-  });
+  const breadCrumbOptions = parentBreadCrumbResolver.getBreadCrumbOptions(nodeType);
 
-  if (nodeType === 'host') {
-    breadCrumbs.push({
-      ...hostsLinkProps,
-      text: 'Hosts',
-    });
-  }
-
-  breadCrumbs.push({
-    text: nodeName,
-  });
-
-  useMetricsBreadcrumbs(breadCrumbs);
+  useMetricsBreadcrumbs([
+    {
+      ...breadCrumbOptions.link,
+      text: breadCrumbOptions.text,
+    },
+    {
+      text: nodeName,
+    },
+  ]);
 
   return (
     <EuiErrorBoundary>
