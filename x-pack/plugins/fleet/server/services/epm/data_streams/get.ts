@@ -32,19 +32,17 @@ export async function getDataStreams(options: {
       })
     : allDataStreams;
 
-  const mappedDataStreams = filteredDataStreams.map((dataStream) => {
-    const dataStreamExtendedInfo = {
-      package: {
-        name: dataStream._meta?.package?.name,
-        managed_by: dataStream._meta?.managed_by,
-      },
-    };
-
-    return {
-      name: dataStream.name,
-      ...(extendedResponse ? dataStreamExtendedInfo : {}),
-    };
-  });
+  const mappedDataStreams = filteredDataStreams.map((dataStream) => ({
+    name: dataStream.name,
+    ...(extendedResponse
+      ? {
+          package: {
+            name: dataStream._meta?.package?.name,
+            managed_by: dataStream._meta?.managed_by,
+          },
+        }
+      : {}),
+  }));
 
   const sortedDataStreams = mappedDataStreams.sort((a, b) => {
     return a.name.localeCompare(b.name);

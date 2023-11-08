@@ -195,16 +195,13 @@ export const getDataStreamsStatsHandler: FleetRequestHandler<
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const [dataStreams, dataStreamsStats] = await Promise.all([
-      await getDataStreams({
+      getDataStreams({
         esClient,
         ...request.query,
         uncategorisedOnly: false,
         extendedResponse: true,
       }),
-      await getDataStreamsStats({
-        esClient,
-        ...request.query,
-      }),
+      getDataStreamsStats({ esClient, ...request.query }),
     ]);
 
     const body: GetEpmDataStreamsStatsResponse = {
