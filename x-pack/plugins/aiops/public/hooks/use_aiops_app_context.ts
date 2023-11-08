@@ -101,7 +101,7 @@ export interface AiopsAppDependencies {
   /**
    * UI actions.
    */
-  uiActions: UiActionsStart;
+  uiActions?: UiActionsStart;
   /**
    * Internationalisation service
    */

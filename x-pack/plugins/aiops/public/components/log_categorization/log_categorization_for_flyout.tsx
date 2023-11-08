@@ -241,6 +241,10 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   ]);
 
   const createADJob = () => {
+    if (uiActions === undefined) {
+      return;
+    }
+
     const triggerOptions = {
       dataView,
       field: selectedField,
@@ -275,7 +279,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
-        {capabilities.ml.canCreateJob ? (
+        {uiActions !== undefined && capabilities.ml.canCreateJob ? (
           <EuiButtonEmpty
             data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
             onClick={() => createADJob()}
