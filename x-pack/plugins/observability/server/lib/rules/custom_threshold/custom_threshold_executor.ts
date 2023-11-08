@@ -86,7 +86,6 @@ export const createCustomThresholdExecutor = ({
       executionId,
     });
 
-    // TODO: check if we need to use "savedObjectsClient"=> https://github.com/elastic/kibana/issues/159340
     const {
       alertWithLifecycle,
       getAlertUuid,
