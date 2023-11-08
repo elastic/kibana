@@ -155,8 +155,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       isSelectorView,
       connectors,
       onRowClick,
-      // FIXME: was removed in Antonio's PR, merge with his
-      showSolutionColumn: true,
+      showSolutionColumn: !hasOwner && availableSolutions.length > 1,
       disableActions: selectedCases.length > 0,
     });
 
