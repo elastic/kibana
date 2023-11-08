@@ -86,7 +86,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "popoverContent": <EuiContextMenuPanel
+          "popoverContent": <EuiContextMenuPanelClass
             items={
               Array [
                 <EuiContextMenuItem
@@ -148,7 +148,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "popoverContent": <EuiContextMenuPanel
+          "popoverContent": <EuiContextMenuPanelClass
             items={
               Array [
                 <EuiContextMenuItem
@@ -204,7 +204,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "popoverContent": <EuiContextMenuPanel
+          "popoverContent": <EuiContextMenuPanelClass
             items={
               Array [
                 <EuiContextMenuItem

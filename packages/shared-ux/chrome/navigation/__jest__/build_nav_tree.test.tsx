@@ -22,6 +22,9 @@ import {
   type TestType,
   type ProjectNavigationChangeListener,
 } from './utils';
+import { getServicesMock } from '../mocks/src/jest';
+
+const { cloudLinks: mockCloudLinks } = getServicesMock();
 
 describe('builds navigation tree', () => {
   test('render reference UI and build the navigation tree', async () => {
@@ -675,21 +678,41 @@ describe('builds navigation tree', () => {
   });
 
   test('should render the cloud links', async () => {
+    const stripLastChar = (str: string = '') => str.substring(0, str.length - 1);
+
     const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
       try {
         expect(await findByTestId(/nav-item-group1.cloudLink1/)).toBeVisible();
         expect(await findByTestId(/nav-item-group1.cloudLink2/)).toBeVisible();
         expect(await findByTestId(/nav-item-group1.cloudLink3/)).toBeVisible();
 
-        expect((await findByTestId(/nav-item-group1.cloudLink1/)).textContent).toBe(
-          'Mock Users & RolesExternal link'
-        );
-        expect((await findByTestId(/nav-item-group1.cloudLink2/)).textContent).toBe(
-          'Mock PerformanceExternal link'
-        );
-        expect((await findByTestId(/nav-item-group1.cloudLink3/)).textContent).toBe(
-          'Mock Billing & SubscriptionsExternal link'
-        );
+        {
+          const userAndRolesLink = await findByTestId(/nav-item-group1.cloudLink1/);
+          expect(userAndRolesLink.textContent).toBe('Mock Users & RolesExternal link');
+          const href = userAndRolesLink.getAttribute('href');
+          expect(href).toBe(stripLastChar(mockCloudLinks.userAndRoles?.href));
+        }
+
+        {
+          const performanceLink = await findByTestId(/nav-item-group1.cloudLink2/);
+          expect(performanceLink.textContent).toBe('Mock PerformanceExternal link');
+          const href = performanceLink.getAttribute('href');
+          expect(href).toBe(stripLastChar(mockCloudLinks.performance?.href));
+        }
+
+        {
+          const billingLink = await findByTestId(/nav-item-group1.cloudLink3/);
+          expect(billingLink.textContent).toBe('Mock Billing & SubscriptionsExternal link');
+          const href = billingLink.getAttribute('href');
+          expect(href).toBe(stripLastChar(mockCloudLinks.billingAndSub?.href));
+        }
+
+        {
+          const deploymentLink = await findByTestId(/nav-item-group1.cloudLink4/);
+          expect(deploymentLink.textContent).toBe('Mock DeploymentExternal link');
+          const href = deploymentLink.getAttribute('href');
+          expect(href).toBe(stripLastChar(mockCloudLinks.deployment?.href));
+        }
       } catch (e) {
         errorHandler(type)(e);
       }
@@ -706,6 +729,7 @@ describe('builds navigation tree', () => {
             { id: 'cloudLink1', cloudLink: 'userAndRoles' },
             { id: 'cloudLink2', cloudLink: 'performance' },
             { id: 'cloudLink3', cloudLink: 'billingAndSub' },
+            { id: 'cloudLink4', cloudLink: 'deployment' },
           ],
         },
       ];
@@ -727,6 +751,7 @@ describe('builds navigation tree', () => {
               <Navigation.Item id="cloudLink1" cloudLink="userAndRoles" />
               <Navigation.Item id="cloudLink2" cloudLink="performance" />
               <Navigation.Item id="cloudLink3" cloudLink="billingAndSub" />
+              <Navigation.Item id="cloudLink4" cloudLink="deployment" />
             </Navigation.Group>
           </Navigation>
         ),

@@ -40,7 +40,7 @@ export interface KibanaLogicProps {
   cloud?: CloudSetup;
   config: ClientConfigType;
   data: DataPublicPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   isSidebarEnabled: boolean;
   lens: LensPublicStart;

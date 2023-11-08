@@ -191,6 +191,7 @@ export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams &
   ilmPhase?: string;
   indexId: string;
   indexName: string;
+  sameFamilyFields?: string[];
   unallowedMappingFields?: string[];
   unallowedValueFields?: string[];
 };
@@ -203,6 +204,7 @@ export interface DataQualityCheckAllCompletedParams {
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;
   numberOfIndicesChecked?: number;
+  numberOfSameFamily?: number;
   sizeInBytes?: number;
   timeConsumedMs?: number;
 }

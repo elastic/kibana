@@ -337,7 +337,8 @@ describe('CaseViewPage', () => {
     });
   });
 
-  describe('Tabs', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/149777
+  describe.skip('Tabs', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
