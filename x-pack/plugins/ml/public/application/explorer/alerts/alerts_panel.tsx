@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, AlertConsumers, type AlertStatus } from '@kbn/rule-data-utils';
 import React, { type FC, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
@@ -84,8 +84,11 @@ export const AlertsPanel: FC = () => {
         headerItems={Object.entries(countByStatus ?? {}).map(([status, count]) => {
           return (
             <>
-              {statusNameMap[status]}{' '}
-              <EuiNotificationBadge size="m" color={status === 'active' ? 'accent' : 'subdued'}>
+              {statusNameMap[status as AlertStatus]}{' '}
+              <EuiNotificationBadge
+                size="m"
+                color={status === ALERT_STATUS_ACTIVE ? 'accent' : 'subdued'}
+              >
                 {count}
               </EuiNotificationBadge>
             </>

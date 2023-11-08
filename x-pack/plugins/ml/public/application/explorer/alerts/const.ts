@@ -6,15 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 
-export const statusNameMap: Record<string, string> = {
-  active: i18n.translate('xpack.ml.explorer.alertsPanel.statusNameMap.active', {
+export const statusNameMap = {
+  [ALERT_STATUS_ACTIVE]: i18n.translate('xpack.ml.explorer.alertsPanel.statusNameMap.active', {
     defaultMessage: 'Active',
   }),
-  recovered: i18n.translate('xpack.ml.explorer.alertsPanel.statusNameMap.recovered', {
-    defaultMessage: 'Recovered',
-  }),
-  untracked: i18n.translate('xpack.ml.explorer.alertsPanel.statusNameMap.untracked', {
-    defaultMessage: 'Untracked',
-  }),
-};
+  [ALERT_STATUS_RECOVERED]: i18n.translate(
+    'xpack.ml.explorer.alertsPanel.statusNameMap.recovered',
+    {
+      defaultMessage: 'Recovered',
+    }
+  ),
+  [ALERT_STATUS_UNTRACKED]: i18n.translate(
+    'xpack.ml.explorer.alertsPanel.statusNameMap.untracked',
+    {
+      defaultMessage: 'Untracked',
+    }
+  ),
+} as const;

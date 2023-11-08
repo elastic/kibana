@@ -18,7 +18,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_RULE_NAME,
+  ALERT_START,
+  ALERT_STATUS_ACTIVE,
+  type AlertStatus,
+} from '@kbn/rule-data-utils';
 import { pick } from 'lodash';
 import React, { type FC, useCallback, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -144,10 +150,10 @@ export const SwimLaneWrapper: FC<SwimLaneWrapperProps> = ({
                       ).map(([status, count]) => {
                         return (
                           <EuiText size={'xs'}>
-                            {statusNameMap[status]}{' '}
+                            {statusNameMap[status as AlertStatus]}{' '}
                             <EuiNotificationBadge
                               size="s"
-                              color={status === 'active' ? 'accent' : 'subdued'}
+                              color={status === ALERT_STATUS_ACTIVE ? 'accent' : 'subdued'}
                             >
                               {count}
                             </EuiNotificationBadge>

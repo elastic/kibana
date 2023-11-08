@@ -11,6 +11,7 @@ import {
   ALERT_STATUS,
   ALERT_END,
   ALERT_START,
+  ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
 import { groupBy } from 'lodash';
 import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
@@ -37,7 +38,7 @@ export function getAlertsSummary(alertsData: AnomalyDetectionAlert[]): RulesSumm
         ruleName,
         {
           totalCount: alerts.length,
-          activeCount: alerts.filter((alert) => alert[ALERT_STATUS] === 'active').length,
+          activeCount: alerts.filter((alert) => alert[ALERT_STATUS] === ALERT_STATUS_ACTIVE).length,
           recoveredAt: latestAlert[ALERT_END],
           startedAt: latestAlert[ALERT_START],
           lastDuration: latestAlert[ALERT_DURATION],

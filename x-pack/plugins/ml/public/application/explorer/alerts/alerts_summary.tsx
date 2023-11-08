@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { statusNameMap } from './const';
 import { getAlertFormatters } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
 import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
@@ -48,7 +49,7 @@ export const AlertsSummary: React.FC = () => {
               </EuiFlexItem>
               {ruleSummary.activeCount > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="accent">Active</EuiBadge>
+                  <EuiBadge color="accent">{statusNameMap.active}</EuiBadge>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
