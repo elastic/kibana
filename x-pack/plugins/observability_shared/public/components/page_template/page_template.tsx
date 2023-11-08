@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
@@ -24,6 +24,7 @@ import type {
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
@@ -95,7 +96,7 @@ export function ObservabilityPageTemplate({
   getUrlForApp,
   navigateToApp,
   navigationSections$,
-  showSolutionNav = true,
+  showSolutionNav: _showSolutionNav,
   isPageDataLoaded = true,
   getPageTemplateServices,
   bottomBar,
@@ -109,6 +110,12 @@ export function ObservabilityPageTemplate({
   const { pathname: currentPath } = useLocation();
 
   const { services } = useKibana();
+  const { chrome } = services;
+  const chromeStyle$: Observable<ChromeStyle> = chrome
+    ? chrome.getChromeStyle$()
+    : of('classic' as const);
+  const chromeStyle = useObservable(chromeStyle$, 'classic');
+  const showSolutionNav = _showSolutionNav ?? chromeStyle === 'classic';
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>

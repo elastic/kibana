@@ -24,7 +24,12 @@ export function createLazyObservabilityPageTemplate({
   return (pageTemplateProps: LazyObservabilityPageTemplateProps) => {
     const isSidebarEnabled = useObservable(isSidebarEnabled$);
     const { showSolutionNav: showSolutionNavProp, ...props } = pageTemplateProps;
-    const showSolutionNav = !!showSolutionNavProp || isSidebarEnabled;
+    const showSolutionNav =
+      showSolutionNavProp !== undefined
+        ? !!showSolutionNavProp || isSidebarEnabled
+        : isSidebarEnabled
+        ? undefined // leave it undefined, will be set depending of the ChromeStyle
+        : false;
 
     return (
       <React.Suspense fallback={null}>
