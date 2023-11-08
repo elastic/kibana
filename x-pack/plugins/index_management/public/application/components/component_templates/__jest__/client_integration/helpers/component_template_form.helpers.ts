@@ -182,6 +182,8 @@ export type ComponentTemplateFormTestSubjects =
   | 'stepReview.content'
   | 'stepReview.summaryTab'
   | 'stepReview.requestTab'
+  | 'valueDataRetentionField'
+  | 'dataRetentionToggle.input'
   | 'versionField'
   | 'aliasesEditor'
   | 'mappingsEditor'
