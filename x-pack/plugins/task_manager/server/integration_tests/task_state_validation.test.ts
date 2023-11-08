@@ -260,4 +260,79 @@ describe('task state validation', () => {
       );
     });
   });
+
+  describe('allow_reading_invalid_state: false', () => {
+    const taskIdsToRemove: string[] = [];
+    let esServer: TestElasticsearchUtils;
+    let kibanaServer: TestKibanaUtils;
+    let taskManagerPlugin: TaskManagerStartContract;
+    let pollingLifecycleOpts: TaskPollingLifecycleOpts;
+
+    beforeAll(async () => {
+      const setupResult = await setupTestServers({
+        xpack: {
+          task_manager: {
+            allow_reading_invalid_state: false,
+          },
+        },
+      });
+      esServer = setupResult.esServer;
+      kibanaServer = setupResult.kibanaServer;
+
+      expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
+      taskManagerPlugin = taskManagerStartSpy.mock.results[0].value;
+
+      expect(TaskPollingLifecycleMock).toHaveBeenCalledTimes(1);
+      pollingLifecycleOpts = TaskPollingLifecycleMock.mock.calls[0][0];
+    });
+
+    afterAll(async () => {
+      if (kibanaServer) {
+        await kibanaServer.stop();
+      }
+      if (esServer) {
+        await esServer.stop();
+      }
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    afterEach(async () => {
+      while (taskIdsToRemove.length > 0) {
+        const id = taskIdsToRemove.pop();
+        await taskManagerPlugin.removeIfExists(id!);
+      }
+    });
+
+    it('should fail the task run when setting allow_reading_invalid_state:false and reading an invalid state', async () => {
+      const errorLogSpy = jest.spyOn(pollingLifecycleOpts.logger, 'error');
+
+      const id = uuidV4();
+      await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+        id,
+        taskType: 'fooType',
+        params: { foo: true },
+        state: { foo: true, bar: 'test', baz: 'test' },
+        stateVersion: 4,
+        runAt: new Date(),
+        enabled: true,
+        scheduledAt: new Date(),
+        attempts: 0,
+        status: TaskStatus.Idle,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      });
+      taskIdsToRemove.push(id);
+
+      await retry(async () => {
+        expect(errorLogSpy).toHaveBeenCalledWith(
+          `Task fooType "${id}" failed: Error: [foo]: expected value of type [string] but got [boolean]`,
+          expect.anything()
+        );
+      });
+    });
+  });
 });
