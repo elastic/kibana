@@ -40,7 +40,7 @@ import {
   createIndexPatternService,
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
-import { useGetUserMessages } from './get_application_user_messages';
+import { useApplicationUserMessages } from './get_application_user_messages';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -507,7 +507,7 @@ export function App({
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
 
-  const { getUserMessages, addUserMessages } = useGetUserMessages({
+  const { getUserMessages, addUserMessages } = useApplicationUserMessages({
     coreStart,
     framePublicAPI,
     activeDatasourceId,

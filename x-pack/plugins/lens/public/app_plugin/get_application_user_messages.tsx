@@ -241,7 +241,7 @@ function bySeverity(a: UserMessage, b: UserMessage) {
   return 1;
 }
 
-export const useGetUserMessages = ({
+export const useApplicationUserMessages = ({
   coreStart,
   dispatch,
   activeDatasourceId,
