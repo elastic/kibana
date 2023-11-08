@@ -14,19 +14,19 @@ export interface EcsEmail {
   /**
    * A list of objects describing the attachment files sent along with an email message.
    */
-  attachments?: Record<string, unknown> | Array<Record<string, unknown>>;
+  attachments?: Array<Record<string, unknown>>;
   bcc?: {
     /**
      * The email address of BCC recipient
      */
-    address?: string | string[];
+    address?: string[];
   };
 
   cc?: {
     /**
      * The email address of CC recipient
      */
-    address?: string | string[];
+    address?: string[];
   };
 
   /**
@@ -46,7 +46,7 @@ export interface EcsEmail {
     /**
      * The email address of the sender, typically from the RFC 5322 `From:` header field.
      */
-    address?: string | string[];
+    address?: string[];
   };
 
   /**
@@ -66,7 +66,7 @@ export interface EcsEmail {
     /**
      * The address that replies should be delivered to based on the value in the RFC 5322 `Reply-To:` header.
      */
-    address?: string | string[];
+    address?: string[];
   };
 
   sender?: {
@@ -84,7 +84,7 @@ export interface EcsEmail {
     /**
      * The email address of recipient
      */
-    address?: string | string[];
+    address?: string[];
   };
 
   /**

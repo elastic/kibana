@@ -9,7 +9,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
-const DEFAULT_READY_TIMEOUT = 60 * 1000; // 1 minute
+const DEFAULT_READY_TIMEOUT = 120 * 1000; // 2 minutes
 
 export type ClusterReadyStatus = 'green' | 'yellow';
 export interface WaitOptions {

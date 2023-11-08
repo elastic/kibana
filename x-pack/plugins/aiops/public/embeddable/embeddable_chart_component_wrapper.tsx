@@ -170,7 +170,7 @@ export const ChartGridEmbeddableWrapper: FC<
       },
     });
 
-    if (partitions && fieldConfig.splitField) {
+    if (Array.isArray(partitions) && partitions.length > 0 && fieldConfig.splitField) {
       mergedQuery.bool?.filter.push({
         terms: {
           [fieldConfig.splitField]: partitions,

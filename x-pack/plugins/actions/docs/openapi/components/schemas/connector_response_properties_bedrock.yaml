@@ -1,0 +1,31 @@
+title: Connector response properties for an Amazon Bedrock connector
+type: object
+required:
+  - config
+  - connector_type_id
+  - id
+  - is_deprecated
+  - is_preconfigured
+  - name
+properties:
+  config:
+    $ref: 'config_properties_bedrock.yaml'
+  connector_type_id:
+    type: string
+    description: The type of connector.
+    enum:
+      - .bedrock
+  id:
+    type: string
+    description: The identifier for the connector.
+  is_deprecated:
+   $ref: 'is_deprecated.yaml'
+  is_missing_secrets:
+    $ref: 'is_missing_secrets.yaml'
+  is_preconfigured:
+    $ref: 'is_preconfigured.yaml'
+  is_system_action:
+    $ref: 'is_system_action.yaml'
+  name:
+    type: string
+    description: The display name for the connector.

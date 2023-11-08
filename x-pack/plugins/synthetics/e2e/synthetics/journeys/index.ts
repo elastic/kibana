@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './data_retention.journey';
 export * from './project_api_keys.journey';
 export * from './getting_started.journey';
 export * from './add_monitor.journey';
@@ -17,9 +18,8 @@ export * from './private_locations.journey';
 export * from './alerting_default.journey';
 export * from './global_parameters.journey';
 export * from './detail_flyout';
-// export * from './alert_rules/default_status_alert.journey';
-// export * from './test_now_mode.journey';
-// export * from './data_retention.journey';
+export * from './alert_rules/default_status_alert.journey';
+export * from './test_now_mode.journey';
 export * from './monitor_details_page/monitor_summary.journey';
 export * from './test_run_details.journey';
 export * from './step_details.journey';

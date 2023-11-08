@@ -93,13 +93,17 @@ interface AuditServiceSetupParams {
   config: ConfigType['audit'];
   logging: Pick<LoggingServiceSetup, 'configure'>;
   http: Pick<HttpServiceSetup, 'registerOnPostAuth'>;
+
   getCurrentUser(
     request: KibanaRequest
   ): ReturnType<SecurityPluginSetup['authc']['getCurrentUser']> | undefined;
+
   getSID(request: KibanaRequest): Promise<string | undefined>;
+
   getSpaceId(
     request: KibanaRequest
   ): ReturnType<SpacesPluginSetup['spacesService']['getSpaceId']> | undefined;
+
   recordAuditLoggingUsage(): void;
 }
 
@@ -154,9 +158,13 @@ export class AuditService {
       }
     };
 
+    const isLoggingEnabled = () => {
+      return this.logger.isLevelEnabled('info');
+    };
+
     const asScoped = (request: KibanaRequest): AuditLogger => ({
       log: async (event) => {
-        if (!event) {
+        if (!event || !isLoggingEnabled()) {
           return;
         }
         const spaceId = getSpaceId(request);
@@ -197,7 +205,7 @@ export class AuditService {
     });
 
     http.registerOnPostAuth((request, response, t) => {
-      if (request.auth.isAuthenticated) {
+      if (request.auth.isAuthenticated && isLoggingEnabled()) {
         asScoped(request).log(httpRequestEvent({ request }));
       }
       return t.next();
@@ -249,9 +257,8 @@ export function filterEvent(
     return !ignoreFilters.some(
       (rule) =>
         (!rule.actions || rule.actions.includes(event.event?.action!)) &&
-        (!rule.categories ||
-          (event.event?.category as string[])?.every?.((c) => rule.categories?.includes(c))) &&
-        (!rule.types || (event.event?.type as string[])?.every?.((t) => rule.types?.includes(t))) &&
+        (!rule.categories || event.event?.category?.every((c) => rule.categories?.includes(c))) &&
+        (!rule.types || event.event?.type?.every((t) => rule.types?.includes(t))) &&
         (!rule.outcomes || rule.outcomes.includes(event.event?.outcome!)) &&
         (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!))
     );

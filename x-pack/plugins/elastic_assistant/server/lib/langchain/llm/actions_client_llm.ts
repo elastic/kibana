@@ -93,8 +93,7 @@ export class ActionsClientLlm extends LLM {
       );
     }
 
-    // TODO: handle errors from the connector
-    const content = get('data', actionResult);
+    const content = get('data.message', actionResult);
 
     if (typeof content !== 'string') {
       throw new Error(

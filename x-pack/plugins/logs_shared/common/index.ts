@@ -56,3 +56,7 @@ export {
   logEntriesSummaryRequestRT,
   logEntriesSummaryResponseRT,
 } from './http_api';
+
+// Locators
+export { LOGS_LOCATOR_ID, NODE_LOGS_LOCATOR_ID } from './locators';
+export type { LogsLocatorParams, NodeLogsLocatorParams } from './locators';

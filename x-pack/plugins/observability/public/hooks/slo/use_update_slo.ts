@@ -9,13 +9,16 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { encode } from '@kbn/rison';
 import { useKibana } from '../../utils/kibana_react';
+import { paths } from '../../../common/locators/paths';
 import { sloKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useUpdateSlo() {
   const {
+    application: { navigateToUrl },
     http,
     notifications: { toasts },
   } = useKibana().services;
@@ -25,7 +28,7 @@ export function useUpdateSlo() {
     UpdateSLOResponse,
     ServerError,
     { sloId: string; slo: UpdateSLOInput },
-    { previousData?: FindSLOResponse; queryKey?: QueryKey }
+    { previousData?: FindSLOResponse; queryKey?: QueryKey; sloId: string }
   >(
     ['updateSlo'],
     ({ sloId, slo }) => {
@@ -57,7 +60,7 @@ export function useUpdateSlo() {
           queryClient.setQueryData(queryKey, optimisticUpdate);
         }
 
-        return { previousData, queryKey };
+        return { previousData, queryKey, sloId };
       },
       onSuccess: (_data, { slo: { name } }) => {
         toasts.addSuccess(
@@ -66,8 +69,10 @@ export function useUpdateSlo() {
             values: { name },
           })
         );
+
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
       },
-      onError: (error, { slo: { name } }, context) => {
+      onError: (error, { slo }, context) => {
         if (context?.previousData && context?.queryKey) {
           queryClient.setQueryData(context.queryKey, context.previousData);
         }
@@ -75,12 +80,17 @@ export function useUpdateSlo() {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.slo.update.errorNotification', {
             defaultMessage: 'Something went wrong when updating {name}',
-            values: { name },
+            values: { name: slo.name },
           }),
         });
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+
+        if (context?.sloId) {
+          navigateToUrl(
+            http.basePath.prepend(
+              paths.observability.sloEditWithEncodedForm(context.sloId, encode(slo))
+            )
+          );
+        }
       },
     }
   );

@@ -233,6 +233,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DataViewPickerPropsExtended",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
@@ -269,6 +277,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DataViewSelectorProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
@@ -305,6 +321,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DataViewsListProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
@@ -341,6 +365,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "FilterBadgeGroupProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/unified_search/public/filter_badge/index.ts",

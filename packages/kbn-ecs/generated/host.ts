@@ -116,15 +116,15 @@ export interface EcsHost {
   /**
    * Host ip addresses.
    */
-  ip?: string | string[];
+  ip?: string[];
   /**
    * Host MAC addresses.
    * The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.
    */
-  mac?: string | string[];
+  mac?: string[];
   /**
    * Name of the host.
-   * It can contain what hostname returns on Unix systems, the fully qualified domain name (FQDN), or a name specified by the user. The recommended value is the lowercase FQDN of the host.
+   * It can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.
    */
   name?: string;
   network?: {

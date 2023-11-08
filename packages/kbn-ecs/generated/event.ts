@@ -32,17 +32,17 @@ export interface EcsEvent {
    * `event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory.
    * This field is an array. This will allow proper categorization of some events that fall in multiple categories.
    */
-  category?: string | string[];
+  category?: string[];
   /**
    * Identification code for this event, if one exists.
    * Some event sources use event codes to identify messages unambiguously, regardless of message language or wording adjustments over time. An example of this is the Windows Event ID.
    */
   code?: string;
   /**
-   * `event.created` contains the date/time when the event was first read by an agent, or by your pipeline.
-   * This field is distinct from `@timestamp` in that `@timestamp` typically contain the time extracted from the original event.
+   * event.created contains the date/time when the event was first read by an agent, or by your pipeline.
+   * This field is distinct from @timestamp in that @timestamp typically contain the time extracted from the original event.
    * In most situations, these two timestamps will be slightly different. The difference can be used to calculate the delay between your source generating an event, and the time when your agent first processed it. This can be used to monitor your agent's or pipeline's ability to keep up with your event source.
-   * In case the two timestamps are identical, `@timestamp` should be used.
+   * In case the two timestamps are identical, @timestamp should be used.
    */
   created?: string;
   /**
@@ -53,11 +53,11 @@ export interface EcsEvent {
   dataset?: string;
   /**
    * Duration of the event in nanoseconds.
-   * If `event.start` and `event.end` are known this value should be the difference between the end and start time.
+   * If event.start and event.end are known this value should be the difference between the end and start time.
    */
   duration?: number;
   /**
-   * `event.end` contains the date when the event ended or when the activity was last observed.
+   * event.end contains the date when the event ended or when the activity was last observed.
    */
   end?: string;
   /**
@@ -77,7 +77,7 @@ export interface EcsEvent {
   /**
    * This is one of four ECS Categorization Fields, and indicates the highest level in the ECS category hierarchy.
    * `event.kind` gives high-level information about what type of information the event contains, without being specific to the contents of the event. For example, values of this field distinguish alert events from metric events.
-   * The value of this field can be used to inform how these kinds of events should be handled. They may warrant different retention, different access control, it may also help understand whether the data is coming in at a regular interval or not.
+   * The value of this field can be used to inform how these kinds of events should be handled. They may warrant different retention, different access control, it may also help understand whether the data coming in at a regular interval or not.
    */
   kind?: string;
   /**
@@ -134,7 +134,7 @@ export interface EcsEvent {
    */
   severity?: number;
   /**
-   * `event.start` contains the date when the event started or when the activity was first observed.
+   * event.start contains the date when the event started or when the activity was first observed.
    */
   start?: string;
   /**
@@ -147,7 +147,7 @@ export interface EcsEvent {
    * `event.type` represents a categorization "sub-bucket" that, when used along with the `event.category` field values, enables filtering events down to a level appropriate for single visualization.
    * This field is an array. This will allow proper categorization of some events that fall in multiple event types.
    */
-  type?: string | string[];
+  type?: string[];
   /**
    * URL linking to an external system to continue investigation of this event.
    * This URL links to another system where in-depth investigation of the specific occurrence of this event can take place. Alert events, indicated by `event.kind:alert`, are a common use case for this field.

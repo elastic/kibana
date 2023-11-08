@@ -42,19 +42,20 @@ function getEditableConfig({
 }
 
 export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[]) {
-  const { services } = useKibana();
+  const {
+    services: { settings },
+  } = useKibana();
 
-  const { uiSettings } = services;
   const [isSaving, setIsSaving] = useState(false);
   const [forceReloadSettings, setForceReloadSettings] = useState(0);
   const [unsavedChanges, setUnsavedChanges] = useState<Record<string, FieldState>>({});
 
   const settingsEditableConfig = useMemo(
     () => {
-      return getEditableConfig({ settingsKeys, uiSettings });
+      return getEditableConfig({ settingsKeys, uiSettings: settings?.client });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [uiSettings, settingsKeys, forceReloadSettings]
+    [settings, settingsKeys, forceReloadSettings]
   );
 
   function handleFieldChange(key: string, fieldState: FieldState) {
@@ -77,11 +78,11 @@ export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[
   }
 
   async function saveAll() {
-    if (uiSettings && !isEmpty(unsavedChanges)) {
+    if (settings && !isEmpty(unsavedChanges)) {
       try {
         setIsSaving(true);
         const arr = Object.entries(unsavedChanges).map(([key, fieldState]) =>
-          uiSettings.set(key, fieldState.value)
+          settings.client.set(key, fieldState.value)
         );
 
         await Promise.all(arr);

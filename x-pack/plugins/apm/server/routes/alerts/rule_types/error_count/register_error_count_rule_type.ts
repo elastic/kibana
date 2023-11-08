@@ -18,6 +18,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import {
@@ -34,7 +35,6 @@ import {
   SERVICE_NAME,
 } from '../../../../../common/es_fields/apm';
 import {
-  ApmRuleType,
   APM_SERVER_FEATURE_ID,
   formatErrorCountReason,
   RULE_TYPES_CONFIG,
@@ -104,6 +104,7 @@ export function registerErrorCountRuleType({
         services,
         spaceId,
         startedAt,
+        getTimeRange,
       }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.ErrorCount,
@@ -131,6 +132,10 @@ export function registerErrorCountRuleType({
             ]
           : [];
 
+        const { dateStart } = getTimeRange(
+          `${ruleParams.windowSize}${ruleParams.windowUnit}`
+        );
+
         const searchParams = {
           index: indices.error,
           body: {
@@ -142,7 +147,7 @@ export function registerErrorCountRuleType({
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                        gte: dateStart,
                       },
                     },
                   },

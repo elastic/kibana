@@ -16,9 +16,9 @@ import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 
 export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { height: number }) => {
-  const { searchCriteria, parsedDateRange } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
+  const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
@@ -48,10 +48,10 @@ export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { he
   // we want it to reload only once the table has finished loading.
   // attributes passed to useAfterLoadedState don't need to be memoized
   const { afterLoadedState } = useAfterLoadedState(loading, {
-    lastReloadRequestTime: requestTs,
-    dateRange: parsedDateRange,
+    dateRange: searchCriteria.dateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
+    searchSessionId,
     subtitle,
   });
 
@@ -64,11 +64,11 @@ export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { he
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
       layers={layers}
-      lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}
       height={height}
       query={afterLoadedState.query}
       title={title}
+      searchSessionId={afterLoadedState.searchSessionId}
       subtitle={afterLoadedState.subtitle}
       toolTip={tooltipComponent}
       visualizationType="lnsMetric"

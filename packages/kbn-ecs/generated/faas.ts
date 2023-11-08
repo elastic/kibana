@@ -27,17 +27,10 @@ export interface EcsFaas {
    * The name of a serverless function.
    */
   name?: string;
-  trigger?: {
-    /**
-     * The ID of the trigger request , message, event, etc.
-     */
-    request_id?: string;
-    /**
-     * The trigger for the function execution.
-     */
-    type?: string;
-  };
-
+  /**
+   * Details about the function trigger.
+   */
+  trigger?: Record<string, unknown>;
   /**
    * The version of a serverless function.
    */

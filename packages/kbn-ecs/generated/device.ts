@@ -12,7 +12,7 @@
  */
 export interface EcsDevice {
   /**
-   * The unique identifier of a device. The identifier must not change across application sessions but stay fixed for an instance of a (mobile) device.
+   * The unique identifier of a device. The identifier must not change across application sessions but stay fixex for an instance of a (mobile) device.
    * On iOS, this value must be equal to the vendor identifier (https://developer.apple.com/documentation/uikit/uidevice/1620059-identifierforvendor). On Android, this value must be equal to the Firebase Installation ID or a globally unique UUID which is persisted across sessions in your application.
    * For GDPR and data protection law reasons this identifier should not carry information that would allow to identify a user.
    */
