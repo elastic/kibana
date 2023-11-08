@@ -57,17 +57,20 @@ export class AnnotationEditorPageObject extends FtrService {
     const queryInput = await this.testSubjects.find('annotation-query-based-query-input');
     await queryInput.type(config.query);
 
+    const titles = await this.find.allByCssSelector(
+      '.euiFlyout h3.lnsDimensionEditorSection__heading'
+    );
+    const lastTitle = titles[titles.length - 1];
+    await lastTitle.click(); // close query input pop-up
+    await lastTitle.focus(); // scroll down to the bottom of the section
+
+    await this.testSubjects.setValue(
+      'euiColorPickerAnchor indexPattern-dimension-colorPicker',
+      config.color
+    );
+    await lastTitle.click(); // close color picker pop-up
+
     await this.testSubjects.setValue('lnsXYThickness', '' + config.lineThickness);
-
-    const firstTitle = await this.find.byCssSelector('.euiFlyoutBody .euiTitle');
-
-    await this.retry.try(async () => {
-      await this.testSubjects.setValue(
-        'euiColorPickerAnchor indexPattern-dimension-colorPicker',
-        config.color
-      );
-      await firstTitle.click(); // close color picker popover (sometimes it obscures the input if it opens during a scroll)
-    });
 
     await this.retry.waitFor('annotation editor UI to close', async () => {
       await this.testSubjects.click('backToGroupSettings');
