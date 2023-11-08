@@ -30,7 +30,6 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { MlServicesContext } from '../../app';
 
@@ -47,7 +46,6 @@ interface StartPlugins {
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
-  licensing: LicensingPluginStart;
   maps?: MapsStartApi;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;

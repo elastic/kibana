@@ -94,7 +94,6 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
       kibanaVersion: deps.kibanaVersion,
       lens: deps.lens,
       licenseManagement: deps.licenseManagement,
-      licensing: deps.licensing,
       maps: deps.maps,
       presentationUtil: deps.presentationUtil,
       savedObjectsManagement: deps.savedObjectsManagement,
