@@ -8066,6 +8066,29 @@
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.IKibanaSearchResponse.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [
+              "\nHTTP request parameters from elasticsearch transport client t"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SanitizedConnectionRequestParams",
+                "text": "SanitizedConnectionRequestParams"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12532,12 +12555,12 @@
               "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
             },
             {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/hooks/use_kibana_index_patterns.ts"
-            },
-            {
               "plugin": "graph",
               "path": "x-pack/plugins/graph/public/plugin.ts"
+            },
+            {
+              "plugin": "infra",
+              "path": "x-pack/plugins/infra/public/hooks/use_kibana_index_patterns.ts"
             },
             {
               "plugin": "inputControlVis",
@@ -12628,10 +12651,6 @@
               "path": "src/plugins/dashboard/public/services/data/data_service.ts"
             },
             {
-              "plugin": "stackAlerts",
-              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
-            },
-            {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
             },
@@ -12646,6 +12665,10 @@
             {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/data_drift/charts/default_value_formatter.ts"
+            },
+            {
+              "plugin": "stackAlerts",
+              "path": "x-pack/plugins/stack_alerts/public/rule_types/threshold/expression.tsx"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -13360,12 +13383,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
                 "plugin": "graph",
@@ -19507,12 +19530,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
                 "plugin": "graph",
