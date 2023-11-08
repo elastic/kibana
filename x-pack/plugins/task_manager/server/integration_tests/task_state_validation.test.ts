@@ -305,35 +305,5 @@ describe('task state validation', () => {
         await taskManagerPlugin.removeIfExists(id!);
       }
     });
-
-    it('should fail the task run when setting allow_reading_invalid_state:false and reading an invalid state', async () => {
-      const errorLogSpy = jest.spyOn(pollingLifecycleOpts.logger, 'error');
-
-      const id = uuidV4();
-      await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-        id,
-        taskType: 'fooType',
-        params: { foo: true },
-        state: { foo: true, bar: 'test', baz: 'test' },
-        stateVersion: 4,
-        runAt: new Date(),
-        enabled: true,
-        scheduledAt: new Date(),
-        attempts: 0,
-        status: TaskStatus.Idle,
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
-      });
-      taskIdsToRemove.push(id);
-
-      await retry(async () => {
-        expect(errorLogSpy).toHaveBeenCalledWith(
-          `Failed to poll for work: Error: [foo]: expected value of type [string] but got [boolean]`
-        );
-      });
-
-      expect(mockCreateTaskRunner).not.toHaveBeenCalled();
-    });
   });
 });

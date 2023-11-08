@@ -316,10 +316,11 @@ export class TaskManagerRunner implements TaskRunner {
     });
 
     // Validate state
-    let taskValidation = this.validateTaskState(this.instance.task);
+    const validatedTaskStateResp = this.validateTaskState(this.instance.task);
+    let { validatedState: taskValidation } = validatedTaskStateResp;
 
     const modifiedContext = await this.beforeRun({
-      taskInstance: { ...this.instance.task, state: taskValidation.state },
+      taskInstance: validatedTaskStateResp.validatedTaskInstance,
     });
 
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
@@ -406,11 +407,15 @@ export class TaskManagerRunner implements TaskRunner {
 
   private validateTaskState(taskInstance: ConcreteTaskInstance) {
     let error;
-    const { state, taskType, id, numSkippedRuns = 0 } = taskInstance;
+    const { taskType, id, numSkippedRuns = 0 } = taskInstance;
     const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
-    let validatedState = state;
+    let validatedTask;
     try {
-      validatedState = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance).state;
+      validatedTask = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+      return {
+        validatedTaskInstance: validatedTask,
+        validatedState: { state: validatedTask.state },
+      };
     } catch (err) {
       this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
       if (numSkippedRuns < maxAttempts) {
@@ -421,8 +426,10 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
     }
-
-    return { ...(error ? { error } : {}), state: validatedState };
+    return {
+      validatedTaskInstance: taskInstance,
+      validatedState: { ...(error ? { error } : {}), state: taskInstance.state },
+    };
   }
 
   private async validateIndirectTaskParams({ taskInstance }: RunContext) {
