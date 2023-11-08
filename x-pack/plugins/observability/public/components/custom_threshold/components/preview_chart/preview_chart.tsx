@@ -254,6 +254,9 @@ function PreviewChart({
     }
     const attributesLens = new LensAttributesBuilder({
       visualization: new XYChart({
+        visualOptions: {
+          valueLabels: 'hide',
+        },
         layers,
         formulaAPI: formulaAsync.value.formula,
         dataView,

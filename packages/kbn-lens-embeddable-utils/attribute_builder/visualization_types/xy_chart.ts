@@ -25,6 +25,7 @@ export interface XYVisualOptions {
   missingValues?: XYArgs['fittingFunction'];
   endValues?: XYArgs['endValue'];
   showDottedLine?: boolean;
+  valueLabels?: XYArgs['valueLabels'];
 }
 
 export class XYChart implements Chart<XYState> {
@@ -80,6 +81,7 @@ export class XYChart implements Chart<XYState> {
       endValue: this.chartConfig.visualOptions?.endValues,
       curveType: this.chartConfig.visualOptions?.lineInterpolation,
       emphasizeFitting: !this.chartConfig.visualOptions?.showDottedLine,
+      valueLabels: this.chartConfig.visualOptions?.valueLabels,
     };
   }
 
