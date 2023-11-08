@@ -56,7 +56,6 @@
     "@kbn/licensing-plugin",
     "@kbn/expressions-plugin",
     "@kbn/serverless",
-    "@kbn/stack-alerts-plugin",
   ],
   "exclude": ["target/**/*"]
 }
