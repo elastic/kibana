@@ -98,8 +98,6 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         );
 
         const [locatorParams] = payload.locatorParams;
-        console.log('\n\n\n\n\n locatorParmas', locatorParams);
-        console.log('\n\n\n\n layout', payload.layout);
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');

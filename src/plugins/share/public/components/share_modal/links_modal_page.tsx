@@ -13,26 +13,39 @@ import React, { FC } from 'react';
 interface LinksModalPageProps {
   isEmbedded: boolean;
   allowShortUrl: boolean;
-  objectType: string;
+  objectId?: string;
 }
 
 export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
+  // logic about saved state of the dashboard needed
+  const { objectId } = props;
+  const isNotSaved = () => {
+    return objectId === undefined || objectId === '';
+  };
+  const saveNeeded = isNotSaved() ? (
+    <EuiFormRow
+      helpText={
+        <FormattedMessage
+          id="plugins.share.linkModalPage.saveWorkDescription"
+          defaultMessage="One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard."
+        />
+      }
+    >
+      <EuiCodeBlock isCopyable>
+        <EuiSpacer size="xs" />
+        placeholder saved objects href
+      </EuiCodeBlock>
+    </EuiFormRow>
+  ) : (
+    <EuiCodeBlock isCopyable>
+      <EuiSpacer size="xs" />
+      placeholder saved objects href
+    </EuiCodeBlock>
+  );
   return (
-    <EuiForm>
+    <EuiForm className="kbnShareContextMenu__finalPanel">
       <EuiSpacer />
-      <EuiFormRow
-        helpText={
-          <FormattedMessage
-            id="plugins.share.linkModalPage.saveWorkDescription"
-            defaultMessage="One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard."
-          />
-        }
-      >
-        <EuiCodeBlock isCopyable>
-          <EuiSpacer size="xs" />
-          placeholder saved objects href
-        </EuiCodeBlock>
-      </EuiFormRow>
+      {saveNeeded}
     </EuiForm>
   );
 };
