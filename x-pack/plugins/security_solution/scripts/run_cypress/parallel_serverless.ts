@@ -269,7 +269,7 @@ function waitForLoginToWork(kbUrl: string, username: string, password: string): 
         'elastic-api-version': '2023-10-31',
       },
     });
-    if (response.data.status !== '200') {
+    if (response.status !== 200) {
       throw new Error('Cannot login. Retrying in 20s...');
     } else {
       log.info('Login can be performed successfully');
