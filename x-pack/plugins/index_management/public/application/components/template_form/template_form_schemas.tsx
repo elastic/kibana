@@ -193,7 +193,7 @@ export const schemas: Record<string, FormSchema> = {
             if (!value) {
               return {
                 message: i18n.translate(
-                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldRequiredError',
+                  'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldRequiredError',
                   {
                     defaultMessage: 'A data retention value is required.',
                   }
@@ -204,7 +204,7 @@ export const schemas: Record<string, FormSchema> = {
             if (value <= 0) {
               return {
                 message: i18n.translate(
-                  'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionFieldNonNegativeError',
+                  'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldNonNegativeError',
                   {
                     defaultMessage: `A positive value is required.`,
                   }
