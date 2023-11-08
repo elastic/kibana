@@ -7,6 +7,8 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { PassThrough, Transform } from 'stream';
+import { IncomingMessage } from 'http';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -191,8 +193,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async invokeStream(body: InvokeAIActionParams): Promise<ReadableStream> {
-    const res = await this.streamApi({ body: JSON.stringify(body), stream: true });
-    return res as ReadableStream;
+    const res = (await this.streamApi({
+      body: JSON.stringify(body),
+      stream: true,
+    })) as unknown as IncomingMessage;
+    return res.pipe(new PassThrough()).pipe(transformToSimpleString());
   }
 
   /**
@@ -217,3 +222,24 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     };
   }
 }
+const transformToSimpleString = () =>
+  new Transform({
+    transform(chunk, encoding, callback) {
+      const decoder = new TextDecoder();
+      const encoder = new TextEncoder();
+      const nextChunk = decoder
+        .decode(chunk)
+        .split('\n')
+        // every line starts with "data: ", we remove it and are left with stringified JSON or the string "[DONE]"
+        .map((str) => str.substring(6))
+        // filter out empty lines and the "[DONE]" string
+        .filter((str) => !!str && str !== '[DONE]')
+        .map((line) => {
+          const openaiResponse = JSON.parse(line);
+          return openaiResponse.choices[0]?.delta.content ?? '';
+        })
+        .join('');
+      const newChunk = encoder.encode(nextChunk);
+      callback(null, newChunk);
+    },
+  });

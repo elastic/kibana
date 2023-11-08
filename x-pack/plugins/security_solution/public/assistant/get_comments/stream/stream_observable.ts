@@ -6,28 +6,12 @@
  */
 
 import { concatMap, delay, finalize, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import type { Dispatch, SetStateAction } from 'react';
 import { API_ERROR } from '@kbn/elastic-assistant/impl/assistant/translations';
-import type { PromptObservableState, Chunk } from './types';
+import type { PromptObservableState } from './types';
 
 const MIN_DELAY = 35;
-const errorChoice = {
-  delta: {
-    role: '',
-    content: `${API_ERROR}\n\n`,
-  },
-  index: 0 as const,
-  finish_reason: null,
-};
-const errorChunk: Chunk = {
-  id: '',
-  object: '',
-  created: 12,
-  model: '',
-  choices: [errorChoice],
-};
+
 /**
  * Returns an Observable that reads data from a ReadableStream and emits values representing the state of the data processing.
  *
@@ -43,7 +27,7 @@ export const getStreamObservable = (
   new Observable<PromptObservableState>((observer) => {
     observer.next({ chunks: [], loading: true });
     const decoder = new TextDecoder();
-    const chunks: Chunk[] = [...(isError ? [errorChunk] : [])];
+    const chunks: string[] = [];
     function read() {
       reader
         .read()
@@ -58,72 +42,18 @@ export const getStreamObservable = (
               observer.complete();
               return;
             }
-            const codec = new EventStreamCodec(toUtf8, fromUtf8);
-            const event = codec.decode(value);
-            const body = JSON.parse(
-              Buffer.from(
-                JSON.parse(new TextDecoder('utf-8').decode(event.body)).bytes,
-                'base64'
-              ).toString()
-            );
-            console.log('do we get here???', { done });
-            console.log('body???', body);
-
-            const bedrockChunk = {
-              ...errorChunk,
-              choices: [
-                {
-                  ...errorChoice,
-                  delta: {
-                    ...errorChoice.delta,
-                    content: body.completion,
-                  },
-                },
-              ],
-            };
-            if (false) {
-              const nextChunks: Chunk[] = isError
-                ? decoder
-                    .decode(value)
-                    .split('\n')
-                    .map((line) => JSON.parse(line))
-                    // we return a raw error of {message: string; status_code: number }
-                    .map((all) => {
-                      console.log('ALLL???', all);
-                      const { message }: { message: string } = all;
-                      return {
-                        ...errorChunk,
-                        choices: [
-                          {
-                            ...errorChoice,
-                            delta: {
-                              ...errorChoice.delta,
-                              content: message,
-                            },
-                          },
-                        ],
-                      };
-                    })
-                : decoder
-                    .decode(value)
-                    .split('\n')
-                    // every line starts with "data: ", we remove it and are left with stringified JSON or the string "[DONE]"
-                    .map((str) => str.substring(6))
-                    // filter out empty lines and the "[DONE]" string
-                    .filter((str) => !!str && str !== '[DONE]')
-                    .map((line) => JSON.parse(line));
-            }
-            console.log('bedrockChunk????', bedrockChunk);
-            // nextChunks.forEach((chunk) => {
-            chunks.push(bedrockChunk);
-            const message = getMessageFromChunks(chunks);
-            console.log('MESSAGE????', message);
+            const decoded = decoder.decode(value);
+            const content = isError
+              ? // we format errors as {message: string; status_code: number}
+                `${API_ERROR}\n\n${JSON.parse(decoded).message}`
+              : // all other responses are just strings (handled by subaction invokeStream)
+                decoded;
+            chunks.push(content);
             observer.next({
               chunks,
               message: getMessageFromChunks(chunks),
               loading: true,
             });
-            // });
           } catch (err) {
             observer.error(err);
             return;
@@ -172,8 +102,8 @@ export const getStreamObservable = (
     finalize(() => setLoading(false))
   );
 
-function getMessageFromChunks(chunks: Chunk[]) {
-  return chunks.map((chunk) => chunk.choices[0]?.delta.content ?? '').join('');
+function getMessageFromChunks(chunks: string[]) {
+  return chunks.join('');
 }
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();

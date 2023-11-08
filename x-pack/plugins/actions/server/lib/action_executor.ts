@@ -14,6 +14,7 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PassThrough, Readable } from 'stream';
+import { CreateChatCompletionRequest } from 'openai';
 import {
   validateParams,
   validateConfig,
@@ -354,9 +355,17 @@ export class ActionExecutor {
           };
 
           if (result.data instanceof Readable) {
+            const body =
+              validatedParams.subAction === 'invokeStream'
+                ? JSON.stringify(
+                    (validatedParams as { subActionParams: CreateChatCompletionRequest })
+                      .subActionParams
+                  )
+                : (validatedParams as { subActionParams: { body: string } }).subActionParams.body;
+
             getTokenCountFromOpenAIStream({
               responseStream: result.data.pipe(new PassThrough()),
-              body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
+              body,
             })
               .then(({ total, prompt, completion }) => {
                 event.kibana!.action!.execution!.gen_ai!.usage = {

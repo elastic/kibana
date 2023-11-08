@@ -8,9 +8,10 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import type { AxiosError } from 'axios';
-import { AxiosResponse } from 'axios/index';
 import { IncomingMessage } from 'http';
-import { PassThrough } from 'stream';
+import { PassThrough, Transform } from 'stream';
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -36,20 +37,6 @@ interface SignedRequest {
   body: string;
   path: string;
 }
-
-const pipeStreamingResponse = (response: AxiosResponse<IncomingMessage>) => {
-  // Streaming responses are compressed by the Hapi router by default
-  // Set content-type to something that's not recognized by Hapi in order to circumvent this
-  // response.data.headers = {
-  //   ['Content-Type']: 'dont-compress-this',
-  // };
-  return {
-    ...response.data,
-    headers: {
-      ['Content-Type']: 'dont-compress-this',
-    },
-  };
-};
 
 export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   private url;
@@ -86,6 +73,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_AI,
       method: 'invokeAI',
+      schema: InvokeAIActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_STREAM,
+      method: 'invokeStream',
       schema: InvokeAIActionParamsSchema,
     });
   }
@@ -181,6 +174,14 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     return response.data.pipe(new PassThrough());
   }
 
+  public async invokeStream(body: InvokeAIActionParams): Promise<ReadableStream> {
+    const res = (await this.streamApi({
+      body: JSON.stringify(body),
+      stream: true,
+    })) as unknown as IncomingMessage;
+    return res.pipe(new PassThrough()).pipe(transformToSimpleString());
+  }
+
   /**
    * takes in an array of messages and a model as input, and returns a promise that resolves to a string.
    * The method combines the messages into a single prompt formatted for bedrock,sends a request to the
@@ -218,3 +219,20 @@ const formatBedrockBody = ({
     stop_sequences: ['\n\nHuman:'],
   };
 };
+
+const transformToSimpleString = () =>
+  new Transform({
+    transform(chunk, encoding, callback) {
+      const encoder = new TextEncoder();
+      const codec = new EventStreamCodec(toUtf8, fromUtf8);
+      const event = codec.decode(chunk);
+      const body = JSON.parse(
+        Buffer.from(
+          JSON.parse(new TextDecoder('utf-8').decode(event.body)).bytes,
+          'base64'
+        ).toString()
+      );
+      const newChunk = encoder.encode(body.completion);
+      callback(null, newChunk);
+    },
+  });
