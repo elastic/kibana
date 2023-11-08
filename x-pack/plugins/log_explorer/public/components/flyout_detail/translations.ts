@@ -96,7 +96,7 @@ export const flyoutCloudProjectIdLabel = i18n.translate(
 export const flyoutCloudInstanceIdLabel = i18n.translate(
   'xpack.logExplorer.flyoutDetail.label.cloudInstanceId',
   {
-    defaultMessage: 'Cloud Instance ID',
+    defaultMessage: 'Cloud instance ID',
   }
 );
 

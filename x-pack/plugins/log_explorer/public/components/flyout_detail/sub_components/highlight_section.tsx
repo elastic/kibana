@@ -11,6 +11,7 @@ import {
   EuiFlexGrid,
   EuiHorizontalRule,
   EuiTitle,
+  EuiFlexItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -25,12 +26,17 @@ export function HighlightSection({
   children,
   showBottomRule = true,
 }: HighlightSectionProps) {
-  const shouldRenderSection = React.Children.toArray(children).filter(Boolean).length > 0;
+  const validChildren = React.Children.toArray(children).filter(Boolean);
+  const shouldRenderSection = validChildren.length > 0;
   const accordionTitle = (
     <EuiTitle size="xs">
       <p>{title}</p>
     </EuiTitle>
   );
+
+  const flexChildren = validChildren.map((child, idx) => (
+    <EuiFlexItem key={idx}>{child}</EuiFlexItem>
+  ));
 
   const accordionId = useGeneratedHtmlId({
     prefix: title,
@@ -43,9 +49,9 @@ export function HighlightSection({
         buttonContent={accordionTitle}
         paddingSize="s"
         initialIsOpen={true}
-        data-test-subj={title}
+        data-test-subj={`logExplorerFlyoutHighlightSection${title}`}
       >
-        <EuiFlexGrid columns={3}>{children}</EuiFlexGrid>
+        <EuiFlexGrid columns={3}>{flexChildren}</EuiFlexGrid>
       </EuiAccordion>
       {showBottomRule && <EuiHorizontalRule margin="xs" />}
     </>

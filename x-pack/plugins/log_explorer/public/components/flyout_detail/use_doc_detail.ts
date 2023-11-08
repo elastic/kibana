@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { formatFieldValue } from '@kbn/discover-utils';
+import he from 'he';
 import * as constants from '../../../common/constants';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { FlyoutDoc, FlyoutProps, LogDocument } from './types';
@@ -33,48 +34,49 @@ export function useDocDetail(
   // Flyout Headers
   const level = formatField(constants.LOG_LEVEL_FIELD)?.toLowerCase();
   const timestamp = formatField(constants.TIMESTAMP_FIELD);
-  const message = formatField(constants.MESSAGE_FIELD);
+  const formattedMessage = formatField(constants.MESSAGE_FIELD);
+  const message = formattedMessage ? he.decode(formattedMessage) : undefined;
 
   // Service Highlights
   const serviceName = formatField(constants.SERVICE_NAME_FIELD);
-  const traceId = formatField(constants.TRACE_ID);
+  const traceId = formatField(constants.TRACE_ID_FIELD);
 
   // Infrastructure Highlights
   const hostname = formatField(constants.HOST_NAME_FIELD);
-  const orchestratorClusterName = formatField(constants.ORCHESTRATOR_CLUSTER_NAME);
-  const orchestratorResourceId = formatField(constants.ORCHESTRATOR_RESOURCE_ID);
+  const orchestratorClusterName = formatField(constants.ORCHESTRATOR_CLUSTER_NAME_FIELD);
+  const orchestratorResourceId = formatField(constants.ORCHESTRATOR_RESOURCE_ID_FIELD);
 
   // Cloud Highlights
-  const cloudProvider = formatField(constants.CLOUD_PROVIDER);
-  const cloudRegion = formatField(constants.CLOUD_REGION);
-  const cloudAz = formatField(constants.CLOUD_AVAILABILITY_ZONE);
-  const cloudProjectId = formatField(constants.CLOUD_PROJECT_ID);
-  const cloudInstanceId = formatField(constants.CLOUD_INSTANCE_ID);
+  const cloudProvider = formatField(constants.CLOUD_PROVIDER_FIELD);
+  const cloudRegion = formatField(constants.CLOUD_REGION_FIELD);
+  const cloudAz = formatField(constants.CLOUD_AVAILABILITY_ZONE_FIELD);
+  const cloudProjectId = formatField(constants.CLOUD_PROJECT_ID_FIELD);
+  const cloudInstanceId = formatField(constants.CLOUD_INSTANCE_ID_FIELD);
 
   // Other Highlights
-  const logFilePath = formatField(constants.LOG_FILE_PATH);
-  const namespace = formatField(constants.DATASTREAM_NAMESPACE);
-  const dataset = formatField(constants.DATASTREAM_DATASET);
-  const agentName = formatField(constants.AGENT_NAME);
+  const logFilePath = formatField(constants.LOG_FILE_PATH_FIELD);
+  const namespace = formatField(constants.DATASTREAM_NAMESPACE_FIELD);
+  const dataset = formatField(constants.DATASTREAM_DATASET_FIELD);
+  const agentName = formatField(constants.AGENT_NAME_FIELD);
 
   return {
     [constants.LOG_LEVEL_FIELD]: level,
     [constants.TIMESTAMP_FIELD]: timestamp,
     [constants.MESSAGE_FIELD]: message,
     [constants.SERVICE_NAME_FIELD]: serviceName,
-    [constants.TRACE_ID]: traceId,
+    [constants.TRACE_ID_FIELD]: traceId,
     [constants.HOST_NAME_FIELD]: hostname,
-    [constants.ORCHESTRATOR_CLUSTER_NAME]: orchestratorClusterName,
-    [constants.ORCHESTRATOR_RESOURCE_ID]: orchestratorResourceId,
-    [constants.CLOUD_PROVIDER]: cloudProvider,
-    [constants.CLOUD_REGION]: cloudRegion,
-    [constants.CLOUD_AVAILABILITY_ZONE]: cloudAz,
-    [constants.CLOUD_PROJECT_ID]: cloudProjectId,
-    [constants.CLOUD_INSTANCE_ID]: cloudInstanceId,
-    [constants.LOG_FILE_PATH]: logFilePath,
-    [constants.DATASTREAM_NAMESPACE]: namespace,
-    [constants.DATASTREAM_DATASET]: dataset,
-    [constants.AGENT_NAME]: agentName,
+    [constants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: orchestratorClusterName,
+    [constants.ORCHESTRATOR_RESOURCE_ID_FIELD]: orchestratorResourceId,
+    [constants.CLOUD_PROVIDER_FIELD]: cloudProvider,
+    [constants.CLOUD_REGION_FIELD]: cloudRegion,
+    [constants.CLOUD_AVAILABILITY_ZONE_FIELD]: cloudAz,
+    [constants.CLOUD_PROJECT_ID_FIELD]: cloudProjectId,
+    [constants.CLOUD_INSTANCE_ID_FIELD]: cloudInstanceId,
+    [constants.LOG_FILE_PATH_FIELD]: logFilePath,
+    [constants.DATASTREAM_NAMESPACE_FIELD]: namespace,
+    [constants.DATASTREAM_DATASET_FIELD]: dataset,
+    [constants.AGENT_NAME_FIELD]: agentName,
   };
 }
 

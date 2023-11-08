@@ -57,9 +57,3 @@ export interface FlyoutDoc {
   'data_stream.namespace': string;
   'data_stream.dataset': string;
 }
-
-export interface FlyoutHighlightField {
-  label: string;
-  value: string;
-  iconType?: EuiIconType;
-}

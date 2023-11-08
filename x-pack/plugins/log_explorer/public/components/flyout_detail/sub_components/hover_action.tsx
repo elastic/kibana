@@ -23,6 +23,15 @@ interface HoverActionProps {
   actions: HoverActionType[];
 }
 
+const hoverActionDisplayCss = {
+  ':hover, :focus-within': {
+    '.visibleOnHoverFocus': {
+      opacity: 1,
+      visibility: 'visible',
+    },
+  },
+};
+
 export const HoverAction = ({ displayText, actions }: HoverActionProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -31,14 +40,7 @@ export const HoverAction = ({ displayText, actions }: HoverActionProps) => {
       alignItems="center"
       justifyContent="flexStart"
       gutterSize="s"
-      css={{
-        ':hover, :focus-within': {
-          '.visibleOnHoverFocus': {
-            opacity: 1,
-            visibility: 'visible',
-          },
-        },
-      }}
+      css={hoverActionDisplayCss}
     >
       <EuiFlexItem
         grow={false}
@@ -59,16 +61,14 @@ export const HoverAction = ({ displayText, actions }: HoverActionProps) => {
         gutterSize="none"
       >
         {actions.map((action) => (
-          <span key={action.id}>
-            <EuiToolTip content={action.tooltipContent}>
-              <EuiButtonIcon
-                size="xs"
-                iconType={action.iconType}
-                aria-label={action.tooltipContent as string}
-                onClick={() => action.onClick()}
-              />
-            </EuiToolTip>
-          </span>
+          <EuiToolTip content={action.tooltipContent} key={action.id}>
+            <EuiButtonIcon
+              size="xs"
+              iconType={action.iconType}
+              aria-label={action.tooltipContent as string}
+              onClick={() => action.onClick()}
+            />
+          </EuiToolTip>
         ))}
       </EuiFlexGroup>
     </EuiFlexGroup>

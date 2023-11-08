@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { ReactNode, useMemo } from 'react';
 import { HoverAction, HoverActionType } from './hover_action';
 import { flyoutHoverActionFilterForText, flyoutHoverActionFilterOutText } from '../translations';
-import { useDiscoverAction } from '../../../context/discover_actions/use_discover_action';
+import { useDiscoverActionsContext } from '../../../hooks/use_discover_action';
 
 interface HighlightFieldProps {
   label: string | ReactNode;
@@ -28,7 +28,7 @@ export function HighlightField({
 }: HighlightFieldProps) {
   const filterForText = flyoutHoverActionFilterForText(value);
   const filterOutText = flyoutHoverActionFilterOutText(value);
-  const { actions } = useDiscoverAction();
+  const actions = useDiscoverActionsContext();
 
   const hoverActions: HoverActionType[] = useMemo(
     () => [
@@ -50,13 +50,13 @@ export function HighlightField({
     [actions, field, value, filterForText, filterOutText]
   );
   return formattedValue ? (
-    <EuiFlexGroup direction="column" gutterSize="xs" data-test-subj={dataTestSubj}>
-      <EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="none" data-test-subj={dataTestSubj}>
+      <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="xs">
           {label}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <HoverAction displayText={formattedValue} actions={hoverActions} />
       </EuiFlexItem>
     </EuiFlexGroup>

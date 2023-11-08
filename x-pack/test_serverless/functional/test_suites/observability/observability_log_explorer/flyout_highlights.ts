@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load the service container with all fields', async () => {
         await dataGrid.clickRowToggle();
-        await testSubjects.existOrFail('Service');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionService');
         await testSubjects.existOrFail('logExplorerFlyoutService');
         await testSubjects.existOrFail('logExplorerFlyoutTrace');
         await dataGrid.closeFlyout();
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load the service container even when 1 field is missing', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 1 });
-        await testSubjects.existOrFail('Service');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionService');
         await testSubjects.missingOrFail('logExplorerFlyoutService');
         await testSubjects.existOrFail('logExplorerFlyoutTrace');
         await dataGrid.closeFlyout();
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not load the service container if all fields are missing', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 3 });
-        await testSubjects.missingOrFail('Service');
+        await testSubjects.missingOrFail('logExplorerFlyoutHighlightSectionService');
         await testSubjects.missingOrFail('logExplorerFlyoutService');
         await testSubjects.missingOrFail('logExplorerFlyoutTrace');
         await dataGrid.closeFlyout();
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load the infrastructure container with all fields', async () => {
         await dataGrid.clickRowToggle();
-        await testSubjects.existOrFail('Infrastructure');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionInfrastructure');
         await testSubjects.existOrFail('logExplorerFlyoutHostName');
         await testSubjects.existOrFail('logExplorerFlyoutClusterName');
         await testSubjects.existOrFail('logExplorerFlyoutResourceId');
@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load the infrastructure container even when 1 field is missing', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 1 });
-        await testSubjects.existOrFail('Infrastructure');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionInfrastructure');
         await testSubjects.missingOrFail('logExplorerFlyoutHostName');
         await testSubjects.existOrFail('logExplorerFlyoutClusterName');
         await testSubjects.existOrFail('logExplorerFlyoutResourceId');
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not load the infrastructure container if all fields are missing', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 2 });
-        await testSubjects.missingOrFail('Infrastructure');
+        await testSubjects.missingOrFail('logExplorerFlyoutHighlightSectionInfrastructure');
         await testSubjects.missingOrFail('logExplorerFlyoutHostName');
         await testSubjects.missingOrFail('logExplorerFlyoutClusterName');
         await testSubjects.missingOrFail('logExplorerFlyoutResourceId');
@@ -200,7 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load the cloud container with all fields', async () => {
         await dataGrid.clickRowToggle();
-        await testSubjects.existOrFail('Cloud');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionCloud');
         await testSubjects.existOrFail('logExplorerFlyoutCloudProvider');
         await testSubjects.existOrFail('logExplorerFlyoutCloudRegion');
         await testSubjects.existOrFail('logExplorerFlyoutCloudAz');
@@ -211,18 +211,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load the cloud container even when some fields are missing', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 1 });
-        await testSubjects.existOrFail('Cloud');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionCloud');
 
         await testSubjects.missingOrFail('logExplorerFlyoutCloudProvider');
         await testSubjects.missingOrFail('logExplorerFlyoutCloudInstanceId');
 
         await testSubjects.existOrFail('logExplorerFlyoutCloudRegion');
         await testSubjects.existOrFail('logExplorerFlyoutCloudAz');
+        await testSubjects.existOrFail('logExplorerFlyoutCloudProjectId');
         await dataGrid.closeFlyout();
       });
 
       it('should not load the cloud container if all fields are missing', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 2 });
+        await testSubjects.missingOrFail('logExplorerFlyoutHighlightSectionCloud');
         await testSubjects.missingOrFail('logExplorerFlyoutCloudProvider');
         await testSubjects.missingOrFail('logExplorerFlyoutCloudRegion');
         await testSubjects.missingOrFail('logExplorerFlyoutCloudAz');
@@ -265,7 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load the other container with all fields', async () => {
         await dataGrid.clickRowToggle();
-        await testSubjects.existOrFail('Other');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionOther');
         await testSubjects.existOrFail('logExplorerFlyoutLogPathFile');
         await testSubjects.existOrFail('logExplorerFlyoutNamespace');
         await testSubjects.existOrFail('logExplorerFlyoutDataset');
@@ -275,7 +277,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load the other container even when some fields are missing', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 1 });
-        await testSubjects.existOrFail('Other');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionOther');
 
         await testSubjects.missingOrFail('logExplorerFlyoutLogPathFile');
         await testSubjects.missingOrFail('logExplorerFlyoutLogShipper');

@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { createContext } from 'react';
+import createContainer from 'constate';
 import { FlyoutContentActions } from '@kbn/discover-plugin/public';
 
-export const DiscoverActionContext = createContext<{ actions: FlyoutContentActions }>({
-  actions: {
-    addFilter: () => {},
-    addColumn: () => {},
-    removeColumn: () => {},
-  },
-});
+interface UseFlyoutActionsDeps {
+  value: FlyoutContentActions;
+}
+
+const useDiscoverActions = ({ value }: UseFlyoutActionsDeps) => value;
+
+export const [DiscoverActionsProvider, useDiscoverActionsContext] =
+  createContainer(useDiscoverActions);

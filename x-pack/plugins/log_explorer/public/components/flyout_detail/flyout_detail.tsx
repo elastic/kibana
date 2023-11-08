@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { FlyoutProps, LogDocument } from './types';
 import { useDocDetail } from './use_doc_detail';
-import { FlyoutHeader } from './fylout_header';
+import { FlyoutHeader } from './flyout_header';
 import { FlyoutHighlights } from './flyout_highlights';
 
 export function FlyoutDetail({
