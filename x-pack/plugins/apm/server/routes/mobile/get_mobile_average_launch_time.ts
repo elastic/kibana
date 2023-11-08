@@ -100,13 +100,13 @@ async function getAvgLaunchTimeTimeseries({
     response?.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: bucket.launchTime.value,
+        y: bucket.launchTimeAvg.value,
       };
     }) ?? [];
 
   return {
     timeseries,
-    value: response.aggregations?.launchTime?.value,
+    value: response.aggregations?.launchTimeAvg?.value,
   };
 }
 
