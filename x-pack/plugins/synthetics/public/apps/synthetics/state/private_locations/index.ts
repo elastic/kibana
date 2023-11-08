@@ -6,13 +6,20 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
+import { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { AgentPolicyInfo } from '../../../../../common/types';
 import { IHttpSerializedFetchError } from '..';
-import { getAgentPoliciesAction, setAddingNewPrivateLocation } from './actions';
+import {
+  getAgentPoliciesAction,
+  setAddingNewPrivateLocation,
+  getPrivateLocationsAction,
+} from './actions';
 
 export interface AgentPoliciesState {
   data: AgentPolicyInfo[] | null;
+  privateLocations?: SyntheticsPrivateLocations | null;
   loading: boolean;
+  fetchLoading?: boolean;
   error: IHttpSerializedFetchError | null;
   isManageFlyoutOpen?: boolean;
   isAddingNewPrivateLocation?: boolean;
@@ -38,6 +45,17 @@ export const agentPoliciesReducer = createReducer(initialState, (builder) => {
     .addCase(getAgentPoliciesAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
+    })
+    .addCase(getPrivateLocationsAction.get, (state) => {
+      state.fetchLoading = true;
+    })
+    .addCase(getPrivateLocationsAction.success, (state, action) => {
+      state.privateLocations = action.payload;
+      state.fetchLoading = false;
+    })
+    .addCase(getPrivateLocationsAction.fail, (state, action) => {
+      state.error = action.payload;
+      state.fetchLoading = false;
     })
     .addCase(setAddingNewPrivateLocation, (state, action) => {
       state.isAddingNewPrivateLocation = action.payload;
