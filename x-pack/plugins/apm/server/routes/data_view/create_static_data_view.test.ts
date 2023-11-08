@@ -16,9 +16,10 @@ import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_rout
 function getMockedDataViewService(existingDataViewTitle: string) {
   return {
     get: jest.fn(() => ({
-      title: existingDataViewTitle,
+      getIndexPattern: () => existingDataViewTitle,
     })),
     createAndSave: jest.fn(),
+    delete: () => {},
   } as unknown as DataViewsService;
 }
 
