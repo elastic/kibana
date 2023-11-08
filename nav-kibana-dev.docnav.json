@@ -194,6 +194,17 @@
       ]
     },
     {
+      "label": "Serverless",
+      "items": [
+        {
+          "id": "ktServerlessReleaseOverview"
+        },
+        {
+          "id": "ktCustomServerlessImage"
+        }
+      ]
+    },
+    {
       "label": "Contributors Newsletters",
       "items": [
         {

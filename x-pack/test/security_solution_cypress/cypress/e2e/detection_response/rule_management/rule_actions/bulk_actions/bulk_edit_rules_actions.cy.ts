@@ -76,7 +76,7 @@ const expectedSlackMessage = 'Slack action test message';
 
 describe(
   'Detection rules, bulk edit of rule actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless', '@brokenInServerlessQA'] },
   () => {
     beforeEach(() => {
       login();
