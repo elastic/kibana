@@ -12,14 +12,11 @@ import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
 import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
-import type { CasesOwners } from '../../client/helpers/can_use_cases';
-import type { EuiBasicTableOnChange, Solution } from './types';
+import type { EuiBasicTableOnChange } from './types';
 
 import { SortFieldCase } from '../../../common/ui/types';
 import type { CaseStatuses } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
-import { OWNER_INFO } from '../../../common/constants';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
 import { CASES_TABLE_PERPAGE_VALUES } from './types';
@@ -33,6 +30,7 @@ import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
 import { useAllCasesState } from './use_all_cases_state';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -50,17 +48,6 @@ const ProgressLoader = styled(EuiProgress)`
 const getSortField = (field: string): SortFieldCase =>
   // @ts-ignore
   SortFieldCase[field] ?? SortFieldCase.title;
-
-const isValidSolution = (solution: string): solution is CasesOwners =>
-  Object.keys(OWNER_INFO).includes(solution);
-
-const mapToReadableSolutionName = (solution: string): Solution => {
-  if (isValidSolution(solution)) {
-    return OWNER_INFO[solution];
-  }
-
-  return { id: solution, label: solution, iconType: '' };
-};
 
 export interface AllCasesListProps {
   hiddenStatuses?: CaseStatuses[];
@@ -157,29 +144,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
         deselectCases();
-        setFilterOptions({
-          ...newFilterOptions,
-          /**
-           * If the user selects and deselects all solutions
-           * then the owner is set to an empty array. This results in fetching all cases the user has access to including
-           * the ones with read access. We want to show only the cases the user has full access to.
-           * For that reason we fallback to availableSolutions if the owner is empty.
-           *
-           * If the consumer of cases has passed an owner we fallback to the provided owner
-           */
-          ...(newFilterOptions.owner != null && !hasOwner
-            ? {
-                owner:
-                  newFilterOptions.owner.length === 0 ? availableSolutions : newFilterOptions.owner,
-              }
-            : newFilterOptions.owner != null && hasOwner
-            ? {
-                owner: newFilterOptions.owner.length === 0 ? owner : newFilterOptions.owner,
-              }
-            : {}),
-        });
+        setFilterOptions(newFilterOptions);
       },
-      [deselectCases, setFilterOptions, hasOwner, availableSolutions, owner]
+      [deselectCases, setFilterOptions]
     );
 
     const { columns } = useCasesColumns({
@@ -188,7 +155,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       isSelectorView,
       connectors,
       onRowClick,
-      showSolutionColumn: !hasOwner && availableSolutions.length > 1,
+      // FIXME: was removed in Antonio's PR, merge with his
+      showSolutionColumn: true,
       disableActions: selectedCases.length > 0,
     });
 
@@ -219,10 +187,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       []
     );
 
-    const availableSolutionsLabels = availableSolutions.map((solution) =>
-      mapToReadableSolutionName(solution)
-    );
-
     const onCreateCasePressed = useCallback(() => {
       onRowClick?.(undefined, true);
     }, [onRowClick]);
@@ -241,7 +205,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           countOpenCases={data.countOpenCases}
           countInProgressCases={data.countInProgressCases}
           onFilterChanged={onFilterChangedCallback}
-          availableSolutions={hasOwner ? [] : availableSolutionsLabels}
+          availableSolutions={hasOwner ? [] : availableSolutions}
           hiddenStatuses={hiddenStatuses}
           onCreateCasePressed={onCreateCasePressed}
           isSelectorView={isSelectorView}

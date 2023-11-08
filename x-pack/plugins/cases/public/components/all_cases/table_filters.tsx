@@ -23,7 +23,6 @@ import { AssigneesFilterPopover } from './assignees_filter';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
-import type { Solution } from './types';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -31,7 +30,7 @@ interface CasesTableFiltersProps {
   countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   hiddenStatuses?: CaseStatuses[];
-  availableSolutions: Solution[];
+  availableSolutions: string[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
   isLoading: boolean;
@@ -53,7 +52,6 @@ const CasesTableFiltersComponent = ({
   filterOptions,
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(filterOptions.search);
-  const [selectedOwner, setSelectedOwner] = useState([]);
   const [selectedAssignees, setSelectedAssignees] = useState<AssigneesFilteringSelection[]>([]);
   const { data: tags = [] } = useGetTags();
   const { data: categories = [] } = useGetCategories();
@@ -86,16 +84,6 @@ const CasesTableFiltersComponent = ({
       }
     },
     [selectedAssignees, onFilterChanged]
-  );
-
-  const handleSelectedSolution = useCallback(
-    (newOwner) => {
-      if (!isEqual(newOwner, selectedOwner)) {
-        setSelectedOwner(newOwner);
-        onFilterChanged({ owner: newOwner });
-      }
-    },
-    [onFilterChanged, selectedOwner]
   );
 
   const handleOnSearch = useCallback(
@@ -178,9 +166,9 @@ const CasesTableFiltersComponent = ({
           />
           {availableSolutions.length > 1 && (
             <SolutionFilter
-              onSelectedOptionsChanged={handleSelectedSolution}
-              selectedOptions={selectedOwner}
-              options={availableSolutions}
+              onChange={onChange}
+              selectedOptions={filterOptions?.owner}
+              availableSolutions={availableSolutions}
             />
           )}
         </EuiFilterGroup>
