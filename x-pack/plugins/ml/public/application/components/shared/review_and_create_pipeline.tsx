@@ -202,7 +202,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          {pipelineCreated && sourceIndex ? (
+          {pipelineCreated ? (
             <>
               <EuiSpacer size="m" />
               <EuiAccordion

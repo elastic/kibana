@@ -109,15 +109,6 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
     return errors;
   }, [pipelineNames, formState.pipelineName]);
 
-  const sourceIndex = useMemo(
-    () =>
-      Array.isArray(model.metadata?.analytics_config.source.index)
-        ? model.metadata?.analytics_config.source.index.join()
-        : model.metadata?.analytics_config.source.index,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [model?.model_id]
-  );
-
   return (
     <EuiFlyout
       onClose={onClose}
@@ -172,7 +163,6 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
             pipelineName={formState.pipelineName}
             pipelineCreated={formState.pipelineCreated}
             pipelineError={formState.pipelineError}
-            sourceIndex={sourceIndex}
           />
         )}
       </EuiFlyoutBody>

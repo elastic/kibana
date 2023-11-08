@@ -57,13 +57,13 @@ const destIndexInvalid = i18n.translate(
 
 interface Props {
   pipelineName: string;
-  sourceIndex: string;
+  sourceIndex?: string;
 }
 
 export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) => {
-  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>([
-    { label: sourceIndex },
-  ]);
+  const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>(
+    sourceIndex ? [{ label: sourceIndex }] : []
+  );
   const [options, setOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [destinationIndex, setDestinationIndex] = useState<string>('');
   const [destinationIndexExists, setDestinationIndexExists] = useState<boolean>(false);
