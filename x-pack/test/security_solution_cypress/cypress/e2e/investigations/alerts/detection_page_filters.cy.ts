@@ -51,6 +51,7 @@ import {
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { setEndDate, setStartDate } from '../../../tasks/date_picker';
 import { fillAddFilterForm, openAddFilterPopover } from '../../../tasks/search_bar';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 
 const customFilters = [
   {
@@ -107,15 +108,12 @@ const assertFilterControlsWithFilterObject = (
 };
 
 describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
-  });
-
   beforeEach(() => {
+    deleteAlertsAndRules();
+    createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
     login();
     visitWithTimeRange(ALERTS_URL);
     waitForAlerts();
-    resetFilters();
   });
 
   it('Default page filters are populated when nothing is provided in the URL', () => {
@@ -123,16 +121,6 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('Alert Page Filters Customization ', () => {
-    beforeEach(() => {
-      login();
-      visitWithTimeRange(ALERTS_URL);
-      waitForAlerts();
-    });
-
-    afterEach(() => {
-      resetFilters();
-    });
-
     it('should be able to delete Controls', () => {
       waitForPageFilters();
       editFilterGroupControls();
@@ -233,10 +221,6 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   });
 
   context('with data modificiation', () => {
-    after(() => {
-      createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
-    });
-
     it(`Alert list is updated when the alerts are updated`, () => {
       // mark status of one alert to be acknowledged
       selectCountTable();
