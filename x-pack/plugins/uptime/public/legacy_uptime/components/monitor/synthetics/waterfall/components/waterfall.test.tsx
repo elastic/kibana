@@ -11,7 +11,7 @@ import { renderLegendItem } from '../../step_detail/waterfall/waterfall_chart_wr
 import { render } from '../../../../../lib/helper/rtl_helpers';
 
 import 'jest-canvas-mock';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 describe('waterfall', () => {
   it('sets the correct height in case of full height', () => {
