@@ -1750,12 +1750,6 @@ paths:
             schema:
               type: object
               properties:
-                revoke:
-                  type: boolean
-                  description: Revokes API keys of agents
-                force:
-                  type: boolean
-                  description: Unenroll hosted agents too
                 agents:
                   oneOf:
                     - type: string
@@ -1764,6 +1758,17 @@ paths:
                       items:
                         type: string
                       description: list of agent IDs
+                revoke:
+                  type: boolean
+                  description: Revokes API keys of agents
+                force:
+                  type: boolean
+                  description: Unenrolls hosted agents too
+                includeInactive:
+                  type: boolean
+                  description: >-
+                    When passing agents by KQL query, unenrolls inactive agents
+                    too
               required:
                 - agents
             example:
@@ -5240,6 +5245,16 @@ components:
           type: number
         required_acks:
           type: number
+        secrets:
+          type: object
+          properties:
+            password:
+              type: string
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - type
@@ -5304,6 +5319,14 @@ components:
               type: number
             loadbalance:
               type: boolean
+        secrets:
+          type: object
+          properties:
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - hosts

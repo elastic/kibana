@@ -8,9 +8,9 @@
 import { PartialSetupState, ProfilingSetupOptions } from './setup';
 
 export async function hasProfilingData({
-  client,
+  clientWithProfilingAuth,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const hasProfilingDataResponse = await client.search('has_any_profiling_data', {
+  const hasProfilingDataResponse = await clientWithProfilingAuth.search('has_any_profiling_data', {
     index: 'profiling*',
     size: 0,
     track_total_hits: 1,

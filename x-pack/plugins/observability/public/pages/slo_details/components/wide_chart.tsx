@@ -23,6 +23,7 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import moment from 'moment';
 import React, { useRef } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { ChartData } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -71,6 +72,7 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
         }}
         pointerUpdateDebounce={0}
         pointerUpdateTrigger={'x'}
+        locale={i18n.getLocale()}
       />
       <Axis
         id="bottom"

@@ -10,7 +10,6 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IncomingMessage } from 'http';
 import { compact, isEmpty, merge, omit } from 'lodash';
 import type {
   ChatCompletionFunctions,
@@ -18,10 +17,11 @@ import type {
   CreateChatCompletionRequest,
   CreateChatCompletionResponse,
 } from 'openai';
+import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
 import {
-  type CompatibleJSONSchema,
   MessageRole,
+  type CompatibleJSONSchema,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -100,7 +100,7 @@ export class ObservabilityAIAssistantClient {
     await this.dependencies.esClient.delete({
       id: conversation._id,
       index: conversation._index,
-      refresh: 'wait_for',
+      refresh: true,
     });
   };
 
@@ -116,7 +116,7 @@ export class ObservabilityAIAssistantClient {
     functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
     functionCall?: string;
     stream?: TStream;
-  }): Promise<TStream extends false ? CreateChatCompletionResponse : IncomingMessage> => {
+  }): Promise<TStream extends false ? CreateChatCompletionResponse : Readable> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
       messages
         .filter((message) => message.message.content || message.message.function_call?.name)
@@ -195,7 +195,11 @@ export class ObservabilityAIAssistantClient {
       throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
     }
 
-    return executeResult.data as any;
+    const response = stream
+      ? ((executeResult.data as Readable).pipe(new PassThrough()) as Readable)
+      : (executeResult.data as CreateChatCompletionResponse);
+
+    return response as any;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
@@ -240,7 +244,7 @@ export class ObservabilityAIAssistantClient {
       id: document._id,
       index: document._index,
       doc: updatedConversation,
-      refresh: 'wait_for',
+      refresh: true,
     });
 
     return updatedConversation;
@@ -330,7 +334,7 @@ export class ObservabilityAIAssistantClient {
       id: document._id,
       index: document._index,
       doc: { conversation: { title } },
-      refresh: 'wait_for',
+      refresh: true,
     });
 
     return updatedConversation;
@@ -352,7 +356,7 @@ export class ObservabilityAIAssistantClient {
     await this.dependencies.esClient.index({
       index: this.dependencies.resources.aliases.conversations,
       document: createdConversation,
-      refresh: 'wait_for',
+      refresh: true,
     });
 
     return createdConversation;

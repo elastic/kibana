@@ -70,6 +70,7 @@ export function getStateDefaults({
     savedQuery: undefined,
     rowHeight: undefined,
     rowsPerPage: undefined,
+    sampleSize: undefined,
     grid: undefined,
     breakdownField: undefined,
   };
@@ -94,7 +95,9 @@ export function getStateDefaults({
   if (savedSearch.rowsPerPage) {
     defaultState.rowsPerPage = savedSearch.rowsPerPage;
   }
-
+  if (savedSearch.sampleSize) {
+    defaultState.sampleSize = savedSearch.sampleSize;
+  }
   if (savedSearch.breakdownField) {
     defaultState.breakdownField = savedSearch.breakdownField;
   }

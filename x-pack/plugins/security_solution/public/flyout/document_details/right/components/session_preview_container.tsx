@@ -10,7 +10,7 @@ import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { useDispatch } from 'react-redux';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css/dist/emotion-css.cjs';
+import { css } from '@emotion/css';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionPreview } from '../hooks/use_session_preview';

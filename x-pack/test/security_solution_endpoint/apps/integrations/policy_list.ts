@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import { targetTags } from '../../target_tags';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -24,7 +25,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('When on the Endpoint Policy List Page', () => {
+  describe('When on the Endpoint Policy List Page', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     before(async () => {
       await browser.refresh();
     });

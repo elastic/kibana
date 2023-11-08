@@ -42,17 +42,23 @@ xpack.index_management.enableIndexActions: false
 xpack.index_management.enableLegacyTemplates: false
 # Disable index stats information from Index Management UI
 xpack.index_management.enableIndexStats: false
+# Only limited index settings can be edited
+xpack.index_management.editableIndexSettings: limited
+# Disable Storage size column in the Data streams table from Index Management UI
+xpack.index_management.enableDataStreamsStorageColumn: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
 management.deeplinks.navLinkStatus: visible
 
+# Onboarding team UI configurations
+xpack.cloud_integrations.data_migration.enabled: false
+guided_onboarding.enabled: false
+
 # Other disabled plugins
 xpack.canvas.enabled: false
-xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.enabled: false
-xpack.screenshotting.enabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
 xpack.security.showInsecureClusterWarning: false
@@ -137,3 +143,12 @@ xpack.task_manager.allow_reading_invalid_state: false
 
 ## TaskManager requeue invalid tasks, supports ZDT
 xpack.task_manager.requeue_invalid_tasks.enabled: true
+
+# Reporting feature
+xpack.screenshotting.enabled: false
+xpack.reporting.roles.enabled: false
+xpack.reporting.statefulSettings.enabled: false
+
+
+# Disabled Observability plugins
+xpack.ux.enabled: false

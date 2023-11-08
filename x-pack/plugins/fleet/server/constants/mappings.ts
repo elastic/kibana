@@ -298,6 +298,47 @@ export const AGENT_MAPPINGS = {
     upgrade_status: {
       type: 'keyword',
     },
+    upgrade_details: {
+      properties: {
+        target_version: {
+          type: 'text',
+          fields: {
+            keyword: {
+              type: 'keyword',
+              ignore_above: 16,
+            },
+          },
+        },
+        action_id: {
+          type: 'keyword',
+        },
+        state: {
+          type: 'keyword',
+        },
+        metadata: {
+          properties: {
+            scheduled_at: {
+              type: 'date',
+            },
+            download_percent: {
+              type: 'double',
+            },
+            failed_state: {
+              type: 'keyword',
+            },
+            error_msg: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 1024,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     // added to allow validation on status field
     status: {
       type: 'keyword',

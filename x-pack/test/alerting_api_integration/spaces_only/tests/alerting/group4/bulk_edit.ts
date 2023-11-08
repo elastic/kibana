@@ -422,45 +422,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should ignore bulk snooze and snooze schedule rule for SIEM rules', async () => {
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ enabled: false, consumer: 'siem' }));
-
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-      const payload = {
-        ids: [createdRule.id],
-        operations: [
-          {
-            operation: 'set',
-            field: 'snoozeSchedule',
-            value: getSnoozeSchedule(),
-          },
-        ],
-      };
-
-      const bulkSnoozeResponse = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
-        .set('kbn-xsrf', 'foo')
-        .send(payload);
-
-      expect(bulkSnoozeResponse.body.errors).to.have.length(0);
-      expect(bulkSnoozeResponse.body.rules).to.have.length(1);
-      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule).empty();
-      // Ensure revision is NOT updated
-      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(0);
-
-      // Ensure AAD isn't broken
-      await checkAAD({
-        supertest,
-        spaceId: Spaces.space1.id,
-        type: 'alert',
-        id: createdRule.id,
-      });
-    });
-
     it('should not bulk update API key with apiKey operation', async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

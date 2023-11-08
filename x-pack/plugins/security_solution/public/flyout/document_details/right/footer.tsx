@@ -8,9 +8,12 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { EuiPanel } from '@elastic/eui';
 import { FlyoutFooter } from '../../../timelines/components/side_panel/event_details/flyout';
 import { useRightPanelContext } from './context';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
+import { DEFAULT_DARK_MODE } from '../../../../common/constants';
+import { useUiSetting } from '../../../common/lib/kibana';
 
 /**
  *
@@ -25,6 +28,7 @@ export const PanelFooter: FC = () => {
     refetchFlyoutData,
     scopeId,
   } = useRightPanelContext();
+  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
 
   const { isHostIsolationPanelOpen, showHostIsolationPanel } = useHostIsolationTools();
 
@@ -45,16 +49,24 @@ export const PanelFooter: FC = () => {
   );
 
   return (
-    <FlyoutFooter
-      detailsData={dataFormattedForFieldBrowser}
-      detailsEcsData={dataAsNestedObject}
-      handleOnEventClosed={closeFlyout}
-      isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-      isReadOnly={false}
-      loadingEventDetails={false}
-      onAddIsolationStatusClick={showHostIsolationPanelCallback}
-      scopeId={scopeId}
-      refetchFlyoutData={refetchFlyoutData}
-    />
+    <EuiPanel
+      hasShadow={false}
+      borderRadius="none"
+      style={{
+        backgroundColor: isDarkMode ? `rgb(37, 38, 46)` : `rgb(241, 244, 250)`,
+      }}
+    >
+      <FlyoutFooter
+        detailsData={dataFormattedForFieldBrowser}
+        detailsEcsData={dataAsNestedObject}
+        handleOnEventClosed={closeFlyout}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        isReadOnly={false}
+        loadingEventDetails={false}
+        onAddIsolationStatusClick={showHostIsolationPanelCallback}
+        scopeId={scopeId}
+        refetchFlyoutData={refetchFlyoutData}
+      />
+    </EuiPanel>
   );
 };

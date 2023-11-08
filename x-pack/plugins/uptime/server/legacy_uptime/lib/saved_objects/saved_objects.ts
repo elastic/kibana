@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers, SavedObjectsServiceSetup } from '@kbn/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+  SavedObjectsServiceSetup,
+} from '@kbn/core/server';
 
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../../constants/settings';
 import { DynamicSettingsAttributes } from '../../../runtime_types/settings';
@@ -20,7 +24,10 @@ export const registerUptimeSavedObjects = (savedObjectsService: SavedObjectsServ
 export interface UMSavedObjectsAdapter {
   config: UptimeConfig | null;
   getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettingsAttributes>;
-  setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettingsAttributes>;
+  setUptimeDynamicSettings: (
+    client: SavedObjectsClientContract,
+    attr: DynamicSettingsAttributes
+  ) => Promise<DynamicSettingsAttributes>;
 }
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
@@ -43,10 +50,15 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       throw getErr;
     }
   },
-  setUptimeDynamicSettings: async (client, settings: DynamicSettingsAttributes | undefined) => {
-    await client.create(umDynamicSettings.name, settings, {
-      id: settingsObjectId,
-      overwrite: true,
-    });
+  setUptimeDynamicSettings: async (client, settings: DynamicSettingsAttributes) => {
+    const newObj = await client.create<DynamicSettingsAttributes>(
+      umDynamicSettings.name,
+      settings,
+      {
+        id: settingsObjectId,
+        overwrite: true,
+      }
+    );
+    return newObj.attributes;
   },
 };

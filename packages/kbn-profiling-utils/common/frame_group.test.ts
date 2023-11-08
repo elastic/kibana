@@ -40,7 +40,7 @@ const elfSymbolizedTests = [
       sourceFilename: '',
       functionName: 'strlen()',
     },
-    expected: 'elf;libc;strlen()',
+    expected: 'elf;0x0123456789ABCDEF;strlen()',
   },
   {
     params: {
@@ -50,7 +50,7 @@ const elfSymbolizedTests = [
       sourceFilename: '',
       functionName: 'strtok()',
     },
-    expected: 'elf;libc;strtok()',
+    expected: 'elf;0xFEDCBA9876543210;strtok()',
   },
 ];
 

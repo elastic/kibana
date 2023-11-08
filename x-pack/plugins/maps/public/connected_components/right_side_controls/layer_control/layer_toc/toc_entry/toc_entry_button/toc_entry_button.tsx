@@ -20,7 +20,7 @@ interface Footnote {
 
 interface IconAndTooltipContent {
   icon?: ReactNode;
-  tooltipContent?: string | null;
+  tooltipContent?: ReactNode;
   footnotes: Footnote[];
 }
 
@@ -74,15 +74,15 @@ export class TOCEntryButton extends Component<Props, State> {
       return {
         icon: (
           <EuiIcon
-            aria-label={i18n.translate('xpack.maps.layer.loadWarningAriaLabel', {
-              defaultMessage: 'Load warning',
-            })}
             size="m"
-            type="warning"
-            color="warning"
+            type="error"
+            color="danger"
+            data-test-subj={`layerTocErrorIcon${this.props.escapedDisplayName}`}
           />
         ),
-        tooltipContent: this.props.layer.getErrors(),
+        tooltipContent: this.props.layer
+          .getErrors()
+          .map(({ title }) => <div key={title}>{title}</div>),
         footnotes: [],
       };
     }

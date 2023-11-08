@@ -16,6 +16,7 @@ import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { ResponseBody } from '../types';
 import { callAgentExecutor } from '.';
+import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 
 jest.mock('../llm/actions_client_llm');
 
@@ -33,6 +34,13 @@ const mockCall = jest.fn();
 jest.mock('langchain/agents', () => ({
   initializeAgentExecutorWithOptions: jest.fn().mockImplementation(() => ({
     call: mockCall,
+  })),
+}));
+
+jest.mock('../elasticsearch_store/elasticsearch_store', () => ({
+  ElasticsearchStore: jest.fn().mockImplementation(() => ({
+    asRetriever: jest.fn(),
+    isModelInstalled: jest.fn().mockResolvedValue(true),
   })),
 }));
 
@@ -128,5 +136,25 @@ describe('callAgentExecutor', () => {
       data: mockActionResponse,
       status: 'ok',
     });
+  });
+
+  it('throws an error if ELSER model is not installed', async () => {
+    (ElasticsearchStore as unknown as jest.Mock).mockImplementationOnce(() => ({
+      isModelInstalled: jest.fn().mockResolvedValue(false),
+    }));
+
+    await expect(
+      callAgentExecutor({
+        actions: mockActions,
+        connectorId: mockConnectorId,
+        esClient: esClientMock,
+        langChainMessages,
+        logger: mockLogger,
+        request: mockRequest,
+        kbResource: ESQL_RESOURCE,
+      })
+    ).rejects.toThrow(
+      'Please ensure ELSER is configured to use the Knowledge Base, otherwise disable the Knowledge Base in Advanced Settings to continue.'
+    );
   });
 });

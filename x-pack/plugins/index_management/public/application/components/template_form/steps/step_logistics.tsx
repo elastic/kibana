@@ -112,6 +112,19 @@ function getFieldsMeta(esDocsBase: string) {
       }),
       testSubject: 'versionField',
     },
+    allowAutoCreate: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateTitle', {
+        defaultMessage: 'Allow auto create',
+      }),
+      description: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateDescription',
+        {
+          defaultMessage:
+            'Indices can be automatically created even if auto-creation of indices is disabled via actions.auto_create_index.',
+        }
+      ),
+      testSubject: 'allowAutoCreateField',
+    },
   };
 }
 
@@ -185,9 +198,8 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
     }, [onChange, isFormValid, validate, getFormData]);
 
-    const { name, indexPatterns, createDataStream, order, priority, version } = getFieldsMeta(
-      documentationService.getEsDocsBase()
-    );
+    const { name, indexPatterns, createDataStream, order, priority, version, allowAutoCreate } =
+      getFieldsMeta(documentationService.getEsDocsBase());
 
     return (
       <>
@@ -293,6 +305,16 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               }}
             />
           </FormRow>
+
+          {/* Allow auto create */}
+          {isLegacy === false && (
+            <FormRow title={allowAutoCreate.title} description={allowAutoCreate.description}>
+              <UseField
+                path="allowAutoCreate"
+                componentProps={{ 'data-test-subj': allowAutoCreate.testSubject }}
+              />
+            </FormRow>
+          )}
 
           {/* _meta */}
           {isLegacy === false && (

@@ -9,8 +9,9 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import type { OutputSOAttributes } from '../types';
+import type { Logger } from '@kbn/logging';
 
+import type { OutputSOAttributes } from '../types';
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 
 import { outputService, outputIdToUuid } from './output';
@@ -27,6 +28,17 @@ const mockedAppContextService = appContextService as jest.Mocked<typeof appConte
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
+
+mockedAppContextService.getLogger.mockImplementation(() => {
+  return {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger;
+});
+
+mockedAppContextService.getExperimentalFeatures.mockReturnValue({});
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
@@ -688,6 +700,28 @@ describe('Output Service', () => {
           type: 'kafka',
         },
         { id: 'output-1' }
+      );
+    });
+
+    it('should throw when a remote es output is attempted to be created as default data output', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+
+      await expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: true,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'remote_elasticsearch',
+          },
+          { id: 'output-1' }
+        )
+      ).rejects.toThrow(
+        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
       );
     });
   });
@@ -1487,6 +1521,23 @@ describe('Output Service', () => {
         'synthetics_policy',
         { data_output_id: 'output-test' },
         { force: true }
+      );
+    });
+
+    it('should throw when a remote es output is attempted to be updated as default data output', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+
+      await expect(
+        outputService.update(soClient, esClientMock, 'output-test', {
+          is_default: true,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'remote_elasticsearch',
+        })
+      ).rejects.toThrow(
+        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
       );
     });
   });

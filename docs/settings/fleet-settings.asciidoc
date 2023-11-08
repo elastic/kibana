@@ -188,7 +188,7 @@ NOTE: The `xpack.fleet.outputs` settings are intended for advanced configuration
   `name`::: 
     Output name.
   `type`::: 
-    Type of Output. Currently we only support "elasticsearch".
+    Type of Output. Currently we support "elasticsearch", "logstash", "kafka".
   `hosts`::: 
     Array that contains the list of host for that output.
   `config`::: 

@@ -105,8 +105,7 @@ describe('loadESQL', () => {
     await loadESQL(esStore, logger);
 
     expect(logger.error).toHaveBeenCalledWith(
-      'Failed to load ES|QL docs, language docs, and example queries into the Knowledge Base',
-      error
+      'Failed to load ES|QL docs, language docs, and example queries into the Knowledge Base\nError: Failed to load documents'
     );
   });
 });
