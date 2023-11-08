@@ -8,42 +8,20 @@
 import Url from 'url';
 
 import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
-import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
-import { createAgentPolicy, getLatestAvailableAgentVersion } from './utils';
+import { createAgentPolicy } from './utils';
 
 async function setupFleetAgent({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const kbnClient = getService('kibanaServer');
 
-  const elasticUrl = Url.format(config.get('servers.elasticsearch'));
-  const kibanaUrl = Url.format(config.get('servers.kibana'));
-  const fleetServerUrl = Url.format({
-    protocol: config.get('servers.kibana.protocol'),
-    hostname: config.get('servers.kibana.hostname'),
-    port: config.get('servers.fleetserver.port'),
-  });
-  const username = config.get('servers.elasticsearch.username');
-  const password = config.get('servers.elasticsearch.password');
-
   await verifyDockerInstalled(log);
   await maybeCreateDockerNetwork(log);
-
-  await startRuntimeServices({
-    log,
-    elasticUrl,
-    kibanaUrl,
-    fleetServerUrl,
-    username,
-    password,
-    version: await getLatestAvailableAgentVersion(kbnClient),
-  });
-
-  await new FleetManager(log).setup();
+  await new FleetManager(kbnClient, log).setup();
 
   const unique = Math.random().toString(32).substring(2, 6);
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, `Default policy (${unique})`);
