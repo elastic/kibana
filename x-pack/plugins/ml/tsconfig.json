@@ -96,6 +96,7 @@
     "@kbn/ml-runtime-field-utils",
     "@kbn/ml-date-utils",
     "@kbn/ml-category-validator",
+    "@kbn/ml-ui-actions",
     "@kbn/deeplinks-ml",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/unified-field-list",

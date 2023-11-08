@@ -5,32 +5,14 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-// import type { Embeddable } from '@kbn/lens-plugin/public';
-// import type { MapEmbeddable } from '@kbn/maps-plugin/public';
-import type {
-  // Action,
-  // createAction,
-  Trigger,
-  UiActionsActionDefinition,
-} from '@kbn/ui-actions-plugin/public';
+import type { Trigger, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import {
+  CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
+  CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
+  type CreateCategorizationADJobContext,
+} from '@kbn/ml-ui-actions';
 import type { MlCoreSetup } from '../plugin';
-// import { isLensEmbeddable, isMapEmbeddable } from '../application/jobs/new_job/job_from_dashboard';
-
-export interface CreateCategorizationADJobContext {
-  field: DataViewField;
-  dataView: DataView;
-  query: QueryDslQueryContainer;
-  timeRange: TimeRange;
-}
-
-export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION = 'createMLADCategorizationJobAction';
-
-export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER =
-  'CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER';
 
 export const createCategorizationADJobTrigger: Trigger = {
   id: CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,

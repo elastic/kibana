@@ -8,12 +8,12 @@
 import { CoreSetup } from '@kbn/core/public';
 import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ml-ui-actions';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
 import { createVisToADJobAction } from './open_vis_in_ml_action';
 import {
   createCategorizationADJobAction,
-  CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   createCategorizationADJobTrigger,
 } from './open_create_categorization_job_action';
 import { MlPluginStart, MlStartDependencies } from '../plugin';

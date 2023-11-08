@@ -11,6 +11,10 @@ import moment from 'moment';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
+  type CreateCategorizationADJobContext,
+} from '@kbn/ml-ui-actions';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -40,13 +44,13 @@ export const CreateCategorizationJobButton: FC<Props> = ({
       return;
     }
 
-    const triggerOptions = {
+    const triggerOptions: CreateCategorizationADJobContext = {
       dataView,
       field,
       query,
       timeRange: { from: moment(earliest).toISOString(), to: moment(latest).toISOString() },
     };
-    uiActions.getTrigger('CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER').exec(triggerOptions);
+    uiActions.getTrigger(CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER).exec(triggerOptions);
   };
 
   if (uiActions === undefined || capabilities.ml.canCreateJob === false) {
