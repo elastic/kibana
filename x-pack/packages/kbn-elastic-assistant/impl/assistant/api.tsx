@@ -64,7 +64,7 @@ export const fetchConnectorExecuteAction = async ({
     ? {
         params: {
           subActionParams: body,
-          subAction: 'stream',
+          subAction: 'invokeStream',
         },
         assistantLangChain,
       }

@@ -166,7 +166,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   }: StreamActionParams): Promise<StreamingResponse> {
     // set model on per request basis
     const model = reqModel ? reqModel : this.model;
-    const formattedBody = formatBedrockBody(body);
+    const formattedBody = JSON.stringify(formatBedrockBody(JSON.parse(body)));
     const signed = this.signRequest(formattedBody, `/model/${model}/invoke-with-response-stream`);
 
     const response = await this.request({
@@ -178,43 +178,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       responseType: 'stream',
     });
 
-    const bytes = response.data;
-    // const buffer = Buffer.from(bytes, 'base64');
-    //
-    // const message = new Readable();
-    // message.push(buffer);
-    // message.push(null);
-    //
-    // console.log('message', message);
     return response.data.pipe(new PassThrough());
-
-    // const stream = new ReadableStream({
-    //   async start(controller) {
-    //     for await (const event of response.data) {
-    //       const chunk = event.chunk;
-    //       if (chunk) {
-    //         const bytes = atob(chunk.bytes);
-    //         const buffer = new Uint8Array(bytes.length);
-    //         for (let i = 0; i < bytes.length; i++) {
-    //           buffer[i] = bytes.charCodeAt(i);
-    //         }
-    //         controller.enqueue(buffer);
-    //       }
-    //     }
-    //
-    //     controller.close();
-    //   },
-    // });
-    // console.log('stream???', stream);
-    //
-    // return stream.pipe(new PassThrough());
-
-    // for await (const chunk of stream) {
-    //   const data = new TextDecoder().decode(chunk);
-    //   const json = JSON.parse(data);
-    //   console.log('$$$$$$$$$$$$$$$', json);
-    // }
-    // // return pipeStreamingResponse(response);
   }
 
   /**
@@ -228,29 +192,16 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     messages,
     model,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const combinedMessages = messages.reduce((acc: string, message) => {
-      const { role, content } = message;
-      // Bedrock only has Assistant and Human, so 'system' and 'user' will be converted to Human
-      const bedrockRole = role === 'assistant' ? '\n\nAssistant:' : '\n\nHuman:';
-      return `${acc}${bedrockRole}${content}`;
-    }, '');
-
-    const req = {
-      // end prompt in "Assistant:" to avoid the model starting its message with "Assistant:"
-      prompt: `${combinedMessages} \n\nAssistant:`,
-      max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
-      temperature: 0.5,
-      // prevent model from talking to itself
-      stop_sequences: ['\n\nHuman:'],
-    };
-
-    const res = await this.runApi({ body: JSON.stringify(req), model });
+    const res = await this.runApi({ body: JSON.stringify(formatBedrockBody({ messages })), model });
     return { message: res.completion.trim() };
   }
 }
 
-const formatBedrockBody = (body: string) => {
-  const { messages } = JSON.parse(body);
+const formatBedrockBody = ({
+  messages,
+}: {
+  messages: Array<{ role: string; content: string }>;
+}) => {
   const combinedMessages = messages.reduce((acc: string, message) => {
     const { role, content } = message;
     // Bedrock only has Assistant and Human, so 'system' and 'user' will be converted to Human
@@ -258,7 +209,7 @@ const formatBedrockBody = (body: string) => {
     return `${acc}${bedrockRole}${content}`;
   }, '');
 
-  const req = {
+  return {
     // end prompt in "Assistant:" to avoid the model starting its message with "Assistant:"
     prompt: `${combinedMessages} \n\nAssistant:`,
     max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
@@ -266,24 +217,4 @@ const formatBedrockBody = (body: string) => {
     // prevent model from talking to itself
     stop_sequences: ['\n\nHuman:'],
   };
-
-  return JSON.stringify(req);
 };
-
-function parseJsonStream(stream) {
-  return new Promise((resolve, reject) => {
-    let data = '';
-
-    stream.on('data', (chunk) => {
-      data += chunk;
-    });
-
-    stream.on('end', () => {
-      resolve(JSON.parse(data));
-    });
-
-    stream.on('error', (error) => {
-      reject(error);
-    });
-  });
-}

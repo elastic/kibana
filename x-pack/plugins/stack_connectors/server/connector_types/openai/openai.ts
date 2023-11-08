@@ -82,6 +82,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       method: 'invokeAI',
       schema: InvokeAIActionParamsSchema,
     });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_STREAM,
+      method: 'invokeStream',
+      schema: InvokeAIActionParamsSchema,
+    });
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
@@ -182,6 +188,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     });
 
     return { available: response.success };
+  }
+
+  public async invokeStream(body: InvokeAIActionParams): Promise<ReadableStream> {
+    const res = await this.streamApi({ body: JSON.stringify(body), stream: true });
+    return res as ReadableStream;
   }
 
   /**
