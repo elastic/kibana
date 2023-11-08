@@ -217,7 +217,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
       (provider) => provider.type === 'basic'
     );
 
-    return rootRequest({
+    const myLogin = rootRequest({
       url: `${baseUrl}/internal/security/login`,
       method: 'POST',
       body: {
@@ -226,6 +226,12 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
         currentURL: '/',
         params: { username, password },
       },
+      retryOnStatusCodeFailure: true,
     });
+
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(3000);
+
+    return myLogin;
   });
 };
