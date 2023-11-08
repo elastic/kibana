@@ -7,7 +7,10 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { DataRequestDescriptor, DataRequestMeta } from '../../../common/descriptor_types';
+import React, { ReactNode } from 'react';
+import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
+import { getApplication } from '../../kibana_services'
+import type { DataRequestDescriptor, DataRequestMeta } from '../../../common/descriptor_types';
 
 export class DataRequest {
   private readonly _descriptor: DataRequestDescriptor;
@@ -52,8 +55,26 @@ export class DataRequest {
     return this._descriptor.dataRequestToken;
   }
 
-  getError(): string | undefined {
-    return this._descriptor.error;
+  renderError(): ReactNode {
+    if (!this._descriptor.error) {
+      return null;
+    }
+
+    const overrideDisplay = getSearchErrorOverrideDisplay({
+      error: this._descriptor.error,
+      application: getApplication(),
+    });
+
+    const body = overrideDisplay?.body
+      ? overrideDisplay.body
+      : (<p>{this._descriptor.error.message}</p>);
+
+    return overrideDisplay?.actions 
+      ? <>
+          {body}
+          {overrideDisplay.actions}
+        </>
+      : body;
   }
 }
 

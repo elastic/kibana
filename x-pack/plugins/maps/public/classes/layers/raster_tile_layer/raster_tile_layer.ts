@@ -99,7 +99,7 @@ export class RasterTileLayer extends AbstractLayer {
       };
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data, {});
     } catch (error) {
-      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
+      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error);
     }
   }
 

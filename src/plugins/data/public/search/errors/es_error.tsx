@@ -48,7 +48,7 @@ export class EsError extends KbnError {
 
   public getActions(application: ApplicationStart) {
     return [
-      <EuiButton color="primary" onClick={this.openInInspector}>
+      <EuiButton key="viewRequestDetails" color="primary" onClick={this.openInInspector} size="s" >
         {i18n.translate('data.esError.viewDetailsButtonLabel', {
           defaultMessage: 'View details',
         })}

@@ -198,12 +198,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         throw new DataRequestAbortError();
       }
 
-      throw new Error(
-        i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
-          defaultMessage: `Elasticsearch search request failed, error: {message}`,
-          values: { message: error.message },
-        })
-      );
+      throw error;
     }
   }
 
