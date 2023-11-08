@@ -39,7 +39,7 @@ interface TableItem {
   category: string;
   count: number;
 }
-const LENS_VISUALIZATION_SIZE = 110;
+const LENS_VISUALIZATION_SIZE = 126;
 const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
 
 export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
@@ -222,13 +222,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
                     }
                   />
                 </div>
-                <EuiBasicTable
-                  responsive={false}
-                  columns={columns}
-                  items={items}
-                  loading={!userRiskData}
-                  compressed
-                />
+                <EuiBasicTable responsive={false} columns={columns} items={items} compressed />
               </div>
             </InspectButtonContainer>
           </EuiFlexItem>
