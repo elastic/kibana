@@ -19,10 +19,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 import * as i18n from './translations';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { getFormattedComments } from '../../utils/helpers';
-import { MAX_COMMENT_LENGTH } from '../constants';
 
 interface ExceptionItemCommentsProps {
   exceptionItemComments?: Comment[];

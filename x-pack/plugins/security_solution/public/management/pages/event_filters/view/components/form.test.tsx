@@ -25,7 +25,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EventFiltersForm } from './form';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { MAX_COMMENT_LENGTH } from '../../../../../detection_engine/rule_exceptions/components/constants';
+import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');

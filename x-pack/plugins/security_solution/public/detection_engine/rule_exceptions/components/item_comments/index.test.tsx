@@ -14,7 +14,7 @@ import { ExceptionItemComments } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { shallow } from 'enzyme';
-import { MAX_COMMENT_LENGTH } from '../constants';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 jest.mock('../../../../common/lib/kibana');
 

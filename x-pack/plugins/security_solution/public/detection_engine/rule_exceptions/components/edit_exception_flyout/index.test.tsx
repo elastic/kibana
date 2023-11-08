@@ -34,7 +34,7 @@ import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import * as i18n from './translations';
-import { MAX_COMMENT_LENGTH } from '../constants';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 const mockTheme = getMockTheme({
   eui: {

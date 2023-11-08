@@ -35,7 +35,7 @@ import {
 import type { AlertData } from '../../utils/types';
 import { useFindRules } from '../../../rule_management/logic/use_find_rules';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
-import { MAX_COMMENT_LENGTH } from '../constants';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
