@@ -111,7 +111,8 @@ export const reportingScreenshotShareProvider = ({
             onClose={onClose}
             theme={theme}
             jobProviderOptions={jobProviderOptions}
-          />)
+          />
+        ),
       },
     };
 

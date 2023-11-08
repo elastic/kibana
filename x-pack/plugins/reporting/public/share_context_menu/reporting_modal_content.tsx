@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiForm,
-  EuiFormRow,
-  EuiRadioGroup,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiForm, EuiFormRow, EuiRadioGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { ToastsSetup } from '@kbn/core-notifications-browser';
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -44,43 +37,41 @@ export interface ReportingModalProps {
 
 export type Props = ReportingModalProps & { intl?: InjectedIntl };
 
-const getJobParams =
-  (
-    apiClient: ReportingAPIClient,
-    opts: JobParamsProviderOptions,
-    type: string,
-  ) => {
-    const {
-      objectType,
-      sharingData: { title, layout, locatorParams },
-    } = opts;
+const getJobParams = (
+  apiClient: ReportingAPIClient,
+  opts: JobParamsProviderOptions,
+  type: string
+) => {
+  const {
+    objectType,
+    sharingData: { title, layout, locatorParams },
+  } = opts;
 
-    if (!['pngV2', 'printablePdfV2', 'printablePdf'].includes(type)) return 
+  if (!['pngV2', 'printablePdfV2', 'printablePdf'].includes(type)) return;
 
-    const baseParams = {
-      objectType,
-      layout,
-      title,
-    };
-
-    if (type === 'printablePdfV2') {
-      // multi locator for PDF V2
-      return { ...baseParams, locatorParams: [locatorParams] } as AppParams;
-    } else if (type === 'pngV2') {
-      // single locator for PNG V2
-      return { ...baseParams, locatorParams } as AppParams;
-    }
-    else {
-      // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-      // Replace hashes with original RISON values.
-      const relativeUrl = opts.shareableUrl.replace(
-        window.location.origin + apiClient.getServerBasePath(),
-        ''
-      );
-      // multi URL for PDF
-      return { ...baseParams, relativeUrls: [relativeUrl] } as AppParams;
-    }
+  const baseParams = {
+    objectType,
+    layout,
+    title,
   };
+
+  if (type === 'printablePdfV2') {
+    // multi locator for PDF V2
+    return { ...baseParams, locatorParams: [locatorParams] } as AppParams;
+  } else if (type === 'pngV2') {
+    // single locator for PNG V2
+    return { ...baseParams, locatorParams } as AppParams;
+  } else {
+    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
+    // Replace hashes with original RISON values.
+    const relativeUrl = opts.shareableUrl.replace(
+      window.location.origin + apiClient.getServerBasePath(),
+      ''
+    );
+    // multi URL for PDF
+    return { ...baseParams, relativeUrls: [relativeUrl] } as AppParams;
+  }
+};
 
 const renderTitle = (
   objectType:
@@ -117,18 +108,17 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const [useCanvasLayout, setCanvasLayout] = useState(false);
   let [absoluteUrl, setAbsoluteUrl] = useState('');
   const mounted = useRef<boolean>();
-  const [objectType,] = useState('dashboard');
-  
+  const [objectType] = useState('dashboard');
 
   const getAbsoluteReportGenerationUrl = (props: ReportingModalProps) => {
-    if (getJobParams(apiClient, jobProviderOptions, selectedRadio) !== undefined ) {
-    const relativePath = props.apiClient.getReportingPublicJobPath(
-      selectedRadio,
-      props.apiClient.getDecoratedJobParams(
-        getJobParams(apiClient, jobProviderOptions, selectedRadio)!
-      )
-    );
-    return url.resolve(window.location.href, relativePath);
+    if (getJobParams(apiClient, jobProviderOptions, selectedRadio) !== undefined) {
+      const relativePath = props.apiClient.getReportingPublicJobPath(
+        selectedRadio,
+        props.apiClient.getDecoratedJobParams(
+          getJobParams(apiClient, jobProviderOptions, selectedRadio)!
+        )
+      );
+      return url.resolve(window.location.href, relativePath);
     }
   };
 
@@ -139,7 +129,6 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       absoluteUrl = getAbsoluteReportGenerationUrl(props)!;
       setAbsoluteUrl(absoluteUrl);
     }
-    
   };
 
   const markAsStale = () => {
@@ -304,7 +293,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   //   }
   //   return null;
   // };
-  
+
   return (
     <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
       <EuiSpacer size="xs" />
