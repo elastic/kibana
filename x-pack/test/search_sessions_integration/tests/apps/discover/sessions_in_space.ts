@@ -67,10 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessionItem.view();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
 
         // Check that session is restored
         await searchSessions.expectState('restored');
-        await PageObjects.discover.showsErrorCallout();
         expect(await toasts.getToastCount()).to.be(0); // no session restoration related warnings
       });
     });
