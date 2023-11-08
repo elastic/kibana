@@ -8,14 +8,14 @@
 import { IndexSettings } from './indices';
 import { Aliases } from './aliases';
 import { Mappings } from './mappings';
-import { DataRetention } from '.';
+import { DataStream, DataRetention } from '.';
 
 export interface ComponentTemplateSerialized {
   template: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
-    lifecycle?: DataRetention;
+    lifecycle?: DataStream['lifecycle'];
   };
   version?: number;
   _meta?: { [key: string]: any };

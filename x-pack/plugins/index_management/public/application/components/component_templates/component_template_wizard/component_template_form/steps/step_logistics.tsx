@@ -145,7 +145,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           />
         </FormRow>
 
-        {/* Name field */}
+        {/* Data retention field */}
         <FormRow
           title={
             <FormattedMessage
