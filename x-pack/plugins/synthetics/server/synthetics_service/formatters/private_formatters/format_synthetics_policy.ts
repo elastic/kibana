@@ -23,6 +23,7 @@ export interface ProcessorFields {
   'monitor.id': string;
   test_run_id: string;
   run_once: boolean;
+  spaceId: string;
 }
 
 export const formatSyntheticsPolicy = (
