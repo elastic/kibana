@@ -223,8 +223,16 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
     }, [onChange, isFormValid, validate, getFormData]);
 
-    const { name, indexPatterns, createDataStream, order, priority, version, dataRetention, allowAutoCreate } =
-      getFieldsMeta(documentationService.getEsDocsBase());
+    const {
+      name,
+      indexPatterns,
+      createDataStream,
+      order,
+      priority,
+      version,
+      dataRetention,
+      allowAutoCreate,
+    } = getFieldsMeta(documentationService.getEsDocsBase());
 
     return (
       <>

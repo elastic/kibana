@@ -198,7 +198,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         form.setInputValue('valueDataRetentionField', String(lifecycle.value));
       });
     }
-    
+
     await act(async () => {
       if (allowAutoCreate) {
         form.toggleEuiSwitch('allowAutoCreateField.input');
