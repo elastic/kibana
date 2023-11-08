@@ -289,7 +289,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
       await queryBar.submitQuery();
-      
+
       await PageObjects.discover.showsErrorCallout();
 
       // now remove the query

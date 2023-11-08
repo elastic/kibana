@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessionItem.view();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
-        
+
         // Check that session is restored
         await searchSessions.expectState('restored');
         await PageObjects.discover.showsErrorCallout();
