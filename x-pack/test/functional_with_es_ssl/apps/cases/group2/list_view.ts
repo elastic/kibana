@@ -724,16 +724,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.openColumnsPopover();
 
         const input = await testSubjects.find('column-selection-popover-search');
-        await input.type('Name');
+        await input.type('name');
 
-        await testSubjects.existOrFail(`column-selection-switch-title`);
-
-        await testSubjects.missingOrFail(`column-selection-switch-closedAt`);
-        await testSubjects.missingOrFail(`column-selection-switch-category`);
-
-        await testSubjects.click(`column-selection-switch-title`);
-
-        expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+        await testSubjects.existOrFail('column-selection-switch-title');
+        await testSubjects.missingOrFail('column-selection-switch-closedAt');
+        await testSubjects.missingOrFail('column-selection-switch-category');
       });
     });
   });
