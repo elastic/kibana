@@ -22,7 +22,7 @@ import {
   createOldOsqueryPath,
   FLEET_AGENT_POLICIES,
   NAV_SEARCH_INPUT_OSQUERY_RESULTS,
-  navigateToWithoutWaitForReact,
+  navigateTo,
   OSQUERY,
 } from '../../tasks/navigation';
 import {
@@ -124,12 +124,13 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('epmList.searchBar').type('osquery');
       cy.getBySel('integration-card:epr:osquery_manager').click();
       cy.getBySel('addIntegrationPolicyButton').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+
       cy.getBySel('agentPolicySelect').within(() => {
         cy.contains(policyName);
       });
-      cy.getBySel('packagePolicyNameInput')
-        .wait(500)
-        .type(`{selectall}{backspace}${integrationName}`);
+      cy.getBySel('packagePolicyNameInput').clear().wait(500);
+      cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
       cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
       cy.getBySel('confirmModalCancelButton').click();
       cy.get(`[title="${integrationName}"]`).should('exist');
@@ -175,7 +176,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
 
-      navigateToWithoutWaitForReact('app/osquery/packs');
+      navigateTo('app/osquery/packs');
       cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
       cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
       cy.getBySel('policyIdsComboBox').type(`${policyName} {downArrow}{enter}`);
@@ -205,7 +206,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       integrationExistsWithinPolicyDetails(integrationName);
 
       // test list of prebuilt queries
-      navigateToWithoutWaitForReact('/app/osquery/saved_queries');
+      navigateTo('/app/osquery/saved_queries');
       cy.get(TABLE_ROWS).should('have.length.above', 5);
     });
   });

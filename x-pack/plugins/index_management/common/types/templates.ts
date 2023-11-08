@@ -24,6 +24,7 @@ export interface TemplateSerialized {
   priority?: number;
   _meta?: { [key: string]: any };
   data_stream?: {};
+  allow_auto_create?: boolean;
 }
 
 /**
@@ -42,6 +43,7 @@ export interface TemplateDeserialized {
   composedOf?: string[]; // Composable template only
   version?: number;
   priority?: number; // Composable template only
+  allowAutoCreate?: boolean;
   order?: number; // Legacy template only
   ilmPolicy?: {
     name: string;
