@@ -24,7 +24,7 @@ const riskScoreRanges = {
   [RiskSeverity.critical]: { start: 90, stop: 100 },
 };
 
-const sortedRiskSeverities = [
+export const sortedRiskSeverities = [
   RiskSeverity.unknown,
   RiskSeverity.low,
   RiskSeverity.moderate,
@@ -68,7 +68,7 @@ export const getRiskScoreMetricAttributes: (
         trendlineMetricAccessor: columnIds[2],
         palette: {
           type: 'palette',
-          name: 'status',
+          name: 'custom',
           params: {
             steps: 3,
             name: 'custom',
@@ -77,6 +77,10 @@ export const getRiskScoreMetricAttributes: (
             rangeMin: 0,
             rangeMax: null,
             progression: 'fixed',
+            colorStops: sortedRiskSeverities.map((riskSeverity) => ({
+              color: RISK_SEVERITY_COLOUR[riskSeverity],
+              stop: riskScoreRanges[riskSeverity].start,
+            })),
             stops: sortedRiskSeverities.map((riskSeverity) => ({
               color: RISK_SEVERITY_COLOUR[riskSeverity],
               stop: riskScoreRanges[riskSeverity].stop,

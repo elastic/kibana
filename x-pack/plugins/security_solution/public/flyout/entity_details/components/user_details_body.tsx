@@ -36,6 +36,8 @@ import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { RiskSummary } from './risk_summary';
+import { ExpandFlyoutButton } from './expand_flyout_button';
+import { useExpandDetailsFlyout } from '../hooks/use_expand_details_flyout';
 
 export const QUERY_ID = 'usersDetailsQuery';
 
@@ -63,6 +65,12 @@ export const UserDetailsBody = ({
   isDraggable,
 }: UserDetailsBodyComponentProps) => {
   const { euiTheme } = useEuiTheme();
+
+  const { data: userRisk } = riskScoreState;
+  const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const { isExpanded, onToggle } = useExpandDetailsFlyout({
+    riskInputs: userRiskData?.user.risk.inputs ?? [],
+  });
 
   const lastSeenDate = useMemo(
     () =>
@@ -134,6 +142,17 @@ export const UserDetailsBody = ({
           <EuiPanel hasShadow={false}>
             <RiskSummary riskScoreData={riskScoreState} />
           </EuiPanel>
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <ExpandFlyoutButton
+                isExpanded={isExpanded}
+                onToggle={onToggle}
+                collapsedText={i18n.SHOW_ALL_RISK_INPUTS}
+                expandedText={i18n.HIDE_ALL_RISK_INPUTS}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
           <EuiHorizontalRule margin="xs" />
         </>
       )}
@@ -156,3 +175,5 @@ export const UserDetailsBody = ({
     </>
   );
 };
+
+// TODO

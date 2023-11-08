@@ -60,6 +60,7 @@ export const UserDetailsPanel = ({
 
   const { inspect, refetch, loading } = riskScoreState;
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
+
   const observedUser = useObservedUser(userName);
   const managedUser = useManagedUser(userName);
 

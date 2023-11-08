@@ -142,12 +142,11 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiPanel hasShadow={false} hasBorder={true}>
-        <EuiFlexGroup gutterSize="m" direction="row">
+        <EuiFlexGroup gutterSize="m" direction="column">
           <EuiFlexItem grow={false}>
             <div
               // Improve Visualization loading state by predefining the size
               css={css`
-                width: ${LENS_VISUALIZATION_SIZE}px;
                 height: ${LENS_VISUALIZATION_SIZE}px;
               `}
             >
@@ -157,7 +156,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
                   lensAttributes={lensAttributes}
                   id={`RiskSummary-risk_score_metric`}
                   timerange={LAST_30_DAYS}
-                  width={LENS_VISUALIZATION_SIZE}
+                  width={'100%'}
                   height={LENS_VISUALIZATION_SIZE}
                   inspectTitle={
                     <FormattedMessage
@@ -198,28 +197,6 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
                 <EuiBasicTable columns={columns} items={items} loading={!userRiskData} compressed />
               </div>
             </InspectButtonContainer>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <ExpandFlyoutButton
-              isExpanded={isExpanded}
-              onToggle={onToggle}
-              collapsedText={i18n.translate(
-                'xpack.securitySolution.flyout.right.entityDetails.showAllRiskInputs',
-                {
-                  defaultMessage: 'Show all risk inputs',
-                }
-              )}
-              expandedText={i18n.translate(
-                'xpack.securitySolution.flyout.right.header.hideAllRiskInputs',
-                {
-                  defaultMessage: 'Hide all risk inputs',
-                }
-              )}
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
