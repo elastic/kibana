@@ -231,10 +231,10 @@ export function SavedQueryManagementList({
         setCurrentPageQueries(
           currentPageQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQueryId)
         );
+        setSelectedSavedQuery(undefined);
 
         if (loadedSavedQuery && loadedSavedQuery.id === savedQueryId) {
           onClearSavedQuery();
-          setSelectedSavedQuery(undefined);
         }
 
         await savedQueryService.deleteSavedQuery(savedQueryId);
