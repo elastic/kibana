@@ -9,7 +9,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import * as fs from 'fs';
 import Url from 'url';
-import { createNewSAMLSession } from './saml_auth';
+import { load as loadYaml } from 'js-yaml';
+import { createNewSAMLSession, createSessionWithFakeSAMLAuth } from './saml_auth';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export interface User {
@@ -29,12 +30,11 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const isServerless = config.get('serverless');
   const isCloud = !!process.env.TEST_CLOUD;
-  // const cloudEnv = process.env.TEST_CLOUD_ENV ?? 'qa';
   const cloudRoleUsersFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
-  // const roles = Object.keys(
-  //   loadYaml(fs.readFileSync('packages/kbn-es/src/serverless_resources/roles.yml', 'utf8'))
-  // );
-  let users: { [key: string]: User };
+  const roles = Object.keys(
+    loadYaml(fs.readFileSync('packages/kbn-es/src/serverless_resources/roles.yml', 'utf8'))
+  );
+  let users: Map<string, User> = new Map();
 
   if (!isServerless) {
     throw new Error(`'svlUserManager' service can't be used in non-serverless FTR context`);
@@ -45,6 +45,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       `Roles testing is only available on Cloud at the moment.
     We are working to enable it for the local development`
     );
+    users.set('viewer', { username: 'elastic_viewer', password: 'changeme' });
   } else {
     // QAF should prepare the file on MKI pipelines
     if (!fs.existsSync(cloudRoleUsersFilePath)) {
@@ -57,7 +58,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     if (data.length === 0) {
       throw new Error(`'${cloudRoleUsersFilePath}' is empty: no roles are defined`);
     }
-    users = JSON.parse(data);
+    users = new Map(Object.entries(JSON.parse(data)));
   }
 
   // to be re-used within FTr config run
@@ -73,36 +74,37 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
         return sessionCache.get(role)!;
       }
 
-      log.debug(`new SAML authentication with ${role} role`);
-      const { username, password } = this.getUserByRole(role);
-      const kbnVersion = await kibanaServer.version.get();
-      const kbnHost = Url.format({
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-      });
+      let session: Session;
 
-      const session = await createNewSAMLSession({
-        username,
-        password,
-        cloudEnv: 'qa',
-        kbnHost,
-        kbnVersion,
-      });
+      if (isCloud) {
+        log.debug(`new SAML authentication with ${role} role`);
+        const { username, password } = this.getUserByRole(role);
+        const kbnVersion = await kibanaServer.version.get();
+        const kbnHost = Url.format({
+          protocol: config.get('servers.kibana.protocol'),
+          hostname: config.get('servers.kibana.hostname'),
+        });
+
+        session = await createNewSAMLSession({
+          username,
+          password,
+          kbnHost,
+          kbnVersion,
+        });
+      } else {
+        log.debug(`new fake SAML authentication with ${role} role`);
+        session = await createSessionWithFakeSAMLAuth();
+      }
 
       sessionCache.set(role, session);
       return session;
     },
 
     getUserByRole(role: string) {
-      // WIP
-      if (!isCloud) {
-        throw new Error('Roles are not defined for local run');
-      }
-      const user = users[role];
-      if (user) {
-        return user;
+      if (users.has(role)) {
+        return users.get(role)!;
       } else {
-        throw new Error(`'${role}' role is not defined in '${cloudRoleUsersFilePath}'`);
+        throw new Error(`User with '${role}' role is not defined`);
       }
     },
   };

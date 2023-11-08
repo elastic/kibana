@@ -12,7 +12,6 @@ import * as cheerio from 'cheerio';
 export interface SessionParams {
   username: string;
   password: string;
-  cloudEnv: CloudEnv;
   kbnHost: string;
   kbnVersion: string;
 }
@@ -25,20 +24,37 @@ const envHosts: { [key: string]: string } = {
   production: 'api.elastic-cloud.com',
 };
 
-const getSidCookie = (cookies: string[] | undefined) => {
+const getSidCookie = (cookies: string[]) => {
   return cookies?.[0].toString().split(';')[0].split('sid=')[1] ?? '';
 };
 
-const getHostUrl = (env: CloudEnv, pathname?: string) => {
+const getCloudHostName = () => {
+  const env = process.env.TEST_CLOUD_ENV;
+  if (!env) {
+    throw new Error(
+      'SAML Authentication requires TEST_CLOUD_ENV env variable to be set: qa, staging or production'
+    );
+  }
+
+  const host = envHosts[env.toLowerCase()];
+
+  if (host) {
+    return host;
+  } else {
+    throw new Error(`Unsupported Cloud environment: '${env}'`);
+  }
+};
+
+const getCloudUrl = (hostname: string, pathname: string) => {
   return Url.format({
     protocol: 'https',
-    hostname: envHosts[env],
+    hostname,
     pathname,
   });
 };
 
-const createCloudSession = async (env: CloudEnv, email: string, password: string) => {
-  const cloudLoginUrl = getHostUrl(env, '/api/v1/users/_login');
+const createCloudSession = async (hostname: string, email: string, password: string) => {
+  const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/users/_login');
   const sessionResponse: AxiosResponse = await axios.request({
     url: cloudLoginUrl,
     method: 'post',
@@ -73,7 +89,7 @@ const createSAMLRequest = async (kbnUrl: string, kbnVersion: string) => {
     validateStatus: () => true,
     maxRedirects: 0,
   });
-  const sid = getSidCookie(samlResponse.headers['set-cookie']);
+  const sid = getSidCookie(samlResponse.headers['set-cookie']!);
   return { location: samlResponse.data.location, sid };
 };
 
@@ -109,14 +125,20 @@ const finishSAMLHandshake = async (
     maxRedirects: 0,
   });
 
-  return getSidCookie(authResponse.headers['set-cookie']);
+  return getSidCookie(authResponse.headers['set-cookie']!);
 };
 
 export const createNewSAMLSession = async (params: SessionParams) => {
-  const { username, password, cloudEnv, kbnHost, kbnVersion } = params;
-  const ecSession = await createCloudSession(cloudEnv, username, password);
+  const { username, password, kbnHost, kbnVersion } = params;
+  const hostName = getCloudHostName();
+  const ecSession = await createCloudSession(hostName, username, password);
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion);
   const samlResponse = await createSAMLResponse(location, ecSession);
   const cookie = await finishSAMLHandshake(kbnHost, samlResponse, sid);
   return { username, cookie };
+};
+
+export const createSessionWithFakeSAMLAuth = async () => {
+  // WIP: waiting Kibana-security Team to add capability
+  return { username: 'elastic', cookie: 'test' };
 };
