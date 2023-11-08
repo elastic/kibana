@@ -17,7 +17,7 @@ import {
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
 import { createRule } from '../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
   expandFirstAlert,
@@ -36,9 +36,15 @@ import { enableRiskEngine } from '../../tasks/entity_analytics';
 const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169154
-describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
+describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
+    cleanKibana();
+  });
+
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    cy.task('esArchiverUnload', 'risk_hosts');
+    cy.task('esArchiverUnload', 'risk_hosts_updated');
     cy.task('esArchiverUnload', 'risk_scores_new');
     cy.task('esArchiverUnload', 'risk_scores_new_updated');
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });
@@ -83,9 +89,9 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
         cy.get(ENRICHED_DATA_ROW).contains('Critical').should('not.exist');
         cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL).should('not.exist');
 
-        closeAlertFlyout();
         cy.task('esArchiverUnload', 'risk_hosts');
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts_updated' });
+        closeAlertFlyout();
         expandFirstAlert();
         cy.get(ENRICHED_DATA_ROW).contains('Critical');
         cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL);
