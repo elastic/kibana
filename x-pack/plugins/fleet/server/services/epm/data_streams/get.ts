@@ -17,8 +17,9 @@ export async function getDataStreams(options: {
   datasetQuery?: string;
   sortOrder: 'asc' | 'desc';
   uncategorisedOnly: boolean;
+  extendedResponse?: boolean;
 }) {
-  const { esClient, type, datasetQuery, uncategorisedOnly, sortOrder } = options;
+  const { esClient, type, datasetQuery, uncategorisedOnly, sortOrder, extendedResponse } = options;
 
   const allDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: type ? type : '*',
@@ -32,7 +33,17 @@ export async function getDataStreams(options: {
     : allDataStreams;
 
   const mappedDataStreams = filteredDataStreams.map((dataStream) => {
-    return { name: dataStream.name };
+    const dataStreamExtendedInfo = {
+      package: {
+        name: dataStream._meta?.package?.name,
+        managed_by: dataStream._meta?.managed_by,
+      },
+    };
+
+    return {
+      name: dataStream.name,
+      ...(extendedResponse ? dataStreamExtendedInfo : {}),
+    };
   });
 
   const sortedDataStreams = mappedDataStreams.sort((a, b) => {

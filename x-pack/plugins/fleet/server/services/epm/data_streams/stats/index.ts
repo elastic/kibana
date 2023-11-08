@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { getDataStreams } from './get';
-export * from './stats';
+export { getDataStreamsStats } from './get';

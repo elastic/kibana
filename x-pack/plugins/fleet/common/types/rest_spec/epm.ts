@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { ByteSize, SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   AssetReference,
@@ -71,6 +71,20 @@ export interface GetEpmDataStreamsResponse {
     name: string;
   }>;
 }
+
+export interface GetEpmDataStreamsStatsResponse {
+  items: Array<{
+    name: string;
+    size?: ByteSize;
+    size_bytes?: number;
+    last_activity?: number;
+    package?: {
+      name?: string;
+      managed_by?: string;
+    };
+  }>;
+}
+
 export interface GetLimitedPackagesResponse {
   items: string[];
   // deprecated in 8.0

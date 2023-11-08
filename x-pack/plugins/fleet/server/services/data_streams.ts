@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { IndicesDataStream, IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStream,
+  IndicesDataStreamsStatsDataStreamsStatsItem,
+  IndicesIndexTemplate,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*,profiling-*';
@@ -45,6 +49,28 @@ class DataStreamService {
       });
 
       return dataStreamsInfo;
+    } catch (e) {
+      if (e.statusCode === 404) {
+        return [];
+      }
+      throw e;
+    }
+  }
+
+  public async getMatchingDataStreamsStats(
+    esClient: ElasticsearchClient,
+    dataStreamParts: {
+      dataset: string;
+      type: string;
+    }
+  ): Promise<IndicesDataStreamsStatsDataStreamsStatsItem[]> {
+    try {
+      const { data_streams: dataStreamsStats } = await esClient.indices.dataStreamsStats({
+        name: this.streamPartsToIndexPattern(dataStreamParts),
+        human: true,
+      });
+
+      return dataStreamsStats;
     } catch (e) {
       if (e.statusCode === 404) {
         return [];
