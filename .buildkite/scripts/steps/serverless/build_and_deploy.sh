@@ -7,8 +7,8 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/docker_image.sh
 
 PROJECT_TYPE=""
-is_pr_with_label "ci:project-deploy-es" && PROJECT_TYPE="elasticsearch"
-is_pr_with_label "ci:project-deploy-oblt" && PROJECT_TYPE="observability"
+is_pr_with_label "ci:project-deploy-elasticsearch" && PROJECT_TYPE="elasticsearch"
+is_pr_with_label "ci:project-deploy-observability" && PROJECT_TYPE="observability"
 is_pr_with_label "ci:project-deploy-security" && PROJECT_TYPE="security"
 if [ -z "${PROJECT_TYPE}" ]; then
   echo "Mising project type"

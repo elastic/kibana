@@ -6,13 +6,9 @@
  */
 
 import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
-import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { assertUnreachable } from '../../../../utility_types';
 import type { RuleExecutionStatus, RuleExecutionStatusOrder } from './execution_status.gen';
 import { RuleExecutionStatusEnum } from './execution_status.gen';
-
-// TODO remove after the migration to Zod is done
-export const TRuleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatusEnum);
 
 export const ruleExecutionStatusToNumber = (
   status: RuleExecutionStatus
