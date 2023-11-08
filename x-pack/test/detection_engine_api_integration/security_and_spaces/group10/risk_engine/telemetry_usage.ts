@@ -12,12 +12,9 @@ import { deleteAllRules, deleteAllAlerts, getRiskEngineStats } from '../../../ut
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
-  deleteRiskEngineTask,
-  deleteRiskScoreIndices,
   waitForRiskScoresToBePresent,
   riskEngineRouteHelpersFactory,
-  cleanRiskEngineConfig,
-  clearTransforms,
+  cleanRiskEngine,
 } from './utils';
 import { dataGeneratorFactory } from '../../../utils/data_generator';
 
@@ -49,12 +46,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await cleanRiskEngineConfig({ kibanaServer });
-      await deleteRiskEngineTask({ es, log });
-      await deleteRiskScoreIndices({ log, es });
+      await cleanRiskEngine({ kibanaServer, es, log });
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
-      await clearTransforms({ es, log });
     });
 
     describe('Risk engine not enabled', () => {
@@ -67,7 +61,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168429
     describe('Risk engine enabled', () => {
       let hostId: string;
       let userId: string;
@@ -105,12 +98,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await cleanRiskEngineConfig({ kibanaServer });
-        await deleteRiskEngineTask({ es, log });
-        await deleteRiskScoreIndices({ log, es });
+        await cleanRiskEngine({ kibanaServer, es, log });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await clearTransforms({ es, log });
       });
 
       it('should return riskEngineMetrics with expected values', async () => {
