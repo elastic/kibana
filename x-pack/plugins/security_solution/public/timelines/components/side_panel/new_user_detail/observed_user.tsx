@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiSpacer, EuiTitle, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
@@ -33,10 +33,7 @@ export const ObservedUser = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const observedItems = useObservedUserItems(observedUser);
-  const [isObservedDataToggleOpen, setObservedDataToggleOpen] = useState(false);
-  const onToggleObservedData = useCallback(() => {
-    setObservedDataToggleOpen((isOpen) => !isOpen);
-  }, [setObservedDataToggleOpen]);
+
   const observedUserTableColumns = useMemo(
     () => getObservedUserTableColumns(contextID, scopeId, isDraggable),
     [contextID, scopeId, isDraggable]
@@ -47,10 +44,10 @@ export const ObservedUser = ({
     <>
       <InspectButtonContainer>
         <EuiAccordion
+          initialIsOpen={false}
           isLoading={observedUser.isLoading}
           id="observedUser-data"
           data-test-subj="observedUser-data"
-          forceState={isObservedDataToggleOpen ? 'open' : 'closed'}
           buttonProps={{
             'data-test-subj': 'observedUser-accordion-button',
             css: css`
@@ -62,7 +59,6 @@ export const ObservedUser = ({
               <h3>{i18n.OBSERVED_DATA_TITLE}</h3>
             </EuiTitle>
           }
-          onToggle={onToggleObservedData}
           extraAction={
             <>
               <span

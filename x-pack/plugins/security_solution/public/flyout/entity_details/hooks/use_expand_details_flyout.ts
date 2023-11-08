@@ -14,22 +14,22 @@ export const useExpandDetailsFlyout = ({ riskInputs }: { riskInputs: RiskInputs 
   const { closeLeftPanel, openLeftPanel, panels } = useExpandableFlyoutContext();
   const isExpanded: boolean = panels.left != null;
 
-  const onToggle = useCallback(() => {
-    if (riskInputs.length === 0) {
-      return;
-    }
+  const openPanel = useCallback(() => {
+    openLeftPanel({
+      id: RiskInputsPanelKey,
+      params: {
+        riskInputs,
+      },
+    });
+  }, [openLeftPanel, riskInputs]);
 
+  const togglePanel = useCallback(() => {
     if (isExpanded) {
       closeLeftPanel();
     } else {
-      openLeftPanel({
-        id: RiskInputsPanelKey,
-        params: {
-          riskInputs,
-        },
-      });
+      openPanel();
     }
-  }, [closeLeftPanel, isExpanded, openLeftPanel, riskInputs]);
+  }, [closeLeftPanel, isExpanded, openPanel]);
 
-  return { isExpanded, onToggle };
+  return { isExpanded, togglePanel, closePanel: closeLeftPanel, openPanel };
 };

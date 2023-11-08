@@ -57,7 +57,7 @@ export const UserDetailsContent = ({
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   const riskInputs = userRiskData?.user.risk.inputs ?? [];
 
-  const { isExpanded, onToggle } = useExpandDetailsFlyout({ riskInputs });
+  const { isExpanded, togglePanel } = useExpandDetailsFlyout({ riskInputs });
 
   if (riskScoreState.loading || observedUser.isLoading || managedUser.isLoading) {
     return <FlyoutLoading />;
@@ -79,7 +79,7 @@ export const UserDetailsContent = ({
         {riskInputs.length > 0 && (
           <ExpandFlyoutButton
             isExpanded={isExpanded}
-            onToggle={onToggle}
+            onToggle={togglePanel}
             expandedText={i18n.translate(
               'xpack.securitySolution.flyout.entityDetails.header.expandDetailButtonLabel',
               {

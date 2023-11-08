@@ -17,7 +17,7 @@ import {
   useEuiFontSize,
 } from '@elastic/eui';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
@@ -45,10 +45,6 @@ export const ManagedUser = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const managedItems = useManagedUserItems(managedUser.details);
-  const [isManagedDataToggleOpen, setManagedDataToggleOpen] = useState(false);
-  const onToggleManagedData = useCallback(() => {
-    setManagedDataToggleOpen((isOpen) => !isOpen);
-  }, [setManagedDataToggleOpen]);
   const managedUserTableColumns = useMemo(
     () => getManagedUserTableColumns(contextID, scopeId, isDraggable),
     [isDraggable, contextID, scopeId]
@@ -67,9 +63,9 @@ export const ManagedUser = ({
       <InspectButtonContainer>
         <EuiAccordion
           isLoading={managedUser.isLoading}
+          initialIsOpen={false}
           id={'managedUser-data'}
           data-test-subj="managedUser-data"
-          forceState={isManagedDataToggleOpen ? 'open' : 'closed'}
           buttonProps={{
             'data-test-subj': 'managedUser-accordion-button',
             css: css`
@@ -81,7 +77,6 @@ export const ManagedUser = ({
               <h5>{i18n.MANAGED_DATA_TITLE}</h5>
             </EuiTitle>
           }
-          onToggle={onToggleManagedData}
           extraAction={
             <>
               <span

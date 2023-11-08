@@ -8,15 +8,15 @@
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  useEuiTheme,
+  EuiAccordion,
   EuiTitle,
   EuiSpacer,
-  EuiPanel,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiFontSize,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -27,9 +27,9 @@ import { RiskScoreEntity } from '../../../../common/risk_engine';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getRiskScoreMetricAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_metric';
-import { ExpandFlyoutButton } from './expand_flyout_button';
 import { useExpandDetailsFlyout } from '../hooks/use_expand_details_flyout';
 import { USER_DETAILS_RISK_SCORE_QUERY_ID } from '../user_details';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;
@@ -45,6 +45,10 @@ const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
 export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
   const { data: userRisk } = riskScoreData;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+  const { euiTheme } = useEuiTheme();
+  const { openPanel } = useExpandDetailsFlyout({
+    riskInputs: userRiskData?.user.risk.inputs ?? [],
+  });
 
   const lensAttributes = useMemo(() => {
     return getRiskScoreMetricAttributes({
@@ -86,10 +90,6 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
     []
   );
 
-  const { isExpanded, onToggle } = useExpandDetailsFlyout({
-    riskInputs: userRiskData?.user.risk.inputs ?? [],
-  });
-
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
   const items: TableItem[] = useMemo(
@@ -103,45 +103,73 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
   );
 
   return (
-    <>
-      <EuiFlexGroup direction="row" alignItems="baseline" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.title"
-                defaultMessage="Risk summary"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <span
-            css={css`
-              font-size: ${xsFontSize};
-            `}
-          >
-            {userRiskData && (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.riskUpdatedTime"
-                defaultMessage="Updated {time}"
-                values={{
-                  time: (
-                    <FormattedRelativePreferenceDate
-                      value={userRiskData['@timestamp']}
-                      dateFormat="MMM D, YYYY"
-                      relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
-                    />
-                  ),
-                }}
-              />
-            )}
-          </span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiAccordion
+      initialIsOpen
+      id={'risk_summary'}
+      buttonProps={{
+        css: css`
+          color: ${euiTheme.colors.primary};
+        `,
+      }}
+      buttonContent={
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.title"
+              defaultMessage="Risk summary"
+            />
+          </h3>
+        </EuiTitle>
+      }
+      extraAction={
+        <span
+          css={css`
+            font-size: ${xsFontSize};
+          `}
+        >
+          {userRiskData && (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.riskUpdatedTime"
+              defaultMessage="Updated {time}"
+              values={{
+                time: (
+                  <FormattedRelativePreferenceDate
+                    value={userRiskData['@timestamp']}
+                    dateFormat="MMM D, YYYY"
+                    relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
+                  />
+                ),
+              }}
+            />
+          )}
+        </span>
+      }
+    >
       <EuiSpacer size="m" />
-      <EuiPanel hasShadow={false} hasBorder={true}>
+
+      <ExpandablePanel
+        header={{
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.riskInputs"
+              defaultMessage="Risk inputs"
+            />
+          ),
+          link: {
+            callback: openPanel,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
+                defaultMessage="Show all risk inputs"
+              />
+            ),
+          },
+          iconType: 'arrowStart',
+        }}
+        expand={{
+          expandable: false,
+        }}
+      >
         <EuiFlexGroup gutterSize="m" direction="column">
           <EuiFlexItem grow={false}>
             <div
@@ -194,13 +222,20 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
                     }
                   />
                 </div>
-                <EuiBasicTable columns={columns} items={items} loading={!userRiskData} compressed />
+                <EuiBasicTable
+                  responsive={false}
+                  columns={columns}
+                  items={items}
+                  loading={!userRiskData}
+                  compressed
+                />
               </div>
             </InspectButtonContainer>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
-    </>
+      </ExpandablePanel>
+      <EuiSpacer size="s" />
+    </EuiAccordion>
   );
 });
 RiskSummary.displayName = 'RiskSummary';

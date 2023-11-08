@@ -24,17 +24,3 @@ export const MANAGED_BADGE = i18n.translate(
 export const USER = i18n.translate('xpack.securitySolution.flyout.entityDetails.userLabel', {
   defaultMessage: 'User',
 });
-
-export const SHOW_ALL_RISK_INPUTS = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.showAllRiskInputs',
-  {
-    defaultMessage: 'Show all risk inputs',
-  }
-);
-
-export const HIDE_ALL_RISK_INPUTS = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.hideAllRiskInputs',
-  {
-    defaultMessage: 'Hide all risk inputs',
-  }
-);
