@@ -132,6 +132,7 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
           step={step}
           setStep={handleSetStep}
           isDetailsStepValid={pipelineNameError === undefined}
+          isConfigureProcessorStepValid={hasUnsavedChanges === false}
           hasProcessorStep={false}
         />
         <EuiSpacer size="m" />
