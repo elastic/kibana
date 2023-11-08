@@ -15,6 +15,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   const deployment = getService('deployment');
   const log = getService('log');
   const browser = getService('browser');
+  const svlUserManager = getService('svlUserManager');
 
   const delay = (ms: number) =>
     new Promise((resolve) => {
@@ -22,20 +23,19 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     });
 
   return {
-    async loginWithRole(roleName: string) {
-      log.debug(`Logging with cookie for '${roleName}' role`);
-      // get the Cookie using svlRoleManager
-      // await svlRoleManager.getCookieByRole(roleName);
-      await browser.setCookie('sid', '');
+    async loginWithRole(role: string) {
+      log.debug(`Logging with cookie for '${role}' role`);
+      const session = await svlUserManager.getSessionByRole(role);
+      await browser.get(deployment.getHostPort() + '/bootstrap.js');
+      await browser.setCookie('sid', session.cookie);
       await browser.get(deployment.getHostPort());
       // ensure welcome screen won't be shown. This is relevant for environments which don't allow
       // to use the yml setting, e.g. cloud
       await browser.setLocalStorageItem('home:welcome:show', 'false');
       if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
         log.debug('userMenuButton is found, logged in passed');
-        return true;
       } else {
-        throw new Error(`Failed to login with cookie for '${roleName}' role`);
+        throw new Error(`Failed to login with cookie for '${role}' role`);
       }
     },
 
