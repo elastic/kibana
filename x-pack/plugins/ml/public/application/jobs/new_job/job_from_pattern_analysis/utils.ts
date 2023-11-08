@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 import { ML_PAGES } from '../../../../locator';
 import type { CategorizationType } from './quick_create_job';

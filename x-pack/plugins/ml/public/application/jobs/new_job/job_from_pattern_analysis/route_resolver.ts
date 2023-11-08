@@ -9,9 +9,9 @@ import rison from '@kbn/rison';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import {
-  CategorizationType,
+  type CategorizationType,
   QuickCategorizationJobCreator,
   CATEGORIZATION_TYPE,
 } from './quick_create_job';

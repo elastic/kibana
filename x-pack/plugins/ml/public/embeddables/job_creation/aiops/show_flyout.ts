@@ -12,8 +12,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TimeRange } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TimeRange } from '@kbn/es-query';
 import { createFlyout } from '../common/create_flyout_temp';
 import { CreateCategorizationJobFlyout } from './flyout';
 

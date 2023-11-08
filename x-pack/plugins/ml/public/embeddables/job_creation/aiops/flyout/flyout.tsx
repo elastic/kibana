@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 
 // import { Layer } from './layer';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TimeRange } from '@kbn/es-query';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TimeRange } from '@kbn/es-query';
 // import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 // import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';
 // import { useMlFromLensKibanaContext } from '../../common/context';

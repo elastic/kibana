@@ -12,13 +12,13 @@ import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MLCATEGORY, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CREATED_BY_LABEL, DEFAULT_BUCKET_SPAN } from '../../../../../common/constants/new_job';
-import { CreateState, QuickJobCreatorBase } from '../job_from_dashboard/quick_create_job_base';
-import { MlApiServices } from '../../../services/ml_api_service';
+import { type CreateState, QuickJobCreatorBase } from '../job_from_dashboard/quick_create_job_base';
+import type { MlApiServices } from '../../../services/ml_api_service';
 import { createEmptyDatafeed, createEmptyJob } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
-import { JobCreatorType } from '../common/job_creator';
+import type { JobCreatorType } from '../common/job_creator';
 
 // export enum CATEGORIZATION_TYPE {
 //   COUNT,

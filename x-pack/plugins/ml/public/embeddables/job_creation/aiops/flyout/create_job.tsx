@@ -21,21 +21,21 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 // import type { Embeddable } from '@kbn/lens-plugin/public';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { redirectToADJobWizards } from '../../../../application/jobs/new_job/job_from_pattern_analysis/utils';
 import { createFieldOptions } from '../../../../application/jobs/new_job/common/job_creator/util/general';
 import { NewJobCapsService } from '../../../../application/services/new_job_capabilities/new_job_capabilities_service';
 import {
-  CategorizationType,
+  type CategorizationType,
   CATEGORIZATION_TYPE,
   QuickCategorizationJobCreator,
 } from '../../../../application/jobs/new_job/job_from_pattern_analysis';
 // import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { useMlFromLensKibanaContext } from '../../common/context';
-import { JobDetails, CreateADJobParams } from '../../common/job_details';
+import { JobDetails, type CreateADJobParams } from '../../common/job_details';
 
 interface Props {
   dataView: DataView;

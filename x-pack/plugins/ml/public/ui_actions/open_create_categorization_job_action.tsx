@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 // import type { Embeddable } from '@kbn/lens-plugin/public';
 // import type { MapEmbeddable } from '@kbn/maps-plugin/public';
-import {
+import type {
   // Action,
   // createAction,
   Trigger,
