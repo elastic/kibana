@@ -260,48 +260,4 @@ describe('task state validation', () => {
       );
     });
   });
-
-  describe('allow_reading_invalid_state: false', () => {
-    const taskIdsToRemove: string[] = [];
-    let esServer: TestElasticsearchUtils;
-    let kibanaServer: TestKibanaUtils;
-    let taskManagerPlugin: TaskManagerStartContract;
-
-    beforeAll(async () => {
-      const setupResult = await setupTestServers({
-        xpack: {
-          task_manager: {
-            allow_reading_invalid_state: false,
-          },
-        },
-      });
-      esServer = setupResult.esServer;
-      kibanaServer = setupResult.kibanaServer;
-
-      expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
-      taskManagerPlugin = taskManagerStartSpy.mock.results[0].value;
-
-      expect(TaskPollingLifecycleMock).toHaveBeenCalledTimes(1);
-    });
-
-    afterAll(async () => {
-      if (kibanaServer) {
-        await kibanaServer.stop();
-      }
-      if (esServer) {
-        await esServer.stop();
-      }
-    });
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    afterEach(async () => {
-      while (taskIdsToRemove.length > 0) {
-        const id = taskIdsToRemove.pop();
-        await taskManagerPlugin.removeIfExists(id!);
-      }
-    });
-  });
 });
