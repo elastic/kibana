@@ -14,11 +14,13 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { orderBy } from 'lodash';
+import { useDataViewId } from '../../../hooks/use_data_view_id';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { asBigNumber, asInteger } from '../../../../common/utils/formatters';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../common/data_view_constants';
 import type { ApmEvent } from '../../../../server/routes/diagnostics/bundle/get_apm_events';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -27,6 +29,8 @@ import { SearchBar } from '../../shared/search_bar/search_bar';
 export function DiagnosticsApmDocuments() {
   const { diagnosticsBundle, isImported } = useDiagnosticsContext();
   const { discover } = useKibana<ApmPluginStartDeps>().services;
+  const dataViewId = useDataViewId();
+
   const [sortField, setSortField] = useState<keyof ApmEvent>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const {
@@ -103,7 +107,7 @@ export function DiagnosticsApmDocuments() {
                 language: 'kuery',
                 query: item.kuery,
               },
-              dataViewId: APM_STATIC_DATA_VIEW_ID,
+              dataViewId,
               timeRange:
                 rangeTo && rangeFrom
                   ? {
@@ -123,13 +127,32 @@ export function DiagnosticsApmDocuments() {
       {isImported && diagnosticsBundle ? (
         <>
           <EuiBadge>
-            From: {new Date(diagnosticsBundle.params.start).toISOString()}
+            {i18n.translate(
+              'xpack.apm.diagnosticsApmDocuments.from:BadgeLabel',
+              { defaultMessage: 'From:' }
+            )}
+            {new Date(diagnosticsBundle.params.start).toISOString()}
           </EuiBadge>
           <EuiBadge>
-            To: {new Date(diagnosticsBundle.params.end).toISOString()}
+            <FormattedMessage
+              id="xpack.apm.diagnosticsApmDocuments.to:BadgeLabel"
+              defaultMessage="To:"
+            />
+            {new Date(diagnosticsBundle.params.end).toISOString()}
           </EuiBadge>
           <EuiBadge>
-            Filter: {diagnosticsBundle?.params.kuery ?? <em>Empty</em>}
+            {i18n.translate(
+              'xpack.apm.diagnosticsApmDocuments.filter:BadgeLabel',
+              { defaultMessage: 'Filter:' }
+            )}
+            {diagnosticsBundle?.params.kuery ?? (
+              <em>
+                {i18n.translate(
+                  'xpack.apm.diagnosticsApmDocuments.em.emptyLabel',
+                  { defaultMessage: 'Empty' }
+                )}
+              </em>
+            )}
           </EuiBadge>
           <EuiSpacer />
         </>
@@ -169,7 +192,13 @@ function IntervalDocCount({
   };
 }) {
   if (interval === undefined) {
-    return <>-</>;
+    return (
+      <>
+        {i18n.translate('xpack.apm.intervalDocCount.-Label', {
+          defaultMessage: '-',
+        })}
+      </>
+    );
   }
 
   return (
@@ -183,7 +212,13 @@ function IntervalDocCount({
         <EuiText
           css={{ fontStyle: 'italic', fontSize: '80%', display: 'inline' }}
         >
-          ({asBigNumber(interval.eventDocCount)} events)
+          {i18n.translate('xpack.apm.intervalDocCount.TextLabel', {
+            defaultMessage: '(',
+          })}
+          {asBigNumber(interval.eventDocCount)}{' '}
+          {i18n.translate('xpack.apm.intervalDocCount.eventsTextLabel', {
+            defaultMessage: 'events)',
+          })}
         </EuiText>
       </div>
     </EuiToolTip>

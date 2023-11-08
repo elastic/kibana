@@ -6,23 +6,23 @@
  */
 
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { getApmDataViewTitle } from './get_apm_data_view_title';
+import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
 
-describe('getApmDataViewTitle', () => {
-  it('returns a data view title by combining existing indicies', () => {
-    const title = getApmDataViewTitle({
+describe('getApmDataViewIndexPattern', () => {
+  it('returns a data view index pattern by combining existing indicies', () => {
+    const indexPattern = getApmDataViewIndexPattern({
       transaction: 'apm-*-transaction-*',
       span: 'apm-*-span-*',
       error: 'apm-*-error-*',
       metric: 'apm-*-metrics-*',
     } as APMIndices);
-    expect(title).toBe(
+    expect(indexPattern).toBe(
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
     );
   });
 
   it('removes duplicates', () => {
-    const title = getApmDataViewTitle({
+    const title = getApmDataViewIndexPattern({
       transaction: 'apm-*',
       span: 'apm-*',
       error: 'apm-*',

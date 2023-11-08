@@ -13,16 +13,18 @@ import { MapTypes } from '../../../../../../../common/mobile/constants';
 export async function getLayerList({
   selectedMap,
   maps,
+  dataViewId,
 }: {
   selectedMap: MapTypes;
-  maps?: MapsStartApi;
+  maps: MapsStartApi | undefined;
+  dataViewId: string;
 }): Promise<LayerDescriptor[]> {
   switch (selectedMap) {
     case MapTypes.Http:
-      return await getHttpRequestsLayerList(maps);
+      return await getHttpRequestsLayerList(maps, dataViewId);
     case MapTypes.Session:
-      return await getSessionMapLayerList(maps);
+      return await getSessionMapLayerList(maps, dataViewId);
     default:
-      return await getHttpRequestsLayerList(maps);
+      return await getHttpRequestsLayerList(maps, dataViewId);
   }
 }

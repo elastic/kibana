@@ -12,11 +12,11 @@ import { useEffect, useState } from 'react';
 import { ApmPluginStartDeps } from '../plugin';
 import { callApmApi } from '../services/rest/create_call_apm_api';
 
-async function getApmDataViewTitle() {
-  const res = await callApmApi('GET /internal/apm/data_view/title', {
+async function getApmDataViewIndexPattern() {
+  const res = await callApmApi('GET /internal/apm/data_view/index_pattern', {
     signal: null,
   });
-  return res.apmDataViewTitle;
+  return res.apmDataViewIndexPattern;
 }
 
 export function useApmDataView() {
@@ -25,11 +25,11 @@ export function useApmDataView() {
 
   useEffect(() => {
     async function fetchDataView() {
-      const title = await getApmDataViewTitle();
+      const indexPattern = await getApmDataViewIndexPattern();
       try {
         const displayError = false;
         return await services.dataViews.create(
-          { title },
+          { title: indexPattern },
           undefined,
           displayError
         );

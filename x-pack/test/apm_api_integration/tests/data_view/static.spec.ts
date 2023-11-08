@@ -8,7 +8,7 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
-import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
+import { getDataViewId } from '@kbn/apm-plugin/common/data_view_constants';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import request from 'superagent';
@@ -22,26 +22,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtrace = getService('synthtraceEsClient');
   const dataViewPattern = 'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*';
 
-  function createDataViewWithWriteUser() {
+  function createDataViewWithWriteUser({ spaceId }: { spaceId: string }) {
     return apmApiClient.writeUser({
       endpoint: 'POST /internal/apm/data_view/static',
+      spaceId,
     });
   }
 
-  function createDataViewWithReadUser() {
-    return apmApiClient.readUser({ endpoint: 'POST /internal/apm/data_view/static' });
+  function createDataViewWithReadUser({ spaceId }: { spaceId: string }) {
+    return apmApiClient.readUser({
+      endpoint: 'POST /internal/apm/data_view/static',
+      spaceId,
+    });
   }
 
   function deleteDataView() {
     return supertest
-      .delete(`/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}?force=true`)
+      .delete(`/api/saved_objects/index-pattern/${getDataViewId('default')}?force=true`)
       .set('kbn-xsrf', 'foo');
   }
 
-  function getDataView({ space }: { space: string }) {
-    const spacePrefix = space !== 'default' ? `/s/${space}` : '';
+  function getDataView({ spaceId }: { spaceId: string }) {
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return supertest.get(
-      `${spacePrefix}/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}`
+      `${spacePrefix}/api/saved_objects/index-pattern/${getDataViewId(spaceId)}`
     );
   }
 
@@ -56,7 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('no mappings exist', { config: 'basic', archives: [] }, () => {
     let response: SupertestReturnType<'POST /internal/apm/data_view/static'>;
     before(async () => {
-      response = await createDataViewWithWriteUser();
+      response = await createDataViewWithWriteUser({ spaceId: 'default' });
     });
 
     it('does not create data view', async () => {
@@ -68,10 +72,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('cannot fetch data view', async () => {
-      const res = await getDataView({ space: 'default' });
+      const res = await getDataView({ spaceId: 'default' });
       expect(res.status).to.be(404);
       expect(res.body.message).to.eql(
-        'Saved object [index-pattern/apm_static_index_pattern_id] not found'
+        'Saved object [index-pattern/apm_static_data_view_id_default] not found'
       );
     });
   });
@@ -93,7 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let response: SupertestReturnType<'POST /internal/apm/data_view/static'>;
 
       before(async () => {
-        response = await createDataViewWithWriteUser();
+        response = await createDataViewWithWriteUser({ spaceId: 'default' });
       });
 
       it('successfully creates the apm data view', async () => {
@@ -102,9 +106,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         // @ts-expect-error
         const dataView = response.body.dataView as DataView;
 
-        expect(dataView.id).to.be('apm_static_index_pattern_id');
+        expect(dataView.id).to.be('apm_static_data_view_id_default');
         expect(dataView.name).to.be('APM');
-        expect(dataView.title).to.be('traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*');
+        expect(dataView.getIndexPattern()).to.be(
+          'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*'
+        );
       });
     });
 
@@ -112,8 +118,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let dataViewResponse: request.Response;
 
       before(async () => {
-        await createDataViewWithWriteUser();
-        dataViewResponse = await getDataView({ space: 'default' });
+        await createDataViewWithWriteUser({ spaceId: 'default' });
+        dataViewResponse = await getDataView({ spaceId: 'default' });
       });
 
       it('return 200', () => {
@@ -121,7 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('has correct id', () => {
-        expect(dataViewResponse.body.id).to.be('apm_static_index_pattern_id');
+        expect(dataViewResponse.body.id).to.be('apm_static_data_view_id');
       });
 
       it('has correct title', () => {
@@ -170,7 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when creating data view via read user', () => {
       it('throws an error', async () => {
         try {
-          await createDataViewWithReadUser();
+          await createDataViewWithReadUser({ spaceId: 'default' });
         } catch (e) {
           const err = e as ApmApiError;
           const responseBody = err.res.body;
@@ -184,8 +190,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when creating data view twice', () => {
       it('returns 200 response with reason, if data view already exists', async () => {
-        await createDataViewWithWriteUser();
-        const res = await createDataViewWithWriteUser();
+        await createDataViewWithWriteUser({ spaceId: 'default' });
+        const res = await createDataViewWithWriteUser({ spaceId: 'default' });
 
         expect(res.status).to.be(200);
         expect(res.body).to.eql({
@@ -197,16 +203,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when creating data view in "default" space', async () => {
       it('can be retrieved from the "default space"', async () => {
-        await createDataViewWithWriteUser();
-        const res = await getDataView({ space: 'default' });
-        expect(res.body.id).to.eql('apm_static_index_pattern_id');
+        await createDataViewWithWriteUser({ spaceId: 'default' });
+        const res = await getDataView({ spaceId: 'default' });
+        expect(res.body.id).to.eql('apm_static_data_view_id_default');
         expect(res.body.namespaces).to.eql(['*', 'default']);
       });
 
       it('can be retrieved from the "foo" space', async () => {
-        await createDataViewWithWriteUser();
-        const res = await getDataView({ space: 'foo' });
-        expect(res.body.id).to.eql('apm_static_index_pattern_id');
+        await createDataViewWithWriteUser({ spaceId: 'default' });
+        const res = await getDataView({ spaceId: 'foo' });
+        expect(res.body.id).to.eql('apm_static_data_view_id_foo');
         expect(res.body.namespaces).to.eql(['*', 'default']);
       });
     });

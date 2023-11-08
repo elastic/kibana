@@ -55,6 +55,7 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: false },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
     });
     expect(dataViewService.createAndSave).not.toHaveBeenCalled();
   });
@@ -73,6 +74,7 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: false },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
     });
     expect(dataViewService.createAndSave).not.toHaveBeenCalled();
   });
@@ -92,6 +94,7 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: true },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
     });
 
     expect(dataViewService.createAndSave).toHaveBeenCalled();
@@ -114,6 +117,7 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: true },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
     });
 
     expect(dataViewService.get).toHaveBeenCalled();
@@ -143,6 +147,7 @@ describe('createStaticDataView', () => {
         config: { autoCreateApmDataView: true },
       } as APMRouteHandlerResources,
       dataViewService,
+      spaceId: 'default',
     });
 
     expect(dataViewService.get).toHaveBeenCalled();

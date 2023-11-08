@@ -6,7 +6,6 @@
  */
 
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
 import {
   AGENT_NAME_DASHBOARD_FILE_MAPPING,
   loadDashboardFile,
@@ -29,7 +28,8 @@ function getDashboardFile({ agentName }: MetricsDashboardProps) {
 }
 
 export async function getDashboardPanelMap(
-  props: MetricsDashboardProps
+  props: MetricsDashboardProps,
+  dataViewId: string
 ): Promise<DashboardPanelMap | undefined> {
   const dashboardFile = getDashboardFile(props);
   const panelsRawObj = !!dashboardFile
@@ -42,7 +42,7 @@ export async function getDashboardPanelMap(
 
   const panelsStr: string = (
     panelsRawObj.attributes.panelsJSON as string
-  ).replaceAll('APM_STATIC_DATA_VIEW_ID', APM_STATIC_DATA_VIEW_ID);
+  ).replaceAll('APM_STATIC_DATA_VIEW_ID', dataViewId);
 
   const panelsRawObjects = JSON.parse(panelsStr) as any[];
 
