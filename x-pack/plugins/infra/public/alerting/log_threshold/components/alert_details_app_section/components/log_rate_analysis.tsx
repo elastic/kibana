@@ -285,7 +285,6 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
               'theme',
               'lens',
               'i18n',
-              'uiActions',
             ])}
           />
         </EuiFlexItem>
