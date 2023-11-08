@@ -22,7 +22,7 @@ export async function getDataStreams(options: {
   const { esClient, type, datasetQuery, uncategorisedOnly, sortOrder, extendedResponse } = options;
 
   const allDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
-    type: type ? type : '*',
+    type: type ?? '*',
     dataset: datasetQuery ? `*${datasetQuery}*` : '*',
   });
 

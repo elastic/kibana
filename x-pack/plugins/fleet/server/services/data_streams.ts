@@ -45,7 +45,7 @@ class DataStreamService {
   ): Promise<IndicesDataStream[]> {
     try {
       const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({
-        name: this.streamPartsToIndexPattern(dataStreamParts),
+        name: `${dataStreamParts.type}-${dataStreamParts.dataset}`,
       });
 
       return dataStreamsInfo;
@@ -66,7 +66,7 @@ class DataStreamService {
   ): Promise<IndicesDataStreamsStatsDataStreamsStatsItem[]> {
     try {
       const { data_streams: dataStreamsStats } = await esClient.indices.dataStreamsStats({
-        name: this.streamPartsToIndexPattern(dataStreamParts),
+        name: `${dataStreamParts.type}-${dataStreamParts.dataset}`,
         human: true,
       });
 

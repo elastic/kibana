@@ -20,7 +20,7 @@ export async function getDataStreamsStats(options: {
   const { esClient, type, datasetQuery, sortOrder } = options;
 
   const matchingDataStreamsStats = await dataStreamService.getMatchingDataStreamsStats(esClient, {
-    type: type ? type : '*',
+    type: type ?? '*',
     dataset: datasetQuery ? `*${datasetQuery}*` : '*',
   });
 
