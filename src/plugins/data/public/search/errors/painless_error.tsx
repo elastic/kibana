@@ -68,7 +68,11 @@ export class PainlessError extends EsError {
     }
     const actions = super.getActions(application) ?? [];
     actions.push(
-      <EuiButtonEmpty key="editPainlessScript" onClick={() => onClick(this?.indexPattern?.id)} size="s">
+      <EuiButtonEmpty
+        key="editPainlessScript"
+        onClick={() => onClick(this?.indexPattern?.id)}
+        size="s"
+      >
         {i18n.translate('data.painlessError.buttonTxt', {
           defaultMessage: 'Edit script',
         })}
