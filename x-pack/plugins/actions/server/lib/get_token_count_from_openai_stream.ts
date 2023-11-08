@@ -60,14 +60,38 @@ export async function getTokenCountFromOpenAIStream({
   let responseBody: string = '';
 
   responseStream.on('data', (chunk: string) => {
+    console.log('STREAM data');
     responseBody += chunk.toString();
   });
+
+  responseStream.on('close', () => {
+    console.log('STREAM close');
+  });
+  responseStream.on('end', () => {
+    console.log('STREAM end');
+  });
+  responseStream.on('error', () => {
+    console.log('STREAM error');
+  });
+  responseStream.on('cancel', () => {
+    console.log('STREAM cancel');
+  });
+  // responseStream.on('readable', () => {
+  //   console.log('STREAM readable');
+  //   let data;
+  //
+  //   while ((data = this.read()) !== null) {
+  //     console.log('STREAM readable::::', data);
+  //   }
+  // });
 
   try {
     await finished(responseStream);
   } catch {
     // no need to handle this explicitly
   }
+
+  console.log('responseBody', responseBody);
 
   const response = responseBody
     .split('\n')

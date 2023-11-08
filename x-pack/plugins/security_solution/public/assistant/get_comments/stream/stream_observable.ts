@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { concatMap, delay, finalize, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
+import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
 import { API_ERROR } from '@kbn/elastic-assistant/impl/assistant/translations';
 import type { PromptObservableState } from './types';
@@ -33,6 +33,7 @@ export const getStreamObservable = (
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
+            console.log('{ done, value }', { done, value });
             if (done) {
               observer.next({
                 chunks,
@@ -69,9 +70,10 @@ export const getStreamObservable = (
       reader.cancel();
     };
   }).pipe(
+    // this causes the observable to be hot and unsubscribe does not stop the stream
     // make sure the request is only triggered once,
     // even with multiple subscribers
-    shareReplay(1),
+    // shareReplay(1),
     // append a timestamp of when each value was emitted
     timestamp(),
     // use the previous timestamp to calculate a target

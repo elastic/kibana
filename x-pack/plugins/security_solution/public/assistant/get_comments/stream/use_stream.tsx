@@ -53,6 +53,7 @@ export const useStream = ({
     [content, isError, reader]
   );
   const onCompleteStream = useCallback(() => {
+    console.log('unsubscribe');
     subscription?.unsubscribe();
     setLoading(false);
     amendMessage(pendingMessage ?? '');
@@ -67,10 +68,12 @@ export const useStream = ({
   useEffect(() => {
     const newSubscription = observer$.pipe(share()).subscribe({
       next: ({ message, loading: isLoading }) => {
+        console.log('next called by subscription');
         setLoading(isLoading);
         setPendingMessage(message);
       },
       complete: () => {
+        console.log('complete called by subscription');
         setComplete(true);
       },
       error: (err) => {

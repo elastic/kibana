@@ -48,6 +48,7 @@ export const executeAction = async ({
     };
   }
   const readable = get('data', actionResult) as Readable;
+  console.log('what is readable?', Object.keys(readable));
 
   if (typeof readable?.read !== 'function') {
     throw new Error('Action result status is error: result is not streamable');

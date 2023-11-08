@@ -353,7 +353,6 @@ export class ActionExecutor {
               },
             },
           };
-
           if (result.data instanceof Readable) {
             const body =
               validatedParams.subAction === 'invokeStream'
@@ -364,7 +363,7 @@ export class ActionExecutor {
                 : (validatedParams as { subActionParams: { body: string } }).subActionParams.body;
 
             getTokenCountFromOpenAIStream({
-              responseStream: result.data.pipe(new PassThrough()),
+              responseStream: result.data.compose(new PassThrough()),
               body,
             })
               .then(({ total, prompt, completion }) => {

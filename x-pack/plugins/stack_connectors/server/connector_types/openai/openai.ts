@@ -192,12 +192,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     return { available: response.success };
   }
 
-  public async invokeStream(body: InvokeAIActionParams): Promise<ReadableStream> {
+  public async invokeStream(body: InvokeAIActionParams): Promise<Transform> {
     const res = (await this.streamApi({
       body: JSON.stringify(body),
       stream: true,
     })) as unknown as IncomingMessage;
-    return res.pipe(new PassThrough()).pipe(transformToSimpleString());
+    return res.compose(new PassThrough()).compose(transformToSimpleString());
   }
 
   /**
@@ -240,6 +240,7 @@ const transformToSimpleString = () =>
         })
         .join('');
       const newChunk = encoder.encode(nextChunk);
+      console.log('still transforming', nextChunk);
       callback(null, newChunk);
     },
   });
