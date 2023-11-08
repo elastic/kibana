@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializer, Plugin } from '@kbn/core/server';
+import type { PluginInitializer, Plugin } from '@kbn/core-plugins-server';
 import { schema } from '@kbn/config-schema';
 
 import {
