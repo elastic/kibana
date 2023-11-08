@@ -47,7 +47,7 @@ describe('Category ', () => {
   it('renders category correctly', () => {
     render(<CategoryComponent {...defaultProps} category="new-category" />);
 
-    expect(screen.getByText('new-category')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toHaveValue('new-category');
   });
 
   it('renders allow to add new category option', async () => {
@@ -56,7 +56,7 @@ describe('Category ', () => {
     userEvent.type(screen.getByRole('combobox'), 'new{enter}');
 
     expect(onChange).toBeCalledWith('new');
-    expect(screen.getByText('new')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toHaveValue('new');
   });
 
   it('renders current option list', async () => {
@@ -97,10 +97,10 @@ describe('Category ', () => {
       expect(onChange).toHaveBeenCalledWith('hi');
     });
 
-    userEvent.type(screen.getByRole('combobox'), 'Hi{enter}');
+    userEvent.type(screen.getByRole('combobox'), ' there{enter}');
 
     await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith('Hi');
+      expect(onChange).toHaveBeenCalledWith('hi there');
     });
   });
 });
