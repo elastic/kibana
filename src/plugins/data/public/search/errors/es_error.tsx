@@ -27,7 +27,7 @@ export class EsError extends KbnError {
     this.attributes = err.attributes;
   }
 
-  public getErrorMessage(application: ApplicationStart) {
+  public getErrorMessage() {
     if (!this.attributes?.error) {
       return null;
     }
@@ -46,7 +46,7 @@ export class EsError extends KbnError {
     );
   }
 
-  public getActions() {
+  public getActions(application: ApplicationStart) {
     return [
       <EuiButton color="primary" onClick={this.openInInspector}>
         {i18n.translate('data.esError.viewDetailsButtonLabel', {

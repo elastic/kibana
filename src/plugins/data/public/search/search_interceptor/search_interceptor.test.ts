@@ -23,6 +23,8 @@ import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
 import { UI_SETTINGS } from '../../../common';
 import type { IEsError } from '../errors';
+import type { SearchServiceStartDependencies } from '../search_service';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 jest.mock('./utils', () => {
   const originalModule = jest.requireActual('./utils');
@@ -117,13 +119,17 @@ describe('SearchInterceptor', () => {
     const bfetchMock = bfetchPluginMock.createSetupContract();
     bfetchMock.batchedFunction.mockReturnValue(fetchMock);
 
+    const inspectorServiceMock = {
+      open: () => {}
+    } as unknown as InspectorStart;
+
     bfetchSetup = bfetchPluginMock.createSetupContract();
     bfetchSetup.batchedFunction.mockReturnValue(fetchMock);
     searchInterceptor = new SearchInterceptor({
       bfetch: bfetchSetup,
       toasts: mockCoreSetup.notifications.toasts,
       startServices: new Promise((resolve) => {
-        resolve([mockCoreStart, {}, {}]);
+        resolve([mockCoreStart, { inspector: inspectorServiceMock } as unknown as SearchServiceStartDependencies, {}]);
       }),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
@@ -155,7 +161,8 @@ describe('SearchInterceptor', () => {
           attributes: {
             error: searchPhaseException.error,
           },
-        })
+        },
+        () => {})
       );
       expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
       expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();

@@ -30,11 +30,12 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
-import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
 import {
   ApplicationStart,
@@ -76,14 +77,14 @@ import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash, getSearchErrorOverrideDisplay } from './utils';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchConfigSchema } from '../../../config';
-import type { DataStartDependencies } from '../../types';
+import type { SearchServiceStartDependencies } from '../search_service';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
   http: HttpSetup;
   executionContext: ExecutionContextSetup;
   uiSettings: IUiSettingsClient;
-  startServices: Promise<[CoreStart, DataStartDependencies, unknown]>;
+  startServices: Promise<[CoreStart, object, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
@@ -129,7 +130,7 @@ export class SearchInterceptor {
     this.deps.startServices.then(([coreStart, depsStart]) => {
       this.application = coreStart.application;
       this.docLinks = coreStart.docLinks;
-      this.inspector = depsStart.inspector;
+      this.inspector = (depsStart as SearchServiceStartDependencies).inspector;
     });
 
     this.batchedFetch = deps.bfetch.batchedFunction({
@@ -191,7 +192,7 @@ export class SearchInterceptor {
   private handleSearchError(
     e: KibanaServerError | AbortError,
     requestBody: estypes.SearchRequest,
-    options?: ISearchOptions,
+    options?: IAsyncSearchOptions,
     isTimeout?: boolean
   ): Error {
     if (isTimeout || e.message === 'Request timed out') {
@@ -211,9 +212,9 @@ export class SearchInterceptor {
 
     if (isEsError(e)) {
       const openInInspector = () => {
-        const requestId = options.inspector?.id ?? uuidv4();
-        const requestAdapter = options.inspector?.adapter ?? new RequestAdapter();
-        if (!options.inspector?.adapter) {
+        const requestId = options?.inspector?.id ?? uuidv4();
+        const requestAdapter = options?.inspector?.adapter ?? new RequestAdapter();
+        if (!options?.inspector?.adapter) {
           const requestResponder = requestAdapter.start(
             i18n.translate('data.searchService.anonymousRequestTitle', {
               defaultMessage: 'Request',
@@ -511,7 +512,7 @@ export class SearchInterceptor {
             return throwError(
               this.handleSearchError(
                 e,
-                request.params.body,
+                request?.params?.body ?? {},
                 searchOptions,
                 searchAbortController.isTimeout()
               )

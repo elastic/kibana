@@ -34,7 +34,6 @@ export class PainlessError extends EsError {
     // fallback, show ES stacktrace
     const painlessStack = rootCause?.script_stack ? rootCause?.script_stack.join('\n') : undefined;
 
-    const indexPatternId = this?.indexPattern?.id;
     return (
       <>
         <EuiText size="s" data-test-subj="painlessScript">
@@ -62,12 +61,14 @@ export class PainlessError extends EsError {
   }
 
   getActions(application: ApplicationStart) {
+    const indexPatternId = this?.indexPattern?.id;
+    
     function onClick(indexPatternId?: string) {
       application.navigateToApp('management', {
         path: `/kibana/indexPatterns${indexPatternId ? `/patterns/${indexPatternId}` : ''}`,
       });
     }
-    const actions = super.getActions() ?? [];
+    const actions = super.getActions(application) ?? [];
     actions.push(
       <EuiButtonEmpty onClick={() => onClick(indexPatternId)} size="s">
         {i18n.translate('data.painlessError.buttonTxt', {
