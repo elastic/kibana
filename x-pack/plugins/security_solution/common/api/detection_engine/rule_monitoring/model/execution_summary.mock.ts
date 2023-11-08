@@ -6,7 +6,7 @@
  */
 
 import { RuleExecutionStatusEnum } from './execution_status.gen';
-import type { RuleExecutionSummary } from './execution_summary';
+import type { RuleExecutionSummary } from './execution_summary.gen';
 
 const getSummarySucceeded = (): RuleExecutionSummary => ({
   last_execution: {

@@ -19,10 +19,7 @@
 {{~/if~}}
 
 {{~#if (eq type "array")}}
-  z.preprocess(
-    (value: unknown) => (typeof value === "string") ? value === '' ? [] : value.split(",") : value,
-    z.array({{~> zod_schema_item items ~}})
-  )
+  ArrayFromString({{~> zod_schema_item items ~}})
   {{~#if minItems}}.min({{minItems}}){{/if~}}
   {{~#if maxItems}}.max({{maxItems}}){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
@@ -30,12 +27,9 @@
 {{~/if~}}
 
 {{~#if (eq type "boolean")}}
-  z.preprocess(
-    (value: unknown) => (typeof value === "boolean") ? String(value) : value,
-    z.enum(["true", "false"])
-    {{~#if (defined default)}}.default("{{{toJSON default}}}"){{/if~}}
-    .transform((value) => value === "true")
-  )
+  BooleanFromString
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
 {{~/if~}}
 
 {{~#if (eq type "string")}}
