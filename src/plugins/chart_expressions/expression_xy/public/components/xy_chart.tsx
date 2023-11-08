@@ -42,6 +42,7 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import fastIsEqual from 'fast-deep-equal';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
@@ -298,18 +299,35 @@ export function XYChart({
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
 
-  const onWillRender = useCallback(() => {
-    // requestAnimationFrame(() => {
-    setDimensions({
-      aspectRatio: isHorizontalChart(dataLayers)
-        ? { x: 9, y: 16 }
-        : {
-            x: 16,
-            y: 9,
-          },
-    });
-    // });
-  }, [dataLayers, setDimensions]);
+  const dimensions = {
+    aspectRatio: isHorizontalChart(dataLayers)
+      ? { x: 9, y: 16 }
+      : {
+          x: 16,
+          y: 9,
+        },
+  };
+
+  const [showVeil, setShowVeil] = useState(false);
+  const currentDimensions = useRef(dimensions);
+
+  if (!fastIsEqual(dimensions, currentDimensions.current)) {
+    // if the dimensions have changed we request new dimensions from the client
+    // and this sets off a chain of events
+    // - the charts library will plan a render
+    // - the client will resize the container
+    // - we show the veil to hide the next step
+    // - the charts library will render the chart based on the original container dimensions
+    // - the charts library will resize the chart to the updated container dimensions
+    // - we hide the veil
+    setShowVeil(true);
+    setDimensions(dimensions);
+    currentDimensions.current = dimensions;
+  }
+
+  const onResize = useCallback(() => {
+    setShowVeil(false);
+  }, []);
 
   const formattedDatatables = useMemo(
     () =>
@@ -730,6 +748,16 @@ export function XYChart({
 
   return (
     <div css={chartContainerStyle}>
+      <div
+        css={{
+          height: '100%',
+          width: '100%',
+          backgroundColor: 'white',
+          position: 'absolute',
+          zIndex: 1,
+          display: showVeil ? 'block' : 'none',
+        }}
+      />
       {showLegend !== undefined && uiState && (
         <LegendToggle
           onClick={toggleLegend}
@@ -803,7 +831,7 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
-            onWillRender={onWillRender}
+            onResize={onResize}
             onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },
