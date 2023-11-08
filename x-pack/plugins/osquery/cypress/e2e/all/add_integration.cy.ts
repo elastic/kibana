@@ -124,12 +124,13 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('epmList.searchBar').type('osquery');
       cy.getBySel('integration-card:epr:osquery_manager').click();
       cy.getBySel('addIntegrationPolicyButton').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+
       cy.getBySel('agentPolicySelect').within(() => {
         cy.contains(policyName);
       });
-      cy.getBySel('packagePolicyNameInput')
-        .wait(500)
-        .type(`{selectall}{backspace}${integrationName}`);
+      cy.getBySel('packagePolicyNameInput').clear().wait(500);
+      cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
       cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
       cy.getBySel('confirmModalCancelButton').click();
       cy.get(`[title="${integrationName}"]`).should('exist');

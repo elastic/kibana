@@ -147,6 +147,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     version,
     dataStream,
     lifecycle,
+    allowAutoCreate,
   }: Partial<TemplateDeserialized> = {}) => {
     const { component, form, find } = testBed;
 
@@ -197,8 +198,12 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         form.setInputValue('valueDataRetentionField', String(lifecycle.value));
       });
     }
-
+    
     await act(async () => {
+      if (allowAutoCreate) {
+        form.toggleEuiSwitch('allowAutoCreateField.input');
+      }
+
       clickNextButton();
       jest.advanceTimersByTime(0);
     });
@@ -348,6 +353,7 @@ export type TestSubjects =
   | 'priorityField.input'
   | 'dataStreamField.input'
   | 'dataRetentionToggle.input'
+  | 'allowAutoCreateField.input'
   | 'pageTitle'
   | 'previewTab'
   | 'removeFieldButton'

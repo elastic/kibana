@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
-import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
+import { TemplateDeserialized, getTemplateParameter, Aliases } from '../../../../../common';
 import { SimulateTemplate } from '../../index_templates';
 import { getLifecycleValue } from '../../../lib/data_streams';
 import { WizardSection } from '../template_form';
@@ -40,8 +40,8 @@ const NoneDescriptionText = () => (
   />
 );
 
-const getDescriptionText = (data: any) => {
-  const hasEntries = data && Object.entries(data).length > 0;
+const getDescriptionText = (data: Aliases | boolean | undefined) => {
+  const hasEntries = typeof data === 'boolean' ? data : data && Object.entries(data).length > 0;
 
   return hasEntries ? (
     <FormattedMessage
@@ -91,6 +91,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       order,
       template: indexTemplate,
       priority,
+      allowAutoCreate,
       composedOf,
       _meta,
       _kbnMeta: { isLegacy },
@@ -189,6 +190,21 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               <EuiDescriptionListDescription>
                 {version ? version : <NoneDescriptionText />}
               </EuiDescriptionListDescription>
+
+              {/* Allow auto create */}
+              {isLegacy !== true && (
+                <>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.allowAutoCreateLabel"
+                      defaultMessage="Allow auto create"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {getDescriptionText(allowAutoCreate)}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
 
               {/* components */}
               {isLegacy !== true && (
