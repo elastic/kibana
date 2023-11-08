@@ -78,6 +78,8 @@ interface StartedServer {
   url: string;
   /** Stop server */
   stop: () => Promise<void>;
+  /** Stop server synchronously. Sometimes useful when called from nodeJS unexpected exits. */
+  stopNow: () => void;
   /** Any information about the server */
   info?: string;
 }
@@ -362,6 +364,12 @@ Kill container:       ${chalk.cyan(`docker kill ${containerId}`)}
           `Stopping (kill) fleet server. Container name [${containerName}] id [${containerId}]`
         );
         await execa('docker', ['kill', containerId]);
+      },
+      stopNow: () => {
+        log.info(
+          `Stopping (kill) fleet server. Container name [${containerName}] id [${containerId}]`
+        );
+        execa.sync('docker', ['kill', containerId]);
       },
     };
   });
