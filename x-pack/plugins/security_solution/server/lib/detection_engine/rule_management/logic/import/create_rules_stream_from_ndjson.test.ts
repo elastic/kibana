@@ -283,7 +283,7 @@ describe('create_rules_stream_from_ndjson', () => {
         immutable: false,
       });
       expect(resultOrError[1].message).toContain(
-        'Invalid value "undefined" supplied to "name",Invalid value "undefined" supplied to "description",Invalid value "undefined" supplied to "risk_score",Invalid value "undefined" supplied to "severity"'
+        'name: Required, description: Required, risk_score: Required, severity: Required, rule_id: Required, and 25 more'
       );
       expect(resultOrError[2]).toEqual({
         rule_id: 'rule-2',
