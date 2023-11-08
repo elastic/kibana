@@ -32,7 +32,7 @@ import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider } from './contexts/ml';
-import { StartServices } from './contexts/kibana';
+import type { StartServices } from './contexts/kibana';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
