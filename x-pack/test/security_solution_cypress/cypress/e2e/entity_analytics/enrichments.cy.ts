@@ -17,7 +17,7 @@ import {
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
 import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { deleteAlertsAndRules } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
   expandFirstAlert,
@@ -37,10 +37,6 @@ const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
 describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     deleteAlertsAndRules();
     cy.task('esArchiverUnload', 'risk_hosts');
