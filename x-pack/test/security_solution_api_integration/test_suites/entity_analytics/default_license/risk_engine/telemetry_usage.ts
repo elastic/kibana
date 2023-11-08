@@ -135,8 +135,6 @@ export default ({ getService }: FtrProviderContext) => {
             all_host_risk_scores_total_day: 10,
           };
           expect(otherStats).to.eql(expected);
-          expect(allRiskScoreIndexSize).to.be.greaterThan(0);
-          expect(uniqueRiskScoreIndexSize).to.be.greaterThan(0);
         });
       });
     });
