@@ -199,13 +199,11 @@ export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeco
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
+  // Expiration time is not set to allow upgrading agents staying offline for long time
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
       minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-      expiration: moment(startTime)
-        .add(MINIMUM_EXECUTION_DURATION_SECONDS, 'seconds')
-        .toISOString(),
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)
