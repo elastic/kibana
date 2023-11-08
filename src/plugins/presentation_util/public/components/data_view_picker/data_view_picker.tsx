@@ -12,7 +12,7 @@ import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 
-export type DataViewTriggerProps = ToolbarButtonProps & {
+export type DataViewTriggerProps = Omit<ToolbarButtonProps<'standard'>, 'label'> & {
   label: string;
   title?: string;
 };
@@ -49,12 +49,11 @@ export function DataViewPicker({
         aria-label={title}
         data-test-subj="open-data-view-picker"
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
+        label={label}
         fullWidth
         {...colorProp}
         {...rest}
-      >
-        {label}
-      </ToolbarButton>
+      />
     );
   };
 

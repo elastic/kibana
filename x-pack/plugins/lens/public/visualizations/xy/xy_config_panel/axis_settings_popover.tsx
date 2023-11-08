@@ -131,7 +131,7 @@ const popoverConfig = (
   isHorizontal: boolean
 ): {
   icon: IconType;
-  groupPosition: ToolbarButtonProps['groupPosition'];
+  groupPosition: ToolbarButtonProps<'iconButton'>['groupPosition'];
   popoverTitle: string;
   buttonDataTestSubj: string;
 } => {

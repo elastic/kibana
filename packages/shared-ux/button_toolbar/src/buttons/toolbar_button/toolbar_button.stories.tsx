@@ -22,10 +22,10 @@ export default {
 
 const argTypes = {
   buttonStyle: {
-    defaultValue: 'regular',
+    defaultValue: 'standard',
     control: {
       type: 'radio',
-      options: ['regular', 'iconButton'],
+      options: ['standard', 'iconButton'],
     },
   },
   buttonType: {

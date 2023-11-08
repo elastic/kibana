@@ -35,7 +35,7 @@ export interface ToolbarPopoverProps {
   /**
    * Button group position
    */
-  groupPosition?: ToolbarButtonProps['groupPosition'];
+  groupPosition?: ToolbarButtonProps<'iconButton'>['groupPosition'];
   buttonDataTestSubj?: string;
   panelClassName?: string;
   handleClose?: () => void;

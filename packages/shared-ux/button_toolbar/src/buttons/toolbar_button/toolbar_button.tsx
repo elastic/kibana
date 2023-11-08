@@ -18,7 +18,7 @@ type ToolbarButtonFontWeights = 'normal' | 'bold';
 
 type ButtonPositions = 'left' | 'right' | 'center' | 'none';
 
-type ButtonRenderStyle = 'regular' | 'iconButton';
+type ButtonRenderStyle = 'standard' | 'iconButton';
 
 interface AbstractToolbarButtonProps
   extends Pick<
@@ -29,10 +29,7 @@ interface AbstractToolbarButtonProps
    * Render style of the toolbar button
    */
   as?: ButtonRenderStyle;
-  /**
-   * Display text for toolbar button
-   */
-  label?: React.ReactNode;
+  label?: string;
   type?: ToolbarButtonTypes;
   /**
    * Determines prominence
@@ -47,23 +44,21 @@ interface AbstractToolbarButtonProps
 /**
  * Props for `PrimaryButton`.
  */
-export type Props = AbstractToolbarButtonProps &
-  (
-    | ({
-        as?: Extract<ButtonRenderStyle, 'regular'>;
-        /**
-         * Label prop is required when {@link as} is specified as a regular which is the default
-         */
-        label: NonNullable<AbstractToolbarButtonProps['label']>;
-      } & Pick<EuiButtonPropsForButton, 'fullWidth' | 'isLoading'>)
-    | {
-        /*
-         * Specifying a render style of iconButton through the prop {@link as}, requires that a {@link IconType} be provided
-         */
-        as: Extract<ButtonRenderStyle, 'iconButton'>;
-        iconType: IconType;
-      }
-  );
+export type Props<T extends ButtonRenderStyle> = T extends Extract<ButtonRenderStyle, 'standard'>
+  ? {
+      as?: Extract<ButtonRenderStyle, 'standard'>;
+      /**
+       * Display text for toolbar button
+       */
+      label: React.ReactNode;
+    } & Omit<AbstractToolbarButtonProps, 'label'> &
+      Pick<EuiButtonPropsForButton, 'fullWidth' | 'isLoading'>
+  : T extends Extract<ButtonRenderStyle, 'iconButton'>
+  ? {
+      as: Extract<ButtonRenderStyle, 'iconButton'>;
+      iconType: IconType;
+    } & AbstractToolbarButtonProps
+  : never;
 
 const computeToolbarButtonCSSProps = (
   euiTheme: ReturnType<typeof useEuiTheme>,
@@ -72,12 +67,12 @@ const computeToolbarButtonCSSProps = (
     isDisabled,
     fontWeight,
     groupPosition,
-  }: Pick<Props, 'type' | 'isDisabled' | 'fontWeight' | 'groupPosition'>
+  }: Pick<Props<ButtonRenderStyle>, 'type' | 'isDisabled' | 'fontWeight' | 'groupPosition'>
 ) => {
   const toolButtonStyles = ToolbarButtonStyles(euiTheme);
 
   const groupPositionStyles =
-    groupPosition !== 'none' && groupPosition
+    groupPosition && groupPosition !== 'none'
       ? toolButtonStyles.buttonPositions[groupPosition]
       : {};
 
@@ -98,8 +93,8 @@ const computeToolbarButtonCSSProps = (
       };
 };
 
-export const ToolbarButton = ({
-  as = 'regular',
+export function ToolbarButton<T extends ButtonRenderStyle>({
+  as = 'standard',
   type = 'empty',
   iconSide = 'left',
   size = 'm',
@@ -108,7 +103,7 @@ export const ToolbarButton = ({
   isDisabled,
   label,
   ...rest
-}: Props) => {
+}: Props<T>) {
   const euiTheme = useEuiTheme();
   const cssProps = computeToolbarButtonCSSProps(euiTheme, {
     type,
@@ -126,6 +121,7 @@ export const ToolbarButton = ({
   if (as === 'iconButton') {
     return (
       <EuiButtonIcon
+        aria-label={label as string}
         size={size}
         css={cssProps}
         isDisabled={isDisabled}
@@ -150,4 +146,4 @@ export const ToolbarButton = ({
       {label}
     </EuiButton>
   );
-};
+}
