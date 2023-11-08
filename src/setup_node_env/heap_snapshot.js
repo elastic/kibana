@@ -7,6 +7,7 @@
  */
 
 var getopts = require('getopts');
+var path = require('path');
 var v8 = require('node:v8');
 var worker = require('node:worker_threads');
 
@@ -32,7 +33,7 @@ function getHeapSnapshotPath() {
   var threadId = worker.threadId;
   var serial = (++heapSnapshotSerial).toString().padStart(3, '0');
 
-  return `${diagnosticDir}/Heap.${date}.${time}.${pid}.${threadId}.${serial}.heapsnapshot`;
+  return path.join(diagnosticDir, `Heap.${date}.${time}.${pid}.${threadId}.${serial}.heapsnapshot`);
 }
 
 if (diagnosticDir && heapSnapshotSignal) {
