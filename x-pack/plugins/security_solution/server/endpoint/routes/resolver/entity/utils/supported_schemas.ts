@@ -64,6 +64,24 @@ export const supportedSchemas: SupportedSchema[] = [
     },
   },
   {
+    name: 'osquerybeat',
+    constraints: [
+      {
+        field: 'agent.type',
+        value: 'osquerybeat',
+      },
+      {
+        field: 'event.module',
+        value: 'osquery_manager',
+      },
+    ],
+    schema: {
+      id: 'osquery.entity_id',
+      parent: 'osquery.ancestry.entity_id',
+      name: 'osquery.name',
+    },
+  },
+  {
     name: 'sysmonViaFilebeat',
     constraints: [
       {

@@ -19,8 +19,9 @@ export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
     eventDataStream.some((datastream) => datastream.includes('windows.sysmon'));
   const agentTypeIsEndpoint = agentType === 'endpoint';
   const agentTypeIsWinlogBeat = agentType === 'winlogbeat' && eventModule === 'sysmon';
+  const agentTypeIsOsqueryBeat = agentType === 'osquerybeat' && eventModule === 'osquery_manager';
   const isEndpointOrSysmonFromWinlogBeat =
-    agentTypeIsEndpoint || agentTypeIsWinlogBeat || datasetIncludesSysmon;
+    agentTypeIsEndpoint || agentTypeIsWinlogBeat || datasetIncludesSysmon || agentTypeIsOsqueryBeat;
   const hasProcessEntityId =
     processEntityIds != null && processEntityIds.length === 1 && firstProcessEntityId !== '';
   return isEndpointOrSysmonFromWinlogBeat && hasProcessEntityId;
