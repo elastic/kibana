@@ -63,7 +63,8 @@ context and state in action parameter templates, and a short human readable
 description. When you create a rule in {kib}, it uses this information to prompt
 you for these variables in action parameter editors.
 
-// `alerts`:: TBD
+`alerts`::
+(object) Details about alerts as data documents for this rule type, including any custom mappings.
 
 `authorized_consumers`::
 (object) The list of the plugins IDs that have access to the rule type.
@@ -82,7 +83,8 @@ action.
 (boolean) Indicates whether the rule type is enabled or disabled based on the
 subscription.
 
-// `has_alerts_mappings`:: TBD
+`has_alerts_mappings`::
+(boolean) Indicates whether the rule type has custom mappings for the alert data.
 
 // `has_fields_for_a_a_d`:: TBD
 
