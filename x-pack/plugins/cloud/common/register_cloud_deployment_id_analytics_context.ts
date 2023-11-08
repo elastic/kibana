@@ -16,6 +16,7 @@ export interface CloudDeploymentMetadata {
   deployment_url?: string;
   serverless?: {
     project_id?: string;
+    project_type?: string;
   };
 }
 
@@ -30,7 +31,7 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
     id: cloudId,
     trial_end_date: cloudTrialEndDate,
     is_elastic_staff_owned: cloudIsElasticStaffOwned,
-    serverless: { project_id: projectId } = {},
+    serverless: { project_id: projectId, project_type: projectType } = {},
   } = cloudMetadata;
 
   analytics.registerContextProvider({
@@ -41,6 +42,7 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
       cloudTrialEndDate,
       cloudIsElasticStaffOwned,
       projectId,
+      projectType,
     }),
     schema: {
       cloudId: {
@@ -65,6 +67,10 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
       projectId: {
         type: 'keyword',
         _meta: { description: 'The Serverless Project ID', optional: true },
+      },
+      projectType: {
+        type: 'keyword',
+        _meta: { description: 'The Serverless Project type', optional: true },
       },
     },
   });

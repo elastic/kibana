@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
+  const config = getService('config');
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -47,8 +48,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ],
     };
 
-    const TEST_USERNAME = 'elastic_serverless';
-    const TEST_PASSWORD = 'changeme';
+    // Kibana CI and MKI use different users
+    const TEST_USERNAME = config.get('servers.kibana.username');
+    const TEST_PASSWORD = config.get('servers.kibana.password');
 
     before('initialize saved object archive', async () => {
       // add test saved search object

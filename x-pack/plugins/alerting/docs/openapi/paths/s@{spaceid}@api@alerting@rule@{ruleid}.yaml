@@ -35,8 +35,6 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
-  servers:
-    - url: https://localhost:5601
 
 delete:
   summary: Deletes a rule.
@@ -67,8 +65,6 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
-  servers:
-    - url: https://localhost:5601
 
 post:
   summary: Creates a rule with a specific rule identifier.
@@ -102,6 +98,8 @@ post:
         schema:
           $ref: '../components/schemas/create_rule_request.yaml'
         examples:
+          createEsQueryEsqlRuleIdRequest:
+            $ref: '../components/examples/create_es_query_esql_rule_request.yaml'
           createEsQueryRuleIdRequest:
             $ref: '../components/examples/create_es_query_rule_request.yaml'
           createEsQueryKqlRuleIdRequest:
@@ -116,6 +114,8 @@ post:
           schema:
             $ref: '../components/schemas/rule_response_properties.yaml' 
           examples:
+            createEsQueryEsqlRuleIdResponse:
+              $ref: '../components/examples/create_es_query_esql_rule_response.yaml'
             createEsQueryRuleIdResponse:
               $ref: '../components/examples/create_es_query_rule_response.yaml'
             createEsQueryKqlRuleIdResponse:
@@ -134,8 +134,6 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
-  servers:
-    - url: https://localhost:5601
 
 put:
   summary: Updates the attributes for a rule.
@@ -188,7 +186,3 @@ put:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

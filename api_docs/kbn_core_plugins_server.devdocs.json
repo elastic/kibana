@@ -191,7 +191,15 @@
             "label": "stop",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<void>) | undefined"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
@@ -356,7 +364,15 @@
             "label": "stop",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<void>) | undefined"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
@@ -824,6 +840,22 @@
             "label": "optionalPlugins",
             "description": [
               "\nAn optional list of the other plugins that if installed and enabled **may be**\nleveraged by this plugin for some additional functionality but otherwise are\nnot required for this plugin to work properly."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.runtimePluginDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimePluginDependencies",
+            "description": [
+              "\nAn optional list of plugin dependencies that can be resolved dynamically at runtime\nusing the dynamic contract resolving capabilities from the plugin service."
             ],
             "signature": [
               "readonly string[]"

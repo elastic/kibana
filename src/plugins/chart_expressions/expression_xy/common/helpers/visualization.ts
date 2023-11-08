@@ -19,3 +19,5 @@ export function isTimeChart(layers: CommonXYDataLayerConfigResult[]) {
       (!l.xScaleType || l.xScaleType === XScaleTypes.TIME)
   );
 }
+
+export const shouldShowLegendActionDefault = () => true;

@@ -62,8 +62,7 @@ import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_deta
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Rules override', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewOverrideRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');
