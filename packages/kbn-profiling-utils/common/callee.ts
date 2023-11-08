@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { sum } from 'lodash';
 import { createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   emptyExecutable,
@@ -51,6 +52,9 @@ export interface CalleeTree {
   CountInclusive: number[];
   /** self cpu */
   CountExclusive: number[];
+  TotalSamples: number;
+  TotalCPU: number;
+  SelfCPU: number;
 }
 
 /**
@@ -83,14 +87,17 @@ export function createCalleeTree(
     FunctionOffset: new Array(totalFrames),
     SourceFilename: new Array(totalFrames),
     SourceLine: new Array(totalFrames),
-
     CountInclusive: new Array(totalFrames),
     CountExclusive: new Array(totalFrames),
+    TotalSamples: 0,
+    SelfCPU: 0,
+    TotalCPU: 0,
   };
 
   // The inverse of the sampling rate is the number with which to multiply the number of
   // samples to get an estimate of the actual number of samples the backend received.
   const scalingFactor = 1.0 / samplingRate;
+  let totalSamples = 0;
   tree.Edges[0] = new Map<FrameGroupID, NodeID>();
 
   tree.FileID[0] = '';
@@ -127,7 +134,7 @@ export function createCalleeTree(
     const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
     const lenStackTrace = stackTrace.FrameIDs.length;
     const samples = Math.floor((events.get(stackTraceID) ?? 0) * scalingFactor);
-
+    totalSamples += samples;
     let currentNode = 0;
 
     // Increment the count by the number of samples observed, multiplied with the inverse of the
@@ -182,6 +189,13 @@ export function createCalleeTree(
       currentNode = node;
     }
   }
+  const sumSelfCPU = sum(tree.CountExclusive);
+  const sumTotalCPU = sum(tree.CountInclusive);
 
-  return tree;
+  return {
+    ...tree,
+    TotalSamples: totalSamples,
+    SelfCPU: sumSelfCPU,
+    TotalCPU: sumTotalCPU,
+  };
 }

@@ -209,9 +209,6 @@ const basicTestSourceConfiguration: InfraSource = {
       indexPatternId: 'INDEX_PATTERN_ID',
     },
     logColumns: [],
-    fields: {
-      message: [],
-    },
     metricAlias: 'METRIC_ALIAS',
     inventoryDefaultView: '0',
     metricsExplorerDefaultView: '0',
