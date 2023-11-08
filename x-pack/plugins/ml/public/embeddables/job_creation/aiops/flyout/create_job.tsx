@@ -69,6 +69,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
   const [selectedPartitionFieldOptions, setSelectedPartitionFieldOptions] = useState<
     EuiComboBoxOptionOption[]
   >([]);
+  const [formComplete, setFormComplete] = useState<boolean | undefined>(undefined);
 
   const toggleEnablePerPartitionCategorization = useCallback(
     () => setEnablePerPartitionCategorization(!enablePerPartitionCategorization),
@@ -122,6 +123,12 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
     setSelectedPartitionFieldOptions([]);
   }, [enablePerPartitionCategorization]);
 
+  useEffect(() => {
+    setFormComplete(
+      enablePerPartitionCategorization === false || selectedPartitionFieldOptions.length > 0
+    );
+  }, [enablePerPartitionCategorization, selectedPartitionFieldOptions]);
+
   async function createADJob({
     jobId,
     bucketSpan,
@@ -163,6 +170,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         embeddable={embeddable}
         layer={undefined}
         layerIndex={0}
+        outerFormComplete={formComplete}
       >
         <>
           <EuiCheckableCard

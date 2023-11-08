@@ -58,6 +58,7 @@ interface Props {
   layerIndex: number;
   embeddable: Embeddable | MapEmbeddable;
   incomingCreateError?: { text: string; errorText: string };
+  outerFormComplete?: boolean;
 }
 
 enum STATE {
@@ -76,6 +77,7 @@ export const JobDetails: FC<Props> = ({
   layerIndex,
   embeddable,
   incomingCreateError,
+  outerFormComplete,
 }) => {
   const {
     services: {
@@ -313,7 +315,8 @@ export const JobDetails: FC<Props> = ({
                   state === STATE.VALIDATING ||
                   jobId === '' ||
                   jobIdValidationError !== '' ||
-                  bucketSpanValidationError !== ''
+                  bucketSpanValidationError !== '' ||
+                  outerFormComplete === false
                 }
                 onClick={createJob.bind(null, layerIndex)}
                 size="s"
