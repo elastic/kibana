@@ -173,10 +173,10 @@ components:
           type: string
         queryMatch:
           $ref: '#/components/schemas/QueryMatchResult'
-        and:
-          type: array
-          items:
-            $ref: '#/components/schemas/DataProviderResult'
+        # and:
+        #   type: array
+        #   items:
+        #     $ref: '#/components/schemas/DataProviderResult'
         type:
           $ref: '#/components/schemas/DataProviderType'
     FavoriteTimelineResult:

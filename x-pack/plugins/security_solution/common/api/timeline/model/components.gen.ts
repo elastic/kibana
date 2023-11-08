@@ -122,7 +122,6 @@ export const DataProviderResult = z.object({
   excluded: z.boolean().optional(),
   kqlQuery: z.string().optional(),
   queryMatch: QueryMatchResult.optional(),
-  and: z.array(DataProviderResult).optional(),
   type: DataProviderType.optional(),
 });
 
