@@ -8,7 +8,6 @@
 import { IndexSettings } from './indices';
 import { Aliases } from './aliases';
 import { Mappings } from './mappings';
-import { DataStream } from '..';
 import { DataRetention } from '.';
 
 export interface ComponentTemplateSerialized {
@@ -33,7 +32,6 @@ export interface ComponentTemplateDeserialized extends ComponentTemplateSerializ
 
 export interface ComponentTemplateFromEs {
   name: string;
-  lifecycle?: DataStream['lifecycle'];
   component_template: ComponentTemplateSerialized;
 }
 
