@@ -30,7 +30,6 @@ import type {
   BulkCreateBulkUpdateCaseUserActions,
   CommonUserActionArgs,
   CreatePayloadFunction,
-  CreateUserActionClient,
   CreateUserActionES,
   GetUserActionItemByDifference,
   PostCaseUserActionArgs,
@@ -38,6 +37,8 @@ import type {
   TypedUserActionDiffedItems,
   UserActionEvent,
   UserActionsDict,
+  CreateUserActionArgs,
+  BulkCreateUserActionArgs,
 } from '../types';
 import { isAssigneesArray, isCustomFieldsArray, isStringArray } from '../type_guards';
 import type { IndexRefresh } from '../../types';
@@ -375,21 +376,16 @@ export class UserActionPersister {
   }
 
   public async createUserAction<T extends keyof BuilderParameters>({
-    action,
-    type,
-    caseId,
-    user,
-    owner,
-    payload,
-    connectorId,
-    attachmentId,
+    userAction,
     refresh,
-  }: CreateUserActionClient<T>): Promise<void> {
+  }: CreateUserActionArgs<T>): Promise<void> {
+    const { action, type, caseId, user, owner, payload, connectorId, attachmentId } = userAction;
+
     try {
       this.context.log.debug(`Attempting to create a user action of type: ${type}`);
       const userActionBuilder = this.builderFactory.getBuilder<T>(type);
 
-      const userAction = userActionBuilder?.build({
+      const userActionPayload = userActionBuilder?.build({
         action,
         caseId,
         user,
@@ -399,11 +395,50 @@ export class UserActionPersister {
         payload,
       });
 
-      if (userAction) {
-        await this.createAndLog({ userAction, refresh });
+      if (userActionPayload) {
+        await this.createAndLog({ userAction: userActionPayload, refresh });
       }
     } catch (error) {
       this.context.log.error(`Error on creating user action of type: ${type}. Error: ${error}`);
+      throw error;
+    }
+  }
+
+  public async bulkCreateUserAction<T extends keyof BuilderParameters>({
+    userActions,
+    refresh,
+  }: BulkCreateUserActionArgs<T>): Promise<void> {
+    try {
+      this.context.log.debug(`Attempting to bulk create a user actions`);
+
+      if (userActions.length <= 0) {
+        return;
+      }
+
+      const userActionsPayload = userActions
+        .map(({ action, type, caseId, user, owner, payload, connectorId, attachmentId }) => {
+          const userActionBuilder = this.builderFactory.getBuilder<T>(type);
+          const userAction = userActionBuilder?.build({
+            action,
+            caseId,
+            user,
+            owner,
+            connectorId,
+            attachmentId,
+            payload,
+          });
+
+          if (userAction == null) {
+            return null;
+          }
+
+          return userAction;
+        })
+        .filter(Boolean) as UserActionEvent[];
+
+      await this.bulkCreateAndLog({ userActions: userActionsPayload, refresh });
+    } catch (error) {
+      this.context.log.error(`Error on bulk creating user actions. Error: ${error}`);
       throw error;
     }
   }

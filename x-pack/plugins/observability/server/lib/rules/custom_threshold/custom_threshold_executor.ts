@@ -134,6 +134,7 @@ export const createCustomThresholdExecutor = ({
 
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
     const dataView = initialSearchSource.getField('index')!.getIndexPattern();
+    const dataViewName = initialSearchSource.getField('index')!.name;
     const timeFieldName = initialSearchSource.getField('index')?.timeFieldName;
     if (!dataView) {
       throw new Error('No matched data view');
@@ -189,7 +190,7 @@ export const createCustomThresholdExecutor = ({
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = buildFiredAlertReason(alertResults, group, dataView);
+        reason = buildFiredAlertReason(alertResults, group, dataViewName);
       }
 
       /* NO DATA STATE HANDLING

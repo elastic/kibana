@@ -20,8 +20,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/saved-objects-plugin",
     "@kbn/ui-actions-enhanced-plugin",
-    "@kbn/es-query",
-    "@kbn/share-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
     "@kbn/ui-actions-plugin",

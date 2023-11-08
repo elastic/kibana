@@ -235,7 +235,7 @@ describe('The metric threshold alert type', () => {
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBeUndefined();
       expect(action.reason).toBe(
-        'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedIndexPattern)'
+        'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName)'
       );
     });
   });
@@ -1052,7 +1052,7 @@ describe('The metric threshold alert type', () => {
       const { action } = mostRecentAction(instanceID);
       const reasons = action.reason;
       expect(reasons).toBe(
-        'Average test.metric.1 is 1, above the threshold of 1; Average test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedIndexPattern)'
+        'Average test.metric.1 is 1, above the threshold of 1; Average test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedDataViewName)'
       );
     });
   });
@@ -1774,6 +1774,7 @@ const alertsServices = alertsMock.createRuleExecutorServices();
 const mockedIndex = {
   id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
   title: 'metrics-fake_hosts',
+  name: 'mockedDataViewName',
   fieldFormatMap: {},
   typeMeta: {},
   timeFieldName: '@timestamp',
