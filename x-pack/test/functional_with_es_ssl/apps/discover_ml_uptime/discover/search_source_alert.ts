@@ -406,6 +406,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // this test fails with caching in place
     it('should navigate to alert results via link provided in notification', async () => {
+      // todo verify this fixes something
+      await PageObjects.settings.refreshDataViewFieldList(SOURCE_DATA_VIEW);
       await openAlertResults(RULE_NAME);
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });
