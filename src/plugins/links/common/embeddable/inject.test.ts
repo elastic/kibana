@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { inject } from './inject';
-
 test('Should return original state and empty references with by-reference embeddable state', () => {
   const linksByReferenceInput = {
     id: '2192e502-0ec7-4316-82fb-c9bbf78525c4',
