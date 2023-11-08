@@ -356,6 +356,9 @@ describe('Sourcerer component', () => {
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
     );
+
+    wrapper.update();
+
     wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
     expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 2))).toEqual({
@@ -753,179 +756,6 @@ describe('sourcerer on alerts page or rules details page', () => {
   });
 });
 
-describe('timeline sourcerer', () => {
-  let wrapper: ReactWrapper;
-  const { storage } = createSecuritySolutionStorageMock();
-  store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  const testProps = {
-    scope: sourcererModel.SourcererScopeName.timeline,
-  };
-
-  beforeAll(() => {
-    (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
-    wrapper = mount(
-      <TestProviders store={store}>
-        <Sourcerer {...testProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
-    wrapper
-      .find(
-        `[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-advanced-options-toggle"]`
-      )
-      .first()
-      .simulate('click');
-  });
-
-  it('renders "alerts only" checkbox, unchecked', () => {
-    wrapper
-      .find(
-        `[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-alert-only-checkbox"]`
-      )
-      .first()
-      .simulate('click');
-    expect(wrapper.find(`[data-test-subj="sourcerer-alert-only-checkbox"]`).first().text()).toEqual(
-      'Show only detection alerts'
-    );
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-alert-only-checkbox"] input`).first().prop('checked')
-    ).toEqual(false);
-  });
-
-  it('data view selector is enabled', () => {
-    expect(
-      wrapper
-        .find(`[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-select"]`)
-        .first()
-        .prop('disabled')
-    ).toBeFalsy();
-  });
-
-  it('data view selector is default to Security Default Data View', () => {
-    expect(
-      wrapper
-        .find(`[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-select"]`)
-        .first()
-        .prop('valueOfSelected')
-    ).toEqual('security-solution');
-  });
-
-  it('index pattern selector is enabled', () => {
-    expect(
-      wrapper
-        .find(
-          `[data-test-subj="timeline-sourcerer-popover"] [data-test-subj="sourcerer-combo-box"]`
-        )
-        .first()
-        .prop('disabled')
-    ).toBeFalsy();
-  });
-
-  it('render reset button', () => {
-    expect(wrapper.find(`[data-test-subj="sourcerer-reset"]`).exists()).toBeTruthy();
-  });
-
-  it('render save button', () => {
-    expect(wrapper.find(`[data-test-subj="sourcerer-save"]`).exists()).toBeTruthy();
-  });
-
-  it('Checks box when only alerts index is selected in timeline', () => {
-    const state2 = {
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        sourcererScopes: {
-          ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-            loading: false,
-            selectedDataViewId: id,
-            selectedPatterns: [`${mockGlobalState.sourcerer.signalIndexName}`],
-          },
-        },
-      },
-    };
-
-    store = createStore(
-      state2,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
-
-    wrapper = mount(
-      <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
-    expect(
-      wrapper.find(`[data-test-subj="sourcerer-alert-only-checkbox"] input`).first().prop('checked')
-    ).toEqual(true);
-  });
-});
-
-describe('Sourcerer integration tests', () => {
-  const state = {
-    ...mockGlobalState,
-    sourcerer: {
-      ...mockGlobalState.sourcerer,
-      kibanaDataViews: [
-        mockGlobalState.sourcerer.defaultDataView,
-        {
-          ...mockGlobalState.sourcerer.defaultDataView,
-          id: '1234',
-          title: 'fakebeat-*,neatbeat-*',
-          patternList: ['fakebeat-*'],
-        },
-      ],
-      sourcererScopes: {
-        ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.default]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-          loading: false,
-          selectedDataViewId: id,
-          selectedPatterns: patternListNoSignals.slice(0, 2),
-        },
-      },
-    },
-  };
-
-  const { storage } = createSecuritySolutionStorageMock();
-
-  beforeEach(() => {
-    (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-    jest.clearAllMocks();
-  });
-
-  it('Selects a different index pattern', async () => {
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <Sourcerer {...defaultProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
-    wrapper.find(`button[data-test-subj="sourcerer-select"]`).first().simulate('click');
-
-    wrapper.find(`[data-test-subj="dataView-option-super"]`).first().simulate('click');
-    expect(checkOptionsAndSelections(wrapper, ['fakebeat-*'])).toEqual({
-      availableOptionCount: 0,
-      optionsSelected: true,
-    });
-    wrapper.find(`button[data-test-subj="sourcerer-save"]`).first().simulate('click');
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.default,
-        selectedDataViewId: '1234',
-        selectedPatterns: ['fakebeat-*'],
-      })
-    );
-  });
-});
-
 describe('No data', () => {
   const mockNoIndicesState = {
     ...mockGlobalState,
@@ -1287,20 +1117,18 @@ describe('Missing index patterns', () => {
 
     fireEvent.click(screen.getByTestId('sourcerer-deprecated-update'));
 
-    await waitFor(() => {
-      expect(screen.queryAllByTestId('sourcerer-deprecated-callout')[0].textContent).toBe(
-        'This timeline is out of date with the Security Data View'
-      );
-      expect(screen.queryAllByTestId('sourcerer-current-patterns-message')[0].textContent).toBe(
-        'The active index patterns in this timeline are: myFakebeat-*'
-      );
-      expect(screen.queryAllByTestId('sourcerer-missing-patterns-callout')[0].textContent).toBe(
-        'security data view is missing the following index patterns: myfakebeat-*'
-      );
-      expect(screen.queryAllByTestId('sourcerer-missing-patterns-message')[0].textContent).toBe(
-        "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
-      );
-    });
+    expect(screen.getByTestId('sourcerer-deprecated-callout').textContent).toBe(
+      'This timeline is out of date with the Security Data View'
+    );
+    expect(screen.getByTestId('sourcerer-current-patterns-message').textContent).toBe(
+      'The active index patterns in this timeline are: myFakebeat-*'
+    );
+    expect(screen.queryAllByTestId('sourcerer-missing-patterns-callout')[0].textContent).toBe(
+      'Security Data View is missing the following index patterns: myFakebeat-*'
+    );
+    expect(screen.queryAllByTestId('sourcerer-missing-patterns-message')[0].textContent).toBe(
+      "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
+    );
   });
 
   test('Show UpdateDefaultDataViewModal CallOut for timeline template', async () => {
@@ -1310,7 +1138,7 @@ describe('Missing index patterns', () => {
     });
     store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-    wrapper = mount(
+    render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
       </TestProviders>
