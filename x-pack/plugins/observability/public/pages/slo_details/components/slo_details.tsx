@@ -23,6 +23,7 @@ import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historic
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { BurnRates } from './burn_rates';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
+import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
@@ -94,6 +95,11 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
                   slo={slo}
                 />
               </EuiFlexItem>
+              {slo.indicator.type !== 'sli.metric.timeslice' ? (
+                <EuiFlexItem>
+                  <EventsChartPanel slo={slo} />
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexGroup>
         </Fragment>

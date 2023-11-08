@@ -53,6 +53,9 @@ const historicalSummarySchema = t.intersection([
 const previewDataSchema = t.type({
   date: dateType,
   sliValue: t.number,
+  goodEvents: t.number,
+  badEvents: t.number,
+  totalEvents: t.number,
 });
 
 const dateRangeSchema = t.type({ from: dateType, to: dateType });

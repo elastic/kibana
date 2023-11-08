@@ -60,6 +60,7 @@ const createSLOResponseSchema = t.type({
 const getPreviewDataParamsSchema = t.type({
   body: t.type({
     indicator: indicatorSchema,
+    range: t.union([t.literal('day'), t.literal('hour')]),
   }),
 });
 

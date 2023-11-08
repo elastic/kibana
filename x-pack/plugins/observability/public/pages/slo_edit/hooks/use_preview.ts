@@ -25,5 +25,5 @@ export function useDebouncedGetPreviewData(isIndicatorValid: boolean, indicator:
     }
   }, [indicatorState, serializedIndicator, store]);
 
-  return useGetPreviewData(isIndicatorValid, JSON.parse(indicatorState));
+  return useGetPreviewData(isIndicatorValid, JSON.parse(indicatorState), 'hour');
 }

@@ -27,11 +27,16 @@ import {
   GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
 
+interface Options {
+  fromRange: 'now-1h' | 'now-24h';
+  interval: '1m' | '10m';
+}
 export class GetPreviewData {
   constructor(private esClient: ElasticsearchClient) {}
 
   private async getAPMTransactionDurationPreviewData(
-    indicator: APMTransactionDurationIndicator
+    indicator: APMTransactionDurationIndicator,
+    options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter = [];
     if (indicator.params.service !== ALL_VALUE)
@@ -61,7 +66,7 @@ export class GetPreviewData {
       query: {
         bool: {
           filter: [
-            { range: { '@timestamp': { gte: 'now-60m' } } },
+            { range: { '@timestamp': { gte: options.fromRange } } },
             { terms: { 'processor.event': ['metric'] } },
             { term: { 'metricset.name': 'transaction' } },
             { exists: { field: 'transaction.duration.histogram' } },
@@ -73,7 +78,7 @@ export class GetPreviewData {
         perMinute: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: '1m',
+            fixed_interval: options.interval,
           },
           aggs: {
             _good: {
@@ -105,11 +110,15 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
+      goodEvents: bucket.good?.value ?? 0,
+      badEvents: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
+      totalEvents: bucket.total?.value ?? 0,
     }));
   }
 
   private async getAPMTransactionErrorPreviewData(
-    indicator: APMTransactionErrorRateIndicator
+    indicator: APMTransactionErrorRateIndicator,
+    options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter = [];
     if (indicator.params.service !== ALL_VALUE)
@@ -137,7 +146,7 @@ export class GetPreviewData {
       query: {
         bool: {
           filter: [
-            { range: { '@timestamp': { gte: 'now-60m' } } },
+            { range: { '@timestamp': { gte: options.fromRange } } },
             { term: { 'metricset.name': 'transaction' } },
             { terms: { 'event.outcome': ['success', 'failure'] } },
             ...filter,
@@ -148,7 +157,7 @@ export class GetPreviewData {
         perMinute: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: '1m',
+            fixed_interval: options.interval,
           },
           aggs: {
             good: {
@@ -179,28 +188,32 @@ export class GetPreviewData {
         !!bucket.good && !!bucket.total
           ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
           : null,
+      goodEvents: bucket.good?.doc_count ?? 0,
+      badEvents: (bucket.total?.doc_count ?? 0) - (bucket.good?.doc_count ?? 0),
+      totalEvents: bucket.total?.doc_count ?? 0,
     }));
   }
 
   private async getHistogramPreviewData(
-    indicator: HistogramIndicator
+    indicator: HistogramIndicator,
+    options: Options
   ): Promise<GetPreviewDataResponse> {
     const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(indicator);
     const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
     const timestampField = indicator.params.timestampField;
-    const options = {
+    const result = await this.esClient.search({
       index: indicator.params.index,
       size: 0,
       query: {
         bool: {
-          filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
+          filter: [{ range: { [timestampField]: { gte: options.fromRange } } }, filterQuery],
         },
       },
       aggs: {
         perMinute: {
           date_histogram: {
             field: timestampField,
-            fixed_interval: '1m',
+            fixed_interval: options.interval,
           },
           aggs: {
             ...getHistogramIndicatorAggregations.execute({
@@ -214,19 +227,22 @@ export class GetPreviewData {
           },
         },
       },
-    };
-    const result = await this.esClient.search(options);
+    });
 
     // @ts-ignore buckets is not improperly typed
     return result.aggregations?.perMinute.buckets.map((bucket) => ({
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
+      goodEvents: bucket.good?.value ?? 0,
+      badEvents: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
+      totalEvents: bucket.total?.value ?? 0,
     }));
   }
 
   private async getCustomMetricPreviewData(
-    indicator: MetricCustomIndicator
+    indicator: MetricCustomIndicator,
+    options: Options
   ): Promise<GetPreviewDataResponse> {
     const timestampField = indicator.params.timestampField;
     const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
@@ -236,14 +252,14 @@ export class GetPreviewData {
       size: 0,
       query: {
         bool: {
-          filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
+          filter: [{ range: { [timestampField]: { gte: options.fromRange } } }, filterQuery],
         },
       },
       aggs: {
         perMinute: {
           date_histogram: {
             field: timestampField,
-            fixed_interval: '1m',
+            fixed_interval: options.interval,
           },
           aggs: {
             ...getCustomMetricIndicatorAggregation.execute({
@@ -264,11 +280,15 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
+      goodEvents: bucket.good?.value ?? 0,
+      badEvents: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
+      totalEvents: bucket.total?.value ?? 0,
     }));
   }
 
   private async getTimesliceMetricPreviewData(
-    indicator: TimesliceMetricIndicator
+    indicator: TimesliceMetricIndicator,
+    options: Options
   ): Promise<GetPreviewDataResponse> {
     const timestampField = indicator.params.timestampField;
     const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
@@ -280,14 +300,14 @@ export class GetPreviewData {
       size: 0,
       query: {
         bool: {
-          filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
+          filter: [{ range: { [timestampField]: { gte: options.fromRange } } }, filterQuery],
         },
       },
       aggs: {
         perMinute: {
           date_histogram: {
             field: timestampField,
-            fixed_interval: '1m',
+            fixed_interval: options.interval,
           },
           aggs: {
             ...getCustomMetricIndicatorAggregation.execute('metric'),
@@ -300,11 +320,15 @@ export class GetPreviewData {
     return result.aggregations?.perMinute.buckets.map((bucket) => ({
       date: bucket.key_as_string,
       sliValue: !!bucket.metric ? bucket.metric.value : null,
+      goodEvents: 0,
+      totalEvents: 0,
+      badEvents: 0,
     }));
   }
 
   private async getCustomKQLPreviewData(
-    indicator: KQLCustomIndicator
+    indicator: KQLCustomIndicator,
+    options: Options
   ): Promise<GetPreviewDataResponse> {
     const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
     const goodQuery = getElastichsearchQueryOrThrow(indicator.params.good);
@@ -315,14 +339,14 @@ export class GetPreviewData {
       size: 0,
       query: {
         bool: {
-          filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
+          filter: [{ range: { [timestampField]: { gte: options.fromRange } } }, filterQuery],
         },
       },
       aggs: {
         perMinute: {
           date_histogram: {
             field: timestampField,
-            fixed_interval: '1m',
+            fixed_interval: options.interval,
           },
           aggs: {
             good: { filter: goodQuery },
@@ -339,25 +363,32 @@ export class GetPreviewData {
         !!bucket.good && !!bucket.total
           ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
           : null,
+      goodEvents: bucket.good?.doc_count ?? 0,
+      badEvents: (bucket.total?.doc_count ?? 0) - (bucket.good?.doc_count ?? 0),
+      totalEvents: bucket.total?.doc_count ?? 0,
     }));
   }
 
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
     try {
+      const options: Options =
+        params.range === 'hour'
+          ? { fromRange: 'now-1h', interval: '1m' }
+          : { fromRange: 'now-24h', interval: '10m' };
       const type = params.indicator.type;
       switch (type) {
         case 'sli.apm.transactionDuration':
-          return this.getAPMTransactionDurationPreviewData(params.indicator);
+          return this.getAPMTransactionDurationPreviewData(params.indicator, options);
         case 'sli.apm.transactionErrorRate':
-          return this.getAPMTransactionErrorPreviewData(params.indicator);
+          return this.getAPMTransactionErrorPreviewData(params.indicator, options);
         case 'sli.kql.custom':
-          return this.getCustomKQLPreviewData(params.indicator);
+          return this.getCustomKQLPreviewData(params.indicator, options);
         case 'sli.histogram.custom':
-          return this.getHistogramPreviewData(params.indicator);
+          return this.getHistogramPreviewData(params.indicator, options);
         case 'sli.metric.custom':
-          return this.getCustomMetricPreviewData(params.indicator);
+          return this.getCustomMetricPreviewData(params.indicator, options);
         case 'sli.metric.timeslice':
-          return this.getTimesliceMetricPreviewData(params.indicator);
+          return this.getTimesliceMetricPreviewData(params.indicator, options);
         default:
           assertNever(type);
       }
