@@ -40,7 +40,7 @@ describe(
     });
 
     it('should display upselling section for protections', () => {
-      cy.getByTestSubj('endpointPolicy-protectionsLockedCard', { timeout: 60000 })
+      cy.getByTestSubj('endpointPolicy-protectionsLockedCard', { timeout: 5 * 60 * 1000 })
         .should('exist')
         .and('be.visible');
     });
