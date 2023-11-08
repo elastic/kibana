@@ -312,16 +312,18 @@ export function XYChart({
   const currentDimensions = useRef(dimensions);
 
   if (!fastIsEqual(dimensions, currentDimensions.current)) {
-    // if the dimensions have changed we request new dimensions from the client
-    // and this sets off a chain of events
-    // - the charts library will plan a render
-    // - the client will resize the container
-    // - we show the veil to hide the next step
-    // - the charts library will render the chart based on the original container dimensions
-    // - the charts library will resize the chart to the updated container dimensions
-    // - we hide the veil
-    setShowVeil(true);
+    // If the dimensions have changed we request new dimensions from the client
+    // and set off a chain of events:
+    //
+    // 1. we show the veil to hide step 4
+    // 2. the charts library will plan a render
+    // 3. the client will resize the container
+    // 4. the charts library will render the chart based on the original container dimensions
+    // 5. the charts library will resize the chart to the updated container dimensions
+    // 6. we hide the veil
+
     setDimensions(dimensions);
+    setShowVeil(true);
     currentDimensions.current = dimensions;
   }
 
