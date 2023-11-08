@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+
 import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
@@ -41,6 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
       .post(RISK_SCORE_CALCULATION_URL)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(body)
       .expect(200);
     return result;

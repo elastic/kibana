@@ -8,8 +8,4 @@ import { GenericFtrProviderContext } from '@kbn/test';
 
 import { services } from '../../test_serverless/api_integration/services';
 
-const allServices = {
-  ...services,
-  spaces: SpacesServiceProvider,
-};
-export type FtrProviderContext = GenericFtrProviderContext<typeof allServices, {}>;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

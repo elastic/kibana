@@ -10,6 +10,7 @@ import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import {
   createAlertsIndex,
   deleteAllAlerts,
@@ -41,6 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
     const { body: result } = await supertest
       .post(RISK_SCORE_PREVIEW_URL)
       .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .set('kbn-xsrf', 'true')
       .send({ ...defaultBody, ...body })
       .expect(200);

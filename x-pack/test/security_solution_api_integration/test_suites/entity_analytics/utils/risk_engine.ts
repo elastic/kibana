@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { v4 as uuidv4 } from 'uuid';
 import SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
@@ -381,7 +384,7 @@ export const clearLegacyDashboards = async ({
         '/internal/risk_score/prebuilt_content/saved_objects/_bulk_delete/hostRiskScoreDashboards'
       )
       .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200);
 
@@ -390,7 +393,7 @@ export const clearLegacyDashboards = async ({
         '/internal/risk_score/prebuilt_content/saved_objects/_bulk_delete/userRiskScoreDashboards'
       )
       .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200);
   } catch (e) {
@@ -452,7 +455,7 @@ export const riskEngineRouteHelpersFactory = (
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
-      .set('x-elastic-internal-origin', 'Kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
 
@@ -469,7 +472,7 @@ export const riskEngineRouteHelpersFactory = (
       .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
-      .set('x-elastic-internal-origin', 'Kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
 
@@ -478,7 +481,7 @@ export const riskEngineRouteHelpersFactory = (
       .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
-      .set('x-elastic-internal-origin', 'Kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
 });
@@ -492,7 +495,7 @@ export const installLegacyRiskScore = async ({
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set('x-elastic-internal-origin', 'Kibana')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send({ riskScoreEntity: 'host' })
     .expect(200);
 
@@ -500,7 +503,7 @@ export const installLegacyRiskScore = async ({
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set('x-elastic-internal-origin', 'Kibana')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send({ riskScoreEntity: 'user' })
     .expect(200);
 
@@ -510,7 +513,7 @@ export const installLegacyRiskScore = async ({
     )
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set('x-elastic-internal-origin', 'Kibana')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send()
     .expect(200);
 
@@ -520,7 +523,7 @@ export const installLegacyRiskScore = async ({
     )
     .set('kbn-xsrf', 'true')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set('x-elastic-internal-origin', 'Kibana')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send()
     .expect(200);
 };
