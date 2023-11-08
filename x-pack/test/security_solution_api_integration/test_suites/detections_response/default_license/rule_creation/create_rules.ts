@@ -467,7 +467,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid input',
+            message:
+              '[request body]: type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", saved_id: Required, and 14 more',
             statusCode: 400,
           });
         });
@@ -574,7 +575,9 @@ export default ({ getService }: FtrProviderContext) => {
             .send(rule)
             .expect(400);
 
-          expect(body.message).to.eql('[request body]: Invalid input');
+          expect(body.message).to.eql(
+            '[request body]: investigation_fields: Expected object, received array, type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", investigation_fields: Expected object, received array, investigation_fields: Expected object, received array, and 22 more'
+          );
         });
       });
     });
