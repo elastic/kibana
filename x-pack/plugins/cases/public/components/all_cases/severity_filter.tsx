@@ -5,61 +5,45 @@
  * 2.0.
  */
 
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
-import type { CaseSeverityWithAll } from '../../containers/types';
-import { SeverityAll } from '../../containers/types';
-import { severitiesWithAll } from '../severity/config';
+import type { CaseSeverity } from '../../../common/types/domain';
+import type { FilterOptions } from '../../containers/types';
+import { severities } from '../severity/config';
+import { MultiSelectFilter } from './multi_select_filter';
+import * as i18n from './translations';
 
-interface Props {
-  selectedSeverity: CaseSeverityWithAll;
-  onSeverityChange: (status: CaseSeverityWithAll) => void;
-  isLoading: boolean;
-  isDisabled: boolean;
+interface SeverityOption {
+  label: CaseSeverity;
 }
 
-export const SeverityFilter: React.FC<Props> = ({
-  selectedSeverity,
-  onSeverityChange,
-  isLoading,
-  isDisabled,
-}) => {
-  const caseSeverities = Object.keys(severitiesWithAll) as CaseSeverityWithAll[];
-  const options: Array<EuiSuperSelectOption<CaseSeverityWithAll>> = caseSeverities.map(
-    (severity) => {
-      const severityData = severitiesWithAll[severity];
-      return {
-        value: severity,
-        inputDisplay: (
-          <EuiFlexGroup
-            gutterSize="xs"
-            alignItems={'center'}
-            responsive={false}
-            data-test-subj={`case-severity-filter-${severity}`}
-          >
-            <EuiFlexItem grow={false}>
-              {severity === SeverityAll ? (
-                <EuiText size="s">{severityData.label}</EuiText>
-              ) : (
-                <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      };
-    }
-  );
+interface Props {
+  selectedOptions: CaseSeverity[];
+  onChange: ({ filterId, options }: { filterId: keyof FilterOptions; options: string[] }) => void;
+}
+
+const options = Object.keys(severities) as CaseSeverity[];
+
+export const SeverityFilter: React.FC<Props> = ({ selectedOptions, onChange }) => {
+  const renderOption = (option: SeverityOption) => {
+    const severityData = severities[option.label];
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   return (
-    <EuiSuperSelect
-      disabled={isDisabled}
-      fullWidth={true}
-      isLoading={isLoading}
+    <MultiSelectFilter<SeverityOption>
+      buttonLabel={i18n.SEVERITY}
+      id={'severity'}
+      onChange={onChange}
       options={options}
-      valueOfSelected={selectedSeverity}
-      onChange={onSeverityChange}
-      data-test-subj="case-severity-filter"
+      renderOption={renderOption}
+      selectedOptions={selectedOptions}
     />
   );
 };

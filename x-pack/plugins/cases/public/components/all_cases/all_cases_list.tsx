@@ -11,17 +11,13 @@ import { EuiProgress } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
-import type {
-  CaseUI,
-  CaseStatusWithAllStatus,
-  FilterOptions,
-  CasesUI,
-} from '../../../common/ui/types';
+import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import type { EuiBasicTableOnChange, Solution } from './types';
 
-import { SortFieldCase, StatusAll } from '../../../common/ui/types';
-import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
+import { SortFieldCase } from '../../../common/ui/types';
+import type { CaseStatuses } from '../../../common/types/domain';
+import { caseStatuses } from '../../../common/types/domain';
 import { OWNER_INFO } from '../../../common/constants';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
@@ -67,7 +63,7 @@ const mapToReadableSolutionName = (solution: string): Solution => {
 };
 
 export interface AllCasesListProps {
-  hiddenStatuses?: CaseStatusWithAllStatus[];
+  hiddenStatuses?: CaseStatuses[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
 }
@@ -160,22 +156,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
-        if (newFilterOptions?.status) {
-          if (
-            newFilterOptions.status[0] === CaseStatuses.closed &&
-            queryParams.sortField === SortFieldCase.createdAt
-          ) {
-            setQueryParams({ sortField: SortFieldCase.closedAt });
-          } else if (
-            [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
-              newFilterOptions.status[0]
-            ) &&
-            queryParams.sortField === SortFieldCase.closedAt
-          ) {
-            setQueryParams({ sortField: SortFieldCase.createdAt });
-          }
-        }
-
         deselectCases();
         setFilterOptions({
           ...newFilterOptions,
@@ -199,19 +179,11 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             : {}),
         });
       },
-      [
-        queryParams.sortField,
-        deselectCases,
-        setFilterOptions,
-        hasOwner,
-        availableSolutions,
-        owner,
-        setQueryParams,
-      ]
+      [deselectCases, setFilterOptions, hasOwner, availableSolutions, owner]
     );
 
     const { columns } = useCasesColumns({
-      filterStatus: filterOptions.status ?? StatusAll,
+      filterStatus: filterOptions.status ?? [],
       userProfiles: userProfiles ?? new Map(),
       isSelectorView,
       connectors,
@@ -270,22 +242,12 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           countInProgressCases={data.countInProgressCases}
           onFilterChanged={onFilterChangedCallback}
           availableSolutions={hasOwner ? [] : availableSolutionsLabels}
-          initial={{
-            search: filterOptions.search,
-            searchFields: filterOptions.searchFields,
-            assignees: filterOptions.assignees,
-            reporters: filterOptions.reporters,
-            tags: filterOptions.tags,
-            status: filterOptions.status,
-            owner: filterOptions.owner,
-            severity: filterOptions.severity,
-            category: filterOptions.category,
-          }}
           hiddenStatuses={hiddenStatuses}
           onCreateCasePressed={onCreateCasePressed}
           isSelectorView={isSelectorView}
           isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}
+          filterOptions={filterOptions}
         />
         <CasesTable
           columns={columns}

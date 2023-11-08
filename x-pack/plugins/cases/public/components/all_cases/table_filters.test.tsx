@@ -17,8 +17,6 @@ import {
   OWNER_INFO,
   SECURITY_SOLUTION_OWNER,
   OBSERVABILITY_OWNER,
-  MAX_TAGS_FILTER_LENGTH,
-  MAX_CATEGORY_FILTER_LENGTH,
 } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -34,15 +32,13 @@ jest.mock('../../containers/use_get_categories');
 jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 
 const onFilterChanged = jest.fn();
-const setFilterRefetch = jest.fn();
 
 const props = {
   countClosedCases: 1234,
   countOpenCases: 99,
   countInProgressCases: 54,
   onFilterChanged,
-  initial: DEFAULT_FILTER_OPTIONS,
-  setFilterRefetch,
+  filterOptions: DEFAULT_FILTER_OPTIONS,
   availableSolutions: [],
   isLoading: false,
   currentUserProfile: undefined,
@@ -65,41 +61,41 @@ describe('CasesTableFilters ', () => {
   it('should render the case status filter dropdown', () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    expect(screen.getByTestId('case-status-filter')).toBeInTheDocument();
+    expect(screen.getByTestId('options-filter-popover-button-status')).toBeInTheDocument();
   });
 
   it('should render the case severity filter dropdown', () => {
     appMockRender.render(<CasesTableFilters {...props} />);
-    expect(screen.getByTestId('case-severity-filter')).toBeTruthy();
+    expect(screen.getByTestId('options-filter-popover-button-severity')).toBeTruthy();
   });
 
   it('should call onFilterChange when the severity filter changes', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
-    userEvent.click(screen.getByTestId('case-severity-filter'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-severity'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-severity-filter-high'));
+    userEvent.click(screen.getByTestId('options-filter-popover-item-high'));
 
-    expect(onFilterChanged).toBeCalledWith({ severity: ['high'] });
+    expect(onFilterChanged).toBeCalledWith({ ...DEFAULT_FILTER_OPTIONS, severity: ['high'] });
   });
 
   it('should call onFilterChange when selected tags change', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('options-filter-popover-item-coke'));
 
-    expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
+    expect(onFilterChanged).toBeCalledWith({ ...DEFAULT_FILTER_OPTIONS, tags: ['coke'] });
   });
 
   it('should call onFilterChange when selected category changes', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-category'));
     await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('options-filter-popover-item-twix'));
 
-    expect(onFilterChanged).toBeCalledWith({ category: ['twix'] });
+    expect(onFilterChanged).toBeCalledWith({ ...DEFAULT_FILTER_OPTIONS, category: ['twix'] });
   });
 
   it('should call onFilterChange when selected assignees change', async () => {
@@ -127,7 +123,7 @@ describe('CasesTableFilters ', () => {
   it('should call onFilterChange when search changes', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    await userEvent.type(screen.getByTestId('search-cases'), 'My search{enter}');
+    userEvent.type(screen.getByTestId('search-cases'), 'My search{enter}');
 
     expect(onFilterChanged).toBeCalledWith({ search: 'My search' });
   });
@@ -135,115 +131,14 @@ describe('CasesTableFilters ', () => {
   it('should call onFilterChange when changing status', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-status'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByTestId('case-status-filter-closed'));
+    userEvent.click(screen.getByTestId('options-filter-popover-item-closed'));
 
-    expect(onFilterChanged).toBeCalledWith({ status: [CaseStatuses.closed] });
-  });
-
-  it('should remove tag from selected tags when tag no longer exists', () => {
-    const ourProps = {
-      ...props,
-      initial: {
-        ...DEFAULT_FILTER_OPTIONS,
-        tags: ['pepsi', 'rc'],
-      },
-    };
-
-    appMockRender.render(<CasesTableFilters {...ourProps} />);
-    expect(onFilterChanged).toHaveBeenCalledWith({ tags: ['pepsi'] });
-  });
-
-  it('should show warning message when maximum tags selected', async () => {
-    const newTags = Array(MAX_TAGS_FILTER_LENGTH).fill('coke');
-    (useGetTags as jest.Mock).mockReturnValue({ data: newTags, isLoading: false });
-
-    const ourProps = {
-      ...props,
-      initial: {
-        ...DEFAULT_FILTER_OPTIONS,
-        tags: newTags,
-      },
-    };
-
-    appMockRender.render(<CasesTableFilters {...ourProps} />);
-
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
-
-    await waitForEuiPopoverOpen();
-
-    expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
-  });
-
-  it('should show warning message when tags selection reaches maximum limit', async () => {
-    const newTags = Array(MAX_TAGS_FILTER_LENGTH - 1).fill('coke');
-    const tags = [...newTags, 'pepsi'];
-    (useGetTags as jest.Mock).mockReturnValue({ data: tags, isLoading: false });
-
-    const ourProps = {
-      ...props,
-      initial: {
-        ...DEFAULT_FILTER_OPTIONS,
-        tags: newTags,
-      },
-    };
-
-    appMockRender.render(<CasesTableFilters {...ourProps} />);
-
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
-
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(screen.getByTestId(`options-filter-popover-item-${tags[tags.length - 1]}`));
-
-    expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
-  });
-
-  it('should not show warning message when one of the tags deselected after reaching the limit', async () => {
-    const newTags = Array(MAX_TAGS_FILTER_LENGTH).fill('coke');
-    (useGetTags as jest.Mock).mockReturnValue({ data: newTags, isLoading: false });
-
-    const ourProps = {
-      ...props,
-      initial: {
-        ...DEFAULT_FILTER_OPTIONS,
-        tags: newTags,
-      },
-    };
-
-    appMockRender.render(<CasesTableFilters {...ourProps} />);
-
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
-
-    await waitForEuiPopoverOpen();
-
-    expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
-
-    userEvent.click(screen.getAllByTestId(`options-filter-popover-item-${newTags[0]}`)[0]);
-
-    expect(screen.queryByTestId('maximum-length-warning')).not.toBeInTheDocument();
-  });
-
-  it('should show warning message when maximum categories selected', async () => {
-    const newCategories = Array(MAX_CATEGORY_FILTER_LENGTH).fill('snickers');
-    (useGetCategories as jest.Mock).mockReturnValue({ data: newCategories, isLoading: false });
-
-    const ourProps = {
-      ...props,
-      initial: {
-        ...DEFAULT_FILTER_OPTIONS,
-        category: newCategories,
-      },
-    };
-
-    appMockRender.render(<CasesTableFilters {...ourProps} />);
-
-    userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
-
-    await waitForEuiPopoverOpen();
-
-    expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
+    expect(onFilterChanged).toBeCalledWith({
+      ...DEFAULT_FILTER_OPTIONS,
+      status: [CaseStatuses.closed],
+    });
   });
 
   it('should remove assignee from selected assignees when assignee no longer exists', async () => {
@@ -278,14 +173,6 @@ describe('CasesTableFilters ', () => {
         ],
       }
     `);
-  });
-
-  it('StatusFilterWrapper should have a fixed width of 180px', () => {
-    appMockRender.render(<CasesTableFilters {...props} />);
-
-    expect(screen.getByTestId('status-filter-wrapper')).toHaveStyleRule('flex-basis', '180px', {
-      modifier: '&&',
-    });
   });
 
   describe('Solution filter', () => {

@@ -277,11 +277,11 @@ describe('Cases API', () => {
       });
     });
 
-    it('should not send the severity field with "all" severity value', async () => {
+    it('should not send the severity field if empty', async () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          severity: ['all'],
+          severity: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -318,11 +318,11 @@ describe('Cases API', () => {
       });
     });
 
-    it('should not send the severity field with "all" status value', async () => {
+    it('should not send the status field if empty', async () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          status: ['all'],
+          status: [],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,

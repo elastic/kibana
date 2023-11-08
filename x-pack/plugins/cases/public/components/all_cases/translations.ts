@@ -176,3 +176,16 @@ export const NO_ATTACHMENTS_ADDED = i18n.translate(
     defaultMessage: 'No attachments added to the case',
   }
 );
+
+export const EMPTY_FILTER_MESSAGE = i18n.translate(
+  'xpack.cases.tableFilters.useFilters.emptyMessage',
+  {
+    defaultMessage: 'No options',
+  }
+);
+
+export const OPTIONS = (totalCount: number) =>
+  i18n.translate('xpack.cases.tableFilters.useFilters.options', {
+    defaultMessage: '{totalCount, plural, one {# option} other {# options}}',
+    values: { totalCount },
+  });

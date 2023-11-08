@@ -65,14 +65,6 @@ export interface CasesUiConfigType {
   };
 }
 
-export const StatusAll = 'all' as const;
-export type StatusAllType = typeof StatusAll;
-
-export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
-
-export const SeverityAll = 'all' as const;
-export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
-
 export const UserActionTypeAll = 'all' as const;
 export type CaseUserActionTypeWithAll = UserActionFindRequestTypes | typeof UserActionTypeAll;
 
@@ -156,8 +148,8 @@ export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
 export interface FilterOptions {
   search: string;
   searchFields: string[];
-  severity: CaseSeverityWithAll[];
-  status: CaseStatusWithAllStatus[];
+  severity: CaseSeverity[];
+  status: CaseStatuses[];
   tags: string[];
   assignees: Array<string | null> | null;
   reporters: User[];

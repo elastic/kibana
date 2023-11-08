@@ -35,7 +35,7 @@ import type {
   CasesUI,
   FilterOptions,
 } from '../../common/ui/types';
-import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
+import { SortFieldCase } from '../../common/ui/types';
 import {
   getCaseCommentsUrl,
   getCasesDeleteFileAttachmentsUrl,
@@ -252,10 +252,10 @@ export const getCases = async ({
   filterOptions = {
     search: '',
     searchFields: [],
-    severity: [SeverityAll],
+    severity: [],
     assignees: [],
     reporters: [],
-    status: [StatusAll],
+    status: [],
     tags: [],
     owner: [],
     category: [],
@@ -272,12 +272,12 @@ export const getCases = async ({
     ...removeOptionFromFilter({
       filterKey: 'status',
       filterOptions: filterOptions.status,
-      optionToBeRemoved: StatusAll,
+      optionToBeRemoved: 'all',
     }),
     ...removeOptionFromFilter({
       filterKey: 'severity',
       filterOptions: filterOptions.severity,
-      optionToBeRemoved: SeverityAll,
+      optionToBeRemoved: 'all',
     }),
     ...constructAssigneesFilter(filterOptions.assignees),
     ...constructReportersFilter(filterOptions.reporters),
