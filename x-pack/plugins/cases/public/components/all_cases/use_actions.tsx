@@ -34,7 +34,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
   disableActions,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
 
@@ -172,7 +172,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
         data-test-subj={`case-action-popover-${theCase.id}`}
         button={
           <EuiButtonIcon
-            onClick={togglePopover}
+            onClick={tooglePopover}
             iconType="boxesHorizontal"
             aria-label={i18n.ACTIONS}
             color="text"
