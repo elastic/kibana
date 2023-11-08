@@ -1,19 +1,12 @@
 # https://buildkite.com/elastic/kibana-serverless-emergency-release-branch-testing
 
-## Runs regular PR testing and builds the artifacts container image for emergency releases
+## Triggers the artifacts container image build for emergency releases
 
 notify:
   - slack: "#kibana-mission-control"
     if: "build.state == 'passed' || build.state == 'failed' || build.state == 'scheduled'"
 
 steps:
-  - trigger: "kibana-pull-request"
-    label: ":kibana: Run Kibana Pull Request Build and tests"
-    build:
-      branch: $BUILDKITE_BRANCH
-      commit: $BUILDKITE_COMMIT
-      message: Running PR build for $BUILDKITE_BRANCH
-
   - trigger: "kibana-artifacts-container-image"
     label: ":docker: Build Kibana Artifacts Container Image"
     build:
