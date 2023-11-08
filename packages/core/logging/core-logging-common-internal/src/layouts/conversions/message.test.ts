@@ -78,6 +78,21 @@ describe('MessageConversion', () => {
     ).toEqual('toString...\\u001b[5;7;6mThis is Fine\\u001b[27m');
   });
 
+  test('it should encode/escape ANSI chars lines from the error stack', () => {
+    const error = new Error('Something went bad');
+    error.stack = 'stack...\u001b[5;7;6mThis is Fine\u001b[27m';
+    expect(
+      MessageConversion.convert(
+        {
+          ...baseRecord,
+          message: 'Some message that will be ignored',
+          error,
+        },
+        false
+      )
+    ).toEqual('stack...\\u001b[5;7;6mThis is Fine\\u001b[27m');
+  });
+
   test('it should encode/escape ANSI chars lines from the error stack when not a string', () => {
     expect(
       MessageConversion.convert(
