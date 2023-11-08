@@ -12,8 +12,11 @@ import { CancellationToken, LocatorParams } from '@kbn/reporting-common';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import { createMockConfigSchema } from '../../test_helpers';
-import { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png/types';
-import { generatePngObservable, cryptoFactory } from '@kbn/reporting-export-types-helpers-server';
+import {
+  generatePngObservable,
+  cryptoFactory,
+  TaskPayloadPNGV2,
+} from '@kbn/reporting-export-types-helpers-server';
 
 jest.mock('@kbn/reporting-export-types-helpers-server/generate_png');
 

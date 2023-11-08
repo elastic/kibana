@@ -11,7 +11,7 @@ import {
   PDF_JOB_TYPE_V2,
   PNG_JOB_TYPE,
   PNG_JOB_TYPE_V2,
-} from '@kbn/reporting-export-types-helpers-public/job_types';
+} from '@kbn/reporting-common';
 import { CSV_JOB_TYPE_DEPRECATED } from './constants';
 
 // TODO: Remove this code once everyone is using the new PDF format, then we can also remove the legacy

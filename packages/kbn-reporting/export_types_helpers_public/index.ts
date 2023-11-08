@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { buildKibanaPath } from './build_kibana_path';
 export * from './constants';
 export * from './metrics';

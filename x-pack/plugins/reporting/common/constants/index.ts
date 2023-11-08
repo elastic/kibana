@@ -6,7 +6,7 @@
  */
 
 import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
-import { jobTypes, reportTypes } from '@kbn/reporting-export-types-helpers-public';
+import { jobTypes, reportTypes } from '@kbn/reporting-common';
 
 const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
 

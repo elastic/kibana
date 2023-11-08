@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import { Ensure, SerializableRecord } from '@kbn/utility-types';
+import { SerializableRecord } from '@kbn/utility-types';
+import type { BaseParams } from '@kbn/reporting-export-types-helpers-server';
 
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 // Licenses
@@ -18,20 +18,6 @@ export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed
 export interface IlmPolicyStatusResponse {
   status: IlmPolicyMigrationStatus;
 }
-
-/**
- * @deprecated
- */
-export type BaseParams = Ensure<
-  {
-    layout?: LayoutParams;
-    objectType: string;
-    title: string;
-    browserTimezone: string; // to format dates in the user's time zone
-    version: string; // to handle any state migrations
-  },
-  SerializableRecord
->;
 
 export interface LocatorParams<P extends SerializableRecord = SerializableRecord> {
   id: string;
