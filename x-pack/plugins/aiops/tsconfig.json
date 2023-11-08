@@ -66,6 +66,7 @@
     "@kbn/ml-chi2test",
     "@kbn/usage-collection-plugin",
     "@kbn/analytics",
+    "@kbn/ml-ui-actions",
   ],
   "exclude": [
     "target/**/*",
