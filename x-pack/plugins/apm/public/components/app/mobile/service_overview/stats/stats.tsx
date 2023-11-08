@@ -122,7 +122,7 @@ export function MobileStats({
     {
       color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.metrics.load.time', {
-        defaultMessage: 'Average App load time',
+        defaultMessage: 'Average app load time',
       }),
       icon: getIcon('visGauge'),
       value: data?.currentPeriod?.launchTimes?.value ?? NaN,
