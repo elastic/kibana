@@ -127,10 +127,12 @@ export function MobileStats({
       icon: getIcon('visGauge'),
       value: data?.currentPeriod?.launchTimes?.value ?? NaN,
       valueFormatter: (value: number) =>
-        Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(value, 'ms'),
+        Number.isNaN(value)
+          ? NOT_AVAILABLE_LABEL
+          : valueFormatter(value.toFixed(1), 'ms'),
       trend: data?.currentPeriod?.launchTimes?.timeseries,
       extra: getComparisonValueFormatter(
-        data?.previousPeriod.launchTimes?.value
+        data?.previousPeriod.launchTimes?.value?.toFixed(1)
       ),
       trendShape: MetricTrendShape.Area,
     },
