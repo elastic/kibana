@@ -31,7 +31,7 @@ Once uploaded to the telemetry cluster, the data telemetry is stored in
 
 In order to collect a new telemetry field you need to add a task which performs the query that collects the data from the cluster.
 
-All the available tasks are [here](https://github.com/elastic/kibana/blob/ba84602455671f0f6175bbc0fd2e8f302c60bbe6/x-pack/plugins/apm/server/lib/apm_telemetry/collect_data_telemetry/tasks.ts)
+All the available tasks are [here](https://github.com/elastic/kibana/blob/ba84602455671f0f6175bbc0fd2e8f302c60bbe6/x-pack/plugins/observability_solution/apm/server/lib/apm_telemetry/collect_data_telemetry/tasks.ts)
 
 ### Debug telemetry
 
@@ -61,7 +61,7 @@ The collection tasks also use the [`APMDataTelemetry` type](../server/lib/apm_te
 
 Running `node scripts/telemetry_check --fix` from the root Kibana directory will update the schemas which should automatically notify the Infra team when a pull request is opened so they can update the mapping in the telemetry clusters.
 
-Running `node scripts/test/jest --updateSnapshot` from the `x-pack/plugins/apm` directory will update the
+Running `node scripts/test/jest --updateSnapshot` from the `x-pack/plugins/observability_solution/apm` directory will update the
 mappings snapshot used in the jest tests.
 
 ## Behavioral Telemetry
@@ -78,8 +78,8 @@ EBT is part of the core analytics service in Kibana and the `TelemetryService` p
 
 #### Collect a new event type
 
-1. You need to define the event type in the [telemetry_events.ts](https://github.com/elastic/kibana/blob/4283802c195231f710be0d9870615fbc31382a31/x-pack/plugins/apm/public/services/telemetry/telemetry_events.ts#L36)
-2. Define the tracking method in the [telemetry_client.ts](https://github.com/elastic/kibana/blob/4283802c195231f710be0d9870615fbc31382a31/x-pack/plugins/apm/public/services/telemetry/telemetry_client.ts#L18)
+1. You need to define the event type in the [telemetry_events.ts](https://github.com/elastic/kibana/blob/4283802c195231f710be0d9870615fbc31382a31/x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_events.ts#L36)
+2. Define the tracking method in the [telemetry_client.ts](https://github.com/elastic/kibana/blob/4283802c195231f710be0d9870615fbc31382a31/x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts#L18)
 3. Use the tracking method with the telemetry client (`telemetry.reportSearchQuerySumbitted({property: test})`)
 
 In addition to the custom properties, analytics module automatically sends context properties. The list of the properties can be found [here](https://docs.elastic.dev/telemetry/collection/event-based-telemetry-context#browser-context)

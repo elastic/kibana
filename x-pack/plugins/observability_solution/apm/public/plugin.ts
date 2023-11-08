@@ -349,7 +349,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       order: 8300,
       euiIconType: 'logoObservability',
       appRoute: '/app/apm',
-      icon: 'plugins/apm/public/icon.svg',
+      icon: 'plugins/observability_solution/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
       navLinkStatus: AppNavLinkStatus.visible,
       deepLinks: [

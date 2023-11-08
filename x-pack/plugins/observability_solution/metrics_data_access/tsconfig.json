@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../typings/**/*", "server/**/*", "common/**/*", "public/**/*"],
+  "include": ["../../../../typings/**/*", "server/**/*", "common/**/*", "public/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",

@@ -33,11 +33,12 @@ type ConvertibleDeclaration =
   | MethodDeclaration;
 
 const project = new Project({
-  tsConfigFilePath: Path.resolve(__dirname, '../../../../../tsconfig.json'),
+  tsConfigFilePath: Path.resolve(__dirname, '../../../../../../tsconfig.json'),
 });
 
 const glob =
-  (argv.glob as string | undefined) || 'x-pack/plugins/apm/server/**/route.ts';
+  (argv.glob as string | undefined) ||
+  'x-pack/plugins/observability_solution/apm/server/**/route.ts';
 
 const files = project.getSourceFiles(glob);
 

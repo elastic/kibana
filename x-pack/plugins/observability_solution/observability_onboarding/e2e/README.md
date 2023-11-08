@@ -24,6 +24,7 @@ node x-pack/plugins/observability_onboarding/scripts/test/e2e --server
 ```
 
 ### Run tests
+
 Runs all tests in the terminal
 
 ```
@@ -31,21 +32,23 @@ node x-pack/plugins/observability_onboarding/scripts/test/e2e --runner
 ```
 
 ### Open cypress dashboard
+
 Opens cypress dashboard, there it's possible to select what test you want to run.
 
 ```
 node x-pack/plugins/observability_onboarding/scripts/test/e2e --open
 ```
+
 ### Arguments
 
-| Option       | Description                                     |
-| ------------ | ----------------------------------------------- |
-| --server     | Only start ES and Kibana                        |
-| --runner     | Only run tests                                  |
-| --spec       | Specify the specs to run                        |
-| --times      | Repeat the test n number of times               |
-| --bail       | stop tests after the first failure              |
+| Option   | Description                        |
+| -------- | ---------------------------------- |
+| --server | Only start ES and Kibana           |
+| --runner | Only run tests                     |
+| --spec   | Specify the specs to run           |
+| --times  | Repeat the test n number of times  |
+| --bail   | stop tests after the first failure |
 
 ```
-node x-pack/plugins/observability_onboarding/scripts/test/e2e.js --runner --spec cypress/e2e/home.cy.ts --times 2
+node x-pack/plugins/observability_solution/observability_onboarding/scripts/test/e2e.js --runner --spec cypress/e2e/home.cy.ts --times 2
 ```

@@ -29,7 +29,9 @@ export function Introduction({ isBeta, guideLink }: IntroductionProps) {
     />
   );
 
-  const previewImage = useKibanaUrl('/plugins/apm/assets/apm.png');
+  const previewImage = useKibanaUrl(
+    '/plugins/observability_solution/apm/assets/apm.png'
+  );
 
   const rightSideItems = [
     <EuiImage

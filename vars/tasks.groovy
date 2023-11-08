@@ -150,7 +150,7 @@ def functionalXpack(Map params = [:]) {
     }
 
     whenChanged([
-      'x-pack/plugins/apm/',
+      'x-pack/plugins/observability_solution/apm/',
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-APMCypress', './test/scripts/jenkins_apm_cypress.sh'))
@@ -158,7 +158,7 @@ def functionalXpack(Map params = [:]) {
     }
 
     whenChanged([
-      'x-pack/plugins/synthetics/',
+      'x-pack/plugins/observability_solution/synthetics/',
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
@@ -166,7 +166,7 @@ def functionalXpack(Map params = [:]) {
     }
 
     whenChanged([
-      'x-pack/plugins/ux/',
+      'x-pack/plugins/observability_solution/ux/',
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-uxPluginSynthetics', './test/scripts/jenkins_ux_synthetics.sh'))

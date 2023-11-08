@@ -13,4 +13,4 @@ echo "--- Uptime plugin @elastic/synthetics Tests"
 
 cd "$XPACK_DIR"
 
-node plugins/uptime/scripts/uptime_e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}
+node plugins/observability_solution/uptime/scripts/uptime_e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}

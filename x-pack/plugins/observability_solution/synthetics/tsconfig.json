@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "scripts/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
+  "include": [
+    "common/**/*",
+    "scripts/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../typings/**/*"
+  ],
   "kbn_references": [
     "@kbn/alerting-plugin",
     "@kbn/ml-plugin",

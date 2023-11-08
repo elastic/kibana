@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         `${MOCKED_PUBLIC_BASE_URL}/internal/observability_onboarding`
       );
       expect(request.body.scriptDownloadUrl).to.be(
-        `${MOCKED_PUBLIC_BASE_URL}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`
+        `${MOCKED_PUBLIC_BASE_URL}/plugins/observability_solution/observabilityOnboarding/assets/standalone_agent_setup.sh`
       );
     });
   });
@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         `${MOCKED_KIBANA_URL}/internal/observability_onboarding`
       );
       expect(request.body.scriptDownloadUrl).to.be(
-        `${MOCKED_KIBANA_URL}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`
+        `${MOCKED_KIBANA_URL}/plugins/observability_solution/observabilityOnboarding/assets/standalone_agent_setup.sh`
       );
     });
   });

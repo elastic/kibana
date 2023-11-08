@@ -7,9 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/synthetics'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/synthetics',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/plugins/observability_solution/synthetics'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/synthetics',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/synthetics/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/observability_solution/synthetics/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };

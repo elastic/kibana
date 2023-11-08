@@ -96,6 +96,6 @@ It allows you to monitor the performance of thousands of applications in real ti
         isFleetPluginEnabled,
         cloudSetup: cloud,
       }),
-      previewImagePath: '/plugins/apm/assets/apm.png',
+      previewImagePath: '/plugins/observability_solution/apm/assets/apm.png',
     } as TutorialSchema;
   };

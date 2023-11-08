@@ -929,8 +929,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 # Actionable observability
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/observability_functional @elastic/actionable-observability
-x-pack/plugins/infra/public/alerting @elastic/actionable-observability
-x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
+x-pack/plugins/observability_solution/infra/public/alerting @elastic/actionable-observability
+x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/actionable-observability
 
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
@@ -975,16 +975,16 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
-/x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
-/x-pack/plugins/apm/public/components/app/rum_dashboard @elastic/uptime
+/x-pack/plugins/observability_solution/apm/public/application/uxApp.tsx @elastic/uptime
+/x-pack/plugins/observability_solution/apm/public/components/app/rum_dashboard @elastic/uptime
 /x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
 # Observability onboarding tour
-/x-pack/plugins/observability_shared/public/components/tour @elastic/platform-onboarding
+/x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/platform-onboarding
 /x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding
 
 # Observability settings
-/x-pack/plugins/observability/server/ui_settings.ts @elastic/obs-docs
+/x-pack/plugins/observability_solution/observability/server/ui_settings.ts @elastic/obs-docs
 
 ### END Observability Plugins
 
@@ -1413,8 +1413,8 @@ x-pack/test/detection_engine_api_integration/security_and_spaces/group10/risk_en
 **/*.scss @elastic/kibana-design
 
 # Observability design
-/x-pack/plugins/apm/**/*.scss @elastic/observability-design
-/x-pack/plugins/infra/**/*.scss @elastic/observability-design
+/x-pack/plugins/observability_solution/apm/**/*.scss @elastic/observability-design
+/x-pack/plugins/observability_solution/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/fleet/**/*.scss @elastic/observability-design
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
@@ -1443,7 +1443,7 @@ x-pack/plugins/translations/translations
 x-pack/test/profiling_api_integration @elastic/profiling-ui
 
 # Observability shared profiling
-x-pack/plugins/observability_shared/public/components/profiling @elastic/profiling-ui
+x-pack/plugins/observability_solution/observability_shared/public/components/profiling @elastic/profiling-ui
 
 # Shared UX
 packages/react @elastic/appex-sharedux

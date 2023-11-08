@@ -27,7 +27,9 @@ export function getAppName(fileName: string, cwd: string) {
     }, new Set<string>())
   );
 
-  const relativePathArray = relativePathToFile.split('/');
+  const relativePathArray = relativePathToFile
+    .split('/')
+    .filter((el) => el !== 'observability_solution');
 
   const appName = camelCase(
     packageDirs.reduce((acc, repoPath) => {

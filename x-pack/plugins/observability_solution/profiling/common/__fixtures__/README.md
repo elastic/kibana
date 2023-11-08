@@ -1,6 +1,6 @@
 The stacktrace fixtures in this directory are originally from Elasticsearch's
 `POST /_profiling/stacktraces` endpoint. They were subsequently filtered
-through the `shrink_stacktrace_response.js` command in `x-pack/plugins/profiling/scripts/`
+through the `shrink_stacktrace_response.js` command in `x-pack/plugins/observability_solution/profiling/scripts/`
 to reduce the size without losing sampling fidelity (see the script for further
 details).
 

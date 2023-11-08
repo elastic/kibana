@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/observability_log_explorer'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/plugins/observability_solution/observability_log_explorer'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_log_explorer',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/observability_log_explorer',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_log_explorer/{common,public}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/plugins/observability_solution/observability_log_explorer/{common,public}/**/*.{ts,tsx}',
   ],
 };

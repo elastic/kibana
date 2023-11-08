@@ -25,7 +25,7 @@ const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
 
 /*
  * This template contains:
- *  - The Shared Observability Nav (https://github.com/elastic/kibana/blob/f7698bd8aa8787d683c728300ba4ca52b202369c/x-pack/plugins/observability/public/components/shared/page_template/README.md)
+ *  - The Shared Observability Nav (https://github.com/elastic/kibana/blob/f7698bd8aa8787d683c728300ba4ca52b202369c/x-pack/plugins/observability_solution/observability/public/components/shared/page_template/README.md)
  *  - The APM Header Action Menu
  *  - Page title
  *

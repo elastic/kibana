@@ -14,9 +14,16 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
   const relativePathToFile = dir.replace(cwd, '');
 
-  const relativePathArray = relativePathToFile.split('/');
+  const relativePathArray = relativePathToFile.split('/').slice(2);
 
-  const path = `${relativePathArray[2]}/${relativePathArray[3]}`;
+  const publicFolderIndex = relativePathArray.findIndex((el) => el === 'public');
+
+  const path = relativePathArray.reduce((acc, curr, index) => {
+    if (index < publicFolderIndex) {
+      return index === 0 ? curr : `${acc}/${curr}`;
+    }
+    return acc;
+  }, '');
 
   const xpackRC = resolve(join(__dirname, '../../../'), 'x-pack/.i18nrc.json');
 

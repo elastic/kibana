@@ -45,7 +45,7 @@ There's also a `rest_api` folder that defines the structure of the RESTful API e
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
 ```
-yarn test:jest x-pack/plugins/synthetics
+yarn test:jest x-pack/plugins/observability_solution/synthetics
 ```
 
 ### Functional tests

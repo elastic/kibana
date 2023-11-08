@@ -16,7 +16,10 @@ const root = resolve(__dirname, '../../../..');
 
 const execaOpts = { cwd: root, stderr: 'pipe' };
 
-const tsconfig = resolve(root, 'x-pack/plugins/apm/tsconfig.json');
+const tsconfig = resolve(
+  root,
+  'x-pack/plugins/observability_solution/apm/tsconfig.json'
+);
 
 const testTsconfig = resolve(root, 'x-pack/test/tsconfig.json');
 

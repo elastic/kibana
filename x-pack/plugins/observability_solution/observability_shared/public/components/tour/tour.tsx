@@ -130,7 +130,9 @@ const getSteps = ({
                 <EuiSpacer size="m" />
                 <EuiImage
                   alt={imageConfig.altText}
-                  src={prependBasePath(`/plugins/observability/assets/${imageConfig.name}`)}
+                  src={prependBasePath(
+                    `/plugins/observability_solution/observability/assets/${imageConfig.name}`
+                  )}
                   size="fullWidth"
                 />
               </>
