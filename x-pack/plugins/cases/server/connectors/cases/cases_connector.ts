@@ -12,8 +12,9 @@ import { pick } from 'lodash';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import pMap from 'p-map';
+import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
-import { AttachmentType } from '../../../common';
+import { ConnectorTypes, AttachmentType } from '../../../common';
 import { CASES_CONNECTOR_SUB_ACTION, MAX_CONCURRENT_REQUEST_ATTACH_ALERTS } from './constants';
 import type {
   BulkCreateOracleRecordRequest,
@@ -121,6 +122,7 @@ export class CasesConnector extends SubActionConnector<
     );
 
     const groupedAlertsWithCases = await this.bulkGetOrCreateCases(
+      params,
       casesClient,
       groupedAlertsWithCaseId
     );
@@ -259,9 +261,11 @@ export class CasesConnector extends SubActionConnector<
   }
 
   private async bulkGetOrCreateCases(
+    params: CasesConnectorRunParams,
     casesClient: CasesClient,
     groupedAlertsWithCaseId: Map<string, GroupedAlertsWithCaseId>
   ): Promise<Map<string, GroupedAlertsWithCases>> {
+    const bulkCreateReq: BulkCreateCasesRequest['cases'] = [];
     const casesMap = new Map<string, GroupedAlertsWithCases>();
 
     const ids = Array.from(groupedAlertsWithCaseId.values()).map(({ caseId }) => caseId);
@@ -279,8 +283,34 @@ export class CasesConnector extends SubActionConnector<
     }
 
     /**
-     * TODO: Bulk create cases that do not exist (404)
+     * TODO: Handle different type of errors
      */
+    for (const error of errors) {
+      if (groupedAlertsWithCaseId.has(error.caseId) && error.status === 404) {
+        bulkCreateReq.push({
+          description: '',
+          tags: [],
+          title: '',
+          connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+          settings: { syncAlerts: false },
+          owner: params.owner,
+        });
+      }
+    }
+
+    if (bulkCreateReq.length === 0) {
+      return casesMap;
+    }
+
+    const bulkCreateCasesResponse = await casesClient.cases.bulkCreate({ cases: bulkCreateReq });
+
+    for (const res of bulkCreateCasesResponse.cases) {
+      if (groupedAlertsWithCaseId.has(res.id)) {
+        const data = groupedAlertsWithCaseId.get(res.id) as GroupedAlertsWithCaseId;
+        casesMap.set(res.id, { ...data, theCase: res });
+      }
+    }
+
     return casesMap;
   }
 

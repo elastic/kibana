@@ -148,6 +148,7 @@ describe('CasesConnector', () => {
       });
 
       casesClientMock.cases.bulkGet.mockResolvedValue({ cases, errors: [] });
+      casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
 
       getCasesClient.mockReturnValue(casesClientMock);
 
@@ -258,6 +259,67 @@ describe('CasesConnector', () => {
           expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
             ids: ['mock-id-1', 'mock-id-2', 'mock-id-3'],
           });
+        });
+
+        it('creates non existing cases', async () => {
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[2]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [cases[0], cases[1]],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-3',
+              },
+              {
+                error: 'Forbidden',
+                message: 'Unauthorized to access case',
+                status: 403,
+                caseId: 'mock-id-3',
+              },
+            ],
+          });
+
+          await connector.run({ alerts, groupingBy, owner, rule });
+
+          expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
+            cases: [
+              {
+                title: '',
+                description: '',
+                owner: 'cases',
+                settings: {
+                  syncAlerts: false,
+                },
+                tags: [],
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+              },
+            ],
+          });
+        });
+
+        it('does not creates when there are no 404 errors', async () => {
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [cases[0], cases[1]],
+            errors: [
+              {
+                error: 'Forbidden',
+                message: 'Unauthorized to access case',
+                status: 403,
+                caseId: 'mock-id-3',
+              },
+            ],
+          });
+
+          await connector.run({ alerts, groupingBy, owner, rule });
+
+          expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
         });
       });
 
