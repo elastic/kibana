@@ -85,7 +85,6 @@ const executeSubAction = async ({
 export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const securityService = getService('security');
 
   describe('Sub action framework', () => {
     const objectRemover = new ObjectRemover(supertest);
