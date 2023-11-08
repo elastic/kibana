@@ -87,7 +87,6 @@ const navigationTree: NavigationTreeDefinition = {
         {
           title: CONNECTORS_LABEL,
           link: 'serverlessConnectors',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
         },
         {
           link: 'management:api_keys',
