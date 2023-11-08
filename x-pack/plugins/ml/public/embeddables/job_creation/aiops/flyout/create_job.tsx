@@ -79,7 +79,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
   // const toggleStopOnWarn = useCallback(() => setStopOnWarn(!stopOnWarn), [stopOnWarn]);
 
   useMemo(() => {
-    const newJobCapsService = new NewJobCapsService();
+    const newJobCapsService = new NewJobCapsService(mlApiServices);
     newJobCapsService.initializeFromDataVIew(dataView).then(() => {
       const options: EuiComboBoxOptionOption[] = [
         ...createFieldOptions(newJobCapsService.categoryFields, []),
@@ -89,7 +89,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       setCategoryFieldsOptions(options);
       // setCategoryFields(newJobCapsService.categoryFields);
     });
-  }, [dataView]);
+  }, [dataView, mlApiServices]);
 
   const quickJobCreator = useMemo(
     () =>
