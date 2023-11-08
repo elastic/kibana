@@ -6,6 +6,7 @@
  */
 
 import type { NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { TagsCapabilities } from '../../common';
 import { ITagsCache, ITagInternalClient } from '../services';
@@ -30,6 +31,7 @@ interface GetUiApiOptions {
   cache: ITagsCache;
   client: ITagInternalClient;
   notifications: NotificationsStart;
+  spaces?: SpacesApi;
 }
 
 export const getUiApi = ({
@@ -39,6 +41,7 @@ export const getUiApi = ({
   overlays,
   theme,
   notifications,
+  spaces,
 }: GetUiApiOptions): SavedObjectsTaggingApiUi => {
   const components = getComponents({
     cache,
