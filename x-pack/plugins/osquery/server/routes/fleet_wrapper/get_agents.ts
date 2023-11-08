@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { ListWithKuery } from '@kbn/fleet-plugin/server/types';
 import { getAgentsRequestQuerySchema } from '../../../common/api';
 import type { GetAgentsRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -35,10 +36,22 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
       async (context, request, response) => {
         let agents;
         try {
-          agents = await osqueryContext.service
-            .getAgentService()
-            ?.asInternalUser // @ts-expect-error update types
-            .listAgents(request.query);
+          agents = await osqueryContext.service.getAgentService()?.asInternalUser.listAgents({
+            ...(request.query as ListWithKuery & { showInactive: boolean }),
+            aggregations: {
+              platforms: {
+                terms: {
+                  field: 'local_metadata.os.platform',
+                },
+              },
+              policies: {
+                terms: {
+                  field: 'policy_id',
+                  size: 2000,
+                },
+              },
+            },
+          });
         } catch (error) {
           return response.badRequest({ body: error });
         }

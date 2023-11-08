@@ -13,6 +13,8 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common/types';
 
@@ -72,6 +74,7 @@ export interface AgentClient {
   listAgents(
     options: ListWithKuery & {
       showInactive: boolean;
+      aggregations?: Record<string, AggregationsAggregationContainer>;
     }
   ): Promise<{
     agents: Agent[];
@@ -99,6 +102,7 @@ class AgentClientImpl implements AgentClient {
   public async listAgents(
     options: ListWithKuery & {
       showInactive: boolean;
+      aggregations?: Record<string, AggregationsAggregationContainer>;
     }
   ) {
     await this.#runPreflight();

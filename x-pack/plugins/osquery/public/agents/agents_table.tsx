@@ -22,7 +22,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../common/lib/kibana';
 import { useAllAgents } from './use_all_agents';
-import { useAgentGroups } from './use_agent_groups';
+
 import { AgentGrouper } from './agent_grouper';
 import {
   getNumAgentsInGrouping,
@@ -68,20 +68,15 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     [searchValue]
   );
 
-  // grouping related
-  const {
-    isLoading: groupsLoading,
-    data: agentGroupsData,
-    isFetched: groupsFetched,
-  } = useAgentGroups();
   const {
     isLoading: agentsLoading,
-    data: agents,
+    data,
     isFetched: agentsFetched,
   } = useAllAgents(debouncedSearchValue, {
     perPage,
   });
 
+  const { agents, total, groups } = data ?? { agents: [], total: 0, groups: {} };
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
@@ -101,7 +96,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         selectedGroups: SelectedGroups;
       } = generateAgentSelection(selection);
       if (newAgentSelection.allAgentsSelected) {
-        setNumAgentsSelected(agentGroupsData?.total ?? 0);
+        setNumAgentsSelected(total ?? 0);
       } else {
         const checkAgent = generateAgentCheck(selectedGroups);
         setNumAgentsSelected(
@@ -110,14 +105,14 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
             // add the number of agents added via policy and platform groups
             getNumAgentsInGrouping(selectedGroups) -
             // subtract the number of agents double counted by policy/platform selections
-            getNumOverlapped(selectedGroups, agentGroupsData?.groups?.overlap ?? {})
+            getNumOverlapped(selectedGroups, groups?.overlap ?? {})
         );
       }
 
       onChange(newAgentSelection);
       setSelectedOptions(selection);
     },
-    [agentGroupsData, onChange]
+    [groups?.overlap, onChange, total]
   );
 
   useEffect(() => {
@@ -159,24 +154,20 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   }, [agentSelection, onSelection, options, selectedOptions]);
 
   useEffect(() => {
-    if (agentsFetched && groupsFetched && agentGroupsData) {
+    if (agentsFetched && groups) {
       // Cap policies to 10 on init dropdown
-      const policies = (agentGroupsData?.groups.policies || []).slice(
-        0,
-        searchValue === '' ? 10 : undefined
-      );
+      const policies = (groups?.policies || []).slice(0, searchValue === '' ? 10 : undefined);
 
       const grouper = new AgentGrouper();
       // update the groups when groups or agents have changed
-      grouper.setTotalAgents(agentGroupsData?.total);
-      grouper.updateGroup(AGENT_GROUP_KEY.Platform, agentGroupsData?.groups.platforms);
+      grouper.setTotalAgents(total);
+      grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups?.platforms ?? []);
       grouper.updateGroup(AGENT_GROUP_KEY.Policy, policies);
-      // @ts-expect-error update types
       grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
       const newOptions = grouper.generateOptions();
       setOptions((prevOptions) => (!deepEqual(prevOptions, newOptions) ? newOptions : prevOptions));
     }
-  }, [groupsLoading, agents, agentsFetched, groupsFetched, agentGroupsData, searchValue]);
+  }, [agents, agentsFetched, groups, searchValue, total]);
 
   const renderOption = useCallback((option, searchVal, contentClassName) => {
     const { label, value } = option;
@@ -201,7 +192,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     setModifyingSearch(v !== '');
     setSearchValue(v);
   }, []);
-  const isFetched = groupsFetched && agentsFetched && agentGroupsData;
+  const isFetched = agentsFetched && groups;
 
   const renderNoAgentAvailableWarning = () => {
     if (isFetched && !options.length) {
@@ -243,7 +234,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
           <EuiComboBox
             data-test-subj="agentSelection"
             placeholder={SELECT_AGENT_LABEL}
-            isLoading={groupsLoading || agentsLoading || modifyingSearch}
+            isLoading={agentsLoading || modifyingSearch}
             options={options}
             isClearable={true}
             fullWidth={true}
