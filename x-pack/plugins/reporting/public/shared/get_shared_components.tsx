@@ -6,12 +6,9 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
+import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-common';
+import { PDF_REPORT_TYPE, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-common/report_types';
 import React from 'react';
-import {
-  PDF_REPORT_TYPE,
-  PDF_REPORT_TYPE_V2,
-  PNG_REPORT_TYPE_V2,
-} from '@kbn/reporting-export-types-helpers-public/report_types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
