@@ -251,6 +251,45 @@ function waitForProject(projectId: string, apiKey: string): Promise<void> {
   return pRetry(fetchProjectStatusAttempt, retryOptions);
 }
 
+// Wait until application is ready
+function waitForLoginToWork(kbUrl: string, username: string, password: string): Promise<void> {
+  const body = {
+    providerType: 'basic',
+    providerName: 'cloud-basic',
+    currentURL: '/',
+    params: { username, password },
+  };
+
+  const fetchLoginStatusAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if login can be performed.`);
+    const response = await axios.post(`${kbUrl}/internal/security/login`, body, {
+      headers: {
+        'kbn-xsrf': 'cypress-creds',
+        'x-elastic-internal-origin': 'security-solution',
+        'elastic-api-version': '2023-10-31',
+      },
+    });
+    if (response.data.status !== '200') {
+      throw new Error('Cannot login. Retrying in 20s...');
+    } else {
+      log.info('Login can be performed successfully');
+    }
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info('Project is not reachable. Retrying login in 20s...');
+      } else {
+        log.info(error);
+      }
+    },
+    retries: 100,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+  return pRetry(fetchLoginStatusAttempt, retryOptions);
+}
+
 export const cli = () => {
   run(
     async () => {
@@ -400,6 +439,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               return process.exit(1);
             }
 
+            await waitForProject(environment.id, API_KEY);
+
             // Reset credentials for elastic user
             const credentials = await resetCredentials(environment.id, id, API_KEY);
 
@@ -408,8 +449,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               // eslint-disable-next-line no-process-exit
               return process.exit(1);
             }
-
-            await waitForProject(environment.id, API_KEY);
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = btoa(`${credentials.username}:${credentials.password}`);
@@ -420,7 +459,12 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             // Wait until Kibana is available
             await waitForKibanaAvailable(environment.kb_url, auth, id);
 
-            delay(480000);
+            // Wait for Login
+            await waitForLoginToWork(
+              environment.kb_url,
+              credentials.username,
+              credentials.password
+            );
 
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
