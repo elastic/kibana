@@ -151,6 +151,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
+  const renderId = useRef(1);
 
   const {
     services: {
@@ -324,6 +325,16 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
     [columns, dispatch, onRemoveColumn, timelineId]
   );
 
+  const onFieldEdited = useCallback(() => {
+    console.log('holla');
+    refetch();
+    renderId.current += 1;
+  }, [refetch]);
+
+  const wrappedOnFieldEdited = useCallback(async () => {
+    onFieldEdited();
+  }, [onFieldEdited]);
+
   const sidebarPanel = useMemo(
     () => (
       <EuiFlexGroup gutterSize="none" className="test-gr">
@@ -342,7 +353,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
               onAddFieldToWorkspace={onAddFieldToWorkspace}
               onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
               onAddFilter={onAddFilter}
-              onFieldEdited={async () => Promise.resolve(refetch())}
+              onFieldEdited={wrappedOnFieldEdited}
             />
           ) : null}
         </EuiFlexItem>
@@ -358,52 +369,58 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
       onAddFieldToWorkspace,
       onAddFilter,
       onRemoveFieldFromWorkspace,
-      refetch,
+      wrappedOnFieldEdited,
     ]
   );
 
-  const table = useMemo(
-    () => (
-      <DataGridMemoized
-        columns={columns}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        itemsPerPage={itemsPerPage}
-        itemsPerPageOptions={itemsPerPageOptions}
-        sort={sort}
-        events={events}
-        refetch={refetch}
-        dataLoadingState={dataLoadingState}
-        totalCount={totalCount}
-        onEventClosed={onEventClosed}
-        expandedDetail={expandedDetail}
-        showExpandedDetails={showExpandedDetails}
-        onChangePage={onChangePage}
-        activeTab={activeTab}
-        updatedAt={updatedAt}
-        isTextBasedQuery={isTextBasedQuery}
-      />
-    ),
-    [
-      activeTab,
-      columns,
-      dataLoadingState,
-      events,
-      expandedDetail,
-      isTextBasedQuery,
-      itemsPerPage,
-      itemsPerPageOptions,
-      onChangePage,
-      onEventClosed,
-      refetch,
-      rowRenderers,
-      showExpandedDetails,
-      sort,
-      timelineId,
-      totalCount,
-      updatedAt,
-    ]
-  );
+  const table = useMemo(() => {
+    console.log('updatin', renderId.current, columns);
+    if (renderId.current) {
+      return (
+        <DataGridMemoized
+          columns={columns}
+          rowRenderers={rowRenderers}
+          timelineId={timelineId}
+          itemsPerPage={itemsPerPage}
+          itemsPerPageOptions={itemsPerPageOptions}
+          sort={sort}
+          events={events}
+          refetch={refetch}
+          onFieldEdited={onFieldEdited}
+          dataLoadingState={dataLoadingState}
+          totalCount={totalCount}
+          onEventClosed={onEventClosed}
+          expandedDetail={expandedDetail}
+          showExpandedDetails={showExpandedDetails}
+          onChangePage={onChangePage}
+          activeTab={activeTab}
+          updatedAt={updatedAt}
+          isTextBasedQuery={isTextBasedQuery}
+          renderId={renderId.current}
+        />
+      );
+    }
+  }, [
+    activeTab,
+    columns,
+    dataLoadingState,
+    events,
+    expandedDetail,
+    isTextBasedQuery,
+    itemsPerPage,
+    itemsPerPageOptions,
+    onChangePage,
+    onEventClosed,
+    refetch,
+    onFieldEdited,
+    renderId,
+    rowRenderers,
+    showExpandedDetails,
+    sort,
+    timelineId,
+    totalCount,
+    updatedAt,
+  ]);
 
   if (!dataView) {
     return null;

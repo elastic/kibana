@@ -7,7 +7,7 @@
 
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 
 import * as i18n from './translations';
 
@@ -40,16 +40,16 @@ export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
   ({ compact = false, updatedAt, showUpdating = false }) => {
     const [date, setDate] = useState(Date.now());
 
-    function tick() {
+    const tick = useCallback(() => {
       setDate(Date.now());
-    }
+    }, []);
 
     useEffect(() => {
       const timerID = setInterval(() => tick(), 10000);
       return () => {
         clearInterval(timerID);
       };
-    }, []);
+    }, [tick]);
 
     const updateText = useMemo(() => {
       if (showUpdating) {

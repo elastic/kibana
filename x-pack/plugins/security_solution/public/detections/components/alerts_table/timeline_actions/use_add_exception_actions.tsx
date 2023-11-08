@@ -70,21 +70,21 @@ export const useAlertExceptionActions = ({
   isEndpointAlert,
   onAddExceptionTypeClick,
 }: UseExceptionActionProps) => {
-  const { exceptionActionItems } = useExceptionActions({
-    isEndpointAlert,
-    onAddExceptionTypeClick,
-  });
+  // const { exceptionActionItems } = useExceptionActions({
+  //   isEndpointAlert,
+  //   onAddExceptionTypeClick,
+  // });
 
-  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
-  // Endpoint exceptions are available for:
-  // Serverless Endpoint Essentials/Complete PLI and
-  // on ESS Security Kibana sub-feature Endpoint Exceptions (enabled when Security feature is enabled)
-  if (!canWriteEndpointExceptions) {
-    return {
-      exceptionActionItems: exceptionActionItems.map((item) => {
-        return { ...item, disabled: item.name === ACTION_ADD_ENDPOINT_EXCEPTION };
-      }),
-    };
-  }
-  return { exceptionActionItems };
+  // const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
+  // // Endpoint exceptions are available for:
+  // // Serverless Endpoint Essentials/Complete PLI and
+  // // on ESS Security Kibana sub-feature Endpoint Exceptions (enabled when Security feature is enabled)
+  // if (!canWriteEndpointExceptions) {
+  //   return {
+  //     exceptionActionItems: exceptionActionItems.map((item) => {
+  //       return { ...item, disabled: item.name === ACTION_ADD_ENDPOINT_EXCEPTION };
+  //     }),
+  //   };
+  // }
+  return { exceptionActionItems: [] };
 };
