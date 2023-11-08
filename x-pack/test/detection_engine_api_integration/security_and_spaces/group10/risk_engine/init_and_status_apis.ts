@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_enginesaved_object';
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   cleanRiskEngineConfig,
