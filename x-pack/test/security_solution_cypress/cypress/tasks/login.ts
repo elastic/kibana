@@ -8,11 +8,11 @@
 import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
-import { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
+import { LoginState } from '@kbn/security-plugin/common/login_state';
 import { LOGOUT_URL } from '../urls/navigation';
-import { rootRequest } from './common';
+import { API_HEADERS, rootRequest } from './common';
 import {
   CLOUD_SERVERLESS,
   ELASTICSEARCH_PASSWORD,
@@ -210,6 +210,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
   }
 
   // Programmatically authenticate without interacting with the Kibana login page.
+
   rootRequest<LoginState>({
     url: `${baseUrl}/internal/security/login_state`,
   }).then((loginState) => {
@@ -217,8 +218,8 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
       (provider) => provider.type === 'basic'
     );
 
-    const myLogin = rootRequest({
-      url: `${baseUrl}/internal/security/login`,
+    cy.request({
+      url: '/internal/security/login',
       method: 'POST',
       body: {
         providerType: basicProvider?.type,
@@ -226,12 +227,9 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
         currentURL: '/',
         params: { username, password },
       },
+      headers: API_HEADERS,
+
       retryOnStatusCodeFailure: true,
     });
-
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(3000);
-
-    return myLogin;
   });
 };
