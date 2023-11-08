@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-require('../setup_node_env/dist');
-require('../setup_node_env/root');
-require('./apm')();
-require('../setup_node_env/mute_libraries');
-require('./cli');
+// disable moment deprecation warnings
+var moment = require('moment');
+moment.suppressDeprecationWarnings = true;
