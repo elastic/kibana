@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../../../../../pr-kibana/kibana/x-pack/test/security_solution_api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection keyword family data types', function () {
