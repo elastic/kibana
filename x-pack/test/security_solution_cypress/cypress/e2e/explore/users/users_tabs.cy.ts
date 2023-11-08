@@ -13,15 +13,14 @@ import {
 } from '../../../screens/users/user_authentications';
 import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../../screens/users/user_events';
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/user_risk_score';
-import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit, visitUserDetailsPage } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitUserDetailsPage, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { USERS_URL } from '../../../urls/navigation';
 
-describe('Users stats and tables', () => {
+describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'users' });
 
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });
@@ -29,7 +28,7 @@ describe('Users stats and tables', () => {
 
   beforeEach(() => {
     login();
-    visit(USERS_URL);
+    visitWithTimeRange(USERS_URL);
   });
 
   after(() => {

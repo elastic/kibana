@@ -11,7 +11,6 @@
     "types": [
       "cypress",
       "node",
-      "cypress-react-selector"
     ],
   },
   "kbn_references": [
@@ -32,5 +31,6 @@
     "@kbn/test",
     "@kbn/repo-info",
     "@kbn/data-views-plugin",
+    "@kbn/tooling-log",
   ]
 }

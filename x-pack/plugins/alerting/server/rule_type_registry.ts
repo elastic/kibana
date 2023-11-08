@@ -38,8 +38,11 @@ import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_n
 import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
 import { AlertsService } from './alerts_service/alerts_service';
+import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
+import { AlertingConfig } from './config';
 
 export interface ConstructorOptions {
+  config: AlertingConfig;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
@@ -58,6 +61,7 @@ export interface RegistryRuleType
     | 'recoveryActionGroup'
     | 'defaultActionGroupId'
     | 'actionVariables'
+    | 'category'
     | 'producer'
     | 'minimumLicenseRequired'
     | 'isExportable'
@@ -70,6 +74,7 @@ export interface RegistryRuleType
   enabledInLicense: boolean;
   hasFieldsForAAD: boolean;
   hasAlertsMappings: boolean;
+  validLegacyConsumers: string[];
 }
 
 /**
@@ -102,6 +107,7 @@ export type NormalizedRuleType<
   RecoveryActionGroupId extends string,
   AlertData extends RuleAlertData
 > = {
+  validLegacyConsumers: string[];
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
 } & Omit<
   RuleType<
@@ -144,6 +150,7 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
 >;
 
 export class RuleTypeRegistry {
+  private readonly config: AlertingConfig;
   private readonly logger: Logger;
   private readonly taskManager: TaskManagerSetupContract;
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
@@ -155,6 +162,7 @@ export class RuleTypeRegistry {
   private readonly alertsService: AlertsService | null;
 
   constructor({
+    config,
     logger,
     taskManager,
     taskRunnerFactory,
@@ -164,6 +172,7 @@ export class RuleTypeRegistry {
     inMemoryMetrics,
     alertsService,
   }: ConstructorOptions) {
+    this.config = config;
     this.logger = logger;
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
@@ -273,7 +282,7 @@ export class RuleTypeRegistry {
       ActionGroupIds,
       RecoveryActionGroupId,
       AlertData
-    >(ruleType);
+    >(ruleType, this.config);
 
     this.ruleTypes.set(
       ruleTypeIdSchema.validate(ruleType.id),
@@ -378,6 +387,7 @@ export class RuleTypeRegistry {
           recoveryActionGroup,
           defaultActionGroupId,
           actionVariables,
+          category,
           producer,
           minimumLicenseRequired,
           isExportable,
@@ -386,6 +396,7 @@ export class RuleTypeRegistry {
           doesSetRecoveryContext,
           alerts,
           fieldsForAAD,
+          validLegacyConsumers,
         },
       ]) => {
         // KEEP the type here to be safe if not the map is  ignoring it for some reason
@@ -396,6 +407,7 @@ export class RuleTypeRegistry {
           recoveryActionGroup,
           defaultActionGroupId,
           actionVariables,
+          category,
           producer,
           minimumLicenseRequired,
           isExportable,
@@ -409,6 +421,7 @@ export class RuleTypeRegistry {
           ).isValid,
           hasFieldsForAAD: Boolean(fieldsForAAD),
           hasAlertsMappings: !!alerts,
+          validLegacyConsumers,
           ...(alerts ? { alerts } : {}),
         };
         return ruleType;
@@ -449,7 +462,8 @@ function augmentActionGroupsWithReserved<
     ActionGroupIds,
     RecoveryActionGroupId,
     AlertData
-  >
+  >,
+  config: AlertingConfig
 ): NormalizedRuleType<
   Params,
   ExtractedParams,
@@ -497,7 +511,9 @@ function augmentActionGroupsWithReserved<
 
   return {
     ...ruleType,
+    ...(config?.rules?.overwriteProducer ? { producer: config.rules.overwriteProducer } : {}),
     actionGroups: [...actionGroups, ...reservedActionGroups],
     recoveryActionGroup: recoveryActionGroup ?? RecoveredActionGroup,
+    validLegacyConsumers: getRuleTypeIdValidLegacyConsumers(id),
   };
 }

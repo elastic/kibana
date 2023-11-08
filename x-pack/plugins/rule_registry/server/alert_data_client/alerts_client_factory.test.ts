@@ -26,6 +26,7 @@ const alertsClientFactoryParams: AlertsClientFactoryProps = {
   esClient: {} as ElasticsearchClient,
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
 };
 
 const auditLogger = auditLoggerMock.create();
@@ -53,6 +54,7 @@ describe('AlertsClientFactory', () => {
       esClient: {},
       ruleDataService: alertsClientFactoryParams.ruleDataService,
       getRuleType: alertsClientFactoryParams.getRuleType,
+      getAlertIndicesAlias: alertsClientFactoryParams.getAlertIndicesAlias,
     });
   });
 

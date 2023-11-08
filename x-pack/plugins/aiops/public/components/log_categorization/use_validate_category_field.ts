@@ -8,10 +8,15 @@
 import { useRef, useCallback } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
+
+import type { HttpFetchOptions } from '@kbn/core/public';
+
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
+import { createCategorizeQuery } from '../../../common/api/log_categorization/create_categorize_query';
+
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { createCategorizeQuery } from './use_categorize_request';
 
 export function useValidateFieldRequest() {
   const { http } = useAiopsAppContext();
@@ -24,7 +29,8 @@ export function useValidateFieldRequest() {
       timeField: string,
       start: number | undefined,
       end: number | undefined,
-      queryIn: QueryDslQueryContainer
+      queryIn: QueryDslQueryContainer,
+      headers?: HttpFetchOptions['headers']
     ) => {
       const query = createCategorizeQuery(queryIn, timeField, start, end);
       const resp = await http.post<FieldValidationResults>(
@@ -45,6 +51,7 @@ export function useValidateFieldRequest() {
             indicesOptions: undefined,
             includeExamples: false,
           }),
+          headers,
           version: '1',
         }
       );

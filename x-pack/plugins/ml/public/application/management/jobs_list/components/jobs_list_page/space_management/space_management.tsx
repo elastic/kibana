@@ -21,7 +21,7 @@ import {
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useTableState } from '@kbn/ml-in-memory-table';
-import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../../../../contexts/ml';
 import type { JobType, MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 import type {
   ManagementListResponse,
@@ -46,11 +46,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   const [filters, setFilters] = useState<SearchFilterConfig[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
-    'isADEnabled',
-    'isDFAEnabled',
-    'isNLPEnabled',
-  ]);
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
 
   const { onTableChange, pagination, sorting, setPageIndex } = useTableState<ManagementItems>(
     items ?? [],

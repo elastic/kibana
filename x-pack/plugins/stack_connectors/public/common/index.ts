@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import GenAiLogo from '../connector_types/gen_ai/logo';
+import OpenAILogo from '../connector_types/openai/logo';
 
-export { GEN_AI_CONNECTOR_ID, OpenAiProviderType } from '../../common/gen_ai/constants';
-export { GenAiLogo };
+export { OPENAI_CONNECTOR_ID, OpenAiProviderType } from '../../common/openai/constants';
+export { OpenAILogo };

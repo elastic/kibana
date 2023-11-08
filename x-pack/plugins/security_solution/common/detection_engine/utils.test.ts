@@ -12,6 +12,7 @@ import {
   normalizeMachineLearningJobIds,
   normalizeThresholdField,
   isMlRule,
+  isEsqlRule,
 } from './utils';
 
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -132,6 +133,16 @@ describe('isMlRule', () => {
 
   test('it returns false if not a Ml rule', () => {
     expect(isMlRule('query')).toEqual(false);
+  });
+});
+
+describe('isEsqlRule', () => {
+  test('it returns true if a ES|QL rule', () => {
+    expect(isEsqlRule('esql')).toEqual(true);
+  });
+
+  test('it returns false if not a ES|QL rule', () => {
+    expect(isEsqlRule('query')).toEqual(false);
   });
 });
 

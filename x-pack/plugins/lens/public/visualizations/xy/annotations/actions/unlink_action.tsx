@@ -13,6 +13,7 @@ import {
   XYByValueAnnotationLayerConfig,
   XYState,
 } from '../../types';
+import { getAnnotationLayerTitle } from '../../visualization_helpers';
 
 export const getUnlinkLayerAction = ({
   state,
@@ -45,7 +46,7 @@ export const getUnlinkLayerAction = ({
       toasts.addSuccess(
         i18n.translate('xpack.lens.xyChart.annotations.notificationUnlinked', {
           defaultMessage: `Unlinked "{title}"`,
-          values: { title: layer.__lastSaved.title },
+          values: { title: getAnnotationLayerTitle(layer) },
         })
       );
     },

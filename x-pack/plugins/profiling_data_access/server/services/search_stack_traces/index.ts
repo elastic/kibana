@@ -6,7 +6,7 @@
  */
 
 import { decodeStackTraceResponse } from '@kbn/profiling-utils';
-import { ProfilingESClient } from '../../utils/create_profiling_es_client';
+import { ProfilingESClient } from '../../../common/profiling_es_client';
 import { kqlQuery } from '../../utils/query';
 
 export async function searchStackTraces({

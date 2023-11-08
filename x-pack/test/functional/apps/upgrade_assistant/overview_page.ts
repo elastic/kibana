@@ -15,7 +15,8 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
-  describe('Overview Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/167081
+  describe.skip('Overview Page', function () {
     this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {

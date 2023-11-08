@@ -32,11 +32,11 @@ import {
   APP_WRAPPER_CLASS,
   useExecutionContext,
 } from '../../../../shared_imports';
+import { Section } from '../../../../../common/constants';
 import { useAppContext } from '../../../app_context';
 import { useLoadDataStreams } from '../../../services/api';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
-import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';

@@ -80,7 +80,7 @@
           "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldRowProvider}."
         ],
         "signature": [
-          "({ children, docLinks, toasts, }: React.PropsWithChildren<",
+          "({ children, docLinks, notifications, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
             "scope": "common",
@@ -99,7 +99,7 @@
             "id": "def-common.FieldRowKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  docLinks,\n  toasts,\n}",
+            "label": "{\n  children,\n  docLinks,\n  notifications,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -224,12 +224,12 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.FieldRowProps.onChange",
+            "id": "def-common.FieldRowProps.onFieldChange",
             "type": "Function",
             "tags": [],
-            "label": "onChange",
+            "label": "onFieldChange",
             "description": [
-              "The {@link OnChangeFn} handler."
+              "The {@link OnInputChangeFn} handler."
             ],
             "signature": [
               "(id: string, change?: ",
@@ -257,18 +257,18 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-components-field-row",
-                "id": "def-common.FieldRowProps.onChange.$1",
+                "id": "def-common.FieldRowProps.onFieldChange.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "packages/kbn-management/settings/components/field_row/types.ts",
+                "path": "packages/kbn-management/settings/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/management-settings-components-field-row",
-                "id": "def-common.FieldRowProps.onChange.$2",
+                "id": "def-common.FieldRowProps.onFieldChange.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "change",
@@ -283,7 +283,7 @@
                   },
                   "<T> | undefined"
                 ],
-                "path": "packages/kbn-management/settings/components/field_row/types.ts",
+                "path": "packages/kbn-management/settings/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -529,70 +529,6 @@
         "path": "packages/kbn-management/settings/components/field_row/types.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-components-field-row",
-        "id": "def-common.RowOnChangeFn",
-        "type": "Type",
-        "tags": [],
-        "label": "RowOnChangeFn",
-        "description": [
-          "\nAn `onChange` handler for a {@link FieldRow} component."
-        ],
-        "signature": [
-          "(id: string, change?: ",
-          {
-            "pluginId": "@kbn/management-settings-types",
-            "scope": "common",
-            "docId": "kibKbnManagementSettingsTypesPluginApi",
-            "section": "def-common.UnsavedFieldChange",
-            "text": "UnsavedFieldChange"
-          },
-          "<T> | undefined) => void"
-        ],
-        "path": "packages/kbn-management/settings/components/field_row/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.RowOnChangeFn.$1",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "A unique id corresponding to the particular setting being changed."
-            ],
-            "path": "packages/kbn-management/settings/components/field_row/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/management-settings-components-field-row",
-            "id": "def-common.RowOnChangeFn.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "change",
-            "description": [
-              "The {@link UnsavedFieldChange } corresponding to any unsaved change to the field."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
-                "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChange",
-                "text": "UnsavedFieldChange"
-              },
-              "<T> | undefined"
-            ],
-            "path": "packages/kbn-management/settings/components/field_row/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ],

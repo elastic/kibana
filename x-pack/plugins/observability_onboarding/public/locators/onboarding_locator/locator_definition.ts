@@ -11,6 +11,8 @@ import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability/locators';
 
+export type { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability/locators';
+
 export class ObservabilityOnboardingLocatorDefinition
   implements LocatorDefinition<ObservabilityOnboardingLocatorParams>
 {

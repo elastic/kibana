@@ -23,6 +23,7 @@ const createStartContract = (): Start => {
     userPermissions: {
       editDataView: jest.fn(),
     },
+    dataViewEditorServiceFactory: jest.fn(),
   };
 };
 

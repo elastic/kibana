@@ -36,6 +36,7 @@ import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { AiopsApiLogRateAnalysis } from '../../../common/api';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   getGroupTableItems,
   LogRateAnalysisResultsTable,
@@ -113,6 +114,8 @@ interface LogRateAnalysisResultsProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -129,6 +132,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  embeddingOrigin,
 }) => {
   const { http } = useAiopsAppContext();
 
@@ -172,7 +176,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     data,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream(
+  } = useFetchStream<AiopsApiLogRateAnalysis['body'], typeof streamReducer>(
     http,
     '/internal/aiops/log_rate_analysis',
     '1',
@@ -198,7 +202,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       overrides,
       sampleProbability,
     },
-    { reducer: streamReducer, initialState }
+    { reducer: streamReducer, initialState },
+    { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin }
   );
 
   const { significantTerms } = data;
@@ -409,7 +414,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               )}
               {overrides !== undefined ? (
                 <p>
-                  <EuiButton size="s" onClick={() => startHandler(true)}>
+                  <EuiButton
+                    data-test-subj="aiopsLogRateAnalysisResultsTryToContinueAnalysisButton"
+                    size="s"
+                    onClick={() => startHandler(true)}
+                  >
                     <FormattedMessage
                       id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
                       defaultMessage="Try to continue analysis"

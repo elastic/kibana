@@ -11,6 +11,8 @@ export const BACK_TO_CASES_BTN = '[data-test-subj="backToCases"]';
 
 export const DESCRIPTION_INPUT = '[data-test-subj="caseDescription"] textarea';
 
+export const EMPTY_TIMELINE = '[data-test-subj="euiSelectableMessage"]';
+
 export const INSERT_TIMELINE_BTN = '.euiMarkdownEditorToolbar [aria-label="Insert timeline link"]';
 
 export const LOADING_SPINNER = '[data-test-subj="create-case-loading-spinner"]';

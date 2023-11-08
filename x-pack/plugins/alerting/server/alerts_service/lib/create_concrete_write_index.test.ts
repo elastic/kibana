@@ -26,7 +26,7 @@ interface EsError extends Error {
 }
 
 const GetAliasResponse = {
-  real_index: {
+  '.internal.alerts-test.alerts-default-000001': {
     aliases: {
       alias_1: {
         is_hidden: true,
@@ -63,6 +63,7 @@ const IndexPatterns = {
   basePattern: '.alerts-test.alerts-*',
   alias: '.alerts-test.alerts-default',
   name: '.internal.alerts-test.alerts-default-000001',
+  validPrefixes: ['.internal.alerts-', '.alerts-'],
 };
 
 describe('createConcreteWriteIndex', () => {
@@ -370,6 +371,49 @@ describe('createConcreteWriteIndex', () => {
 
         expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 1 : 2);
         expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 1 : 2);
+      });
+
+      it(`should skip updating underlying settings and mappings of existing concrete indices if they follow an unexpected naming convention`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => ({
+          bad_index_name: {
+            aliases: {
+              alias_1: {
+                is_hidden: true,
+              },
+            },
+          },
+        }));
+
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        if (!useDataStream) {
+          expect(clusterClient.indices.create).toHaveBeenCalledWith({
+            index: '.internal.alerts-test.alerts-default-000001',
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
+              },
+            },
+          });
+          expect(logger.warn).toHaveBeenCalledWith(
+            `Found unexpected concrete index name "bad_index_name" while expecting index with one of the following prefixes: [.internal.alerts-,.alerts-] Not updating mappings or settings for this index.`
+          );
+        }
+
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 1 : 0);
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 1 : 0);
       });
 
       it(`should retry simulateIndexTemplate on transient ES errors`, async () => {

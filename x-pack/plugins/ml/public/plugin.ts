@@ -13,12 +13,12 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, mergeMap } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -48,15 +48,29 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import {
+  getMlSharedServices,
+  MlSharedServices,
+} from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
-import { MlLocatorDefinition, type MlLocator } from './locator';
+import { MlLocatorDefinition, MlLocatorParams, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
-import { ML_APP_ROUTE, PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+import {
+  initEnabledFeatures,
+  type MlFeatures,
+  ML_APP_ROUTE,
+  PLUGIN_ICON_SOLUTION,
+  PLUGIN_ID,
+  type ConfigSchema,
+} from '../common/constants/app';
 import type { MlCapabilities } from './shared';
+import { ElasticModels } from './application/services/elastic_models_service';
 
 export interface MlStartDependencies {
+  dataViewEditor: DataViewEditorStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
@@ -103,13 +117,27 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private locator: undefined | MlLocator;
-  private isServerless: boolean = false;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  private sharedMlServices: MlSharedServices | undefined;
+
+  private isServerless: boolean = false;
+  private enabledFeatures: MlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
+
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
   }
 
-  setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
+  setup(
+    core: MlCoreSetup,
+    pluginsSetup: MlSetupDependencies
+  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
+    this.sharedMlServices = getMlSharedServices(core.http);
+
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
@@ -128,6 +156,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             charts: pluginsStart.charts,
             data: pluginsStart.data,
+            dataViewEditor: pluginsStart.dataViewEditor,
             unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
@@ -152,7 +181,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             presentationUtil: pluginsStart.presentationUtil,
           },
           params,
-          this.isServerless
+          this.isServerless,
+          this.enabledFeatures
         );
       },
     });
@@ -168,77 +198,86 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         {
           usageCollection: pluginsSetup.usageCollection,
         },
-        this.isServerless
+        this.isServerless,
+        this.enabledFeatures
       ).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-    licensing.subscribe(async (license) => {
-      const mlEnabled = isMlEnabled(license);
-      const fullLicense = isFullLicense(license);
-      const [coreStart, pluginStart] = await core.getStartServices();
-      const { capabilities } = coreStart.application;
-      const mlCapabilities = capabilities.ml as MlCapabilities;
+    licensing
+      .pipe(
+        mergeMap(async (license) => {
+          const mlEnabled = isMlEnabled(license);
+          const fullLicense = isFullLicense(license);
+          const [coreStart, pluginStart] = await core.getStartServices();
+          const { capabilities } = coreStart.application;
+          const mlCapabilities = capabilities.ml as MlCapabilities;
 
-      // register various ML plugin features which require a full license
-      // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
-      if (mlEnabled) {
-        // add ML to home page
-        if (pluginsSetup.home) {
-          registerHomeFeature(pluginsSetup.home);
-        }
-
-        const {
-          registerEmbeddables,
-          registerMlUiActions,
-          registerSearchLinks,
-          registerMlAlerts,
-          registerMapExtension,
-          registerCasesAttachments,
-        } = await import('./register_helper');
-        registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, this.isServerless);
-
-        if (fullLicense) {
-          registerMlUiActions(pluginsSetup.uiActions, core, this.isServerless);
-
-          if (mlCapabilities.isADEnabled) {
-            registerEmbeddables(pluginsSetup.embeddable, core, this.isServerless);
-
-            if (pluginsSetup.cases) {
-              registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+          // register various ML plugin features which require a full license
+          // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
+          if (mlEnabled) {
+            // add ML to home page
+            if (pluginsSetup.home) {
+              registerHomeFeature(pluginsSetup.home);
             }
 
-            if (
-              pluginsSetup.triggersActionsUi &&
-              mlCapabilities.canUseMlAlerts &&
-              mlCapabilities.canGetJobs
-            ) {
-              registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
-            }
+            const {
+              registerEmbeddables,
+              registerMlUiActions,
+              registerSearchLinks,
+              registerMlAlerts,
+              registerMapExtension,
+              registerCasesAttachments,
+            } = await import('./register_helper');
+            registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, !this.isServerless);
 
-            if (pluginsSetup.maps) {
-              // Pass canGetJobs as minimum permission to show anomalies card in maps layers
-              await registerMapExtension(pluginsSetup.maps, core, {
-                canGetJobs: mlCapabilities.canGetJobs,
-                canCreateJobs: mlCapabilities.canCreateJob,
-              });
+            if (fullLicense) {
+              registerMlUiActions(pluginsSetup.uiActions, core);
+
+              if (this.enabledFeatures.ad) {
+                registerEmbeddables(pluginsSetup.embeddable, core);
+
+                if (pluginsSetup.cases) {
+                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                }
+
+                if (
+                  pluginsSetup.triggersActionsUi &&
+                  mlCapabilities.canUseMlAlerts &&
+                  mlCapabilities.canGetJobs
+                ) {
+                  registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+                }
+
+                if (pluginsSetup.maps) {
+                  // Pass canGetJobs as minimum permission to show anomalies card in maps layers
+                  await registerMapExtension(pluginsSetup.maps, core, {
+                    canGetJobs: mlCapabilities.canGetJobs,
+                    canCreateJobs: mlCapabilities.canCreateJob,
+                  });
+                }
+              }
             }
+          } else {
+            // if ml is disabled in elasticsearch, disable ML in kibana
+            this.appUpdater$.next(() => ({
+              status: AppStatus.inaccessible,
+            }));
           }
-        }
-      } else {
-        // if ml is disabled in elasticsearch, disable ML in kibana
-        this.appUpdater$.next(() => ({
-          status: AppStatus.inaccessible,
-        }));
-      }
-    });
+        })
+      )
+      .subscribe();
 
     return {
       locator: this.locator,
+      elasticModels: this.sharedMlServices.elasticModels,
     };
   }
 
-  start(core: CoreStart, deps: MlStartDependencies) {
+  start(
+    core: CoreStart,
+    deps: MlStartDependencies
+  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
     setDependencyCache({
       docLinks: core.docLinks!,
       basePath: core.http.basePath,
@@ -249,6 +288,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       locator: this.locator,
+      elasticModels: this.sharedMlServices?.elasticModels,
     };
   }
 

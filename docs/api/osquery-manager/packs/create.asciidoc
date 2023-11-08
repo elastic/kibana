@@ -33,7 +33,7 @@ experimental[] Create packs.
 
 `policy_ids`:: (Optional, array) A list of agents policy IDs.
 
-`shards`:: (Required, object) An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.
+`shards`:: (Optional, object) An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.
 
 `queries`:: (Required, object) An object of queries.
 

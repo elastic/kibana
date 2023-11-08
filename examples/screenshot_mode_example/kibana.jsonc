@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/screenshot-mode-example-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/appex-sharedux",
   "description": "Example plugin of how to use screenshotMode plugin services",
   "plugin": {
     "id": "screenshotModeExample",

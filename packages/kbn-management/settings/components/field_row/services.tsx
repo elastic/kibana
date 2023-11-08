@@ -44,7 +44,7 @@ export const FieldRowProvider = ({ children, ...services }: FieldRowProviderProp
 export const FieldRowKibanaProvider: FC<FieldRowKibanaDependencies> = ({
   children,
   docLinks,
-  toasts,
+  notifications,
 }) => {
   return (
     <FieldRowContext.Provider
@@ -52,7 +52,7 @@ export const FieldRowKibanaProvider: FC<FieldRowKibanaDependencies> = ({
         links: docLinks.links.management,
       }}
     >
-      <FieldInputKibanaProvider {...{ toasts }}>{children}</FieldInputKibanaProvider>
+      <FieldInputKibanaProvider {...{ notifications }}>{children}</FieldInputKibanaProvider>
     </FieldRowContext.Provider>
   );
 };

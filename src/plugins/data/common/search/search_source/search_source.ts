@@ -103,13 +103,7 @@ import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
-import {
-  getEsQueryConfig,
-  IKibanaSearchResponse,
-  isPartialResponse,
-  isCompleteResponse,
-  UI_SETTINGS,
-} from '../..';
+import { getEsQueryConfig, IKibanaSearchResponse, isRunningResponse, UI_SETTINGS } from '../..';
 import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
 import {
@@ -464,7 +458,9 @@ export class SearchSource {
     const last$ = s$
       .pipe(
         catchError((e) => {
-          requestResponder?.error({ json: e });
+          requestResponder?.error({
+            json: 'attributes' in e ? e.attributes : { message: e.message },
+          });
           return EMPTY;
         }),
         last(undefined, null),
@@ -546,7 +542,7 @@ export class SearchSource {
         // For testing timeout messages in UI, uncomment the next line
         // response.rawResponse.timed_out = true;
         return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
-          if (isPartialResponse(response)) {
+          if (isRunningResponse(response)) {
             obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
@@ -582,7 +578,7 @@ export class SearchSource {
         });
       }),
       map((response) => {
-        if (!isCompleteResponse(response)) {
+        if (isRunningResponse(response)) {
           return response;
         }
         return onResponse(searchRequest, response, options);
@@ -952,7 +948,7 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false, includeFields = true): SerializedSearchSourceFields {
+  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
       aggs: searchSourceAggs,
@@ -967,9 +963,7 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.isPersisted()
-        ? index.id
-        : index.toSpec(includeFields);
+      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;

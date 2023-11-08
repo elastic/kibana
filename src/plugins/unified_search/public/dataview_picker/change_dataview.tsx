@@ -120,7 +120,7 @@ export function ChangeDataView({
 
   useEffect(() => {
     if (textBasedLanguage) {
-      setTriggerLabel(getLanguageDisplayName(textBasedLanguage).toUpperCase());
+      setTriggerLabel(getLanguageDisplayName(textBasedLanguage));
     } else {
       setTriggerLabel(trigger.label);
     }
@@ -244,7 +244,9 @@ export function ChangeDataView({
                         {
                           defaultMessage:
                             "Switching data views removes the current {textBasedLanguage} query. Save this search to ensure you don't lose work.",
-                          values: { textBasedLanguage },
+                          values: {
+                            textBasedLanguage: getLanguageDisplayName(textBasedLanguage),
+                          },
                         }
                       )}
                     >

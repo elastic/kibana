@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Profiling API tests functions.spec.ts cloud Loading profiling data Functions api returns correct result 1`] = `
+exports[`Profiling API tests functions.spec.ts cloud Loading profiling data Functions api With data returns correct result 1`] = `
 Object {
   "SamplingRate": 1,
   "TopN": Array [

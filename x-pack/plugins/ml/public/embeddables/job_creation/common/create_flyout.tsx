@@ -27,7 +27,6 @@ export function createFlyout(
   share: SharePluginStart,
   data: DataPublicPluginStart,
   dashboardService: DashboardStart,
-  isServerless: boolean,
   lens?: LensPublicStart
 ): Promise<void> {
   const {
@@ -54,7 +53,7 @@ export function createFlyout(
               data,
               lens,
               dashboardService,
-              mlServices: getMlGlobalServices(http, isServerless),
+              mlServices: getMlGlobalServices(http),
             }}
           >
             <FlyoutComponent

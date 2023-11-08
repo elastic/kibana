@@ -43,11 +43,13 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
 
 test('DashboardContainer initializes embeddables', (done) => {
   const container = buildMockDashboard({
-    panels: {
-      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+    overrides: {
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Sam', id: '123' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
 
@@ -94,11 +96,13 @@ test('DashboardContainer.replacePanel', (done) => {
   const ID = '123';
 
   const container = buildMockDashboard({
-    panels: {
-      [ID]: getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: ID },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+    overrides: {
+      panels: {
+        [ID]: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Sam', id: ID },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
   let counter = 0;
@@ -134,11 +138,13 @@ test('DashboardContainer.replacePanel', (done) => {
 
 test('Container view mode change propagates to existing children', async () => {
   const container = buildMockDashboard({
-    panels: {
-      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+    overrides: {
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Sam', id: '123' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
 
@@ -197,7 +203,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   uiActionsSetup.registerAction(editModeAction);
   uiActionsSetup.addTriggerAction(CONTEXT_MENU_TRIGGER, editModeAction);
 
-  const container = buildMockDashboard({ viewMode: ViewMode.VIEW });
+  const container = buildMockDashboard({ overrides: { viewMode: ViewMode.VIEW } });
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -273,8 +279,10 @@ describe('getInheritedInput', () => {
 
   test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', async () => {
     const container = buildMockDashboard({
-      timeRange: dashboardTimeRange,
-      timeslice: dashboardTimeslice,
+      overrides: {
+        timeRange: dashboardTimeRange,
+        timeslice: dashboardTimeslice,
+      },
     });
     const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
       CONTACT_CARD_EMBEDDABLE,
@@ -296,8 +304,10 @@ describe('getInheritedInput', () => {
 
   test('Should not pass dashboard timeRange and timeslice to panel when panel has custom time range', async () => {
     const container = buildMockDashboard({
-      timeRange: dashboardTimeRange,
-      timeslice: dashboardTimeslice,
+      overrides: {
+        timeRange: dashboardTimeRange,
+        timeslice: dashboardTimeslice,
+      },
     });
     const embeddableTimeRange = {
       to: 'now',

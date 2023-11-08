@@ -22,35 +22,65 @@ const dataViewMockWithTimeField = buildDataViewMock({
 
 describe('updateSearchSource', () => {
   const defaults = {
-    sampleSize: 50,
     sortDir: 'asc',
   };
 
+  const customSampleSize = 70;
+
   it('updates a given search source', async () => {
     const searchSource = createSearchSourceMock({});
-    updateSearchSource(searchSource, dataViewMock, [] as SortOrder[], false, defaults);
+    updateSearchSource(
+      searchSource,
+      dataViewMock,
+      [] as SortOrder[],
+      customSampleSize,
+      false,
+      defaults
+    );
     expect(searchSource.getField('fields')).toBe(undefined);
     // does not explicitly request fieldsFromSource when not using fields API
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
+    expect(searchSource.getField('size')).toEqual(customSampleSize);
   });
 
   it('updates a given search source with the usage of the new fields api', async () => {
     const searchSource = createSearchSourceMock({});
-    updateSearchSource(searchSource, dataViewMock, [] as SortOrder[], true, defaults);
+    updateSearchSource(
+      searchSource,
+      dataViewMock,
+      [] as SortOrder[],
+      customSampleSize,
+      true,
+      defaults
+    );
     expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
+    expect(searchSource.getField('size')).toEqual(customSampleSize);
   });
 
   it('updates a given search source with sort field', async () => {
     const searchSource1 = createSearchSourceMock({});
-    updateSearchSource(searchSource1, dataViewMock, [] as SortOrder[], true, defaults);
+    updateSearchSource(
+      searchSource1,
+      dataViewMock,
+      [] as SortOrder[],
+      customSampleSize,
+      true,
+      defaults
+    );
     expect(searchSource1.getField('sort')).toEqual([{ _score: 'asc' }]);
 
     const searchSource2 = createSearchSourceMock({});
-    updateSearchSource(searchSource2, dataViewMockWithTimeField, [] as SortOrder[], true, {
-      sampleSize: 50,
-      sortDir: 'desc',
-    });
+    updateSearchSource(
+      searchSource2,
+      dataViewMockWithTimeField,
+      [] as SortOrder[],
+      customSampleSize,
+      true,
+      {
+        sortDir: 'desc',
+      }
+    );
     expect(searchSource2.getField('sort')).toEqual([{ _doc: 'desc' }]);
 
     const searchSource3 = createSearchSourceMock({});
@@ -58,6 +88,7 @@ describe('updateSearchSource', () => {
       searchSource3,
       dataViewMockWithTimeField,
       [['bytes', 'desc']] as SortOrder[],
+      customSampleSize,
       true,
       defaults
     );

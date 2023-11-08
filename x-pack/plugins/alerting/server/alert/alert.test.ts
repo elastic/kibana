@@ -695,6 +695,7 @@ describe('isFilteredOut', () => {
           _id: '1',
           _index: '.alerts',
           '@timestamp': '',
+          // @ts-expect-error
           kibana: {
             alert: {
               instance: { id: 'a' },

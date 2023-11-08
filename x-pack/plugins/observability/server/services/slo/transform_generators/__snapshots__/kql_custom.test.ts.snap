@@ -92,7 +92,7 @@ Object {
       Object {
         "range": Object {
           "log_timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -235,6 +235,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": Array [
@@ -247,7 +248,7 @@ Object {
           Object {
             "range": Object {
               "log_timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
@@ -465,6 +466,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": Array [
@@ -477,7 +479,7 @@ Object {
           Object {
             "range": Object {
               "log_timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },

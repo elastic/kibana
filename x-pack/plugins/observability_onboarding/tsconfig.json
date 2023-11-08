@@ -32,7 +32,8 @@
     "@kbn/use-tracked-promise",
     "@kbn/custom-integrations",
     "@kbn/share-plugin",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/fleet-plugin",
   ],
   "exclude": [
     "target/**/*",

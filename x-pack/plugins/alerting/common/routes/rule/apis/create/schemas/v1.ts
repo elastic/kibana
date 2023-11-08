@@ -6,26 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleNotifyWhenV1 } from '../../../response';
-import {
-  validateNotifyWhenV1,
-  validateDurationV1,
-  validateHoursV1,
-  validateTimezoneV1,
-} from '../../../validation';
-
-export const notifyWhenSchema = schema.oneOf(
-  [
-    schema.literal(ruleNotifyWhenV1.CHANGE),
-    schema.literal(ruleNotifyWhenV1.ACTIVE),
-    schema.literal(ruleNotifyWhenV1.THROTTLE),
-  ],
-  { validate: validateNotifyWhenV1 }
-);
+import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
+import { notifyWhenSchemaV1 } from '../../../response';
 
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean(),
-  notify_when: notifyWhenSchema,
+  notify_when: notifyWhenSchemaV1,
   throttle: schema.nullable(schema.string({ validate: validateDurationV1 })),
 });
 
@@ -91,7 +77,7 @@ export const createBodySchema = schema.object({
     interval: schema.string({ validate: validateDurationV1 }),
   }),
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
-  notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
+  notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
 });
 
 export const createParamsSchema = schema.object({

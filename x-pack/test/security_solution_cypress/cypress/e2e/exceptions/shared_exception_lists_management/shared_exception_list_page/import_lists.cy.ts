@@ -17,19 +17,15 @@ import {
   validateImportExceptionListWentSuccessfully,
   validateImportExceptionListFailedBecauseExistingListFound,
 } from '../../../../tasks/exceptions_table';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-// Flaky in serverless
 describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
-  before(() => {
-    cy.task('esArchiverResetKibana');
-  });
   beforeEach(() => {
     login();
-    visitWithoutDateRange(EXCEPTIONS_URL);
+    visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
   });

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
-import { type BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { type BehaviorSubject, distinctUntilChanged, filter, take } from 'rxjs';
+import styled from '@emotion/styled';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { AppMountParameters } from '@kbn/core-application-browser';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -19,7 +19,6 @@ import {
   EuiHeaderLinks,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  useEuiTheme,
 } from '@elastic/eui';
 import { LogExplorerStateContainer } from '@kbn/log-explorer-plugin/public';
 import {
@@ -29,20 +28,24 @@ import {
 import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { css } from '@emotion/react';
+import { LOG_EXPLORER_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { PluginKibanaContextValue } from '../utils/use_kibana';
 import {
   betaBadgeDescription,
   betaBadgeTitle,
   discoverLinkTitle,
+  feedbackLinkTitle,
   onboardingLinkTitle,
 } from '../../common/translations';
 import { getRouterLinkProps } from '../utils/get_router_link_props';
+import { ObservabilityLogExplorerAppMountParameters } from '../types';
 
 interface LogExplorerTopNavMenuProps {
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  setHeaderActionMenu: ObservabilityLogExplorerAppMountParameters['setHeaderActionMenu'];
   services: KibanaReactContextValue<PluginKibanaContextValue>['services'];
   state$: BehaviorSubject<LogExplorerStateContainer>;
-  theme$: AppMountParameters['theme$'];
+  theme$: ObservabilityLogExplorerAppMountParameters['theme$'];
 }
 
 export const LogExplorerTopNavMenu = ({
@@ -69,8 +72,6 @@ const ServerlessTopNav = ({
   services,
   state$,
 }: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EuiHeader data-test-subj="logExplorerHeaderMenu">
       <EuiHeaderSection>
@@ -83,7 +84,7 @@ const ServerlessTopNav = ({
       <EuiHeaderSection
         side="right"
         css={css`
-          gap: ${euiTheme.size.m};
+          gap: ${euiThemeVars.euiSizeM};
         `}
       >
         <EuiHeaderSectionItem>
@@ -94,6 +95,10 @@ const ServerlessTopNav = ({
             tooltipContent={betaBadgeDescription}
             alignment="middle"
           />
+        </EuiHeaderSectionItem>
+        <EuiHeaderSectionItem>
+          <FeedbackLink />
+          <VerticalRule />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <OnboardingLink services={services} />
@@ -109,7 +114,15 @@ const StatefulTopNav = ({
   state$,
   theme$,
 }: LogExplorerTopNavMenuProps) => {
-  const { euiTheme } = useEuiTheme();
+  /**
+   * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
+   * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
+   */
+  const [previousAppendExtension$] = useState(() =>
+    services.chrome.getBreadcrumbsAppendExtension$().pipe(filter(Boolean), take(1))
+  );
+
+  const previousAppendExtension = useObservable(previousAppendExtension$);
 
   useEffect(() => {
     const { chrome, i18n, theme } = services;
@@ -120,7 +133,7 @@ const StatefulTopNav = ({
           <EuiHeaderSection
             data-test-subj="logExplorerHeaderMenu"
             css={css`
-              margin-left: ${euiTheme.size.m};
+              margin-left: ${euiThemeVars.euiSizeM};
             `}
           >
             <EuiHeaderSectionItem>
@@ -132,12 +145,21 @@ const StatefulTopNav = ({
                 alignment="middle"
               />
             </EuiHeaderSectionItem>
+            <EuiHeaderSectionItem>
+              <FeedbackLink />
+            </EuiHeaderSectionItem>
           </EuiHeaderSection>,
           { theme, i18n }
         ),
       });
     }
-  }, [euiTheme, services]);
+
+    return () => {
+      if (chrome) {
+        chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
+      }
+    };
+  }, [services, previousAppendExtension]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
@@ -232,3 +254,24 @@ const OnboardingLink = React.memo(({ services }: Pick<LogExplorerTopNavMenuProps
     </EuiButton>
   );
 });
+
+const FeedbackLink = React.memo(() => {
+  return (
+    <EuiHeaderLink
+      color="primary"
+      href={LOG_EXPLORER_FEEDBACK_LINK}
+      iconType="popout"
+      iconSide="right"
+      iconSize="s"
+      target="_blank"
+    >
+      {feedbackLinkTitle}
+    </EuiHeaderLink>
+  );
+});
+
+const VerticalRule = styled.span`
+  width: 1px;
+  height: 20px;
+  background-color: ${euiThemeVars.euiColorLightShade};
+`;

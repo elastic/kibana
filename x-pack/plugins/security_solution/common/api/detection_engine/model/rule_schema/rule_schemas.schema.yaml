@@ -4,846 +4,915 @@ info:
   version: 'not applicable'
 paths: {}
 components:
-  x-codegen-enabled: false
+  x-codegen-enabled: true
   schemas:
-    SortOrder:
-      type: string
-      enum:
-        - asc
-        - desc
-    RuleExecutionStatus:
-      type: string
-      description: |-
-        Custom execution status of Security rules that is different from the status used in the Alerting Framework. We merge our custom status with the Framework's status to determine the resulting status of a rule.
-        - going to run - @deprecated Replaced by the 'running' status but left for backwards compatibility with rule execution events already written to Event Log in the prior versions of Kibana. Don't use when writing rule status changes.
-        - running - Rule execution started but not reached any intermediate or final status.
-        - partial failure - Rule can partially fail for various reasons either in the middle of an execution (in this case we update its status right away) or in the end of it. So currently this status can be both intermediate and final at the same time. A typical reason for a partial failure: not all the indices that the rule searches over actually exist.
-        - failed - Rule failed to execute due to unhandled exception or a reason defined in the business logic of its executor function.
-        - succeeded - Rule executed successfully without any issues. Note: this status is just an indication of a rule's "health". The rule might or might not generate any alerts despite of it.
-
-      enum:
-        - going to run
-        - running
-        - partial failure
-        - failed
-        - succeeded
-
-    RuleExecutionResult:
-      type: object
-      description: |-
-        Rule execution result is an aggregate that groups plain rule execution events by execution UUID.
-      properties:
-        execution_uuid:
-          type: string
-        timestamp:
-          type: string
-          format: date-time
-        duration_ms:
-          type: integer
-        status:
-          type: string
-        message:
-          type: string
-        num_active_alerts:
-          type: integer
-        num_new_alerts:
-          type: integer
-        num_recovered_alerts:
-          type: integer
-        num_triggered_actions:
-          type: integer
-        num_succeeded_actions:
-          type: integer
-        num_errored_actions:
-          type: integer
-        total_search_duration_ms:
-          type: integer
-        es_search_duration_ms:
-          type: integer
-        schedule_delay_ms:
-          type: integer
-        timed_out:
-          type: boolean
-        indexing_duration_ms:
-          type: integer
-        search_duration_ms:
-          type: integer
-        gap_duration_s:
-          type: integer
-        security_status:
-          type: string
-        security_message:
-          type: string
-      required:
-        - execution_uuid
-        - timestamp
-        - duration_ms
-        - status
-        - message
-        - num_active_alerts
-        - num_new_alerts
-        - num_recovered_alerts
-        - num_triggered_actions
-        - num_succeeded_actions
-        - num_errored_actions
-        - total_search_duration_ms
-        - es_search_duration_ms
-        - schedule_delay_ms
-        - timed_out
-        - indexing_duration_ms
-        - search_duration_ms
-        - gap_duration_s
-        - security_status
-        - security_message
-
-    Action:
-      type: object
-      properties:
-        action_type_id:
-          type: string
-          description: The action type used for sending notifications.
-        group:
-          type: string
-          description: Optionally groups actions by use cases. Use `default` for alert notifications.
-        id:
-          type: string
-          description: The connector ID.
-        params:
-          type: object
-          description: Object containing the allowed connector fields, which varies according to the connector type.
-        uuid:
-          type: string
-        alerts_filter:
-          type: object
-          description: TODO implement the schema type
-        frequency:
-          type: object
-          description: TODO implement the schema type
-      required:
-        - action_type_id
-        - group
-        - id
-        - params
-
-    AlertSuppression:
-      type: object
-      properties:
-        group_by:
-          type: array
-          items:
-            type: string
-          minItems: 1
-          maxItems: 3
-        duration:
-          type: object
-          properties:
-            value:
-              type: integer
-              minimum: 1
-            unit:
-              type: string
-              enum:
-                - s
-                - m
-                - h
-          required:
-            - value
-            - unit
-        missing_fields_strategy:
-          type: string
-          enum:
-            - doNotSuppress
-            - suppress
-      required:
-        - group_by
-
-    BaseRule:
+    BaseRequiredFields:
       type: object
       properties:
         name:
-          type: string
-          description: Rule name
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleName'
         description:
-          type: string
-          description: Rule description
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleDescription'
         risk_score:
-          type: integer
-          description: Risk score (0 to 100)
-          minimum: 0
-          maximum: 100
+          $ref: './common_attributes.schema.yaml#/components/schemas/RiskScore'
         severity:
-          type: string
-          enum: [low, medium, high, critical]
-          description: Severity of the rule
-        rule_name_override:
-          type: string
-          description: Sets the source field for the alert's signal.rule.name value
-        timestamp_override:
-          type: string
-          description: Sets the time field used to query indices (optional)
-        timeline_id:
-          type: string
-          description: Timeline template ID
-        timeline_title:
-          type: string
-          description: Timeline template title
-        outcome:
-          type: string
-          enum:
-            - exactMatch
-            - aliasMatch
-            - conflict
-        alias_target_id:
-          type: string
-          description: TODO
-        alias_purpose:
-          type: string
-          enum:
-            - savedObjectConversion
-            - savedObjectImport
-          description: TODO
-        license:
-          type: string
-          description: The rule’s license.
-        note:
-          type: string
-          description: Notes to help investigate alerts produced by the rule.
-        building_block_type:
-          type: string
-          description: Determines if the rule acts as a building block. By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts. Its value must be default.
-        output_index:
-          type: string
-          description: (deprecated) Has no effect.
-        namespace:
-          type: string
-          description: Has no effect.
-        meta:
-          type: object
-          description: Stores rule metadata.
-        throttle:
-          type: string
-          description: Defines the interval on which a rule's actions are executed.
-        version:
-          type: integer
-          minimum: 1
-          default: 1
-          description: The rule’s version number. Defaults to 1.
-        tags:
-          type: array
-          items:
-            type: string
-          default: []
-          description: String array containing words and phrases to help categorize, filter, and search rules. Defaults to an empty array.
-        enabled:
-          type: boolean
-          default: true
-          description: Determines whether the rule is enabled. Defaults to true.
-        risk_score_mapping:
-          type: array
-          items:
-            type: object
-            properties:
-              field:
-                type: string
-              operator:
-                type: string
-                enum:
-                  - equals
-              value:
-                type: string
-              risk_score:
-                type: integer
-                minimum: 0
-                maximum: 100
-            required:
-              - field
-              - value
-              - operator
-          description: Overrides generated alerts' risk_score with a value from the source event
-          default: []
-        severity_mapping:
-          type: array
-          items:
-            type: object
-            properties:
-              field:
-                type: string
-              operator:
-                type: string
-                enum:
-                  - equals
-              severity:
-                type: string
-                enum:
-                  - low
-                  - medium
-                  - high
-                  - critical
-              value:
-                type: string
-            required:
-              - field
-              - operator
-              - severity
-              - value
-          description: Overrides generated alerts' severity with values from the source event
-          default: []
-        interval:
-          type: string
-          description: Frequency of rule execution, using a date math range. For example, "1h" means the rule runs every hour. Defaults to 5m (5 minutes).
-          default: 5m
-        from:
-          type: string
-          description: Time from which data is analyzed each time the rule executes, using a date math range. For example, now-4200s means the rule analyzes data from 70 minutes before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
-          default: now-6m
-        to:
-          type: string
-          description: TODO
-          default: now
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Action'
-          default: []
-        exceptions_list:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: ID of the exception container
-                minLength: 1
-              list_id:
-                type: string
-                description: List ID of the exception container
-                minLength: 1
-              type:
-                type: string
-                description: The exception type
-                enum:
-                  - detection
-                  - rule_default
-                  - endpoint
-                  - endpoint_trusted_apps
-                  - endpoint_events
-                  - endpoint_host_isolation_exceptions
-                  - endpoint_blocklists
-              namespace_type:
-                type: string
-                description: Determines the exceptions validity in rule's Kibana space
-                enum:
-                  - agnostic
-                  - single
-            required:
-              - id
-              - list_id
-              - type
-              - namespace_type
-          default: []
-        author:
-          type: array
-          items:
-            type: string
-          default: []
-        false_positives:
-          type: array
-          items:
-            type: string
-          default: []
-        references:
-          type: array
-          items:
-            type: string
-          default: []
-        max_signals:
-          type: integer
-          minimum: 1
-          default: 100
-        threat:
-          type: array
-          items:
-            type: object
-            properties:
-              framework:
-                type: string
-                description: Relevant attack framework
-              tactic:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  reference:
-                    type: string
-                required:
-                  - id
-                  - name
-                  - reference
-              technique:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    name:
-                      type: string
-                    reference:
-                      type: string
-                    subtechnique:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                          name:
-                            type: string
-                          reference:
-                            type: string
-                        required:
-                          - id
-                          - name
-                          - reference
-                  required:
-                    - id
-                    - name
-                    - reference
-            required:
-              - framework
-              - tactic
+          $ref: './common_attributes.schema.yaml#/components/schemas/Severity'
       required:
-        - id
         - name
         - description
         - risk_score
         - severity
 
-    QueryRule:
+    BaseOptionalFields:
+      type: object
+      properties:
+        # Field overrides
+        rule_name_override:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleNameOverride'
+
+        timestamp_override:
+          $ref: './common_attributes.schema.yaml#/components/schemas/TimestampOverride'
+
+        timestamp_override_fallback_disabled:
+          $ref: './common_attributes.schema.yaml#/components/schemas/TimestampOverrideFallbackDisabled'
+
+        # Timeline template
+        timeline_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/TimelineTemplateId'
+
+        timeline_title:
+          $ref: './common_attributes.schema.yaml#/components/schemas/TimelineTemplateTitle'
+
+        # Attributes related to SavedObjectsClient.resolve API
+        outcome:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SavedObjectResolveOutcome'
+        alias_target_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SavedObjectResolveAliasTargetId'
+        alias_purpose:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SavedObjectResolveAliasPurpose'
+
+        # Misc attributes
+        license:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleLicense'
+        note:
+          $ref: './common_attributes.schema.yaml#/components/schemas/InvestigationGuide'
+        building_block_type:
+          $ref: './common_attributes.schema.yaml#/components/schemas/BuildingBlockType'
+
+        output_index:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertsIndex'
+        namespace:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertsIndexNamespace'
+        meta:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleMetadata'
+        investigation_fields:
+          $ref: './common_attributes.schema.yaml#/components/schemas/InvestigationFields'
+
+        # Throttle
+        throttle:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleActionThrottle'
+
+    BaseDefaultableFields:
+      type: object
+      properties:
+        # Main attributes
+        version:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleVersion'
+        tags:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleTagArray'
+        enabled:
+          $ref: './common_attributes.schema.yaml#/components/schemas/IsRuleEnabled'
+
+        # Field overrides
+        risk_score_mapping:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RiskScoreMapping'
+
+        severity_mapping:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SeverityMapping'
+
+        # Rule schedule
+        interval:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleInterval'
+        from:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleIntervalFrom'
+        to:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleIntervalTo'
+
+        # Rule actions
+        actions:
+          type: array
+          items:
+            $ref: './common_attributes.schema.yaml#/components/schemas/RuleAction'
+
+        # Rule exceptions
+        exceptions_list:
+          type: array
+          items:
+            $ref: './common_attributes.schema.yaml#/components/schemas/RuleExceptionList'
+
+        # Misc attributes
+        author:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleAuthorArray'
+
+        false_positives:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleFalsePositiveArray'
+
+        references:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleReferenceArray'
+
+        # maxSignals not used in ML rules but probably should be used
+        max_signals:
+          $ref: './common_attributes.schema.yaml#/components/schemas/MaxSignals'
+        threat:
+          $ref: './common_attributes.schema.yaml#/components/schemas/ThreatArray'
+
+    BaseCreateProps:
       allOf:
-        - $ref: '#/components/schemas/BaseRule'
+        - $ref: '#/components/schemas/BaseRequiredFields'
+        - $ref: '#/components/schemas/BaseOptionalFields'
+        - $ref: '#/components/schemas/BaseDefaultableFields'
+
+    BasePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequiredFields'
+          x-modify: partial
+        - $ref: '#/components/schemas/BaseOptionalFields'
+        - $ref: '#/components/schemas/BaseDefaultableFields'
+
+    BaseResponseProps:
+      allOf:
+        - $ref: '#/components/schemas/BaseRequiredFields'
+        - $ref: '#/components/schemas/BaseOptionalFields'
+        - $ref: '#/components/schemas/BaseDefaultableFields'
+          x-modify: required
+
+    ResponseRequiredFields:
+      type: object
+      properties:
+        id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+        rule_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+        immutable:
+          $ref: './common_attributes.schema.yaml#/components/schemas/IsRuleImmutable'
+        updated_at:
+          type: string
+          format: date-time
+        updated_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        revision:
+          type: integer
+          minimum: 0
+        # NOTE: For now, Related Integrations, Required Fields and Setup Guide are
+        # supported for prebuilt rules only. We don't want to allow users to edit these 3
+        # fields via the API. If we added them to baseParams.defaultable, they would
+        # become a part of the request schema as optional fields. This is why we add them
+        # here, in order to add them only to the response schema.
+        related_integrations:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
+        required_fields:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
+        setup:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
+      required:
+        - id
+        - rule_id
+        - immutable
+        - updated_at
+        - updated_by
+        - created_at
+        - created_by
+        - revision
+        - related_integrations
+        - required_fields
+        - setup
+
+    ResponseOptionalFields:
+      type: object
+      properties:
+        execution_summary:
+          $ref: '../../rule_monitoring/model/execution_summary.schema.yaml#/components/schemas/RuleExecutionSummary'
+
+    SharedCreateProps:
+      allOf:
+        - $ref: '#/components/schemas/BaseCreateProps'
         - type: object
           properties:
-            type:
-              type: string
-              enum: [query]
-              description: Rule type
-            index:
-              type: array
-              items:
-                type: string
-            data_view_id:
-              type: string
-            filters:
-              type: array
-              items: {} # unknown
-            saved_id:
-              type: string
-            response_actions:
-              type: array
-              items:
-                type: object
-              description: TODO
-            alert_suppression:
-              $ref: '#/components/schemas/AlertSuppression'
-            query:
-              type: string
-              description: Query to execute
-              default: ''
-            language:
-              type: string
-              enum:
-                - kuery
-                - lucene
-              default: kuery
-              description: Query language to use.
-          required:
-            - type
+            rule_id:
+              $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+
+    SharedUpdateProps:
+      allOf:
+        - $ref: '#/components/schemas/BaseCreateProps'
+        - type: object
+          properties:
+            id:
+              $ref: './common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+            rule_id:
+              $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+
+    SharedPatchProps:
+      allOf:
+        - $ref: '#/components/schemas/BasePatchProps'
+        - type: object
+          properties:
+            id:
+              $ref: './common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+            rule_id:
+              $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+
+    SharedResponseProps:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponseProps'
+        - $ref: '#/components/schemas/ResponseRequiredFields'
+        - $ref: '#/components/schemas/ResponseOptionalFields'
+
+    ############
+    # EQL Rule #
+    ############
+
+    EqlQueryLanguage:
+      type: string
+      enum:
+        - eql
+
+    EqlRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [eql]
+          description: Rule type
+        query:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
+          description: EQL query to execute
+        language:
+          $ref: '#/components/schemas/EqlQueryLanguage'
+          description: Query language to use
+      required:
+        - type
+        - query
+        - language
+
+    EqlOptionalFields:
+      type: object
+      properties:
+        index:
+          $ref: './common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
+        data_view_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
+        filters:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+        event_category_override:
+          $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/EventCategoryOverride'
+        tiebreaker_field:
+          $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TiebreakerField'
+        timestamp_field:
+          $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TimestampField'
+
+    EqlRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/EqlRequiredFields'
+        - $ref: '#/components/schemas/EqlOptionalFields'
+
+    EqlRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/EqlRequiredFields'
+        - $ref: '#/components/schemas/EqlOptionalFields'
+
+    EqlRulePatchFields:
+      allOf:
+        - $ref: '#/components/schemas/EqlRequiredFields'
+          x-modify: partial
+        - $ref: '#/components/schemas/EqlOptionalFields'
+
+    EqlRule:
+      allOf:
+        - $ref: '#/components/schemas/SharedResponseProps'
+        - $ref: '#/components/schemas/EqlRuleResponseFields'
+
+    EqlRuleCreateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedCreateProps'
+        - $ref: '#/components/schemas/EqlRuleCreateFields'
+
+    EqlRuleUpdateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedUpdateProps'
+        - $ref: '#/components/schemas/EqlRuleCreateFields'
+
+    EqlRulePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedPatchProps'
+        - $ref: '#/components/schemas/EqlRulePatchFields'
+
+    ##############
+    # Query Rule #
+    ##############
+
+    QueryRuleRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [query]
+          description: Rule type
+      required:
+        - type
+
+    QueryRuleOptionalFields:
+      type: object
+      properties:
+        index:
+          $ref: './common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
+        data_view_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
+        filters:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+        saved_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
+        alert_suppression:
+          $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppression'
+
+    QueryRuleDefaultableFields:
+      type: object
+      properties:
+        query:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
+        language:
+          $ref: './common_attributes.schema.yaml#/components/schemas/KqlQueryLanguage'
+
+    QueryRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/QueryRuleRequiredFields'
+        - $ref: '#/components/schemas/QueryRuleOptionalFields'
+        - $ref: '#/components/schemas/QueryRuleDefaultableFields'
+
+    QueryRulePatchFields:
+      allOf:
+        - $ref: '#/components/schemas/QueryRuleRequiredFields'
+          x-modify: partial
+        - $ref: '#/components/schemas/QueryRuleOptionalFields'
+        - $ref: '#/components/schemas/QueryRuleDefaultableFields'
+
+    QueryRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/QueryRuleRequiredFields'
+        - $ref: '#/components/schemas/QueryRuleOptionalFields'
+        - $ref: '#/components/schemas/QueryRuleDefaultableFields'
+          x-modify: required
+
+    QueryRule:
+      allOf:
+        - $ref: '#/components/schemas/SharedResponseProps'
+        - $ref: '#/components/schemas/QueryRuleResponseFields'
+
+    QueryRuleCreateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedCreateProps'
+        - $ref: '#/components/schemas/QueryRuleCreateFields'
+
+    QueryRuleUpdateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedUpdateProps'
+        - $ref: '#/components/schemas/QueryRuleCreateFields'
+
+    QueryRulePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedPatchProps'
+        - $ref: '#/components/schemas/QueryRulePatchFields'
+
+    ####################
+    # Saved Query Rule #
+    ####################
+
+    SavedQueryRuleRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [saved_query]
+          description: Rule type
+        saved_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+      required:
+        - type
+        - saved_id
+
+    SavedQueryRuleOptionalFields:
+      type: object
+      properties:
+        index:
+          $ref: './common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
+        data_view_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
+        filters:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
+        alert_suppression:
+          $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppression'
+        query:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
+
+    SavedQueryRuleDefaultableFields:
+      type: object
+      properties:
+        language:
+          $ref: './common_attributes.schema.yaml#/components/schemas/KqlQueryLanguage'
+
+    SavedQueryRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/SavedQueryRuleRequiredFields'
+        - $ref: '#/components/schemas/SavedQueryRuleOptionalFields'
+        - $ref: '#/components/schemas/SavedQueryRuleDefaultableFields'
+
+    SavedQueryRulePatchFields:
+      allOf:
+        - $ref: '#/components/schemas/SavedQueryRuleRequiredFields'
+          x-modify: partial
+        - $ref: '#/components/schemas/SavedQueryRuleOptionalFields'
+        - $ref: '#/components/schemas/SavedQueryRuleDefaultableFields'
+
+    SavedQueryRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/SavedQueryRuleRequiredFields'
+        - $ref: '#/components/schemas/SavedQueryRuleOptionalFields'
+        - $ref: '#/components/schemas/SavedQueryRuleDefaultableFields'
+          x-modify: required
 
     SavedQueryRule:
       allOf:
-        - $ref: '#/components/schemas/BaseRule'
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [saved_query]
-              description: Rule type
-            index:
-              type: array
-              items:
-                type: string
-            data_view_id:
-              type: string
-            filters:
-              type: array
-              items: {} # unknown
-            saved_id:
-              type: string
-            response_actions:
-              type: array
-              items:
-                type: object
-              description: TODO
-            alert_suppression:
-              $ref: '#/components/schemas/AlertSuppression'
-            query:
-              type: string
-              description: Query to execute
-            language:
-              type: string
-              enum:
-                - kuery
-                - lucene
-              default: kuery
-              description: Query language to use.
-          required:
-            - type
-            - saved_id
+        - $ref: '#/components/schemas/SharedResponseProps'
+        - $ref: '#/components/schemas/SavedQueryRuleResponseFields'
+
+    SavedQueryRuleCreateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedCreateProps'
+        - $ref: '#/components/schemas/SavedQueryRuleCreateFields'
+
+    SavedQueryRuleUpdateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedUpdateProps'
+        - $ref: '#/components/schemas/SavedQueryRuleCreateFields'
+
+    SavedQueryRulePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedPatchProps'
+        - $ref: '#/components/schemas/SavedQueryRulePatchFields'
+
+    ##################
+    # Threshold Rule #
+    ##################
+
+    ThresholdRuleRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [threshold]
+          description: Rule type
+        query:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
+        threshold:
+          $ref: './specific_attributes/threshold_attributes.schema.yaml#/components/schemas/Threshold'
+      required:
+        - type
+        - query
+        - threshold
+
+    ThresholdRuleOptionalFields:
+      type: object
+      properties:
+        index:
+          $ref: './common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
+        data_view_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
+        filters:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+        saved_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+
+    ThresholdRuleDefaultableFields:
+      type: object
+      properties:
+        language:
+          $ref: './common_attributes.schema.yaml#/components/schemas/KqlQueryLanguage'
+
+    ThresholdRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/ThresholdRuleRequiredFields'
+        - $ref: '#/components/schemas/ThresholdRuleOptionalFields'
+        - $ref: '#/components/schemas/ThresholdRuleDefaultableFields'
+
+    ThresholdRulePatchFields:
+      allOf:
+        - $ref: '#/components/schemas/ThresholdRuleRequiredFields'
+          x-modify: partial
+        - $ref: '#/components/schemas/ThresholdRuleOptionalFields'
+        - $ref: '#/components/schemas/ThresholdRuleDefaultableFields'
+
+    ThresholdRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/ThresholdRuleRequiredFields'
+        - $ref: '#/components/schemas/ThresholdRuleOptionalFields'
+        - $ref: '#/components/schemas/ThresholdRuleDefaultableFields'
+          x-modify: required
 
     ThresholdRule:
       allOf:
-        - $ref: '#/components/schemas/BaseRule'
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [threshold]
-              description: Rule type
-            query:
-              type: string
-            threshold:
-              type: object
-              properties:
-                field:
-                  oneOf:
-                    - type: string
-                    - type: array
-                      items:
-                        type: string
-                  description: Field to aggregate on
-                value:
-                  type: integer
-                  minimum: 1
-                  description: Threshold value
-                cardinality:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      field:
-                        type: string
-                      value:
-                        type: integer
-                        minimum: 0
-            index:
-              type: array
-              items:
-                type: string
-            data_view_id:
-              type: string
-            filters:
-              type: array
-              items: {} # unknown
-            saved_id:
-              type: string
-            language:
-              type: string
-              enum:
-                - kuery
-                - lucene
-              default: kuery
-              description: Query language to use.
-          required:
-            - type
-            - query
-            - threshold
+        - $ref: '#/components/schemas/SharedResponseProps'
+        - $ref: '#/components/schemas/ThresholdRuleResponseFields'
+
+    ThresholdRuleCreateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedCreateProps'
+        - $ref: '#/components/schemas/ThresholdRuleCreateFields'
+
+    ThresholdRuleUpdateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedUpdateProps'
+        - $ref: '#/components/schemas/ThresholdRuleCreateFields'
+
+    ThresholdRulePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedPatchProps'
+        - $ref: '#/components/schemas/ThresholdRulePatchFields'
+
+    #####################
+    # Threat Match Rule #
+    #####################
+
+    ThreatMatchRuleRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [threat_match]
+          description: Rule type
+        query:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
+        threat_query:
+          $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatQuery'
+        threat_mapping:
+          $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatMapping'
+        threat_index:
+          $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatIndex'
+      required:
+        - type
+        - query
+        - threat_query
+        - threat_mapping
+        - threat_index
+
+    ThreatMatchRuleOptionalFields:
+      type: object
+      properties:
+        index:
+          $ref: './common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
+        data_view_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
+        filters:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+        saved_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+        threat_filters:
+          $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatFilters'
+        threat_indicator_path:
+          $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ThreatIndicatorPath'
+        threat_language:
+          $ref: './common_attributes.schema.yaml#/components/schemas/KqlQueryLanguage'
+        concurrent_searches:
+          $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ConcurrentSearches'
+        items_per_search:
+          $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ItemsPerSearch'
+
+    ThreatMatchRuleDefaultableFields:
+      type: object
+      properties:
+        language:
+          $ref: './common_attributes.schema.yaml#/components/schemas/KqlQueryLanguage'
+
+    ThreatMatchRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/ThreatMatchRuleRequiredFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleOptionalFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleDefaultableFields'
+
+    ThreatMatchRulePatchFields:
+      allOf:
+        - $ref: '#/components/schemas/ThreatMatchRuleRequiredFields'
+          x-modify: partial
+        - $ref: '#/components/schemas/ThreatMatchRuleOptionalFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleDefaultableFields'
+
+    ThreatMatchRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/ThreatMatchRuleRequiredFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleOptionalFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleDefaultableFields'
+          x-modify: required
+
     ThreatMatchRule:
       allOf:
-        - $ref: '#/components/schemas/BaseRule'
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [threat_match]
-              description: Rule type
-            query:
-              type: string
-            threat_query:
-              type: string
-              description: Query to execute
-            threat_mapping:
-              type: array
-              minItems: 1
-              items:
-                type: object
-                properties:
-                  entries:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        field:
-                          type: string
-                          minLength: 1
-                        type:
-                          type: string
-                          enum:
-                            - mapping
-                        value:
-                          type: string
-                          minLength: 1
-            threat_index:
-              type: array
-              items:
-                type: string
-            index:
-              type: array
-              items:
-                type: string
-            data_view_id:
-              type: string
-            filters:
-              type: array
-              items: {} # unknown
-            saved_id:
-              type: string
-            threat_filters:
-              type: array
-              items:
-                description: Query and filter context array used to filter documents from the Elasticsearch index containing the threat values
-            threat_indicator_path:
-              type: string
-              description: Defines the path to the threat indicator in the indicator documents (optional)
-            threat_language:
-              type: string
-              enum:
-                - kuery
-                - lucene
-              description: Query language to use.
-            concurrent_searches:
-              type: integer
-              minimum: 1
-            items_per_search:
-              type: integer
-              minimum: 1
-            language:
-              type: string
-              enum:
-                - kuery
-                - lucene
-              default: kuery
-              description: Query language to use.
-          required:
-            - type
-            - query
-            - threat_query
-            - threat_mapping
-            - threat_index
-    MlRule:
+        - $ref: '#/components/schemas/SharedResponseProps'
+        - $ref: '#/components/schemas/ThreatMatchRuleResponseFields'
+
+    ThreatMatchRuleCreateProps:
       allOf:
-        - $ref: '#/components/schemas/BaseRule'
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [machine_learning]
-              description: Rule type
-            anomaly_threshold:
-              type: integer
-              minimum: 0
-              description: Anomaly threshold
-            machine_learning_job_id:
-              oneOf:
-                - type: string
-                - type: array
-                  items:
-                    type: string
-                  minItems: 1
-              description: Machine learning job ID
-          required:
-            - type
-            - machine_learning_job_id
-            - anomaly_threshold
-    EqlRule:
+        - $ref: '#/components/schemas/SharedCreateProps'
+        - $ref: '#/components/schemas/ThreatMatchRuleCreateFields'
+
+    ThreatMatchRuleUpdateProps:
       allOf:
-        - $ref: '#/components/schemas/BaseRule'
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [eql]
-              description: Rule type
-            language:
-              type: string
-              enum:
-                - eql
-            query:
-              type: string
-              description: EQL query to execute
-            index:
-              type: array
-              items:
-                type: string
-            data_view_id:
-              type: string
-            filters:
-              type: array
-              items: {} # unknown
-            event_category_field:
-              type: string
-              description: Contains the event classification
-            tiebreaker_field:
-              type: string
-              description: Sets a secondary field for sorting events
-            timestamp_field:
-              type: string
-              description: Contains the event timestamp used for sorting a sequence of events
-          required:
-            - type
-            - language
-            - query
+        - $ref: '#/components/schemas/SharedUpdateProps'
+        - $ref: '#/components/schemas/ThreatMatchRuleCreateFields'
+
+    ThreatMatchRulePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedPatchProps'
+        - $ref: '#/components/schemas/ThreatMatchRulePatchFields'
+
+    ###########
+    # ML Rule #
+    ###########
+
+    MachineLearningRuleRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [machine_learning]
+          description: Rule type
+        anomaly_threshold:
+          $ref: './specific_attributes/ml_attributes.schema.yaml#/components/schemas/AnomalyThreshold'
+        machine_learning_job_id:
+          $ref: './specific_attributes/ml_attributes.schema.yaml#/components/schemas/MachineLearningJobId'
+      required:
+        - type
+        - machine_learning_job_id
+        - anomaly_threshold
+
+    MachineLearningRulePatchFields:
+      allOf:
+        - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+          x-modify: partial
+
+    MachineLearningRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+
+    MachineLearningRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+
+    MachineLearningRule:
+      allOf:
+        - $ref: '#/components/schemas/SharedResponseProps'
+        - $ref: '#/components/schemas/MachineLearningRuleResponseFields'
+
+    MachineLearningRuleCreateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedCreateProps'
+        - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
+
+    MachineLearningRuleUpdateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedUpdateProps'
+        - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
+
+    MachineLearningRulePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedPatchProps'
+        - $ref: '#/components/schemas/MachineLearningRulePatchFields'
+
+    ##################
+    # New Terms Rule #
+    ##################
+
+    NewTermsRuleRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [new_terms]
+          description: Rule type
+        query:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
+        new_terms_fields:
+          $ref: './specific_attributes/new_terms_attributes.schema.yaml#/components/schemas/NewTermsFields'
+        history_window_start:
+          $ref: './specific_attributes/new_terms_attributes.schema.yaml#/components/schemas/HistoryWindowStart'
+      required:
+        - type
+        - query
+        - new_terms_fields
+        - history_window_start
+
+    NewTermsRuleOptionalFields:
+      type: object
+      properties:
+        index:
+          $ref: './common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
+        data_view_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
+        filters:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+
+    NewTermsRuleDefaultableFields:
+      type: object
+      properties:
+        language:
+          $ref: './common_attributes.schema.yaml#/components/schemas/KqlQueryLanguage'
+
+    NewTermsRulePatchFields:
+      allOf:
+        - $ref: '#/components/schemas/NewTermsRuleRequiredFields'
+          x-modify: partial
+        - $ref: '#/components/schemas/NewTermsRuleOptionalFields'
+        - $ref: '#/components/schemas/NewTermsRuleDefaultableFields'
+
+    NewTermsRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/NewTermsRuleRequiredFields'
+        - $ref: '#/components/schemas/NewTermsRuleOptionalFields'
+        - $ref: '#/components/schemas/NewTermsRuleDefaultableFields'
+          x-modify: required
+
+    NewTermsRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/NewTermsRuleRequiredFields'
+        - $ref: '#/components/schemas/NewTermsRuleOptionalFields'
+        - $ref: '#/components/schemas/NewTermsRuleDefaultableFields'
 
     NewTermsRule:
       allOf:
-        - $ref: '#/components/schemas/BaseRule'
-        - type: object
-          properties:
-            type:
-              type: string
-              enum: [new_terms]
-              description: Rule type
-            query:
-              type: string
-            new_terms_fields:
-              type: array
-              items:
-                type: string
-              minItems: 1
-              maxItems: 3
-            history_window_size:
-              type: string
-              minLength: 1
-            index:
-              type: array
-              items:
-                type: string
-            data_view_id:
-              type: string
-            filters:
-              type: array
-              items: {} # unknown
-            language:
-              type: string
-              enum:
-                - kuery
-                - lucene
-              default: kuery
-          required:
-            - type
-            - query
-            - new_terms_fields
-            - history_window_start
+        - $ref: '#/components/schemas/SharedResponseProps'
+        - $ref: '#/components/schemas/NewTermsRuleResponseFields'
 
-    Rule:
-      oneOf:
+    NewTermsRuleCreateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedCreateProps'
+        - $ref: '#/components/schemas/NewTermsRuleCreateFields'
+
+    NewTermsRuleUpdateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedUpdateProps'
+        - $ref: '#/components/schemas/NewTermsRuleCreateFields'
+
+    NewTermsRulePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedPatchProps'
+        - $ref: '#/components/schemas/NewTermsRulePatchFields'
+
+    ###########
+    # ESQL Rule #
+    ###########
+
+    EsqlQueryLanguage:
+      type: string
+      enum:
+        - esql
+
+    EsqlRuleRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [esql]
+          description: Rule type
+        language:
+          $ref: '#/components/schemas/EsqlQueryLanguage'
+        query:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
+          description: ESQL query to execute
+      required:
+        - type
+        - language
+        - query
+
+    EsqlRulePatchFields:
+      allOf:
+        - $ref: '#/components/schemas/EsqlRuleRequiredFields'
+          x-modify: partial
+
+    EsqlRuleResponseFields:
+      allOf:
+        - $ref: '#/components/schemas/EsqlRuleRequiredFields'
+
+    EsqlRuleCreateFields:
+      allOf:
+        - $ref: '#/components/schemas/EsqlRuleRequiredFields'
+
+    EsqlRule:
+      allOf:
+        - $ref: '#/components/schemas/SharedResponseProps'
+        - $ref: '#/components/schemas/EsqlRuleResponseFields'
+
+    EsqlRuleCreateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedCreateProps'
+        - $ref: '#/components/schemas/EsqlRuleCreateFields'
+
+    EsqlRuleUpdateProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedUpdateProps'
+        - $ref: '#/components/schemas/EsqlRuleCreateFields'
+
+    EsqlRulePatchProps:
+      allOf:
+        - $ref: '#/components/schemas/SharedPatchProps'
+        - $ref: '#/components/schemas/EsqlRulePatchFields'
+          x-modify: partial
+
+    ##########################
+    # Final combined schemas #
+    ##########################
+
+    TypeSpecificCreateProps:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRuleCreateFields'
+        - $ref: '#/components/schemas/QueryRuleCreateFields'
+        - $ref: '#/components/schemas/SavedQueryRuleCreateFields'
+        - $ref: '#/components/schemas/ThresholdRuleCreateFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleCreateFields'
+        - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
+        - $ref: '#/components/schemas/NewTermsRuleCreateFields'
+        - $ref: '#/components/schemas/EsqlRuleCreateFields'
+
+    TypeSpecificPatchProps:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRulePatchFields'
+        - $ref: '#/components/schemas/QueryRulePatchFields'
+        - $ref: '#/components/schemas/SavedQueryRulePatchFields'
+        - $ref: '#/components/schemas/ThresholdRulePatchFields'
+        - $ref: '#/components/schemas/ThreatMatchRulePatchFields'
+        - $ref: '#/components/schemas/MachineLearningRulePatchFields'
+        - $ref: '#/components/schemas/NewTermsRulePatchFields'
+        - $ref: '#/components/schemas/EsqlRulePatchFields'
+
+    TypeSpecificResponse:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRuleResponseFields'
+        - $ref: '#/components/schemas/QueryRuleResponseFields'
+        - $ref: '#/components/schemas/SavedQueryRuleResponseFields'
+        - $ref: '#/components/schemas/ThresholdRuleResponseFields'
+        - $ref: '#/components/schemas/ThreatMatchRuleResponseFields'
+        - $ref: '#/components/schemas/MachineLearningRuleResponseFields'
+        - $ref: '#/components/schemas/NewTermsRuleResponseFields'
+        - $ref: '#/components/schemas/EsqlRuleResponseFields'
+
+    RuleCreateProps:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRuleCreateProps'
+        - $ref: '#/components/schemas/QueryRuleCreateProps'
+        - $ref: '#/components/schemas/SavedQueryRuleCreateProps'
+        - $ref: '#/components/schemas/ThresholdRuleCreateProps'
+        - $ref: '#/components/schemas/ThreatMatchRuleCreateProps'
+        - $ref: '#/components/schemas/MachineLearningRuleCreateProps'
+        - $ref: '#/components/schemas/NewTermsRuleCreateProps'
+        - $ref: '#/components/schemas/EsqlRuleCreateProps'
+
+    RuleUpdateProps:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRuleUpdateProps'
+        - $ref: '#/components/schemas/QueryRuleUpdateProps'
+        - $ref: '#/components/schemas/SavedQueryRuleUpdateProps'
+        - $ref: '#/components/schemas/ThresholdRuleUpdateProps'
+        - $ref: '#/components/schemas/ThreatMatchRuleUpdateProps'
+        - $ref: '#/components/schemas/MachineLearningRuleUpdateProps'
+        - $ref: '#/components/schemas/NewTermsRuleUpdateProps'
+        - $ref: '#/components/schemas/EsqlRuleUpdateProps'
+
+    RulePatchProps:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRulePatchProps'
+        - $ref: '#/components/schemas/QueryRulePatchProps'
+        - $ref: '#/components/schemas/SavedQueryRulePatchProps'
+        - $ref: '#/components/schemas/ThresholdRulePatchProps'
+        - $ref: '#/components/schemas/ThreatMatchRulePatchProps'
+        - $ref: '#/components/schemas/MachineLearningRulePatchProps'
+        - $ref: '#/components/schemas/NewTermsRulePatchProps'
+        - $ref: '#/components/schemas/EsqlRulePatchProps'
+
+    RuleResponse:
+      anyOf:
+        - $ref: '#/components/schemas/EqlRule'
         - $ref: '#/components/schemas/QueryRule'
         - $ref: '#/components/schemas/SavedQueryRule'
         - $ref: '#/components/schemas/ThresholdRule'
         - $ref: '#/components/schemas/ThreatMatchRule'
-        - $ref: '#/components/schemas/MlRule'
-        - $ref: '#/components/schemas/EqlRule'
+        - $ref: '#/components/schemas/MachineLearningRule'
         - $ref: '#/components/schemas/NewTermsRule'
-
-    Throttle:
-      type: string
-      description: Defines the maximum interval in which a rule's actions are executed.
-      enum:
-        - rule
-        - 1h
-        - 1d
-        - 7d
-
-    Subtechnique:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Subtechnique ID
-        name:
-          type: string
-          description: Subtechnique name
-        reference:
-          type: string
-          description: Subtechnique reference
-      required:
-        - id
-        - name
-        - reference
-
-    Technique:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Technique ID
-        name:
-          type: string
-          description: Technique name
-        reference:
-          type: string
-          description: Technique reference
-        subtechnique:
-          type: array
-          items:
-            $ref: '#/components/schemas/Subtechnique'
-          description: Array containing more specific information on the attack technique
-      required:
-        - id
-        - name
-        - reference
-
-    Threat:
-      type: object
-      properties:
-        framework:
-          type: string
-          description: Relevant attack framework
-        tactic:
-          type: object
-          properties:
-            id:
-              type: string
-              description: Tactic ID
-            name:
-              type: string
-              description: Tactic name
-            reference:
-              type: string
-              description: Tactic reference
-          required:
-            - id
-            - name
-            - reference
-        technique:
-          type: array
-          items:
-            $ref: '#/components/schemas/Technique'
-          description: Array containing information on the attack techniques (optional)
-      required:
-        - framework
-        - tactic
-
-    RuleResponse:
-      type: object
-
-    RuleCreateProps:
-      type: object
-
-    RuleUpdateProps:
-      type: object
-
-    RulePatchProps:
-      type: object
+        - $ref: '#/components/schemas/EsqlRule'

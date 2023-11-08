@@ -21,4 +21,8 @@ export default createTestConfig({
   kbnServerArgs: [],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
+  esServerArgs: [],
 });

@@ -13,6 +13,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PassThrough, Readable } from 'stream';
 import {
   validateParams,
   validateConfig,
@@ -37,6 +38,7 @@ import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
+import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -276,8 +278,6 @@ export class ActionExecutor {
           }
         }
 
-        eventLogger.stopTiming(event);
-
         // allow null-ish return to indicate success
         const result = rawResult || {
           actionId,
@@ -286,8 +286,50 @@ export class ActionExecutor {
 
         event.event = event.event || {};
 
-        // start gen_ai extension
-        // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
+        const { error, ...resultWithoutError } = result;
+
+        function completeEventLogging() {
+          eventLogger.stopTiming(event);
+
+          const currentUser = security?.authc.getCurrentUser(request);
+
+          event.user = event.user || {};
+          event.user.name = currentUser?.username;
+          event.user.id = currentUser?.profile_uid;
+
+          if (result.status === 'ok') {
+            span?.setOutcome('success');
+            event.event!.outcome = 'success';
+            event.message = `action executed: ${actionLabel}`;
+          } else if (result.status === 'error') {
+            span?.setOutcome('failure');
+            event.event!.outcome = 'failure';
+            event.message = `action execution failure: ${actionLabel}`;
+            event.error = event.error || {};
+            event.error.message = actionErrorToMessage(result);
+            if (result.error) {
+              logger.error(result.error, {
+                tags: [actionTypeId, actionId, 'action-run-failed'],
+                error: { stack_trace: result.error.stack },
+              });
+            }
+            logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
+          } else {
+            span?.setOutcome('failure');
+            event.event!.outcome = 'failure';
+            event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
+            event.error = event.error || {};
+            event.error.message = 'action execution returned unexpected result';
+            logger.warn(
+              `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
+            );
+          }
+
+          eventLogger.logEvent(event);
+        }
+
+        // start openai extension
+        // add event.kibana.action.execution.openai to event log when OpenAI Connector is executed
         if (result.status === 'ok' && actionTypeId === '.gen-ai') {
           const data = result.data as unknown as {
             usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
@@ -310,45 +352,34 @@ export class ActionExecutor {
               },
             },
           };
-        }
-        // end gen_ai extension
 
-        const currentUser = security?.authc.getCurrentUser(request);
+          if (result.data instanceof Readable) {
+            getTokenCountFromOpenAIStream({
+              responseStream: result.data.pipe(new PassThrough()),
+              body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
+            })
+              .then(({ total, prompt, completion }) => {
+                event.kibana!.action!.execution!.gen_ai!.usage = {
+                  total_tokens: total,
+                  prompt_tokens: prompt,
+                  completion_tokens: completion,
+                };
+              })
+              .catch((err) => {
+                logger.error('Failed to calculate tokens from streaming response');
+                logger.error(err);
+              })
+              .finally(() => {
+                completeEventLogging();
+              });
 
-        event.user = event.user || {};
-        event.user.name = currentUser?.username;
-        event.user.id = currentUser?.profile_uid;
-
-        if (result.status === 'ok') {
-          span?.setOutcome('success');
-          event.event.outcome = 'success';
-          event.message = `action executed: ${actionLabel}`;
-        } else if (result.status === 'error') {
-          span?.setOutcome('failure');
-          event.event.outcome = 'failure';
-          event.message = `action execution failure: ${actionLabel}`;
-          event.error = event.error || {};
-          event.error.message = actionErrorToMessage(result);
-          if (result.error) {
-            logger.error(result.error, {
-              tags: [actionTypeId, actionId, 'action-run-failed'],
-              error: { stack_trace: result.error.stack },
-            });
+            return resultWithoutError;
           }
-          logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
-        } else {
-          span?.setOutcome('failure');
-          event.event.outcome = 'failure';
-          event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
-          event.error = event.error || {};
-          event.error.message = 'action execution returned unexpected result';
-          logger.warn(
-            `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
-          );
         }
+        // end openai extension
 
-        eventLogger.logEvent(event);
-        const { error, ...resultWithoutError } = result;
+        completeEventLogging();
+
         return resultWithoutError;
       }
     );

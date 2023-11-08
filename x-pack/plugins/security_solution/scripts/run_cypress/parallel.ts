@@ -28,37 +28,8 @@ import {
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
-import { isSkipped, parseTestFileConfig } from './utils';
+import { parseTestFileConfig, retrieveIntegrations } from './utils';
 import { getFTRConfig } from './get_ftr_config';
-
-/**
- * Retrieve test files using a glob pattern.
- * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
- */
-const retrieveIntegrations = (integrationsPaths: string[]) => {
-  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
-
-  if (process.env.RUN_ALL_TESTS === 'true') {
-    return nonSkippedSpecs;
-  } else {
-    // The number of instances of this job were created
-    const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
-      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
-      : 1;
-    // An index which uniquely identifies this instance of the job
-    const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-      : 0;
-
-    const nonSkippedSpecsForChunk: string[] = [];
-
-    for (let i = chunkIndex; i < nonSkippedSpecs.length; i += chunksTotal) {
-      nonSkippedSpecsForChunk.push(nonSkippedSpecs[i]);
-    }
-
-    return nonSkippedSpecsForChunk;
-  }
-};
 
 export const cli = () => {
   run(
@@ -81,7 +52,8 @@ export const cli = () => {
             }
             return acc;
           }, {} as Record<string, string | number>)
-        );
+        )
+        .boolean('inspect');
 
       log.info(`
 ----------------------------------------------
@@ -176,6 +148,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const fleetServerPorts: number[] = [8220];
 
       const getEsPort = <T>(): T | number => {
+        if (isOpen) {
+          return 9220;
+        }
+
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
         if (esPorts.includes(esPort)) {
           return getEsPort();
@@ -263,7 +239,17 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 Cypress FTR setup for file: ${filePath}:
 ----------------------------------------------
 
-${JSON.stringify(config.getAll(), null, 2)}
+${JSON.stringify(
+  config.getAll(),
+  (key, v) => {
+    if (Array.isArray(v) && v.length > 32) {
+      return v.slice(0, 32).concat('... trimmed after 32 items.');
+    } else {
+      return v;
+    }
+  },
+  2
+)}
 
 ----------------------------------------------
 `);
@@ -305,6 +291,7 @@ ${JSON.stringify(config.getAll(), null, 2)}
                   ? []
                   : ['--dev', '--no-dev-config', '--no-dev-credentials'],
               onEarlyExit,
+              inspect: argv.inspect,
             });
 
             await providers.loadAll();
@@ -402,7 +389,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             } else {
               try {
                 result = await cypress.run({
-                  browser: 'chrome',
+                  browser: 'electron',
                   spec: filePath,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
@@ -436,7 +423,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
           results,
-          (result) => result?.status === 'finished' && result.totalFailed > 0
+          (result) =>
+            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (result as CypressCommandLine.CypressRunResult)?.totalFailed
         );
         if (hasFailedTests) {
           throw createFailError('Not all tests passed');

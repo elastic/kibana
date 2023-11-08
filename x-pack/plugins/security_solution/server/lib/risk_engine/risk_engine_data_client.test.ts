@@ -7,9 +7,7 @@
 
 import {
   createOrUpdateComponentTemplate,
-  createOrUpdateIlmPolicy,
   createOrUpdateIndexTemplate,
-  getDataStreamAdapter,
 } from '@kbn/alerting-plugin/server';
 import {
   loggingSystemMock,
@@ -62,9 +60,7 @@ const transformsMock = {
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
-  createOrUpdateIlmPolicy: jest.fn(),
   createOrUpdateIndexTemplate: jest.fn(),
-  getDataStreamAdapter: jest.fn(),
 }));
 
 jest.mock('./utils/create_datastream', () => ({
@@ -102,7 +98,6 @@ describe('RiskEngineDataClient', () => {
           esClient,
           soClient: mockSavedObjectClient,
           namespace: 'default',
-          dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
         };
         riskEngineDataClient = new RiskEngineDataClient(options);
       });
@@ -131,29 +126,6 @@ describe('RiskEngineDataClient', () => {
       describe('initializeResources success', () => {
         it('should initialize risk engine resources', async () => {
           await riskEngineDataClient.initializeResources({ namespace: 'default' });
-
-          expect(getDataStreamAdapter).toHaveBeenCalledWith({ useDataStreamForAlerts });
-
-          expect(createOrUpdateIlmPolicy).toHaveBeenCalledWith({
-            logger,
-            esClient,
-            name: '.risk-score-ilm-policy',
-            policy: {
-              _meta: {
-                managed: true,
-              },
-              phases: {
-                hot: {
-                  actions: {
-                    rollover: {
-                      max_age: '30d',
-                      max_primary_shard_size: '50gb',
-                    },
-                  },
-                },
-              },
-            },
-          });
 
           expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -312,12 +284,8 @@ describe('RiskEngineDataClient', () => {
                 index_patterns: ['risk-score.risk-score-default'],
                 composed_of: ['.risk-score-mappings'],
                 template: {
+                  lifecycle: {},
                   settings: {
-                    auto_expand_replicas: '0-1',
-                    hidden: true,
-                    'index.lifecycle': {
-                      name: '.risk-score-ilm-policy',
-                    },
                     'index.mapping.total_fields.limit': totalFieldsLimit,
                   },
                   mappings: {
@@ -511,18 +479,13 @@ describe('RiskEngineDataClient', () => {
               transform_id: 'risk_score_latest_transform_default',
             },
           });
-
-          expect(transforms.startTransform).toHaveBeenCalledWith({
-            esClient,
-            transformId: 'risk_score_latest_transform_default',
-          });
         });
       });
 
       describe('initializeResources error', () => {
         it('should handle errors during initialization', async () => {
           const error = new Error('There error');
-          (createOrUpdateIlmPolicy as jest.Mock).mockRejectedValueOnce(error);
+          (createOrUpdateIndexTemplate as jest.Mock).mockRejectedValueOnce(error);
 
           try {
             await riskEngineDataClient.initializeResources({ namespace: 'default' });
@@ -562,7 +525,7 @@ describe('RiskEngineDataClient', () => {
               namespace: 'default',
             });
             expect(status).toEqual({
-              isMaxAmountOfRiskEnginesReached: false,
+              isMaxAmountOfRiskEnginesReached: true,
               riskEngineStatus: 'ENABLED',
               legacyRiskEngineStatus: 'NOT_INSTALLED',
             });

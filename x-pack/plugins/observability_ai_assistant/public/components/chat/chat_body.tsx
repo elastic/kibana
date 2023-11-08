@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { last } from 'lodash';
+import { flatten, last } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -94,7 +94,7 @@ export function ChatBody({
   let footer: React.ReactNode;
 
   const isLoading = Boolean(
-    connectors.loading || knowledgeBase.status.loading || last(timeline.items)?.loading
+    connectors.loading || knowledgeBase.status.loading || last(flatten(timeline.items))?.loading
   );
 
   const containerClassName = css`
@@ -189,6 +189,10 @@ export function ChatBody({
                 onFeedback={timeline.onFeedback}
                 onRegenerate={timeline.onRegenerate}
                 onStopGenerating={timeline.onStopGenerating}
+                onActionClick={(payload) => {
+                  setStickToBottom(true);
+                  return timeline.onActionClick(payload);
+                }}
               />
             </EuiPanel>
           </div>

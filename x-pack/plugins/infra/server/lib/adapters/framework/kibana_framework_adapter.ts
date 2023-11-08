@@ -12,7 +12,7 @@ import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+import { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
@@ -34,6 +34,7 @@ interface FrozenIndexParams {
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;
   public plugins: InfraServerPluginSetupDeps;
+  public config: InfraConfig;
   private core: CoreSetup<InfraServerPluginStartDeps>;
 
   constructor(
@@ -44,6 +45,7 @@ export class KibanaFramework {
     this.router = core.http.createRouter();
     this.plugins = plugins;
     this.core = core;
+    this.config = config;
   }
 
   public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(

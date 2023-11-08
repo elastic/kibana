@@ -145,5 +145,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchEmbeddableToDashboard();
       await testSubjects.missingOrFail('dataGridFullScreenButton');
     });
+
+    it('should show the the grid toolbar', async () => {
+      await addSearchEmbeddableToDashboard();
+      await testSubjects.existOrFail('dscGridToolbar');
+    });
   });
 }

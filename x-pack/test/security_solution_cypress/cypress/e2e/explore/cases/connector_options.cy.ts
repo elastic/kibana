@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   getCase1,
   getConnectorIds,
@@ -26,72 +27,58 @@ import {
 import { goToCreateNewCase } from '../../../tasks/all_cases';
 import { CASES_URL } from '../../../urls/navigation';
 import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../../screens/case_details';
-import { cleanKibana } from '../../../tasks/common';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165712
-describe(
-  'Cases connector incident fields',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
-  () => {
-    before(() => {
-      cleanKibana();
-      login();
+describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, () => {
+  beforeEach(() => {
+    login();
+    cy.intercept('GET', '/api/cases/configure/connectors/_find', getMockConnectorsResponse());
+    cy.intercept('POST', `/api/actions/connector/${getConnectorIds().sn}/_execute`, (req) => {
+      const response =
+        req.body.params.subAction === 'getChoices'
+          ? getExecuteResponses().servicenow.choices
+          : { status: 'ok', data: [] };
+      req.reply(response);
     });
-
-    beforeEach(() => {
-      login();
-      cy.intercept('GET', '/api/cases/configure/connectors/_find', getMockConnectorsResponse());
-      cy.intercept('POST', `/api/actions/connector/${getConnectorIds().sn}/_execute`, (req) => {
+    cy.intercept('POST', `/api/actions/connector/${getConnectorIds().jira}/_execute`, (req) => {
+      const response =
+        req.body.params.subAction === 'issueTypes'
+          ? getExecuteResponses().jira.issueTypes
+          : getExecuteResponses().jira.fieldsByIssueType;
+      req.reply(response);
+    });
+    cy.intercept(
+      'POST',
+      `/api/actions/connector/${getConnectorIds().resilient}/_execute`,
+      (req) => {
         const response =
-          req.body.params.subAction === 'getChoices'
-            ? getExecuteResponses().servicenow.choices
-            : { status: 'ok', data: [] };
+          req.body.params.subAction === 'incidentTypes'
+            ? getExecuteResponses().resilient.incidentTypes
+            : getExecuteResponses().resilient.severity;
+
         req.reply(response);
-      });
-      cy.intercept('POST', `/api/actions/connector/${getConnectorIds().jira}/_execute`, (req) => {
-        const response =
-          req.body.params.subAction === 'issueTypes'
-            ? getExecuteResponses().jira.issueTypes
-            : getExecuteResponses().jira.fieldsByIssueType;
-        req.reply(response);
-      });
-      cy.intercept(
-        'POST',
-        `/api/actions/connector/${getConnectorIds().resilient}/_execute`,
-        (req) => {
-          const response =
-            req.body.params.subAction === 'incidentTypes'
-              ? getExecuteResponses().resilient.incidentTypes
-              : getExecuteResponses().resilient.severity;
-
-          req.reply(response);
-        }
-      );
-      cy.intercept(
-        'POST',
-        `/api/cases/**/connector/${getConnectorIds().resilient}/_push`,
-        (req) => {
-          req.reply(getCaseResponse());
-        }
-      );
+      }
+    );
+    cy.intercept('POST', `/api/cases/**/connector/${getConnectorIds().resilient}/_push`, (req) => {
+      req.reply(getCaseResponse());
     });
+  });
 
-    it('Correct incident fields show when connector is changed', () => {
-      visitWithoutDateRange(CASES_URL);
-      goToCreateNewCase();
-      fillCasesMandatoryfields(getCase1());
-      fillJiraConnectorOptions(getJiraConnectorOptions());
-      fillServiceNowConnectorOptions(getServiceNowConnectorOptions());
-      fillIbmResilientConnectorOptions(getIbmResilientConnectorOptions());
-      createCase();
+  it('Correct incident fields show when connector is changed', () => {
+    visit(CASES_URL);
+    goToCreateNewCase();
+    fillCasesMandatoryfields(getCase1());
+    fillJiraConnectorOptions(getJiraConnectorOptions());
+    fillServiceNowConnectorOptions(getServiceNowConnectorOptions());
+    fillIbmResilientConnectorOptions(getIbmResilientConnectorOptions());
+    createCase();
 
-      cy.get(CONNECTOR_TITLE).should('have.text', getIbmResilientConnectorOptions().title);
-      cy.get(CONNECTOR_CARD_DETAILS).should(
-        'have.text',
-        `Incident Types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
-          getIbmResilientConnectorOptions().severity
-        }`
-      );
-    });
-  }
-);
+    cy.get(CONNECTOR_TITLE).should('have.text', getIbmResilientConnectorOptions().title);
+    cy.get(CONNECTOR_CARD_DETAILS).should(
+      'have.text',
+      `Incident Types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
+        getIbmResilientConnectorOptions().severity
+      }`
+    );
+  });
+});

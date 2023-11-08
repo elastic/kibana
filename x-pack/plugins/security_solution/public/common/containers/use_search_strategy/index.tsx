@@ -9,7 +9,7 @@ import { noop, omit } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { useObservable } from '@kbn/securitysolution-hook-utils';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import * as i18n from './translations';
 
@@ -64,7 +64,7 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
             abortSignal,
           }
         )
-        .pipe(filter((response) => isCompleteResponse(response)));
+        .pipe(filter((response) => !isRunningResponse(response)));
 
       observable.subscribe({
         next: (response) => {
@@ -158,7 +158,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   }, [abort]);
 
   const [formattedResult, inspect] = useMemo(() => {
-    if (isErrorResponse(result)) {
+    if (!result) {
       return [initialResult, EMPTY_INSPECT];
     }
     return [

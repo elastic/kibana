@@ -34,7 +34,7 @@ interface Props {
   pipelineName: string;
   pipelineCreated: boolean;
   pipelineError?: string;
-  sourceIndex: string;
+  sourceIndex?: string;
 }
 
 export const ReviewAndCreatePipeline: FC<Props> = ({
@@ -202,7 +202,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          {pipelineCreated ? (
+          {pipelineCreated && sourceIndex ? (
             <>
               <EuiSpacer size="m" />
               <EuiAccordion

@@ -96,31 +96,23 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputKibanaDependencies.toasts",
+            "id": "def-common.FieldInputKibanaDependencies.notifications",
             "type": "Object",
             "tags": [],
-            "label": "toasts",
+            "label": "notifications",
             "description": [
               "The portion of the {@link ToastsStart} contract used by this component."
             ],
             "signature": [
-              "{ addDanger: (toastOrTitle: ",
+              "{ toasts: Pick<",
               {
                 "pluginId": "@kbn/core-notifications-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastInput",
-                "text": "ToastInput"
+                "section": "def-common.IToasts",
+                "text": "IToasts"
               },
-              ", options?: any) => ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
-                "text": "Toast"
-              },
-              "; }"
+              ", \"addDanger\">; }"
             ],
             "path": "packages/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
@@ -193,12 +185,12 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.FieldInputProps.onChange",
+            "id": "def-common.FieldInputProps.onInputChange",
             "type": "Function",
             "tags": [],
-            "label": "onChange",
+            "label": "onInputChange",
             "description": [
-              "The `onChange` handler for the input."
+              "The `onInputChange` handler for the input."
             ],
             "signature": [
               "(change?: ",
@@ -218,7 +210,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-components-field-input",
-                "id": "def-common.FieldInputProps.onChange.$1",
+                "id": "def-common.FieldInputProps.onInputChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "change",
@@ -410,12 +402,12 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-input",
-            "id": "def-common.InputProps.onChange",
+            "id": "def-common.InputProps.onInputChange",
             "type": "Function",
             "tags": [],
-            "label": "onChange",
+            "label": "onInputChange",
             "description": [
-              "The `onChange` handler."
+              "The `onInputChange` handler."
             ],
             "signature": [
               "(change?: ",
@@ -435,7 +427,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/management-settings-components-field-input",
-                "id": "def-common.InputProps.onChange.$1",
+                "id": "def-common.InputProps.onInputChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "change",

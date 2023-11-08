@@ -7,18 +7,13 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { MetricsDataClient } from './client';
+import { MetricsDataClient, DEFAULT_METRIC_INDICES } from './client';
 import { metricsDataSourceSavedObjectName } from '../saved_objects/metrics_data_source';
 
 describe('MetricsDataClient', () => {
-  const client = new MetricsDataClient();
-
-  client.setDefaultMetricIndicesHandler(async () => {
-    return 'fallback-indices*';
-  });
-
   describe('metric indices', () => {
     it('retrieves metrics saved object', async () => {
+      const client = new MetricsDataClient();
       const savedObjectsClient = {
         get: jest.fn().mockResolvedValue({ attributes: { metricIndices: 'foo,bar' } }),
       };
@@ -36,6 +31,10 @@ describe('MetricsDataClient', () => {
     });
 
     it('falls back to provided handler when no metrics saved object exists', async () => {
+      const client = new MetricsDataClient();
+      client.setDefaultMetricIndicesHandler(async () => {
+        return 'fallback-indices*';
+      });
       const savedObjectsClient = {
         get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
       };
@@ -50,6 +49,18 @@ describe('MetricsDataClient', () => {
         'default',
       ]);
       expect(indices).toEqual('fallback-indices*');
+    });
+
+    it('falls back to static indices when no fallback exists', async () => {
+      const client = new MetricsDataClient();
+      const savedObjectsClient = {
+        get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+      };
+
+      const indices = await client.getMetricIndices({
+        savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientContract,
+      });
+      expect(indices).toEqual(DEFAULT_METRIC_INDICES);
     });
   });
 });

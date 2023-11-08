@@ -123,7 +123,7 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
-    describe('isSytemApi property', () => {
+    describe('isSystemRequest property', () => {
       it('is false when no kbn-system-request header is set', () => {
         const request = hapiMocks.createRequest({
           headers: { custom: 'one' },

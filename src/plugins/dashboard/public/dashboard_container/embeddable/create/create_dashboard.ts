@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import { cloneDeep, identity, pickBy } from 'lodash';
 
@@ -19,14 +20,20 @@ import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public'
 import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 
-import { DashboardContainerInput } from '../../../../common';
 import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
+import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { LoadDashboardReturn } from '../../../services/dashboard_content_management/types';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../../../dashboard_constants';
+import { panelPlacementStrategies } from '../../component/panel_placement/place_new_panel_strategies';
+import {
+  DEFAULT_DASHBOARD_INPUT,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+  GLOBAL_STATE_STORAGE_KEY,
+} from '../../../dashboard_constants';
 import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { DashboardPublicState } from '../../types';
@@ -60,13 +67,13 @@ export const createDashboard = async (
   // Lazy load required systems and Dashboard saved object.
   // --------------------------------------------------------------------------------------
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
-  const defaultDataViewAssignmentPromise = dataViews.getDefaultDataView();
+  const defaultDataViewExistsPromise = dataViews.defaultDataViewExists();
   const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
 
   const [reduxEmbeddablePackage, savedObjectResult, defaultDataView] = await Promise.all([
     reduxEmbeddablePackagePromise,
     dashboardSavedObjectPromise,
-    defaultDataViewAssignmentPromise,
+    defaultDataViewExistsPromise,
   ]);
 
   if (!defaultDataView) {
@@ -128,8 +135,9 @@ export const initializeDashboard = async ({
   controlGroup?: ControlGroupContainer;
 }) => {
   const {
-    dashboardSessionStorage,
+    dashboardBackup,
     embeddable: { getEmbeddableFactory },
+    dashboardCapabilities: { showWriteControls },
     data: {
       query: queryService,
       search: { session },
@@ -163,23 +171,42 @@ export const initializeDashboard = async ({
   }
 
   // --------------------------------------------------------------------------------------
-  // Gather input from session storage if integration is used.
+  // Gather input from session storage and local storage if integration is used.
   // --------------------------------------------------------------------------------------
   const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardSessionStorage.getState(loadDashboardReturn.dashboardId);
+    return dashboardBackup.getState(loadDashboardReturn.dashboardId);
   })();
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
+  const initialViewMode = (() => {
+    if (loadDashboardReturn.managed || !showWriteControls) return ViewMode.VIEW;
+    if (
+      loadDashboardReturn.newDashboardCreated ||
+      dashboardBackup.dashboardHasUnsavedEdits(loadDashboardReturn.dashboardId)
+    ) {
+      return ViewMode.EDIT;
+    }
+
+    return dashboardBackup.getViewMode();
+  })();
+
   const overrideInput = getInitialInput?.();
   const initialInput: DashboardContainerInput = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
     ...(loadDashboardReturn?.dashboardInput ?? {}),
     ...sessionStorageInput,
+
+    ...(initialViewMode ? { viewMode: initialViewMode } : {}),
     ...overrideInput,
   });
+
+  // Back up any view mode passed in explicitly.
+  if (overrideInput?.viewMode) {
+    dashboardBackup.storeViewMode(overrideInput?.viewMode);
+  }
 
   initialInput.executionContext = {
     type: 'dashboard',
@@ -274,13 +301,46 @@ export const initializeDashboard = async ({
         scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
       );
     } else {
-      // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
+      // otherwise this incoming embeddable is brand new and can be added after the dashboard container is created.
+
       untilDashboardReady().then(async (container) => {
-        const embeddable = await container.addNewEmbeddable(
-          incomingEmbeddable.type,
-          incomingEmbeddable.input
-        );
-        scrolltoIncomingEmbeddable(container, embeddable.id);
+        const createdEmbeddable = await (async () => {
+          // if there is no width or height we can add the panel using the default behaviour.
+          if (!incomingEmbeddable.size) {
+            return await container.addNewEmbeddable(
+              incomingEmbeddable.type,
+              incomingEmbeddable.input
+            );
+          }
+
+          // if the incoming embeddable has an explicit width or height we add the panel to the grid directly.
+          const { width, height } = incomingEmbeddable.size;
+          const currentPanels = container.getInput().panels;
+          const embeddableId = incomingEmbeddable.embeddableId ?? v4();
+          const { findTopLeftMostOpenSpace } = panelPlacementStrategies;
+          const { newPanelPlacement } = findTopLeftMostOpenSpace({
+            width: width ?? DEFAULT_PANEL_WIDTH,
+            height: height ?? DEFAULT_PANEL_HEIGHT,
+            currentPanels,
+          });
+          const newPanelState: DashboardPanelState = {
+            explicitInput: { ...incomingEmbeddable.input, id: embeddableId },
+            type: incomingEmbeddable.type,
+            gridData: {
+              ...newPanelPlacement,
+              i: embeddableId,
+            },
+          };
+          container.updateInput({
+            panels: {
+              ...container.getInput().panels,
+              [newPanelState.explicitInput.id]: newPanelState,
+            },
+          });
+
+          return await container.untilEmbeddableLoaded(embeddableId);
+        })();
+        scrolltoIncomingEmbeddable(container, createdEmbeddable.id);
       });
     }
   }

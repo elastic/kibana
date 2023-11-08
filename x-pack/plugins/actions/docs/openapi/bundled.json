@@ -14,8 +14,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601",
-      "description": "local"
+      "url": "/"
     }
   ],
   "security": [
@@ -33,20 +32,16 @@
     }
   ],
   "paths": {
-    "/s/{spaceId}/api/actions/connector": {
+    "/api/actions/connector": {
       "post": {
         "summary": "Creates a connector.",
         "operationId": "createConnector",
-        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
         "tags": [
           "connectors"
         ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "requestBody": {
@@ -54,73 +49,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "Create connector request body properties",
-                "description": "The properties vary depending on the connector type.",
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_cases_webhook"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_d3security"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_email"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_genai"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_index"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_jira"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_opsgenie"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_pagerduty"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_resilient"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_serverlog"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_servicenow"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_servicenow_itom"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_servicenow_sir"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_slack_api"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_slack_webhook"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_swimlane"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_teams"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_tines"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_webhook"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_xmatters"
-                  }
-                ],
-                "discriminator": {
-                  "propertyName": "connector_type_id"
-                }
+                "$ref": "#/components/schemas/create_connector_request"
               },
               "examples": {
                 "createEmailConnectorRequest": {
@@ -167,33 +96,19 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
-    "/s/{spaceId}/api/actions/connector/{connectorId}": {
+    "/api/actions/connector/{connectorId}": {
       "get": {
         "summary": "Retrieves a connector by ID.",
         "operationId": "getConnector",
-        "description": "You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
         "tags": [
           "connectors"
         ],
         "parameters": [
           {
             "$ref": "#/components/parameters/connector_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -216,40 +131,13 @@
             "$ref": "#/components/responses/401"
           },
           "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "Not Found"
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "example": 404
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Deletes a connector.",
         "operationId": "deleteConnector",
-        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.\n",
         "tags": [
           "connectors"
         ],
@@ -259,9 +147,6 @@
           },
           {
             "$ref": "#/components/parameters/connector_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -272,40 +157,13 @@
             "$ref": "#/components/responses/401"
           },
           "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "Not Found"
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "example": 404
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Creates a connector.",
         "operationId": "createConnectorId",
-        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
         "tags": [
           "connectors"
         ],
@@ -314,12 +172,9 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           },
           {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
             "in": "path",
             "name": "connectorId",
-            "description": "A UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated.",
+            "description": "A UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated.\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -332,73 +187,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "Create connector request body properties",
-                "description": "The properties vary depending on the connector type.",
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_cases_webhook"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_d3security"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_email"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_genai"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_index"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_jira"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_opsgenie"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_pagerduty"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_resilient"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_serverlog"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_servicenow"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_servicenow_itom"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_servicenow_sir"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_slack_api"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_slack_webhook"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_swimlane"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_teams"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_tines"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_webhook"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_xmatters"
-                  }
-                ],
-                "discriminator": {
-                  "propertyName": "connector_type_id"
-                }
+                "$ref": "#/components/schemas/create_connector_request"
               },
               "examples": {
                 "createIndexConnectorRequest": {
@@ -427,17 +216,11 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Updates the attributes for a connector.",
         "operationId": "updateConnector",
-        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
         "tags": [
           "connectors"
         ],
@@ -447,9 +230,6 @@
           },
           {
             "$ref": "#/components/parameters/connector_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "requestBody": {
@@ -457,64 +237,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "Update connector request body properties",
-                "description": "The properties vary depending on the connector type.",
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_cases_webhook"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_d3security"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_email"
-                  },
-                  {
-                    "$ref": "#/components/schemas/create_connector_request_genai"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_index"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_jira"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_opsgenie"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_pagerduty"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_resilient"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_serverlog"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_servicenow"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_servicenow_itom"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_slack_api"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_slack_webhook"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_swimlane"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_teams"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_webhook"
-                  },
-                  {
-                    "$ref": "#/components/schemas/update_connector_request_xmatters"
-                  }
-                ]
+                "$ref": "#/components/schemas/update_connector_request"
               },
               "examples": {
                 "updateIndexConnectorRequest": {
@@ -536,28 +259,7 @@
             }
           },
           "400": {
-            "description": "Indicates a bad request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "Bad Request"
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "error validating action type config: [index]: expected value of type [string] but got [undefined]"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "example": 400
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/401"
           },
           "401": {
             "$ref": "#/components/responses/401"
@@ -565,217 +267,10 @@
           "404": {
             "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
-    "/s/{spaceId}/api/actions/connectors": {
-      "get": {
-        "summary": "Retrieves all connectors.",
-        "operationId": "getConnectors",
-        "description": "You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
-        "tags": [
-          "connectors"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/space_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "title": "Get connectors response body properties",
-                    "description": "The properties vary for each connector type.",
-                    "type": "object",
-                    "required": [
-                      "connector_type_id",
-                      "id",
-                      "is_deprecated",
-                      "is_preconfigured",
-                      "name",
-                      "referenced_by_count"
-                    ],
-                    "properties": {
-                      "connector_type_id": {
-                        "$ref": "#/components/schemas/connector_types"
-                      },
-                      "config": {
-                        "type": "object",
-                        "description": "The configuration for the connector. Configuration properties vary depending on the connector type.",
-                        "additionalProperties": true,
-                        "nullable": true
-                      },
-                      "id": {
-                        "type": "string",
-                        "description": "The identifier for the connector.",
-                        "example": "b0766e10-d190-11ec-b04c-776c77d14fca"
-                      },
-                      "is_deprecated": {
-                        "$ref": "#/components/schemas/is_deprecated"
-                      },
-                      "is_missing_secrets": {
-                        "$ref": "#/components/schemas/is_missing_secrets"
-                      },
-                      "is_preconfigured": {
-                        "$ref": "#/components/schemas/is_preconfigured"
-                      },
-                      "is_system_action": {
-                        "$ref": "#/components/schemas/is_system_action"
-                      },
-                      "name": {
-                        "type": "string",
-                        "description": "The display name for the connector.",
-                        "example": "my-connector"
-                      },
-                      "referenced_by_count": {
-                        "type": "integer",
-                        "description": "Indicates the number of saved objects that reference the connector. If `is_preconfigured` is true, this value is not calculated.",
-                        "example": 2,
-                        "default": 0
-                      }
-                    }
-                  }
-                },
-                "examples": {
-                  "getConnectorsResponse": {
-                    "$ref": "#/components/examples/get_connectors_response"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
-    },
-    "/s/{spaceId}/api/actions/connector_types": {
-      "get": {
-        "summary": "Retrieves a list of all connector types.",
-        "operationId": "getConnectorTypes",
-        "description": "You do not need any Kibana feature privileges to run this API.\n",
-        "tags": [
-          "connectors"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/space_id"
-          },
-          {
-            "in": "query",
-            "name": "feature_id",
-            "description": "A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).",
-            "schema": {
-              "$ref": "#/components/schemas/features"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Get connector types response body properties",
-                  "description": "The properties vary for each connector type.",
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "enabled": {
-                        "type": "boolean",
-                        "description": "Indicates whether the connector type is enabled in Kibana.",
-                        "example": true
-                      },
-                      "enabled_in_config": {
-                        "type": "boolean",
-                        "description": "Indicates whether the connector type is enabled in the Kibana `.yml` file.",
-                        "example": true
-                      },
-                      "enabled_in_license": {
-                        "type": "boolean",
-                        "description": "Indicates whether the connector is enabled in the license.",
-                        "example": true
-                      },
-                      "id": {
-                        "$ref": "#/components/schemas/connector_types"
-                      },
-                      "minimum_license_required": {
-                        "type": "string",
-                        "description": "The license that is required to use the connector type.",
-                        "example": "basic"
-                      },
-                      "name": {
-                        "type": "string",
-                        "description": "The name of the connector type.",
-                        "example": "Index"
-                      },
-                      "supported_feature_ids": {
-                        "type": "array",
-                        "description": "The Kibana features that are supported by the connector type.",
-                        "items": {
-                          "$ref": "#/components/schemas/features"
-                        },
-                        "example": [
-                          "alerting",
-                          "uptime",
-                          "siem"
-                        ]
-                      }
-                    }
-                  }
-                },
-                "examples": {
-                  "getConnectorTypesResponse": {
-                    "$ref": "#/components/examples/get_connector_types_response"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
-        }
-      ]
-    },
-    "/s/{spaceId}/api/actions/connector/{connectorId}/_execute": {
+    "/api/actions/connector/{connectorId}/_execute": {
       "post": {
         "summary": "Runs a connector.",
         "operationId": "runConnector",
@@ -789,9 +284,6 @@
           },
           {
             "$ref": "#/components/parameters/connector_id"
-          },
-          {
-            "$ref": "#/components/parameters/space_id"
           }
         ],
         "requestBody": {
@@ -799,66 +291,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "Run connector request body properties",
-                "description": "The properties vary depending on the connector type.",
-                "type": "object",
-                "required": [
-                  "params"
-                ],
-                "properties": {
-                  "params": {
-                    "oneOf": [
-                      {
-                        "$ref": "#/components/schemas/run_connector_params_documents"
-                      },
-                      {
-                        "$ref": "#/components/schemas/run_connector_params_level_message"
-                      },
-                      {
-                        "title": "Subaction parameters",
-                        "description": "Test an action that involves a subaction.",
-                        "oneOf": [
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_addevent"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_closealert"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_createalert"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_fieldsbyissuetype"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_getchoices"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_getfields"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_getincident"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_issue"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_issues"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_issuetypes"
-                          },
-                          {
-                            "$ref": "#/components/schemas/run_connector_subaction_pushtoservice"
-                          }
-                        ],
-                        "discriminator": {
-                          "propertyName": "subAction"
-                        }
-                      }
-                    ]
-                  }
-                }
+                "$ref": "#/components/schemas/run_connector_request"
               },
               "examples": {
                 "runIndexConnectorRequest": {
@@ -945,18 +378,630 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
+    },
+    "/api/actions/connectors": {
+      "get": {
+        "summary": "Retrieves all connectors.",
+        "operationId": "getConnectors",
+        "tags": [
+          "connectors"
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/connector_response_properties"
+                  }
+                },
+                "examples": {
+                  "getConnectorsResponse": {
+                    "$ref": "#/components/examples/get_connectors_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          }
+        }
+      }
+    },
+    "/api/actions/connector_types": {
+      "get": {
+        "summary": "Retrieves a list of all connector types.",
+        "operationId": "getConnectorTypes",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "feature_id",
+            "description": "A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).",
+            "schema": {
+              "$ref": "#/components/schemas/features"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Get connector types response body properties",
+                  "description": "The properties vary for each connector type.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in Kibana.",
+                        "example": true
+                      },
+                      "enabled_in_config": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in the Kibana configuration file.",
+                        "example": true
+                      },
+                      "enabled_in_license": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector is enabled in the license.",
+                        "example": true
+                      },
+                      "id": {
+                        "$ref": "#/components/schemas/connector_types"
+                      },
+                      "is_system_action_type": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "minimum_license_required": {
+                        "type": "string",
+                        "description": "The license that is required to use the connector type.",
+                        "example": "basic"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the connector type.",
+                        "example": "Index"
+                      },
+                      "supported_feature_ids": {
+                        "type": "array",
+                        "description": "The features that are supported by the connector type.",
+                        "items": {
+                          "$ref": "#/components/schemas/features"
+                        },
+                        "example": [
+                          "alerting",
+                          "cases",
+                          "siem"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "getConnectorTypesServerlessResponse": {
+                    "$ref": "#/components/examples/get_connector_types_generativeai_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/api/actions/connector": {
+      "post": {
+        "summary": "Creates a connector.",
+        "operationId": "createConnectorWithSpaceId",
+        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/create_connector_request"
+              },
+              "examples": {
+                "createEmailConnectorRequest": {
+                  "$ref": "#/components/examples/create_email_connector_request"
+                },
+                "createIndexConnectorRequest": {
+                  "$ref": "#/components/examples/create_index_connector_request"
+                },
+                "createWebhookConnectorRequest": {
+                  "$ref": "#/components/examples/create_webhook_connector_request"
+                },
+                "createXmattersConnectorRequest": {
+                  "$ref": "#/components/examples/create_xmatters_connector_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connector_response_properties"
+                },
+                "examples": {
+                  "createEmailConnectorResponse": {
+                    "$ref": "#/components/examples/create_email_connector_response"
+                  },
+                  "createIndexConnectorResponse": {
+                    "$ref": "#/components/examples/create_index_connector_response"
+                  },
+                  "createWebhookConnectorResponse": {
+                    "$ref": "#/components/examples/create_webhook_connector_response"
+                  },
+                  "createXmattersConnectorResponse": {
+                    "$ref": "#/components/examples/create_xmatters_connector_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/api/actions/connector/{connectorId}": {
+      "get": {
+        "summary": "Retrieves a connector by ID.",
+        "operationId": "getConnectorWithSpaceId",
+        "description": "You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/connector_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connector_response_properties"
+                },
+                "examples": {
+                  "getConnectorResponse": {
+                    "$ref": "#/components/examples/get_connector_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes a connector.",
+        "operationId": "deleteConnectorWithSpaceId",
+        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/connector_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      },
+      "post": {
+        "summary": "Creates a connector.",
+        "operationId": "createConnectorIdWithSpaceId",
+        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "connectorId",
+            "description": "A UUID v1 or v4 identifier for the connector. If you omit this parameter, an identifier is randomly generated.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/create_connector_request"
+              },
+              "examples": {
+                "createIndexConnectorRequest": {
+                  "$ref": "#/components/examples/create_index_connector_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connector_response_properties"
+                },
+                "examples": {
+                  "createIndexConnectorResponse": {
+                    "$ref": "#/components/examples/create_index_connector_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          }
+        }
+      },
+      "put": {
+        "summary": "Updates the attributes for a connector.",
+        "operationId": "updateConnectorWithSpaceId",
+        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/connector_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/update_connector_request"
+              },
+              "examples": {
+                "updateIndexConnectorRequest": {
+                  "$ref": "#/components/examples/update_index_connector_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connector_response_properties"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/401"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/api/actions/connectors": {
+      "get": {
+        "summary": "Retrieves all connectors.",
+        "operationId": "getConnectorsWithSpaceId",
+        "description": "You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/connector_response_properties"
+                  }
+                },
+                "examples": {
+                  "getConnectorsResponse": {
+                    "$ref": "#/components/examples/get_connectors_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/api/actions/connector_types": {
+      "get": {
+        "summary": "Retrieves a list of all connector types.",
+        "operationId": "getConnectorTypesWithSpaceId",
+        "description": "You do not need any Kibana feature privileges to run this API.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "query",
+            "name": "feature_id",
+            "description": "A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).",
+            "schema": {
+              "$ref": "#/components/schemas/features"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Get connector types response body properties",
+                  "description": "The properties vary for each connector type.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in Kibana.",
+                        "example": true
+                      },
+                      "enabled_in_config": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in the Kibana `.yml` file.",
+                        "example": true
+                      },
+                      "enabled_in_license": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector is enabled in the license.",
+                        "example": true
+                      },
+                      "id": {
+                        "$ref": "#/components/schemas/connector_types"
+                      },
+                      "minimum_license_required": {
+                        "type": "string",
+                        "description": "The license that is required to use the connector type.",
+                        "example": "basic"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the connector type.",
+                        "example": "Index"
+                      },
+                      "supported_feature_ids": {
+                        "type": "array",
+                        "description": "The Kibana features that are supported by the connector type.",
+                        "items": {
+                          "$ref": "#/components/schemas/features"
+                        },
+                        "example": [
+                          "alerting",
+                          "uptime",
+                          "siem"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "getConnectorTypesResponse": {
+                    "$ref": "#/components/examples/get_connector_types_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/api/actions/connector/{connectorId}/_execute": {
+      "post": {
+        "summary": "Runs a connector.",
+        "operationId": "runConnectorWithSpaceId",
+        "description": "You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/connector_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/run_connector_request"
+              },
+              "examples": {
+                "runIndexConnectorRequest": {
+                  "$ref": "#/components/examples/run_index_connector_request"
+                },
+                "runJiraConnectorRequest": {
+                  "$ref": "#/components/examples/run_jira_connector_request"
+                },
+                "runServerLogConnectorRequest": {
+                  "$ref": "#/components/examples/run_server_log_connector_request"
+                },
+                "runServiceNowITOMConnectorRequest": {
+                  "$ref": "#/components/examples/run_servicenow_itom_connector_request"
+                },
+                "runSwimlaneConnectorRequest": {
+                  "$ref": "#/components/examples/run_swimlane_connector_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "connector_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "connector_id": {
+                      "type": "string",
+                      "description": "The identifier for the connector."
+                    },
+                    "data": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "description": "Information returned from the action.",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "description": "An array of information returned from the action.",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "The status of the action.",
+                      "enum": [
+                        "error",
+                        "ok"
+                      ]
+                    }
+                  }
+                },
+                "examples": {
+                  "runIndexConnectorResponse": {
+                    "$ref": "#/components/examples/run_index_connector_response"
+                  },
+                  "runJiraConnectorResponse": {
+                    "$ref": "#/components/examples/run_jira_connector_response"
+                  },
+                  "runServerLogConnectorResponse": {
+                    "$ref": "#/components/examples/run_server_log_connector_response"
+                  },
+                  "runServiceNowITOMConnectorResponse": {
+                    "$ref": "#/components/examples/run_servicenow_itom_connector_response"
+                  },
+                  "runSwimlaneConnectorResponse": {
+                    "$ref": "#/components/examples/run_swimlane_connector_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          }
+        }
+      }
     },
     "/s/{spaceId}/api/actions/action/{actionId}": {
       "delete": {
@@ -985,12 +1030,7 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Retrieves a connector by ID.",
@@ -1015,12 +1055,7 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Updates the attributes for a connector.",
@@ -1074,18 +1109,8 @@
           "404": {
             "$ref": "#/components/responses/404"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions": {
       "get": {
@@ -1118,12 +1143,7 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Creates a connector.",
@@ -1177,18 +1197,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/list_action_types": {
       "get": {
@@ -1250,18 +1260,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     },
     "/s/{spaceId}/api/actions/action/{actionId}/_execute": {
       "post": {
@@ -1343,18 +1343,8 @@
           "401": {
             "$ref": "#/components/responses/401"
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://localhost:5601"
         }
-      ]
+      }
     }
   },
   "components": {
@@ -1379,16 +1369,6 @@
         "description": "Cross-site request forgery protection",
         "required": true
       },
-      "space_id": {
-        "in": "path",
-        "name": "spaceId",
-        "description": "An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "example": "default"
-        }
-      },
       "connector_id": {
         "in": "path",
         "name": "connectorId",
@@ -1397,6 +1377,16 @@
         "schema": {
           "type": "string",
           "example": "df770e30-8b8b-11ed-a780-3b746c987a81"
+        }
+      },
+      "space_id": {
+        "in": "path",
+        "name": "spaceId",
+        "description": "An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "default"
         }
       },
       "action_id": {
@@ -1411,6 +1401,76 @@
       }
     },
     "schemas": {
+      "config_properties_bedrock": {
+        "title": "Connector request properties for an Amazon Bedrock connector",
+        "description": "Defines properties for connectors when type is `.bedrock`.",
+        "type": "object",
+        "required": [
+          "apiUrl"
+        ],
+        "properties": {
+          "apiUrl": {
+            "type": "string",
+            "description": "The Amazon Bedrock request URL."
+          },
+          "defaultModel": {
+            "type": "string",
+            "description": "The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.\n",
+            "default": "anthropic.claude-v2"
+          }
+        }
+      },
+      "secrets_properties_bedrock": {
+        "title": "Connector secrets properties for an Amazon Bedrock connector",
+        "description": "Defines secrets for connectors when type is `.bedrock`.",
+        "type": "object",
+        "required": [
+          "accessKey",
+          "secret"
+        ],
+        "properties": {
+          "accessKey": {
+            "type": "string",
+            "description": "The AWS access key for authentication."
+          },
+          "secret": {
+            "type": "string",
+            "description": "The AWS secret for authentication."
+          }
+        }
+      },
+      "create_connector_request_bedrock": {
+        "title": "Create Amazon Bedrock connector request",
+        "description": "The Amazon Bedrock connector uses axios to send a POST request to Amazon Bedrock.",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_bedrock"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".bedrock"
+            ],
+            "example": ".bedrock"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "example": "my-connector"
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_bedrock"
+          }
+        }
+      },
       "config_properties_cases_webhook": {
         "title": "Connector request properties for Webhook - Case Management connector",
         "required": [
@@ -1756,7 +1816,7 @@
         }
       },
       "config_properties_genai": {
-        "title": "Connector request properties for a generative AI connector",
+        "title": "Connector request properties for an OpenAI connector",
         "description": "Defines properties for connectors when type is `.gen-ai`.",
         "oneOf": [
           {
@@ -1809,7 +1869,7 @@
         }
       },
       "secrets_properties_genai": {
-        "title": "Connector secrets properties for a generative AI connector",
+        "title": "Connector secrets properties for an OpenAI connector",
         "description": "Defines secrets for connectors when type is `.gen-ai`.",
         "type": "object",
         "properties": {
@@ -1820,8 +1880,8 @@
         }
       },
       "create_connector_request_genai": {
-        "title": "Create generative AI connector request",
-        "description": "The generative AI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.\n",
+        "title": "Create OpenAI connector request",
+        "description": "The OpenAI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.\n",
         "type": "object",
         "required": [
           "config",
@@ -2789,13 +2849,34 @@
         "title": "Connector request properties for a Tines connector",
         "description": "Defines properties for connectors when type is `.tines`.",
         "type": "object",
-        "additionalProperties": true
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "description": "The Tines tenant URL. If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.\n",
+            "type": "string"
+          }
+        }
       },
       "secrets_properties_tines": {
         "title": "Connector secrets properties for a Tines connector",
         "description": "Defines secrets for connectors when type is `.tines`.",
         "type": "object",
-        "additionalProperties": true
+        "required": [
+          "email",
+          "token"
+        ],
+        "properties": {
+          "email": {
+            "description": "The email used to sign in to Tines.",
+            "type": "string"
+          },
+          "token": {
+            "description": "The Tines API token.",
+            "type": "string"
+          }
+        }
       },
       "create_connector_request_tines": {
         "title": "Create Tines connector request",
@@ -2826,6 +2907,66 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_tines"
+          }
+        }
+      },
+      "config_properties_torq": {
+        "title": "Connector request properties for a Torq connector",
+        "description": "Defines properties for connectors when type is `.torq`.",
+        "type": "object",
+        "required": [
+          "webhookIntegrationUrl"
+        ],
+        "properties": {
+          "webhookIntegrationUrl": {
+            "description": "The endpoint URL of the Elastic Security integration in Torq.",
+            "type": "string"
+          }
+        }
+      },
+      "secrets_properties_torq": {
+        "title": "Connector secrets properties for a Torq connector",
+        "description": "Defines secrets for connectors when type is `.torq`.",
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "description": "The secret of the webhook authentication header.",
+            "type": "string"
+          }
+        }
+      },
+      "create_connector_request_torq": {
+        "title": "Create Torq connector request",
+        "description": "The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.\n",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_torq"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".torq"
+            ],
+            "example": ".torq"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "example": "my-connector"
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_torq"
           }
         }
       },
@@ -3016,6 +3157,81 @@
           }
         }
       },
+      "create_connector_request": {
+        "title": "Create connector request body properties",
+        "description": "The properties vary depending on the connector type.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/create_connector_request_bedrock"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_cases_webhook"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_d3security"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_email"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_genai"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_index"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_jira"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_opsgenie"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_pagerduty"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_resilient"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_serverlog"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_servicenow"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_servicenow_itom"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_servicenow_sir"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_slack_api"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_slack_webhook"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_swimlane"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_teams"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_tines"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_torq"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_webhook"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_xmatters"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "connector_type_id"
+        }
+      },
       "is_deprecated": {
         "type": "boolean",
         "description": "Indicates whether the connector type is deprecated.",
@@ -3028,7 +3244,7 @@
       },
       "is_preconfigured": {
         "type": "boolean",
-        "description": "Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.",
+        "description": "Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. \n",
         "example": false
       },
       "is_system_action": {
@@ -3036,11 +3252,59 @@
         "description": "Indicates whether the connector is used for system actions.",
         "example": false
       },
+      "connector_response_properties_bedrock": {
+        "title": "Connector response properties for an Amazon Bedrock connector",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_bedrock"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".bedrock"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the connector."
+          },
+          "is_deprecated": {
+            "$ref": "#/components/schemas/is_deprecated"
+          },
+          "is_missing_secrets": {
+            "$ref": "#/components/schemas/is_missing_secrets"
+          },
+          "is_preconfigured": {
+            "$ref": "#/components/schemas/is_preconfigured"
+          },
+          "is_system_action": {
+            "$ref": "#/components/schemas/is_system_action"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          }
+        }
+      },
+      "referenced_by_count": {
+        "type": "integer",
+        "description": "Indicates the number of saved objects that reference the connector. If `is_preconfigured` is true, this value is not calculated. This property is returned only by the get all connectors API.\n",
+        "example": 2
+      },
       "connector_response_properties_cases_webhook": {
         "title": "Connector request properties for a Webhook - Case Management connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3077,6 +3341,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3084,7 +3351,6 @@
         "title": "Connector response properties for a D3 Security connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3121,6 +3387,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3128,7 +3397,6 @@
         "title": "Connector response properties for an email connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3165,6 +3433,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3172,7 +3443,6 @@
         "title": "Connector response properties for an index connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3209,6 +3479,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3216,7 +3489,6 @@
         "title": "Connector response properties for a Jira connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3253,6 +3525,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3260,7 +3535,6 @@
         "title": "Connector response properties for an Opsgenie connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3297,6 +3571,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3304,7 +3581,6 @@
         "title": "Connector response properties for a PagerDuty connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3341,6 +3617,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3348,7 +3627,6 @@
         "title": "Connector response properties for a IBM Resilient connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3385,6 +3663,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3392,7 +3673,6 @@
         "title": "Connector response properties for a server log connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3430,6 +3710,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3437,7 +3720,6 @@
         "title": "Connector response properties for a ServiceNow ITSM connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3474,6 +3756,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3481,7 +3766,6 @@
         "title": "Connector response properties for a ServiceNow ITOM connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3518,6 +3802,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3525,7 +3812,6 @@
         "title": "Connector response properties for a ServiceNow SecOps connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3562,6 +3848,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3602,6 +3891,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3642,6 +3934,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3649,7 +3944,6 @@
         "title": "Connector response properties for a Swimlane connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3686,6 +3980,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3729,6 +4026,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3736,7 +4036,6 @@
         "title": "Connector response properties for a Tines connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3773,6 +4072,55 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
+          }
+        }
+      },
+      "connector_response_properties_torq": {
+        "title": "Connector response properties for a Torq connector",
+        "type": "object",
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_torq"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".torq"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the connector."
+          },
+          "is_deprecated": {
+            "$ref": "#/components/schemas/is_deprecated"
+          },
+          "is_missing_secrets": {
+            "$ref": "#/components/schemas/is_missing_secrets"
+          },
+          "is_preconfigured": {
+            "$ref": "#/components/schemas/is_preconfigured"
+          },
+          "is_system_action": {
+            "$ref": "#/components/schemas/is_system_action"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3780,7 +4128,6 @@
         "title": "Connector response properties for a Webhook connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3817,6 +4164,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3824,7 +4174,6 @@
         "title": "Connector response properties for an xMatters connector",
         "type": "object",
         "required": [
-          "config",
           "connector_type_id",
           "id",
           "is_deprecated",
@@ -3861,6 +4210,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector."
+          },
+          "referenced_by_count": {
+            "$ref": "#/components/schemas/referenced_by_count"
           }
         }
       },
@@ -3868,6 +4220,9 @@
         "title": "Connector response properties",
         "description": "The properties vary depending on the connector type.",
         "oneOf": [
+          {
+            "$ref": "#/components/schemas/connector_response_properties_bedrock"
+          },
           {
             "$ref": "#/components/schemas/connector_response_properties_cases_webhook"
           },
@@ -3920,6 +4275,9 @@
             "$ref": "#/components/schemas/connector_response_properties_tines"
           },
           {
+            "$ref": "#/components/schemas/connector_response_properties_torq"
+          },
+          {
             "$ref": "#/components/schemas/connector_response_properties_webhook"
           },
           {
@@ -3928,6 +4286,26 @@
         ],
         "discriminator": {
           "propertyName": "connector_type_id"
+        }
+      },
+      "update_connector_request_bedrock": {
+        "title": "Update Amazon Bedrock connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_bedrock"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_bedrock"
+          }
         }
       },
       "update_connector_request_cases_webhook": {
@@ -4221,6 +4599,48 @@
           }
         }
       },
+      "update_connector_request_tines": {
+        "title": "Update Tines connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_tines"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_tines"
+          }
+        }
+      },
+      "update_connector_request_torq": {
+        "title": "Update Torq connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_torq"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_torq"
+          }
+        }
+      },
       "update_connector_request_webhook": {
         "title": "Update Webhook connector request",
         "type": "object",
@@ -4263,42 +4683,73 @@
           }
         }
       },
-      "connector_types": {
-        "title": "Connector types",
-        "type": "string",
-        "description": "The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.",
-        "enum": [
-          ".cases-webhook",
-          ".d3security",
-          ".email",
-          ".gen-ai",
-          ".index",
-          ".jira",
-          ".opsgenie",
-          ".pagerduty",
-          ".resilient",
-          ".servicenow",
-          ".servicenow-itom",
-          ".servicenow-sir",
-          ".server-log",
-          ".slack",
-          ".slack_api",
-          ".swimlane",
-          ".teams",
-          ".tines",
-          ".webhook",
-          ".xmatters"
-        ],
-        "example": ".server-log"
-      },
-      "features": {
-        "type": "string",
-        "description": "The feature that uses the connector. Valid values are `alerting`, `cases`, `uptime`, and `siem`.\n",
-        "enum": [
-          "alerting",
-          "cases",
-          "uptime",
-          "siem"
+      "update_connector_request": {
+        "title": "Update connector request body properties",
+        "description": "The properties vary depending on the connector type.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/update_connector_request_bedrock"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_cases_webhook"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_d3security"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_email"
+          },
+          {
+            "$ref": "#/components/schemas/create_connector_request_genai"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_index"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_jira"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_opsgenie"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_pagerduty"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_resilient"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_serverlog"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_servicenow"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_servicenow_itom"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_slack_api"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_slack_webhook"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_swimlane"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_teams"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_tines"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_torq"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_webhook"
+          },
+          {
+            "$ref": "#/components/schemas/update_connector_request_xmatters"
+          }
         ]
       },
       "run_connector_params_documents": {
@@ -4983,6 +5434,109 @@
           }
         }
       },
+      "run_connector_request": {
+        "title": "Run connector request body properties",
+        "description": "The properties vary depending on the connector type.",
+        "type": "object",
+        "required": [
+          "params"
+        ],
+        "properties": {
+          "params": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/run_connector_params_documents"
+              },
+              {
+                "$ref": "#/components/schemas/run_connector_params_level_message"
+              },
+              {
+                "title": "Subaction parameters",
+                "description": "Test an action that involves a subaction.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_addevent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_closealert"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_createalert"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_fieldsbyissuetype"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_getchoices"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_getfields"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_getincident"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_issue"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_issues"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_issuetypes"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_pushtoservice"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "subAction"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "features": {
+        "type": "string",
+        "description": "The feature that uses the connector.\n",
+        "enum": [
+          "alerting",
+          "cases",
+          "generativeAI",
+          "siem",
+          "uptime"
+        ]
+      },
+      "connector_types": {
+        "title": "Connector types",
+        "type": "string",
+        "description": "The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.",
+        "enum": [
+          ".bedrock",
+          ".cases-webhook",
+          ".d3security",
+          ".email",
+          ".gen-ai",
+          ".index",
+          ".jira",
+          ".opsgenie",
+          ".pagerduty",
+          ".resilient",
+          ".servicenow",
+          ".servicenow-itom",
+          ".servicenow-sir",
+          ".server-log",
+          ".slack",
+          ".slack_api",
+          ".swimlane",
+          ".teams",
+          ".tines",
+          ".torq",
+          ".webhook",
+          ".xmatters"
+        ],
+        "example": ".server-log"
+      },
       "action_response_properties": {
         "title": "Action response properties",
         "description": "The properties vary depending on the action type.",
@@ -5154,7 +5708,7 @@
         }
       },
       "get_connector_response": {
-        "summary": "A list of connector types",
+        "summary": "Get connector details.",
         "value": {
           "id": "df770e30-8b8b-11ed-a780-3b746c987a81",
           "name": "my_server_log_connector",
@@ -5174,78 +5728,6 @@
             "index": "updated-index"
           }
         }
-      },
-      "get_connectors_response": {
-        "summary": "A list of connectors",
-        "value": [
-          {
-            "id": "preconfigured-email-connector",
-            "name": "my-preconfigured-email-notification",
-            "connector_type_id": ".email",
-            "is_preconfigured": true,
-            "is_deprecated": false,
-            "referenced_by_count": 0,
-            "is_system_action": false
-          },
-          {
-            "id": "e07d0c80-8b8b-11ed-a780-3b746c987a81",
-            "name": "my-index-connector",
-            "config": {
-              "index": "test-index",
-              "refresh": false,
-              "executionTimeField": null
-            },
-            "connector_type_id": ".index",
-            "is_preconfigured": false,
-            "is_deprecated": false,
-            "referenced_by_count": 2,
-            "is_missing_secrets": false,
-            "is_system_action": false
-          }
-        ]
-      },
-      "get_connector_types_response": {
-        "summary": "A list of connector types",
-        "value": [
-          {
-            "id": ".swimlane",
-            "name": "Swimlane",
-            "enabled": true,
-            "enabled_in_config": true,
-            "enabled_in_license": true,
-            "minimum_license_required": "gold",
-            "supported_feature_ids": [
-              "alerting",
-              "cases",
-              "siem"
-            ]
-          },
-          {
-            "id": ".index",
-            "name": "Index",
-            "enabled": true,
-            "enabled_in_config": true,
-            "enabled_in_license": true,
-            "minimum_license_required": "basic",
-            "supported_feature_ids": [
-              "alerting",
-              "uptime",
-              "siem"
-            ]
-          },
-          {
-            "id": ".server-log",
-            "name": "Server log",
-            "enabled": true,
-            "enabled_in_config": true,
-            "enabled_in_license": true,
-            "minimum_license_required": "basic",
-            "supported_feature_ids": [
-              "alerting",
-              "uptime"
-            ]
-          }
-        ]
       },
       "run_index_connector_request": {
         "summary": "Run an index connector.",
@@ -5463,6 +5945,107 @@
           },
           "status": "ok"
         }
+      },
+      "get_connectors_response": {
+        "summary": "A list of connectors",
+        "value": [
+          {
+            "id": "preconfigured-email-connector",
+            "name": "my-preconfigured-email-notification",
+            "connector_type_id": ".email",
+            "is_preconfigured": true,
+            "is_deprecated": false,
+            "referenced_by_count": 0,
+            "is_system_action": false
+          },
+          {
+            "id": "e07d0c80-8b8b-11ed-a780-3b746c987a81",
+            "name": "my-index-connector",
+            "config": {
+              "index": "test-index",
+              "refresh": false,
+              "executionTimeField": null
+            },
+            "connector_type_id": ".index",
+            "is_preconfigured": false,
+            "is_deprecated": false,
+            "referenced_by_count": 2,
+            "is_missing_secrets": false,
+            "is_system_action": false
+          }
+        ]
+      },
+      "get_connector_types_generativeai_response": {
+        "summary": "A list of connector types for the `generativeAI` feature.",
+        "value": [
+          {
+            "id": ".gen-ai",
+            "name": "OpenAI",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "enterprise",
+            "supported_feature_ids": [
+              "generativeAI"
+            ],
+            "is_system_action_type": false
+          },
+          {
+            "id": ".bedrock",
+            "name": "AWS Bedrock",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "enterprise",
+            "supported_feature_ids": [
+              "generativeAI"
+            ],
+            "is_system_action_type": false
+          }
+        ]
+      },
+      "get_connector_types_response": {
+        "summary": "A list of connector types",
+        "value": [
+          {
+            "id": ".swimlane",
+            "name": "Swimlane",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "gold",
+            "supported_feature_ids": [
+              "alerting",
+              "cases",
+              "siem"
+            ]
+          },
+          {
+            "id": ".index",
+            "name": "Index",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "basic",
+            "supported_feature_ids": [
+              "alerting",
+              "uptime",
+              "siem"
+            ]
+          },
+          {
+            "id": ".server-log",
+            "name": "Server log",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "basic",
+            "supported_feature_ids": [
+              "alerting",
+              "uptime"
+            ]
+          }
+        ]
       }
     },
     "responses": {

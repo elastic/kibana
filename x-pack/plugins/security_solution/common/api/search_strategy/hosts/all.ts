@@ -16,7 +16,7 @@ export const allHostsSchema = requestBasicOptionsSchema.extend({
   sort,
   pagination,
   timerange,
-  isNewRiskScoreModuleAvailable: z.boolean().default(false),
+  isNewRiskScoreModuleInstalled: z.boolean().default(false),
   factoryQueryType: z.literal(HostsQueries.hosts),
 });
 

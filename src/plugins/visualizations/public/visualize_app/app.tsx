@@ -98,7 +98,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
       if (hasUserDataView) {
         // Adding this check as TSVB asks for the default dataview on initialization
-        const defaultDataView = await dataViews.getDefaultDataView();
+        const defaultDataView = await dataViews.defaultDataViewExists();
         if (!defaultDataView) {
           setShowNoDataPage(true);
         }

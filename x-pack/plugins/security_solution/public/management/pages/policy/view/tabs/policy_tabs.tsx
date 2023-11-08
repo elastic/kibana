@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useLicense } from '../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { ProtectionUpdatesLayout } from '../protection_updates/protection_updates_layout';
 import { PolicySettingsLayout } from '../policy_settings_layout';
@@ -101,7 +102,11 @@ export const PolicyTabs = React.memo(() => {
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
-  const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
+  const isProtectionUpdatesFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'protectionUpdatesEnabled'
+  );
+  const isEnterprise = useLicense().isEnterprise();
+  const isProtectionUpdatesEnabled = isEnterprise && isProtectionUpdatesFeatureEnabled;
   // move the user out of this route if they can't access it
   useEffect(() => {
     if (

@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isCompleteResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   Inspect,
   PaginationInputPaginated,
@@ -246,7 +246,7 @@ export const useTimelineEventsHandler = ({
             )
             .subscribe({
               next: (response) => {
-                if (isCompleteResponse(response)) {
+                if (!isRunningResponse(response)) {
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,

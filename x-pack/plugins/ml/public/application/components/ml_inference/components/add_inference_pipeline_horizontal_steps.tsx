@@ -113,6 +113,6 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
         navSteps[4].status = 'current';
         break;
     }
-    return <EuiStepsHorizontal steps={navSteps} />;
+    return <EuiStepsHorizontal steps={navSteps} size="s" />;
   }
 );

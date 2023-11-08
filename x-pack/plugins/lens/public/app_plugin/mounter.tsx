@@ -102,6 +102,7 @@ export async function getLensServices(
     share,
     unifiedSearch,
     serverless,
+    contentManagement,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -114,6 +115,7 @@ export async function getLensServices(
     storage,
     inspector: getLensInspectorService(inspector),
     navigation,
+    contentManagement,
     fieldFormats,
     stateTransfer,
     usageCollection,

@@ -197,7 +197,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const getDataViewId = async () => {
       const index = job.datafeed_config.indices[0];
 
-      const dataViewId = await getDataViewIdFromName(index);
+      const dataViewId = await getDataViewIdFromName(index, job);
 
       // If data view doesn't exist for some reasons
       if (!dataViewId && !unmounted) {

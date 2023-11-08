@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -133,6 +133,9 @@ export interface DiscoverSidebarResponsiveProps {
    * For customization and testing purposes
    */
   fieldListVariant?: UnifiedFieldListSidebarContainerProps['variant'];
+
+  unifiedFieldListSidebarContainerApi: UnifiedFieldListSidebarContainerApi | null;
+  setUnifiedFieldListSidebarContainerApi: (api: UnifiedFieldListSidebarContainerApi) => void;
 }
 
 /**
@@ -153,6 +156,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onChangeDataView,
     onAddField,
     onRemoveField,
+    unifiedFieldListSidebarContainerApi,
+    setUnifiedFieldListSidebarContainerApi,
   } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -161,8 +166,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
-  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
-    useState<UnifiedFieldListSidebarContainerApi | null>(null);
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -385,6 +388,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       allFields={sidebarState.allFields}
       showFieldList={showFieldList}
       workspaceSelectedFieldNames={columns}
+      fullWidth
       onAddFieldToWorkspace={onAddFieldToWorkspace}
       onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
       onAddFilter={onAddFilter}

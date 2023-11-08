@@ -29,7 +29,6 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import type { ConnectionRequestParams } from '@elastic/transport';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
@@ -52,11 +51,12 @@ import {
   IAsyncSearchOptions,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
   ISearchOptions,
   ISearchOptionsSerializable,
   pollSearch,
   UI_SETTINGS,
+  type SanitizedConnectionRequestParams,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
 import {
@@ -195,18 +195,18 @@ export class SearchInterceptor {
       // The timeout error is shown any time a request times out, or once per session, if the request is part of a session.
       this.showTimeoutError(err, options?.sessionId);
       return err;
-    } else if (e instanceof AbortError || e instanceof BfetchRequestError) {
+    }
+
+    if (e instanceof AbortError || e instanceof BfetchRequestError) {
       // In the case an application initiated abort, throw the existing AbortError, same with BfetchRequestErrors
       return e;
-    } else if (isEsError(e)) {
-      if (isPainlessError(e)) {
-        return new PainlessError(e, options?.indexPattern);
-      } else {
-        return new EsError(e);
-      }
-    } else {
-      return e instanceof Error ? e : new Error(e.message);
     }
+
+    if (isEsError(e)) {
+      return isPainlessError(e) ? new PainlessError(e, options?.indexPattern) : new EsError(e);
+    }
+
+    return e instanceof Error ? e : new Error(e.message);
   }
 
   private getSerializableOptions(options?: ISearchOptions) {
@@ -311,7 +311,7 @@ export class SearchInterceptor {
     //
     // First request contains useful request params for tools like Inspector.
     // Preserve and project first request params into responses.
-    let firstRequestParams: ConnectionRequestParams;
+    let firstRequestParams: SanitizedConnectionRequestParams;
 
     return pollSearch(search, cancel, {
       pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
@@ -325,7 +325,7 @@ export class SearchInterceptor {
 
         id = response.id;
 
-        if (isCompleteResponse(response)) {
+        if (!isRunningResponse(response)) {
           searchTracker?.complete();
         }
       }),

@@ -27,12 +27,11 @@ import {
   SelectUnsavedFieldChange,
   StringUnsavedFieldChange,
   UndefinedUnsavedFieldChange,
-  SettingType,
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 
 /** Simplifed type for a {@link UnsavedFieldChange} */
-type Change = UnsavedFieldChange<SettingType>;
+type Change = UnsavedFieldChange;
 
 /**
  * Returns `true` if the given {@link FieldUnsavedChange} is an {@link ArrayUnsavedFieldChange},

@@ -4,6 +4,7 @@
     "outDir": "target/types"
   },
   "include": [
+    "common/**/*",
     "server/**/*",
     "jest.config.js"
   ],
@@ -16,6 +17,9 @@
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/apm-utils",
-    "@kbn/profiling-utils"
+    "@kbn/profiling-utils",
+    "@kbn/fleet-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/spaces-plugin",
   ]
 }

@@ -7,7 +7,7 @@
 
 import rt from 'io-ts';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { InventoryFormatterTypeRT } from '../../../../common/inventory_models/types';
+import { InventoryFormatterTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsTimeInput } from './hooks/use_metrics_time';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 

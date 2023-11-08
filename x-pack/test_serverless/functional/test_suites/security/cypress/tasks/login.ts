@@ -8,6 +8,7 @@
 import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { ServerlessRoleName } from '../../../../../shared/lib';
+import { ServerlessRoleName as RoleName } from '../../../../../shared/lib/security/types';
 import { STANDARD_HTTP_HEADERS } from '../../../../../shared/lib/security/default_http_headers';
 
 /**
@@ -36,8 +37,8 @@ const sendApiLoginRequest = (
         method: 'POST',
         headers,
         body: {
-          providerType: basicProvider.type,
-          providerName: basicProvider.name,
+          providerType: basicProvider?.type,
+          providerName: basicProvider?.name,
           currentURL: '/',
           params: { username, password },
         },
@@ -47,7 +48,7 @@ const sendApiLoginRequest = (
 };
 
 interface CyLoginTask {
-  (user?: ServerlessRoleName): ReturnType<typeof sendApiLoginRequest>;
+  (user?: ServerlessRoleName | 'elastic'): ReturnType<typeof sendApiLoginRequest>;
 
   /**
    * Login using any username/password
@@ -64,7 +65,7 @@ interface CyLoginTask {
  * @param user Defaults to `soc_manager`
  */
 export const login: CyLoginTask = (
-  user: ServerlessRoleName | 'elastic' = 'soc_manager'
+  user: ServerlessRoleName | 'elastic' = RoleName.SOC_MANAGER
 ): ReturnType<typeof sendApiLoginRequest> => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
