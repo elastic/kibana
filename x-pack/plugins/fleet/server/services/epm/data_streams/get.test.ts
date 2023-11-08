@@ -120,7 +120,7 @@ describe('getDataStreams', () => {
     });
     expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(expect.anything(), {
       type: 'logs',
-      dataset: 'nginx',
+      dataset: '*nginx*',
     });
   });
   describe('uncategorisedOnly option', () => {

@@ -40,6 +40,7 @@ const templateToClone = getComposableTemplate({
   template: {
     mappings: MAPPINGS,
   },
+  allowAutoCreate: true,
 });
 
 describe('<TemplateClone />', () => {
@@ -97,7 +98,7 @@ describe('<TemplateClone />', () => {
         actions.clickNextButton();
       });
 
-      const { priority, version, _kbnMeta } = templateToClone;
+      const { priority, version, _kbnMeta, allowAutoCreate } = templateToClone;
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/index_templates`,
         expect.objectContaining({
@@ -106,6 +107,7 @@ describe('<TemplateClone />', () => {
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             priority,
             version,
+            allowAutoCreate,
             _kbnMeta,
           }),
         })

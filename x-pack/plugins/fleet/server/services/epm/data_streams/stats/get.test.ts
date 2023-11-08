@@ -68,7 +68,7 @@ describe('getDataStreams', () => {
     });
     expect(dataStreamService.getMatchingDataStreamsStats).toHaveBeenCalledWith(expect.anything(), {
       type: 'logs',
-      dataset: 'nginx',
+      dataset: '*nginx*',
     });
   });
   describe('Can be sorted', () => {

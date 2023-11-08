@@ -9,6 +9,9 @@ xpack.observability.enabled: false
 xpack.uptime.enabled: false
 xpack.legacy_uptime.enabled: false
 
+## Cloud settings
+xpack.cloud.serverless.project_type: security
+
 ## Enable the Security Solution Serverless plugin
 xpack.securitySolutionServerless.enabled: true
 xpack.securitySolutionServerless.productTypes:

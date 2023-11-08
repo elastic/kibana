@@ -15,7 +15,7 @@ import {
   selectAllAgents,
   submitQuery,
 } from './live_query';
-import { navigateToWithoutWaitForReact } from './navigation';
+import { navigateTo } from './navigation';
 
 export const getSavedQueriesComplexTest = () =>
   describe('Saved queries Complex Test', () => {
@@ -88,7 +88,7 @@ export const getSavedQueriesComplexTest = () =>
         closeToastIfVisible();
 
         // play saved query
-        navigateToWithoutWaitForReact('/app/osquery/saved_queries');
+        navigateTo('/app/osquery/saved_queries');
         cy.contains(savedQueryId);
         cy.get(`[aria-label="Run ${savedQueryId}"]`).click();
         selectAllAgents();
@@ -120,7 +120,7 @@ export const getSavedQueriesComplexTest = () =>
 
         // Save edited
         cy.getBySel('euiFlyoutCloseButton').click();
-        cy.getBySel('savedQueryFormUpdateButton').click();
+        cy.getBySel('update-query-button').click();
         cy.contains(`${savedQueryDescription} Edited`);
 
         // delete saved query
