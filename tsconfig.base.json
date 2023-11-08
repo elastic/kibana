@@ -1314,8 +1314,6 @@
       "@kbn/serverless/*": ["x-pack/plugins/serverless/*"],
       "@kbn/serverless-common-settings": ["packages/serverless/settings/common"],
       "@kbn/serverless-common-settings/*": ["packages/serverless/settings/common/*"],
-      "@kbn/serverless-mock-identity-provider": ["packages/serverless/mock_identity_provider"],
-      "@kbn/serverless-mock-identity-provider/*": ["packages/serverless/mock_identity_provider/*"],
       "@kbn/serverless-observability": ["x-pack/plugins/serverless_observability"],
       "@kbn/serverless-observability/*": ["x-pack/plugins/serverless_observability/*"],
       "@kbn/serverless-observability-settings": ["packages/serverless/settings/observability_project"],
