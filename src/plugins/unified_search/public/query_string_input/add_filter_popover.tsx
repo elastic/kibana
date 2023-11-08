@@ -13,7 +13,6 @@ import {
   EuiPopover,
   EuiButtonIconProps,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
@@ -56,7 +55,6 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   onLocalFilterCreate,
   suggestionsAbstraction,
 }: AddFilterPopoverProps) {
-  const euiTheme = useEuiTheme();
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
 
   const button = (
