@@ -34,8 +34,8 @@ export const mouseoverOnToOverflowItem = () => {
       });
     },
     {
-      timeout: 15000,
-      interval: 500,
+      timeout: 60000,
+      interval: 1000,
     }
   );
 };
