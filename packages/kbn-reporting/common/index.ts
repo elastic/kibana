@@ -13,7 +13,7 @@ export * from './errors';
 export * from './schema_utils';
 export * from './schema';
 export * as jobTypes from './job_types';
-export * as reportTypes from './report_types';
+export * from './report_types';
 export type {
   LocatorParams,
   UrlOrUrlLocatorTuple,

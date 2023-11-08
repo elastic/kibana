@@ -21,12 +21,12 @@ import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
 import {
   CancellationToken,
-  TaskRunResult,
   byteSizeValueToNumber,
   ReportingError,
   AuthenticationExpiredError,
 } from '@kbn/reporting-common';
 import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
+import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { i18nTexts } from './i18n_texts';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
