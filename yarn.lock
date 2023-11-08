@@ -4304,6 +4304,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/error-boundary-example-plugin@link:examples/error_boundary":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-archiver@link:packages/kbn-es-archiver":
   version "0.0.0"
   uid ""
