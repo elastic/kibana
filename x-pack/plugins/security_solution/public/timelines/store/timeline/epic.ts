@@ -40,15 +40,6 @@ import type {
 } from '../../../../common/api/timeline';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import {
-  setRelativeRangeDatePicker,
-  setTimelineRangeDatePicker,
-} from '../../../common/store/inputs/actions';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import {
-  DEFAULT_FROM_MOMENT,
-  DEFAULT_TO_MOMENT,
-} from '../../../common/utils/default_date_settings';
 import type { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';
 
@@ -65,7 +56,6 @@ import {
   addTimeline,
   saveTimeline,
   setChanged,
-  showTimeline,
 } from './actions';
 import type { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -184,7 +174,6 @@ export const createTimelineEpic =
             const saveAction = action as unknown as ReturnType<typeof saveTimeline>;
             return saveAction.payload.saveAsNew && timelineId
               ? saveAsNewEpic(
-                  action$,
                   action,
                   timelineId,
                   {
@@ -393,7 +382,6 @@ const convertToString = (obj: unknown) => {
 };
 
 function saveAsNewEpic<State>(
-  action$: Observable<Action>,
   action: ActionTimeline,
   timelineId: string,
   timeline: TimelineInput,
@@ -420,39 +408,13 @@ function saveAsNewEpic<State>(
           // - close old timeline
           // - open new timeline
           // - set correct date range in new timeline...
-          const newTl = {
-            ...recentTimeline[action.payload.id],
-            ...response.originalTimeline,
-          };
-          const tlActions: Action[] = [];
-          if (
-            timeline.status === TimelineStatus.immutable &&
-            timeline.timelineType === TimelineType.template
-          ) {
-            tlActions.push(
-              setRelativeRangeDatePicker({
-                id: InputsModelId.timeline,
-                fromStr: 'now-24h',
-                toStr: 'now',
-                from: DEFAULT_FROM_MOMENT.toISOString(),
-                to: DEFAULT_TO_MOMENT.toISOString(),
-              })
-            );
-          } else if (timeline.dateRange) {
-            tlActions.push(
-              setTimelineRangeDatePicker({
-                from: timeline.dateRange.start,
-                to: timeline.dateRange.end,
-              })
-            );
-          }
 
-          tlActions.push(
-            addTimeline({
-              id: action.payload.id,
-              timeline: newTl,
-            })
-          );
+          const { timeline: clonedTimeline } = response;
+
+          myEpicTimelineId.setTimelineId(clonedTimeline.savedObjectId);
+          myEpicTimelineId.setTimelineVersion(clonedTimeline.version);
+          myEpicTimelineId.setTemplateTimelineId(clonedTimeline.templateTimelineId);
+          myEpicTimelineId.setTemplateTimelineVersion(clonedTimeline.templateTimelineVersion);
 
           return [
             // reset the current timeline
@@ -460,16 +422,12 @@ function saveAsNewEpic<State>(
               id: action.payload.id,
               timeline: {
                 ...recentTimeline[action.payload.id],
-                ...response.originalTimeline,
+                ...clonedTimeline,
               },
             }),
             setChanged({
               id: action.payload.id,
               changed: false,
-            }),
-            showTimeline({
-              id: action.payload.id,
-              show: false,
             }),
             endTimelineSaving({
               id: action.payload.id,
@@ -498,7 +456,6 @@ function handleTimelineResponse<Success extends SuccessResponse>(
     response: Success extends CloneTimelineResponse ? ResponseCloneTimeline : ResponseTimeline
   ) => Action[]
 ): Action[] {
-  debugger;
   if (isErrorResponse(response)) {
     switch (response.status_code) {
       // conflict
