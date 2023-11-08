@@ -20,13 +20,16 @@ describe('PainlessError', () => {
   });
 
   it('Should show reason and code', () => {
-    const e = new PainlessError({
-      statusCode: 400,
-      message: 'search_phase_execution_exception',
-      attributes: {
-        error: searchPhaseException.error,
+    const e = new PainlessError(
+      {
+        statusCode: 400,
+        message: 'search_phase_execution_exception',
+        attributes: {
+          error: searchPhaseException.error,
+        },
       },
-    }, () => {});
+      () => {}
+    );
     const component = mount(e.getErrorMessage());
 
     const failedShards = searchPhaseException.error.failed_shards![0];

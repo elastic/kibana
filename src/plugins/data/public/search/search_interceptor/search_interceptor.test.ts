@@ -120,7 +120,7 @@ describe('SearchInterceptor', () => {
     bfetchMock.batchedFunction.mockReturnValue(fetchMock);
 
     const inspectorServiceMock = {
-      open: () => {}
+      open: () => {},
     } as unknown as InspectorStart;
 
     bfetchSetup = bfetchPluginMock.createSetupContract();
@@ -129,7 +129,11 @@ describe('SearchInterceptor', () => {
       bfetch: bfetchSetup,
       toasts: mockCoreSetup.notifications.toasts,
       startServices: new Promise((resolve) => {
-        resolve([mockCoreStart, { inspector: inspectorServiceMock } as unknown as SearchServiceStartDependencies, {}]);
+        resolve([
+          mockCoreStart,
+          { inspector: inspectorServiceMock } as unknown as SearchServiceStartDependencies,
+          {},
+        ]);
       }),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
@@ -155,14 +159,16 @@ describe('SearchInterceptor', () => {
 
     test('Renders a PainlessError', async () => {
       searchInterceptor.showError(
-        new PainlessError({
-          statusCode: 400,
-          message: 'search_phase_execution_exception',
-          attributes: {
-            error: searchPhaseException.error,
+        new PainlessError(
+          {
+            statusCode: 400,
+            message: 'search_phase_execution_exception',
+            attributes: {
+              error: searchPhaseException.error,
+            },
           },
-        },
-        () => {})
+          () => {}
+        )
       );
       expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
       expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();

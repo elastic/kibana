@@ -9,7 +9,7 @@
 
 import React, { ReactNode } from 'react';
 import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
-import { getApplication } from '../../kibana_services'
+import { getApplication } from '../../kibana_services';
 import type { DataRequestDescriptor, DataRequestMeta } from '../../../common/descriptor_types';
 
 export class DataRequest {
@@ -65,16 +65,20 @@ export class DataRequest {
       application: getApplication(),
     });
 
-    const body = overrideDisplay?.body
-      ? overrideDisplay.body
-      : (<p>{this._descriptor.error.message}</p>);
+    const body = overrideDisplay?.body ? (
+      overrideDisplay.body
+    ) : (
+      <p>{this._descriptor.error.message}</p>
+    );
 
-    return overrideDisplay?.actions 
-      ? <>
-          {body}
-          {overrideDisplay.actions}
-        </>
-      : body;
+    return overrideDisplay?.actions ? (
+      <>
+        {body}
+        {overrideDisplay.actions}
+      </>
+    ) : (
+      body
+    );
   }
 }
 

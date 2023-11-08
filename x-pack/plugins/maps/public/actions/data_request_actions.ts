@@ -312,12 +312,7 @@ function endDataLoad(
   };
 }
 
-function onDataLoadError(
-  layerId: string,
-  dataId: string,
-  requestToken: symbol,
-  error: Error
-) {
+function onDataLoadError(layerId: string, dataId: string, requestToken: symbol, error: Error) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState

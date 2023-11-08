@@ -62,7 +62,7 @@ export class PainlessError extends EsError {
 
   getActions(application: ApplicationStart) {
     const indexPatternId = this?.indexPattern?.id;
-    
+
     function onClick(indexPatternId?: string) {
       application.navigateToApp('management', {
         path: `/kibana/indexPatterns${indexPatternId ? `/patterns/${indexPatternId}` : ''}`,
