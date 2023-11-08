@@ -16,8 +16,8 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
-  BulkActionType,
-  BulkActionEditType,
+  BulkActionTypeEnum,
+  BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule());
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.export })
+        .send({ query: '', action: BulkActionTypeEnum.export })
         .expect(200)
         .expect('Content-Type', 'application/ndjson')
         .expect('Content-Disposition', 'attachment; filename="rules_export.ndjson"')
@@ -177,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
       };
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.export })
+        .send({ query: '', action: BulkActionTypeEnum.export })
         .expect(200)
         .expect('Content-Type', 'application/ndjson')
         .expect('Content-Disposition', 'attachment; filename="rules_export.ndjson"')
@@ -234,7 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, testRule);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.delete })
+        .send({ query: '', action: BulkActionTypeEnum.delete })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -269,7 +269,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.delete })
+        .send({ query: '', action: BulkActionTypeEnum.delete })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -290,7 +290,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId));
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.enable })
+        .send({ query: '', action: BulkActionTypeEnum.enable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -326,7 +326,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.enable })
+        .send({ query: '', action: BulkActionTypeEnum.enable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -363,7 +363,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.disable })
+        .send({ query: '', action: BulkActionTypeEnum.disable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -399,7 +399,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule1.id);
 
       const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionType.disable })
+        .send({ query: '', action: BulkActionTypeEnum.disable })
         .expect(200);
 
       expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -437,7 +437,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await postBulkAction()
         .send({
           query: '',
-          action: BulkActionType.duplicate,
+          action: BulkActionTypeEnum.duplicate,
           duplicate: { include_exceptions: false, include_expired_exceptions: false },
         })
         .expect(200);
@@ -516,7 +516,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await postBulkAction()
         .send({
           query: '',
-          action: BulkActionType.duplicate,
+          action: BulkActionTypeEnum.duplicate,
           duplicate: { include_exceptions: true, include_expired_exceptions: true },
         })
         .expect(200);
@@ -622,7 +622,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await postBulkAction()
         .send({
           query: '',
-          action: BulkActionType.duplicate,
+          action: BulkActionTypeEnum.duplicate,
           duplicate: { include_exceptions: true, include_expired_exceptions: false },
         })
         .expect(200);
@@ -696,7 +696,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await postBulkAction()
         .send({
           query: '',
-          action: BulkActionType.duplicate,
+          action: BulkActionTypeEnum.duplicate,
           duplicate: { include_exceptions: false, include_expired_exceptions: false },
         })
         .expect(200);
@@ -778,10 +778,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.set_tags,
+                    type: BulkActionEditTypeEnum.set_tags,
                     value: tagsToOverwrite,
                   },
                 ],
@@ -835,10 +835,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.delete_tags,
+                    type: BulkActionEditTypeEnum.delete_tags,
                     value: tagsToDelete,
                   },
                 ],
@@ -891,10 +891,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body: bulkEditResponse } = await postBulkAction()
               .send({
                 query: '',
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.add_tags,
+                    type: BulkActionEditTypeEnum.add_tags,
                     value: addedTags,
                   },
                 ],
@@ -925,21 +925,21 @@ export default ({ getService }: FtrProviderContext): void => {
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToUpdate: [],
             resultingTags: ['tag1', 'tag2', 'tag3'],
-            operation: BulkActionEditType.delete_tags,
+            operation: BulkActionEditTypeEnum.delete_tags,
           },
           {
             caseName: '0 existing tags - 2 tags = 0 tags',
             existingTags: [],
             tagsToUpdate: ['tag4', 'tag5'],
             resultingTags: [],
-            operation: BulkActionEditType.delete_tags,
+            operation: BulkActionEditTypeEnum.delete_tags,
           },
           {
             caseName: '3 existing tags - 2 other tags (none of them) = 3 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToUpdate: ['tag4', 'tag5'],
             resultingTags: ['tag1', 'tag2', 'tag3'],
-            operation: BulkActionEditType.delete_tags,
+            operation: BulkActionEditTypeEnum.delete_tags,
           },
           // Add no-ops
           {
@@ -947,14 +947,14 @@ export default ({ getService }: FtrProviderContext): void => {
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToUpdate: ['tag1', 'tag2'],
             resultingTags: ['tag1', 'tag2', 'tag3'],
-            operation: BulkActionEditType.add_tags,
+            operation: BulkActionEditTypeEnum.add_tags,
           },
           {
             caseName: '3 existing tags + 0 tags = 3 tags',
             existingTags: ['tag1', 'tag2', 'tag3'],
             tagsToUpdate: [],
             resultingTags: ['tag1', 'tag2', 'tag3'],
-            operation: BulkActionEditType.add_tags,
+            operation: BulkActionEditTypeEnum.add_tags,
           },
         ];
 
@@ -968,8 +968,8 @@ export default ({ getService }: FtrProviderContext): void => {
               const { body: bulkEditResponse } = await postBulkAction()
                 .send({
                   query: '',
-                  action: BulkActionType.edit,
-                  [BulkActionType.edit]: [
+                  action: BulkActionTypeEnum.edit,
+                  [BulkActionTypeEnum.edit]: [
                     {
                       type: operation,
                       value: tagsToUpdate,
@@ -1007,10 +1007,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: bulkEditResponse } = await postBulkAction()
             .send({
               query: '',
-              action: BulkActionType.edit,
-              [BulkActionType.edit]: [
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
                 {
-                  type: BulkActionEditType.set_index_patterns,
+                  type: BulkActionEditTypeEnum.set_index_patterns,
                   value: ['initial-index-*'],
                 },
               ],
@@ -1042,10 +1042,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: bulkEditResponse } = await postBulkAction()
             .send({
               query: '',
-              action: BulkActionType.edit,
-              [BulkActionType.edit]: [
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
                 {
-                  type: BulkActionEditType.add_index_patterns,
+                  type: BulkActionEditTypeEnum.add_index_patterns,
                   value: ['index3-*'],
                 },
               ],
@@ -1079,10 +1079,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: bulkEditResponse } = await postBulkAction()
             .send({
               query: '',
-              action: BulkActionType.edit,
-              [BulkActionType.edit]: [
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
                 {
-                  type: BulkActionEditType.delete_index_patterns,
+                  type: BulkActionEditTypeEnum.delete_index_patterns,
                   value: ['index2-*'],
                 },
               ],
@@ -1113,10 +1113,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [mlRule.id],
-              action: BulkActionType.edit,
-              [BulkActionType.edit]: [
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
                 {
-                  type: BulkActionEditType.add_index_patterns,
+                  type: BulkActionEditTypeEnum.add_index_patterns,
                   value: ['index-*'],
                 },
               ],
@@ -1143,10 +1143,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [esqlRule.id],
-              action: BulkActionType.edit,
-              [BulkActionType.edit]: [
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
                 {
-                  type: BulkActionEditType.add_index_patterns,
+                  type: BulkActionEditTypeEnum.add_index_patterns,
                   value: ['index-*'],
                 },
               ],
@@ -1176,10 +1176,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [rule.id],
-              action: BulkActionType.edit,
-              [BulkActionType.edit]: [
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
                 {
-                  type: BulkActionEditType.delete_index_patterns,
+                  type: BulkActionEditTypeEnum.delete_index_patterns,
                   value: ['simple-index-*'],
                 },
               ],
@@ -1209,10 +1209,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               ids: [rule.id],
-              action: BulkActionType.edit,
-              [BulkActionType.edit]: [
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
                 {
-                  type: BulkActionEditType.set_index_patterns,
+                  type: BulkActionEditTypeEnum.set_index_patterns,
                   value: [],
                 },
               ],
@@ -1244,21 +1244,21 @@ export default ({ getService }: FtrProviderContext): void => {
             existingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
             indexPatternsToUpdate: [],
             resultingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
-            operation: BulkActionEditType.delete_index_patterns,
+            operation: BulkActionEditTypeEnum.delete_index_patterns,
           },
           {
             caseName: '0 existing indeces - 2 indeces = 0 indeces',
             existingIndexPatterns: [],
             indexPatternsToUpdate: ['index1-*', 'index2-*'],
             resultingIndexPatterns: [],
-            operation: BulkActionEditType.delete_index_patterns,
+            operation: BulkActionEditTypeEnum.delete_index_patterns,
           },
           {
             caseName: '3 existing indeces - 2 other indeces (none of them) = 3 indeces',
             existingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
             indexPatternsToUpdate: ['index8-*', 'index9-*'],
             resultingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
-            operation: BulkActionEditType.delete_index_patterns,
+            operation: BulkActionEditTypeEnum.delete_index_patterns,
           },
           // Add no-ops
           {
@@ -1266,14 +1266,14 @@ export default ({ getService }: FtrProviderContext): void => {
             existingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
             indexPatternsToUpdate: ['index1-*', 'index2-*'],
             resultingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
-            operation: BulkActionEditType.add_index_patterns,
+            operation: BulkActionEditTypeEnum.add_index_patterns,
           },
           {
             caseName: '3 existing indeces + 0 indeces = 3 indeces',
             existingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
             indexPatternsToUpdate: [],
             resultingIndexPatterns: ['index1-*', 'index2-*', 'index3-*'],
-            operation: BulkActionEditType.add_index_patterns,
+            operation: BulkActionEditTypeEnum.add_index_patterns,
           },
         ];
 
@@ -1296,8 +1296,8 @@ export default ({ getService }: FtrProviderContext): void => {
               const { body: bulkEditResponse } = await postBulkAction()
                 .send({
                   query: '',
-                  action: BulkActionType.edit,
-                  [BulkActionType.edit]: [
+                  action: BulkActionTypeEnum.edit,
+                  [BulkActionTypeEnum.edit]: [
                     {
                       type: operation,
                       value: indexPatternsToUpdate,
@@ -1353,10 +1353,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: setTagsBody } = await postBulkAction().send({
           query: '',
-          action: BulkActionType.edit,
-          [BulkActionType.edit]: [
+          action: BulkActionTypeEnum.edit,
+          [BulkActionTypeEnum.edit]: [
             {
-              type: BulkActionEditType.set_tags,
+              type: BulkActionEditTypeEnum.set_tags,
               value: ['reset-tag'],
             },
           ],
@@ -1401,10 +1401,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_timeline,
+                type: BulkActionEditTypeEnum.set_timeline,
                 value: {
                   timeline_id: timelineId,
                   timeline_title: timelineTitle,
@@ -1444,10 +1444,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_timeline,
+                type: BulkActionEditTypeEnum.set_timeline,
                 value: {
                   timeline_id: '',
                   timeline_title: '',
@@ -1476,10 +1476,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [mlRule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.add_index_patterns,
+                type: BulkActionEditTypeEnum.add_index_patterns,
                 value: ['index-*'],
               },
             ],
@@ -1509,10 +1509,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.delete_index_patterns,
+                type: BulkActionEditTypeEnum.delete_index_patterns,
                 value: ['simple-index-*'],
               },
             ],
@@ -1538,10 +1538,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.add_tags,
+                type: BulkActionEditTypeEnum.add_tags,
                 value: ['test'],
               },
             ],
@@ -1559,35 +1559,35 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('prebuilt rules', () => {
         const cases = [
           {
-            type: BulkActionEditType.add_tags,
+            type: BulkActionEditTypeEnum.add_tags,
             value: ['new-tag'],
           },
           {
-            type: BulkActionEditType.set_tags,
+            type: BulkActionEditTypeEnum.set_tags,
             value: ['new-tag'],
           },
           {
-            type: BulkActionEditType.delete_tags,
+            type: BulkActionEditTypeEnum.delete_tags,
             value: ['new-tag'],
           },
           {
-            type: BulkActionEditType.add_index_patterns,
+            type: BulkActionEditTypeEnum.add_index_patterns,
             value: ['test-*'],
           },
           {
-            type: BulkActionEditType.set_index_patterns,
+            type: BulkActionEditTypeEnum.set_index_patterns,
             value: ['test-*'],
           },
           {
-            type: BulkActionEditType.delete_index_patterns,
+            type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['test-*'],
           },
           {
-            type: BulkActionEditType.set_timeline,
+            type: BulkActionEditTypeEnum.set_timeline,
             value: { timeline_id: 'mock-id', timeline_title: 'mock-title' },
           },
           {
-            type: BulkActionEditType.set_schedule,
+            type: BulkActionEditTypeEnum.set_schedule,
             value: { interval: '1m', lookback: '1m' },
           },
         ];
@@ -1599,8 +1599,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [prebuiltRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
                     type,
                     value,
@@ -1648,10 +1648,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.set_rule_actions,
+                    type: BulkActionEditTypeEnum.set_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [
@@ -1706,10 +1706,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.set_rule_actions,
+                    type: BulkActionEditTypeEnum.set_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [
@@ -1766,10 +1766,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.set_rule_actions,
+                    type: BulkActionEditTypeEnum.set_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [],
@@ -1818,10 +1818,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.set_rule_actions,
+                    type: BulkActionEditTypeEnum.set_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [
@@ -1871,10 +1871,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.add_rule_actions,
+                    type: BulkActionEditTypeEnum.add_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [
@@ -1931,10 +1931,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.add_rule_actions,
+                    type: BulkActionEditTypeEnum.add_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [
@@ -2004,10 +2004,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.add_rule_actions,
+                    type: BulkActionEditTypeEnum.add_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [
@@ -2069,10 +2069,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.add_rule_actions,
+                    type: BulkActionEditTypeEnum.add_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [],
@@ -2120,10 +2120,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [createdRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.add_rule_actions,
+                    type: BulkActionEditTypeEnum.add_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [],
@@ -2147,10 +2147,10 @@ export default ({ getService }: FtrProviderContext): void => {
         describe('prebuilt rules', () => {
           const cases = [
             {
-              type: BulkActionEditType.set_rule_actions,
+              type: BulkActionEditTypeEnum.set_rule_actions,
             },
             {
-              type: BulkActionEditType.add_rule_actions,
+              type: BulkActionEditTypeEnum.add_rule_actions,
             },
           ];
           cases.forEach(({ type }) => {
@@ -2162,8 +2162,8 @@ export default ({ getService }: FtrProviderContext): void => {
               const { body } = await postBulkAction()
                 .send({
                   ids: [prebuiltRule.id],
-                  action: BulkActionType.edit,
-                  [BulkActionType.edit]: [
+                  action: BulkActionTypeEnum.edit,
+                  [BulkActionTypeEnum.edit]: [
                     {
                       type,
                       value: {
@@ -2220,10 +2220,10 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postBulkAction()
               .send({
                 ids: [prebuiltRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
-                    type: BulkActionEditType.set_rule_actions,
+                    type: BulkActionEditTypeEnum.set_rule_actions,
                     value: {
                       throttle: '1h',
                       actions: [
@@ -2235,7 +2235,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     },
                   },
                   {
-                    type: BulkActionEditType.set_tags,
+                    type: BulkActionEditTypeEnum.set_tags,
                     value: ['tag-1'],
                   },
                 ],
@@ -2290,10 +2290,10 @@ export default ({ getService }: FtrProviderContext): void => {
               const { body } = await postBulkAction()
                 .send({
                   ids: [createdRule.id],
-                  action: BulkActionType.edit,
-                  [BulkActionType.edit]: [
+                  action: BulkActionTypeEnum.edit,
+                  [BulkActionTypeEnum.edit]: [
                     {
-                      type: BulkActionEditType.set_rule_actions,
+                      type: BulkActionEditTypeEnum.set_rule_actions,
                       value: {
                         throttle: payloadThrottle,
                         actions: [],
@@ -2331,62 +2331,63 @@ export default ({ getService }: FtrProviderContext): void => {
               expectedThrottle: undefined,
             },
           ];
-          [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].forEach(
-            (ruleAction) => {
-              casesForNonEmptyActions.forEach(({ payloadThrottle, expectedThrottle }) => {
-                it(`throttle is updated correctly for rule action "${ruleAction}", if payload throttle="${payloadThrottle}" and actions non empty`, async () => {
-                  // create a new connector
-                  const webHookConnector = await createWebHookConnector();
+          [
+            BulkActionEditTypeEnum.set_rule_actions,
+            BulkActionEditTypeEnum.add_rule_actions,
+          ].forEach((ruleAction) => {
+            casesForNonEmptyActions.forEach(({ payloadThrottle, expectedThrottle }) => {
+              it(`throttle is updated correctly for rule action "${ruleAction}", if payload throttle="${payloadThrottle}" and actions non empty`, async () => {
+                // create a new connector
+                const webHookConnector = await createWebHookConnector();
 
-                  const ruleId = 'ruleId';
-                  const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+                const ruleId = 'ruleId';
+                const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
 
-                  const { body } = await postBulkAction()
-                    .send({
-                      ids: [createdRule.id],
-                      action: BulkActionType.edit,
-                      [BulkActionType.edit]: [
-                        {
-                          type: BulkActionEditType.set_rule_actions,
-                          value: {
-                            throttle: payloadThrottle,
-                            actions: [
-                              {
-                                id: webHookConnector.id,
-                                group: 'default',
-                                params: { body: '{}' },
-                              },
-                            ],
-                          },
+                const { body } = await postBulkAction()
+                  .send({
+                    ids: [createdRule.id],
+                    action: BulkActionTypeEnum.edit,
+                    [BulkActionTypeEnum.edit]: [
+                      {
+                        type: BulkActionEditTypeEnum.set_rule_actions,
+                        value: {
+                          throttle: payloadThrottle,
+                          actions: [
+                            {
+                              id: webHookConnector.id,
+                              group: 'default',
+                              params: { body: '{}' },
+                            },
+                          ],
                         },
-                      ],
-                    })
-                    .expect(200);
-
-                  // Check that the updated rule is returned with the response
-                  expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
-
-                  const expectedActions = body.attributes.results.updated[0].actions.map(
-                    (action: any) => ({
-                      ...action,
-                      frequency: {
-                        summary: true,
-                        throttle: payloadThrottle !== 'rule' ? payloadThrottle : null,
-                        notifyWhen:
-                          payloadThrottle !== 'rule' ? 'onThrottleInterval' : 'onActiveAlert',
                       },
-                    })
-                  );
+                    ],
+                  })
+                  .expect(200);
 
-                  // Check that the updates have been persisted
-                  const { body: rule } = await fetchRule(ruleId).expect(200);
+                // Check that the updated rule is returned with the response
+                expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
 
-                  expect(rule.throttle).to.eql(expectedThrottle);
-                  expect(rule.actions).to.eql(expectedActions);
-                });
+                const expectedActions = body.attributes.results.updated[0].actions.map(
+                  (action: any) => ({
+                    ...action,
+                    frequency: {
+                      summary: true,
+                      throttle: payloadThrottle !== 'rule' ? payloadThrottle : null,
+                      notifyWhen:
+                        payloadThrottle !== 'rule' ? 'onThrottleInterval' : 'onActiveAlert',
+                    },
+                  })
+                );
+
+                // Check that the updates have been persisted
+                const { body: rule } = await fetchRule(ruleId).expect(200);
+
+                expect(rule.throttle).to.eql(expectedThrottle);
+                expect(rule.actions).to.eql(expectedActions);
               });
-            }
-          );
+            });
+          });
         });
 
         describe('notifyWhen', () => {
@@ -2409,10 +2410,10 @@ export default ({ getService }: FtrProviderContext): void => {
               await postBulkAction()
                 .send({
                   ids: [createdRule.id],
-                  action: BulkActionType.edit,
-                  [BulkActionType.edit]: [
+                  action: BulkActionTypeEnum.edit,
+                  [BulkActionTypeEnum.edit]: [
                     {
-                      type: BulkActionEditType.set_rule_actions,
+                      type: BulkActionEditTypeEnum.set_rule_actions,
                       value: {
                         throttle: payload.throttle,
                         actions: [],
@@ -2443,10 +2444,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               query: '',
-              action: BulkActionType.edit,
-              [BulkActionType.edit]: [
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
                 {
-                  type: BulkActionEditType.set_schedule,
+                  type: BulkActionEditTypeEnum.set_schedule,
                   value: {
                     interval,
                     lookback,
@@ -2458,8 +2459,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(body.statusCode).to.eql(400);
           expect(body.error).to.eql('Bad Request');
-          expect(body.message).to.contain('Invalid value "0m" supplied to "edit,value,interval"');
-          expect(body.message).to.contain('Invalid value "-1m" supplied to "edit,value,lookback"');
+          expect(body.message).to.contain('edit.0.value.interval: Invalid');
+          expect(body.message).to.contain('edit.0.value.lookback: Invalid');
         });
 
         it('should update schedule values in rules with a valid payload', async () => {
@@ -2473,10 +2474,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await postBulkAction()
             .send({
               query: '',
-              action: BulkActionType.edit,
-              [BulkActionType.edit]: [
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
                 {
-                  type: BulkActionEditType.set_schedule,
+                  type: BulkActionEditTypeEnum.set_schedule,
                   value: {
                     interval,
                     lookback,
@@ -2511,10 +2512,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.add_index_patterns,
+                type: BulkActionEditTypeEnum.add_index_patterns,
                 value: ['initial-index-*'],
                 overwrite_data_views: true,
               },
@@ -2552,10 +2553,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.add_index_patterns,
+                type: BulkActionEditTypeEnum.add_index_patterns,
                 value: ['initial-index-*'],
                 overwrite_data_views: false,
               },
@@ -2597,10 +2598,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_index_patterns,
+                type: BulkActionEditTypeEnum.set_index_patterns,
                 value: ['initial-index-*'],
                 overwrite_data_views: true,
               },
@@ -2638,10 +2639,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_index_patterns,
+                type: BulkActionEditTypeEnum.set_index_patterns,
                 value: [],
                 overwrite_data_views: true,
               },
@@ -2674,10 +2675,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: setIndexBody } = await postBulkAction()
           .send({
             query: '',
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_index_patterns,
+                type: BulkActionEditTypeEnum.set_index_patterns,
                 value: ['initial-index-*'],
                 overwrite_data_views: false,
               },
@@ -2720,10 +2721,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.delete_index_patterns,
+                type: BulkActionEditTypeEnum.delete_index_patterns,
                 value: ['simple-index-*'],
                 overwrite_data_views: true,
               },
@@ -2761,10 +2762,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.delete_index_patterns,
+                type: BulkActionEditTypeEnum.delete_index_patterns,
                 value: ['simple-index-*'],
                 overwrite_data_views: true,
               },
@@ -2797,10 +2798,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.delete_index_patterns,
+                type: BulkActionEditTypeEnum.delete_index_patterns,
                 value: ['simple-index-*'],
                 overwrite_data_views: false,
               },
@@ -2830,14 +2831,14 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.add_index_patterns,
+                type: BulkActionEditTypeEnum.add_index_patterns,
                 value: ['initial-index-*'],
               },
               {
-                type: BulkActionEditType.add_tags,
+                type: BulkActionEditTypeEnum.add_tags,
                 value: ['tag3'],
               },
             ],
@@ -2868,16 +2869,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               // Valid operation
               {
-                type: BulkActionEditType.add_index_patterns,
+                type: BulkActionEditTypeEnum.add_index_patterns,
                 value: ['initial-index-*'],
               },
               // Operation to be skipped
               {
-                type: BulkActionEditType.add_tags,
+                type: BulkActionEditTypeEnum.add_tags,
                 value: ['tag1'],
               },
             ],
@@ -2908,16 +2909,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             ids: [rule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               // Operation to be skipped
               {
-                type: BulkActionEditType.add_index_patterns,
+                type: BulkActionEditTypeEnum.add_index_patterns,
                 value: ['index1-*'],
               },
               // Operation to be skipped
               {
-                type: BulkActionEditType.add_tags,
+                type: BulkActionEditTypeEnum.add_tags,
                 value: ['tag1'],
               },
             ],
@@ -2949,10 +2950,10 @@ export default ({ getService }: FtrProviderContext): void => {
         Array.from({ length: 10 }).map(() =>
           postBulkAction().send({
             query: '',
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_timeline,
+                type: BulkActionEditTypeEnum.set_timeline,
                 value: {
                   timeline_id: timelineId,
                   timeline_title: timelineTitle,
@@ -2978,10 +2979,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await postBulkAction()
         .send({
           ids: [id],
-          action: BulkActionType.edit,
-          [BulkActionType.edit]: [
+          action: BulkActionTypeEnum.edit,
+          [BulkActionTypeEnum.edit]: [
             {
-              type: BulkActionEditType.set_timeline,
+              type: BulkActionEditTypeEnum.set_timeline,
               value: {
                 timeline_id: timelineId,
                 timeline_title: timelineTitle,
@@ -3033,7 +3034,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
-          .send({ query: '', action: BulkActionType.export })
+          .send({ query: '', action: BulkActionTypeEnum.export })
           .expect(200)
           .expect('Content-Type', 'application/ndjson')
           .expect('Content-Disposition', 'attachment; filename="rules_export.ndjson"')
@@ -3094,7 +3095,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should delete rules with investigation fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
-          .send({ query: '', action: BulkActionType.delete })
+          .send({ query: '', action: BulkActionTypeEnum.delete })
           .expect(200);
 
         expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
@@ -3124,7 +3125,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should enable rules with legacy investigation fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
-          .send({ query: '', action: BulkActionType.enable })
+          .send({ query: '', action: BulkActionTypeEnum.enable })
           .expect(200);
 
         expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
@@ -3188,7 +3189,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should disable rules with legacy investigation fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
-          .send({ query: '', action: BulkActionType.disable })
+          .send({ query: '', action: BulkActionTypeEnum.disable })
           .expect(200);
 
         expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 3, total: 3 });
@@ -3251,7 +3252,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postBulkAction()
           .send({
             query: '',
-            action: BulkActionType.duplicate,
+            action: BulkActionTypeEnum.duplicate,
             duplicate: { include_exceptions: false, include_expired_exceptions: false },
           })
           .expect(200);
@@ -3353,10 +3354,10 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should edit rules with legacy investigation fields', async () => {
         const { body } = await postBulkAction().send({
           query: '',
-          action: BulkActionType.edit,
-          [BulkActionType.edit]: [
+          action: BulkActionTypeEnum.edit,
+          [BulkActionTypeEnum.edit]: [
             {
-              type: BulkActionEditType.set_tags,
+              type: BulkActionEditTypeEnum.set_tags,
               value: ['reset-tag'],
             },
           ],

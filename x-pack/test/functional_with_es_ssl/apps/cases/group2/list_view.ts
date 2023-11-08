@@ -601,6 +601,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
         await cases.casesTable.validateCasesTableHasNthRows(5);
+
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
       });
     });
 
