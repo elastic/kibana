@@ -2356,6 +2356,74 @@ describe('TaskManagerRunner', () => {
           'Task Manager has skipped executing the Task (bar/foo) 1 times as it has invalid params.'
         );
       });
+
+      test('does not skip task.run when the task has invalid state and allowReadingInvalidState = true', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          schedule: { interval: '10m' },
+          status: TaskStatus.Idle,
+          startedAt: new Date(),
+          enabled: true,
+          runAt: new Date(),
+          params: { foo: true },
+          state: { foo: true, bar: 'test', baz: 'test' },
+          stateVersion: 4,
+        };
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { state: { foo: 'bar' } };
+                },
+              }),
+              stateSchemaByVersion: {
+                1: {
+                  up: (state: Record<string, unknown>) => ({ foo: state.foo || '' }),
+                  schema: schema.object({
+                    foo: schema.string(),
+                  }),
+                },
+                2: {
+                  up: (state: Record<string, unknown>) => ({ ...state, bar: state.bar || '' }),
+                  schema: schema.object({
+                    foo: schema.string(),
+                    bar: schema.string(),
+                  }),
+                },
+                3: {
+                  up: (state: Record<string, unknown>) => ({ ...state, baz: state.baz || '' }),
+                  schema: schema.object({
+                    foo: schema.string(),
+                    bar: schema.string(),
+                    baz: schema.string(),
+                  }),
+                },
+              },
+            },
+          },
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
+          allowReadingInvalidState: true,
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledTimes(1);
+        const instance = store.update.mock.calls[0][0];
+        expect(instance.state).toEqual({
+          foo: 'bar',
+        });
+        expect(instance.attempts).toBe(0);
+        expect(instance.numSkippedRuns).toBe(0);
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(result).toEqual(asOk({ state: { foo: 'bar' } }));
+      });
     });
   });
 
