@@ -129,7 +129,7 @@ export function MobileStats({
       valueFormatter: (value: number) =>
         Number.isNaN(value)
           ? NOT_AVAILABLE_LABEL
-          : valueFormatter(value.toFixed(1), 'ms'),
+          : valueFormatter(Number(value).toFixed(1), 'ms'),
       trend: data?.currentPeriod?.launchTimes?.timeseries,
       extra: getComparisonValueFormatter(
         data?.previousPeriod.launchTimes?.value?.toFixed(1)
