@@ -34,6 +34,10 @@ export interface FileDescriptor<M = unknown> {
    */
   id: string;
   /**
+   * Spaces to which the file is shared
+   */
+  namespaces?: string[];
+  /**
    * The file's metadata.
    */
   metadata: FileMetadata<M>;

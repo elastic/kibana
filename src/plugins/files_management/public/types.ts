@@ -8,6 +8,7 @@
 
 import { FilesClient, FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 
 export interface AppContext {
   filesClient: FilesClient;
@@ -21,4 +22,5 @@ export interface SetupDependencies {
 }
 export interface StartDependencies {
   files: FilesStart;
+  spaces?: SpacesApi;
 }

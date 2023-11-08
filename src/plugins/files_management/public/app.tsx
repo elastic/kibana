@@ -57,6 +57,7 @@ export const App: FunctionComponent = () => {
             .then(({ files, total }) => ({
               hits: files.map((file) => ({
                 id: file.id,
+                namespaces: file.namespaces ?? [],
                 updatedAt: file.updated,
                 references: [],
                 type: 'file',
