@@ -23,5 +23,6 @@
     "@kbn/generate-csv",
     "@kbn/core-http-server",
     "@kbn/reporting-export-types-helpers-server",
+    "@kbn/reporting-export-types-helpers-public",
   ]
 }
