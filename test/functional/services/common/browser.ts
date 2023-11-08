@@ -181,8 +181,8 @@ class BrowserService extends FtrService {
     });
 
     if (relativeUrl) {
-      const { path, search, hash } = Url.parse(currentWithoutTime);
-      return `${path}${search ?? ''}${hash ?? ''}`;
+      const { path } = Url.parse(currentWithoutTime);
+      return path; // this property includes query params and anchors
     } else {
       return currentWithoutTime;
     }
@@ -202,8 +202,9 @@ class BrowserService extends FtrService {
     await retry.waitForWithTimeout(`URL to be ${expectedPath}`, 5000, async () => {
       const currentPath = await this.getCurrentUrl(true);
 
-      if (currentPath !== expectedPath)
+      if (currentPath !== expectedPath) {
         log.debug(`Expected URL to be ${expectedPath}, got ${currentPath}`);
+      }
       return currentPath === expectedPath;
     });
 
