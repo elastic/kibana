@@ -6,29 +6,28 @@
  */
 
 import { ProcessorFields } from './format_synthetics_policy';
-import { MonitorFields } from '../../../../common/runtime_types';
-
-type Fields = Record<string, string | boolean>;
+import { HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
 
 interface FieldProcessor {
   add_fields: {
     target: string;
-    fields: Fields;
+    fields: HeartbeatFields;
   };
 }
 
 export const processorsFormatter = (config: Partial<MonitorFields & ProcessorFields>) => {
-  const fields: Fields = {
+  const fields: HeartbeatFields = {
     'monitor.fleet_managed': true,
+    config_id: config.config_id!,
+    meta: {
+      space_id: config.spaceId!,
+    },
   };
   if (config.test_run_id) {
     fields.test_run_id = config.test_run_id;
   }
   if (config.run_once) {
     fields.run_once = config.run_once;
-  }
-  if (config.config_id) {
-    fields.config_id = config.config_id;
   }
   if (config['monitor.project.name']) {
     fields['monitor.project.name'] = config['monitor.project.name'];
