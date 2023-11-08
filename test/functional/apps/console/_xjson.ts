@@ -15,7 +15,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  describe.only('XJSON', function testXjson() {
+  describe('XJSON', function testXjson() {
     this.tags('includeFirefox');
     before(async () => {
       await PageObjects.common.navigateToApp('console');
