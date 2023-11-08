@@ -64,7 +64,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
     CATEGORIZATION_TYPE.COUNT
   );
   const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(false);
-  // const [stopOnWarn, setStopOnWarn] = useState(false);
+  const [stopOnWarn, setStopOnWarn] = useState(false);
   const [categoryFieldOptions, setCategoryFieldsOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [selectedPartitionFieldOptions, setSelectedPartitionFieldOptions] = useState<
     EuiComboBoxOptionOption[]
@@ -76,7 +76,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
     [enablePerPartitionCategorization]
   );
 
-  // const toggleStopOnWarn = useCallback(() => setStopOnWarn(!stopOnWarn), [stopOnWarn]);
+  const toggleStopOnWarn = useCallback(() => setStopOnWarn(!stopOnWarn), [stopOnWarn]);
 
   useMemo(() => {
     const newJobCapsService = new NewJobCapsService(mlApiServices);
@@ -113,6 +113,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       dataView,
       field,
       partitionField,
+      stopOnWarn,
       query,
       timeRange,
       share
@@ -121,6 +122,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
 
   useEffect(() => {
     setSelectedPartitionFieldOptions([]);
+    setStopOnWarn(false);
   }, [enablePerPartitionCategorization]);
 
   useEffect(() => {
@@ -146,11 +148,11 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       dataView,
       field,
       partitionField,
+      stopOnWarn,
       query,
       timeRange,
       startJob,
-      runInRealTime,
-      0
+      runInRealTime
     );
     return result;
   }
@@ -259,7 +261,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
                 />
               </EuiFormRow>
 
-              {/* <EuiSpacer size="m" />
+              <EuiSpacer size="m" />
 
               <EuiSwitch
                 name="categorizationPerPartitionSwitch"
@@ -273,45 +275,14 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
                     defaultMessage="Stop on warn"
                   />
                 }
-              /> */}
+              />
             </>
           ) : null}
 
           <EuiSpacer size="m" />
 
           <EuiHorizontalRule margin="m" />
-
-          {/* <CountCard
-            onClick={() => setCategorizationType(CATEGORIZATION_TYPE.COUNT)}
-            isSelected={categorizationType === CATEGORIZATION_TYPE.COUNT}
-          />
-          <RareCard
-            onClick={() => setCategorizationType(CATEGORIZATION_TYPE.RARE)}
-            isSelected={categorizationType === CATEGORIZATION_TYPE.RARE}
-          /> */}
         </>
-        {/* <EuiFlexGroup gutterSize="s" data-test-subj="mlLensLayerCompatible">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <EuiIcon type="checkInCircleFilled" color="success" />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              {layer.jobType === JOB_TYPE.MULTI_METRIC ? (
-                <FormattedMessage
-                  id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.multiMetric"
-                  defaultMessage="This layer can be used to create a multi-metric job"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.ml.embeddables.lensLayerFlyout.createJobCalloutTitle.singleMetric"
-                  defaultMessage="This layer can be used to create a single metric job"
-                />
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup> */}
       </JobDetails>
     </>
   );

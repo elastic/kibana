@@ -72,6 +72,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     },
     uiSettings,
     uiActions,
+    application: { capabilities },
   } = useAiopsAppContext();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
@@ -245,7 +246,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       field: selectedField,
       query: searchQuery,
       timeRange: { from: moment(earliest).toISOString(), to: moment(latest).toISOString() },
-      // originatingApp,
     };
     uiActions.getTrigger('CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER').exec(triggerOptions);
   };
@@ -275,13 +275,19 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
-        <EuiButtonEmpty
-          data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
-          onClick={() => createADJob()}
-          flush="left"
-        >
-          Find anomalies in patterns
-        </EuiButtonEmpty>
+        {capabilities.ml.canCreateJob ? (
+          <EuiButtonEmpty
+            data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
+            onClick={() => createADJob()}
+            flush="left"
+          >
+            <FormattedMessage
+              id="xpack.aiops.categorizeFlyout.findAnomalies"
+              defaultMessage="Find anomalies in patterns"
+            />
+          </EuiButtonEmpty>
+        ) : null}
+
         <FieldValidationCallout validationResults={fieldValidationResult} />
 
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}

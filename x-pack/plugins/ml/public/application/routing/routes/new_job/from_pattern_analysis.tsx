@@ -26,6 +26,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
     dataViewId,
     field,
     partitionField,
+    stopOnWarn,
     from,
     to,
     query,
@@ -55,6 +56,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
         dataViewId,
         field,
         partitionField,
+        stopOnWarn,
         from,
         to,
         query

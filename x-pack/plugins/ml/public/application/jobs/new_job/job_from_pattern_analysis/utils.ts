@@ -18,6 +18,7 @@ export async function redirectToADJobWizards(
   dataView: DataView,
   field: DataViewField,
   partitionField: DataViewField | null,
+  stopOnWarn: boolean,
   query: QueryDslQueryContainer,
   timeRange: TimeRange,
   share: SharePluginStart
@@ -32,6 +33,7 @@ export async function redirectToADJobWizards(
       dataViewId: dataView.id,
       field: field.name,
       partitionField: partitionField?.name || null,
+      stopOnWarn,
       from: timeRange.from,
       to: timeRange.to,
       query: JSON.stringify(query),

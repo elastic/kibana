@@ -32,6 +32,7 @@ export async function resolver(
   dataViewIdRisonString: string,
   fieldRisonString: string,
   partitionFieldRisonString: string | null,
+  stopOnWarnRisonString: string,
   fromRisonString: string,
   toRisonString: string,
   queryRisonString: string
@@ -97,6 +98,13 @@ export async function resolver(
     partitionField = '';
   }
 
+  let stopOnWarn;
+  try {
+    stopOnWarn = rison.decode(stopOnWarnRisonString) as boolean;
+  } catch (error) {
+    stopOnWarn = false;
+  }
+
   const jobCreator = new QuickCategorizationJobCreator(
     kibanaConfig,
     timeFilter,
@@ -109,6 +117,7 @@ export async function resolver(
     dataViewId,
     field,
     partitionField,
+    stopOnWarn,
     from,
     to,
     query

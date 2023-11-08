@@ -50,11 +50,11 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     dataView: DataView,
     field: DataViewField,
     partitionField: DataViewField | null,
+    stopOnWarn: boolean,
     query: QueryDslQueryContainer,
     timeRange: TimeRange,
     startJob: boolean,
-    runInRealTime: boolean,
-    layerIndex: number
+    runInRealTime: boolean
   ): Promise<CreateState> {
     // const { query, filters, to, from, dashboard, chartInfo } = await getJobsItemsFromEmbeddable(
     //   embeddable,
@@ -69,6 +69,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
       dataView,
       field,
       partitionField,
+      stopOnWarn,
       timeRange,
       query,
       bucketSpan
@@ -94,6 +95,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     dataViewId: string,
     fieldName: string,
     partitionFieldName: string | null,
+    stopOnWarn: boolean,
     startString: string,
     endString: string,
     query: QueryDslQueryContainer
@@ -114,6 +116,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
         dataView,
         field,
         partitionField,
+        stopOnWarn,
         { from: startString, to: endString },
         query,
         DEFAULT_BUCKET_SPAN
@@ -145,6 +148,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     dataView: DataView,
     field: DataViewField,
     partitionField: DataViewField | null,
+    stopOnWarn: boolean,
     timeRange: TimeRange,
     query: QueryDslQueryContainer,
     bucketSpan: string
@@ -171,7 +175,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
       categorization_field_name: field.name,
       per_partition_categorization: {
         enabled: partitionField !== null,
-        stop_on_warn: false,
+        stop_on_warn: stopOnWarn,
       },
       influencers: [MLCATEGORY],
       detectors: [
