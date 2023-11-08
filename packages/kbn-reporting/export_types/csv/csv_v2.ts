@@ -28,9 +28,10 @@ import {
   decryptJobHeaders,
   ExportType,
   getFieldFormats,
+  JobParamsCsvFromSavedObject,
   ReportingRequestHandlerContext,
+  TaskPayloadCsvFromSavedObject,
 } from '@kbn/reporting-export-types-helpers-server';
-import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from './types';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {

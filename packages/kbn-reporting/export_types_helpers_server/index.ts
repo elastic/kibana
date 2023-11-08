@@ -9,7 +9,7 @@
 export { getFieldFormats, setFieldFormats } from './services';
 export { decryptJobHeaders } from './decrypt_job_headers';
 export { getCustomLogo } from './get_custom_logo';
-export { getFullRedirectAppUrl } from './v2/get_full_redirect_app_url';
+export { getFullRedirectAppUrl } from './get_full_redirect_app_url';
 export { generatePdfObservable } from './generate_pdf';
 export { validateUrls } from './validate_urls';
 export { getFullUrls } from './get_full_urls';

@@ -8,6 +8,4 @@
 
 export { buildKibanaPath } from './build_kibana_path';
 export * from './constants';
-export * as jobTypes from './job_types';
-export * as reportTypes from './report_types';
 export * from './metrics';

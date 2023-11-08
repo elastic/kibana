@@ -31,7 +31,6 @@ import {
   LICENSE_TYPE_ENTERPRISE,
   REPORTING_TRANSACTION_TYPE,
   CancellationToken,
-  TaskRunResult,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
@@ -44,6 +43,7 @@ import {
   JobParamsPDFV2,
   TaskPayloadPDFV2,
 } from '@kbn/reporting-export-types-helpers-server';
+import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
 import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {

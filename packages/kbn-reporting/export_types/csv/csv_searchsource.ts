@@ -26,8 +26,9 @@ import {
   ExportType,
   decryptJobHeaders,
   getFieldFormats,
+  JobParamsCSV,
+  TaskPayloadCSV,
 } from '@kbn/reporting-export-types-helpers-server';
-import type { JobParamsCSV, TaskPayloadCSV } from './types';
 
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {

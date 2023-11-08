@@ -10,15 +10,11 @@ import { Writable } from 'stream';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  LocatorParams,
-  ConfigSchema,
-  TaskRunResult,
-  CancellationToken,
-} from '@kbn/reporting-common';
+import type { LocatorParams, ConfigSchema, CancellationToken } from '@kbn/reporting-common';
 import type { Ensure, SerializableRecord } from '@kbn/utility-types';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { TypeOf } from '@kbn/config-schema';
+import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
 
 /**
  * @deprecated
@@ -159,4 +155,44 @@ export interface TaskPayloadPDFV2 extends BasePayload, BaseParamsPDFV2 {
    * The value of forceNow is injected server-side every time a given report is generated.
    */
   forceNow: string;
+}
+interface BaseParamsCSV {
+  searchSource: SerializedSearchSourceFields;
+  columns?: string[];
+}
+
+export type JobParamsCSV = BaseParamsCSV & BaseParams;
+export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
+
+interface CsvFromSavedObjectBase {
+  objectType: 'search';
+}
+
+/**
+ * Makes title optional, as it can be derived from the saved search object
+ */
+export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
+  Omit<BaseParamsV2, 'title'> & { title?: string };
+
+/**
+ *
+ */
+export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayloadV2;
+
+export interface JobParamsPNGV2 extends BaseParams {
+  layout: LayoutParams;
+  /**
+   * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
+   */
+  locatorParams: LocatorParams;
+}
+
+// Job payload: structure of stored job data provided by create_job
+export interface TaskPayloadPNGV2 extends BasePayload {
+  layout: LayoutParams;
+  forceNow: string;
+  /**
+   * Even though we only ever handle one locator for a PNG, we store it as an array for consistency with how PDFs are stored
+   */
+  locatorParams: LocatorParams[];
 }

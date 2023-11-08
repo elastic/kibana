@@ -18,7 +18,6 @@ import {
   LocatorParams,
   PNG_JOB_TYPE_V2,
   REPORTING_TRANSACTION_TYPE,
-  TaskRunResult,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
 import { Writable } from 'stream';
@@ -42,8 +41,10 @@ import {
   ExportType,
   getFullRedirectAppUrl,
   generatePngObservable,
+  JobParamsPNGV2,
+  TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-helpers-server';
-import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
+import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;

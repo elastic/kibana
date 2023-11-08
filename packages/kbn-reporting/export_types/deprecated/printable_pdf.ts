@@ -17,7 +17,6 @@ import {
   PDF_JOB_TYPE,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
-  TaskRunResult,
 } from '@kbn/reporting-common';
 import { Writable } from 'stream';
 import apm from 'elastic-apm-node';
@@ -35,6 +34,7 @@ import {
   BaseParams,
   TaskPayloadPDF,
 } from '@kbn/reporting-export-types-helpers-server';
+import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
 
 interface BaseParamsPDF {
   layout: LayoutParams;

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 
-import { VisualReportingSoftDisabledError } from '@kbn/generate-csv/src/errors';
+import { VisualReportingSoftDisabledError } from '@kbn/reporting-common/errors';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 
 import type { Job } from '../../lib/job';

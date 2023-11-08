@@ -19,7 +19,6 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  TaskRunResult,
 } from '@kbn/reporting-common';
 import { Writable } from 'stream';
 import type {
@@ -29,6 +28,8 @@ import type {
   JobParamsDownloadCSV,
 } from '@kbn/reporting-export-types-helpers-server';
 import { getFieldFormats, ExportType } from '@kbn/reporting-export-types-helpers-server';
+import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
+
 type CsvSearchSourceImmediateExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceImmediateExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
@@ -127,7 +128,7 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
 
     const { warnings } = result;
     if (warnings) {
-      warnings.forEach((warning) => {
+      warnings.forEach((warning: string | Error) => {
         this.logger.warn(warning);
       });
     }
