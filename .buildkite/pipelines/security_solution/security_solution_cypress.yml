@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/mki_security_solution_cypress.sh cypress:run:qa:serverless
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless
     label: 'Serverless MKI QA Security Cypress Tests'
     agents:
       queue: n2-4-spot
@@ -11,7 +11,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/mki_security_solution_cypress.sh cypress:run:qa:serverless:explore
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:explore
     label: 'Serverless MKI QA Explore - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
@@ -23,7 +23,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations
     label: 'Serverless MKI QA Investigations - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
