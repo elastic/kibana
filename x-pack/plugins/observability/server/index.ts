@@ -57,6 +57,7 @@ const configSchema = schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
+  createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
 });
 
 export const config: PluginConfigDescriptor = {

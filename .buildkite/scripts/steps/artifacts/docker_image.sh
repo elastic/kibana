@@ -14,7 +14,7 @@ else
 fi
 
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
-KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
@@ -37,7 +37,8 @@ node scripts/build \
   --skip-docker-ubuntu \
   --skip-docker-ubi \
   --skip-docker-cloud \
-  --skip-docker-contexts
+  --skip-docker-contexts \
+  --skip-cdn-assets
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
@@ -104,7 +105,6 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_RE
   cat << EOF | buildkite-agent pipeline upload
 steps:
   - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
-    async: true
     branches: main
     trigger: gpctl-promote-with-e2e-tests
     build:

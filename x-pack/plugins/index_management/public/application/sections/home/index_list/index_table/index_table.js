@@ -295,7 +295,7 @@ export class IndexTable extends Component {
           >
             {value}
           </EuiLink>
-          {renderBadges(index, filterChanged, appServices.extensionsService)}
+          {renderBadges(index, appServices.extensionsService, filterChanged)}
         </Fragment>
       );
     } else if (fieldName === 'data_stream' && value) {
@@ -310,6 +310,8 @@ export class IndexTable extends Component {
           {value}
         </EuiLink>
       );
+    } else if (fieldName === 'documents' && value) {
+      return Number(value).toLocaleString();
     }
 
     return value;
