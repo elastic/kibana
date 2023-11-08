@@ -61,8 +61,6 @@ export class PainlessError extends EsError {
   }
 
   getActions(application: ApplicationStart) {
-    const indexPatternId = this?.indexPattern?.id;
-
     function onClick(indexPatternId?: string) {
       application.navigateToApp('management', {
         path: `/kibana/indexPatterns${indexPatternId ? `/patterns/${indexPatternId}` : ''}`,
@@ -70,7 +68,7 @@ export class PainlessError extends EsError {
     }
     const actions = super.getActions(application) ?? [];
     actions.push(
-      <EuiButtonEmpty key="editPainlessScript" onClick={() => onClick(indexPatternId)} size="s">
+      <EuiButtonEmpty key="editPainlessScript" onClick={() => onClick(this?.indexPattern?.id)} size="s">
         {i18n.translate('data.painlessError.buttonTxt', {
           defaultMessage: 'Edit script',
         })}
