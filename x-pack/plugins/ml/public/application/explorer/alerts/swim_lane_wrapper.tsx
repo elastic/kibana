@@ -20,7 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START } from '@kbn/rule-data-utils';
 import { pick } from 'lodash';
-import React, { type FC, useMemo, useRef } from 'react';
+import React, { type FC, useCallback, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -81,20 +81,13 @@ export const SwimLaneWrapper: FC<SwimLaneWrapperProps> = ({
 
   const popoverOpen = !!selection && !!selectedAlerts?.length;
 
-  const button = (
-    <button
-      data-test-subj="mlSwimLanePopoverTrigger"
-      css={css`
-        position: absolute;
-        top: 0;
-        visibility: hidden;
-      `}
-    />
-  );
-
   const alertFormatter = useMemo(() => getAlertEntryFormatter(fieldFormats), [fieldFormats]);
 
   const viewType = 'table';
+
+  const closePopover = useCallback(() => {
+    anomalyTimelineStateService.setSelectedCells();
+  }, [anomalyTimelineStateService]);
 
   return (
     <div
@@ -114,12 +107,21 @@ export const SwimLaneWrapper: FC<SwimLaneWrapperProps> = ({
         `}
       >
         <EuiPopover
-          button={button}
+          button={
+            <button
+              data-test-subj="mlSwimLanePopoverTrigger"
+              css={css`
+                position: absolute;
+                top: 0;
+                visibility: hidden;
+              `}
+            />
+          }
           isOpen={popoverOpen}
           anchorPosition="upCenter"
           hasArrow
           repositionOnScroll
-          closePopover={() => {}}
+          closePopover={closePopover}
           panelPaddingSize="s"
         >
           <EuiPopoverTitle paddingSize={'xs'}>
@@ -159,7 +161,7 @@ export const SwimLaneWrapper: FC<SwimLaneWrapperProps> = ({
                       size="s"
                       color={'text'}
                       iconType={'cross'}
-                      onClick={() => anomalyTimelineStateService.setSelectedCells()}
+                      onClick={closePopover}
                       aria-label={i18n.translate(
                         'xpack.ml.explorer.cellSelectionPopover.closeButtonAriaLabel',
                         {
