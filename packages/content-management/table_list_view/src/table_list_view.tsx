@@ -7,7 +7,7 @@
  */
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import {
   TableListViewTable,
   type TableListViewTableProps,
@@ -36,7 +36,7 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
-  | 'showEditActionForItem'
+  | 'itemIsEditable'
 > & {
   title: string;
   description?: string;
@@ -73,6 +73,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions,
   withoutPageTemplateWrapper,
+  itemIsEditable,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -80,6 +81,10 @@ export const TableListView = <T extends UserContentCommonSchema>({
 
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
+
+  const onFetchSuccess = useCallback(() => {
+    setHasInitialFetchReturned(true);
+  }, []);
 
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
@@ -114,12 +119,9 @@ export const TableListView = <T extends UserContentCommonSchema>({
           id={listingId}
           contentEditor={contentEditor}
           titleColumnName={titleColumnName}
+          itemIsEditable={itemIsEditable}
           withoutPageTemplateWrapper={withoutPageTemplateWrapper}
-          onFetchSuccess={() => {
-            if (!hasInitialFetchReturned) {
-              setHasInitialFetchReturned(true);
-            }
-          }}
+          onFetchSuccess={onFetchSuccess}
           setPageDataTestSubject={setPageDataTestSubject}
         />
       </KibanaPageTemplate.Section>

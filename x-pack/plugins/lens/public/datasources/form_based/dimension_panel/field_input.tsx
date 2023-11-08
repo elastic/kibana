@@ -16,6 +16,7 @@ import type {
   GenericIndexPatternColumn,
 } from '../operations/definitions';
 import type { FieldBasedIndexPatternColumn } from '../operations/definitions/column_types';
+import { shouldShowTimeSeriesOption } from '../pure_utils';
 
 export function FieldInput({
   layer,
@@ -83,6 +84,12 @@ export function FieldInput({
             })
           );
         }}
+        showTimeSeriesDimensions={shouldShowTimeSeriesOption(
+          layer,
+          indexPattern,
+          groupId,
+          dimensionGroups
+        )}
       />
     </EuiFormRow>
   );

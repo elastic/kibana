@@ -26,7 +26,8 @@ import PageNotFound from '../404';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { observabilityFeatureId } from '../../../common';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -60,7 +61,6 @@ export function AlertDetails() {
   const userCasesPermissions = canUseCases();
   const { rule } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID],
-    http,
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
 
@@ -75,6 +75,7 @@ export function AlertDetails() {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
         defaultMessage: 'Alerts',
       }),
+      deepLinkId: 'observability-overview:alerts',
     },
     {
       text: alert ? pageTitleContent(alert.fields[ALERT_RULE_CATEGORY]) : defaultBreadcrumb,
@@ -123,7 +124,9 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle alert={alert} />,
+        pageTitle: (
+          <PageTitle alert={alert} dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'} />
+        ),
         rightSideItems: [
           <CasesContext
             owner={[observabilityFeatureId]}
@@ -138,6 +141,7 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
+      <HeaderMenu />
       <AlertSummary alertSummaryFields={summaryFields} />
       <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && (

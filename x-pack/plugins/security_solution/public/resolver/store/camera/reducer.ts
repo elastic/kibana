@@ -33,28 +33,28 @@ export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
       /**
        * Handle the scale being explicitly set, for example by a 'reset zoom' feature, or by a range slider with exact scale values
        */
-      const state: Draft<CameraState> = draft.analyzerById[id].camera;
+      const state: Draft<CameraState> = draft[id].camera;
       state.scalingFactor = clamp(zoomLevel, 0, 1);
       return draft;
     })
   )
   .withHandling(
     immerCase(userClickedZoomIn, (draft, { id }) => {
-      const state: Draft<CameraState> = draft.analyzerById[id].camera;
+      const state: Draft<CameraState> = draft[id].camera;
       state.scalingFactor = clamp(state.scalingFactor + 0.1, 0, 1);
       return draft;
     })
   )
   .withHandling(
     immerCase(userClickedZoomOut, (draft, { id }) => {
-      const state: Draft<CameraState> = draft.analyzerById[id].camera;
+      const state: Draft<CameraState> = draft[id].camera;
       state.scalingFactor = clamp(state.scalingFactor - 0.1, 0, 1);
       return draft;
     })
   )
   .withHandling(
     immerCase(userZoomed, (draft, { id, zoomChange, time }) => {
-      const state: Draft<CameraState> = draft.analyzerById[id].camera;
+      const state: Draft<CameraState> = draft[id].camera;
       const stateWithNewScaling: Draft<CameraState> = {
         ...state,
         scalingFactor: clamp(state.scalingFactor + zoomChange, 0, 1),
@@ -93,12 +93,12 @@ export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
           stateWithNewScaling.translationNotCountingCurrentPanning,
           delta
         );
-        draft.analyzerById[id].camera = {
+        draft[id].camera = {
           ...stateWithNewScaling,
           translationNotCountingCurrentPanning,
         };
       } else {
-        draft.analyzerById[id].camera = stateWithNewScaling;
+        draft[id].camera = stateWithNewScaling;
       }
       return draft;
     })
@@ -108,7 +108,7 @@ export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
       /**
        * Handle the case where the position of the camera is explicitly set, for example by a 'back to center' feature.
        */
-      const state: Draft<CameraState> = draft.analyzerById[id].camera;
+      const state: Draft<CameraState> = draft[id].camera;
       state.animation = undefined;
       state.translationNotCountingCurrentPanning[0] = cameraView[0];
       state.translationNotCountingCurrentPanning[1] = cameraView[1];
@@ -117,7 +117,7 @@ export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(userStartedPanning, (draft, { id, screenCoordinates, time }) => {
-      const state: Draft<CameraState> = draft.analyzerById[id].camera;
+      const state: Draft<CameraState> = draft[id].camera;
       if (selectors.isAnimating(state)(time)) {
         return draft;
       }
@@ -139,7 +139,7 @@ export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
       /**
        * When the user stops panning (by letting up on the mouse) we calculate the new translation of the camera.
        */
-      const state: Draft<CameraState> = draft.analyzerById[id].camera;
+      const state: Draft<CameraState> = draft[id].camera;
       state.translationNotCountingCurrentPanning = selectors.translation(state)(time);
       state.panning = undefined;
       return draft;
@@ -147,7 +147,7 @@ export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(userNudgedCamera, (draft, { id, direction, time }) => {
-      const state: Draft<CameraState> = draft.analyzerById[id].camera;
+      const state: Draft<CameraState> = draft[id].camera;
       /**
        * Nudge less when zoomed in.
        */
@@ -156,7 +156,7 @@ export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
         direction
       );
 
-      draft.analyzerById[id].camera = animatePanning(
+      draft[id].camera = animatePanning(
         state,
         time,
         vector2.add(state.translationNotCountingCurrentPanning, nudge),
@@ -171,14 +171,14 @@ export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
        * Handle resizes of the Resolver component. We need to know the size in order to convert between screen
        * and world coordinates.
        */
-      draft.analyzerById[id].camera.rasterSize = dimensions;
+      draft[id].camera.rasterSize = dimensions;
       return draft;
     })
   )
   .withHandling(
     immerCase(userMovedPointer, (draft, { id, screenCoordinates, time }) => {
-      const state: Draft<CameraState> = draft.analyzerById[id].camera;
-      let stateWithUpdatedPanning: Draft<CameraState> = draft.analyzerById[id].camera;
+      const state: Draft<CameraState> = draft[id].camera;
+      let stateWithUpdatedPanning: Draft<CameraState> = draft[id].camera;
       if (state.panning) {
         stateWithUpdatedPanning = {
           ...state,
@@ -188,7 +188,7 @@ export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
           },
         };
       }
-      draft.analyzerById[id].camera = {
+      draft[id].camera = {
         ...stateWithUpdatedPanning,
         /**
          * keep track of the last world coordinates the user moved over.

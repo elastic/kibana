@@ -17,9 +17,7 @@ import type {
 } from '../../../../../../common/search_strategy/endpoint/response_actions';
 
 export const allActions: EndpointFactory<ResponseActionsQueries.actions> = {
-  buildDsl: (options: ActionRequestOptions, { authz }) => {
-    return buildResponseActionsQuery(options, authz);
-  },
+  buildDsl: (options: ActionRequestOptions, { authz }) => buildResponseActionsQuery(options, authz),
   parse: async (
     options: ActionRequestOptions,
     response: IEsSearchResponse,

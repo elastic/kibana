@@ -21,5 +21,6 @@ export interface AlertsProgressBarData {
   key: string;
   value: number;
   percentage: number;
+  percentageLabel: string;
   label: string;
 }

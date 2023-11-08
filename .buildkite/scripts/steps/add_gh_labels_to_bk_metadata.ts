@@ -27,15 +27,15 @@ const fetchLabels = (prNumber: PrNumber) =>
 
 try {
   const labels = pipe(head, firstMatch, parseInt10, fetchLabels)(`${process.env[parseTarget]}`);
-  execSync(`buildkite-agent meta-data set gh_labels ${labels}`);
-  if (alsoAnnotate)
-    execSync(
-      `buildkite-agent annotate --context 'default' --style 'info' "Github Labels: ${labels}"`
-    );
+  if (labels) {
+    execSync(`buildkite-agent meta-data set gh_labels ${labels}`);
+    if (alsoAnnotate)
+      execSync(
+        `buildkite-agent annotate --context 'default' --style 'info' "Github Labels: ${labels}"`
+      );
+  }
 } catch (e) {
-  console.error(
-    `\n!!! Error fetching Github Labels (stringified): \n${JSON.stringify(e, null, 2)}`
-  );
+  console.error(`Error fetching Github Labels for issue ${firstMatch}`);
 }
 
 export {};

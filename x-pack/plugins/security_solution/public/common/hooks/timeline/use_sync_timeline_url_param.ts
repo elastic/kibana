@@ -17,20 +17,18 @@ import { URL_PARAM_KEY } from '../use_url_state';
 export const useSyncTimelineUrlParam = () => {
   const updateUrlParam = useUpdateUrlParam<TimelineUrl>(URL_PARAM_KEY.timeline);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { activeTab, graphEventId, show, savedObjectId } = useShallowEqualSelector(
+  const { activeTab, graphEventId, show, savedObjectId, savedSearchId } = useShallowEqualSelector(
     (state) => getTimeline(state, TimelineId.active) ?? {}
   );
 
   useEffect(() => {
-    updateUrlParam(
-      savedObjectId != null
-        ? {
-            id: savedObjectId,
-            isOpen: show,
-            activeTab,
-            graphEventId: graphEventId ?? '',
-          }
-        : null
-    );
-  }, [activeTab, graphEventId, savedObjectId, show, updateUrlParam]);
+    const params = {
+      ...(savedObjectId ? { id: savedObjectId } : {}),
+      isOpen: show,
+      activeTab,
+      graphEventId: graphEventId ?? '',
+      savedSearchId: savedSearchId ? savedSearchId : undefined,
+    };
+    updateUrlParam(params);
+  }, [activeTab, graphEventId, savedObjectId, show, updateUrlParam, savedSearchId]);
 };

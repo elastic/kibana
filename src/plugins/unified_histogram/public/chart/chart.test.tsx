@@ -43,6 +43,7 @@ async function mountComponent({
   allSuggestions,
   isPlainRecord,
   hasDashboardPermissions,
+  isChartLoading,
 }: {
   noChart?: boolean;
   noHits?: boolean;
@@ -54,6 +55,7 @@ async function mountComponent({
   allSuggestions?: Suggestion[];
   isPlainRecord?: boolean;
   hasDashboardPermissions?: boolean;
+  isChartLoading?: boolean;
 } = {}) {
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
@@ -98,11 +100,13 @@ async function mountComponent({
     breakdown: noBreakdown ? undefined : { field: undefined },
     currentSuggestion,
     allSuggestions,
+    isChartLoading: Boolean(isChartLoading),
     isPlainRecord,
     appendHistogram,
     onResetChartHeight: jest.fn(),
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
+    withDefaultActions: undefined,
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;
@@ -172,6 +176,11 @@ describe('Chart', () => {
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
   });
 
+  test('render progress bar when text based and request is loading', async () => {
+    const component = await mountComponent({ isPlainRecord: true, isChartLoading: true });
+    expect(component.find('[data-test-subj="unifiedHistogramProgressBar"]').exists()).toBeTruthy();
+  });
+
   test('triggers onEditVisualization on click', async () => {
     expect(mockUseEditVisualization).not.toHaveBeenCalled();
     const component = await mountComponent();
@@ -231,6 +240,28 @@ describe('Chart', () => {
       allSuggestions: allSuggestionsMock,
     });
     expect(component.find(SuggestionSelector).exists()).toBeTruthy();
+  });
+
+  it('should render the edit on the fly button when chart is visible and suggestions exist', async () => {
+    const component = await mountComponent({
+      currentSuggestion: currentSuggestionMock,
+      allSuggestions: allSuggestionsMock,
+      isPlainRecord: true,
+    });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeTruthy();
+  });
+
+  it('should not render the edit on the fly button when chart is visible and suggestions dont exist', async () => {
+    const component = await mountComponent({
+      currentSuggestion: undefined,
+      allSuggestions: undefined,
+      isPlainRecord: true,
+    });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeFalsy();
   });
 
   it('should render the save button when chart is visible and suggestions exist', async () => {

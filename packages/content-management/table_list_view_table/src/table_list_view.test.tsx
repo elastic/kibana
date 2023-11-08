@@ -22,6 +22,7 @@ import {
   type TableListViewTableProps,
   type UserContentCommonSchema,
 } from './table_list_view_table';
+import { getActions } from './table_list_view.test.helpers';
 
 const mockUseEffect = useEffect;
 
@@ -54,12 +55,6 @@ const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
 const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 const yesterdayToString = new Date(yesterday.getTime()).toDateString();
 
-const getActions = (testBed: TestBed) => ({
-  openSortSelect() {
-    testBed.find('tableSortSelectBtn').at(0).simulate('click');
-  },
-});
-
 describe('TableListView', () => {
   const requiredProps: TableListViewTableProps = {
     entityName: 'test',
@@ -91,50 +86,102 @@ describe('TableListView', () => {
     }
   );
 
-  test('render default empty prompt', async () => {
-    let testBed: TestBed;
+  describe('empty prompt', () => {
+    test('render default empty prompt', async () => {
+      let testBed: TestBed;
 
-    await act(async () => {
-      testBed = await setup();
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component, exists } = testBed!;
+      component.update();
+
+      expect(component.find(EuiEmptyPrompt).length).toBe(1);
+      expect(exists('newItemButton')).toBe(false);
     });
 
-    const { component, exists } = testBed!;
-    component.update();
+    // avoid trapping users in empty prompt that can not create new items
+    test('render default empty prompt with create action when createItem supplied', async () => {
+      let testBed: TestBed;
 
-    expect(component.find(EuiEmptyPrompt).length).toBe(1);
-    expect(exists('newItemButton')).toBe(false);
-  });
+      await act(async () => {
+        testBed = await setup({ createItem: () => undefined });
+      });
 
-  // avoid trapping users in empty prompt that can not create new items
-  test('render default empty prompt with create action when createItem supplied', async () => {
-    let testBed: TestBed;
+      const { component, exists } = testBed!;
+      component.update();
 
-    await act(async () => {
-      testBed = await setup({ createItem: () => undefined });
+      expect(component.find(EuiEmptyPrompt).length).toBe(1);
+      expect(exists('newItemButton')).toBe(true);
     });
 
-    const { component, exists } = testBed!;
-    component.update();
+    test('render custom empty prompt', async () => {
+      let testBed: TestBed;
 
-    expect(component.find(EuiEmptyPrompt).length).toBe(1);
-    expect(exists('newItemButton')).toBe(true);
-  });
+      const CustomEmptyPrompt = () => {
+        return <EuiEmptyPrompt data-test-subj="custom-empty-prompt" title={<h1>Table empty</h1>} />;
+      };
 
-  test('render custom empty prompt', async () => {
-    let testBed: TestBed;
+      await act(async () => {
+        testBed = await setup({ emptyPrompt: <CustomEmptyPrompt /> });
+      });
 
-    const CustomEmptyPrompt = () => {
-      return <EuiEmptyPrompt data-test-subj="custom-empty-prompt" title={<h1>Table empty</h1>} />;
-    };
+      const { component, exists } = testBed!;
+      component.update();
 
-    await act(async () => {
-      testBed = await setup({ emptyPrompt: <CustomEmptyPrompt /> });
+      expect(exists('custom-empty-prompt')).toBe(true);
     });
 
-    const { component, exists } = testBed!;
-    component.update();
+    test('render empty prompt after deleting all items from table', async () => {
+      // NOTE: this test is using helpers that are being tested in the
+      // "should allow select items to be deleted" test below.
+      // If this test fails, check that one first.
 
-    expect(exists('custom-empty-prompt')).toBe(true);
+      const hits: UserContentCommonSchema[] = [
+        {
+          id: 'item-1',
+          type: 'dashboard',
+          updatedAt: '2020-01-01T00:00:00Z',
+          attributes: {
+            title: 'Item 1',
+          },
+          references: [],
+        },
+      ];
+
+      const findItems = jest.fn().mockResolvedValue({ total: 1, hits });
+      const deleteItems = jest.fn();
+
+      let testBed: TestBed;
+
+      const EmptyPrompt = () => {
+        return <EuiEmptyPrompt data-test-subj="custom-empty-prompt" title={<h1>Table empty</h1>} />;
+      };
+
+      await act(async () => {
+        testBed = await setup({ emptyPrompt: <EmptyPrompt />, findItems, deleteItems });
+      });
+
+      const { component, exists, table } = testBed!;
+      const { selectRow, clickConfirmModalButton, clickDeleteSelectedItemsButton } = getActions(
+        testBed!
+      );
+      component.update();
+
+      expect(exists('custom-empty-prompt')).toBe(false);
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const [row] = tableCellsValues;
+      expect(row[1]).toBe('Item 1'); // Note: row[0] is the checkbox
+
+      // We delete the item in the table and expect the empty prompt to show
+      findItems.mockResolvedValue({ total: 0, hits: [] });
+      selectRow('item-1');
+      clickDeleteSelectedItemsButton();
+      await clickConfirmModalButton();
+
+      expect(exists('custom-empty-prompt')).toBe(true);
+    });
   });
 
   describe('default columns', () => {
@@ -781,6 +828,229 @@ describe('TableListView', () => {
     });
   });
 
+  describe('initialFilter', () => {
+    const setupInitialFilter = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
+        getTagList: () => [
+          { id: 'id-tag-foo', name: 'foo', type: 'tag', description: '', color: '' },
+        ],
+      }),
+      {
+        defaultProps: { ...requiredProps },
+        memoryRouter: { wrapComponent: true },
+      }
+    );
+
+    test('should filter by tag passed as in initialFilter prop', async () => {
+      let testBed: TestBed;
+
+      const initialFilter = 'tag:(tag-1)';
+      const findItems = jest.fn().mockResolvedValue({
+        total: 1,
+        hits: [
+          {
+            id: 'item-1',
+            type: 'dashboard',
+            updatedAt: new Date('2023-07-15').toISOString(),
+            attributes: {
+              title: 'Item 1',
+            },
+            references: [],
+          },
+        ],
+      });
+
+      await act(async () => {
+        testBed = await setupInitialFilter({
+          findItems,
+          initialFilter,
+          urlStateEnabled: false,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      const getLastCallArgsFromFindItems = () =>
+        findItems.mock.calls[findItems.mock.calls.length - 1];
+
+      // The search bar should be updated
+      const expected = initialFilter;
+      const [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+    });
+  });
+
+  describe('search', () => {
+    const updatedAt = new Date('2023-07-15').toISOString();
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: 'item-1',
+        type: 'dashboard',
+        updatedAt,
+        attributes: {
+          title: 'Item 1',
+        },
+        references: [],
+      },
+      {
+        id: 'item-2',
+        type: 'dashboard',
+        updatedAt,
+        attributes: {
+          title: 'Item 2',
+        },
+        references: [],
+      },
+    ];
+
+    const findItems = jest.fn();
+
+    const setupSearch = (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
+      const testBed = registerTestBed<string, TableListViewTableProps>(
+        WithServices<TableListViewTableProps>(TableListViewTable),
+        {
+          defaultProps: {
+            ...requiredProps,
+            findItems,
+            urlStateEnabled: false,
+            entityName: 'Foo',
+            entityNamePlural: 'Foos',
+          },
+          memoryRouter: { wrapComponent: true },
+        }
+      )(...args);
+
+      const { updateSearchText, getSearchBoxValue } = getActions(testBed);
+
+      return {
+        testBed,
+        updateSearchText,
+        getSearchBoxValue,
+        getLastCallArgsFromFindItems: () => findItems.mock.calls[findItems.mock.calls.length - 1],
+      };
+    };
+
+    beforeEach(() => {
+      findItems.mockReset().mockResolvedValue({ total: hits.length, hits });
+    });
+
+    test('should search the table items', async () => {
+      let testBed: TestBed;
+      let updateSearchText: (value: string) => Promise<void>;
+      let getLastCallArgsFromFindItems: () => Parameters<typeof findItems>;
+      let getSearchBoxValue: () => string;
+
+      await act(async () => {
+        ({ testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+          await setupSearch());
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      let searchTerm = '';
+      let expected = '';
+      [searchTerm] = getLastCallArgsFromFindItems!();
+      expect(getSearchBoxValue!()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      expect(tableCellsValues).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Item 1",
+            "July 15, 2023",
+          ],
+          Array [
+            "Item 2",
+            "July 15, 2023",
+          ],
+        ]
+      `);
+
+      findItems.mockResolvedValueOnce({
+        total: 1,
+        hits: [
+          {
+            id: 'item-from-search',
+            type: 'dashboard',
+            updatedAt: new Date('2023-07-01').toISOString(),
+            attributes: {
+              title: 'Item from search',
+            },
+            references: [],
+          },
+        ],
+      });
+
+      expected = 'foo';
+      await updateSearchText!(expected);
+      [searchTerm] = getLastCallArgsFromFindItems!();
+      expect(getSearchBoxValue!()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      expect(table.getMetaData('itemsInMemTable').tableCellsValues).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Item from search",
+            "July 1, 2023",
+          ],
+        ]
+      `);
+    });
+
+    test('should search and render empty list if no result', async () => {
+      let testBed: TestBed;
+      let updateSearchText: (value: string) => Promise<void>;
+
+      await act(async () => {
+        ({ testBed, updateSearchText } = await setupSearch());
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      findItems.mockResolvedValueOnce({
+        total: 0,
+        hits: [],
+      });
+
+      await updateSearchText!('unknown items');
+
+      expect(table.getMetaData('itemsInMemTable').tableCellsValues).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "No Foos matched your search.",
+          ],
+        ]
+      `);
+
+      await act(async () => {
+        find('clearSearchButton').simulate('click');
+      });
+      component.update();
+
+      // We should get back the initial 2 items (Item 1 and Item 2)
+      expect(table.getMetaData('itemsInMemTable').tableCellsValues).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Item 1",
+            "July 15, 2023",
+          ],
+          Array [
+            "Item 2",
+            "July 15, 2023",
+          ],
+        ]
+      `);
+    });
+  });
+
   describe('url state', () => {
     let router: Router | undefined;
 
@@ -1110,10 +1380,11 @@ describe('TableListView', () => {
     };
 
     test('should allow select items to be deleted', async () => {
-      const {
-        testBed: { table, find, exists, component, form },
-        deleteItems,
-      } = await setupTest();
+      const { testBed, deleteItems } = await setupTest();
+
+      const { table, exists, component } = testBed;
+      const { selectRow, clickDeleteSelectedItemsButton, clickConfirmModalButton } =
+        getActions(testBed);
 
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
@@ -1122,28 +1393,21 @@ describe('TableListView', () => {
         ['', 'Item 1Item 1 description', twoDaysAgoToString],
       ]);
 
+      // Select the second item
       const selectedHit = hits[1];
 
       expect(exists('deleteSelectedItems')).toBe(false);
-      act(() => {
-        // Select the second item
-        form.selectCheckBox(`checkboxSelectRow-${selectedHit.id}`);
-      });
-      component.update();
+
+      selectRow(selectedHit.id);
       // Delete button is now visible
       expect(exists('deleteSelectedItems')).toBe(true);
 
       // Click delete and validate that confirm modal opens
       expect(component.exists('.euiModal--confirmation')).toBe(false);
-      act(() => {
-        find('deleteSelectedItems').simulate('click');
-      });
-      component.update();
+      clickDeleteSelectedItemsButton();
       expect(component.exists('.euiModal--confirmation')).toBe(true);
 
-      await act(async () => {
-        find('confirmModalConfirmButton').simulate('click');
-      });
+      await clickConfirmModalButton();
       expect(deleteItems).toHaveBeenCalledWith([selectedHit]);
     });
 
@@ -1197,10 +1461,23 @@ describe('TableList', () => {
     }
   );
 
-  it('refreshes the list when the bouncer changes', async () => {
+  it('refreshes the list when "refreshListBouncer" changes', async () => {
     let testBed: TestBed;
 
-    const findItems = jest.fn().mockResolvedValue({ total: 0, hits: [] });
+    const originalHits: UserContentCommonSchema[] = [
+      {
+        id: `item`,
+        type: 'dashboard',
+        updatedAt: 'original timestamp',
+        attributes: {
+          title: `Original title`,
+        },
+        references: [],
+      },
+    ];
+    const findItems = jest
+      .fn()
+      .mockResolvedValue({ total: originalHits.length, hits: originalHits });
 
     await act(async () => {
       testBed = setup({ findItems });
@@ -1215,7 +1492,7 @@ describe('TableList', () => {
       {
         id: `item`,
         type: 'dashboard',
-        updatedAt: 'some date',
+        updatedAt: 'updated timestamp',
         attributes: {
           title: `Updated title`,
         },
@@ -1252,7 +1529,7 @@ describe('TableList', () => {
   it('reports the page data test subject', async () => {
     const setPageDataTestSubject = jest.fn();
 
-    act(() => {
+    await act(async () => {
       setup({ setPageDataTestSubject });
     });
 

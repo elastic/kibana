@@ -10,7 +10,7 @@ import { debounce } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
 
-export function useDebouncedGetPreviewData(indicator: Indicator) {
+export function useDebouncedGetPreviewData(isIndicatorValid: boolean, indicator: Indicator) {
   const serializedIndicator = JSON.stringify(indicator);
   const [indicatorState, setIndicatorState] = useState<string>(serializedIndicator);
 
@@ -25,5 +25,5 @@ export function useDebouncedGetPreviewData(indicator: Indicator) {
     }
   }, [indicatorState, serializedIndicator, store]);
 
-  return useGetPreviewData(JSON.parse(indicatorState));
+  return useGetPreviewData(isIndicatorValid, JSON.parse(indicatorState));
 }

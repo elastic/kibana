@@ -12,7 +12,7 @@ import { useSeverityAction } from './use_severity_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
-import { CaseSeverity } from '../../../../common/api';
+import { CaseSeverity } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/api');
 

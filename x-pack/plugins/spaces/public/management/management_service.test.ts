@@ -10,14 +10,15 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { ManagementSection } from '@kbn/management-plugin/public';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 
+import { ManagementService } from './management_service';
 import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { ManagementService } from './management_service';
 
 describe('ManagementService', () => {
   const config: ConfigType = {
     maxSpaces: 1000,
+    allowFeatureVisibility: true,
   };
 
   describe('#setup', () => {

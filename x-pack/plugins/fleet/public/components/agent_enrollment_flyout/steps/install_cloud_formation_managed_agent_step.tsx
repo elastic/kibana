@@ -15,31 +15,37 @@ import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/re
 
 import { CloudFormationInstructions } from '../cloud_formation_instructions';
 
+import type { CloudSecurityIntegration } from '../types';
+
 export const InstallCloudFormationManagedAgentStep = ({
   selectedApiKeyId,
   apiKeyData,
   enrollToken,
   isComplete,
-  cloudFormationTemplateUrl,
+  cloudSecurityIntegration,
+  fleetServerHost,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   enrollToken?: string;
   isComplete?: boolean;
-  cloudFormationTemplateUrl: string;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
+  fleetServerHost: string;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
+
   return {
     status,
     title: i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your cloud',
     }),
     children:
-      selectedApiKeyId && apiKeyData ? (
+      selectedApiKeyId && apiKeyData && cloudSecurityIntegration ? (
         <CloudFormationInstructions
-          cloudFormationTemplateUrl={cloudFormationTemplateUrl}
+          cloudSecurityIntegration={cloudSecurityIntegration}
           enrollmentAPIKey={enrollToken}
+          fleetServerHost={fleetServerHost}
         />
       ) : (
         <React.Fragment />

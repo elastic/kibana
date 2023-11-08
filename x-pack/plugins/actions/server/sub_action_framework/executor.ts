@@ -17,7 +17,10 @@ const isFunction = (v: unknown): v is Function => {
 const getConnectorErrorMsg = (actionId: string, connector: { id: string; name: string }) =>
   `Connector id: ${actionId}. Connector name: ${connector.name}. Connector type: ${connector.id}`;
 
-export const buildExecutor = <Config, Secrets>({
+export const buildExecutor = <
+  Config extends Record<string, unknown>,
+  Secrets extends Record<string, unknown>
+>({
   configurationUtilities,
   connector,
   logger,
@@ -30,7 +33,7 @@ export const buildExecutor = <Config, Secrets>({
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
 
-    const service = new connector.Service({
+    const service = connector.getService({
       connector: { id: actionId, type: connector.id },
       config,
       secrets,

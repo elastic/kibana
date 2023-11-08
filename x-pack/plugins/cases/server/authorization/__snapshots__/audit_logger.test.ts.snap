@@ -2458,7 +2458,7 @@ Object {
       "type": "cases",
     },
   },
-  "message": "Failed attempt to update cases [id=1] as owner \\"awesome\\"",
+  "message": "Failed attempt to push cases [id=1] as owner \\"awesome\\"",
 }
 `;
 
@@ -2478,7 +2478,7 @@ Object {
       "change",
     ],
   },
-  "message": "Failed attempt to update a case as any owners",
+  "message": "Failed attempt to push a case as any owners",
 }
 `;
 
@@ -2500,7 +2500,7 @@ Object {
       "type": "cases",
     },
   },
-  "message": "User is updating cases [id=5] as owner \\"super\\"",
+  "message": "User is pushing cases [id=5] as owner \\"super\\"",
 }
 `;
 
@@ -2516,7 +2516,7 @@ Object {
       "change",
     ],
   },
-  "message": "User is updating a case as any owners",
+  "message": "User is pushing a case as any owners",
 }
 `;
 

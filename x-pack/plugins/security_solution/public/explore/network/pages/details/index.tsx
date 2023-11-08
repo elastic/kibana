@@ -58,8 +58,6 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 
-export { getTrailingBreadcrumbs } from './utils';
-
 const NetworkDetailsManage = manageQuery(IpOverview);
 
 const NetworkDetailsComponent: React.FC = () => {

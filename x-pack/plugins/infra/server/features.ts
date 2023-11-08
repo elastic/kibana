@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
+import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -14,7 +18,13 @@ import {
 } from '../common/alerting/metrics';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { infraSourceConfigurationSavedObjectName } from './lib/sources/saved_object_type';
-import { logViewSavedObjectName } from './saved_objects';
+
+const metricRuleTypes = [
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  ES_QUERY_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+];
 
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,
@@ -28,22 +38,22 @@ export const METRICS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+  alerting: metricRuleTypes,
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
       catalogue: ['infraops', 'metrics'],
       api: ['infra', 'rac'],
       savedObject: {
-        all: ['infrastructure-ui-source'],
+        all: ['infrastructure-ui-source', metricsDataSourceSavedObjectName],
         read: ['index-pattern'],
       },
       alerting: {
         rule: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          all: metricRuleTypes,
         },
         alert: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          all: metricRuleTypes,
         },
       },
       management: {
@@ -57,14 +67,14 @@ export const METRICS_FEATURE = {
       api: ['infra', 'rac'],
       savedObject: {
         all: [],
-        read: ['infrastructure-ui-source', 'index-pattern'],
+        read: ['infrastructure-ui-source', 'index-pattern', metricsDataSourceSavedObjectName],
       },
       alerting: {
         rule: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          read: metricRuleTypes,
         },
         alert: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          read: metricRuleTypes,
         },
       },
       management: {
@@ -74,6 +84,12 @@ export const METRICS_FEATURE = {
     },
   },
 };
+
+const logsRuleTypes = [
+  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
+  ES_QUERY_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+];
 
 export const LOGS_FEATURE = {
   id: LOGS_FEATURE_ID,
@@ -87,7 +103,7 @@ export const LOGS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+  alerting: logsRuleTypes,
   privileges: {
     all: {
       app: ['infra', 'logs', 'kibana'],
@@ -99,10 +115,10 @@ export const LOGS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+          all: logsRuleTypes,
         },
         alert: {
-          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+          all: logsRuleTypes,
         },
       },
       management: {
@@ -116,10 +132,10 @@ export const LOGS_FEATURE = {
       api: ['infra', 'rac'],
       alerting: {
         rule: {
-          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+          read: logsRuleTypes,
         },
         alert: {
-          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
+          read: logsRuleTypes,
         },
       },
       management: {

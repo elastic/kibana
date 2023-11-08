@@ -39,6 +39,7 @@ import {
 
 export interface PageTitleProps {
   alert: TopAlert | null;
+  dataTestSubj: string;
 }
 
 export function pageTitleContent(ruleCategory: string) {
@@ -51,7 +52,7 @@ export function pageTitleContent(ruleCategory: string) {
   });
 }
 
-export function PageTitle({ alert }: PageTitleProps) {
+export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
   if (!alert) return <EuiLoadingSpinner />;
@@ -62,7 +63,7 @@ export function PageTitle({ alert }: PageTitleProps) {
     alert.fields[ALERT_RULE_TYPE_ID] === METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
 
   return (
-    <div data-test-subj="page-title-container">
+    <div data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
         {pageTitleContent(alert.fields[ALERT_RULE_CATEGORY])}
         {showExperimentalBadge && <ExperimentalBadge />}

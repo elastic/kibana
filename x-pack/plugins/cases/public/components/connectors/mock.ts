@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType } from '../../../common/api';
+import { SwimlaneConnectorType } from '../../../common/types/domain';
 
 export const connector = {
   id: '123',
@@ -14,6 +14,7 @@ export const connector = {
   config: {},
   isPreconfigured: false,
   isDeprecated: false,
+  isSystemAction: false,
 };
 
 export const swimlaneConnector = {
@@ -31,6 +32,7 @@ export const swimlaneConnector = {
   },
   isPreconfigured: false,
   isDeprecated: false,
+  isSystemAction: false,
 };
 
 export const issues = [

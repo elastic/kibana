@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ItemsetResult } from '../../../common/types';
+import type { ItemSet } from '../../../common/types';
 
 import { getValueCounts } from './get_value_counts';
 
-export function getValuesDescending(df: ItemsetResult[], field: string): string[] {
+export function getValuesDescending(df: ItemSet[], field: string): string[] {
   const valueCounts = getValueCounts(df, field);
   const keys = Object.keys(valueCounts);
 

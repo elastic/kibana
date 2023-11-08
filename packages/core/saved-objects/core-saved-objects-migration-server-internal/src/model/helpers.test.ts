@@ -7,6 +7,7 @@
  */
 
 import { FetchIndexResponse } from '../actions/fetch_indices';
+import { BaseState } from '../state';
 import {
   addExcludedTypesToBoolQuery,
   addMustClausesToBoolQuery,
@@ -20,6 +21,7 @@ import {
   createBulkIndexOperationTuple,
   hasLaterVersionAlias,
   aliasVersion,
+  getIndexTypes,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {
@@ -442,5 +444,19 @@ describe('getMigrationType', () => {
 describe('getTempIndexName', () => {
   it('composes a temporary index name for reindexing', () => {
     expect(getTempIndexName('.kibana_cases', '8.8.0')).toEqual('.kibana_cases_8.8.0_reindex_temp');
+  });
+});
+
+describe('getIndexTypes', () => {
+  it("returns the list of types that belong to a migrator's index, based on its state", () => {
+    const baseState = {
+      indexPrefix: '.kibana_task_manager',
+      indexTypesMap: {
+        '.kibana': ['foo', 'bar'],
+        '.kibana_task_manager': ['task'],
+      },
+    };
+
+    expect(getIndexTypes(baseState as unknown as BaseState)).toEqual(['task']);
   });
 });

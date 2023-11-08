@@ -7,7 +7,6 @@
 
 import { resolve } from 'path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { pageObjects } from './page_objects';
@@ -17,20 +16,25 @@ import type { CreateTestConfigOptions } from '../shared/types';
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
-    const svlBaseConfig = resolve(REPO_ROOT, 'config', 'serverless.yml');
 
     return {
       ...svlSharedConfig.getAll(),
 
       pageObjects,
       services,
+      esTestCluster: {
+        ...svlSharedConfig.get('esTestCluster'),
+        serverArgs: [
+          ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          ...(options.esServerArgs ?? []),
+        ],
+      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-          options.serverlessProject
-            ? `--serverless=${options.serverlessProject}`
-            : `--config=${svlBaseConfig}`,
+          `--serverless=${options.serverlessProject}`,
+          ...(options.kbnServerArgs ?? []),
         ],
       },
       testFiles: options.testFiles,
@@ -56,12 +60,40 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
+        observabilityLogExplorer: {
+          pathname: '/app/observability-log-explorer',
+        },
+        management: {
+          pathname: '/app/management',
+        },
+        indexManagement: {
+          pathname: '/app/management/data/index_management',
+        },
+        transform: {
+          pathname: '/app/management/data/transform',
+        },
+        connectors: {
+          pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
+        },
+        settings: {
+          pathname: '/app/management/kibana/settings',
+        },
+        login: {
+          pathname: '/login',
+        },
+        reportingManagement: {
+          pathname: '/app/management/insightsAndAlerting/reporting',
+        },
+        securitySolution: {
+          pathname: '/app/security',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
         directory: resolve(__dirname, 'screenshots'),
       },
       junit: options.junit,
+      suiteTags: options.suiteTags,
     };
   };
 }

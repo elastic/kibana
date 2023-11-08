@@ -7,8 +7,11 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
 import {
   Comparator,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -79,10 +82,15 @@ const groupActionVariableDescription = i18n.translate(
   }
 );
 
-export async function registerMetricInventoryThresholdRuleType(
+export async function registerInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
-  libs: InfraBackendLibs
+  libs: InfraBackendLibs,
+  { featureFlags }: InfraConfig
 ) {
+  if (!featureFlags.inventoryThresholdAlertRuleEnabled) {
+    return;
+  }
+
   alertingPlugin.registerType({
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
@@ -105,6 +113,7 @@ export async function registerMetricInventoryThresholdRuleType(
     defaultActionGroupId: FIRED_ACTIONS_ID,
     doesSetRecoveryContext: true,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -145,8 +154,9 @@ export async function registerMetricInventoryThresholdRuleType(
         },
       ],
     },
-    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
     fieldsForAAD: O11Y_AAD_FIELDS,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 }

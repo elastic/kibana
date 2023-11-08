@@ -7,14 +7,17 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { convertRulesFilterToKQL } from '../../../../../../../common/utils/kql';
-import type { CoverageOverviewRequestBody } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
+import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
+import type {
+  CoverageOverviewRequestBody,
+  CoverageOverviewResponse,
+} from '../../../../../../../common/api/detection_engine';
 import {
   CoverageOverviewRuleSource,
   CoverageOverviewRuleActivity,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
-import type { CoverageOverviewResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/response_schema';
+} from '../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../rule_schema';
+import { findRules } from '../../../logic/search/find_rules';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
 
@@ -31,30 +34,26 @@ export async function handleCoverageOverviewRequest({
   params: { filter },
   deps: { rulesClient },
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
-  const kqlFilter = filter
-    ? convertRulesFilterToKQL({
-        filter: filter.search_term,
-        showCustomRules: filter.source?.includes(CoverageOverviewRuleSource.Custom) ?? false,
-        showElasticRules: filter.source?.includes(CoverageOverviewRuleSource.Prebuilt) ?? false,
-        enabled: filter.activity?.includes(CoverageOverviewRuleActivity.Disabled)
-          ? false
-          : filter.activity?.includes(CoverageOverviewRuleActivity.Enabled)
-          ? true
-          : undefined,
-      })
-    : undefined;
+  const activitySet = new Set(filter?.activity);
+  const kqlFilter = convertRulesFilterToKQL({
+    filter: filter?.search_term,
+    showCustomRules: filter?.source?.includes(CoverageOverviewRuleSource.Custom) ?? false,
+    showElasticRules: filter?.source?.includes(CoverageOverviewRuleSource.Prebuilt) ?? false,
+    enabled: getIsEnabledFilter(activitySet),
+  });
 
   // rulesClient.find uses ES Search API to fetch the rules. It has some limitations when the number of rules exceeds
   // index.max_result_window (set to 10K by default) Kibana fails. A proper way to handle it is via ES PIT API.
   // This way the endpoint handles max 10K rules for now while support for the higher number of rules will be addressed
   // in https://github.com/elastic/kibana/issues/160698
-  const rules = await rulesClient.find<CoverageOverviewRuleParams>({
-    options: {
-      filter: kqlFilter,
-      fields: ['name', 'enabled', 'params.threat'],
-      page: 1,
-      perPage: 10000,
-    },
+  const rules = await findRules({
+    rulesClient,
+    filter: kqlFilter,
+    fields: ['name', 'enabled', 'params.threat'],
+    page: 1,
+    perPage: 10000,
+    sortField: undefined,
+    sortOrder: undefined,
   });
 
   return rules.data.reduce(appendRuleToResponse, {
@@ -62,6 +61,47 @@ export async function handleCoverageOverviewRequest({
     unmapped_rule_ids: [],
     rules_data: {},
   } as CoverageOverviewResponse);
+}
+
+function getIsEnabledFilter(activitySet: Set<CoverageOverviewRuleActivity>): boolean | undefined {
+  const bothSpecified =
+    activitySet.has(CoverageOverviewRuleActivity.Enabled) &&
+    activitySet.has(CoverageOverviewRuleActivity.Disabled);
+  const noneSpecified =
+    !activitySet.has(CoverageOverviewRuleActivity.Enabled) &&
+    !activitySet.has(CoverageOverviewRuleActivity.Disabled);
+
+  return bothSpecified || noneSpecified
+    ? undefined
+    : activitySet.has(CoverageOverviewRuleActivity.Enabled);
+}
+
+function appendRuleToResponse(
+  response: CoverageOverviewResponse,
+  rule: SanitizedRule<CoverageOverviewRuleParams>
+): CoverageOverviewResponse {
+  const categories = extractRuleMitreCategories(rule);
+
+  for (const category of categories) {
+    if (!response.coverage[category]) {
+      response.coverage[category] = [rule.id];
+    } else {
+      response.coverage[category].push(rule.id);
+    }
+  }
+
+  if (categories.length === 0) {
+    response.unmapped_rule_ids.push(rule.id);
+  }
+
+  response.rules_data[rule.id] = {
+    name: rule.name,
+    activity: rule.enabled
+      ? CoverageOverviewRuleActivity.Enabled
+      : CoverageOverviewRuleActivity.Disabled,
+  };
+
+  return response;
 }
 
 /**
@@ -95,32 +135,4 @@ function extractRuleMitreCategories(rule: SanitizedRule<CoverageOverviewRulePara
   }
 
   return Array.from(categories);
-}
-
-function appendRuleToResponse(
-  response: CoverageOverviewResponse,
-  rule: SanitizedRule<CoverageOverviewRuleParams>
-): CoverageOverviewResponse {
-  const categories = extractRuleMitreCategories(rule);
-
-  for (const category of categories) {
-    if (!response.coverage[category]) {
-      response.coverage[category] = [rule.id];
-    } else {
-      response.coverage[category].push(rule.id);
-    }
-  }
-
-  if (categories.length === 0) {
-    response.unmapped_rule_ids.push(rule.id);
-  }
-
-  response.rules_data[rule.id] = {
-    name: rule.name,
-    activity: rule.enabled
-      ? CoverageOverviewRuleActivity.Enabled
-      : CoverageOverviewRuleActivity.Disabled,
-  };
-
-  return response;
 }

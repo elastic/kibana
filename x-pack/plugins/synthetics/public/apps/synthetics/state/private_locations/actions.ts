@@ -6,10 +6,10 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
+import { AgentPolicyInfo } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
-import { AgentPoliciesList } from '.';
 
-export const getAgentPoliciesAction = createAsyncAction<void, AgentPoliciesList>(
+export const getAgentPoliciesAction = createAsyncAction<void, AgentPolicyInfo[]>(
   '[AGENT POLICIES] GET'
 );
 

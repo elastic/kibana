@@ -5,72 +5,77 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import type { ReadRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
-  QueryRuleByIds,
+  ReadRuleRequestQuery,
   validateQueryRuleByIds,
-} from '../../../../../../../common/detection_engine/rule_management';
-
+} from '../../../../../../../common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
+import { readRules } from '../../../logic/crud/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
 
-import { readRules } from '../../../logic/crud/read_rules';
-
 export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      validate: {
-        query: buildRouteValidation(QueryRuleByIds),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateQueryRuleByIds(request.query);
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            query: buildRouteValidationWithZod(ReadRuleRequestQuery),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<ReadRuleResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+        const validationErrors = validateQueryRuleByIds(request.query);
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
+        }
 
-      const { id, rule_id: ruleId } = request.query;
+        const { id, rule_id: ruleId } = request.query;
 
-      try {
-        const rulesClient = (await context.alerting).getRulesClient();
+        try {
+          const rulesClient = (await context.alerting).getRulesClient();
 
-        // TODO: https://github.com/elastic/kibana/issues/125642 Reuse fetchRuleById
-        const rule = await readRules({
-          id,
-          rulesClient,
-          ruleId,
-        });
-        if (rule != null) {
-          const transformed = transform(rule);
-          if (transformed == null) {
-            return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
+          // TODO: https://github.com/elastic/kibana/issues/125642 Reuse fetchRuleById
+          const rule = await readRules({
+            id,
+            rulesClient,
+            ruleId,
+          });
+          if (rule != null) {
+            const transformed = transform(rule);
+            if (transformed == null) {
+              return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
+            } else {
+              return response.ok({ body: transformed ?? {} });
+            }
           } else {
-            return response.ok({ body: transformed ?? {} });
+            const error = getIdError({ id, ruleId });
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
           }
-        } else {
-          const error = getIdError({ id, ruleId });
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

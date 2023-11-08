@@ -10,8 +10,8 @@ import {
   PutLogViewRequestPayload,
   putLogViewRequestPayloadRT,
   putLogViewResponsePayloadRT,
-} from '@kbn/infra-plugin/common/http_api';
-import { getLogViewUrl } from '@kbn/infra-plugin/common/http_api/log_views';
+} from '@kbn/logs-shared-plugin/common/http_api';
+import { getLogViewUrl } from '@kbn/logs-shared-plugin/common/http_api/log_views';
 import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import { FtrProviderContext } from '../ftr_provider_context';
 

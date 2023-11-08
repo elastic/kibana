@@ -7,6 +7,10 @@
 
 import { PartitionedFieldMetadata } from '../../types';
 
+/**
+ * Note: this mock does NOT have any `sameFamily` entries.
+ * See `mockPartitionedFieldMetadataWithSameFamily` for an example of a mock with `sameFamily` entries.
+ */
 export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
   all: [
     {
@@ -175,7 +179,7 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       ],
       hasEcsMetadata: true,
       isEcsCompliant: false, // this index has unallowed values
-      isInSameFamily: true, // keyword and keyword are in the same family
+      isInSameFamily: false, // keyword and keyword
     },
     {
       dashed_name: 'host-name',
@@ -258,7 +262,7 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexInvalidValues: [],
       hasEcsMetadata: true,
       isEcsCompliant: true, // indexFieldType === type, and no indexInvalidValues
-      isInSameFamily: false, // `long` is not a member of any families
+      isInSameFamily: false,
     },
   ],
   ecsCompliant: [
@@ -279,7 +283,7 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexInvalidValues: [],
       hasEcsMetadata: true,
       isEcsCompliant: true, // indexFieldType === type, and no indexInvalidValues
-      isInSameFamily: false, // `date` is not a member of any families
+      isInSameFamily: false,
     },
     {
       dashed_name: 'source-port',
@@ -296,7 +300,7 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexInvalidValues: [],
       hasEcsMetadata: true,
       isEcsCompliant: true, // indexFieldType === type, and no indexInvalidValues
-      isInSameFamily: false, // `long` is not a member of any families
+      isInSameFamily: false,
     },
   ],
   custom: [
@@ -481,7 +485,7 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       ],
       hasEcsMetadata: true,
       isEcsCompliant: false, // indexFieldType === type, but there are indexInvalidValues
-      isInSameFamily: true, // `keyword` and `keyword` are in the same family
+      isInSameFamily: false,
     },
     {
       dashed_name: 'host-name',
@@ -518,4 +522,5 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       isInSameFamily: false, // `ip` is not a member of any families
     },
   ],
+  sameFamily: [],
 };

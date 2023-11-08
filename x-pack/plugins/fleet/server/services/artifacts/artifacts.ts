@@ -197,6 +197,37 @@ export const deleteArtifact = async (esClient: ElasticsearchClient, id: string):
   }
 };
 
+export const bulkDeleteArtifacts = async (
+  esClient: ElasticsearchClient,
+  ids: string[]
+): Promise<Error[]> => {
+  try {
+    const body = ids.map((id) => ({
+      delete: { _index: FLEET_SERVER_ARTIFACTS_INDEX, _id: id },
+    }));
+
+    const res = await withPackageSpan(`Bulk delete fleet artifacts`, () =>
+      esClient.bulk({
+        body,
+        refresh: 'wait_for',
+      })
+    );
+    let errors: Error[] = [];
+    // Track errors of the bulk delete action
+    if (res.errors) {
+      errors = res.items.reduce<Error[]>((acc, item) => {
+        if (item.delete?.error) {
+          acc.push(new Error(item.delete.error.reason));
+        }
+        return acc;
+      }, []);
+    }
+    return errors;
+  } catch (e) {
+    throw new ArtifactsElasticsearchError(e);
+  }
+};
+
 export const listArtifacts = async (
   esClient: ElasticsearchClient,
   options: ListArtifactsProps = {}

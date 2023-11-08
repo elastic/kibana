@@ -10,21 +10,24 @@ import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_se
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
+import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
+  const globalStateContainer = getDiscoverGlobalStateContainer(createKbnUrlStateStorage());
 
   describe('getTitle', () => {
     it('returns undefined for new saved searches', () => {
-      const container = getSavedSearchContainer({ services });
+      const container = getSavedSearchContainer({ services, globalStateContainer });
       expect(container.getTitle()).toBe(undefined);
     });
 
     it('returns the title of a persisted saved searches', () => {
-      const container = getSavedSearchContainer({ services });
+      const container = getSavedSearchContainer({ services, globalStateContainer });
       container.set(savedSearch);
       expect(container.getTitle()).toBe(savedSearch.title);
     });
@@ -32,7 +35,7 @@ describe('DiscoverSavedSearchContainer', () => {
 
   describe('set', () => {
     it('should update the current and initial state of the saved search', () => {
-      const container = getSavedSearchContainer({ services });
+      const container = getSavedSearchContainer({ services, globalStateContainer });
       const newSavedSearch: SavedSearch = { ...savedSearch, title: 'New title' };
       const result = container.set(newSavedSearch);
 
@@ -45,7 +48,7 @@ describe('DiscoverSavedSearchContainer', () => {
     });
 
     it('should reset hasChanged$ to false', () => {
-      const container = getSavedSearchContainer({ services });
+      const container = getSavedSearchContainer({ services, globalStateContainer });
       const newSavedSearch: SavedSearch = { ...savedSearch, title: 'New title' };
 
       container.set(newSavedSearch);
@@ -55,7 +58,7 @@ describe('DiscoverSavedSearchContainer', () => {
 
   describe('new', () => {
     it('should create a new saved search', async () => {
-      const container = getSavedSearchContainer({ services });
+      const container = getSavedSearchContainer({ services, globalStateContainer });
       const result = await container.new(dataViewMock);
 
       expect(result.title).toBeUndefined();
@@ -68,7 +71,7 @@ describe('DiscoverSavedSearchContainer', () => {
     });
 
     it('should create a new saved search with provided DataView', async () => {
-      const container = getSavedSearchContainer({ services });
+      const container = getSavedSearchContainer({ services, globalStateContainer });
       const result = await container.new(dataViewMock);
       expect(result.title).toBeUndefined();
       expect(result.id).toBeUndefined();
@@ -86,6 +89,7 @@ describe('DiscoverSavedSearchContainer', () => {
     it('loads a saved search', async () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
+        globalStateContainer,
       });
       await savedSearchContainer.load('the-saved-search-id');
       expect(savedSearchContainer.getInitial$().getValue().id).toEqual('the-saved-search-id');
@@ -100,6 +104,7 @@ describe('DiscoverSavedSearchContainer', () => {
     it('calls saveSavedSearch with the given saved search and save options', async () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
+        globalStateContainer,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
@@ -124,6 +129,7 @@ describe('DiscoverSavedSearchContainer', () => {
 
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
+        globalStateContainer,
       });
 
       const result = await savedSearchContainer.persist(persistedSavedSearch, saveOptions);
@@ -135,6 +141,7 @@ describe('DiscoverSavedSearchContainer', () => {
     it('emits false to the hasChanged$ BehaviorSubject', async () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
+        globalStateContainer,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
@@ -153,6 +160,7 @@ describe('DiscoverSavedSearchContainer', () => {
       }));
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
+        globalStateContainer,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
@@ -176,6 +184,7 @@ describe('DiscoverSavedSearchContainer', () => {
 
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
+        globalStateContainer,
       });
       savedSearchContainer.set(savedSearch);
       savedSearchContainer.update({ nextState: { hideChart: true } });
@@ -196,28 +205,30 @@ describe('DiscoverSavedSearchContainer', () => {
     it('updates a saved search by app state providing hideChart', async () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
+        globalStateContainer,
       });
       savedSearchContainer.set(savedSearch);
-      const updated = await savedSearchContainer.update({ nextState: { hideChart: true } });
+      const updated = savedSearchContainer.update({ nextState: { hideChart: true } });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
       savedSearchContainer.set(updated);
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
-      await savedSearchContainer.update({ nextState: { hideChart: false } });
+      savedSearchContainer.update({ nextState: { hideChart: false } });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      await savedSearchContainer.update({ nextState: { hideChart: true } });
+      savedSearchContainer.update({ nextState: { hideChart: true } });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
     });
     it('updates a saved search by data view', async () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
+        globalStateContainer,
       });
-      const updated = await savedSearchContainer.update({ nextDataView: dataViewMock });
+      const updated = savedSearchContainer.update({ nextDataView: dataViewMock });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
       savedSearchContainer.set(updated);
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
-      await savedSearchContainer.update({ nextDataView: dataViewComplexMock });
+      savedSearchContainer.update({ nextDataView: dataViewComplexMock });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      await savedSearchContainer.update({ nextDataView: dataViewMock });
+      savedSearchContainer.update({ nextDataView: dataViewMock });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
     });
   });

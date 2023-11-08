@@ -7,7 +7,7 @@
 
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 
-import type { PatchRuleRequestBody } from '../../../../../../common/detection_engine/rule_management';
+import type { PatchRuleRequestBody } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { convertPatchAPIToInternalSchema } from '../../normalization/rule_converters';
 

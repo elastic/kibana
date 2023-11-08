@@ -16,6 +16,10 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
+  if (!framework.config.featureFlags.logThresholdAlertRuleEnabled) {
+    return;
+  }
+
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -38,8 +42,10 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
           data: { logView, buckets, alertParams, executionTimeRange },
         } = request.body;
 
-        const [, , { logViews }] = await getStartServices();
-        const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(logView);
+        const [, { logsShared }] = await getStartServices();
+        const resolvedLogView = await logsShared.logViews
+          .getScopedClient(request)
+          .getResolvedLogView(logView);
 
         try {
           const { series } = await getChartPreviewData(

@@ -9,8 +9,12 @@ import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { flattenObject } from '../../lib';
 import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+
+/** User profile data keys that are allowed to be updated by Cloud users */
+const ALLOWED_KEYS_UPDATE_CLOUD = ['userSettings.darkMode'];
 
 export function defineUpdateUserProfileDataRoute({
   router,
@@ -43,18 +47,27 @@ export function defineUpdateUserProfileDataRoute({
       }
 
       const currentUser = getAuthenticationService().getCurrentUser(request);
+      const userProfileData = request.body;
+      const keysToUpdate = Object.keys(flattenObject(userProfileData));
+
       if (currentUser?.elastic_cloud_user) {
-        logger.warn(
-          `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${getPrintableSessionId(
-            session.value.sid
-          )})`
+        // We only allow specific user profile data to be updated by Elastic Cloud SSO users.
+        const isUpdateAllowed = keysToUpdate.every((key) =>
+          ALLOWED_KEYS_UPDATE_CLOUD.includes(key)
         );
-        return response.forbidden();
+        if (keysToUpdate.length === 0 || !isUpdateAllowed) {
+          logger.warn(
+            `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${getPrintableSessionId(
+              session.value.sid
+            )})`
+          );
+          return response.forbidden();
+        }
       }
 
       const userProfileService = getUserProfileService();
       try {
-        await userProfileService.update(session.value.userProfileId, request.body);
+        await userProfileService.update(session.value.userProfileId, userProfileData);
         return response.ok();
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

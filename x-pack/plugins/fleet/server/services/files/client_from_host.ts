@@ -81,6 +81,9 @@ export class FleetFromHostFilesClient implements FleetFromHostFileClientInterfac
       if (error instanceof FleetFilesClientError) {
         throw error;
       }
+      if (error.message.includes('index_not_found')) {
+        throw new FleetFileNotFound(error.message, error);
+      }
 
       throw new FleetFilesClientError(error.message, error);
     }

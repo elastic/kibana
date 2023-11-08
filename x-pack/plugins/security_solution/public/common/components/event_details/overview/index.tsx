@@ -42,22 +42,12 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   eventId: string;
   handleOnEventClosed: () => void;
-  indexName: string;
   scopeId: string;
   isReadOnly?: boolean;
 }
 
 export const Overview = React.memo<Props>(
-  ({
-    browserFields,
-    contextId,
-    data,
-    eventId,
-    handleOnEventClosed,
-    indexName,
-    scopeId,
-    isReadOnly,
-  }) => {
+  ({ browserFields, contextId, data, eventId, handleOnEventClosed, scopeId, isReadOnly }) => {
     const statusData = useMemo(() => {
       const item = find({ field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' }, data);
       return (
@@ -128,7 +118,6 @@ export const Overview = React.memo<Props>(
               eventId={eventId}
               contextId={contextId}
               enrichedFieldInfo={statusData}
-              indexName={indexName}
               scopeId={scopeId}
               handleOnEventClosed={handleOnEventClosed}
             />

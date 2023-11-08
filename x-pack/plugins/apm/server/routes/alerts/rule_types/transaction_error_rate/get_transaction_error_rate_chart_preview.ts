@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
@@ -17,7 +21,7 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
 import { APMConfig } from '../../../..';
@@ -48,6 +52,7 @@ export async function getTransactionErrorRateChartPreview({
     end,
     transactionName,
     groupBy: groupByFields,
+    searchConfiguration,
   } = alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -61,6 +66,21 @@ export async function getTransactionErrorRateChartPreview({
     groupByFields
   );
 
+  const termFilterQuery = !searchConfiguration
+    ? [
+        ...termQuery(SERVICE_NAME, serviceName, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_TYPE, transactionType, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_NAME, transactionName, {
+          queryEmptyString: false,
+        }),
+        ...environmentQuery(environment),
+      ]
+    : [];
+
   const params = {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
@@ -71,18 +91,12 @@ export async function getTransactionErrorRateChartPreview({
       query: {
         bool: {
           filter: [
-            ...termQuery(SERVICE_NAME, serviceName, {
-              queryEmptyString: false,
-            }),
-            ...termQuery(TRANSACTION_TYPE, transactionType, {
-              queryEmptyString: false,
-            }),
-            ...termQuery(TRANSACTION_NAME, transactionName, {
-              queryEmptyString: false,
-            }),
+            ...termFilterQuery,
+            ...getParsedFilterQuery(
+              searchConfiguration?.query?.query as string
+            ),
             ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...getDocumentTypeFilterForTransactions(
+            ...getBackwardCompatibleDocumentTypeFilter(
               searchAggregatedTransactions
             ),
             {

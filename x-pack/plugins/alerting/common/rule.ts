@@ -10,7 +10,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import type { Filter, KueryNode } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { IsoWeekday } from './iso_weekdays';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
@@ -60,6 +60,7 @@ export enum RuleExecutionStatusErrorReasons {
 export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
   MAX_ALERTS = 'maxAlerts',
+  MAX_QUEUED_ACTIONS = 'maxQueuedActions',
 }
 
 export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
@@ -117,28 +118,6 @@ export interface RuleAction {
   alertsFilter?: AlertsFilter;
 }
 
-export interface AggregateOptions {
-  search?: string;
-  defaultSearchOperator?: 'AND' | 'OR';
-  searchFields?: string[];
-  hasReference?: {
-    type: string;
-    id: string;
-  };
-  filter?: string | KueryNode;
-  page?: number;
-  perPage?: number;
-}
-
-export interface RuleAggregationFormattedResult {
-  ruleExecutionStatus: { [status: string]: number };
-  ruleLastRunOutcome: { [status: string]: number };
-  ruleEnabledStatus: { enabled: number; disabled: number };
-  ruleMutedStatus: { muted: number; unmuted: number };
-  ruleSnoozedStatus: { snoozed: number };
-  ruleTags: string[];
-}
-
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
   outcomeOrder?: number;
@@ -170,7 +149,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   actions: RuleAction[];
   params: Params;
   mapped_params?: MappedParams;
-  scheduledTaskId?: string;
+  scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: Date;

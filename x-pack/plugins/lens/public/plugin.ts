@@ -63,6 +63,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -104,6 +105,7 @@ import type {
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
+import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
@@ -111,10 +113,7 @@ import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboa
 
 import type { LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
-import {
-  EmbeddableComponentProps,
-  getEmbeddableComponent,
-} from './embeddable/embeddable_component';
+import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
@@ -126,6 +125,7 @@ import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator
 import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -166,6 +166,7 @@ export interface LensPluginStartDependencies {
   share?: SharePluginStart;
   eventAnnotationService: EventAnnotationServiceType;
   contentManagement: ContentManagementPublicStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface LensPublicSetup {
@@ -205,7 +206,7 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
+  EmbeddableComponent: EmbeddableComponent;
   /**
    * React component which can be used to embed a Lens Visualization Save Modal Component.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
@@ -215,6 +216,14 @@ export interface LensPublicStart {
    * @experimental
    */
   SaveModalComponent: React.ComponentType<Omit<SaveModalContainerProps, 'lensServices'>>;
+  /**
+   * React component which can be used to embed a Lens Visualization Config Panel Component.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  EditLensConfigPanelApi: () => Promise<EditLensConfigPanelComponent>;
   /**
    * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
@@ -251,6 +260,8 @@ export interface LensPublicStart {
     suggestions: LensSuggestionsApi;
   }>;
 }
+
+export type EditLensConfigPanelComponent = React.ComponentType<EditLensConfigurationProps>;
 
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
@@ -578,6 +589,13 @@ export class LensPlugin {
       visualizeAggBasedVisAction(core.application)
     );
 
+    const editInLensAction = new ConfigureInLensPanelAction(
+      startDependencies,
+      core.overlays,
+      core.theme
+    );
+    startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
       startDependencies.uiActions.addTriggerAction(
@@ -648,6 +666,23 @@ export class LensPlugin {
             });
           },
         };
+      },
+      EditLensConfigPanelApi: async () => {
+        const { getEditLensConfiguration } = await import('./async_services');
+        if (!this.editorFrameService) {
+          this.initDependenciesForApi();
+        }
+        const [visualizationMap, datasourceMap] = await Promise.all([
+          this.editorFrameService!.loadVisualizations(),
+          this.editorFrameService!.loadDatasources(),
+        ]);
+        const Component = await getEditLensConfiguration(
+          core,
+          startDependencies,
+          visualizationMap,
+          datasourceMap
+        );
+        return Component;
       },
     };
   }

@@ -192,12 +192,8 @@ export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldR
   defaultMessage: 'A name is required.',
 });
 
-export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
-  defaultMessage: 'Configure cases',
-});
-
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCasesButton', {
-  defaultMessage: 'Edit external connection',
+  defaultMessage: 'Settings',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.cases.caseView.comment.addComment', {
@@ -292,7 +288,14 @@ export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.cas
 export const MAX_LENGTH_ERROR = (field: string, length: number) =>
   i18n.translate('xpack.cases.createCase.maxLengthError', {
     values: { field, length },
-    defaultMessage: 'The length of the {field} is too long. The maximum length is {length}.',
+    defaultMessage:
+      'The length of the {field} is too long. The maximum length is {length} characters.',
+  });
+
+export const MAX_TAGS_ERROR = (length: number) =>
+  i18n.translate('xpack.cases.createCase.maxTagsError', {
+    values: { length },
+    defaultMessage: 'Too many tags. The maximum number of allowed tags is {length}',
   });
 
 export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {
@@ -373,3 +376,12 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX = ADD_TAG_CUSTOM_OPTION_LABEL
 
 export const ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX =
   ADD_CATEGORY_CUSTOM_OPTION_LABEL('{searchValue}');
+
+export const EXPERIMENTAL_LABEL = i18n.translate('xpack.cases.badge.experimentalLabel', {
+  defaultMessage: 'Technical preview',
+});
+
+export const EXPERIMENTAL_DESC = i18n.translate('xpack.cases.badge.experimentalDesc', {
+  defaultMessage:
+    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+});

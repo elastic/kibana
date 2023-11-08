@@ -46,7 +46,7 @@ describe('useRecentlyViewedMonitors', () => {
       );
     };
 
-    jest.spyOn(useMonitorQueryModule, 'useMonitorQueryId').mockImplementation(() => '1');
+    jest.spyOn(useMonitorQueryModule, 'useMonitorQueryId').mockReturnValue('1');
     (useFetcher as jest.Mock).mockImplementation((callback) => {
       callback();
       return { loading: false, status: 'success' as FETCH_STATUS.SUCCESS, refetch: () => {} };

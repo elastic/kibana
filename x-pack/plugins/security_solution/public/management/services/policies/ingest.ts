@@ -8,12 +8,10 @@
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type {
   GetAgentStatusResponse,
-  GetAgentPoliciesRequest,
-  GetAgentPoliciesResponse,
   GetPackagePoliciesResponse,
   GetInfoResponse,
 } from '@kbn/fleet-plugin/common';
-import { epmRouteService } from '@kbn/fleet-plugin/common';
+import { epmRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 
 import type { NewPolicyData } from '../../../../common/endpoint/types';
 import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
@@ -36,7 +34,10 @@ export const sendGetPackagePolicy = (
   packagePolicyId: string,
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, options);
+  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
+    ...options,
+    version: API_VERSIONS.public.v1,
+  });
 };
 
 /**
@@ -52,41 +53,10 @@ export const sendBulkGetPackagePolicies = (
 ) => {
   return http.post<GetPackagePoliciesResponse>(`${INGEST_API_PACKAGE_POLICIES}/_bulk_get`, {
     ...options,
+    version: API_VERSIONS.public.v1,
     body: JSON.stringify({
       ids: packagePolicyIds,
       ignoreMissing: true,
-    }),
-  });
-};
-
-/**
- * Retrieve a list of Agent Policies
- * @param http
- * @param options
- */
-export const sendGetAgentPolicyList = (
-  http: HttpStart,
-  options: HttpFetchOptions & GetAgentPoliciesRequest
-) => {
-  return http.get<GetAgentPoliciesResponse>(INGEST_API_AGENT_POLICIES, options);
-};
-
-/**
- * Retrieve a list of Agent Policies
- * @param http
- * @param options
- */
-export const sendBulkGetAgentPolicyList = (
-  http: HttpStart,
-  ids: string[],
-  options: HttpFetchOptions = {}
-) => {
-  return http.post<GetAgentPoliciesResponse>(`${INGEST_API_AGENT_POLICIES}/_bulk_get`, {
-    ...options,
-    body: JSON.stringify({
-      ids,
-      ignoreMissing: true,
-      full: true,
     }),
   });
 };
@@ -107,6 +77,7 @@ export const sendPutPackagePolicy = (
 ): Promise<UpdatePolicyResponse> => {
   return http.put(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
     ...options,
+    version: API_VERSIONS.public.v1,
     body: JSON.stringify(packagePolicy),
   });
 };
@@ -126,6 +97,7 @@ export const sendGetFleetAgentStatusForPolicy = (
 ): Promise<GetAgentStatusResponse> => {
   return http.get(INGEST_API_FLEET_AGENT_STATUS, {
     ...options,
+    version: API_VERSIONS.public.v1,
     query: {
       policyId,
     },
@@ -139,7 +111,9 @@ export const sendGetEndpointSecurityPackage = async (
   http: HttpStart
 ): Promise<GetInfoResponse['item']> => {
   const path = epmRouteService.getInfoPath('endpoint');
-  const endpointPackageResponse = await http.get<GetInfoResponse>(path);
+  const endpointPackageResponse = await http.get<GetInfoResponse>(path, {
+    version: API_VERSIONS.public.v1,
+  });
   const endpointPackageInfo = endpointPackageResponse.item;
   if (!endpointPackageInfo) {
     throw new Error('Endpoint package was not found.');

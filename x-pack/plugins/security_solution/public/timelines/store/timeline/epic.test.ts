@@ -9,7 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import { convertTimelineAsInput } from './epic';
 import type { TimelineModel } from './model';
 
@@ -175,6 +175,7 @@ describe('Epic Timeline', () => {
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
         savedQueryId: 'my endgame timeline query',
+        savedSearchId: null,
       };
 
       expect(
@@ -309,6 +310,7 @@ describe('Epic Timeline', () => {
           },
         },
         savedQueryId: 'my endgame timeline query',
+        savedSearchId: null,
         sort: [
           {
             columnId: '@timestamp',

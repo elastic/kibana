@@ -18,6 +18,7 @@ import { serviceDetailRoute } from './service_detail';
 import { mobileServiceDetailRoute } from './mobile_service_detail';
 import { settingsRoute } from './settings';
 import { onboarding } from './onboarding';
+import { tutorialRedirectRoute } from './onboarding/redirect';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
@@ -106,6 +107,7 @@ const apmRoutes = {
           ]),
         }),
       },
+      ...tutorialRedirectRoute,
       ...onboarding,
       ...diagnosticsRoute,
       ...settingsRoute,

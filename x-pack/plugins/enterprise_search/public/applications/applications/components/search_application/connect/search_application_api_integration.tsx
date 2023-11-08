@@ -60,7 +60,7 @@ curl --location --request POST '${esUrl}/_application/search_application/${searc
 --header 'Content-Type: application/json' \\
 --data-raw '${JSON.stringify({ params }, null, 2)}'`;
 
-const apiRequestSnippet = (searchApplicationName: string, params: unknown) => {
+const consoleSnippet = (searchApplicationName: string, params: unknown) => {
   const body = JSON.stringify({ params }, null, 2);
   return `
 POST /_application/search_application/${searchApplicationName}/_search
@@ -94,13 +94,13 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
   const params = { query: 'pizza', myCustomParameter: 'example value' };
   const Tabs: Record<TabId, Tab> = {
     apirequest: {
-      code: apiRequestSnippet(searchApplicationName, params),
+      code: consoleSnippet(searchApplicationName, params),
       copy: false,
       language: 'http',
       title: i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.tab.apirequestTitle',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.tab.consoleTitle',
         {
-          defaultMessage: 'API Request',
+          defaultMessage: 'Console',
         }
       ),
     },
@@ -147,19 +147,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
         <p>
           <FormattedMessage
             id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step4.description"
-            defaultMessage="Simplify your API calls by using one of our {clientsDocumentationLink}."
-            values={{
-              clientsDocumentationLink: (
-                <EuiLink href={docLinks.clientsGuide}>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step4.clientsDocumenation',
-                    {
-                      defaultMessage: 'programming language clients',
-                    }
-                  )}
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Simplify your API calls. We recommend using the JavaScript client."
           />
         </p>
       </EuiText>
@@ -244,10 +232,10 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
             <EuiText>
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step4.clientUsageDescription"
-                defaultMessage="To get the most out of the client, use the javascript client's example template and follow our {searchapplicationGettingStartedDocLink} on building a search experience."
+                defaultMessage="To get the most out of the JavaScript client, use the client's example template and follow our {searchapplicationSearchDocLink} on building a search experience."
                 values={{
-                  searchapplicationGettingStartedDocLink: (
-                    <EuiLink href={docLinks.searchApplicationsGettingStarted}>
+                  searchapplicationSearchDocLink: (
+                    <EuiLink href={docLinks.searchApplicationsSearch}>
                       {i18n.translate(
                         'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step3.clientDocumenation',
                         {
@@ -272,7 +260,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
           <EuiFlexGroup direction="column" alignItems="flexEnd">
             <EuiLink href={consolePreviewLink} target="_blank">
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step4.apiRequestConsoleButton"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step4.consoleButton"
                 defaultMessage="Try in console"
               />
             </EuiLink>

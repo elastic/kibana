@@ -93,6 +93,12 @@ export const epmRouteService = {
   getBulkAssetsPath: () => {
     return EPM_API_ROUTES.BULK_ASSETS_PATTERN;
   },
+  getInputsTemplatesPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INPUTS_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -286,6 +292,8 @@ export const enrollmentAPIKeyRouteService = {
 
 export const uninstallTokensRouteService = {
   getListPath: () => UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
+  getInfoPath: (uninstallTokenId: string) =>
+    UNINSTALL_TOKEN_ROUTES.INFO_PATTERN.replace('{uninstallTokenId}', uninstallTokenId),
 };
 
 export const setupRouteService = {

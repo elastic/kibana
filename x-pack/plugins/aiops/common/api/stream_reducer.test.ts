@@ -14,7 +14,7 @@ import {
   resetAllAction,
   resetGroupsAction,
   updateLoadingStateAction,
-} from './explain_log_rate_spikes';
+} from './log_rate_analysis';
 import { initialState, streamReducer } from './stream_reducer';
 
 describe('streamReducer', () => {
@@ -39,6 +39,8 @@ describe('streamReducer', () => {
       initialState,
       addSignificantTermsAction([
         {
+          key: 'the-field-name:the-field-value',
+          type: 'keyword',
           fieldName: 'the-field-name',
           fieldValue: 'the-field-value',
           doc_count: 10,

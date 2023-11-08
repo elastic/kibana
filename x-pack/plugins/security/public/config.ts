@@ -9,7 +9,6 @@ export interface ConfigType {
   loginAssistanceMessage: string;
   showInsecureClusterWarning: boolean;
   sameSiteCookies: 'Strict' | 'Lax' | 'None' | undefined;
-  showNavLinks: boolean;
   ui: {
     userManagementEnabled: boolean;
     roleManagementEnabled: boolean;

@@ -1,5 +1,3 @@
-@import '../../variables';
-
 @mixin flexParent($grow: 1, $shrink: 1, $basis: auto, $direction: column) {
   flex: $grow $shrink $basis;
   display: flex;
@@ -86,7 +84,7 @@
 
   @at-root {
     .kbnBody--hasHeaderBanner & {
-      top: $kbnHeaderBannerHeight;
+      top: var(--kbnHeaderBannerHeight);
     }
   }
 

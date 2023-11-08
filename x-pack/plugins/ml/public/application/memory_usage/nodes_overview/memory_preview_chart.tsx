@@ -119,6 +119,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
       <Settings
         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
         rotation={90}
+        locale={i18n.getLocale()}
       />
 
       <Axis

@@ -10,7 +10,7 @@ import type {
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { buildActiveMappings, diffMappings } from './build_active_mappings';
+import { buildActiveMappings, diffMappings, getUpdatedHashes } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
   test('creates a strict mapping', () => {
@@ -206,5 +206,67 @@ describe('diffMappings', () => {
     };
 
     expect(diffMappings(actual, expected)!.changedProp).toEqual('_meta');
+  });
+});
+
+describe('getUpdatedHashes', () => {
+  test('gives all hashes if _meta is missing from actual', () => {
+    const actual: IndexMapping = {
+      dynamic: 'strict',
+      properties: {},
+    };
+    const expected: IndexMapping = {
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar', bar: 'baz' },
+      },
+      dynamic: 'strict',
+      properties: {},
+    };
+
+    expect(getUpdatedHashes({ actual, expected })).toEqual(['foo', 'bar']);
+  });
+
+  test('gives all hashes if migrationMappingPropertyHashes is missing from actual', () => {
+    const actual: IndexMapping = {
+      dynamic: 'strict',
+      properties: {},
+      _meta: {},
+    };
+    const expected: IndexMapping = {
+      _meta: {
+        migrationMappingPropertyHashes: { foo: 'bar', bar: 'baz' },
+      },
+      dynamic: 'strict',
+      properties: {},
+    };
+
+    expect(getUpdatedHashes({ actual, expected })).toEqual(['foo', 'bar']);
+  });
+
+  test('gives a list of the types with updated hashes', () => {
+    const actual: IndexMapping = {
+      dynamic: 'strict',
+      properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: {
+          type1: 'type1hash1',
+          type2: 'type2hash1',
+          type3: 'type3hash1', // will be removed
+        },
+      },
+    };
+    const expected: IndexMapping = {
+      dynamic: 'strict',
+      properties: {},
+      _meta: {
+        migrationMappingPropertyHashes: {
+          type1: 'type1hash1', // remains the same
+          type2: 'type2hash2', // updated
+          type4: 'type4hash1', // new type
+        },
+      },
+    };
+
+    expect(getUpdatedHashes({ actual, expected })).toEqual(['type2', 'type4']);
   });
 });

@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { LogEntryTime } from '../../../../common/log_entry';
+import { LogEntryTime } from '@kbn/logs-shared-plugin/common';
 import { LogSearchButtons } from './log_search_buttons';
 import { LogSearchInput } from './log_search_input';
 

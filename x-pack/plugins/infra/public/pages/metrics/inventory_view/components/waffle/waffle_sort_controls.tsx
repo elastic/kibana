@@ -25,20 +25,15 @@ const LABELS = {
 export const WaffleSortControls = ({ sort, onChange }: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const showPopover = useCallback(() => {
-    setIsOpen(true);
-  }, [setIsOpen]);
-
-  const closePopover = useCallback(() => {
-    setIsOpen(false);
-  }, [setIsOpen]);
+  const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
 
   const label = LABELS[sort.by];
 
   const button = (
     <DropdownButton
       label={i18n.translate('xpack.infra.waffle.sortLabel', { defaultMessage: 'Sort by' })}
-      onClick={showPopover}
+      onClick={togglePopover}
       data-test-subj={'waffleSortByDropdown'}
     >
       {label}

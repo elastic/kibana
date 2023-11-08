@@ -1,0 +1,31 @@
+summary: The get all data views API returns a list of data views.
+value:
+  {
+    "data_view": [
+      {
+        "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+        "namespaces": [
+          "default"
+        ],
+        "title": "kibana_sample_data_ecommerce",
+        "typeMeta": {},
+        "name": "Kibana Sample Data eCommerce"
+      },
+      {
+        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+        "namespaces": [
+          "default"
+        ],
+        "title": "kibana_sample_data_flights",
+        "name": "Kibana Sample Data Flights"
+      },
+      {
+        "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+        "namespaces": [
+          "default"
+        ],
+        "title": "kibana_sample_data_logs",
+        "name": "Kibana Sample Data Logs"
+      }
+    ]
+  }

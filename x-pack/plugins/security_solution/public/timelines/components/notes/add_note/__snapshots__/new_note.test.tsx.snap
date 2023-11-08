@@ -10,6 +10,7 @@ exports[`NewNote renders correctly 1`] = `
     dataTestSubj="add-a-note"
     height={200}
     onChange={[MockFunction]}
+    setIsMarkdownInvalid={[MockFunction]}
     value="The contents of a new note"
   />
 </NewNoteTabs>

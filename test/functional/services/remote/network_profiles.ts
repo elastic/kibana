@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-interface NetworkOptions {
-  DOWNLOAD: number;
-  UPLOAD: number;
-  LATENCY: number;
+export type NetworkProfile = 'NO_THROTTLING' | 'FAST_3G' | 'SLOW_3G' | 'OFFLINE' | 'CLOUD_USER';
+
+export interface NetworkOptions {
+  offline: boolean;
+  latency: number;
+  download_throughput: number;
+  upload_throughput: number;
 }
 
 const sec = 10 ** 3;
@@ -17,6 +20,36 @@ const MBps = 10 ** 6 / 8; // megabyte per second (MB/s) (can be abbreviated as M
 
 // Selenium uses B/s (bytes) for network throttling
 // Download (B/s)	Upload (B/s) Latency (ms)
-export const NETWORK_PROFILES: { [key: string]: NetworkOptions } = {
-  CLOUD_USER: { DOWNLOAD: 6 * MBps, UPLOAD: 6 * MBps, LATENCY: 0.1 * sec },
+
+export const NETWORK_PROFILES: Record<NetworkProfile, NetworkOptions> = {
+  NO_THROTTLING: {
+    offline: false,
+    latency: 0,
+    download_throughput: -1,
+    upload_throughput: -1,
+  },
+  FAST_3G: {
+    offline: false,
+    latency: 0.56 * sec,
+    download_throughput: 1.44 * MBps,
+    upload_throughput: 0.7 * MBps,
+  },
+  SLOW_3G: {
+    offline: false,
+    latency: 2 * sec,
+    download_throughput: 0.4 * MBps,
+    upload_throughput: 0.4 * MBps,
+  },
+  OFFLINE: {
+    offline: true,
+    latency: 0,
+    download_throughput: 0,
+    upload_throughput: 0,
+  },
+  CLOUD_USER: {
+    offline: false,
+    latency: 0.1 * sec,
+    download_throughput: 6 * MBps,
+    upload_throughput: 6 * MBps,
+  },
 };

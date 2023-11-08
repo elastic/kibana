@@ -8,9 +8,9 @@
 import type React from 'react';
 import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
 import type {
-  CommentRequestExternalReferenceType,
-  CommentRequestPersistableStateType,
-} from '../../../common/api';
+  ExternalReferenceAttachmentPayload,
+  PersistableStateAttachmentPayload,
+} from '../../../common/types/domain';
 import type { CaseUI } from '../../containers/types';
 
 export enum AttachmentActionType {
@@ -53,13 +53,13 @@ export interface CommonAttachmentViewProps {
 }
 
 export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
-  externalReferenceId: CommentRequestExternalReferenceType['externalReferenceId'];
-  externalReferenceMetadata: CommentRequestExternalReferenceType['externalReferenceMetadata'];
+  externalReferenceId: ExternalReferenceAttachmentPayload['externalReferenceId'];
+  externalReferenceMetadata: ExternalReferenceAttachmentPayload['externalReferenceMetadata'];
 }
 
 export interface PersistableStateAttachmentViewProps extends CommonAttachmentViewProps {
-  persistableStateAttachmentTypeId: CommentRequestPersistableStateType['persistableStateAttachmentTypeId'];
-  persistableStateAttachmentState: CommentRequestPersistableStateType['persistableStateAttachmentState'];
+  persistableStateAttachmentTypeId: PersistableStateAttachmentPayload['persistableStateAttachmentTypeId'];
+  persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
 }
 
 export interface AttachmentType<Props> {

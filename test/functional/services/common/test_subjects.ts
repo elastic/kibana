@@ -41,7 +41,7 @@ export class TestSubjects extends FtrService {
    * `retry.waitFor()` loops.
    *
    * When `options.timeout` is not passed the `timeouts.waitForExists` config is used as
-   * the timeout. The default value for that config is currently 2.5 seconds.
+   * the timeout. The default value for that config is currently 2.5 seconds (in ms).
    *
    * If the element is hidden it is not treated as "existing", unless `options.allowHidden`
    * is set to `true`.
@@ -285,9 +285,9 @@ export class TestSubjects extends FtrService {
     return await element.isEnabled();
   }
 
-  public async isDisplayed(selector: string): Promise<boolean> {
+  public async isDisplayed(selector: string, timeout?: number): Promise<boolean> {
     this.log.debug(`TestSubjects.isDisplayed(${selector})`);
-    const element = await this.find(selector);
+    const element = await this.find(selector, timeout);
     return await element.isDisplayed();
   }
 

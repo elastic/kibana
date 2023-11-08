@@ -23,6 +23,25 @@ export default function (providerContext: FtrProviderContext) {
 
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
+  const cleanupFiles = async () => {
+    await esClient.deleteByQuery({
+      index: `${FILE_STORAGE_DATA_AGENT_INDEX},${FILE_STORAGE_METADATA_AGENT_INDEX}`,
+      refresh: true,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [
+            {
+              ids: {
+                values: ['file1', 'file1.0'],
+              },
+            },
+          ],
+        },
+      },
+    });
+  };
+
   describe('fleet_uploads', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
@@ -30,6 +49,7 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
+      await cleanupFiles();
 
       await esClient.create({
         index: AGENT_ACTIONS_INDEX,
@@ -60,34 +80,36 @@ export default function (providerContext: FtrProviderContext) {
         ES_INDEX_OPTIONS
       );
 
-      await esClient.update({
+      await esClient.index({
         index: FILE_STORAGE_METADATA_AGENT_INDEX,
         id: 'file1',
         refresh: true,
+        op_type: 'create',
         body: {
-          doc_as_upsert: true,
-          doc: {
-            upload_id: 'file1',
-            action_id: 'action1',
-            agent_id: 'agent1',
-            file: {
-              ChunkSize: 4194304,
-              extension: 'zip',
-              hash: {},
-              mime_type: 'application/zip',
-              mode: '0644',
-              name: 'elastic-agent-diagnostics-2022-10-07T12-00-00Z-00.zip',
-              path: '/agent/elastic-agent-diagnostics-2022-10-07T12-00-00Z-00.zip',
-              size: 24917,
-              Status: 'READY',
-              type: 'file',
-            },
+          '@timestamp': new Date().toISOString(),
+          upload_id: 'file1',
+          action_id: 'action1',
+          agent_id: 'agent1',
+          file: {
+            ChunkSize: 4194304,
+            extension: 'zip',
+            hash: {},
+            mime_type: 'application/zip',
+            mode: '0644',
+            name: 'elastic-agent-diagnostics-2022-10-07T12-00-00Z-00.zip',
+            path: '/agent/elastic-agent-diagnostics-2022-10-07T12-00-00Z-00.zip',
+            size: 24917,
+            Status: 'READY',
+            type: 'file',
           },
         },
       });
     });
     after(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await Promise.all([
+        esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server'),
+        cleanupFiles(),
+      ]);
     });
 
     it('should get agent uploads', async () => {
@@ -108,17 +130,16 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should get agent uploaded file', async () => {
-      await esClient.update({
+      await esClient.index({
         index: FILE_STORAGE_DATA_AGENT_INDEX,
         id: 'file1.0',
+        op_type: 'create',
         refresh: true,
         body: {
-          doc_as_upsert: true,
-          doc: {
-            last: true,
-            bid: 'file1',
-            data: 'test',
-          },
+          '@timestamp': new Date().toISOString(),
+          last: true,
+          bid: 'file1',
+          data: 'test',
         },
       });
 

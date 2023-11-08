@@ -11,7 +11,7 @@ import React from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { decode, RisonValue } from '@kbn/rison';
 import { throttle } from 'lodash';
-import { replaceStateKeyInQueryString } from '../../common/log_views';
+import { replaceStateKeyInQueryString } from '../../common/url_state_storage_service';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;

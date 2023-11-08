@@ -23,8 +23,8 @@ import styled from 'styled-components';
 import type {
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
-} from '../../../../../common/types/timeline/api';
-import { SortFieldTimeline } from '../../../../../common/types/timeline/api';
+} from '../../../../../common/api/timeline';
+import { SortFieldTimeline } from '../../../../../common/api/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';

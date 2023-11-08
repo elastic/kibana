@@ -8,10 +8,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import type { UserAuthenticationsRequestOptionsInput } from '../../../../common/api/search_strategy';
 import type {
   AuthenticationsEdges,
   AuthStackByField,
-  UserAuthenticationsRequestOptions,
 } from '../../../../common/search_strategy/security_solution';
 import { UsersQueries } from '../../../../common/search_strategy/security_solution';
 import type { PageInfoPaginated, SortField } from '../../../../common/search_strategy';
@@ -58,7 +58,7 @@ export const useAuthentications = ({
   startDate,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
   const [authenticationsRequest, setAuthenticationsRequest] =
-    useState<UserAuthenticationsRequestOptions | null>(null);
+    useState<UserAuthenticationsRequestOptionsInput | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -123,7 +123,7 @@ export const useAuthentications = ({
 
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: UserAuthenticationsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: UsersQueries.authentications,

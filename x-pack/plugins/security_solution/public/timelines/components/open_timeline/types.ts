@@ -8,7 +8,6 @@
 import type React from 'react';
 import type { AllTimelinesVariables } from '../../containers/all';
 import type { TimelineModel } from '../../store/timeline/model';
-import type { Note } from '../../../../common/types/timeline/note/api';
 import type {
   RowRendererId,
   SingleTimelineResolveResponse,
@@ -17,7 +16,8 @@ import type {
   TimelineStatus,
   TemplateTimelineTypeLiteral,
   TimelineStatusLiteralWithNull,
-} from '../../../../common/types/timeline/api';
+  Note,
+} from '../../../../common/api/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {

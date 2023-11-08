@@ -1,6 +1,10 @@
 {
   "ilm.migrate_to_data_tiers": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "dry_run": "__flag__"
     },
     "methods": [
@@ -9,6 +13,10 @@
     "patterns": [
       "_ilm/migrate_to_data_tiers"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-migrate-to-data-tiers.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-migrate-to-data-tiers.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

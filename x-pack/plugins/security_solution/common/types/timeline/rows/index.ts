@@ -6,7 +6,7 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { RowRendererId } from '../api';
+import type { RowRendererId } from '../../../api/timeline';
 
 export interface RowRenderer {
   id: RowRendererId;

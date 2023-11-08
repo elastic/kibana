@@ -103,18 +103,6 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       value={serviceType}
     >
       <EuiFlexGroup direction="column" gutterSize="xs">
-        {documentationUrl && (
-          <EuiFlexItem grow={false}>
-            <EuiLink target="_blank" href={documentationUrl}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
-                {
-                  defaultMessage: 'Documentation',
-                }
-              )}
-            </EuiLink>
-          </EuiFlexItem>
-        )}
         <EuiFlexItem>
           <EuiFlexGroup
             direction="row"
@@ -124,7 +112,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
           >
             {showNativeBadge && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" isDisabled={disabled}>
+                <EuiBadge isDisabled={disabled}>
                   <EuiText size="xs">{NATIVE_LABEL}</EuiText>
                 </EuiBadge>
               </EuiFlexItem>
@@ -152,6 +140,20 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
+        {documentationUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <EuiLink target="_blank" href={documentationUrl}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
+                  {
+                    defaultMessage: 'Documentation',
+                  }
+                )}
+              </EuiLink>
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiCheckableCard>
   );

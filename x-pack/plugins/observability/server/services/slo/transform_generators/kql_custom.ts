@@ -10,7 +10,7 @@ import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -29,7 +29,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(slo, slo.indicator.params.timestampField),
+      this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField)
     );
@@ -40,11 +40,23 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
   }
 
   private buildSource(slo: SLO, indicator: KQLCustomIndicator) {
-    const filter = getElastichsearchQueryOrThrow(indicator.params.filter);
     return {
-      index: indicator.params.index,
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
-      query: filter,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                [indicator.params.timestampField]: {
+                  gte: `now-${slo.timeWindow.duration.format()}/d`,
+                },
+              },
+            },
+            getElastichsearchQueryOrThrow(indicator.params.filter),
+          ],
+        },
+      },
     };
   }
 

@@ -7,10 +7,14 @@
 
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
-import { RequestHandlerContext } from '@kbn/core/server';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type {
+  KibanaRequest,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
-import { SharedServices } from '@kbn/ml-plugin/server/shared_services';
+import type { MlPluginSetup, MlTrainedModels } from '@kbn/ml-plugin/server';
+import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
@@ -168,7 +172,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -182,20 +186,13 @@ describe('Enterprise Search Managed Indices', () => {
         path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
       });
 
-      mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
-        startTrainedModelDeployment: jest.fn(),
-        stopTrainedModelDeployment: jest.fn(),
-        inferTrainedModel: jest.fn(),
-        deleteTrainedModel: jest.fn(),
-        updateTrainedModelDeployment: jest.fn(),
-        putTrainedModel: jest.fn(),
-      } as MlTrainedModels;
+      mockMl = mlPluginServerMock.createSetupContract();
+      mockTrainedModelsProvider = mockMl.trainedModelsProvider(
+        {} as KibanaRequest,
+        {} as SavedObjectsClientContract
+      );
 
-      mockMl = {
-        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      mlPluginServerMock.createSetupContract();
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -294,78 +291,6 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter.shouldThrow(request);
     });
 
-    it('responds with 400 BAD REQUEST with both source/target AND pipeline_definition', async () => {
-      await mockRouter.callRoute({
-        body: {
-          model_id: 'my-model-id',
-          pipeline_name: 'my-pipeline-name',
-          source_field: 'my-source-field',
-          destination_field: 'my-dest-field',
-          pipeline_definition: {
-            processors: [],
-          },
-        },
-        params: { indexName: 'my-index-name' },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          statusCode: 400,
-        })
-      );
-    });
-
-    it('responds with 400 BAD REQUEST with none of source/target/model OR pipeline_definition', async () => {
-      await mockRouter.callRoute({
-        body: {
-          pipeline_name: 'my-pipeline-name',
-        },
-        params: { indexName: 'my-index-name' },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          statusCode: 400,
-        })
-      );
-    });
-
-    it('creates an ML inference pipeline from model and source_field', async () => {
-      (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
-        return Promise.resolve({
-          added_to_parent_pipeline: true,
-          created_pipeline: true,
-          mapping_updated: false,
-          pipeline_id: 'ml-inference-my-pipeline-name',
-        });
-      });
-
-      await mockRouter.callRoute({
-        params: { indexName: 'my-index-name' },
-        body: mockRequestBody,
-      });
-
-      expect(preparePipelineAndIndexForMlInference).toHaveBeenCalledWith(
-        'my-index-name',
-        mockRequestBody.pipeline_name,
-        undefined,
-        mockRequestBody.model_id,
-        mockRequestBody.source_field,
-        mockRequestBody.destination_field,
-        undefined,
-        undefined,
-        mockClient.asCurrentUser
-      );
-
-      expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {
-          created: 'ml-inference-my-pipeline-name',
-          mapping_updated: false,
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    });
-
     it('creates an ML inference pipeline from pipeline definition', async () => {
       (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
         return Promise.resolve({
@@ -380,10 +305,11 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName: 'my-index-name' },
         body: {
           field_mappings: [],
+          model_id: mockRequestBody.model_id,
           pipeline_definition: {
             processors: [],
           },
-          pipeline_name: 'my-pipeline-name',
+          pipeline_name: mockRequestBody.pipeline_name,
         },
       });
 
@@ -393,11 +319,8 @@ describe('Enterprise Search Managed Indices', () => {
         {
           processors: [],
         },
-        undefined,
-        undefined,
-        undefined,
+        mockRequestBody.model_id,
         [],
-        undefined,
         mockClient.asCurrentUser
       );
 
@@ -984,7 +907,7 @@ describe('Enterprise Search Managed Indices', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
+          message: 'Search encountered an error. Check Kibana Server logs for details.',
         },
         statusCode: 502,
       });
@@ -1069,7 +992,7 @@ describe('Enterprise Search Managed Indices', () => {
 
   describe('GET /internal/enterprise_search/pipelines/ml_inference', () => {
     let mockTrainedModelsProvider: MlTrainedModels;
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
 
     beforeEach(() => {
       const context = {
@@ -1082,20 +1005,11 @@ describe('Enterprise Search Managed Indices', () => {
         path: '/internal/enterprise_search/pipelines/ml_inference',
       });
 
-      mockTrainedModelsProvider = {
-        getTrainedModels: jest.fn(),
-        getTrainedModelsStats: jest.fn(),
-        startTrainedModelDeployment: jest.fn(),
-        stopTrainedModelDeployment: jest.fn(),
-        inferTrainedModel: jest.fn(),
-        deleteTrainedModel: jest.fn(),
-        updateTrainedModelDeployment: jest.fn(),
-        putTrainedModel: jest.fn(),
-      } as MlTrainedModels;
-
-      mockMl = {
-        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      mockMl = mlPluginServerMock.createSetupContract();
+      mockTrainedModelsProvider = mockMl.trainedModelsProvider(
+        {} as KibanaRequest,
+        {} as SavedObjectsClientContract
+      );
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1134,7 +1048,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('POST /internal/enterprise_search/ml/models/{modelName}', () => {
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1156,7 +1070,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      } as unknown as jest.Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1164,7 +1078,7 @@ describe('Enterprise Search Managed Indices', () => {
         router: mockRouter.router,
       });
     });
-    const modelName = '.elser_model_1_SNAPSHOT';
+    const modelName = '.elser_model_2';
 
     it('fails validation without modelName', () => {
       const request = {
@@ -1198,7 +1112,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('POST /internal/enterprise_search/ml/models/{modelName}/deploy', () => {
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1220,7 +1134,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      } as unknown as jest.Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1228,7 +1142,7 @@ describe('Enterprise Search Managed Indices', () => {
         router: mockRouter.router,
       });
     });
-    const modelName = '.elser_model_1_SNAPSHOT';
+    const modelName = '.elser_model_2';
 
     it('fails validation without modelName', () => {
       const request = {
@@ -1262,7 +1176,7 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/ml/models/{modelName}', () => {
-    let mockMl: SharedServices;
+    let mockMl: MlPluginSetup;
     let mockTrainedModelsProvider: MlTrainedModels;
 
     beforeEach(() => {
@@ -1283,7 +1197,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       mockMl = {
         trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
-      } as unknown as jest.Mocked<SharedServices>;
+      } as unknown as jest.Mocked<MlPluginSetup>;
 
       registerIndexRoutes({
         ...mockDependencies,
@@ -1291,7 +1205,7 @@ describe('Enterprise Search Managed Indices', () => {
         router: mockRouter.router,
       });
     });
-    const modelName = '.elser_model_1_SNAPSHOT';
+    const modelName = '.elser_model_2';
 
     it('fails validation without modelName', () => {
       const request = {

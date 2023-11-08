@@ -71,6 +71,7 @@ describe('DataTable', () => {
   const mount = useMountAppended();
   const props: DataTableProps = {
     browserFields: mockBrowserFields,
+    getFieldSpec: () => undefined,
     data: mockTimelineData,
     id: TableId.test,
     loadPage: jest.fn(),
@@ -148,7 +149,7 @@ describe('DataTable', () => {
         wrapper
           .find('[data-test-subj="dataGridRowCell"]')
           .at(0)
-          .find('.euiDataGridRowCell__truncate')
+          .find('.euiDataGridRowCell__content')
           .childAt(0)
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);
@@ -158,11 +159,21 @@ describe('DataTable', () => {
   describe('cellActions', () => {
     test('calls useDataGridColumnsCellActions properly', () => {
       const data = mockTimelineData.slice(0, 1);
+      const timestampFieldSpec = {
+        name: '@timestamp',
+        type: 'date',
+        aggregatable: true,
+        esTypes: ['date'],
+        searchable: true,
+      };
       const wrapper = mount(
         <TestProviders>
           <DataTableComponent
             cellActionsTriggerId="mockCellActionsTrigger"
             {...props}
+            getFieldSpec={(name) =>
+              timestampFieldSpec.name === name ? timestampFieldSpec : undefined
+            }
             data={data}
           />
         </TestProviders>
@@ -171,16 +182,7 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
         triggerId: 'mockCellActionsTrigger',
-        fields: [
-          {
-            name: '@timestamp',
-            type: 'date',
-            aggregatable: true,
-            esTypes: ['date'],
-            searchable: true,
-            subType: undefined,
-          },
-        ],
+        fields: [timestampFieldSpec],
         getCellValue: expect.any(Function),
         metadata: {
           scopeId: 'table-test',

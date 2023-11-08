@@ -12,6 +12,7 @@ const DownloadSourceBaseSchema = {
   name: schema.string(),
   host: schema.uri({ scheme: ['http', 'https'] }),
   is_default: schema.boolean({ defaultValue: false }),
+  proxy_id: schema.nullable(schema.string()),
 };
 
 export const DownloadSourceSchema = schema.object({ ...DownloadSourceBaseSchema });

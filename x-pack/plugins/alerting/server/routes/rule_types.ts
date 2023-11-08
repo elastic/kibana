@@ -8,10 +8,10 @@
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { RegistryAlertTypeWithAuth } from '../authorization';
-import { RewriteResponseCase, verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
-const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (results) => {
+const rewriteBodyRes = (results: RegistryAlertTypeWithAuth[]) => {
   return results.map(
     ({
       enabledInLicense,
@@ -25,10 +25,11 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       authorizedConsumers,
       defaultScheduleInterval,
       doesSetRecoveryContext,
-      hasGetSummarizedAlerts,
+      hasAlertsMappings,
       hasFieldsForAAD,
+      validLegacyConsumers,
       ...rest
-    }) => ({
+    }: RegistryAlertTypeWithAuth) => ({
       ...rest,
       enabled_in_license: enabledInLicense,
       recovery_action_group: recoveryActionGroup,
@@ -41,7 +42,7 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       authorized_consumers: authorizedConsumers,
       default_schedule_interval: defaultScheduleInterval,
       does_set_recovery_context: doesSetRecoveryContext,
-      has_get_summarized_alerts: !!hasGetSummarizedAlerts,
+      has_alerts_mappings: !!hasAlertsMappings,
       has_fields_for_a_a_d: !!hasFieldsForAAD,
     })
   );

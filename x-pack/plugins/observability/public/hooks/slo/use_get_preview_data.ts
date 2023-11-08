@@ -27,7 +27,7 @@ export interface UseGetPreviewData {
   ) => Promise<QueryObserverResult<GetPreviewDataResponse | undefined, unknown>>;
 }
 
-export function useGetPreviewData(indicator?: Indicator): UseGetPreviewData {
+export function useGetPreviewData(isValid: boolean, indicator: Indicator): UseGetPreviewData {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
@@ -42,11 +42,11 @@ export function useGetPreviewData(indicator?: Indicator): UseGetPreviewData {
           }
         );
 
-        return response;
+        return Array.isArray(response) ? response : [];
       },
       retry: false,
       refetchOnWindowFocus: false,
-      enabled: Boolean(indicator),
+      enabled: isValid,
     }
   );
 

@@ -49,14 +49,6 @@
             "path": "src/core/public/mocks.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
-          },
-          {
             "plugin": "@kbn/core-plugins-browser-internal",
             "path": "packages/core/plugins/core-plugins-browser-internal/src/plugins_service.test.ts"
           },

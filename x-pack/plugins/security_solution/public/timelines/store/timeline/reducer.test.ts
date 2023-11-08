@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { TimelineTabs, TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 
 import type {
   DataProvider,
@@ -137,6 +137,7 @@ const basicTimeline: TimelineModel = {
   timelineType: TimelineType.default,
   title: '',
   version: null,
+  savedSearchId: null,
 };
 const timelineByIdMock: TimelineById = {
   foo: { ...basicTimeline },
@@ -223,6 +224,7 @@ describe('Timeline', () => {
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
+        savedSearchId: null,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
@@ -235,6 +237,7 @@ describe('Timeline', () => {
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
+        savedSearchId: null,
       });
       expect(update).toEqual({
         foo: basicTimeline,
@@ -253,6 +256,7 @@ describe('Timeline', () => {
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
+        savedSearchId: null,
       });
       expect(update).toEqual({
         foo: basicTimeline,

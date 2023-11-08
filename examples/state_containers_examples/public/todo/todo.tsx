@@ -15,8 +15,8 @@ import {
   EuiCheckbox,
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -202,8 +202,8 @@ export const TodoAppPage: React.FC<{
             </EuiText>
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
+        <EuiPageTemplate.Section>
+          <EuiPageSection>
             <Routes>
               <Route path={'/completed'}>
                 <TodoApp filter={'completed'} stateContainer={stateContainer} />
@@ -233,8 +233,8 @@ export const TodoAppPage: React.FC<{
             <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
               {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
             </EuiButton>
-          </EuiPageContentBody>
-        </EuiPageContent>
+          </EuiPageSection>
+        </EuiPageTemplate.Section>
       </EuiPageBody>
     </Router>
   );

@@ -18,6 +18,7 @@ export const allowedExperimentalValues = Object.freeze({
   ruleStatusFilter: true,
   rulesDetailLogs: true,
   ruleUseExecutionStatus: false,
+  ruleKqlBar: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -41,6 +42,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
       throw new TriggersActionsUIInvalidExperimentalValue(`[${value}] is not valid.`);
     }
 
+    // @ts-expect-error ts upgrade v4.7.4
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 

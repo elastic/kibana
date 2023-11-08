@@ -8,8 +8,8 @@
 import type React from 'react';
 import type { EuiTitleSize } from '@elastic/eui';
 import type { ScaleType, Position, TickFormatter } from '@elastic/charts';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ActionCreator } from 'redux';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/api/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
@@ -83,7 +83,7 @@ export interface MatrixHistogramQueryProps {
   skip?: boolean;
   isPtrIncluded?: boolean;
   includeMissingData?: boolean;
-  runtimeMappings?: MappingRuntimeFields;
+  runtimeMappings?: RunTimeMappings;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {

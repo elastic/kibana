@@ -6,20 +6,20 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { Actions, ActionTypes } from '../../../../common/api';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class PushedUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'pushed'>): UserActionEvent {
-    const action = Actions.push_to_service;
+    const action = UserActionActions.push_to_service;
 
     const parameters = this.buildCommonUserAction({
       ...args,
       action,
       valueKey: 'externalService',
       value: this.extractConnectorIdFromExternalService(args.payload.externalService),
-      type: ActionTypes.pushed,
+      type: UserActionTypes.pushed,
       connectorId: args.payload.externalService.connector_id,
     });
 

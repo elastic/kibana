@@ -25,6 +25,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
@@ -71,6 +72,7 @@ dataStart.search.search = jest.fn(({ params }: IKibanaSearchRequest) => {
 }) as ISearchGeneric;
 
 const appDependencies: AppDependencies = {
+  analytics: coreStart.analytics,
   application: coreStart.application,
   charts: chartPluginMock.createStartContract(),
   chrome: coreStart.chrome,
@@ -95,6 +97,7 @@ const appDependencies: AppDependencies = {
   savedObjectsManagement: {} as jest.Mocked<SavedObjectsManagementPluginStart>,
   settings: settingsServiceMock.createStartContract(),
   savedSearch: savedSearchPluginMock.createStartContract(),
+  contentManagement: contentManagementMock.createStartContract(),
 };
 
 export const useAppDependencies = () => {

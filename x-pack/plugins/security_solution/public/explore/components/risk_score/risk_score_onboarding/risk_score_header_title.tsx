@@ -7,29 +7,20 @@
 import React from 'react';
 
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { NavItemBetaBadge } from '../../../../common/components/navigation/nav_item_beta_badge';
 import * as i18n from '../../../../overview/components/entity_analytics/common/translations';
-import { TECHNICAL_PREVIEW } from './translations';
 
 const RiskScoreHeaderTitleComponent = ({
   riskScoreEntity,
   title,
-  showTechnicalPreviewBadge = false,
 }: {
   riskScoreEntity: RiskScoreEntity;
   title?: string;
-  showTechnicalPreviewBadge?: boolean;
-}) => {
-  return (
-    <>
-      {title ??
-        (riskScoreEntity === RiskScoreEntity.user ? i18n.USER_RISK_TITLE : i18n.HOST_RISK_TITLE)}
-      {showTechnicalPreviewBadge && (
-        <NavItemBetaBadge text={TECHNICAL_PREVIEW} className="eui-alignMiddle" />
-      )}
-    </>
-  );
-};
+}) => (
+  <>
+    {title ??
+      (riskScoreEntity === RiskScoreEntity.user ? i18n.USER_RISK_TITLE : i18n.HOST_RISK_TITLE)}
+  </>
+);
 
 export const RiskScoreHeaderTitle = React.memo(RiskScoreHeaderTitleComponent);
 RiskScoreHeaderTitle.displayName = 'RiskScoreHeaderTitle';

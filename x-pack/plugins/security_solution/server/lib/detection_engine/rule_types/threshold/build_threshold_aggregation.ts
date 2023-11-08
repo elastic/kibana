@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThresholdNormalized } from '../../../../../common/detection_engine/rule_schema';
+import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { shouldFilterByCardinality } from './utils';
 
 export const buildThresholdMultiBucketAggregation = ({

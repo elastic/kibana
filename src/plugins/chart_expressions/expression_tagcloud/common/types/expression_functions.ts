@@ -14,6 +14,7 @@ import {
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
 
 interface TagCloudCommonParams {
@@ -26,6 +27,7 @@ interface TagCloudCommonParams {
   metric: ExpressionValueVisDimension | string;
   bucket?: ExpressionValueVisDimension | string;
   palette: PaletteOutput;
+  colorMapping?: string; // JSON stringified object of the color mapping
 }
 
 export interface TagCloudVisConfig extends TagCloudCommonParams {
@@ -41,6 +43,7 @@ export interface TagcloudRendererConfig {
   visData: Datatable;
   visParams: TagCloudRendererParams;
   syncColors: boolean;
+  overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
 export type ExpressionTagcloudFunctionDefinition = ExpressionFunctionDefinition<

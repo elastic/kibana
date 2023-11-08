@@ -29,23 +29,26 @@ export const alertInstanceFactoryStub = <
   replaceState(state: TInstanceState) {
     return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+      meta: { lastScheduledActions: { group: 'default', date: new Date().toISOString() } },
     });
   },
   scheduleActions(actionGroup: TActionGroupIds, alertcontext: TInstanceContext) {
     return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+      meta: { lastScheduledActions: { group: 'default', date: new Date().toISOString() } },
     });
   },
   setContext(alertContext: TInstanceContext) {
     return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
-      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+      meta: { lastScheduledActions: { group: 'default', date: new Date().toISOString() } },
     });
   },
   getContext() {
     return {} as unknown as TInstanceContext;
+  },
+  getStart() {
+    return null;
   },
   hasContext() {
     return false;

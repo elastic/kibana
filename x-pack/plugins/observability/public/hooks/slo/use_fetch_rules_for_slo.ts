@@ -21,8 +21,10 @@ interface Params {
   sloIds?: SloId[];
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SloRule = { sloId: string; name: string };
+export interface SloRule extends Record<string, unknown> {
+  sloId: string;
+  name: string;
+}
 
 interface RuleApiResponse {
   page: number;
@@ -52,8 +54,7 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
       queryFn: async () => {
         try {
           const body = JSON.stringify({
-            filter:
-              sloIds?.map((sloId) => `alert.attributes.params.sloId:${sloId}`).join(' or ') ?? '',
+            filter: sloIds.map((sloId) => `alert.attributes.params.sloId:${sloId}`).join(' or '),
             fields: ['params.sloId', 'name'],
             per_page: 1000,
           });
@@ -62,7 +63,7 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
             body,
           });
 
-          const init = sloIds?.reduce((acc, sloId) => ({ ...acc, [sloId]: [] }), {});
+          const init = sloIds.reduce((acc, sloId) => ({ ...acc, [sloId]: [] }), {});
 
           return response.data.reduce(
             (acc, rule) => ({
@@ -75,7 +76,7 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
           // ignore error for retrieving slos
         }
       },
-      enabled: Boolean(sloIds?.length),
+      enabled: Boolean(sloIds.length),
       refetchOnWindowFocus: false,
       keepPreviousData: true,
     }

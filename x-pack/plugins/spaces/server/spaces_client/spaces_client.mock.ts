@@ -7,9 +7,9 @@
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 
+import type { SpacesClient } from './spaces_client';
 import type { Space } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import type { SpacesClient } from './spaces_client';
 
 const createSpacesClientMock = () => {
   const repositoryMock = savedObjectsRepositoryMock.create();

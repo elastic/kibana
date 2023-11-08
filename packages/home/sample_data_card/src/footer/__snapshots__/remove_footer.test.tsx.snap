@@ -9,15 +9,15 @@ exports[`install footer should render 1`] = `
   >
     <button
       aria-label="Remove Data Set Name"
-      class="euiButtonEmpty euiButtonEmpty--flushLeft css-1v3a3p6-empty-danger"
+      class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-danger-flush-left"
       data-test-subj="removeSampleDataSetdata-set-id"
       type="button"
     >
       <span
-        class="euiButtonContent euiButtonEmpty__content"
+        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
       >
         <span
-          class="euiButtonEmpty__text"
+          class="eui-textTruncate euiButtonEmpty__text"
         >
           Remove
         </span>
@@ -29,7 +29,7 @@ exports[`install footer should render 1`] = `
   >
     <button
       aria-label="View Data Set Name"
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
       data-test-subj="launchSampleDataSetdata-set-id"
       type="button"
     >

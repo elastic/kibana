@@ -11,6 +11,8 @@ import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { EsQueryRuleParams } from './rule_type_params';
 import { Comparator } from '../../../common/comparator_types';
 import { getHumanReadableComparator } from '../../../common';
+import { isEsqlQueryRule } from './util';
+import { isSearchSourceRule } from './util';
 
 // rule type context provided to actions
 export interface ActionContext extends EsQueryRuleActionContext {
@@ -40,6 +42,7 @@ interface AddMessagesOpts {
   params: EsQueryRuleParams;
   group?: string;
   isRecovered?: boolean;
+  index: string[] | null;
 }
 export function addMessages({
   ruleName,
@@ -47,6 +50,7 @@ export function addMessages({
   params,
   group,
   isRecovered = false,
+  index,
 }: AddMessagesOpts): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle', {
     defaultMessage: `rule '{name}' {verb}`,
@@ -57,28 +61,30 @@ export function addMessages({
   });
 
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
-  const message = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextMessageDescription', {
-    defaultMessage: `rule '{name}' is {verb}:
-
-- Value: {value}
-- Conditions Met: {conditions} over {window}
-- Timestamp: {date}
-- Link: {link}`,
+  const message = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextReasonDescription', {
+    defaultMessage: `Document count is {value} in the last {window}{verb}{index}. Alert when {comparator} {threshold}.`,
     values: {
-      name: ruleName,
       value: baseContext.value,
-      conditions: baseContext.conditions,
       window,
-      date: baseContext.date,
-      link: baseContext.link,
-      verb: isRecovered ? 'recovered' : 'active',
+      verb: group ? ` for ${group}` : '',
+      comparator: getHumanReadableComparator(params.thresholdComparator),
+      threshold: params.threshold.join(' and '),
+      index: index
+        ? ` in ${index.join(', ')} ${
+            isSearchSourceRule(params.searchType)
+              ? 'data view'
+              : index.length === 1
+              ? 'index'
+              : 'indices'
+          }`
+        : '',
     },
   });
-
   return { ...baseContext, title, message };
 }
 
 interface GetContextConditionsDescriptionOpts {
+  searchType: 'searchSource' | 'esQuery' | 'esqlQuery';
   comparator: Comparator;
   threshold: number[];
   aggType: string;
@@ -88,6 +94,7 @@ interface GetContextConditionsDescriptionOpts {
 }
 
 export function getContextConditionsDescription({
+  searchType,
   comparator,
   threshold,
   aggType,
@@ -95,15 +102,23 @@ export function getContextConditionsDescription({
   isRecovered = false,
   group,
 }: GetContextConditionsDescriptionOpts) {
-  return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
-    defaultMessage:
-      'Number of matching documents{groupCondition}{aggCondition} is {negation}{thresholdComparator} {threshold}',
-    values: {
-      aggCondition: aggType === 'count' ? '' : ` where ${aggType} of ${aggField}`,
-      groupCondition: group ? ` for group "${group}"` : '',
-      thresholdComparator: getHumanReadableComparator(comparator),
-      threshold: threshold.join(' and '),
-      negation: isRecovered ? 'NOT ' : '',
-    },
-  });
+  return isEsqlQueryRule(searchType)
+    ? i18n.translate('xpack.stackAlerts.esQuery.esqlAlertTypeContextConditionsDescription', {
+        defaultMessage: 'Query{negation} documents{groupCondition}',
+        values: {
+          groupCondition: group ? ` for group "${group}"` : '',
+          negation: isRecovered ? ' did NOT match' : ' matched',
+        },
+      })
+    : i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
+        defaultMessage:
+          'Number of matching documents{groupCondition}{aggCondition} is {negation}{thresholdComparator} {threshold}',
+        values: {
+          aggCondition: aggType === 'count' ? '' : ` where ${aggType} of ${aggField}`,
+          groupCondition: group ? ` for group "${group}"` : '',
+          thresholdComparator: getHumanReadableComparator(comparator),
+          threshold: threshold.join(' and '),
+          negation: isRecovered ? 'NOT ' : '',
+        },
+      });
 }

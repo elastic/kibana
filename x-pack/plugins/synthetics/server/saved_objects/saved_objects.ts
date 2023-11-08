@@ -16,12 +16,12 @@ import {
   SYNTHETICS_SECRET_ENCRYPTED_TYPE,
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
-import { privateLocationsSavedObject } from './private_locations';
+import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 import { DynamicSettingsAttributes } from '../runtime_types/settings';
 import { ConfigKey } from '../../common/runtime_types';
 import { UptimeConfig } from '../../common/config';
-import { settingsObjectId, umDynamicSettings } from './uptime_settings';
+import { settingsObjectId, settingsObjectType } from './uptime_settings';
 import {
   getSyntheticsMonitorSavedObjectType,
   SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
@@ -37,7 +37,7 @@ export const registerUptimeSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) => {
-  savedObjectsService.registerType(privateLocationsSavedObject);
+  savedObjectsService.registerType(PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE);
 
   savedObjectsService.registerType(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));
   savedObjectsService.registerType(syntheticsServiceApiKey);
@@ -63,10 +63,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   config: null,
   getUptimeDynamicSettings: async (client) => {
     try {
-      const obj = await client.get<DynamicSettingsAttributes>(
-        umDynamicSettings.name,
-        settingsObjectId
-      );
+      const obj = await client.get<DynamicSettingsAttributes>(settingsObjectType, settingsObjectId);
       return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
     } catch (getErr) {
       const config = savedObjectsAdapter.config;
@@ -80,7 +77,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
     }
   },
   setUptimeDynamicSettings: async (client, settings: DynamicSettingsAttributes | undefined) => {
-    await client.create(umDynamicSettings.name, settings, {
+    await client.create(settingsObjectType, settings, {
       id: settingsObjectId,
       overwrite: true,
     });

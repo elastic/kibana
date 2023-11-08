@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 import type { FieldStatsType } from '../common/types';
+import {
+  type DiscoverUrlConfig,
+  type DashboardUrlConfig,
+  type OtherUrlConfig,
+} from '../../../services/ml/data_frame_analytics_edit';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -28,11 +34,32 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
+  const testDiscoverCustomUrl: DiscoverUrlConfig = {
+    label: 'Show data',
+    indexPattern: 'ft_egs_regression',
+    queryEntityFieldNames: ['stabf'],
+    timeRange: TIME_RANGE_TYPE.AUTO,
+  };
+
+  const testDashboardCustomUrl: DashboardUrlConfig = {
+    label: 'Show dashboard',
+    dashboardName: 'ML Test',
+    queryEntityFieldNames: ['stabf'],
+    timeRange: TIME_RANGE_TYPE.AUTO,
+  };
+
+  const testOtherCustomUrl: OtherUrlConfig = {
+    label: 'elastic.co',
+    url: 'https://www.elastic.co/',
+  };
+
   describe('regression creation', function () {
+    let testDashboardId: string | null = null;
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression');
       await ml.testResources.setKibanaTimeZoneToUTC();
+      testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
 
       await ml.securityUI.loginAsMlPowerUser();
     });
@@ -64,6 +91,11 @@ export default function ({ getService }: FtrProviderContext) {
         trainingPercent: 20,
         modelMemory: '20mb',
         createIndexPattern: true,
+        advancedEditorContent: [
+          '{',
+          '  "description": "Regression job based on ft_egs_regression dataset with runtime fields",',
+          '  "source": {',
+        ],
         expected: {
           scatterplotMatrixColorStats: [
             // some marker colors of the continuous color scale
@@ -92,7 +124,6 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '16mb',
                   'Version',
-                  '8.10.0',
                 ],
               },
               {
@@ -296,6 +327,14 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
           await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
 
+          // switch to json editor and back
+          await ml.testExecution.logTestStep('switches to advanced editor then back to form');
+          await ml.dataFrameAnalyticsCreation.openAdvancedEditor();
+          await ml.dataFrameAnalyticsCreation.assertAdvancedEditorCodeEditorContent(
+            testData.advancedEditorContent
+          );
+          await ml.dataFrameAnalyticsCreation.closeAdvancedEditor();
+
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
 
@@ -343,6 +382,40 @@ export default function ({ getService }: FtrProviderContext) {
             testData.jobId,
             testData.expected.rowDetails
           );
+        });
+
+        it('adds discover custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for discover url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds discover custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(
+            testData.jobId,
+            testDiscoverCustomUrl
+          );
+        });
+
+        it('adds dashboard custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for dashboard url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds dashboard custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(
+            testData.jobId,
+            testDashboardCustomUrl,
+            {
+              index: 1,
+              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'stabf:\"$stabf$\"'))`,
+            }
+          );
+        });
+
+        it('adds other custom url type to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for other url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds other type custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

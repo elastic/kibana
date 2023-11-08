@@ -8,8 +8,8 @@
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { Type } from 'io-ts';
 import { exact, partial, strict, string } from 'io-ts';
-import type { CaseAttributes } from '../../../common/api';
-import { CaseAttributesRt } from '../../../common/api';
+import type { CaseAttributes } from '../../../common/types/domain';
+import { CaseAttributesRt } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { ExternalServicePersisted } from './external_service';
 import type { User, UserProfile } from './user';
@@ -48,7 +48,14 @@ export interface CasePersistedAttributes {
   updated_at: string | null;
   updated_by: User | null;
   category?: string | null;
+  customFields?: CasePersistedCustomFields;
 }
+
+type CasePersistedCustomFields = Array<{
+  key: string;
+  type: string;
+  value: null | unknown;
+}>;
 
 export type CaseTransformedAttributes = CaseAttributes;
 

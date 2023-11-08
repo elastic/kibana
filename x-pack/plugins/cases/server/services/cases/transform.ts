@@ -14,6 +14,9 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import type { CaseCustomFields, ExternalService } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
@@ -22,8 +25,6 @@ import {
   STATUS_ESMODEL_TO_EXTERNAL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
-import type { CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, CaseStatuses, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,
@@ -44,6 +45,7 @@ export function transformUpdateResponseToExternalModel(
     status,
     total_alerts,
     total_comments,
+    customFields,
     ...restUpdateAttributes
   } =
     updatedCase.attributes ??
@@ -59,7 +61,7 @@ export function transformUpdateResponseToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
-  let externalService: CaseFullExternalService | null | undefined;
+  let externalService: ExternalService | null | undefined;
 
   // if external_service is not defined then we don't want to include it in the response since it wasn't passed it as an
   // attribute to update
@@ -76,6 +78,9 @@ export function transformUpdateResponseToExternalModel(
       ...(transformedConnector && { connector: transformedConnector }),
       // if externalService is null that means we intentionally updated it to null within ES so return that as a valid value
       ...(externalService !== undefined && { external_service: externalService }),
+      ...(customFields !== undefined && {
+        customFields: customFields as CaseTransformedAttributes['customFields'],
+      }),
     },
   };
 }
@@ -173,6 +178,9 @@ export function transformSavedObjectToExternalModel(
     SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
+  const customFields = !caseSavedObjectAttributes.customFields
+    ? []
+    : (caseSavedObjectAttributes.customFields as CaseCustomFields);
 
   return {
     ...caseSavedObject,
@@ -183,6 +191,7 @@ export function transformSavedObjectToExternalModel(
       connector,
       external_service: externalService,
       category,
+      customFields,
     },
   };
 }
@@ -192,7 +201,7 @@ function transformESExternalService(
   // that's why it can be null here
   externalService: ExternalServicePersisted | null | undefined,
   references: SavedObjectReference[] | undefined
-): CaseFullExternalService | null {
+): ExternalService | null {
   const connectorIdRef = findConnectorIdReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, references);
 
   if (!externalService) {

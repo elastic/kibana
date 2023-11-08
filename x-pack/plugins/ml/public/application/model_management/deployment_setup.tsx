@@ -27,11 +27,10 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import type { Observable } from 'rxjs';
-import type { CoreTheme, OverlayStart } from '@kbn/core/public';
+import type { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { numberValidator } from '@kbn/ml-agg-utils';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isCloudTrial } from '../services/ml_server_info';
 import {
   composeValidators,
@@ -239,7 +238,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         description={
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsHelp"
-            defaultMessage="Increase to improve throughput of all requests."
+            defaultMessage="Increase to improve document ingest throughput."
           />
         }
       >
@@ -282,7 +281,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           description={
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationHelp"
-              defaultMessage="Increase to improve latency for each request."
+              defaultMessage="Increase to improve inference latency."
             />
           }
         >
@@ -497,7 +496,12 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
  * @param theme$
  */
 export const getUserInputModelDeploymentParamsProvider =
-  (overlays: OverlayStart, theme$: Observable<CoreTheme>, startModelDeploymentDocUrl: string) =>
+  (
+    overlays: OverlayStart,
+    theme: ThemeServiceStart,
+    i18nStart: I18nStart,
+    startModelDeploymentDocUrl: string
+  ) =>
   (
     model: ModelItem,
     initialParams?: ThreadingParams,
@@ -507,30 +511,28 @@ export const getUserInputModelDeploymentParamsProvider =
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
-            wrapWithTheme(
-              <StartUpdateDeploymentModal
-                startModelDeploymentDocUrl={startModelDeploymentDocUrl}
-                initialParams={initialParams}
-                modelAndDeploymentIds={deploymentIds}
-                model={model}
-                onConfigChange={(config) => {
-                  modalSession.close();
+            <StartUpdateDeploymentModal
+              startModelDeploymentDocUrl={startModelDeploymentDocUrl}
+              initialParams={initialParams}
+              modelAndDeploymentIds={deploymentIds}
+              model={model}
+              onConfigChange={(config) => {
+                modalSession.close();
 
-                  const resultConfig = { ...config };
-                  if (resultConfig.priority === 'low') {
-                    resultConfig.numOfAllocations = 1;
-                    resultConfig.threadsPerAllocations = 1;
-                  }
+                const resultConfig = { ...config };
+                if (resultConfig.priority === 'low') {
+                  resultConfig.numOfAllocations = 1;
+                  resultConfig.threadsPerAllocations = 1;
+                }
 
-                  resolve(resultConfig);
-                }}
-                onClose={() => {
-                  modalSession.close();
-                  resolve();
-                }}
-              />,
-              theme$
-            )
+                resolve(resultConfig);
+              }}
+              onClose={() => {
+                modalSession.close();
+                resolve();
+              }}
+            />,
+            { theme, i18n: i18nStart }
           )
         );
       } catch (e) {

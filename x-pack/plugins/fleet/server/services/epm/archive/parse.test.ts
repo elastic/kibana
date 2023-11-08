@@ -459,7 +459,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/README.md'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {},
+        assetsMap: {},
       })
     ).toThrowError("No manifest.yml file found for data stream 'stream1'");
   });
@@ -470,7 +470,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.alloc(1),
         },
       })
@@ -483,7 +483,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
             `
           title: Custom Logs`,
@@ -502,7 +502,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
             `
           title: Custom Logs
@@ -532,7 +532,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
             `
           title: Custom Logs
@@ -555,6 +555,93 @@ describe('parseAndVerifyDataStreams', () => {
         release: 'ga',
         title: 'Custom Logs',
         type: 'logs',
+      },
+    ]);
+  });
+
+  it('should parse routing rules', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0`,
+            'utf8'
+          ),
+          'input-only-0.1.0/data_stream/stream1/routing_rules.yml': Buffer.from(
+            `
+          - source_dataset: ds
+            rules:
+              - target_dataset: ds.test
+                if: true == true
+                namespace: "default"
+          `,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+        elasticsearch: {},
+        routing_rules: [
+          {
+            source_dataset: 'ds',
+            rules: [
+              {
+                target_dataset: 'ds.test',
+                if: 'true == true',
+                namespace: 'default',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should parse lifecycle', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0`,
+            'utf8'
+          ),
+          'input-only-0.1.0/data_stream/stream1/lifecycle.yml': Buffer.from(
+            `data_retention: "7d"`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+        elasticsearch: {},
+        lifecycle: { data_retention: '7d' },
       },
     ]);
   });

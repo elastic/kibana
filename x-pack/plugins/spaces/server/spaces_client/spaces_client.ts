@@ -7,12 +7,12 @@
 
 import Boom from '@hapi/boom';
 
-import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
   SavedObject,
 } from '@kbn/core/server';
+import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 
 import { isReservedSpace } from '../../common';
 import type { spaceV1 as v1 } from '../../common';
@@ -124,6 +124,12 @@ export class SpacesClient implements ISpacesClient {
       );
     }
 
+    if (space.disabledFeatures.length > 0 && !this.config.allowFeatureVisibility) {
+      throw Boom.badRequest(
+        'Unable to create Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled'
+      );
+    }
+
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
     const id = space.id;
@@ -136,6 +142,12 @@ export class SpacesClient implements ISpacesClient {
   }
 
   public async update(id: string, space: v1.Space) {
+    if (space.disabledFeatures.length > 0 && !this.config.allowFeatureVisibility) {
+      throw Boom.badRequest(
+        'Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled'
+      );
+    }
+
     const attributes = this.generateSpaceAttributes(space);
     await this.repository.update('space', id, attributes);
     const updatedSavedObject = await this.repository.get('space', id);

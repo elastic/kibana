@@ -6,13 +6,14 @@
  */
 
 import type { ReactNode } from 'react';
-import type { SettingsUserAction } from '../../../common/api';
-import type { UserActionBuilder, UserActionResponse } from './types';
+import type { SnakeToCamelCase } from '../../../common/types';
+import type { SettingsUserAction } from '../../../common/types/domain';
+import type { UserActionBuilder } from './types';
 
 import { createCommonUpdateUserActionBuilder } from './common';
 import { DISABLED_SETTING, ENABLED_SETTING, SYNC_ALERTS_LC } from './translations';
 
-function getSettingsLabel(userAction: UserActionResponse<SettingsUserAction>): ReactNode {
+function getSettingsLabel(userAction: SnakeToCamelCase<SettingsUserAction>): ReactNode {
   if (userAction.payload.settings.syncAlerts) {
     return `${ENABLED_SETTING} ${SYNC_ALERTS_LC}`;
   } else {
@@ -26,7 +27,7 @@ export const createSettingsUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
 }) => ({
   build: () => {
-    const action = userAction as UserActionResponse<SettingsUserAction>;
+    const action = userAction as SnakeToCamelCase<SettingsUserAction>;
     if (action?.payload?.settings?.syncAlerts !== undefined) {
       const commonBuilder = createCommonUpdateUserActionBuilder({
         userProfiles,

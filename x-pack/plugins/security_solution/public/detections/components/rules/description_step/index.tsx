@@ -9,16 +9,15 @@ import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
-
 import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -47,7 +46,9 @@ import {
   buildAlertSuppressionDescription,
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
+  buildHighlightedFieldsOverrideDescription,
 } from './helpers';
+import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
@@ -58,14 +59,12 @@ import type { LicenseService } from '../../../../../common/license';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
-  &.euiDescriptionList--column .euiDescriptionList__title {
-    width: 30%;
-  }
-  &.euiDescriptionList--column .euiDescriptionList__description {
-    width: 70%;
+  .euiDescriptionList__description {
     overflow-wrap: anywhere;
   }
 `;
+
+const DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['50%', '50%'];
 
 interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
@@ -134,6 +133,8 @@ export const StepRuleDescriptionComponent = <T,>({
           <DescriptionListContainer
             data-test-subj="singleSplitStepRuleDescriptionList"
             type="column"
+            columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+            rowGutterSize="m"
             listItems={listItems}
           />
         )}
@@ -241,6 +242,9 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
+  } else if (field === 'investigationFields') {
+    const values: string[] = get(field, data);
+    return buildHighlightedFieldsOverrideDescription(label, values);
   } else if (field === 'riskScore') {
     const values: AboutStepRiskScore = get(field, data);
     return buildRiskScoreDescription(values);
@@ -292,6 +296,10 @@ export const getDescriptionItem = (
     if (get('dataViewId', data)) {
       return [];
     }
+  } else if (field === 'isBuildingBlock') {
+    return get('isBuildingBlock', data)
+      ? [{ title: i18n.BUILDING_BLOCK_LABEL, description: i18n.BUILDING_BLOCK_DESCRIPTION }]
+      : [];
   }
 
   const description: string = get(field, data);

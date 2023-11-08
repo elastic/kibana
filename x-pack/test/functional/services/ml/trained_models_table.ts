@@ -162,6 +162,21 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertTableIsPopulated() {
+      await this.waitForModelsToLoad();
+      const rows = await this.parseModelsTable();
+      expect(rows.length).to.not.eql(0, `Expected trained model row count to be '>0' (got '0')`);
+    }
+
+    public async assertTableIsNotPopulated() {
+      await this.waitForModelsToLoad();
+      const rows = await this.parseModelsTable();
+      expect(rows.length).to.eql(
+        0,
+        `Expected trained model row count to be '0' (got '${rows.length}')`
+      );
+    }
+
     public async assertModelCollapsedActionsButtonExists(modelId: string, expectedValue: boolean) {
       const actionsExists = await this.doesModelCollapsedActionsButtonExist(modelId);
       expect(actionsExists).to.eql(
@@ -198,6 +213,84 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertModelDeployActionButtonExists(modelId: string, expectedValue: boolean) {
+      const actionsExists = await testSubjects.exists(
+        this.rowSelector(modelId, 'mlModelsTableRowDeployAction')
+      );
+
+      expect(actionsExists).to.eql(
+        expectedValue,
+        `Expected row deploy action button for trained model '${modelId}' to be ${
+          expectedValue ? 'visible' : 'hidden'
+        } (got ${actionsExists ? 'visible' : 'hidden'})`
+      );
+    }
+
+    public async assertModelAnalyzeDataDriftButtonExists(modelId: string, expectedValue: boolean) {
+      const actionsExists = await testSubjects.exists(
+        this.rowSelector(modelId, 'mlModelsAnalyzeDataDriftAction')
+      );
+
+      expect(actionsExists).to.eql(
+        expectedValue,
+        `Expected row analyze data drift action button for trained model '${modelId}' to be ${
+          expectedValue ? 'visible' : 'hidden'
+        } (got ${actionsExists ? 'visible' : 'hidden'})`
+      );
+    }
+
+    public async assertAnalyzeDataDriftActionButtonEnabled(
+      modelId: string,
+      expectedValue: boolean
+    ) {
+      const actionsButtonExists = await this.doesModelCollapsedActionsButtonExist(modelId);
+
+      let isEnabled = null;
+      await retry.tryForTime(5 * 1000, async () => {
+        if (actionsButtonExists) {
+          await this.toggleActionsContextMenu(modelId, true);
+          const panelElement = await find.byCssSelector('.euiContextMenuPanel');
+          const actionButton = await panelElement.findByTestSubject('mlModelsTableRowDeleteAction');
+          isEnabled = await actionButton.isEnabled();
+          // escape popover
+          await browser.pressKeys(browser.keys.ESCAPE);
+        } else {
+          await this.assertModelDeleteActionButtonExists(modelId, true);
+          isEnabled = await testSubjects.isEnabled(
+            this.rowSelector(modelId, 'mlModelsAnalyzeDataDriftAction')
+          );
+        }
+
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected row analyze data drift action button for trained model '${modelId}' to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
+    }
+
+    public async clickAnalyzeDataDriftActionButton(modelId: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        const actionsButtonExists = await this.doesModelCollapsedActionsButtonExist(modelId);
+        if (actionsButtonExists) {
+          await this.toggleActionsContextMenu(modelId, true);
+          const panelElement = await find.byCssSelector('.euiContextMenuPanel');
+          const actionButton = await panelElement.findByTestSubject(
+            'mlModelsAnalyzeDataDriftAction'
+          );
+          await actionButton.click();
+          // escape popover
+          await browser.pressKeys(browser.keys.ESCAPE);
+        } else {
+          await this.assertModelDeleteActionButtonExists(modelId, true);
+          await testSubjects.click(this.rowSelector(modelId, 'mlModelsAnalyzeDataDriftAction'));
+        }
+
+        await testSubjects.existOrFail('mlPageDataDriftCustomIndexPatterns');
+      });
+    }
+
     public async assertModelTestButtonExists(modelId: string, expectedValue: boolean) {
       const actionExists = await testSubjects.exists(
         this.rowSelector(modelId, 'mlModelsTableRowTestAction')
@@ -227,14 +320,43 @@ export function TrainedModelsTableProvider(
     }
 
     public async deleteModel(modelId: string) {
+      const fromContextMenu = await this.doesModelCollapsedActionsButtonExist(modelId);
       await mlCommonUI.invokeTableRowAction(
         this.rowSelector(modelId),
-        'mlModelsTableRowDeleteAction'
+        'mlModelsTableRowDeleteAction',
+        fromContextMenu
       );
       await this.assertDeleteModalExists();
       await this.confirmDeleteModel();
       await mlCommonUI.waitForRefreshButtonEnabled();
       await this.assertModelDisplayedInTable(modelId, false);
+    }
+
+    public async assertModelDeployActionButtonEnabled(modelId: string, expectedValue: boolean) {
+      const actionsButtonExists = await this.doesModelCollapsedActionsButtonExist(modelId);
+
+      let isEnabled = null;
+
+      if (actionsButtonExists) {
+        await this.toggleActionsContextMenu(modelId, true);
+        const panelElement = await find.byCssSelector('.euiContextMenuPanel');
+        const actionButton = await panelElement.findByTestSubject('mlModelsTableRowDeployAction');
+        isEnabled = await actionButton.isEnabled();
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+      } else {
+        await this.assertModelDeployActionButtonExists(modelId, true);
+        isEnabled = await testSubjects.isEnabled(
+          this.rowSelector(modelId, 'mlModelsTableRowDeployAction')
+        );
+      }
+
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected row deploy action button for trained model '${modelId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
     }
 
     public async assertModelDeleteActionButtonEnabled(modelId: string, expectedValue: boolean) {
@@ -264,12 +386,31 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async deployModelsContinue(expectedStep?: string) {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineContinueButton');
+      await testSubjects.click('mlTrainedModelsInferencePipelineContinueButton');
+      if (expectedStep) {
+        await testSubjects.existOrFail(expectedStep);
+      }
+    }
+
+    public async assertDeployModelsCreateButton(expectedStep?: string) {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineCreateButton');
+      await testSubjects.click('mlTrainedModelsInferencePipelineCreateButton');
+    }
+
     public async assertDeleteModalExists() {
       await testSubjects.existOrFail('mlModelsDeleteModal', { timeout: 60 * 1000 });
     }
 
     public async assertTestFlyoutExists() {
       await testSubjects.existOrFail('mlTestModelsFlyout', { timeout: 60 * 1000 });
+    }
+
+    public async assertDeployModelFlyoutExists() {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineFlyout', {
+        timeout: 60 * 1000,
+      });
     }
 
     public async assertStartDeploymentModalExists(expectExist = true) {
@@ -333,6 +474,21 @@ export function TrainedModelsTableProvider(
       }
 
       await this.assertDeleteModalExists();
+    }
+
+    public async clickDeployAction(modelId: string) {
+      const actionsButtonExists = await this.doesModelCollapsedActionsButtonExist(modelId);
+
+      if (actionsButtonExists) {
+        await this.toggleActionsContextMenu(modelId, true);
+        const panelElement = await find.byCssSelector('.euiContextMenuPanel');
+        const actionButton = await panelElement.findByTestSubject('mlModelsTableRowDeployAction');
+        await actionButton.click();
+      } else {
+        await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowDeployAction'));
+      }
+
+      await this.assertDeployModelFlyoutExists();
     }
 
     async assertNumOfAllocations(expectedValue: number) {
@@ -403,9 +559,10 @@ export function TrainedModelsTableProvider(
     }
 
     public async clickStopDeploymentAction(modelId: string) {
-      await testSubjects.clickWhenNotDisabled(
-        this.rowSelector(modelId, 'mlModelsTableRowStopDeploymentAction'),
-        { timeout: 5000 }
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowStopDeploymentAction',
+        true
       );
     }
 
@@ -421,7 +578,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertTabContent(
-      type: 'details' | 'stats' | 'inferenceConfig' | 'pipelines',
+      type: 'details' | 'stats' | 'inferenceConfig' | 'pipelines' | 'map',
       expectVisible = true
     ) {
       const tabTestSubj = `mlTrainedModel${upperFirst(type)}`;
@@ -439,6 +596,10 @@ export function TrainedModelsTableProvider(
 
     public async assertDetailsTabContent(expectVisible = true) {
       await this.assertTabContent('details', expectVisible);
+    }
+
+    public async assertModelsMapTabContent(expectVisible = true) {
+      await this.assertTabContent('map', expectVisible);
     }
 
     public async assertInferenceConfigTabContent(expectVisible = true) {
@@ -466,6 +627,13 @@ export function TrainedModelsTableProvider(
           }
         }
       }
+    }
+
+    public async clickAnalyzeDataDriftWithoutSaving() {
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled('analyzeDataDriftWithoutSavingButton');
+        await testSubjects.existOrFail('mlDataDriftTable');
+      });
     }
   })();
 }

@@ -84,6 +84,7 @@ export const createAppContextStartContractMock = (
     config$,
     kibanaVersion: '8.99.0', // Fake version :)
     kibanaBranch: 'main',
+    kibanaInstanceId: '1',
     telemetryEventsSender: createMockTelemetryEventsSender(),
     bulkActionsResolver: {} as any,
     messageSigningService: createMessageSigningServiceMock(),
@@ -178,18 +179,21 @@ export function createMessageSigningServiceMock(): MessageSigningServiceInterfac
   return {
     isEncryptionAvailable: true,
     generateKeyPair: jest.fn(),
-    sign: jest.fn(),
-    getPublicKey: jest.fn(),
+    sign: jest.fn().mockImplementation((message: Record<string, unknown>) =>
+      Promise.resolve({
+        data: Buffer.from(JSON.stringify(message), 'utf8'),
+        signature: 'thisisasignature',
+      })
+    ),
+    getPublicKey: jest.fn().mockResolvedValue('thisisapublickey'),
     rotateKeyPair: jest.fn(),
   };
 }
 
 export function createUninstallTokenServiceMock(): UninstallTokenServiceInterface {
   return {
-    getTokenForPolicyId: jest.fn(),
-    getTokensForPolicyIds: jest.fn(),
-    getAllTokens: jest.fn(),
-    findTokensForPartialPolicyId: jest.fn(),
+    getToken: jest.fn(),
+    getTokenMetadata: jest.fn(),
     getHashedTokenForPolicyId: jest.fn(),
     getHashedTokensForPolicyIds: jest.fn(),
     getAllHashedTokens: jest.fn(),

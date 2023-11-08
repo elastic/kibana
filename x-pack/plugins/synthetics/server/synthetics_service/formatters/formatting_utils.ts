@@ -10,7 +10,10 @@ import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 
-export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
+export type FormatterFn = (
+  fields: Partial<MonitorFields>,
+  key: ConfigKey
+) => string | number | null;
 
 export const replaceStringWithParams = (
   value: string | boolean | {} | [],
@@ -24,10 +27,17 @@ export const replaceStringWithParams = (
   try {
     if (typeof value !== 'string') {
       const strValue = JSON.stringify(value);
+      if (hasNoParams(strValue)) {
+        return value as string | null;
+      }
+
       const parsedVars: ParsedVars = variableParser.parse(strValue);
 
       const parseValue = replaceVarsWithParams(parsedVars, params);
       return JSON.parse(parseValue);
+    }
+    if (hasNoParams(value)) {
+      return value as string | null;
     }
 
     const parsedVars: ParsedVars = variableParser.parse(value);
@@ -40,8 +50,17 @@ export const replaceStringWithParams = (
   return value as string | null;
 };
 
+export const hasNoParams = (strVal: string) => {
+  const shellParamsRegex = /\$\{[a-zA-Z_][a-zA-Z0-9_]*\}/g;
+  return strVal.match(shellParamsRegex) === null;
+};
+
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string) ?? '';
 
   return value ? `${value}s` : null;
+};
+
+export const maxAttemptsFormatter: FormatterFn = (fields, key) => {
+  return (fields[key] as number) ?? 2;
 };

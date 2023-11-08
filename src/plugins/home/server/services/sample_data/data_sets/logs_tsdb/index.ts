@@ -46,7 +46,7 @@ export const logsTSDBSpecProvider = function (): SampleDatasetSchema {
           number_of_shards: 1,
           auto_expand_replicas: '0-1',
           mode: 'time_series',
-          routing_path: 'request',
+          routing_path: 'event.dataset',
           'time_series.start_time': startDate.toISOString(),
           'time_series.end_time': endDate.toISOString(),
         },

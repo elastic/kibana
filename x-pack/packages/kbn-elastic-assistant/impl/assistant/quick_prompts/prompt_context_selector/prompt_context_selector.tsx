@@ -12,6 +12,7 @@ import { PromptContextTemplate } from '../../../..';
 import * as i18n from './translations';
 
 interface Props {
+  isDisabled?: boolean;
   onPromptContextSelectionChange: (promptContexts: PromptContextTemplate[]) => void;
   promptContexts: PromptContextTemplate[];
   selectedPromptContexts?: PromptContextTemplate[];
@@ -23,7 +24,7 @@ export type PromptContextSelectorOption = EuiComboBoxOptionOption<{ category: st
  * Selector for choosing multiple Prompt Context Categories
  */
 export const PromptContextSelector: React.FC<Props> = React.memo(
-  ({ onPromptContextSelectionChange, promptContexts, selectedPromptContexts = [] }) => {
+  ({ isDisabled, onPromptContextSelectionChange, promptContexts, selectedPromptContexts = [] }) => {
     // ComboBox options
     const options = useMemo<PromptContextSelectorOption[]>(
       () =>
@@ -32,6 +33,7 @@ export const PromptContextSelector: React.FC<Props> = React.memo(
             category: pc.category,
           },
           label: pc.description,
+          'data-test-subj': pc.description,
         })),
       [promptContexts]
     );
@@ -85,6 +87,9 @@ export const PromptContextSelector: React.FC<Props> = React.memo(
     return (
       <EuiComboBox
         aria-label={i18n.PROMPT_CONTEXT_SELECTOR}
+        compressed
+        fullWidth
+        isDisabled={isDisabled}
         placeholder={i18n.PROMPT_CONTEXT_SELECTOR_PLACEHOLDER}
         options={options}
         selectedOptions={selectedOptions}

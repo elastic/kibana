@@ -115,6 +115,13 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       return;
     }
 
+    // Not sure why this is getting called without currentDocIndex
+    // would be much better to prevent this function from being called at all
+    if (!currentDocIndex) {
+      controller.setIsLoadingPreview(false);
+      return;
+    }
+
     controller.setLastExecutePainlessRequestParams({
       type,
       script: script?.source,

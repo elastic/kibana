@@ -44,9 +44,9 @@ import type {
   TimelineErrorResponse,
   ResponseTimeline,
   TimelineResult,
-} from '../../../../common/types/timeline/api';
+} from '../../../../common/api/timeline';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';
 
@@ -83,6 +83,7 @@ import {
   addTimeline,
   showCallOutUnauthorizedMsg,
   saveTimeline,
+  updateSavedSearchId,
 } from './actions';
 import type { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -118,6 +119,8 @@ const timelineActionsType = [
   updateSort.type,
   updateRange.type,
   upsertColumn.type,
+
+  updateSavedSearchId.type,
 ];
 
 const isItAtimelineAction = (timelineId: string | undefined) =>
@@ -346,6 +349,7 @@ const timelineInput: TimelineInput = {
   savedQueryId: null,
   sort: null,
   status: null,
+  savedSearchId: null,
 };
 
 export const convertTimelineAsInput = (

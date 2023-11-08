@@ -9,7 +9,10 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
-import { SyntheticsMonitorStatusTranslations } from '../../../common/rules/synthetics/translations';
+import {
+  SyntheticsMonitorStatusTranslations,
+  TlsTranslations,
+} from '../../../common/rules/synthetics/translations';
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
@@ -55,7 +58,7 @@ export class DefaultAlertService {
   setupStatusRule() {
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_STATUS_RULE,
-      `Synthetics status internal alert`,
+      `Synthetics status internal rule`,
       '1m'
     );
   }
@@ -63,8 +66,8 @@ export class DefaultAlertService {
   setupTlsRule() {
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_TLS_RULE,
-      `Synthetics internal TLS alert`,
-      '10m'
+      `Synthetics internal TLS rule`,
+      '1m'
     );
   }
 
@@ -92,7 +95,7 @@ export class DefaultAlertService {
       return alert;
     }
 
-    const actions = await this.getAlertActions();
+    const actions = await this.getAlertActions(ruleType);
 
     const rulesClient = (await this.context.alerting)?.getRulesClient();
     const newAlert = await rulesClient.create<{}>({
@@ -112,14 +115,10 @@ export class DefaultAlertService {
   }
 
   updateStatusRule() {
-    return this.updateDefaultAlert(
-      SYNTHETICS_STATUS_RULE,
-      `Synthetics status internal alert`,
-      '1m'
-    );
+    return this.updateDefaultAlert(SYNTHETICS_STATUS_RULE, `Synthetics status internal rule`, '1m');
   }
   updateTlsRule() {
-    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS alert`, '10m');
+    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
   }
 
   async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
@@ -127,7 +126,7 @@ export class DefaultAlertService {
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
-      const actions = await this.getAlertActions();
+      const actions = await this.getAlertActions(ruleType);
       const updatedAlert = await rulesClient.update({
         id: alert.id,
         data: {
@@ -136,7 +135,6 @@ export class DefaultAlertService {
           tags: alert.tags,
           schedule: alert.schedule,
           params: alert.params,
-          notifyWhen: alert.notifyWhen,
         },
       });
       return { ...updatedAlert, ruleTypeId: updatedAlert.alertTypeId };
@@ -145,25 +143,39 @@ export class DefaultAlertService {
     return await this.createDefaultAlertIfNotExist(ruleType, name, interval);
   }
 
-  async getAlertActions() {
+  async getAlertActions(ruleType: DefaultRuleType) {
     const { actionConnectors, settings } = await this.getActionConnectors();
 
     const defaultActions = (actionConnectors ?? []).filter((act) =>
       settings?.defaultConnectors?.includes(act.id)
     );
 
-    return populateAlertActions({
-      groupId: ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id,
-      defaultActions,
-      defaultEmail: settings?.defaultEmail!,
-      translations: {
-        defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
-        defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
-        defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
-        defaultRecoverySubjectMessage:
-          SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
-      },
-    });
+    if (ruleType === SYNTHETICS_STATUS_RULE) {
+      return populateAlertActions({
+        defaultActions,
+        groupId: ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id,
+        defaultEmail: settings?.defaultEmail!,
+        translations: {
+          defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+          defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
+          defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
+          defaultRecoverySubjectMessage:
+            SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
+        },
+      });
+    } else {
+      return populateAlertActions({
+        defaultActions,
+        groupId: ACTION_GROUP_DEFINITIONS.TLS_CERTIFICATE.id,
+        defaultEmail: settings?.defaultEmail!,
+        translations: {
+          defaultActionMessage: TlsTranslations.defaultActionMessage,
+          defaultRecoveryMessage: TlsTranslations.defaultRecoveryMessage,
+          defaultSubjectMessage: TlsTranslations.defaultSubjectMessage,
+          defaultRecoverySubjectMessage: TlsTranslations.defaultRecoverySubjectMessage,
+        },
+      });
+    }
   }
 
   async getActionConnectors() {

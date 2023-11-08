@@ -5,13 +5,24 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFieldSearch,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+  EuiFlexGroup,
+  type EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 interface RulesTableToolbarProps {
-  search(value: string): void;
+  search: (value: string) => void;
+  onSectionChange: (value: string | undefined) => void;
+  sectionSelectOptions: string[];
   totalRulesCount: number;
   searchValue: string;
   isSearching: boolean;
@@ -29,15 +40,47 @@ export const RulesTableHeader = ({
   isSearching,
   totalRulesCount,
   pageSize,
-}: RulesTableToolbarProps) => (
-  <SearchField
-    isSearching={isSearching}
-    searchValue={searchValue}
-    search={search}
-    totalRulesCount={totalRulesCount}
-    pageSize={pageSize}
-  />
-);
+  onSectionChange,
+  sectionSelectOptions,
+}: RulesTableToolbarProps) => {
+  const [selected, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
+
+  const sectionOptions = sectionSelectOptions.map((option) => ({
+    label: option,
+  }));
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <SearchField
+          isSearching={isSearching}
+          searchValue={searchValue}
+          search={search}
+          totalRulesCount={totalRulesCount}
+          pageSize={pageSize}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        css={css`
+          max-width: 300px;
+        `}
+      >
+        <EuiComboBox
+          placeholder={i18n.translate('xpack.csp.rules.rulesTableHeader.sectionSelectPlaceholder', {
+            defaultMessage: 'Select CIS Section',
+          })}
+          singleSelection={{ asPlainText: true }}
+          options={sectionOptions}
+          selectedOptions={selected}
+          onChange={(option) => {
+            setSelected(option);
+            onSectionChange(option.length ? option[0].label : undefined);
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const SEARCH_DEBOUNCE_MS = 300;
 

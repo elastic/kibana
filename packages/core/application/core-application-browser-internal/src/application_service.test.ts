@@ -1145,7 +1145,7 @@ describe('#start()', () => {
         removeListenerSpy = jest.spyOn(window, 'removeEventListener');
       });
       afterEach(() => {
-        jest.restoreAllMocks();
+        jest.clearAllMocks();
       });
 
       it('calls `navigateToApp` with `skipAppLeave` option', async () => {
@@ -1232,7 +1232,7 @@ describe('#stop()', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('removes the beforeunload listener', async () => {

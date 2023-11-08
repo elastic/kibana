@@ -402,7 +402,7 @@ describe('helpers', () => {
   describe('getTabCountsMarkdownComment', () => {
     test('it returns a comment with the expected counts', () => {
       expect(getTabCountsMarkdownComment(mockPartitionedFieldMetadata)).toBe(
-        '### **Incompatible fields** `3` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n'
+        '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n'
       );
     });
   });
@@ -423,8 +423,16 @@ describe('helpers', () => {
 
   describe('getSummaryTableMarkdownHeader', () => {
     test('it returns the expected header', () => {
-      expect(getSummaryTableMarkdownHeader()).toEqual(
+      const isILMAvailable = true;
+      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|'
+      );
+    });
+
+    test('it returns the expected header when isILMAvailable is false', () => {
+      const isILMAvailable = false;
+      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
+        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|'
       );
     });
   });
@@ -438,6 +446,7 @@ describe('helpers', () => {
           formatNumber,
           incompatible: 3,
           ilmPhase: 'unmanaged',
+          isILMAvailable: true,
           indexName: 'auditbeat-custom-index-1',
           patternDocsCount: 57410,
           sizeInBytes: 28413,
@@ -454,10 +463,27 @@ describe('helpers', () => {
           incompatible: undefined, // <--
           ilmPhase: undefined, // <--
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: true,
           patternDocsCount: 57410,
           sizeInBytes: 28413,
         })
       ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- | -- | 27.7KB |\n');
+    });
+
+    test('it returns the expected row when isILMAvailable is false', () => {
+      expect(
+        getSummaryTableMarkdownRow({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          incompatible: undefined, // <--
+          ilmPhase: undefined, // <--
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          patternDocsCount: 57410,
+          sizeInBytes: 28413,
+        })
+      ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- | 27.7KB |\n');
     });
   });
 
@@ -470,12 +496,31 @@ describe('helpers', () => {
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           patternDocsCount: 57410,
           sizeInBytes: 28413,
         })
       ).toEqual(
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | `unmanaged` | 27.7KB |\n\n'
+      );
+    });
+
+    test('it returns the expected comment when isILMAvailable is false', () => {
+      expect(
+        getSummaryTableMarkdownComment({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          ilmPhase: 'unmanaged',
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          partitionedFieldMetadata: mockPartitionedFieldMetadata,
+          patternDocsCount: 57410,
+          sizeInBytes: 28413,
+        })
+      ).toEqual(
+        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | 27.7KB |\n\n'
       );
     });
   });

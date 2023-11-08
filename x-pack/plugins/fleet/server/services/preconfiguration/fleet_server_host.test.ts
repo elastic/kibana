@@ -112,6 +112,23 @@ describe('getCloudFleetServersHosts', () => {
     expect(getCloudFleetServersHosts()).toBeUndefined();
   });
 
+  it('should return fleet server hosts if cloud is correctly setup in serverless', () => {
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
+      apm: {},
+      isServerlessEnabled: true,
+      serverless: {
+        projectId: undefined,
+      },
+    });
+
+    expect(getCloudFleetServersHosts()).toBeUndefined();
+  });
+
   it('should return fleet server hosts if cloud is correctly setup with default port == 443', () => {
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
@@ -120,6 +137,10 @@ describe('getCloudFleetServersHosts', () => {
       deploymentId: 'deployment-id-1',
       cloudHost: 'us-east-1.aws.found.io',
       apm: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
     });
 
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
@@ -138,6 +159,10 @@ describe('getCloudFleetServersHosts', () => {
       cloudHost: 'test.fr',
       cloudDefaultPort: '9243',
       apm: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
     });
 
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
@@ -171,6 +196,10 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       isCloudEnabled: true,
       deploymentId: 'deployment-id-1',
       apm: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
     });
     mockedGetDefaultFleetServerHost.mockResolvedValue({
       id: 'test',
@@ -190,6 +219,10 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       deploymentId: 'deployment-id-1',
       cloudHost: 'us-east-1.aws.found.io',
       apm: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
     });
     mockedGetDefaultFleetServerHost.mockResolvedValue(null);
     soClient.create.mockResolvedValue({

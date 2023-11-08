@@ -1,0 +1,5 @@
+description: >
+  The name of the numeric field that is used in the aggregation.
+  This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
+type: string
+ 

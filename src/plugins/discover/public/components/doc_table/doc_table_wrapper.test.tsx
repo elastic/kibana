@@ -9,13 +9,12 @@
 import React from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../utils/build_data_record';
-import { EsHitRecord } from '../../types';
-import { DocViewer } from '../../services/doc_views/components/doc_viewer';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 describe('Doc table component', () => {
   const mountComponent = (customProps?: Partial<DocTableWrapperProps>) => {
@@ -48,7 +47,6 @@ describe('Doc table component', () => {
       render: () => {
         return <div data-test-subj="docTable">mock</div>;
       },
-      DocViewer,
       ...(customProps || {}),
     };
 

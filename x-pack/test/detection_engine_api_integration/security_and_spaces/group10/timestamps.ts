@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { orderBy } from 'lodash';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import {
   EqlRuleCreateProps,
   QueryRuleCreateProps,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -261,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             es,
             createdRule,
-            RuleExecutionStatus['partial failure']
+            RuleExecutionStatusEnum['partial failure']
           );
           expect(signalsOpen.hits.hits.length).eql(0);
         });
@@ -340,7 +340,7 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             es,
             createdRule,
-            RuleExecutionStatus['partial failure']
+            RuleExecutionStatusEnum['partial failure']
           );
           expect(signalsOpen.hits.hits.length).eql(0);
         });

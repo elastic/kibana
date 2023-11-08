@@ -45,6 +45,7 @@ const INJECTED_METADATA = {
       dist: expect.any(Boolean),
       version: expect.any(String),
       buildDate: new Date(BUILD_DATE).toISOString(),
+      buildFlavor: expect.any(String),
     },
   },
 };
@@ -179,9 +180,24 @@ function renderTestCases(
       expect(getStylesheetPathsMock).toHaveBeenCalledWith({
         darkMode: true,
         themeVersion: 'v8',
-        basePath: '/mock-server-basepath',
+        baseHref: '/mock-server-basepath',
         buildNum: expect.any(Number),
       });
+    });
+
+    it('renders "core" CDN url injected', async () => {
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
+      (mockRenderingPrebootDeps.http.staticAssets.getHrefBase as jest.Mock).mockImplementation(
+        () => 'http://foo.bar:1773'
+      );
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
     });
   });
 }
@@ -232,7 +248,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -258,7 +274,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -282,7 +298,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -306,7 +322,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -330,7 +346,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -354,7 +370,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -378,7 +394,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });

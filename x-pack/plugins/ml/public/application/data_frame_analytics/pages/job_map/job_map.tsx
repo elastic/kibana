@@ -34,17 +34,18 @@ linear-gradient(
 center,
 ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
-  margin: `-${theme.euiSizeL}`,
   marginTop: 0,
 });
 
 interface Props {
+  key?: string;
+  defaultHeight?: number;
   analyticsId?: string;
   modelId?: string;
   forceRefresh?: boolean;
 }
 
-export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
+export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRefresh }) => {
   // itemsDeleted will reset to false when Controls component calls updateElements to remove nodes deleted from map
   const [itemsDeleted, setItemsDeleted] = useState<boolean>(false);
   const [resetCyToggle, setResetCyToggle] = useState<boolean>(false);
@@ -150,6 +151,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
 
   const refreshCallback = () => fetchAndSetElementsWrapper({ analyticsId, modelId });
 
+  const h = defaultHeight ?? height;
   return (
     <div data-test-subj="mlPageDataFrameAnalyticsMap">
       <EuiSpacer size="m" />
@@ -171,10 +173,10 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div style={{ height: height - parseInt(euiTheme.euiSizeL, 10) - 20 }} ref={ref}>
+      <div style={{ height: h - parseInt(euiTheme.euiSizeL, 10) - 20 }} ref={ref}>
         <Cytoscape
           theme={euiTheme}
-          height={height - 20}
+          height={h - 20}
           elements={elements}
           width={width}
           style={getCytoscapeDivStyle(euiTheme)}

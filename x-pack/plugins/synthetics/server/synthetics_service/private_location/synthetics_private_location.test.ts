@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   DataStream,
@@ -12,20 +12,22 @@ import {
   ScheduleUnit,
   SourceType,
   HeartbeatConfig,
-  PrivateLocation,
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { SyntheticsServerSetup } from '../../types';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('SyntheticsPrivateLocation', () => {
-  const mockPrivateLocation: PrivateLocation = {
+  const mockPrivateLocation: PrivateLocationAttributes = {
     id: 'policyId',
     label: 'Test Location',
     concurrentMonitors: 1,
     agentPolicyId: 'policyId',
+    isServiceManaged: false,
   };
   const testConfig = {
     id: 'testId',
@@ -76,6 +78,7 @@ describe('SyntheticsPrivateLocation', () => {
     },
     coreStart: {
       savedObjects: savedObjectsServiceMock.createStartContract(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
     },
   } as unknown as SyntheticsServerSetup;
 
@@ -92,7 +95,6 @@ describe('SyntheticsPrivateLocation', () => {
       try {
         await syntheticsPrivateLocation.createPackagePolicies(
           [{ config: testConfig, globalParams: {} }],
-          {} as unknown as KibanaRequest,
           [mockPrivateLocation],
           'test-space'
         );
@@ -115,7 +117,6 @@ describe('SyntheticsPrivateLocation', () => {
       try {
         await syntheticsPrivateLocation.editMonitors(
           [{ config: testConfig, globalParams: {} }],
-          {} as unknown as KibanaRequest,
           [mockPrivateLocation],
           'test-space'
         );
@@ -151,11 +152,7 @@ describe('SyntheticsPrivateLocation', () => {
       },
     });
     try {
-      await syntheticsPrivateLocation.deleteMonitors(
-        [testConfig],
-        {} as unknown as KibanaRequest,
-        'test-space'
-      );
+      await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
     } catch (e) {
       expect(e).toEqual(new Error(error));
     }

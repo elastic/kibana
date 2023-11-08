@@ -92,6 +92,7 @@ export class ObservabilityOnboardingApiError extends Error {
 }
 
 export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
+  text: string;
   status: number;
   body: APIReturnType<TEndpoint>;
 }

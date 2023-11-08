@@ -62,6 +62,7 @@ import {
   filterPreviewLabelStyle,
   filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -135,6 +136,7 @@ export interface FilterEditorComponentProps {
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   mode?: 'edit' | 'add';
+  suggestionsAbstraction?: SuggestionsAbstraction;
   docLinks: DocLinksStart;
 }
 
@@ -347,6 +349,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               dataView={selectedDataView!}
               onChange={this.onLocalFilterChange}
               disabled={!selectedDataView}
+              suggestionsAbstraction={this.props.suggestionsAbstraction}
             />
           </EuiToolTip>
         </div>

@@ -9,6 +9,7 @@ import { EuiSearchBar, EuiPagination } from '@elastic/eui';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
+import { SessionViewTelemetryKey } from '../../types';
 
 interface SessionViewSearchBarDeps {
   searchQuery: string;
@@ -16,6 +17,7 @@ interface SessionViewSearchBarDeps {
   totalMatches: number;
   onPrevious: (index: number) => void;
   onNext: (index: number) => void;
+  trackEvent?: (name: SessionViewTelemetryKey) => void;
 }
 
 const translatePlaceholder = {
@@ -37,6 +39,7 @@ export const SessionViewSearchBar = ({
   totalMatches,
   onPrevious,
   onNext,
+  trackEvent,
 }: SessionViewSearchBarDeps) => {
   const showPagination = !!searchQuery && totalMatches !== 0;
   const noResults = !!searchQuery && totalMatches === 0;
@@ -45,27 +48,40 @@ export const SessionViewSearchBar = ({
 
   const [selectedResult, setSelectedResult] = useState(0);
 
-  const onSearch = ({ query }: EuiSearchBarOnChangeArgs) => {
-    setSelectedResult(0);
+  const onSearch = useCallback(
+    ({ query }: EuiSearchBarOnChangeArgs) => {
+      setSelectedResult(0);
 
-    if (query) {
-      setSearchQuery(query.text);
-    } else {
-      setSearchQuery('');
-    }
-  };
+      if (query) {
+        setSearchQuery(query.text);
+      } else {
+        setSearchQuery('');
+      }
+
+      if (trackEvent) {
+        trackEvent('search_performed');
+      }
+    },
+    [setSearchQuery, trackEvent]
+  );
 
   const onPageClick = useCallback(
     (page: number) => {
       setSelectedResult(page);
 
-      if (page > selectedResult) {
+      const isNext = page > selectedResult;
+
+      if (isNext) {
         onNext(page);
       } else {
         onPrevious(page);
       }
+
+      if (trackEvent) {
+        trackEvent(isNext ? 'search_next' : 'search_previous');
+      }
     },
-    [onNext, onPrevious, selectedResult]
+    [onNext, onPrevious, selectedResult, trackEvent]
   );
 
   return (

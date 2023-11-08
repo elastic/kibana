@@ -12,11 +12,13 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import {
   OWNER_INFO,
   SECURITY_SOLUTION_OWNER,
   OBSERVABILITY_OWNER,
+  MAX_TAGS_FILTER_LENGTH,
+  MAX_CATEGORY_FILTER_LENGTH,
 } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -151,6 +153,97 @@ describe('CasesTableFilters ', () => {
 
     appMockRender.render(<CasesTableFilters {...ourProps} />);
     expect(onFilterChanged).toHaveBeenCalledWith({ tags: ['pepsi'] });
+  });
+
+  it('should show warning message when maximum tags selected', async () => {
+    const newTags = Array(MAX_TAGS_FILTER_LENGTH).fill('coke');
+    (useGetTags as jest.Mock).mockReturnValue({ data: newTags, isLoading: false });
+
+    const ourProps = {
+      ...props,
+      initial: {
+        ...DEFAULT_FILTER_OPTIONS,
+        tags: newTags,
+      },
+    };
+
+    appMockRender.render(<CasesTableFilters {...ourProps} />);
+
+    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
+
+    await waitForEuiPopoverOpen();
+
+    expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
+  });
+
+  it('should show warning message when tags selection reaches maximum limit', async () => {
+    const newTags = Array(MAX_TAGS_FILTER_LENGTH - 1).fill('coke');
+    const tags = [...newTags, 'pepsi'];
+    (useGetTags as jest.Mock).mockReturnValue({ data: tags, isLoading: false });
+
+    const ourProps = {
+      ...props,
+      initial: {
+        ...DEFAULT_FILTER_OPTIONS,
+        tags: newTags,
+      },
+    };
+
+    appMockRender.render(<CasesTableFilters {...ourProps} />);
+
+    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
+
+    await waitForEuiPopoverOpen();
+
+    userEvent.click(screen.getByTestId(`options-filter-popover-item-${tags[tags.length - 1]}`));
+
+    expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
+  });
+
+  it('should not show warning message when one of the tags deselected after reaching the limit', async () => {
+    const newTags = Array(MAX_TAGS_FILTER_LENGTH).fill('coke');
+    (useGetTags as jest.Mock).mockReturnValue({ data: newTags, isLoading: false });
+
+    const ourProps = {
+      ...props,
+      initial: {
+        ...DEFAULT_FILTER_OPTIONS,
+        tags: newTags,
+      },
+    };
+
+    appMockRender.render(<CasesTableFilters {...ourProps} />);
+
+    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
+
+    await waitForEuiPopoverOpen();
+
+    expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
+
+    userEvent.click(screen.getAllByTestId(`options-filter-popover-item-${newTags[0]}`)[0]);
+
+    expect(screen.queryByTestId('maximum-length-warning')).not.toBeInTheDocument();
+  });
+
+  it('should show warning message when maximum categories selected', async () => {
+    const newCategories = Array(MAX_CATEGORY_FILTER_LENGTH).fill('snickers');
+    (useGetCategories as jest.Mock).mockReturnValue({ data: newCategories, isLoading: false });
+
+    const ourProps = {
+      ...props,
+      initial: {
+        ...DEFAULT_FILTER_OPTIONS,
+        category: newCategories,
+      },
+    };
+
+    appMockRender.render(<CasesTableFilters {...ourProps} />);
+
+    userEvent.click(screen.getByTestId('options-filter-popover-button-Categories'));
+
+    await waitForEuiPopoverOpen();
+
+    expect(screen.getByTestId('maximum-length-warning')).toBeInTheDocument();
   });
 
   it('should remove assignee from selected assignees when assignee no longer exists', async () => {

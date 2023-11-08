@@ -10,7 +10,7 @@ import React, { useMemo, useCallback } from 'react';
 import { xor } from 'lodash/fp';
 import styled from 'styled-components';
 
-import type { RowRendererId } from '../../../../common/types/timeline/api';
+import type { RowRendererId } from '../../../../common/api/timeline';
 import type { RowRendererOption } from './catalog';
 import { renderers } from './catalog';
 

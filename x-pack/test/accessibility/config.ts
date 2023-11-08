@@ -33,10 +33,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/roles'),
       require.resolve('./apps/ingest_node_pipelines'),
       require.resolve('./apps/index_lifecycle_management'),
-      // https://github.com/elastic/kibana/issues/153596
-      // https://github.com/elastic/kibana/issues/153592
       require.resolve('./apps/ml'),
-      // require.resolve('./apps/transform'),
+      require.resolve('./apps/ml_anomaly_detection'),
+      require.resolve('./apps/transform'),
       require.resolve('./apps/lens'),
       require.resolve('./apps/upgrade_assistant'),
       require.resolve('./apps/canvas'),
@@ -48,19 +47,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       // Please make sure that the remote clusters, snapshot and restore and
       // CCR tests stay in that order. Their execution fails if rearranged.
       require.resolve('./apps/remote_clusters'),
-      // https://github.com/elastic/kibana/issues/153788
-      // require.resolve('./apps/snapshot_and_restore'),
+      require.resolve('./apps/snapshot_and_restore'),
       // https://github.com/elastic/kibana/issues/153599
       // require.resolve('./apps/cross_cluster_replication'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/enterprise_search'),
-      require.resolve('./apps/license_management'),
-      require.resolve('./apps/tags'),
-      require.resolve('./apps/search_sessions'),
-      require.resolve('./apps/stack_monitoring'),
-      require.resolve('./apps/watcher'),
-      require.resolve('./apps/rollup_jobs'),
-      require.resolve('./apps/observability'),
+      // require.resolve('./apps/license_management'),
+      // require.resolve('./apps/tags'),
+      // require.resolve('./apps/search_sessions'),
+      // require.resolve('./apps/stack_monitoring'),
+      // require.resolve('./apps/watcher'),
+      // require.resolve('./apps/rollup_jobs'),
+      // require.resolve('./apps/observability'),
     ],
 
     pageObjects,

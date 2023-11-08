@@ -6,7 +6,7 @@
  */
 
 import type { ValidationConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { SwimlaneConnectorType } from '../../../../common/api';
+import { SwimlaneConnectorType } from '../../../../common/types/domain';
 import type { CaseActionConnector } from '../../types';
 
 const casesRequiredFields = [

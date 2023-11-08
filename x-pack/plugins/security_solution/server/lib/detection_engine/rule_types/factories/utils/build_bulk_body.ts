@@ -20,7 +20,7 @@ import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import { buildRuleNameFromMapping } from '../../utils/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../utils/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score_from_mapping';
-import type { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import { stripNonEcsFields } from './strip_non_ecs_fields';
 
 const isSourceDoc = (

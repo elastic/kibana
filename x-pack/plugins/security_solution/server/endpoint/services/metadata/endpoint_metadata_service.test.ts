@@ -15,8 +15,8 @@ import {
 } from '../../routes/metadata/support/test_support';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import {
-  getESQueryHostMetadataByFleetAgentIds,
   buildUnitedIndexQuery,
+  getESQueryHostMetadataByFleetAgentIds,
 } from '../../routes/metadata/query_builders';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -137,11 +137,14 @@ describe('EndpointMetadataService', () => {
           package_policies: packagePolicies,
         }),
       ];
+
+      const newDate = new Date();
       const agentPolicyIds = agentPolicies.map((policy) => policy.id);
-      const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+      const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata(newDate.getTime());
       const mockAgent = {
         policy_id: agentPolicies[0].id,
         policy_revision: agentPolicies[0].revision,
+        last_checkin: newDate.toISOString(),
       } as unknown as Agent;
       const mockDoc = unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent);
       esClient.search.mockResponse(mockDoc);
@@ -203,6 +206,7 @@ describe('EndpointMetadataService', () => {
                 revision: packagePolicies[0].revision,
               },
             },
+            last_checkin: newDate.toISOString(),
           },
         ],
         total: 1,

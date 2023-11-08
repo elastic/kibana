@@ -6,6 +6,7 @@
  */
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { isEmpty } from 'lodash';
 import { isTestUser, UptimeEsClient } from './lib';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
@@ -57,6 +58,23 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       });
       if (res instanceof KibanaResponse) {
         return res;
+      }
+
+      const inspectData = await uptimeEsClient.getInspectData(uptimeRoute.path);
+
+      if (Array.isArray(res)) {
+        if (isEmpty(inspectData)) {
+          return response.ok({
+            body: res,
+          });
+        } else {
+          return response.ok({
+            body: {
+              result: res,
+              ...inspectData,
+            },
+          });
+        }
       }
 
       return response.ok({

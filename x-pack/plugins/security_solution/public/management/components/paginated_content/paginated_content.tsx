@@ -124,7 +124,6 @@ ErrorMessage.displayName = 'ErrorMessage';
  * controls similar to the BasicTable of EUI. The props supported by this component (for the most part)
  * support those that BasicTable accept.
  */
-// eslint-disable-next-line react/display-name
 export const PaginatedContent = memo(
   <T extends object, C extends ComponentWithAnyProps>({
     items,

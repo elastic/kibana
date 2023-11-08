@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -20,7 +19,6 @@ import {
   EuiPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -91,19 +89,6 @@ const LoadingPanelContainer = styled.div`
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
-const PopoverRowItems = styled(EuiPopover as unknown as FC)<
-  EuiPopoverProps & {
-    className?: string;
-    id?: string;
-  }
->`
-  .euiButtonEmpty__content {
-    padding: 0px 0px;
-  }
-`;
-
-PopoverRowItems.displayName = 'PopoverRowItems';
-
 export const ServerSideEventCount = styled.div`
   margin: 0 5px 0 5px;
 `;
@@ -139,7 +124,7 @@ export const EventsCountComponent = ({
   );
   return (
     <h5>
-      <PopoverRowItems
+      <EuiPopover
         className="footer-popover"
         id="customizablePagination"
         data-test-subj="timelineSizeRowPopover"
@@ -149,6 +134,7 @@ export const EventsCountComponent = ({
               {itemsCount}
               <EuiButtonEmpty
                 className={EVENTS_COUNT_BUTTON_CLASS_NAME}
+                flush="both"
                 size="s"
                 color="text"
                 iconType="arrowDown"
@@ -165,7 +151,7 @@ export const EventsCountComponent = ({
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
-      </PopoverRowItems>
+      </EuiPopover>
       <EuiToolTip
         content={
           <>

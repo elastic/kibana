@@ -8,35 +8,42 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { getNodeDetailUrl } from '../../../pages/link_to';
-import { findInventoryModel } from '../../../../common/inventory_models';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import { parse } from '@kbn/datemath';
+import { useNodeDetailsRedirect } from '../../../pages/link_to';
 
-export interface LinkToAlertsRule {
-  currentTime: number;
-  nodeId: string;
-  nodeType: InventoryItemType;
+import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
+
+export interface LinkToNodeDetailsProps {
+  assetId: string;
+  assetName?: string;
+  assetType: InventoryItemType;
 }
 
-export const LinkToNodeDetails = ({ nodeId, nodeType, currentTime }: LinkToAlertsRule) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+export const LinkToNodeDetails = ({ assetId, assetName, assetType }: LinkToNodeDetailsProps) => {
+  const [state] = useAssetDetailsUrlState();
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
+
+  // don't propagate the autoRefresh to the details page
+  const { dateRange, autoRefresh: _, ...assetDetails } = state ?? {};
 
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType,
-      nodeId,
-      from: nodeDetailFrom,
-      to: currentTime,
+      assetType,
+      assetId,
+      search: {
+        ...assetDetails,
+        name: assetName,
+        from: parse(dateRange?.from ?? '')?.valueOf(),
+        to: parse(dateRange?.to ?? '')?.valueOf(),
+      },
     }),
   });
 
   return (
     <EuiButtonEmpty
-      data-test-subj="infraNodeContextPopoverOpenAsPageButton"
+      data-test-subj="infraAssetDetailsOpenAsPageButton"
       size="xs"
-      iconSide="left"
-      iconType="popout"
       flush="both"
       {...nodeDetailMenuItemLinkProps}
     >

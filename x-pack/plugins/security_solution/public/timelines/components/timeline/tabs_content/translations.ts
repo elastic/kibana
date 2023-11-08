@@ -25,13 +25,6 @@ export const ANALYZER_TAB = i18n.translate(
   }
 );
 
-export const ASSISTANT_TAB = i18n.translate(
-  'xpack.securitySolution.timeline.tabs.assistantTabTitle',
-  {
-    defaultMessage: 'Security assistant',
-  }
-);
-
 export const NOTES_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.notesTabTimelineTitle',
   {
@@ -49,7 +42,21 @@ export const PINNED_TAB = i18n.translate(
 export const SECURITY_ASSISTANT = i18n.translate(
   'xpack.securitySolution.timeline.tabs.securityAssistantTimelineTitle',
   {
-    defaultMessage: 'Security Assistant',
+    defaultMessage: 'Elastic AI Assistant',
+  }
+);
+
+export const DISCOVER_ESQL_IN_TIMELINE_TAB = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline',
+  {
+    defaultMessage: 'ES|QL',
+  }
+);
+
+export const DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
   }
 );
 

@@ -1486,6 +1486,7 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "mapping": {
           "total_fields": {
             "limit": "10000"
@@ -17002,6 +17003,7 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "mapping": {
           "total_fields": {
             "limit": "10000"

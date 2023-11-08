@@ -22,7 +22,6 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -221,9 +220,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
 
     const services = { ...this.services[0], ...this.services[1] };
     const datePickerDeps = {
-      ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-      toMountPoint,
-      wrapWithTheme,
+      ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
       uiSettingsKeys: UI_SETTINGS,
     };
 

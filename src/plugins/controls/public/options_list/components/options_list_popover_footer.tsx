@@ -9,7 +9,10 @@
 import React from 'react';
 
 import {
+  EuiIconTip,
+  EuiFlexItem,
   EuiProgress,
+  EuiFlexGroup,
   EuiButtonGroup,
   EuiPopoverFooter,
   useEuiPaddingSize,
@@ -35,6 +38,9 @@ export const OptionsListPopoverFooter = ({ isLoading }: { isLoading: boolean }) 
   const optionsList = useOptionsList();
 
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
+  const allowExpensiveQueries = optionsList.select(
+    (state) => state.componentState.allowExpensiveQueries
+  );
 
   return (
     <>
@@ -53,22 +59,39 @@ export const OptionsListPopoverFooter = ({ isLoading }: { isLoading: boolean }) 
             />
           </div>
         )}
-        <div
+
+        <EuiFlexGroup
+          gutterSize="xs"
+          responsive={false}
+          alignItems="center"
           css={css`
             padding: ${useEuiPaddingSize('s')};
           `}
+          justifyContent={'spaceBetween'}
         >
-          <EuiButtonGroup
-            legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
-            options={aggregationToggleButtons}
-            idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-            onChange={(optionId) =>
-              optionsList.dispatch.setExclude(optionId === 'optionsList__excludeResults')
-            }
-            buttonSize="compressed"
-            data-test-subj="optionsList__includeExcludeButtonGroup"
-          />
-        </div>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
+              options={aggregationToggleButtons}
+              idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+              onChange={(optionId) =>
+                optionsList.dispatch.setExclude(optionId === 'optionsList__excludeResults')
+              }
+              buttonSize="compressed"
+              data-test-subj="optionsList__includeExcludeButtonGroup"
+            />
+          </EuiFlexItem>
+          {!allowExpensiveQueries && (
+            <EuiFlexItem data-test-subj="optionsList-allow-expensive-queries-warning" grow={false}>
+              <EuiIconTip
+                type="warning"
+                color="warning"
+                content={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
+                aria-label={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiPopoverFooter>
     </>
   );

@@ -8,7 +8,6 @@
 
 import type { OnPostAuthHandler, OnPreResponseHandler } from '@kbn/core-http-server';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import { HttpConfig } from './http_config';
 
 const VERSION_HEADER = 'kbn-version';
@@ -45,11 +44,7 @@ export const createRestrictInternalRoutesPostAuthHandler = (
 
   return (request, response, toolkit) => {
     const isInternalRoute = request.route.options.access === 'internal';
-
-    // only check if the header is present, not it's content.
-    const hasInternalKibanaRequestHeader = X_ELASTIC_INTERNAL_ORIGIN_REQUEST in request.headers;
-
-    if (isRestrictionEnabled && isInternalRoute && !hasInternalKibanaRequestHeader) {
+    if (isRestrictionEnabled && isInternalRoute && !request.isInternalApiRequest) {
       // throw 400
       return response.badRequest({
         body: `uri [${request.url}] with method [${request.route.method}] exists but is not available with the current configuration`,
@@ -75,7 +70,6 @@ export const createVersionCheckPostAuthHandler = (kibanaVersion: string): OnPost
         },
       });
     }
-
     return toolkit.next();
   };
 };

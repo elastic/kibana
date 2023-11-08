@@ -117,5 +117,60 @@ export default function (providerContext: FtrProviderContext) {
           .expect(404);
       });
     });
+
+    describe('POST /fleet_server_hosts', () => {
+      it('should allow to create a default fleet server host with id', async function () {
+        const id = `test-${Date.now()}`;
+
+        await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Default ${Date.now()}`,
+            host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
+            is_default: true,
+            id,
+          })
+          .expect(200);
+
+        const {
+          body: { item: fleetServerHost },
+        } = await supertest.get(`/api/fleet/fleet_server_hosts/${id}`).expect(200);
+
+        expect(fleetServerHost.is_default).to.be(true);
+      });
+
+      it('should not unset default fleet server host on id conflict', async function () {
+        const id = `test-${Date.now()}`;
+
+        await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Default ${Date.now()}`,
+            host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
+            is_default: true,
+            id,
+          })
+          .expect(200);
+
+        await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Default ${Date.now()}`,
+            host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
+            is_default: true,
+            id,
+          })
+          .expect(409);
+
+        const {
+          body: { item: fleetServerHost },
+        } = await supertest.get(`/api/fleet/fleet_server_hosts/${id}`).expect(200);
+
+        expect(fleetServerHost.is_default).to.be(true);
+      });
+    });
   });
 }

@@ -2,9 +2,60 @@
 
 This Kibana package contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
+## UnifiedFieldListSidebarContainer - building block
+
+An example of its usage can be found in Kibana example plugin [examples/unified_field_list_examples](/examples/unified_field_list_examples).
+
+Configure the field list:
+```
+const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
+  return {
+    originatingApp: PLUGIN_ID,
+    localStorageKeyPrefix: 'examples',
+    timeRangeUpdatesType: 'timefilter',
+    disablePopularFields: true,
+    ... // more customization option are available
+  };
+};
+```
+
+Define a ref for accessing API if necessary:
+```
+const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
+```
+
+where `unifiedFieldListContainerRef.current` provides the following API: 
+
+```
+refetchFieldsExistenceInfo: ExistingFieldsFetcher['refetchFieldsExistenceInfo'];
+closeFieldListFlyout: () => void;
+// no user permission or missing dataViewFieldEditor service will result in `undefined` API methods
+createField: undefined | (() => void);
+editField: undefined | ((fieldName: string) => void);
+deleteField: undefined | ((fieldName: string) => void);
+```
+
+Include the building block into your application:
+```
+<UnifiedFieldListSidebarContainer
+  ref={unifiedFieldListContainerRef}
+  // `responsive` is to show the list for desktop view and a button which triggers a flyout with the list for mobile view
+  variant="responsive" // can be also `list-always` and `button-and-flyout-always`
+  getCreationOptions={getCreationOptions}
+  services={services}
+  dataView={dataView}
+  allFields={dataView.fields}
+  workspaceSelectedFieldNames={selectedFieldNames}
+  onAddFieldToWorkspace={onAddFieldToWorkspace}
+  onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+  onAddFilter={onAddFilter}
+  onFieldEdited={onFieldEdited}
+/>
+```
+
 ---
 
-## Field Stats and Field Popover Components
+## Field Stats and Field Popover Components - can be also used as a building block
 
 * `<FieldStats .../>` - loads and renders stats (Top values, Distribution) for a data view field.
 
@@ -53,7 +104,7 @@ These components can be combined and customized as the following:
 />
 ```
 
-## Field List components
+## Field List subcomponents (for low level customization, otherwise consider using UnifiedFieldListSidebarContainer)
 
 * `<FieldList .../>` - a top-level component to render field filters and field list sections.
 
@@ -138,12 +189,6 @@ const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
 const { hasFieldData } = useExistingFieldsReader();
 const hasData = hasFieldData(currentDataViewId, fieldName) // returns a boolean
 ```
-
-## Server APIs
-
-* `/internal/unified_field_list/field_stats` - returns the loaded field stats (except for Ad-hoc data views)
-
-* `/internal/unified_field_list/existing_fields/{dataViewId}` - returns the loaded existing fields (except for Ad-hoc data views)
 
 ## Development
 

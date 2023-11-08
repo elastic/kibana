@@ -9,6 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -20,7 +21,7 @@ export interface UpdateByQueryResponse {
 
 /**
  * Pickup updated mappings by performing an update by query operation on all
- * documents in the index. Returns a task ID which can be
+ * documents matching the passed in query. Returns a task ID which can be
  * tracked for progress.
  *
  * @remarks When mappings are updated to add a field which previously wasn't
@@ -35,7 +36,8 @@ export const pickupUpdatedMappings =
   (
     client: ElasticsearchClient,
     index: string,
-    batchSize: number
+    batchSize: number,
+    query?: QueryDslQueryContainer
   ): TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse> =>
   () => {
     return client
@@ -52,6 +54,8 @@ export const pickupUpdatedMappings =
         refresh: true,
         // Create a task and return task id instead of blocking until complete
         wait_for_completion: false,
+        // Only update the documents that match the provided query
+        query,
       })
       .then(({ task: taskId }) => {
         return Either.right({ taskId: String(taskId!) });

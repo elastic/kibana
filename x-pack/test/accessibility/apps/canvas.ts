@@ -10,14 +10,20 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const { common } = getPageObjects(['common']);
+  const { canvas } = getPageObjects(['canvas']);
 
   describe('Canvas Accessibility', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
-      await common.navigateToApp('canvas');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
+      await canvas.goToListingPage();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('loads workpads', async function () {

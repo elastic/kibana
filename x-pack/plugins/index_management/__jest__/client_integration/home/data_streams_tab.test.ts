@@ -7,10 +7,16 @@
 
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
+import {
+  breadcrumbService,
+  IndexManagementBreadcrumb,
+} from '../../../public/application/services/breadcrumbs';
 import { API_BASE_PATH } from '../../../common/constants';
 import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
+import { notificationService } from '../../../public/application/services/notification';
 
 import {
   DataStreamsTabTestBed,
@@ -40,6 +46,7 @@ const urlServiceMock = {
 describe('Data Streams tab', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: DataStreamsTabTestBed;
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   describe('when there are no data streams', () => {
     beforeEach(async () => {
@@ -120,9 +127,17 @@ describe('Data Streams tab', () => {
       testBed.component.update();
       expect(testBed.find('dataStreamTable').text()).toContain('No data streams found');
     });
+
+    test('updates the breadcrumbs to data streams', () => {
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.dataStreams
+      );
+    });
   });
 
   describe('when there are data streams', () => {
+    const notificationsServiceMock = notificationServiceMock.createStartContract();
+
     beforeEach(async () => {
       const {
         setLoadIndicesResponse,
@@ -158,7 +173,13 @@ describe('Data Streams tab', () => {
       setLoadTemplatesResponse({ templates: [indexTemplate], legacyTemplates: [] });
       setLoadTemplateResponse(indexTemplate.name, indexTemplate);
 
-      testBed = await setup(httpSetup, { history: createMemoryHistory() });
+      notificationService.setup(notificationsServiceMock);
+      testBed = await setup(httpSetup, {
+        history: createMemoryHistory(),
+        services: {
+          notificationService,
+        },
+      });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
       });
@@ -170,8 +191,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', '1', 'Delete'],
-        ['', 'dataStream2', 'green', '1', 'Delete'],
+        ['', 'dataStream1', 'green', '1', '7d', 'Delete'],
+        ['', 'dataStream2', 'green', '1', '7d', 'Delete'],
       ]);
     });
 
@@ -209,8 +230,8 @@ describe('Data Streams tab', () => {
       // The table renders with the stats columns though.
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', 'Delete'],
-        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', 'Delete'],
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', '7d', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', '7d', 'Delete'],
       ]);
     });
 
@@ -229,8 +250,37 @@ describe('Data Streams tab', () => {
       // the human-readable string values.
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', 'Delete'],
-        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', 'Delete'],
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', '7d', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', '7d', 'Delete'],
+      ]);
+    });
+
+    test('hides Storage size column from stats if enableDataStreamsStorageColumn===false', async () => {
+      testBed = await setup(httpSetup, {
+        config: {
+          enableDataStreamsStorageColumn: false,
+        },
+      });
+
+      const { actions, component, table } = testBed;
+
+      await act(async () => {
+        actions.goToDataStreamsList();
+      });
+
+      component.update();
+
+      // Switching the stats on
+      await act(async () => {
+        actions.clickIncludeStatsSwitch();
+      });
+      component.update();
+
+      // The table renders with the stats columns except the Storage size column
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      expect(tableCellsValues).toEqual([
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '1', '7d', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1', '7d', 'Delete'],
       ]);
     });
 
@@ -316,6 +366,113 @@ describe('Data Streams tab', () => {
         );
       });
 
+      describe('update data retention', () => {
+        test('Should show disabled or infinite retention period accordingly in table and flyout', async () => {
+          const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+          const ds1 = createDataStreamPayload({
+            name: 'dataStream1',
+            lifecycle: {
+              enabled: false,
+            },
+          });
+          const ds2 = createDataStreamPayload({
+            name: 'dataStream2',
+            lifecycle: {
+              enabled: true,
+            },
+          });
+
+          setLoadDataStreamsResponse([ds1, ds2]);
+          setLoadDataStreamResponse(ds1.name, ds1);
+
+          testBed = await setup(httpSetup, {
+            history: createMemoryHistory(),
+            url: urlServiceMock,
+          });
+          await act(async () => {
+            testBed.actions.goToDataStreamsList();
+          });
+          testBed.component.update();
+
+          const { actions, find, table } = testBed;
+          const { tableCellsValues } = table.getMetaData('dataStreamTable');
+
+          expect(tableCellsValues).toEqual([
+            ['', 'dataStream1', 'green', '1', 'Disabled', 'Delete'],
+            ['', 'dataStream2', 'green', '1', '', 'Delete'],
+          ]);
+
+          await actions.clickNameAt(0);
+          expect(find('dataRetentionDetail').text()).toBe('Disabled');
+
+          await act(async () => {
+            testBed.find('closeDetailsButton').simulate('click');
+          });
+          testBed.component.update();
+
+          setLoadDataStreamResponse(ds2.name, ds2);
+          await actions.clickNameAt(1);
+          expect(find('dataRetentionDetail').text()).toBe('Keep data indefinitely');
+        });
+
+        test('can set data retention period', async () => {
+          const {
+            actions: { clickNameAt, clickEditDataRetentionButton },
+          } = testBed;
+
+          await clickNameAt(0);
+
+          clickEditDataRetentionButton();
+
+          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+            success: true,
+          });
+
+          // set data retention value
+          testBed.form.setInputValue('dataRetentionValue', '7');
+          // Set data retention unit
+          testBed.find('show-filters-button').simulate('click');
+          testBed.find('filter-option-h').simulate('click');
+
+          await act(async () => {
+            testBed.find('saveButton').simulate('click');
+          });
+          testBed.component.update();
+
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
+            expect.objectContaining({ body: JSON.stringify({ dataRetention: '7h' }) })
+          );
+        });
+
+        test('allows to set infinite retention period', async () => {
+          const {
+            actions: { clickNameAt, clickEditDataRetentionButton },
+          } = testBed;
+
+          await clickNameAt(0);
+
+          clickEditDataRetentionButton();
+
+          httpRequestsMockHelpers.setEditDataRetentionResponse('dataStream1', {
+            success: true,
+          });
+
+          testBed.form.toggleEuiSwitch('infiniteRetentionPeriod.input');
+
+          await act(async () => {
+            testBed.find('saveButton').simulate('click');
+          });
+          testBed.component.update();
+
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
+            expect.objectContaining({ body: JSON.stringify({}) })
+          );
+        });
+      });
+
       test('clicking index template name navigates to the index template details', async () => {
         const {
           actions: { clickNameAt, clickDetailPanelIndexTemplateLink },
@@ -334,6 +491,12 @@ describe('Data Streams tab', () => {
         component.update();
         expect(find('summaryTab').exists()).toBeTruthy();
         expect(find('title').text().trim()).toBe('indexTemplate');
+      });
+
+      test('shows data retention detail when configured', async () => {
+        const { actions, findDetailPanelDataRetentionDetail } = testBed;
+        await actions.clickNameAt(0);
+        expect(findDetailPanelDataRetentionDetail().exists()).toBeTruthy();
       });
     });
   });
@@ -406,6 +569,33 @@ describe('Data Streams tab', () => {
       expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
     });
 
+    test('with ILM updating data retention should be disabled', async () => {
+      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+      const dataStreamForDetailPanel = createDataStreamPayload({
+        name: 'dataStream1',
+        ilmPolicyName: 'my_ilm_policy',
+      });
+
+      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
+      setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
+
+      testBed = await setup(httpSetup, {
+        history: createMemoryHistory(),
+        url: urlServiceMock,
+      });
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+
+      const { actions } = testBed;
+      await actions.clickNameAt(0);
+
+      testBed.find('manageDataStreamButton').simulate('click');
+      expect(testBed.find('editDataRetentionButton').exists()).toBeFalsy();
+    });
+
     test('with an ILM url locator and no ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
@@ -423,10 +613,10 @@ describe('Data Streams tab', () => {
       });
       testBed.component.update();
 
-      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyName } = testBed;
+      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyDetail } = testBed;
       await actions.clickNameAt(0);
       expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
-      expect(findDetailPanelIlmPolicyName().contains('None')).toBeTruthy();
+      expect(findDetailPanelIlmPolicyDetail().exists()).toBeFalsy();
     });
 
     test('without an ILM url locator and with an ILM policy', async () => {
@@ -453,10 +643,10 @@ describe('Data Streams tab', () => {
       });
       testBed.component.update();
 
-      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyName } = testBed;
+      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyDetail } = testBed;
       await actions.clickNameAt(0);
       expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
-      expect(findDetailPanelIlmPolicyName().contains('my_ilm_policy')).toBeTruthy();
+      expect(findDetailPanelIlmPolicyDetail().contains('my_ilm_policy')).toBeTruthy();
     });
   });
 
@@ -489,8 +679,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
-        ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', '7d', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', '7d', 'Delete'],
       ]);
     });
 
@@ -499,14 +689,16 @@ describe('Data Streams tab', () => {
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
-        ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', '7d', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', '7d', 'Delete'],
       ]);
 
       actions.toggleViewFilterAt(0);
 
       ({ tableCellsValues } = table.getMetaData('dataStreamTable'));
-      expect(tableCellsValues).toEqual([['', 'non-managed-data-stream', 'green', '1', 'Delete']]);
+      expect(tableCellsValues).toEqual([
+        ['', 'non-managed-data-stream', 'green', '1', '7d', 'Delete'],
+      ]);
     });
   });
 
@@ -537,7 +729,7 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `hidden-data-stream${nonBreakingSpace}Hidden`, 'green', '1', 'Delete'],
+        ['', `hidden-data-stream${nonBreakingSpace}Hidden`, 'green', '1', '7d', 'Delete'],
       ]);
     });
   });
@@ -548,15 +740,29 @@ describe('Data Streams tab', () => {
 
       const dataStreamWithDelete = createDataStreamPayload({
         name: 'dataStreamWithDelete',
-        privileges: { delete_index: true },
+        privileges: { delete_index: true, manage_data_stream_lifecycle: true },
       });
       const dataStreamNoDelete = createDataStreamPayload({
         name: 'dataStreamNoDelete',
-        privileges: { delete_index: false },
+        privileges: { delete_index: false, manage_data_stream_lifecycle: true },
+      });
+      const dataStreamNoEditRetention = createDataStreamPayload({
+        name: 'dataStreamNoEditRetention',
+        privileges: { delete_index: true, manage_data_stream_lifecycle: false },
+      });
+
+      const dataStreamNoPermissions = createDataStreamPayload({
+        name: 'dataStreamNoPermissions',
+        privileges: { delete_index: false, manage_data_stream_lifecycle: false },
       });
 
       beforeEach(async () => {
-        setLoadDataStreamsResponse([dataStreamWithDelete, dataStreamNoDelete]);
+        setLoadDataStreamsResponse([
+          dataStreamWithDelete,
+          dataStreamNoDelete,
+          dataStreamNoEditRetention,
+          dataStreamNoPermissions,
+        ]);
 
         testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
         await act(async () => {
@@ -570,8 +776,10 @@ describe('Data Streams tab', () => {
         const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
         expect(tableCellsValues).toEqual([
-          ['', 'dataStreamNoDelete', 'green', '1', ''],
-          ['', 'dataStreamWithDelete', 'green', '1', 'Delete'],
+          ['', 'dataStreamNoDelete', 'green', '1', '7d', ''],
+          ['', 'dataStreamNoEditRetention', 'green', '1', '7d', 'Delete'],
+          ['', 'dataStreamNoPermissions', 'green', '1', '7d', ''],
+          ['', 'dataStreamWithDelete', 'green', '1', '7d', 'Delete'],
         ]);
       });
 
@@ -591,17 +799,6 @@ describe('Data Streams tab', () => {
         expect(find('deleteDataStreamsButton').exists()).toBeTruthy();
       });
 
-      test('displays delete button in detail panel', async () => {
-        const {
-          actions: { clickNameAt },
-          find,
-        } = testBed;
-        setLoadDataStreamResponse(dataStreamWithDelete.name, dataStreamWithDelete);
-        await clickNameAt(1);
-
-        expect(find('deleteDataStreamButton').exists()).toBeTruthy();
-      });
-
       test('hides delete button in detail panel', async () => {
         const {
           actions: { clickNameAt },
@@ -610,7 +807,43 @@ describe('Data Streams tab', () => {
         setLoadDataStreamResponse(dataStreamNoDelete.name, dataStreamNoDelete);
         await clickNameAt(0);
 
+        testBed.find('manageDataStreamButton').simulate('click');
         expect(find('deleteDataStreamButton').exists()).toBeFalsy();
+      });
+
+      test('hides edit data retention button if no permissions', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoEditRetention.name, dataStreamNoEditRetention);
+        await clickNameAt(1);
+
+        testBed.find('manageDataStreamButton').simulate('click');
+        expect(find('editDataRetentionButton').exists()).toBeFalsy();
+      });
+
+      test('hides manage button if no permissions', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoPermissions.name, dataStreamNoPermissions);
+        await clickNameAt(2);
+
+        expect(find('manageDataStreamButton').exists()).toBeFalsy();
+      });
+
+      test('displays delete button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamWithDelete.name, dataStreamWithDelete);
+        await clickNameAt(3);
+
+        testBed.find('manageDataStreamButton').simulate('click');
+        expect(find('deleteDataStreamButton').exists()).toBeTruthy();
       });
     });
   });

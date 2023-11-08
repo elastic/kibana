@@ -18,6 +18,7 @@ import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from '../utils/get_state_defaults';
+import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 
 export interface UpdateParams {
   /**
@@ -106,8 +107,10 @@ export interface DiscoverSavedSearchContainer {
 
 export function getSavedSearchContainer({
   services,
+  globalStateContainer,
 }: {
   services: DiscoverServices;
+  globalStateContainer: DiscoverGlobalStateContainer;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -137,6 +140,7 @@ export function getSavedSearchContainer({
       savedSearch: { ...nextSavedSearch },
       dataView,
       state: newAppState,
+      globalStateContainer,
       services,
     });
     return set(nextSavedSearchToSet);
@@ -144,7 +148,12 @@ export function getSavedSearchContainer({
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
-    updateSavedSearch({ savedSearch: nextSavedSearch, services }, true);
+    updateSavedSearch({
+      savedSearch: nextSavedSearch,
+      globalStateContainer,
+      services,
+      useFilterAndQueryServices: true,
+    });
 
     const id = await services.savedSearch.save(nextSavedSearch, saveOptions || {});
 
@@ -161,15 +170,14 @@ export function getSavedSearchContainer({
       ? nextDataView
       : previousSavedSearch.searchSource.getField('index')!;
 
-    const nextSavedSearch = updateSavedSearch(
-      {
-        savedSearch: { ...previousSavedSearch },
-        dataView,
-        state: nextState || {},
-        services,
-      },
-      useFilterAndQueryServices
-    );
+    const nextSavedSearch = updateSavedSearch({
+      savedSearch: { ...previousSavedSearch },
+      dataView,
+      state: nextState || {},
+      globalStateContainer,
+      services,
+      useFilterAndQueryServices,
+    });
 
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
     hasChanged$.next(hasChanged);

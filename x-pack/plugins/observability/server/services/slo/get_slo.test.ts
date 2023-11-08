@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
@@ -26,16 +27,14 @@ describe('GetSLO', () => {
     it('retrieves the SLO from the repository', async () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
-      mockSummaryClient.fetchSummary.mockResolvedValueOnce({
-        [slo.id]: {
-          status: 'HEALTHY',
-          sliValue: 0.9999,
-          errorBudget: {
-            initial: 0.001,
-            consumed: 0.1,
-            remaining: 0.9,
-            isEstimated: false,
-          },
+      mockSummaryClient.computeSummary.mockResolvedValueOnce({
+        status: 'HEALTHY',
+        sliValue: 0.9999,
+        errorBudget: {
+          initial: 0.001,
+          consumed: 0.1,
+          remaining: 0.9,
+          isEstimated: false,
         },
       });
 
@@ -83,6 +82,8 @@ describe('GetSLO', () => {
         updatedAt: slo.updatedAt.toISOString(),
         enabled: slo.enabled,
         revision: slo.revision,
+        groupBy: slo.groupBy,
+        instanceId: ALL_VALUE,
       });
     });
   });

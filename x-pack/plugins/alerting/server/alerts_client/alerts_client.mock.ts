@@ -15,6 +15,7 @@ const createAlertsClientMock = () => {
       hasReachedAlertLimit: jest.fn(),
       checkLimitUsage: jest.fn(),
       persistAlerts: jest.fn(),
+      getSummarizedAlerts: jest.fn(),
       factory: jest.fn(),
       client: jest.fn(),
     };
@@ -29,9 +30,11 @@ const createPublicAlertsClientMock = () => {
   return jest.fn().mockImplementation(() => {
     return {
       create: jest.fn(),
-      getAlertLimitValue: jest.fn(),
+      report: jest.fn(),
+      getAlertLimitValue: jest.fn().mockReturnValue(1000),
       setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn(),
+      getRecoveredAlerts: jest.fn().mockReturnValue([]),
+      setAlertData: jest.fn(),
     };
   });
 };

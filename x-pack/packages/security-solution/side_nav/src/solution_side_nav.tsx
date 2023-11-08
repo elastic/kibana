@@ -22,8 +22,9 @@ import partition from 'lodash/fp/partition';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import type { SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
-import { LinkCategories, SeparatorLinkCategory, SolutionSideNavItemPosition } from './types';
+import { SolutionSideNavItemPosition } from './types';
 import type { SolutionSideNavItem, Tracker } from './types';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
@@ -105,28 +106,25 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
       <EuiFlexGroup gutterSize="none" direction="column">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" direction="column">
-            <EuiFlexItem>
-              <EuiListGroup gutterSize="none">
-                <SolutionSideNavItems
-                  items={topItems}
-                  categories={categories}
-                  selectedId={selectedId}
-                  activePanelNavId={activePanelNavId}
-                  isMobileSize={isMobileSize}
-                  onOpenPanelNav={openPanelNav}
-                />
-              </EuiListGroup>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiListGroup gutterSize="none">
-                <SolutionSideNavItems
-                  items={bottomItems}
-                  selectedId={selectedId}
-                  activePanelNavId={activePanelNavId}
-                  isMobileSize={isMobileSize}
-                  onOpenPanelNav={openPanelNav}
-                />
-              </EuiListGroup>
+              <SolutionSideNavItems
+                items={topItems}
+                categories={categories}
+                selectedId={selectedId}
+                activePanelNavId={activePanelNavId}
+                isMobileSize={isMobileSize}
+                onOpenPanelNav={openPanelNav}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>
+              <SolutionSideNavItems
+                items={bottomItems}
+                selectedId={selectedId}
+                activePanelNavId={activePanelNavId}
+                isMobileSize={isMobileSize}
+                onOpenPanelNav={openPanelNav}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -150,7 +148,7 @@ interface SolutionSideNavItemsProps {
   activePanelNavId: ActivePanelNav;
   isMobileSize: boolean;
   onOpenPanelNav: (id: string) => void;
-  categories?: LinkCategories;
+  categories?: SeparatorLinkCategory[];
 }
 /**
  * The Solution side navigation items component.
@@ -199,7 +197,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
           }
 
           return (
-            <>
+            <React.Fragment key={categoryIndex}>
               {categoryIndex !== 0 && <EuiSpacer size="s" />}
               {categoryItems.map((item) => (
                 <SolutionSideNavItem
@@ -212,7 +210,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
                 />
               ))}
               <EuiSpacer size="s" />
-            </>
+            </React.Fragment>
           );
         })}
       </>
@@ -283,16 +281,18 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
       <>
         <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiFlexItem>
-            <EuiListGroupItem
-              label={itemLabel}
-              href={href}
-              wrapText
-              onClick={onLinkClicked}
-              className={itemClassNames}
-              color="text"
-              size="s"
-              data-test-subj={`solutionSideNavItemLink-${id}`}
-            />
+            <EuiListGroup gutterSize="none">
+              <EuiListGroupItem
+                label={itemLabel}
+                href={href}
+                wrapText
+                onClick={onLinkClicked}
+                className={itemClassNames}
+                color="text"
+                size="s"
+                data-test-subj={`solutionSideNavItemLink-${id}`}
+              />
+            </EuiListGroup>
           </EuiFlexItem>
           {hasPanelNav && (
             <EuiFlexItem grow={0}>

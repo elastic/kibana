@@ -35,14 +35,14 @@ export const DeleteParam = ({
 
   const { status } = useFetcher(() => {
     if (isDeleting) {
-      return deleteGlobalParams({ ids: items.map(({ id }) => id) });
+      return deleteGlobalParams(items.map(({ id }) => id));
     }
   }, [items, isDeleting]);
 
   const name = items
     .map(({ key }) => key)
     .join(', ')
-    .substr(0, 50);
+    .slice(0, 50);
 
   useEffect(() => {
     if (!isDeleting) {
@@ -55,7 +55,7 @@ export const DeleteParam = ({
             <p data-test-subj="uptimeDeleteParamFailure">
               {' '}
               {i18n.translate('xpack.synthetics.paramManagement.paramDeleteFailuresMessage.name', {
-                defaultMessage: 'Param {name} deleted successfully.',
+                defaultMessage: 'Param {name} failed to delete.',
                 values: { name },
               })}
             </p>

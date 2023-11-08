@@ -11,12 +11,22 @@ import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal'
 /**
  * The list of values returned by `checkIndexCurrentAlgorithm`.
  *
- * - `zdt`
- * - `v2-compatible`
- * - `v2-incompatible`
- * - `unknown`
+ * - `zdt`: last algo that ran was zdt
+ *
+ * - `v2-compatible`: last running algo was a v2 version that zdt can take over
+ *
+ * - `v2-incompatible`: last running algo was a v2 version that zdt can not take over
+ *
+ * - `v2-partially-migrated`: last running algo was zdt taking over v2, but the migration failed at some point
+ *
+ * - `unknown`: last running algo cannot be determined
  */
-export type CheckCurrentAlgorithmResult = 'zdt' | 'v2-compatible' | 'v2-incompatible' | 'unknown';
+export type CheckCurrentAlgorithmResult =
+  | 'zdt'
+  | 'v2-partially-migrated'
+  | 'v2-compatible'
+  | 'v2-incompatible'
+  | 'unknown';
 
 export const checkIndexCurrentAlgorithm = (
   indexMapping: IndexMapping
@@ -27,7 +37,7 @@ export const checkIndexCurrentAlgorithm = (
   }
 
   const hasV2Meta = !!meta.migrationMappingPropertyHashes;
-  const hasZDTMeta = !!meta.docVersions || !!meta.mappingVersions;
+  const hasZDTMeta = !!meta.mappingVersions;
 
   if (hasV2Meta && hasZDTMeta) {
     return 'unknown';
@@ -37,7 +47,8 @@ export const checkIndexCurrentAlgorithm = (
     return isCompatible ? 'v2-compatible' : 'v2-incompatible';
   }
   if (hasZDTMeta) {
-    return 'zdt';
+    const isFullZdt = !!meta.docVersions;
+    return isFullZdt ? 'zdt' : 'v2-partially-migrated';
   }
   return 'unknown';
 };

@@ -20,6 +20,7 @@ import {
 } from '../../constants.mock';
 
 export const getListItemResponseMock = (): ListItemSchema => ({
+  '@timestamp': DATE_NOW,
   _version: undefined,
   created_at: DATE_NOW,
   created_by: USER,

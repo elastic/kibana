@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getExportTypesRegistry } from '../lib';
+import { ExportTypesRegistry } from '../lib';
+import { createMockReportingCore, createMockConfigSchema } from '../test_helpers';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { ErrorCodeStats, FeatureAvailabilityMap, MetricsStats } from './types';
@@ -20,12 +21,15 @@ const sizesAggResponse = {
   '95.0': 1.1935594e7,
   '99.0': 1.1935594e7,
 };
+let exportTypesRegistry: ExportTypesRegistry;
+let exportTypesHandler: ReturnType<typeof getExportTypesHandler>;
 
-beforeEach(() => {
+beforeEach(async () => {
+  const mockReporting = await createMockReportingCore(createMockConfigSchema());
+  exportTypesRegistry = mockReporting.getExportTypesRegistry();
+  exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
   featureMap = { PNG: true, csv_searchsource: true, printable_pdf: true };
 });
-
-const exportTypesHandler = getExportTypesHandler(getExportTypesRegistry());
 
 test('Model of job status and status-by-pdf-app', () => {
   const result = getExportStats(
@@ -106,35 +110,7 @@ test('Model of jobTypes', () => {
     exportTypesHandler
   );
 
-  expect(result.PNG).toMatchInlineSnapshot(`
-    Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 3,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": Object {},
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {},
-        "png_memory": Object {},
-      },
-      "output_size": Object {
-        "1.0": 5093470,
-        "25.0": 5093470,
-        "5.0": 5093470,
-        "50.0": 8514532,
-        "75.0": 11935594,
-        "95.0": 11935594,
-        "99.0": 11935594,
-      },
-      "total": 3,
-    }
-  `);
+  expect(result.PNG).toMatchInlineSnapshot(`undefined`);
   expect(result.csv_searchsource).toMatchInlineSnapshot(`
     Object {
       "app": Object {
@@ -215,35 +191,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
     featureMap,
     exportTypesHandler
   );
-  expect(result.PNG).toMatchInlineSnapshot(`
-    Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 5,
-      "error_codes": Object {},
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {},
-        "png_memory": Object {},
-      },
-      "output_size": Object {
-        "1.0": 5093470,
-        "25.0": 5093470,
-        "5.0": 5093470,
-        "50.0": 8514532,
-        "75.0": 11935594,
-        "95.0": 11935594,
-        "99.0": 11935594,
-      },
-      "total": 15,
-    }
-  `);
+  expect(result.PNG).toMatchInlineSnapshot(`undefined`);
 });
 
 test('Incorporate queue times', () => {
@@ -414,19 +362,6 @@ test('Incorporate error code stats', () => {
           invalid_layout_parameters_error: 0,
         },
       },
-      csv_searchsource_immediate: {
-        available: true,
-        total: 3,
-        output_size: sizesAggResponse,
-        metrics: { png_cpu: {}, png_memory: {} } as MetricsStats,
-        app: { dashboard: 3, visualization: 0, 'canvas workpad': 0 },
-        error_codes: {
-          authentication_expired_error: 5,
-          queue_timeout_error: 1,
-          unknown_error: 0,
-          kibana_shutting_down_error: 1,
-        },
-      },
     },
     featureMap,
     exportTypesHandler
@@ -457,15 +392,6 @@ test('Incorporate error code stats', () => {
       "queue_timeout_error": 1,
       "unknown_error": 0,
       "visual_reporting_soft_disabled_error": 1,
-    }
-  `);
-
-  expect(result.csv_searchsource_immediate.error_codes).toMatchInlineSnapshot(`
-    Object {
-      "authentication_expired_error": 5,
-      "kibana_shutting_down_error": 1,
-      "queue_timeout_error": 1,
-      "unknown_error": 0,
     }
   `);
 });

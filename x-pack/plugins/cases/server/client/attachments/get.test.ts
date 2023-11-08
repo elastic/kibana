@@ -20,7 +20,7 @@ describe('get', () => {
       await expect(() =>
         findComment({ caseID: 'mock-id', findQueryParams: { page: 209, perPage: 100 } }, clientArgs)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find comments case id: mock-id: Error: The number of documents is too high. Paginating through more than 10,000 documents is not possible."`
+        `"Failed to find comments case id: mock-id: Error: The number of documents is too high. Paginating through more than 10000 documents is not possible."`
       );
     });
 
@@ -28,7 +28,7 @@ describe('get', () => {
       await expect(() =>
         findComment({ caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9001 } }, clientArgs)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find comments case id: mock-id: Error: The provided perPage value was too high. The maximum allowed perPage value is 100."`
+        `"Failed to find comments case id: mock-id: Error: The provided perPage value is too high. The maximum allowed perPage value is 100."`
       );
     });
 
@@ -36,7 +36,7 @@ describe('get', () => {
       await expect(
         findComment(
           // @ts-expect-error: excess attribute
-          { caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9001, foo: 'bar' } },
+          { caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9, foo: 'bar' } },
           clientArgs
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(

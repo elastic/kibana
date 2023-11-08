@@ -23,7 +23,8 @@ export class LangIdentInference extends InferenceBase<TextClassificationResponse
   );
   protected info = [
     i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.info1', {
-      defaultMessage: 'Test how well the model identifies the language of your text.',
+      defaultMessage:
+        'Test how well the model identifies the language of your text. The model is more accurate with longer text.',
     }),
   ];
 

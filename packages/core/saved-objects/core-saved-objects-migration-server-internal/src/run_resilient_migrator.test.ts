@@ -10,6 +10,7 @@ import buffer from 'buffer';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import { createInitialState } from './initial_state';
@@ -79,6 +80,7 @@ describe('runResilientMigrator', () => {
       typeRegistry: options.typeRegistry,
       docLinks: options.docLinks,
       logger: options.logger,
+      esCapabilities: options.esCapabilities,
     });
 
     // store the created initial state
@@ -153,5 +155,6 @@ const mockOptions = (): RunResilientMigratorParams => {
     },
     typeRegistry: savedObjectTypeRegistryMock,
     docLinks: docLinksServiceMock.createSetupContract(),
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
 };

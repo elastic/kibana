@@ -330,7 +330,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -352,7 +352,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -379,7 +379,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -411,7 +411,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -428,7 +428,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -450,7 +450,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -477,7 +477,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },
@@ -499,7 +499,7 @@ describe('getMigrationHash', () => {
             changes: [
               {
                 type: 'data_backfill',
-                transform: jest.fn(),
+                backfillFn: jest.fn(),
               },
             ],
           },

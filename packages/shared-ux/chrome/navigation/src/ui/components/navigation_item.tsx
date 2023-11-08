@@ -6,24 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, ReactElement, ReactNode, useEffect } from 'react';
+import React, { Fragment, useEffect, useMemo } from 'react';
+import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { EuiCollapsibleNavItem } from '@elastic/eui';
 
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import type { ChromeProjectNavigationNodeEnhanced, NodeProps } from '../types';
+import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
+import type { NodeProps, NodePropsEnhanced } from '../types';
 import { useNavigation } from './navigation';
+import { getNavigationNodeHref } from '../../utils';
 
 export interface Props<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
-  element?: string;
   unstyled?: boolean;
-}
-
-function isReactElement(element: ReactNode): element is ReactElement {
-  return React.isValidElement(element);
 }
 
 function NavigationItemComp<
@@ -31,39 +29,77 @@ function NavigationItemComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
+  const { cloudLinks, navigateToUrl } = useNavigationServices();
   const navigationContext = useNavigation();
-  const navNodeRef = React.useRef<ChromeProjectNavigationNodeEnhanced | null>(null);
+  const navNodeRef = React.useRef<ChromeProjectNavigationNode | null>(null);
 
-  const { element, children, ...node } = props;
+  const { children, node } = useMemo(() => {
+    const { children: _children, ...rest } = props;
+    const nodeEnhanced: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'> = {
+      ...rest,
+      isGroup: false,
+    };
+    if (typeof _children === 'string') {
+      nodeEnhanced.title = nodeEnhanced.title ?? _children;
+    }
+    return {
+      children: _children,
+      node: nodeEnhanced,
+    };
+  }, [props]);
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 
-  let renderItem: (() => ReactElement) | undefined;
-
-  if (!unstyled && children && (typeof children === 'function' || isReactElement(children))) {
-    renderItem =
-      typeof children === 'function' ? () => children(navNodeRef.current) : () => children;
-  }
-
-  const { navNode } = useInitNavNode({ ...node, children, renderItem });
+  const { navNode } = useInitNavNode(node, { cloudLinks });
 
   useEffect(() => {
     navNodeRef.current = navNode;
   }, [navNode]);
 
-  if (!navNode || !unstyled) {
+  if (!navNode) {
     return null;
   }
 
-  if (children) {
-    if (typeof children === 'function') {
-      return children(navNode);
+  if (unstyled) {
+    if (children) {
+      if (typeof children === 'function') {
+        return children(navNode);
+      }
+      return <>{children}</>;
     }
-    return <>{children}</>;
+
+    return <Fragment>{navNode.title}</Fragment>;
   }
 
-  const Element = element || Fragment;
+  const isRootLevel = navNode.path.length === 1;
 
-  return <Element>{navNode.title}</Element>;
+  if (isRootLevel) {
+    const href = getNavigationNodeHref(navNode);
+
+    return (
+      <EuiCollapsibleNavItem
+        id={navNode.id}
+        title={navNode.title}
+        icon={navNode.icon}
+        iconProps={{ size: 'm' }}
+        isSelected={navNode.isActive}
+        data-test-subj={`nav-item-${navNode.id}`}
+        linkProps={{
+          href,
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (href) {
+              navigateToUrl(href);
+            }
+          },
+        }}
+      />
+    );
+  }
+
+  // We don't render anything in the UI for non root item as those register themselves on the parent (Group)
+  // updating its "childrenNodes" state which are then converted to "items" for the EuiCollapsibleNavItem component.
+  return null;
 }
 
 export const NavigationItem = React.memo(NavigationItemComp) as typeof NavigationItemComp;

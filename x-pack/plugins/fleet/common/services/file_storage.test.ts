@@ -10,19 +10,19 @@ import { getFileDataIndexName, getFileMetadataIndexName } from '..';
 describe('File Storage services', () => {
   describe('File Index Names', () => {
     it('should generate file metadata index name for files received from host', () => {
-      expect(getFileMetadataIndexName('foo')).toEqual('.fleet-files-foo');
+      expect(getFileMetadataIndexName('foo')).toEqual('.fleet-fileds-fromhost-meta-foo');
     });
 
     it('should generate file data index name for files received from host', () => {
-      expect(getFileDataIndexName('foo')).toEqual('.fleet-file-data-foo');
+      expect(getFileDataIndexName('foo')).toEqual('.fleet-fileds-fromhost-data-foo');
     });
 
     it('should generate file metadata index name for files to be delivered to host', () => {
-      expect(getFileMetadataIndexName('foo', true)).toEqual('.fleet-filedelivery-meta-foo');
+      expect(getFileMetadataIndexName('foo', true)).toEqual('.fleet-fileds-tohost-meta-foo');
     });
 
     it('should generate file data index name for files to be delivered to host', () => {
-      expect(getFileDataIndexName('foo', true)).toEqual('.fleet-filedelivery-data-foo');
+      expect(getFileDataIndexName('foo', true)).toEqual('.fleet-fileds-tohost-data-foo');
     });
   });
 });

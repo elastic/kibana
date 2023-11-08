@@ -14,25 +14,28 @@ import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
-  Configurations,
+  Configuration,
   ConfigurationAttributes,
+  Configurations,
+  ConnectorMappings,
+} from '../../../common/types/domain';
+import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
-  Configuration,
-  ConnectorMappings,
-  GetConfigurationFindRequest,
   ConnectorMappingResponse,
-} from '../../../common/api';
+  GetConfigurationFindRequest,
+} from '../../../common/types/api';
 import {
-  ConfigurationsRt,
   ConfigurationPatchRequestRt,
-  GetConfigurationFindRequestRt,
-  ConfigurationRt,
-  FindActionConnectorResponseRt,
-  decodeWithExcessOrThrow,
   ConfigurationRequestRt,
-} from '../../../common/api';
-import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+  GetConfigurationFindRequestRt,
+  FindActionConnectorResponseRt,
+} from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
+import {
+  MAX_CONCURRENT_SEARCHES,
+  MAX_SUPPORTED_CONNECTORS_RETURNED,
+} from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
@@ -44,6 +47,9 @@ import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './typ
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
+import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
+import { validateCustomFieldTypesInRequest } from './validators';
 
 /**
  * Defines the internal helper functions.
@@ -63,7 +69,7 @@ export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigurationFindRequest): Promise<Configuration | {}>;
+  get(params: GetConfigurationFindRequest): Promise<Configurations>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
@@ -208,9 +214,9 @@ export async function getConnectors({
       return types;
     }, {} as Record<string, ActionType>);
 
-    const res = (await actionsClient.getAll()).filter((action) =>
-      isConnectorSupported(action, actionTypes)
-    );
+    const res = (await actionsClient.getAll())
+      .filter((action) => isConnectorSupported(action, actionTypes))
+      .slice(0, MAX_SUPPORTED_CONNECTORS_RETURNED);
 
     return decodeOrThrow(FindActionConnectorResponseRt)(res);
   } catch (error) {
@@ -246,11 +252,18 @@ export async function update(
   try {
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
+    validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
+
     const { version, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
       configurationId,
+    });
+
+    validateCustomFieldTypesInRequest({
+      requestCustomFields: request.customFields,
+      originalCustomFields: configuration.attributes.customFields,
     });
 
     await authorization.ensureAuthorized({
@@ -335,7 +348,7 @@ export async function update(
   }
 }
 
-async function create(
+export async function create(
   configRequest: ConfigurationRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
@@ -351,6 +364,10 @@ async function create(
   try {
     const validatedConfigurationRequest =
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
+
+    validateDuplicatedCustomFieldKeysInRequest({
+      requestCustomFields: validatedConfigurationRequest.customFields,
+    });
 
     let error = null;
 
@@ -424,6 +441,7 @@ async function create(
       unsecuredSavedObjectsClient,
       attributes: {
         ...validatedConfigurationRequest,
+        customFields: validatedConfigurationRequest.customFields ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,

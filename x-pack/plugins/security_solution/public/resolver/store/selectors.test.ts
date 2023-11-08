@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyzerState } from '../types';
+import type { AnalyzerById } from '../types';
 import type { Reducer, AnyAction } from 'redux';
 import { createStore } from 'redux';
 import { analyzerReducer } from './reducer';
@@ -27,15 +27,13 @@ describe('resolver selectors', () => {
   /**
    * Get state, given an ordered collection of actions.
    */
-  const testReducer: Reducer<AnalyzerState, AnyAction> = (
+  const testReducer: Reducer<AnalyzerById, AnyAction> = (
     analyzerState = {
-      analyzerById: {
-        [id]: EMPTY_RESOLVER,
-      },
+      [id]: EMPTY_RESOLVER,
     },
     action
-  ): AnalyzerState => analyzerReducer(analyzerState, action);
-  const state: () => AnalyzerState = () => {
+  ): AnalyzerById => analyzerReducer(analyzerState, action);
+  const state: () => AnalyzerById = () => {
     const store = createStore(testReducer, undefined);
     for (const action of actions) {
       store.dispatch(action);
@@ -71,17 +69,13 @@ describe('resolver selectors', () => {
           actions.push(userSetRasterSize({ id, dimensions: [size, size] }));
         });
         it('should return no flowto for the second ancestor', () => {
-          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(secondAncestorID)).toBe(
-            null
-          );
+          expect(selectors.ariaFlowtoNodeID(state()[id])(0)(secondAncestorID)).toBe(null);
         });
         it('should return no flowto for the first ancestor', () => {
-          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(firstAncestorID)).toBe(
-            null
-          );
+          expect(selectors.ariaFlowtoNodeID(state()[id])(0)(firstAncestorID)).toBe(null);
         });
         it('should return no flowto for the origin', () => {
-          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(originID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state()[id])(0)(originID)).toBe(null);
         });
       });
     });
@@ -119,15 +113,13 @@ describe('resolver selectors', () => {
           );
         });
         it('should return no flowto for the origin', () => {
-          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(originID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state()[id])(0)(originID)).toBe(null);
         });
         it('should return the second child as the flowto for the first child', () => {
-          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(firstChildID)).toBe(
-            secondChildID
-          );
+          expect(selectors.ariaFlowtoNodeID(state()[id])(0)(firstChildID)).toBe(secondChildID);
         });
         it('should return no flowto for second child', () => {
-          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(secondChildID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state()[id])(0)(secondChildID)).toBe(null);
         });
       });
       describe('when only the origin and first child are in view', () => {
@@ -143,10 +135,10 @@ describe('resolver selectors', () => {
           );
 
           // get the layout
-          const layout = selectors.layout(state().analyzerById[id]);
+          const layout = selectors.layout(state()[id]);
 
           // find the position of the second child
-          const secondChild = selectors.graphNodeForID(state().analyzerById[id])(secondChildID);
+          const secondChild = selectors.graphNodeForID(state()[id])(secondChildID);
           const positionOfSecondChild = layout.processNodePositions.get(
             secondChild as ResolverNode
           )!;
@@ -165,31 +157,31 @@ describe('resolver selectors', () => {
           );
         });
         it('the origin should be in view', () => {
-          const origin = selectors.graphNodeForID(state().analyzerById[id])(originID);
+          const origin = selectors.graphNodeForID(state()[id])(originID);
           expect(
             selectors
-              .visibleNodesAndEdgeLines(state().analyzerById[id])(0)
+              .visibleNodesAndEdgeLines(state()[id])(0)
               .processNodePositions.has(origin as ResolverNode)
           ).toBe(true);
         });
         it('the first child should be in view', () => {
-          const firstChild = selectors.graphNodeForID(state().analyzerById[id])(firstChildID);
+          const firstChild = selectors.graphNodeForID(state()[id])(firstChildID);
           expect(
             selectors
-              .visibleNodesAndEdgeLines(state().analyzerById[id])(0)
+              .visibleNodesAndEdgeLines(state()[id])(0)
               .processNodePositions.has(firstChild as ResolverNode)
           ).toBe(true);
         });
         it('the second child should not be in view', () => {
-          const secondChild = selectors.graphNodeForID(state().analyzerById[id])(secondChildID);
+          const secondChild = selectors.graphNodeForID(state()[id])(secondChildID);
           expect(
             selectors
-              .visibleNodesAndEdgeLines(state().analyzerById[id])(0)
+              .visibleNodesAndEdgeLines(state()[id])(0)
               .processNodePositions.has(secondChild as ResolverNode)
           ).toBe(false);
         });
         it('should return nothing as the flowto for the first child', () => {
-          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(firstChildID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state()[id])(0)(firstChildID)).toBe(null);
         });
       });
     });

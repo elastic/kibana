@@ -1,0 +1,21 @@
+{
+  "synonyms.put_synonym_rule": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_synonyms/{set_id}/{rule_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-synonym-rule.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

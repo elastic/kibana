@@ -18,10 +18,12 @@ import type { SecurityCellActionExecutionContext } from '../../types';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../common/types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 const services = createStartServicesMock();
 const mockGlobalFilterManager = services.data.query.filterManager;
 const mockTimelineFilterManager = createFilterManagerMock();
+const mockWarningToast = services.notifications.toasts.addWarning;
 
 const mockState = {
   ...mockGlobalState,
@@ -57,7 +59,7 @@ describe('createFilterInCellActionFactory', () => {
   const context = {
     data: [
       {
-        field: { name: 'user.name', type: 'text' },
+        field: { name: 'user.name', type: 'string' },
         value: 'the value',
       },
     ],
@@ -75,13 +77,29 @@ describe('createFilterInCellActionFactory', () => {
     it('should return true if everything is okay', async () => {
       expect(await filterInAction.isCompatible(context)).toEqual(true);
     });
+
     it('should return false if field not allowed', async () => {
       expect(
         await filterInAction.isCompatible({
           ...context,
           data: [
             {
+              ...context.data[0],
               field: { ...context.data[0].field, name: 'signal.reason' },
+            },
+          ],
+        })
+      ).toEqual(false);
+    });
+
+    it('should return false if Kbn type is unsupported', async () => {
+      expect(
+        await filterInAction.isCompatible({
+          ...context,
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, type: KBN_FIELD_TYPES.HISTOGRAM },
             },
           ],
         })
@@ -100,6 +118,21 @@ describe('createFilterInCellActionFactory', () => {
         await filterInAction.execute(dataTableContext);
         expect(mockGlobalFilterManager.addFilters).toHaveBeenCalled();
         expect(mockTimelineFilterManager.addFilters).not.toHaveBeenCalled();
+      });
+
+      it('should show warning if value type is unsupported', async () => {
+        await filterInAction.execute({
+          ...dataTableContext,
+          data: [
+            {
+              ...context.data[0],
+              value: { test: '123' },
+            },
+          ],
+        });
+        expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(mockTimelineFilterManager.addFilters).not.toHaveBeenCalled();
+        expect(mockWarningToast).toHaveBeenCalled();
       });
     });
 

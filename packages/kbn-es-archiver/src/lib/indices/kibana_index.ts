@@ -85,7 +85,7 @@ export async function migrateSavedObjectIndices(kbnClient: KbnClient) {
 const LEGACY_INDICES_REGEXP = new RegExp(`^(${ALL_SAVED_OBJECT_INDICES.join('|')})(:?_\\d*)?$`);
 const INDICES_REGEXP = new RegExp(`^(${ALL_SAVED_OBJECT_INDICES.join('|')})_(pre)?\\d+.\\d+.\\d+`);
 
-function isSavedObjectIndex(index?: string): index is string {
+export function isSavedObjectIndex(index?: string): index is string {
   return Boolean(index && (LEGACY_INDICES_REGEXP.test(index) || INDICES_REGEXP.test(index)));
 }
 
@@ -121,6 +121,7 @@ export async function cleanSavedObjectIndices({
     const resp = await client.deleteByQuery(
       {
         index,
+        refresh: true,
         body: {
           query: {
             bool: {
@@ -139,7 +140,7 @@ export async function cleanSavedObjectIndices({
       }
     );
 
-    if (resp.total !== resp.deleted) {
+    if (resp.total !== resp.deleted && resp.total && resp.total > 1) {
       log.warning(
         'delete by query deleted %d of %d total documents, trying again',
         resp.deleted,

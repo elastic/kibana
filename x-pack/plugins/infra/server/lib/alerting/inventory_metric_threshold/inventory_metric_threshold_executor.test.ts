@@ -29,6 +29,7 @@ import { createInventoryMetricThresholdExecutor } from './inventory_metric_thres
 import { ConditionResult } from './evaluate_condition';
 import { InfraBackendLibs } from '../../infra_types';
 import { infraPluginMock } from '../../../mocks';
+import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
 
 jest.mock('./evaluate_condition', () => ({ evaluateCondition: jest.fn() }));
 
@@ -82,6 +83,10 @@ const mockOptions = {
   },
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+  getTimeRange: () => {
+    const date = new Date().toISOString();
+    return { dateStart: date, dateEnd: date };
+  },
 };
 
 const setEvaluationResults = (response: Record<string, ConditionResult>) => {
@@ -98,9 +103,6 @@ const createMockStaticConfiguration = (sources: any) => ({
   },
   inventory: {
     compositeSize: 2000,
-  },
-  logs: {
-    app_target: 'logs-ui',
   },
   sources,
 });
@@ -121,7 +123,7 @@ const mockLibs = {
   },
   getStartServices: () => [
     null,
-    infraPluginMock.createSetupContract(),
+    { logsShared: logsSharedPluginMock.createStartContract() },
     infraPluginMock.createStartContract(),
   ],
   configuration: createMockStaticConfiguration({}),
@@ -156,10 +158,12 @@ services.alertFactory.create.mockImplementation((instanceID: string) => {
     : newAlertInstance;
   alertInstances.set(instanceID, alertInstance);
 
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
+  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
+    (id: string, action: any) => {
+      alertInstance.actionQueue.push({ id, action });
+      return alertInstance.instance;
+    }
+  );
 
   return alertInstance.instance;
 });

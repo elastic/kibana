@@ -12,14 +12,14 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { ThresholdNormalized } from '../../../../../common/detection_engine/rule_schema';
+import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from './utils';
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
 import type { ThresholdSignalHistory, ThresholdBucket } from './types';
 import type { BulkCreate, WrapHits } from '../types';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
-import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 

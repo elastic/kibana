@@ -18,6 +18,8 @@ import { kibanaService } from '../../../state/kibana_service';
 import { UptimeDataViewContextProvider } from '../../../contexts/uptime_data_view_context';
 
 interface Props {
+  id?: string;
+  stackVersion?: string;
   core: CoreStart;
   plugins: ClientPluginsStart;
   ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];
@@ -25,13 +27,25 @@ interface Props {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function TLSAlert({ core, plugins, ruleParams, setRuleParams }: Props) {
+export default function TLSAlert({
+  id,
+  stackVersion,
+  core,
+  plugins,
+  ruleParams,
+  setRuleParams,
+}: Props) {
   kibanaService.core = core;
   return (
     <ReduxProvider store={store}>
       <KibanaContextProvider services={{ ...core, ...plugins }}>
         <UptimeDataViewContextProvider dataViews={plugins.dataViews}>
-          <AlertTls ruleParams={ruleParams} setRuleParams={setRuleParams} />
+          <AlertTls
+            id={id}
+            stackVersion={stackVersion}
+            ruleParams={ruleParams}
+            setRuleParams={setRuleParams}
+          />
         </UptimeDataViewContextProvider>
       </KibanaContextProvider>
     </ReduxProvider>

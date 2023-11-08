@@ -27,21 +27,26 @@ import type {
 } from './types';
 
 const EMPTY_INDEX_NAMES: string[] = [];
+export const INTERNAL_API_VERSION = '1';
 
 export const getIndexNames = ({
   ilmExplain,
   ilmPhases,
+  isILMAvailable,
   stats,
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   ilmPhases: string[];
+  isILMAvailable: boolean;
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): string[] => {
-  if (ilmExplain != null && stats != null) {
+  if (((isILMAvailable && ilmExplain != null) || !isILMAvailable) && stats != null) {
     const allIndexNames = Object.keys(stats);
-    const filteredByIlmPhase = allIndexNames.filter((indexName) =>
-      ilmPhases.includes(getIlmPhase(ilmExplain[indexName]) ?? '')
-    );
+    const filteredByIlmPhase = isILMAvailable
+      ? allIndexNames.filter((indexName) =>
+          ilmPhases.includes(getIlmPhase(ilmExplain?.[indexName], isILMAvailable) ?? '')
+        )
+      : allIndexNames;
 
     return filteredByIlmPhase;
   } else {
@@ -176,7 +181,11 @@ export const getEnrichedFieldMetadata = ({
     const ecsExpectedType = ecsMetadata[field].type;
     const isEcsCompliant =
       isMappingCompatible({ ecsExpectedType, type }) && indexInvalidValues.length === 0;
-    const isInSameFamily = getIsInSameFamily({ ecsExpectedType, type });
+
+    const isInSameFamily =
+      !isMappingCompatible({ ecsExpectedType, type }) &&
+      indexInvalidValues.length === 0 &&
+      getIsInSameFamily({ ecsExpectedType, type });
 
     return {
       ...ecsMetadata[field],
@@ -219,26 +228,31 @@ export const getPartitionedFieldMetadata = (
       ecsCompliant: x.isEcsCompliant ? [...acc.ecsCompliant, x] : acc.ecsCompliant,
       custom: !x.hasEcsMetadata ? [...acc.custom, x] : acc.custom,
       incompatible:
-        x.hasEcsMetadata && !x.isEcsCompliant ? [...acc.incompatible, x] : acc.incompatible,
+        x.hasEcsMetadata && !x.isEcsCompliant && !x.isInSameFamily
+          ? [...acc.incompatible, x]
+          : acc.incompatible,
+      sameFamily: x.isInSameFamily ? [...acc.sameFamily, x] : acc.sameFamily,
     }),
     {
       all: [],
       ecsCompliant: [],
       custom: [],
       incompatible: [],
+      sameFamily: [],
     }
   );
 
 export const getPartitionedFieldMetadataStats = (
   partitionedFieldMetadata: PartitionedFieldMetadata
 ): PartitionedFieldMetadataStats => {
-  const { all, ecsCompliant, custom, incompatible } = partitionedFieldMetadata;
+  const { all, ecsCompliant, custom, incompatible, sameFamily } = partitionedFieldMetadata;
 
   return {
     all: all.length,
     ecsCompliant: ecsCompliant.length,
     custom: custom.length,
     incompatible: incompatible.length,
+    sameFamily: sameFamily.length,
   };
 };
 
@@ -255,13 +269,21 @@ export const getDocsCount = ({
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): number => (stats && stats[indexName]?.primaries?.docs?.count) ?? 0;
 
+export const getIndexId = ({
+  indexName,
+  stats,
+}: {
+  indexName: string;
+  stats: Record<string, IndicesStatsIndicesStats> | null;
+}): string | null | undefined => stats && stats[indexName]?.uuid;
+
 export const getSizeInBytes = ({
   indexName,
   stats,
 }: {
   indexName: string;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-}): number => (stats && stats[indexName]?.primaries?.store?.size_in_bytes) ?? 0;
+}): number => (stats && stats[indexName]?.primaries?.store?.total_data_set_size_in_bytes) ?? 0;
 
 export const getTotalDocsCount = ({
   indexNames,
@@ -357,8 +379,23 @@ export const getTotalPatternIndicesChecked = (patternRollup: PatternRollup | und
   }
 };
 
+export const getTotalPatternSameFamily = (
+  results: Record<string, DataQualityCheckResult> | undefined
+): number | undefined => {
+  if (results == null) {
+    return undefined;
+  }
+
+  const allResults = Object.values(results);
+
+  return allResults.reduce<number>((acc, { sameFamily }) => acc + (sameFamily ?? 0), 0);
+};
+
 export const getIncompatibleStatColor = (incompatible: number | undefined): string | undefined =>
   incompatible != null && incompatible > 0 ? getFillColor('incompatible') : undefined;
+
+export const getSameFamilyStatColor = (sameFamily: number | undefined): string | undefined =>
+  sameFamily != null && sameFamily > 0 ? getFillColor('same-family') : undefined;
 
 export const getErrorSummary = ({
   error,

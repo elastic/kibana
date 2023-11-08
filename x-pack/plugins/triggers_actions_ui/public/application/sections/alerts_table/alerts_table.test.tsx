@@ -33,7 +33,7 @@ import { bulkActionsReducer } from './bulk_actions/reducer';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
-import { createAppMockRenderer } from '../test_utils';
+import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';
 import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
@@ -53,6 +53,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     useKibana: () => ({
       services: {
         cases: mockCaseService,
+        notifications: {
+          toasts: {
+            addDanger: jest.fn(),
+            addSuccess: jest.fn(),
+          },
+        },
       },
     }),
   };
@@ -196,41 +202,14 @@ const mockedUseCellActions: UseCellActions = () => {
   };
 };
 
-const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+const { fix, cleanup } = getJsDomPerformanceFix();
 
 beforeAll(() => {
-  // The JSDOM implementation is too slow
-  // Especially for dropdowns that try to position themselves
-  // perf issue - https://github.com/jsdom/jsdom/issues/3234
-  Object.defineProperty(window, 'getComputedStyle', {
-    value: (el: HTMLElement) => {
-      /**
-       * This is based on the jsdom implementation of getComputedStyle
-       * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
-       *
-       * It is missing global style parsing and will only return styles applied directly to an element.
-       * Will not return styles that are global or from emotion
-       */
-      const declaration = new CSSStyleDeclaration();
-      const { style } = el;
-
-      Array.prototype.forEach.call(style, (property: string) => {
-        declaration.setProperty(
-          property,
-          style.getPropertyValue(property),
-          style.getPropertyPriority(property)
-        );
-      });
-
-      return declaration;
-    },
-    configurable: true,
-    writable: true,
-  });
+  fix();
 });
 
 afterAll(() => {
-  Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+  cleanup();
 });
 
 describe('AlertsTable', () => {
@@ -321,7 +300,6 @@ describe('AlertsTable', () => {
     pageSize: 1,
     pageSizeOptions: [1, 10, 20, 50, 100],
     leadingControlColumns: [],
-    showExpandToDetails: true,
     trailingControlColumns: [],
     useFetchAlertsData,
     visibleColumns: columns.map((c) => c.id),
@@ -329,7 +307,6 @@ describe('AlertsTable', () => {
     updatedAt: Date.now(),
     onToggleColumn: () => {},
     onResetColumns: () => {},
-    onColumnsChange: () => {},
     onChangeVisibleColumns: () => {},
     browserFields,
     query: {},
@@ -438,11 +415,6 @@ describe('AlertsTable', () => {
     });
 
     describe('leading control columns', () => {
-      it('should return at least the flyout action control', async () => {
-        const wrapper = render(<AlertsTableWithProviders {...tableProps} />);
-        expect(wrapper.getByTestId('expandColumnHeaderLabel').textContent).toBe('Actions');
-      });
-
       it('should render other leading controls', () => {
         const customTableProps = {
           ...tableProps,
@@ -503,13 +475,11 @@ describe('AlertsTable', () => {
         const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
         expect(queryByTestId('testActionColumn')).not.toBe(null);
         expect(queryByTestId('testActionColumn2')).not.toBe(null);
-        expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).not.toBe(null);
       });
 
       it('should not add expansion action when not set', () => {
         const customTableProps = {
           ...tableProps,
-          showExpandToDetails: false,
           alertsTableConfiguration: {
             ...alertsTableConfiguration,
             useActionsColumn: () => {
@@ -554,7 +524,6 @@ describe('AlertsTable', () => {
       it('should render no action column if there is neither the action nor the expand action config is set', () => {
         const customTableProps = {
           ...tableProps,
-          showExpandToDetails: false,
         };
 
         const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);

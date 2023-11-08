@@ -16,6 +16,7 @@ import { License } from '../common/license';
 import { licenseMock } from '../common/licensing.mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { HttpInterceptor } from '@kbn/core/public';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 
 const coreStart = coreMock.createStart();
 describe('licensing plugin', () => {
@@ -442,5 +443,69 @@ describe('licensing plugin', () => {
 
       expect(removeInterceptorMock).toHaveBeenCalledTimes(1);
     });
+
+    it('registers the subscription upsell events', async () => {
+      const sessionStorage = coreMock.createStorage();
+      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+      const coreSetup = coreMock.createSetup();
+
+      await plugin.setup(coreSetup);
+      await plugin.stop();
+
+      expect(findRegisteredEventTypeByName('subscription__upsell__click', coreSetup.analytics))
+        .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "eventType": "subscription__upsell__click",
+          "schema": Object {
+            "feature": Object {
+              "_meta": Object {
+                "description": "A human-readable identifier describing the feature that is being promoted",
+              },
+              "type": "keyword",
+            },
+            "source": Object {
+              "_meta": Object {
+                "description": "A human-readable identifier describing the location of the beginning of the subscription flow",
+              },
+              "type": "keyword",
+            },
+          },
+        },
+      ]
+    `);
+      expect(findRegisteredEventTypeByName('subscription__upsell__impression', coreSetup.analytics))
+        .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "eventType": "subscription__upsell__impression",
+          "schema": Object {
+            "feature": Object {
+              "_meta": Object {
+                "description": "A human-readable identifier describing the feature that is being promoted",
+              },
+              "type": "keyword",
+            },
+            "source": Object {
+              "_meta": Object {
+                "description": "A human-readable identifier describing the location of the beginning of the subscription flow",
+              },
+              "type": "keyword",
+            },
+          },
+        },
+      ]
+    `);
+    });
   });
 });
+
+function findRegisteredEventTypeByName(
+  eventTypeName: string,
+  analyticsClientMock: jest.Mocked<AnalyticsServiceSetup>
+) {
+  return analyticsClientMock.registerEventType.mock.calls.find(
+    ([{ eventType }]) => eventType === eventTypeName
+  )!;
+}

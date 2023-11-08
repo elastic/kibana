@@ -11,6 +11,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -96,6 +97,11 @@ export const configSchema = schema.object({
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 
   /**
+   * Artifacts Configuration for package policy update concurrency
+   */
+  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 10, max: 50, min: 1 }),
+
+  /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
    * when upgrading rules. If not provided, the latest compatible package will be installed,
    * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
@@ -116,12 +122,24 @@ export const configSchema = schema.object({
     defaultValue: 26214400, // 25MB,
     max: 104857600, // 100MB,
   }),
+  /**
+   * Defines the settings for a specific offering of the Security Solution app.
+   * They override the default values.
+   * @example
+   * xpack.securitySolution.offeringSettings: {
+   *  "ILMEnabled": false,
+   * }
+   */
+  offeringSettings: schema.recordOf(schema.string(), schema.boolean(), {
+    defaultValue: {},
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
-export type ConfigType = ConfigSchema & {
+export type ConfigType = Omit<ConfigSchema, 'offeringSettings'> & {
   experimentalFeatures: ExperimentalFeatures;
+  settings: ConfigSettings;
 };
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
@@ -141,8 +159,20 @@ ${invalid.map((key) => `      - ${key}`).join('\n')}
 `);
   }
 
+  const { invalid: invalidConfigSettings, settings } = parseConfigSettings(
+    pluginConfig.offeringSettings
+  );
+
+  if (invalidConfigSettings.length) {
+    logger.warn(`Unsupported "xpack.securitySolution.offeringSettings" values detected.
+The following configuration values are no longer supported and should be removed from the kibana configuration file:
+${invalidConfigSettings.map((key) => `      - ${key}`).join('\n')}
+`);
+  }
+
   return {
     ...pluginConfig,
     experimentalFeatures,
+    settings,
   };
 };

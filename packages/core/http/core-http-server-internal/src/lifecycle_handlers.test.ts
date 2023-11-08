@@ -39,11 +39,13 @@ const createToolkit = (): ToolkitMock => {
 
 const forgeRequest = ({
   headers = {},
+  query = {},
   path = '/',
   method = 'get',
   kibanaRouteOptions,
 }: Partial<{
   headers: Record<string, string>;
+  query: Record<string, string>;
   path: string;
   method: RouteMethod;
   kibanaRouteOptions: KibanaRouteOptions;
@@ -51,6 +53,7 @@ const forgeRequest = ({
   return mockRouter.createKibanaRequest({
     headers,
     path,
+    query,
     method,
     kibanaRouteOptions,
   });
@@ -174,7 +177,7 @@ describe('xsrf post-auth handler', () => {
         path: '/some-path',
         kibanaRouteOptions: {
           xsrfRequired: false,
-          access: 'public',
+          access: 'internal',
         },
       });
 
@@ -259,11 +262,13 @@ describe('restrictInternal post-auth handler', () => {
   });
   const createForgeRequest = (
     access: 'internal' | 'public',
-    headers: Record<string, string> | undefined = {}
+    headers: Record<string, string> | undefined = {},
+    query: Record<string, string> | undefined = {}
   ) => {
     return forgeRequest({
       method: 'get',
       headers,
+      query,
       path: `/${access}/some-path`,
       kibanaRouteOptions: {
         xsrfRequired: false,
@@ -314,6 +319,24 @@ describe('restrictInternal post-auth handler', () => {
     });
 
     it('forward the request to the next interceptor if called without internal origin header for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin query param for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal', undefined, { elasticInternalOrigin: 'true' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin query param for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal', undefined, { elasticInternalOrigin: 'true' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called without internal origin query param for public APIs', () => {
       const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
       const request = createForgeRequest('public');
       createForwardSuccess(handler, request);

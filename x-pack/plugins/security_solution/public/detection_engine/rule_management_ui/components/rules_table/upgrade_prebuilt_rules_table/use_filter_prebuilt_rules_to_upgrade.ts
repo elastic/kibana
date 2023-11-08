@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
+import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { FilterOptions } from '../../../../rule_management/logic/types';
 
 export type UpgradePrebuiltRulesTableFilterOptions = Pick<FilterOptions, 'filter' | 'tags'>;
@@ -20,13 +20,13 @@ export const useFilterPrebuiltRulesToUpgrade = ({
 }) => {
   const filteredRules = useMemo(() => {
     const { filter, tags } = filterOptions;
-    return rules.filter(({ rule }) => {
-      if (filter && !rule.name.toLowerCase().includes(filter.toLowerCase())) {
+    return rules.filter((ruleInfo) => {
+      if (filter && !ruleInfo.current_rule.name.toLowerCase().includes(filter.toLowerCase())) {
         return false;
       }
 
       if (tags && tags.length > 0) {
-        return tags.every((tag) => rule.tags.includes(tag));
+        return tags.every((tag) => ruleInfo.current_rule.tags.includes(tag));
       }
 
       return true;

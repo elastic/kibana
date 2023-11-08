@@ -9,18 +9,20 @@ import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  ConnectorTypes,
-  ConnectorJiraTypeFields,
   CaseStatuses,
   CaseSeverity,
-} from '@kbn/cases-plugin/common/api';
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
+import { ConnectorJiraTypeFields, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
+  deleteAllCaseItems,
   createCase,
   removeServerGeneratedPropertiesFromCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  createConfiguration,
+  getConfigurationRequest,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -41,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('post_case', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
+      await deleteAllCaseItems(es);
     });
 
     describe('happy path', () => {
@@ -159,6 +161,7 @@ export default ({ getService }: FtrProviderContext): void => {
             severity: CaseSeverity.LOW,
             assignees: [],
             category: null,
+            customFields: [],
           },
         });
       });
@@ -168,6 +171,103 @@ export default ({ getService }: FtrProviderContext): void => {
         const data = removeServerGeneratedPropertiesFromCase(postedCase);
 
         expect(data).to.eql(postCaseResp());
+      });
+
+      it('should post a case with customFields', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'valid_key_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'valid_key_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+            },
+          })
+        );
+
+        const res = await createCase(
+          supertest,
+          getPostCaseRequest({
+            customFields: [
+              {
+                key: 'valid_key_1',
+                type: CustomFieldTypes.TEXT,
+                value: 'this is a text field value',
+              },
+              {
+                key: 'valid_key_2',
+                type: CustomFieldTypes.TOGGLE,
+                value: true,
+              },
+            ],
+          })
+        );
+
+        expect(res.customFields).to.eql([
+          {
+            key: 'valid_key_1',
+            type: CustomFieldTypes.TEXT,
+            value: 'this is a text field value',
+          },
+          {
+            key: 'valid_key_2',
+            type: CustomFieldTypes.TOGGLE,
+            value: true,
+          },
+        ]);
+      });
+
+      it('should fill out missing custom fields', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'valid_key_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'valid_key_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+            },
+          })
+        );
+
+        const res = await createCase(
+          supertest,
+          getPostCaseRequest({
+            customFields: [
+              {
+                key: 'valid_key_2',
+                type: CustomFieldTypes.TOGGLE,
+                value: true,
+              },
+            ],
+          })
+        );
+
+        expect(res.customFields).to.eql([
+          { key: 'valid_key_2', type: 'toggle', value: true },
+          { key: 'valid_key_1', type: 'text', value: null },
+        ]);
       });
     });
 
@@ -265,6 +365,12 @@ export default ({ getService }: FtrProviderContext): void => {
         await createCase(supertest, getPostCaseRequest({ title: longTitle }), 400);
       });
 
+      it('400s if the description is too long', async () => {
+        const longDescription = 'a'.repeat(30001);
+
+        await createCase(supertest, getPostCaseRequest({ description: longDescription }), 400);
+      });
+
       describe('tags', async () => {
         it('400s if the a tag is a whitespace', async () => {
           const tags = ['test', ' '];
@@ -274,6 +380,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('400s if the a tag is an empty string', async () => {
           const tags = ['test', ''];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+
+        it('400s if the a tag is too long', async () => {
+          const tag = 'a'.repeat(257);
+
+          await createCase(supertest, getPostCaseRequest({ tags: [tag] }), 400);
+        });
+
+        it('400s if the a tags array is too long', async () => {
+          const tags = Array(201).fill('foo');
 
           await createCase(supertest, getPostCaseRequest({ tags }), 400);
         });
@@ -305,6 +423,159 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             getPostCaseRequest({
               category: '   ',
+            }),
+            400
+          );
+        });
+      });
+
+      describe('customFields', async () => {
+        it('400s when trying to patch with duplicated custom field keys', async () => {
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'duplicated_key',
+                  type: CustomFieldTypes.TEXT,
+                  value: 'this is a text field value',
+                },
+                {
+                  key: 'duplicated_key',
+                  type: CustomFieldTypes.TEXT,
+                  value: 'this is a text field value',
+                },
+              ],
+            }),
+            400
+          );
+        });
+
+        it('400s when trying to create case with customField key that does not exist', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+              },
+            })
+          );
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'invalid_key',
+                  type: CustomFieldTypes.TEXT,
+                  value: 'this is a text field value',
+                },
+              ],
+            }),
+            400
+          );
+        });
+
+        it('400s when creating a case with a missing required custom field', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'text_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                  {
+                    key: 'toggle_custom_field',
+                    label: 'toggle',
+                    type: CustomFieldTypes.TOGGLE,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'text_custom_field',
+                  type: CustomFieldTypes.TEXT,
+                  value: 'a',
+                },
+              ],
+            }),
+            400
+          );
+        });
+
+        it('400s when trying to create case with a required custom field as null', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'text_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'text_custom_field',
+                  type: CustomFieldTypes.TEXT,
+                  value: null,
+                },
+              ],
+            }),
+            400
+          );
+        });
+
+        it('400s when trying to create case with a custom field with the wrong type', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'test_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'test_custom_field',
+                  type: CustomFieldTypes.TOGGLE,
+                  value: true,
+                },
+              ],
             }),
             400
           );

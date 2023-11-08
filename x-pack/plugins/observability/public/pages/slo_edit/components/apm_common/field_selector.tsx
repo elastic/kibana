@@ -7,6 +7,7 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { ReactNode, useState } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
@@ -55,7 +56,7 @@ export function FieldSelector({
     allowAllOption
       ? [
           {
-            value: '*',
+            value: ALL_VALUE,
             label: i18n.translate('xpack.observability.slo.sloEdit.fieldSelector.all', {
               defaultMessage: 'All',
             }),

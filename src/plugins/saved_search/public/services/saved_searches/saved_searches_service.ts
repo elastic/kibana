@@ -14,8 +14,9 @@ import { getSavedSearch, saveSavedSearch, SaveSavedSearchOptions, getNewSavedSea
 import type { SavedSearchCrudTypes } from '../../../common/content_management';
 import { SavedSearchType } from '../../../common';
 import type { SavedSearch } from '../../../common/types';
+import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 
-interface SavedSearchesServiceDeps {
+export interface SavedSearchesServiceDeps {
   search: DataPublicPluginStart['search'];
   contentManagement: ContentManagementPublicStart['client'];
   spaces?: SpacesApi;
@@ -26,13 +27,7 @@ export class SavedSearchesService {
   constructor(private deps: SavedSearchesServiceDeps) {}
 
   get = (savedSearchId: string) => {
-    const { search, contentManagement, spaces, savedObjectsTaggingOss } = this.deps;
-    return getSavedSearch(savedSearchId, {
-      search,
-      contentManagement,
-      spaces,
-      savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-    });
+    return getSavedSearch(savedSearchId, createGetSavedSearchDeps(this.deps));
   };
   getAll = async () => {
     const { contentManagement } = this.deps;
@@ -45,7 +40,7 @@ export class SavedSearchesService {
     });
     return result.hits;
   };
-  getNew = () => getNewSavedSearch({ search: this.deps.search });
+  getNew = () => getNewSavedSearch({ searchSource: this.deps.search.searchSource });
 
   find = async (search: string) => {
     const { contentManagement } = this.deps;

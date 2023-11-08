@@ -23,10 +23,10 @@ export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
 export const MAP_PATH = 'map';
-export const GIS_INTERNAL_PATH = `internal/${APP_ID}`;
-export const INDEX_SETTINGS_API_PATH = `${GIS_INTERNAL_PATH}/indexSettings`;
-export const FONTS_API_PATH = `${GIS_INTERNAL_PATH}/fonts`;
-export const INDEX_SOURCE_API_PATH = `${GIS_INTERNAL_PATH}/docSource`;
+const GIS_INTERNAL_PATH = `internal/${APP_ID}`;
+export const INDEX_SETTINGS_API_PATH = `/${GIS_INTERNAL_PATH}/indexSettings`;
+export const FONTS_API_PATH = `/${GIS_INTERNAL_PATH}/fonts`;
+export const INDEX_SOURCE_API_PATH = `/${GIS_INTERNAL_PATH}/docSource`;
 export const INDEX_FEATURE_PATH = `/${GIS_INTERNAL_PATH}/feature`;
 export const GET_MATCHING_INDEXES_PATH = `/${GIS_INTERNAL_PATH}/getMatchingIndexes`;
 export const CHECK_IS_DRAWING_INDEX = `/${GIS_INTERNAL_PATH}/checkIsDrawingIndex`;
@@ -114,12 +114,6 @@ export enum ES_GEO_FIELD_TYPE {
 
 // Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IndexPatternField.type is compared to value
 export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
-
-export enum ES_SPATIAL_RELATIONS {
-  INTERSECTS = 'INTERSECTS',
-  DISJOINT = 'DISJOINT',
-  WITHIN = 'WITHIN',
-}
 
 export enum GEO_JSON_TYPE {
   POINT = 'Point',

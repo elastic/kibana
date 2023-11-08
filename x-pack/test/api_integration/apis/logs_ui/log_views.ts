@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { defaultLogViewId, LogViewAttributes } from '@kbn/infra-plugin/common/log_views';
+import { defaultLogViewId, LogViewAttributes } from '@kbn/logs-shared-plugin/common/log_views';
 import {
   defaultSourceConfiguration,
   infraSourceConfigurationSavedObjectName,
   mergeSourceConfiguration,
 } from '@kbn/infra-plugin/server/lib/sources';
 import { extractSavedObjectReferences } from '@kbn/infra-plugin/server/lib/sources/saved_object_references';
-import { logViewSavedObjectName } from '@kbn/infra-plugin/server/saved_objects/log_view';
+import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

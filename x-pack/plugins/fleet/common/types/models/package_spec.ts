@@ -31,6 +31,12 @@ export interface PackageSpecManifest {
     RegistryElasticsearch,
     'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
   >;
+  asset_tags?: PackageSpecTags[];
+}
+export interface PackageSpecTags {
+  text: string;
+  asset_types?: string[];
+  asset_ids?: string[];
 }
 
 export type PackageSpecPackageType = 'integration' | 'input';

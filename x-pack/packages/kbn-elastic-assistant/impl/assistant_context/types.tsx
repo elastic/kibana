@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
-import { Prompt } from '../assistant/types';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 export type ConversationRole = 'system' | 'user' | 'assistant';
 
@@ -18,6 +17,7 @@ export interface Message {
   role: ConversationRole;
   content: string;
   timestamp: string;
+  isError?: boolean;
   presentation?: MessagePresentation;
 }
 
@@ -46,17 +46,32 @@ export interface ConversationTheme {
 export interface Conversation {
   apiConfig: {
     connectorId?: string;
-    defaultSystemPrompt?: Prompt;
+    connectorTypeTitle?: string;
+    defaultSystemPromptId?: string;
     provider?: OpenAiProviderType;
+    model?: string;
   };
   id: string;
   messages: Message[];
   replacements?: Record<string, string>;
   theme?: ConversationTheme;
   isDefault?: boolean;
+  excludeFromLastConversationStorage?: boolean;
 }
 
-export interface OpenAIConfig {
-  temperature: number;
-  model: string;
+export interface AssistantTelemetry {
+  reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
+  reportAssistantMessageSent: (params: { conversationId: string; role: string }) => void;
+  reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
+}
+
+export interface AssistantAvailability {
+  // True when user is Enterprise, or Security Complete PLI for serverless. When false, the Assistant is disabled and unavailable
+  isAssistantEnabled: boolean;
+  // When true, the Assistant is hidden and unavailable
+  hasAssistantPrivilege: boolean;
+  // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
+  hasConnectorsAllPrivilege: boolean;
+  // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
+  hasConnectorsReadPrivilege: boolean;
 }

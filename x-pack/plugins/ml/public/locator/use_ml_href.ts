@@ -6,7 +6,7 @@
  */
 
 import { DependencyList } from 'react';
-import { MlPluginStart } from '..';
+import { MlPluginSetup } from '..';
 import { MlLocatorParams } from '../../common/types/locator';
 
 /**
@@ -14,7 +14,7 @@ import { MlLocatorParams } from '../../common/types/locator';
  * TODO remove basePath parameter
  */
 export const useMlHref = (
-  ml: MlPluginStart | undefined,
+  ml: MlPluginSetup | undefined,
   basePath: string | undefined,
   params: MlLocatorParams,
   dependencies?: DependencyList

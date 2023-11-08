@@ -95,7 +95,7 @@ actionTypeRegistry.register(getSlackApiConnectorType());
 const baseProps = {
   actions: [],
   defaultActionGroupId: 'metrics.inventory_threshold.fired',
-  hasSummary: true,
+  hasAlertsMappings: true,
   featureId: 'alerting',
   recoveryActionGroup: 'recovered',
   actionTypeRegistry,
@@ -164,6 +164,7 @@ describe('ActionForm - Slack API Connector', () => {
 
     const testProps = {
       ...baseProps,
+      hasAlertsMappings: false,
       actions: testActions,
     };
 
@@ -173,6 +174,6 @@ describe('ActionForm - Slack API Connector', () => {
       </IntlProvider>
     );
 
-    expect(await screen.findByText('Channel is required.')).toBeInTheDocument();
+    expect(await screen.findByText('Channel ID is required.')).toBeInTheDocument();
   });
 });

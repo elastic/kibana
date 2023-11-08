@@ -7,23 +7,22 @@
 
 import Boom from '@hapi/boom';
 
-// @ts-ignore
+import type { CoreSetup, IBasePath, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   type createRoot,
   request as kbnTestServerRequest,
 } from '@kbn/core-test-helpers-kbn-server';
-import type { CoreSetup, IBasePath, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { kibanaTestUser } from '@kbn/test';
 
+import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
+import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { spacesClientServiceMock } from '../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../spaces_service';
-import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
-import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 
 // FLAKY: https://github.com/elastic/kibana/issues/55953
 describe.skip('onPostAuthInterceptor', () => {

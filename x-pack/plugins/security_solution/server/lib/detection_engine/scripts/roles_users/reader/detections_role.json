@@ -27,6 +27,7 @@
       "feature": {
         "ml": ["read"],
         "siem": ["read", "read_alerts"],
+        "securitySolutionAssistant": ["none"],
         "securitySolutionCases": ["read"],
         "actions": ["read"],
         "builtInAlerts": ["read"]

@@ -8,8 +8,8 @@
 import { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from '../helpers';
-import { ASSETS_ENDPOINT } from '../constants';
+import { createSampleAssets, deleteSampleAssets, viewSampleAssetDocs } from './helpers';
+import { ASSETS_ENDPOINT } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         // Dynamically grab all types from the sample asset data set
         const sampleTypeSet: Set<string> = new Set();
         for (let i = 0; i < sampleAssetDocs.length; i++) {
-          sampleTypeSet.add(sampleAssetDocs[i]['asset.type']);
+          sampleTypeSet.add(sampleAssetDocs[i]['asset.type']!);
         }
         const sampleTypes = Array.from(sampleTypeSet);
         if (sampleTypes.length <= 2) {
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Track a reference to how many docs should be returned for these two types
         const samplesForFilteredTypes = sampleAssetDocs.filter((doc) =>
-          filterByTypes.includes(doc['asset.type'])
+          filterByTypes.includes(doc['asset.type']!)
         );
 
         expect(samplesForFilteredTypes.length).to.be.lessThan(sampleAssetDocs.length);
@@ -133,6 +133,72 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(getResponse.body.message).to.equal(
           'Filters "type" and "ean" are mutually exclusive but found both.'
+        );
+      });
+
+      it('should return assets filtered by a single asset.kind value', async () => {
+        await createSampleAssets(supertest);
+
+        const singleSampleKind = sampleAssetDocs[0]['asset.kind'];
+        const samplesForKind = sampleAssetDocs.filter(
+          (doc) => doc['asset.kind'] === singleSampleKind
+        );
+
+        const getResponse = await supertest
+          .get(ASSETS_ENDPOINT)
+          .query({ size: sampleAssetDocs.length, from: 'now-1d', kind: singleSampleKind })
+          .expect(200);
+
+        expect(getResponse.body).to.have.property('results');
+        expect(getResponse.body.results.length).to.equal(samplesForKind.length);
+      });
+
+      it('should return assets filtered by multiple asset.kind values (OR)', async () => {
+        await createSampleAssets(supertest);
+
+        // Dynamically grab all asset.kind values from the sample asset data set
+        const sampleKindSet: Set<string> = new Set();
+        for (let i = 0; i < sampleAssetDocs.length; i++) {
+          sampleKindSet.add(sampleAssetDocs[i]['asset.kind']!);
+        }
+        const sampleKinds = Array.from(sampleKindSet);
+        if (sampleKinds.length <= 2) {
+          throw new Error(
+            'Not enough asset kind values in sample asset documents, need more than two to test filtering by multiple kinds'
+          );
+        }
+
+        // Pick the first two unique kinds from the sample data set
+        const filterByKinds = sampleKinds.slice(0, 2);
+
+        // Track a reference to how many docs should be returned for these two kinds
+        const samplesForFilteredKinds = sampleAssetDocs.filter((doc) =>
+          filterByKinds.includes(doc['asset.kind']!)
+        );
+
+        expect(samplesForFilteredKinds.length).to.be.lessThan(sampleAssetDocs.length);
+
+        // Request assets for multiple types (with a size matching the number of total sample asset docs)
+        const getResponse = await supertest
+          .get(ASSETS_ENDPOINT)
+          .query({ size: sampleAssetDocs.length, from: 'now-1d', kind: filterByKinds })
+          .expect(200);
+
+        expect(getResponse.body).to.have.property('results');
+        expect(getResponse.body.results.length).to.equal(samplesForFilteredKinds.length);
+      });
+
+      it('should reject requests that try to filter by both kind and ean', async () => {
+        const sampleKind = sampleAssetDocs[0]['asset.kind'];
+        const sampleEan = sampleAssetDocs[0]['asset.ean'];
+
+        const getResponse = await supertest
+          .get(ASSETS_ENDPOINT)
+          .query({ kind: sampleKind, ean: sampleEan })
+          .expect(400);
+
+        expect(getResponse.body.message).to.equal(
+          'Filters "kind" and "ean" are mutually exclusive but found both.'
         );
       });
 

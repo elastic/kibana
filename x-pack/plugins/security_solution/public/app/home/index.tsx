@@ -8,7 +8,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import type { AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
@@ -28,13 +27,14 @@ import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_tit
 import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
 import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
 import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
+import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
+import { AssistantOverlay } from '../../assistant/overlay';
 
 interface HomePageProps {
   children: React.ReactNode;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionMenu }) => {
+const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { pathname } = useLocation();
   useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
@@ -56,11 +56,13 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionM
       <ConsoleManager>
         <TourContextProvider>
           <>
-            <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
+            <GlobalHeader />
             <DragDropContextWrapper browserFields={browserFields}>
               {children}
             </DragDropContextWrapper>
             <HelpMenu />
+            <TopValuesPopover />
+            <AssistantOverlay />
           </>
         </TourContextProvider>
       </ConsoleManager>

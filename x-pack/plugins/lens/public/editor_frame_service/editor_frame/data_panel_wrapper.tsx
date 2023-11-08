@@ -7,14 +7,15 @@
 
 import './data_panel_wrapper.scss';
 
-import React, { useMemo, memo, useContext, useEffect, useCallback } from 'react';
+import React, { useMemo, memo, useEffect, useCallback } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { DragContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { DragDropIdentifier } from '@kbn/dom-drag-drop';
+import memoizeOne from 'memoize-one';
+import { isEqual } from 'lodash';
 import { Easteregg } from './easteregg';
-import { NativeRenderer } from '../../native_renderer';
 import {
   StateSetter,
   DatasourceDataPanelProps,
@@ -54,6 +55,8 @@ interface DataPanelWrapperProps {
   frame: FramePublicAPI;
 }
 
+const memoizeStrictlyEqual = memoizeOne((arg) => arg, isEqual);
+
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const externalContext = useLensSelector(selectExecutionContext);
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -66,10 +69,10 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   const dispatchLens = useLensDispatch();
   const setDatasourceState: StateSetter<unknown, { applyImmediately?: boolean }> = useMemo(() => {
-    return (updater: unknown | ((prevState: unknown) => unknown), options) => {
+    return (newDatasourceState: unknown, options) => {
       dispatchLens(
         updateDatasourceState({
-          updater,
+          newDatasourceState,
           datasourceId: activeDatasourceId!,
           clearStagedPreview: true,
         })
@@ -158,7 +161,6 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   const datasourceProps: DatasourceDataPanelProps = {
     ...externalContext,
-    dragDropContext: useContext(DragContext),
     state: activeDatasourceId ? datasourceStates[activeDatasourceId].state : null,
     setState: setDatasourceState,
     core: props.core,
@@ -170,7 +172,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     indexPatternService: props.indexPatternService,
     frame: props.frame,
     // Visualization can handle dataViews, so need to pass to the data panel the full list of used dataViews
-    usedIndexPatterns: [
+    usedIndexPatterns: memoizeStrictlyEqual([
       ...((activeDatasourceId &&
         props.datasourceMap[activeDatasourceId]?.getUsedDataViews(
           datasourceStates[activeDatasourceId].state
@@ -181,18 +183,18 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           visualizationState.state
         )) ||
         []),
-    ],
+    ]),
   };
+  const DataPanelComponent =
+    activeDatasourceId && !datasourceIsLoading
+      ? props.datasourceMap[activeDatasourceId].DataPanelComponent
+      : null;
 
   return (
     <>
       <Easteregg query={externalContext?.query} />
-      {activeDatasourceId && !datasourceIsLoading && (
-        <NativeRenderer
-          className="lnsDataPanelWrapper"
-          render={props.datasourceMap[activeDatasourceId].renderDataPanel}
-          nativeProps={datasourceProps}
-        />
+      {DataPanelComponent && (
+        <div className="lnsDataPanelWrapper">{DataPanelComponent(datasourceProps)}</div>
       )}
     </>
   );

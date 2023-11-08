@@ -1,218 +1,213 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmptyIndexListPrompt should render normally 1`] = `
-<Fragment>
-  <EuiPageContent_Deprecated
-    className="inpEmptyState"
-    color="subdued"
-    data-test-subj="indexPatternEmptyState"
-    grow={false}
-    horizontalPosition="center"
-    verticalPosition="center"
-  >
-    <EuiPageContentHeader_Deprecated>
-      <EuiPageContentHeaderSection_Deprecated>
-        <EuiTitle>
-          <h2>
+<EuiPanel
+  className="inpEmptyState"
+  color="subdued"
+  data-test-subj="indexPatternEmptyState"
+  hasShadow={false}
+  paddingSize="xl"
+>
+  <EuiPageHeader>
+    <EuiTitle>
+      <h2>
+        <FormattedMessage
+          defaultMessage="Ready to try Kibana? First, you need data."
+          id="indexPatternManagement.createDataView.emptyState.noDataTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+  </EuiPageHeader>
+  <EuiSpacer
+    size="xl"
+  />
+  <div>
+    <EuiFlexGrid
+      className="inpEmptyState__cardGrid"
+      columns={3}
+      responsive={true}
+    >
+      <EuiFlexItem>
+        <EuiCard
+          className="inpEmptyState__card"
+          description={
             <FormattedMessage
-              defaultMessage="Ready to try Kibana? First, you need data."
-              id="indexPatternManagement.createDataView.emptyState.noDataTitle"
+              defaultMessage="Add data from a variety of sources."
+              id="indexPatternManagement.createDataView.emptyState.integrationCardDescription"
               values={Object {}}
             />
-          </h2>
-        </EuiTitle>
-      </EuiPageContentHeaderSection_Deprecated>
-    </EuiPageContentHeader_Deprecated>
+          }
+          icon={
+            <EuiIcon
+              color="subdued"
+              size="xl"
+              type="database"
+            />
+          }
+          onClick={[Function]}
+          title={
+            <FormattedMessage
+              defaultMessage="Add integration"
+              id="indexPatternManagement.createDataView.emptyState.integrationCardTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiCard
+          className="inpEmptyState__card"
+          description={
+            <FormattedMessage
+              defaultMessage="Import a CSV, NDJSON, or log file."
+              id="indexPatternManagement.createDataView.emptyState.uploadCardDescription"
+              values={Object {}}
+            />
+          }
+          icon={
+            <EuiIcon
+              color="subdued"
+              size="xl"
+              type="document"
+            />
+          }
+          onClick={[Function]}
+          title={
+            <FormattedMessage
+              defaultMessage="Upload a file"
+              id="indexPatternManagement.createDataView.emptyState.uploadCardTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiCard
+          className="inpEmptyState__card"
+          description={
+            <FormattedMessage
+              defaultMessage="Load a data set and a Kibana dashboard."
+              id="indexPatternManagement.createDataView.emptyState.sampleDataCardDescription"
+              values={Object {}}
+            />
+          }
+          icon={
+            <EuiIcon
+              color="subdued"
+              size="xl"
+              type="heatmap"
+            />
+          }
+          onClick={[Function]}
+          title={
+            <FormattedMessage
+              defaultMessage="Add sample data"
+              id="indexPatternManagement.createDataView.emptyState.sampleDataCardTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGrid>
     <EuiSpacer
-      size="m"
+      size="xxl"
     />
-    <EuiPageContentBody_Deprecated>
-      <EuiFlexGrid
-        className="inpEmptyState__cardGrid"
-        columns={3}
-        responsive={true}
+    <div
+      className="inpEmptyState__footer"
+    >
+      <EuiFlexGroup
+        justifyContent="center"
       >
-        <EuiFlexItem>
-          <EuiCard
-            className="inpEmptyState__card"
-            description={
-              <FormattedMessage
-                defaultMessage="Add data from a variety of sources."
-                id="indexPatternManagement.createDataView.emptyState.integrationCardDescription"
-                values={Object {}}
-              />
-            }
-            icon={
-              <EuiIcon
-                color="subdued"
-                size="xl"
-                type="database"
-              />
-            }
-            onClick={[Function]}
-            title={
-              <FormattedMessage
-                defaultMessage="Add integration"
-                id="indexPatternManagement.createDataView.emptyState.integrationCardTitle"
-                values={Object {}}
-              />
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            className="inpEmptyState__card"
-            description={
-              <FormattedMessage
-                defaultMessage="Import a CSV, NDJSON, or log file."
-                id="indexPatternManagement.createDataView.emptyState.uploadCardDescription"
-                values={Object {}}
-              />
-            }
-            icon={
-              <EuiIcon
-                color="subdued"
-                size="xl"
-                type="document"
-              />
-            }
-            onClick={[Function]}
-            title={
-              <FormattedMessage
-                defaultMessage="Upload a file"
-                id="indexPatternManagement.createDataView.emptyState.uploadCardTitle"
-                values={Object {}}
-              />
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            className="inpEmptyState__card"
-            description={
-              <FormattedMessage
-                defaultMessage="Load a data set and a Kibana dashboard."
-                id="indexPatternManagement.createDataView.emptyState.sampleDataCardDescription"
-                values={Object {}}
-              />
-            }
-            icon={
-              <EuiIcon
-                color="subdued"
-                size="xl"
-                type="heatmap"
-              />
-            }
-            onClick={[Function]}
-            title={
-              <FormattedMessage
-                defaultMessage="Add sample data"
-                id="indexPatternManagement.createDataView.emptyState.sampleDataCardTitle"
-                values={Object {}}
-              />
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiSpacer
-        size="xxl"
-      />
-      <div
-        className="inpEmptyState__footer"
-      >
-        <EuiFlexGroup
-          justifyContent="center"
+        <EuiFlexItem
+          className="inpEmptyState__footerFlexItem"
+          grow={false}
         >
-          <EuiFlexItem
-            className="inpEmptyState__footerFlexItem"
-            grow={false}
-          >
-            <EuiDescriptionList
-              listItems={
-                Array [
-                  Object {
-                    "description": <EuiLink
-                      external={true}
-                      href="http://elastic.co"
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Read documentation"
-                        id="indexPatternManagement.createDataView.emptyState.readDocs"
-                        values={Object {}}
-                      />
-                    </EuiLink>,
-                    "title": <FormattedMessage
-                      defaultMessage="Want to learn more?"
-                      id="indexPatternManagement.createDataView.emptyState.learnMore"
+          <EuiDescriptionList
+            listItems={
+              Array [
+                Object {
+                  "description": <EuiLink
+                    external={true}
+                    href="http://elastic.co"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Read documentation"
+                      id="indexPatternManagement.createDataView.emptyState.readDocs"
                       values={Object {}}
-                    />,
-                  },
-                ]
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            className="inpEmptyState__footerFlexItem"
-            grow={false}
-          >
-            <EuiDescriptionList
-              listItems={
-                Array [
-                  Object {
-                    "description": <EuiLink
-                      data-test-subj="refreshIndicesButton"
-                      onClick={[Function]}
-                    >
-                      <FormattedMessage
-                        defaultMessage="Check for new data"
-                        id="indexPatternManagement.createDataView.emptyState.checkDataButton"
-                        values={Object {}}
-                      />
-                       
-                      <EuiIcon
-                        size="s"
-                        type="refresh"
-                      />
-                    </EuiLink>,
-                    "title": <FormattedMessage
-                      defaultMessage="Think you already have data?"
-                      id="indexPatternManagement.createDataView.emptyState.haveData"
-                      values={Object {}}
-                    />,
-                  },
-                ]
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiText
-          color="subdued"
-          size="xs"
-          textAlign="center"
-        >
-          <FormattedMessage
-            defaultMessage="You can also {link}"
-            id="indexPatternManagement.createDataView.emptyState.createAnywayTxt"
-            values={
-              Object {
-                "link": <EuiLink
-                  data-test-subj="createAnyway"
-                  onClick={[Function]}
-                >
-                  <FormattedMessage
-                    defaultMessage="create a data view against hidden, system or default indices."
-                    id="indexPatternManagement.createDataView.emptyState.createAnywayLink"
+                    />
+                  </EuiLink>,
+                  "title": <FormattedMessage
+                    defaultMessage="Want to learn more?"
+                    id="indexPatternManagement.createDataView.emptyState.learnMore"
                     values={Object {}}
-                  />
-                </EuiLink>,
-              }
+                  />,
+                },
+              ]
             }
           />
-        </EuiText>
-      </div>
-    </EuiPageContentBody_Deprecated>
-  </EuiPageContent_Deprecated>
-</Fragment>
+        </EuiFlexItem>
+        <EuiFlexItem
+          className="inpEmptyState__footerFlexItem"
+          grow={false}
+        >
+          <EuiDescriptionList
+            listItems={
+              Array [
+                Object {
+                  "description": <EuiLink
+                    data-test-subj="refreshIndicesButton"
+                    onClick={[Function]}
+                  >
+                    <FormattedMessage
+                      defaultMessage="Check for new data"
+                      id="indexPatternManagement.createDataView.emptyState.checkDataButton"
+                      values={Object {}}
+                    />
+                     
+                    <EuiIcon
+                      size="s"
+                      type="refresh"
+                    />
+                  </EuiLink>,
+                  "title": <FormattedMessage
+                    defaultMessage="Think you already have data?"
+                    id="indexPatternManagement.createDataView.emptyState.haveData"
+                    values={Object {}}
+                  />,
+                },
+              ]
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiText
+        color="subdued"
+        size="xs"
+        textAlign="center"
+      >
+        <FormattedMessage
+          defaultMessage="You can also {link}"
+          id="indexPatternManagement.createDataView.emptyState.createAnywayTxt"
+          values={
+            Object {
+              "link": <EuiLink
+                data-test-subj="createAnyway"
+                onClick={[Function]}
+              >
+                <FormattedMessage
+                  defaultMessage="create a data view against hidden, system or default indices."
+                  id="indexPatternManagement.createDataView.emptyState.createAnywayLink"
+                  values={Object {}}
+                />
+              </EuiLink>,
+            }
+          }
+        />
+      </EuiText>
+    </div>
+  </div>
+</EuiPanel>
 `;

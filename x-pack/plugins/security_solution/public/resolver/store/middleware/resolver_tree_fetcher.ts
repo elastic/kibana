@@ -42,11 +42,8 @@ export function ResolverTreeFetcher(
   return async (id: string) => {
     // const id = 'alerts-page';
     const state = api.getState();
-    const databaseParameters = selectors.treeParametersToFetch(state.analyzer.analyzerById[id]);
-    if (
-      selectors.treeRequestParametersToAbort(state.analyzer.analyzerById[id]) &&
-      lastRequestAbortController
-    ) {
+    const databaseParameters = selectors.treeParametersToFetch(state.analyzer[id]);
+    if (selectors.treeRequestParametersToAbort(state.analyzer[id]) && lastRequestAbortController) {
       lastRequestAbortController.abort();
       // calling abort will cause an action to be fired
     } else if (databaseParameters !== null) {
@@ -55,7 +52,7 @@ export function ResolverTreeFetcher(
       let dataSource: string | undefined;
       let dataSourceSchema: ResolverSchema | undefined;
       let result: ResolverNode[] | undefined;
-      const timeRangeFilters = selectors.timeRangeFilters(state.analyzer.analyzerById[id]);
+      const timeRangeFilters = selectors.timeRangeFilters(state.analyzer[id]);
 
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.

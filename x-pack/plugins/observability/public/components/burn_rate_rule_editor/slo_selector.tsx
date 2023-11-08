@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOResponse } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloDefinitions } from '../../hooks/slo/use_fetch_slo_definitions';
 
 interface Props {
   initialSlo?: SLOResponse;
@@ -23,7 +22,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const { isLoading, sloList } = useFetchSloList({ name: searchValue });
+  const { isLoading, data: sloList } = useFetchSloDefinitions({ name: searchValue });
   const hasError = errors !== undefined && errors.length > 0;
 
   useEffect(() => {
@@ -33,7 +32,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   useEffect(() => {
     const isLoadedWithData = !isLoading && sloList !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? sloList.results.map((slo) => ({ value: slo.id, label: slo.name }))
+      ? sloList.map((slo) => ({ value: slo.id, label: slo.name }))
       : [];
     setOptions(opts);
   }, [isLoading, sloList]);
@@ -41,7 +40,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedOptions(opts);
     const selectedSlo =
-      opts.length === 1 ? sloList?.results.find((slo) => slo.id === opts[0].value) : undefined;
+      opts.length === 1 ? sloList?.find((slo) => slo.id === opts[0].value) : undefined;
     onSelected(selectedSlo);
   };
 

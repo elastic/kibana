@@ -66,6 +66,10 @@ export interface InfraLogsHasDataResponse {
   indices: string;
 }
 
+interface UniversalProfilingHasDataResponse {
+  hasData: boolean;
+}
+
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
@@ -150,12 +154,15 @@ export interface UxFetchDataResponse extends FetchDataResponse {
   coreWebVitals: UXMetrics;
 }
 
+export type UniversalProfilingDataResponse = FetchDataResponse;
+
 export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
+  universal_profiling: UniversalProfilingDataResponse;
 }
 
 export interface ObservabilityHasDataResponse {
@@ -164,4 +171,5 @@ export interface ObservabilityHasDataResponse {
   infra_logs: InfraLogsHasDataResponse;
   uptime: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
+  universal_profiling: UniversalProfilingHasDataResponse;
 }

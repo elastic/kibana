@@ -18,7 +18,7 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
@@ -54,6 +54,7 @@ import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
+import { EsqlInfoIcon } from '../../../../detection_engine/rule_creation/components/esql_info_icon';
 import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
@@ -65,6 +66,7 @@ import {
   isThreatMatchRule,
   isThresholdRule,
   isQueryRule,
+  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -75,13 +77,11 @@ import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
-import { GroupByFields } from '../group_by_fields';
+import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
-import {
-  minimumLicenseForSuppression,
-  AlertSuppressionMissingFieldsStrategy,
-} from '../../../../../common/detection_engine/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DurationInput } from '../duration_input';
+import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -172,6 +172,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
+
+  const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
   const { getFields, reset, setFieldValue } = form;
 
@@ -311,6 +313,43 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [ruleType, previousRuleType, getFields]);
 
+  /**
+   * ensures when user switches between rule types, written ES|QL query is not getting lost
+   * additional work is required in this code area, as currently switching to EQL will result in query lose
+   * https://github.com/elastic/kibana/issues/166933
+   */
+  useEffect(() => {
+    const { queryBar: currentQuery } = getFields();
+    if (currentQuery == null) {
+      return;
+    }
+
+    const currentQueryValue = currentQuery.value as DefineStepRule['queryBar'];
+
+    // sets ES|QL query to a default value or earlier added one, when switching to ES|QL rule type
+    if (isEsqlRule(ruleType)) {
+      if (previousRuleType && !isEsqlRule(previousRuleType)) {
+        currentQuery.reset({
+          defaultValue: esqlQueryRef.current ?? defaultCustomQuery.forEsqlRules,
+        });
+      }
+      // otherwise reset it to default values of other rule types
+    } else if (isEsqlRule(previousRuleType)) {
+      // sets ES|QL query value to reference, so it can be used when user switch back from one rule type to another
+      if (currentQueryValue?.query?.language === 'esql') {
+        esqlQueryRef.current = currentQueryValue;
+      }
+
+      const defaultValue = isThreatMatchRule(ruleType)
+        ? defaultCustomQuery.forThreatMatchRules
+        : defaultCustomQuery.forNormalRules;
+
+      currentQuery.reset({
+        defaultValue,
+      });
+    }
+  }, [ruleType, previousRuleType, getFields]);
+
   // if saved query failed to load:
   // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
   const handleSavedQueryError = useCallback(() => {
@@ -378,7 +417,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
       <EuiRadioGroup
         disabled={
-          !license.isAtLeast(minimumLicenseForSuppression) ||
+          !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
           groupByFields == null ||
           groupByFields.length === 0
         }
@@ -397,7 +436,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   durationValueField={groupByDurationValue}
                   durationUnitField={groupByDurationUnit}
                   isDisabled={
-                    !license.isAtLeast(minimumLicenseForSuppression) ||
+                    !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
                     groupByFields?.length === 0 ||
                     groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
                   }
@@ -420,18 +459,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ suppressionMissingFields }) => (
       <EuiRadioGroup
         disabled={
-          !license.isAtLeast(minimumLicenseForSuppression) ||
+          !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
           groupByFields == null ||
           groupByFields.length === 0
         }
         idSelected={suppressionMissingFields.value}
         options={[
           {
-            id: AlertSuppressionMissingFieldsStrategy.Suppress,
+            id: AlertSuppressionMissingFieldsStrategyEnum.suppress,
             label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
           },
           {
-            id: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            id: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
             label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
           },
         ]}
@@ -569,6 +608,45 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     handleResetIndices,
   ]);
 
+  const queryBarProps = useMemo(
+    () =>
+      ({
+        idAria: 'detectionEngineStepDefineRuleQueryBar',
+        indexPattern,
+        isDisabled: isLoading,
+        isLoading,
+        dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+        onValidityChange: setIsQueryBarValid,
+      } as QueryBarDefineRuleProps),
+    [indexPattern, isLoading, setIsQueryBarValid]
+  );
+
+  const esqlQueryBarConfig = useMemo(
+    () => ({
+      ...schema.queryBar,
+      label: i18n.ESQL_QUERY,
+      labelAppend: <EsqlInfoIcon />,
+    }),
+    []
+  );
+
+  const EsqlQueryBarMemo = useMemo(
+    () => (
+      <UseField
+        key="QueryBarDefineRule"
+        path="queryBar"
+        config={esqlQueryBarConfig}
+        component={QueryBarDefineRule}
+        componentProps={{
+          ...queryBarProps,
+          dataTestSubj: 'detectionEngineStepDefineRuleEsqlQueryBar',
+          idAria: 'detectionEngineStepDefineRuleEsqlQueryBar',
+        }}
+      />
+    ),
+    [queryBarProps, esqlQueryBarConfig]
+  );
+
   const QueryBarMemo = useMemo(
     () => (
       <UseField
@@ -655,6 +733,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [indexPattern]
   );
 
+  const selectRuleTypeProps = useMemo(
+    () => ({
+      describedByIds: ['detectionEngineStepDefineRuleType'],
+      isUpdateView,
+      hasValidLicense: hasMlLicense(mlCapabilities),
+      isMlAdmin: hasMlAdminPermissions(mlCapabilities),
+    }),
+    [isUpdateView, mlCapabilities]
+  );
+
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -673,17 +761,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <UseField
             path="ruleType"
             component={SelectRuleType}
-            componentProps={{
-              describedByIds: ['detectionEngineStepDefineRuleType'],
-              isUpdateView,
-              hasValidLicense: hasMlLicense(mlCapabilities),
-              isMlAdmin: hasMlAdminPermissions(mlCapabilities),
-            }}
+            componentProps={selectRuleTypeProps}
           />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
-              <EuiSpacer size="s" />
-              {DataSource}
+              <StyledVisibleContainer isVisible={!isEsqlRule(ruleType)}>
+                <EuiSpacer size="s" />
+                {DataSource}
+              </StyledVisibleContainer>
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <UseField
@@ -709,6 +794,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     label: i18n.EQL_QUERY_BAR_LABEL,
                   }}
                 />
+              ) : isEsqlRule(ruleType) ? (
+                EsqlQueryBarMemo
               ) : (
                 QueryBarMemo
               )}
@@ -746,11 +833,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           >
             <UseField
               path="groupByFields"
-              component={GroupByFields}
+              component={MultiSelectFieldsAutocomplete}
               componentProps={{
                 browserFields: termsAggregationFields,
+                disabledText: i18n.GROUP_BY_FIELD_LICENSE_WARNING,
                 isDisabled:
-                  !license.isAtLeast(minimumLicenseForSuppression) && groupByFields?.length === 0,
+                  !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) &&
+                  groupByFields?.length === 0,
               }}
             />
           </RuleTypeEuiFormRow>

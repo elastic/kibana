@@ -27,6 +27,7 @@ export class TimeToVisualizePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
+  private readonly retry = this.ctx.getService('retry');
 
   public async ensureSaveModalIsOpen() {
     await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
@@ -42,9 +43,24 @@ export class TimeToVisualizePageObject extends FtrService {
   }
 
   public async resetNewDashboard() {
-    await this.common.navigateToApp('dashboard');
-    await this.dashboard.gotoDashboardLandingPage(true);
+    await this.dashboard.navigateToApp();
+    await this.dashboard.gotoDashboardLandingPage();
     await this.dashboard.clickNewDashboard(false);
+  }
+
+  private async selectDashboard(dashboardId: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click('open-dashboard-picker');
+      await this.testSubjects.setValue('dashboard-picker-search', dashboardId);
+      await this.common.sleep(150); // wait for input debounce so loading starts
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click(`dashboard-picker-option-${dashboardId.replaceAll(' ', '-')}`);
+      const dashboardPickerLabel = await this.testSubjects.getVisibleText('open-dashboard-picker');
+      if (dashboardPickerLabel === 'Select dashboard') {
+        throw new Error(`Dashboard not selected`);
+      }
+    });
   }
 
   public async setSaveModalValues(
@@ -75,8 +91,7 @@ export class TimeToVisualizePageObject extends FtrService {
       await label.click();
 
       if (dashboardId) {
-        await this.testSubjects.setValue('dashboardPickerInput', dashboardId);
-        await this.find.clickByButtonText(dashboardId);
+        await this.selectDashboard(dashboardId);
       }
     }
 

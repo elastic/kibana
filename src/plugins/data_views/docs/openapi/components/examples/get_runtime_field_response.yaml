@@ -1,0 +1,617 @@
+summary: The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).
+value:
+  {
+    "fields": [
+      {
+        "count": 0,
+        "name": "hour_of_day",
+        "type": "number",
+        "esTypes": [
+          "long"
+        ],
+        "scripted": false,
+        "searchable": true,
+        "aggregatable": true,
+        "readFromDocValues": false,
+        "shortDotsEnable": false,
+        "runtimeField": {
+          "type": "long",
+          "script": {
+            "source": "emit(doc['timestamp'].value.getHour());"
+          }
+        }
+      }
+    ],
+    "data_view": {
+      "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+      "version": "WzM2LDJd",
+      "title": "kibana_sample_data_flights",
+      "timeFieldName": "timestamp",
+      "sourceFilters": [],
+      "fields": {
+        "hour_of_day": {
+          "count": 0,
+          "name": "hour_of_day",
+          "type": "number",
+          "esTypes": [
+            "long"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": false,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "00"
+            }
+          },
+          "shortDotsEnable": false,
+          "runtimeField": {
+            "type": "long",
+            "script": {
+              "source": "emit(doc['timestamp'].value.getHour());"
+            }
+          }
+        },
+        "AvgTicketPrice": {
+          "count": 0,
+          "name": "AvgTicketPrice",
+          "type": "number",
+          "esTypes": [
+            "float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number",
+            "params": {
+              "pattern": "$0,0.[00]"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "Cancelled": {
+          "count": 0,
+          "name": "Cancelled",
+          "type": "boolean",
+          "esTypes": [
+            "boolean"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "boolean"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "Carrier": {
+          "count": 0,
+          "name": "Carrier",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "Dest": {
+          "count": 0,
+          "name": "Dest",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "DestAirportID": {
+          "count": 0,
+          "name": "DestAirportID",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "DestCityName": {
+          "count": 0,
+          "name": "DestCityName",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "DestCountry": {
+          "count": 0,
+          "name": "DestCountry",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "DestLocation": {
+          "count": 0,
+          "name": "DestLocation",
+          "type": "geo_point",
+          "esTypes": [
+            "geo_point"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "geo_point",
+            "params": {
+              "transform": "wkt"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "DestRegion": {
+          "count": 0,
+          "name": "DestRegion",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "DestWeather": {
+          "count": 0,
+          "name": "DestWeather",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "DistanceKilometers": {
+          "count": 0,
+          "name": "DistanceKilometers",
+          "type": "number",
+          "esTypes": [
+            "float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "DistanceMiles": {
+          "count": 0,
+          "name": "DistanceMiles",
+          "type": "number",
+          "esTypes": [
+            "float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "FlightDelay": {
+          "count": 0,
+          "name": "FlightDelay",
+          "type": "boolean",
+          "esTypes": [
+            "boolean"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "boolean"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "FlightDelayMin": {
+          "count": 0,
+          "name": "FlightDelayMin",
+          "type": "number",
+          "esTypes": [
+            "integer"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "FlightDelayType": {
+          "count": 0,
+          "name": "FlightDelayType",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "FlightNum": {
+          "count": 0,
+          "name": "FlightNum",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "FlightTimeHour": {
+          "count": 0,
+          "name": "FlightTimeHour",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "FlightTimeMin": {
+          "count": 0,
+          "name": "FlightTimeMin",
+          "type": "number",
+          "esTypes": [
+            "float"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "Origin": {
+          "count": 0,
+          "name": "Origin",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "OriginAirportID": {
+          "count": 0,
+          "name": "OriginAirportID",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "OriginCityName": {
+          "count": 0,
+          "name": "OriginCityName",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "OriginCountry": {
+          "count": 0,
+          "name": "OriginCountry",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "OriginLocation": {
+          "count": 0,
+          "name": "OriginLocation",
+          "type": "geo_point",
+          "esTypes": [
+            "geo_point"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "geo_point",
+            "params": {
+              "transform": "wkt"
+            }
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "OriginRegion": {
+          "count": 0,
+          "name": "OriginRegion",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "OriginWeather": {
+          "count": 0,
+          "name": "OriginWeather",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "_id": {
+          "count": 0,
+          "name": "_id",
+          "type": "string",
+          "esTypes": [
+            "_id"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "_index": {
+          "count": 0,
+          "name": "_index",
+          "type": "string",
+          "esTypes": [
+            "_index"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "_score": {
+          "count": 0,
+          "name": "_score",
+          "type": "number",
+          "scripted": false,
+          "searchable": false,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "_source": {
+          "count": 0,
+          "name": "_source",
+          "type": "_source",
+          "esTypes": [
+            "_source"
+          ],
+          "scripted": false,
+          "searchable": false,
+          "aggregatable": false,
+          "readFromDocValues": false,
+          "format": {
+            "id": "_source"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "dayOfWeek": {
+          "count": 0,
+          "name": "dayOfWeek",
+          "type": "number",
+          "esTypes": [
+            "integer"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "number"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        },
+        "timestamp": {
+          "count": 0,
+          "name": "timestamp",
+          "type": "date",
+          "esTypes": [
+            "date"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": true,
+          "format": {
+            "id": "date"
+          },
+          "shortDotsEnable": false,
+          "isMapped": true
+        }
+      },
+      "fieldFormats": {
+        "hour_of_day": {
+          "id": "number",
+          "params": {
+            "pattern": "00"
+          }
+        },
+        "AvgTicketPrice": {
+          "id": "number",
+          "params": {
+            "pattern": "$0,0.[00]"
+          }
+        }
+      },
+      "runtimeFieldMap": {
+        "hour_of_day": {
+          "type": "long",
+          "script": {
+            "source": "emit(doc['timestamp'].value.getHour());"
+          }
+        }
+      },
+      "fieldAttrs": {},
+      "allowNoIndex": false,
+      "name": "Kibana Sample Data Flights"
+    }
+}

@@ -13,4 +13,9 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Search API Integration Tests',
   },
+  suiteTags: { exclude: ['skipSvlSearch'] },
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
+  esServerArgs: [],
 });

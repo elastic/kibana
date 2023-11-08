@@ -6,154 +6,29 @@
  */
 
 import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiStat,
-  EuiText,
-  useEuiTheme,
+  EuiButtonIcon,
+  EuiDataGrid,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+  EuiDataGridControlColumn,
+  EuiDataGridRefProps,
+  EuiDataGridSorting,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { keyBy, orderBy } from 'lodash';
-import React, { useMemo, useState } from 'react';
-import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
-import { getCalleeFunction, StackFrameMetadata } from '../../../common/profiling';
-import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
-import { asCost } from '../../utils/formatters/as_cost';
-import { asWeight } from '../../utils/formatters/as_weight';
-import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { getCalleeFunction, TopNFunctions, TopNFunctionSortField } from '@kbn/profiling-utils';
+import { last, orderBy } from 'lodash';
+import React, { forwardRef, Ref, useMemo, useState } from 'react';
+import { GridOnScrollProps } from 'react-window';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
-import { StackFrameSummary } from '../stack_frame_summary';
-import { GetLabel } from './get_label';
-
-interface Row {
-  rank: number;
-  frame: StackFrameMetadata;
-  samples: number;
-  exclusiveCPU: number;
-  inclusiveCPU: number;
-  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
-  diff?: {
-    rank: number;
-    samples: number;
-    exclusiveCPU: number;
-    inclusiveCPU: number;
-  };
-}
-
-function TotalSamplesStat({
-  baselineTotalSamples,
-  baselineScaleFactor,
-  comparisonTotalSamples,
-  comparisonScaleFactor,
-}: {
-  baselineTotalSamples: number;
-  baselineScaleFactor?: number;
-  comparisonTotalSamples?: number;
-  comparisonScaleFactor?: number;
-}) {
-  const scaledBaselineTotalSamples = scaleValue({
-    value: baselineTotalSamples,
-    scaleFactor: baselineScaleFactor,
-  });
-
-  const value = scaledBaselineTotalSamples.toLocaleString();
-
-  const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
-    defaultMessage: ' Total sample estimate: ',
-  });
-
-  if (comparisonTotalSamples === undefined || comparisonTotalSamples === 0) {
-    return (
-      <EuiStat
-        title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
-        description={sampleHeader}
-      />
-    );
-  }
-
-  const scaledComparisonTotalSamples = scaleValue({
-    value: comparisonTotalSamples,
-    scaleFactor: comparisonScaleFactor,
-  });
-
-  const diffSamples = scaledBaselineTotalSamples - scaledComparisonTotalSamples;
-  const percentDelta = (diffSamples / (scaledBaselineTotalSamples - diffSamples)) * 100;
-
-  return (
-    <EuiStat
-      title={
-        <EuiText style={{ fontWeight: 'bold' }}>
-          {value}
-          <GetLabel value={percentDelta} prepend="(" append=")" />
-        </EuiText>
-      }
-      description={sampleHeader}
-    />
-  );
-}
-
-function SampleStat({
-  samples,
-  diffSamples,
-  totalSamples,
-  isSampled,
-}: {
-  samples: number;
-  diffSamples?: number;
-  totalSamples: number;
-  isSampled: boolean;
-}) {
-  const samplesLabel = `${isSampled ? '~ ' : ''}${samples.toLocaleString()}`;
-
-  if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
-    return <>{samplesLabel}</>;
-  }
-
-  const percentDelta = (diffSamples / (samples - diffSamples)) * 100;
-  const totalPercentDelta = (diffSamples / totalSamples) * 100;
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>{samplesLabel}</EuiFlexItem>
-      <EuiFlexItem>
-        <GetLabel value={percentDelta} append=" rel" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <GetLabel value={totalPercentDelta} append=" abs" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number; isSampled?: boolean }) {
-  const cpuLabel = `${cpu.toFixed(2)}%`;
-
-  if (diffCPU === undefined || diffCPU === 0) {
-    return <>{cpuLabel}</>;
-  }
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>{cpuLabel}</EuiFlexItem>
-      <EuiFlexItem>
-        <GetLabel value={diffCPU} prepend="(" append=")" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
+import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
+import { LabelWithHint } from '../label_with_hint';
+import { FunctionRow } from './function_row';
+import { getFunctionsRows, IFunctionRow } from './utils';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 interface Props {
-  sortDirection: 'asc' | 'desc';
-  sortField: TopNFunctionSortField;
-  onSortChange: (options: {
-    sortDirection: 'asc' | 'desc';
-    sortField: TopNFunctionSortField;
-  }) => void;
   topNFunctions?: TopNFunctions;
   comparisonTopNFunctions?: TopNFunctions;
   totalSeconds: number;
@@ -161,313 +36,326 @@ interface Props {
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
   onFrameClick?: (functionName: string) => void;
+  onScroll?: (scroll: GridOnScrollProps) => void;
+  showDiffColumn?: boolean;
+  pageIndex: number;
+  onChangePage: (nextPage: number) => void;
+  sortField: TopNFunctionSortField;
+  sortDirection: 'asc' | 'desc';
+  onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
+  dataTestSubj?: string;
+  isEmbedded?: boolean;
 }
 
-function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
-  return value * scaleFactor;
-}
+export const TopNFunctionsGrid = forwardRef(
+  (
+    {
+      topNFunctions,
+      comparisonTopNFunctions,
+      totalSeconds,
+      isDifferentialView,
+      baselineScaleFactor,
+      comparisonScaleFactor,
+      onFrameClick,
+      onScroll,
+      showDiffColumn = false,
+      pageIndex,
+      onChangePage,
+      sortField,
+      sortDirection,
+      onChangeSort,
+      dataTestSubj = 'topNFunctionsGrid',
+      isEmbedded = false,
+    }: Props,
+    ref: Ref<EuiDataGridRefProps> | undefined
+  ) => {
+    const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
+    const trackProfilingEvent = useUiTracker({ app: 'profiling' });
+    const calculateImpactEstimates = useCalculateImpactEstimate();
 
-export function TopNFunctionsTable({
-  sortDirection,
-  sortField,
-  onSortChange,
-  topNFunctions,
-  comparisonTopNFunctions,
-  totalSeconds,
-  isDifferentialView,
-  baselineScaleFactor,
-  comparisonScaleFactor,
-  onFrameClick,
-}: Props) {
-  const [selectedRow, setSelectedRow] = useState<Row | undefined>();
-  const isEstimatedA = (topNFunctions?.SamplingRate ?? 1.0) !== 1.0;
-  const totalCount: number = useMemo(() => {
-    if (!topNFunctions || !topNFunctions.TotalCount) {
-      return 0;
+    function onSort(newSortingColumns: EuiDataGridSorting['columns']) {
+      const lastItem = last(newSortingColumns);
+      if (lastItem) {
+        onChangeSort(lastItem);
+      }
     }
 
-    return topNFunctions.TotalCount;
-  }, [topNFunctions]);
-
-  const rows: Row[] = useMemo(() => {
-    if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
-      return [];
-    }
-
-    const comparisonDataById = comparisonTopNFunctions
-      ? keyBy(comparisonTopNFunctions.TopN, 'Id')
-      : {};
-
-    return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
-      const comparisonRow = comparisonDataById?.[topN.Id];
-
-      const topNCountExclusiveScaled = scaleValue({
-        value: topN.CountExclusive,
-        scaleFactor: baselineScaleFactor,
-      });
-
-      const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
-      const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
-      const totalSamples = topN.CountExclusive;
-
-      const impactEstimates =
-        totalSeconds > 0
-          ? calculateImpactEstimates({
-              countExclusive: exclusiveCPU,
-              countInclusive: inclusiveCPU,
-              totalSamples,
-              totalSeconds,
-            })
-          : undefined;
-
-      function calculateDiff() {
-        if (comparisonTopNFunctions && comparisonRow) {
-          const comparisonCountExclusiveScaled = scaleValue({
-            value: comparisonRow.CountExclusive,
-            scaleFactor: comparisonScaleFactor,
-          });
-
-          return {
-            rank: topN.Rank - comparisonRow.Rank,
-            samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
-            exclusiveCPU:
-              exclusiveCPU -
-              (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-            inclusiveCPU:
-              inclusiveCPU -
-              (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
-          };
-        }
+    const totalCount = useMemo(() => {
+      if (!topNFunctions || !topNFunctions.TotalCount) {
+        return 0;
       }
 
-      return {
-        rank: topN.Rank,
-        frame: topN.Frame,
-        samples: topNCountExclusiveScaled,
-        exclusiveCPU,
-        inclusiveCPU,
-        impactEstimates,
-        diff: calculateDiff(),
-      };
-    });
-  }, [
-    topNFunctions,
-    comparisonTopNFunctions,
-    totalSeconds,
-    comparisonScaleFactor,
-    baselineScaleFactor,
-  ]);
+      return topNFunctions.TotalCount;
+    }, [topNFunctions]);
 
-  const theme = useEuiTheme();
+    const rows = useMemo(() => {
+      return getFunctionsRows({
+        baselineScaleFactor,
+        comparisonScaleFactor,
+        comparisonTopNFunctions,
+        topNFunctions,
+        totalSeconds,
+        calculateImpactEstimates,
+      });
+    }, [
+      baselineScaleFactor,
+      calculateImpactEstimates,
+      comparisonScaleFactor,
+      comparisonTopNFunctions,
+      topNFunctions,
+      totalSeconds,
+    ]);
 
-  const columns: Array<EuiBasicTableColumn<Row>> = [
-    {
-      field: TopNFunctionSortField.Rank,
-      name: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
-        defaultMessage: 'Rank',
-      }),
-      render: (_, { rank }) => {
-        return <EuiText style={{ whiteSpace: 'nowrap', fontSize: 'inherit' }}>{rank}</EuiText>;
-      },
-      align: 'right',
-    },
-    {
-      field: TopNFunctionSortField.Frame,
-      name: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
-        defaultMessage: 'Function',
-      }),
-      render: (_, { frame }) => {
-        return <StackFrameSummary frame={frame} onFrameClick={onFrameClick} />;
-      },
-      width: '50%',
-    },
-    {
-      field: TopNFunctionSortField.Samples,
-      name: i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
-        defaultMessage: 'Samples (estd.)',
-      }),
-      render: (_, { samples, diff }) => {
+    const sortedRows = useMemo(() => {
+      switch (sortField) {
+        case TopNFunctionSortField.Frame:
+          return orderBy(rows, (row) => getCalleeFunction(row.frame), sortDirection);
+        case TopNFunctionSortField.SelfCPU:
+          return orderBy(rows, (row) => row.selfCPUPerc, sortDirection);
+        case TopNFunctionSortField.TotalCPU:
+          return orderBy(rows, (row) => row.totalCPUPerc, sortDirection);
+        case TopNFunctionSortField.AnnualizedCo2:
+          return orderBy(rows, (row) => row.impactEstimates?.selfCPU.annualizedCo2, sortDirection);
+        case TopNFunctionSortField.AnnualizedDollarCost:
+          return orderBy(
+            rows,
+            (row) => row.impactEstimates?.selfCPU.annualizedDollarCost,
+            sortDirection
+          );
+        default:
+          return orderBy(rows, sortField, sortDirection);
+      }
+    }, [rows, sortDirection, sortField]);
+
+    const { columns, leadingControlColumns } = useMemo(() => {
+      const gridColumns: EuiDataGridColumn[] = [
+        {
+          id: TopNFunctionSortField.Rank,
+          schema: 'numeric',
+          actions: { showHide: false },
+          initialWidth: isDifferentialView ? 50 : 90,
+          displayAsText: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
+            defaultMessage: 'Rank',
+          }),
+        },
+        {
+          id: TopNFunctionSortField.Frame,
+          actions: { showHide: false },
+          displayAsText: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
+            defaultMessage: 'Function',
+          }),
+        },
+        {
+          id: TopNFunctionSortField.Samples,
+          initialWidth: isDifferentialView ? 100 : 200,
+          schema: 'numeric',
+          actions: { showHide: false },
+          display: (
+            <LabelWithHint
+              label={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
+                defaultMessage: 'Samples',
+              })}
+              hint={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel.hint', {
+                defaultMessage: 'Estimated values',
+              })}
+              labelSize="s"
+              labelStyle={{ fontWeight: 700 }}
+              iconSize="s"
+            />
+          ),
+        },
+        {
+          id: TopNFunctionSortField.SelfCPU,
+          schema: 'numeric',
+          actions: { showHide: false },
+          initialWidth: isDifferentialView ? 100 : 200,
+          display: (
+            <CPULabelWithHint
+              type="self"
+              labelSize="s"
+              labelStyle={{ fontWeight: 700 }}
+              iconSize="s"
+            />
+          ),
+        },
+        {
+          id: TopNFunctionSortField.TotalCPU,
+          schema: 'numeric',
+          actions: { showHide: false },
+          initialWidth: isDifferentialView ? 100 : 200,
+          display: (
+            <CPULabelWithHint
+              type="total"
+              labelSize="s"
+              labelStyle={{ fontWeight: 700 }}
+              iconSize="s"
+            />
+          ),
+        },
+      ];
+
+      const gridLeadingControlColumns: EuiDataGridControlColumn[] = [];
+      if (showDiffColumn) {
+        gridColumns.push({
+          initialWidth: 60,
+          id: TopNFunctionSortField.Diff,
+          actions: { showHide: false },
+          displayAsText: i18n.translate('xpack.profiling.functionsView.diffColumnLabel', {
+            defaultMessage: 'Diff',
+          }),
+        });
+      }
+
+      if (!isDifferentialView) {
+        gridColumns.push(
+          {
+            id: TopNFunctionSortField.AnnualizedCo2,
+            actions: { showHide: false },
+            initialWidth: isDifferentialView ? 100 : 200,
+            schema: 'numeric',
+            display: (
+              <LabelWithHint
+                label={i18n.translate('xpack.profiling.functionsView.annualizedCo2', {
+                  defaultMessage: 'Annualized CO2',
+                })}
+                hint={i18n.translate('xpack.profiling.functionsView.annualizedCo2.hint', {
+                  defaultMessage:
+                    'Indicates the CO2 emission of the function and any functions called by it.',
+                })}
+                labelSize="s"
+                labelStyle={{ fontWeight: 700 }}
+                iconSize="s"
+              />
+            ),
+          },
+          {
+            id: TopNFunctionSortField.AnnualizedDollarCost,
+            schema: 'numeric',
+            actions: { showHide: false },
+            initialWidth: isDifferentialView ? 100 : 200,
+            display: (
+              <LabelWithHint
+                label={i18n.translate('xpack.profiling.functionsView.annualizedDollarCost', {
+                  defaultMessage: `Annualized dollar cost`,
+                })}
+                hint={i18n.translate('xpack.profiling.functionsView.annualizedDollarCost.hint', {
+                  defaultMessage: `Indicates the Dollar cost of the function and any functions called by it.`,
+                })}
+                labelSize="s"
+                labelStyle={{ fontWeight: 700 }}
+                iconSize="s"
+              />
+            ),
+          }
+        );
+
+        gridLeadingControlColumns.push({
+          id: 'actions',
+          width: 40,
+          headerCellRender() {
+            return (
+              <EuiScreenReaderOnly>
+                <span>Controls</span>
+              </EuiScreenReaderOnly>
+            );
+          },
+          rowCellRender: function RowCellRender({ rowIndex }) {
+            function handleOnClick() {
+              trackProfilingEvent({ metric: 'topN_function_details_click' });
+              setSelectedRow(sortedRows[rowIndex]);
+            }
+            return (
+              <EuiButtonIcon
+                data-test-subj="profilingTopNFunctionsGridButton"
+                aria-label="Show actions"
+                iconType="expand"
+                color="text"
+                onClick={handleOnClick}
+              />
+            );
+          },
+        });
+      }
+      return { columns: gridColumns, leadingControlColumns: gridLeadingControlColumns };
+    }, [isDifferentialView, sortedRows, showDiffColumn, trackProfilingEvent]);
+
+    const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
+
+    function RenderCellValue({
+      rowIndex,
+      columnId,
+      setCellProps,
+    }: EuiDataGridCellValueElementProps) {
+      const data = sortedRows[rowIndex];
+      if (data) {
         return (
-          <SampleStat
-            samples={samples}
-            diffSamples={diff?.samples}
-            totalSamples={totalCount}
-            isSampled={isEstimatedA}
+          <FunctionRow
+            functionRow={data}
+            columnId={columnId}
+            totalCount={totalCount}
+            onFrameClick={onFrameClick}
+            setCellProps={setCellProps}
           />
         );
-      },
-      align: 'right',
-    },
-    {
-      field: TopNFunctionSortField.ExclusiveCPU,
-      name: (
-        <CPULabelWithHint
-          type="self"
-          labelSize="xs"
-          labelStyle={{ fontWeight: 600 }}
-          iconSize="s"
-        />
-      ),
-      render: (_, { exclusiveCPU, diff }) => {
-        return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
-      },
-      align: 'right',
-    },
-    {
-      field: TopNFunctionSortField.InclusiveCPU,
-      name: (
-        <CPULabelWithHint
-          type="total"
-          labelSize="xs"
-          labelStyle={{ fontWeight: 600 }}
-          iconSize="s"
-        />
-      ),
-      render: (_, { inclusiveCPU, diff }) => {
-        return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;
-      },
-      align: 'right',
-    },
-  ];
-
-  if (comparisonTopNFunctions) {
-    columns.push({
-      field: TopNFunctionSortField.Diff,
-      name: i18n.translate('xpack.profiling.functionsView.diffColumnLabel', {
-        defaultMessage: 'Diff',
-      }),
-      align: 'right',
-      render: (_, { diff }) => {
-        if (!diff) {
-          return (
-            <EuiText size="xs" color={theme.euiTheme.colors.primaryText}>
-              {i18n.translate('xpack.profiling.functionsView.newLabel', { defaultMessage: 'New' })}
-            </EuiText>
-          );
-        }
-
-        if (diff.rank === 0) {
-          return null;
-        }
-
-        const color = diff.rank > 0 ? 'success' : 'danger';
-        const icon = diff.rank > 0 ? 'sortDown' : 'sortUp';
-
-        return (
-          <EuiBadge
-            color={color}
-            iconType={icon}
-            iconSide="right"
-            style={{ minWidth: '100%', textAlign: 'right' }}
-          >
-            {diff.rank}
-          </EuiBadge>
-        );
-      },
-    });
-  }
-  if (!isDifferentialView) {
-    columns.push(
-      {
-        field: 'annualized_co2',
-        name: i18n.translate('xpack.profiling.functionsView.annualizedCo2', {
-          defaultMessage: 'Annualized CO2',
-        }),
-        render: (_, { impactEstimates }) => {
-          if (impactEstimates?.annualizedCo2) {
-            return <div>{asWeight(impactEstimates.annualizedCo2)}</div>;
-          }
-        },
-        align: 'right',
-      },
-      {
-        field: 'annualized_dollar_cost',
-        name: i18n.translate('xpack.profiling.functionsView.annualizedDollarCost', {
-          defaultMessage: `Annualized dollar cost`,
-        }),
-        render: (_, { impactEstimates }) => {
-          if (impactEstimates?.annualizedDollarCost) {
-            return <div>{asCost(impactEstimates.annualizedDollarCost)}</div>;
-          }
-        },
-        align: 'right',
-      },
-      {
-        name: 'Actions',
-        actions: [
-          {
-            name: 'show_more_information',
-            description: i18n.translate('xpack.profiling.functionsView.showMoreButton', {
-              defaultMessage: `Show more information`,
-            }),
-            icon: 'inspect',
-            color: 'primary',
-            type: 'icon',
-            onClick: setSelectedRow,
-          },
-        ],
       }
+      return null;
+    }
+
+    return (
+      <>
+        <EuiDataGrid
+          data-test-subj={dataTestSubj}
+          ref={ref}
+          aria-label="TopN functions"
+          columns={columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          rowCount={sortedRows.length > 100 ? 100 : sortedRows.length}
+          renderCellValue={RenderCellValue}
+          sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
+          leadingControlColumns={leadingControlColumns}
+          pagination={{
+            pageIndex,
+            pageSize: 50,
+            // Left it empty on purpose as it is a required property on the pagination
+            onChangeItemsPerPage: () => {},
+            onChangePage,
+            pageSizeOptions: [],
+          }}
+          rowHeightsOptions={{ defaultHeight: 'auto' }}
+          toolbarVisibility={{
+            showColumnSelector: false,
+            showKeyboardShortcuts: !isDifferentialView,
+            showDisplaySelector: !isDifferentialView,
+            showFullScreenSelector: !isDifferentialView,
+            showSortSelector: false,
+          }}
+          virtualizationOptions={{
+            onScroll,
+          }}
+        />
+        {selectedRow && (
+          <FrameInformationTooltip
+            onClose={() => {
+              setSelectedRow(undefined);
+            }}
+            frame={{
+              addressOrLine: selectedRow.frame.AddressOrLine,
+              countExclusive: selectedRow.selfCPU,
+              countInclusive: selectedRow.totalCPU,
+              exeFileName: selectedRow.frame.ExeFileName,
+              fileID: selectedRow.frame.FileID,
+              frameType: selectedRow.frame.FrameType,
+              functionName: selectedRow.frame.FunctionName,
+              sourceFileName: selectedRow.frame.SourceFilename,
+              sourceLine: selectedRow.frame.SourceLine,
+            }}
+            totalSeconds={totalSeconds}
+            totalSamples={totalCount}
+            showAIAssistant={!isEmbedded}
+            showSymbolsStatus={!isEmbedded}
+          />
+        )}
+      </>
     );
   }
-
-  const sortedRows = orderBy(
-    rows,
-    (row) => {
-      return sortField === TopNFunctionSortField.Frame
-        ? getCalleeFunction(row.frame).toLowerCase()
-        : row[sortField];
-    },
-    [sortDirection]
-  ).slice(0, 100);
-  return (
-    <>
-      <TotalSamplesStat
-        baselineTotalSamples={totalCount}
-        baselineScaleFactor={baselineScaleFactor}
-        comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
-        comparisonScaleFactor={comparisonScaleFactor}
-      />
-      <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
-      <EuiBasicTable
-        items={sortedRows}
-        columns={columns}
-        tableLayout="auto"
-        onChange={(criteria) => {
-          onSortChange({
-            sortDirection: criteria.sort!.direction,
-            sortField: criteria.sort!.field as TopNFunctionSortField,
-          });
-        }}
-        sorting={{
-          enableAllColumns: true,
-          sort: {
-            direction: sortDirection,
-            field: sortField,
-          },
-        }}
-      />
-      {selectedRow && (
-        <FrameInformationTooltip
-          onClose={() => {
-            setSelectedRow(undefined);
-          }}
-          frame={{
-            addressOrLine: selectedRow.frame.AddressOrLine,
-            countExclusive: selectedRow.exclusiveCPU,
-            countInclusive: selectedRow.inclusiveCPU,
-            exeFileName: selectedRow.frame.ExeFileName,
-            fileID: selectedRow.frame.FileID,
-            frameType: selectedRow.frame.FrameType,
-            functionName: selectedRow.frame.FunctionName,
-            sourceFileName: selectedRow.frame.SourceFilename,
-            sourceLine: selectedRow.frame.SourceLine,
-          }}
-          totalSeconds={totalSeconds ?? 0}
-          totalSamples={selectedRow.samples}
-          samplingRate={topNFunctions?.SamplingRate ?? 1.0}
-        />
-      )}
-    </>
-  );
-}
+);

@@ -38,8 +38,9 @@ export class ComboBoxService extends FtrService {
 
   public async setForLastInput(comboBoxSelector: string, value: string): Promise<void> {
     this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
-    const comboBoxes = await this.testSubjects.findAll(comboBoxSelector);
-    const comboBox = comboBoxes[comboBoxes.length - 1];
+    const comboBox = await this.find.byXPath(
+      `(//*[@data-test-subj='${comboBoxSelector}'])[last()]`
+    );
     await this.setElement(comboBox, value);
   }
 
@@ -354,9 +355,10 @@ export class ComboBoxService extends FtrService {
 
   public async clearLastInputField(comboBoxSelector: string): Promise<void> {
     this.log.debug(`comboBox.clearInputField, comboBoxSelector:${comboBoxSelector}`);
-    const comboBoxElements = await this.testSubjects.findAll(comboBoxSelector);
-    const comboBoxElement = comboBoxElements[comboBoxElements.length - 1];
-    const input = await comboBoxElement.findByTagName('input');
+    const comboBox = await this.find.byXPath(
+      `(//*[@data-test-subj='${comboBoxSelector}'])[last()]`
+    );
+    const input = await comboBox.findByTagName('input');
     await input.clearValueWithKeyboard();
   }
 

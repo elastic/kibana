@@ -9,7 +9,7 @@ import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
-import { SETUP_HEALTH_URL } from '../../../../../common/detection_engine/rule_monitoring';
+import { SETUP_HEALTH_URL } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { api } from '../../api';
 
 export const SETUP_DETECTION_ENGINE_HEALTH_API_MUTATION_KEY = ['POST', SETUP_HEALTH_URL];

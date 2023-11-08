@@ -57,7 +57,7 @@ export const slo: SavedObjectsType = {
   },
   management: {
     displayName: 'SLO',
-    importableAndExportable: true,
+    importableAndExportable: false,
     getTitle(sloSavedObject: SavedObject<StoredSLO>) {
       return `SLO: [${sloSavedObject.attributes.name}]`;
     },

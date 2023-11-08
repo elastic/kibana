@@ -135,7 +135,7 @@ exports[`Overview that overview page renders normally 1`] = `
     <EuiSpacer
       size="m"
     />
-    <EuiPageContent_Deprecated>
+    <EuiPanel>
       <EuiFlexGroup
         wrap={true}
       >
@@ -196,7 +196,7 @@ exports[`Overview that overview page renders normally 1`] = `
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageContent_Deprecated>
+    </EuiPanel>
   </EuiPageBody>
 </EuiPage>
 `;
@@ -231,7 +231,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
     <EuiSpacer
       size="m"
     />
-    <EuiPageContent_Deprecated>
+    <EuiPanel>
       <EuiFlexGroup
         wrap={true}
       >
@@ -292,7 +292,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageContent_Deprecated>
+    </EuiPanel>
   </EuiPageBody>
 </EuiPage>
 `;

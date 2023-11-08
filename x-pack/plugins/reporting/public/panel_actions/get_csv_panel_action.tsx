@@ -68,7 +68,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     });
   }
 
-  public async getSearchSource(savedSearch: SavedSearch, _embeddable: ISearchEmbeddable) {
+  public async getSharingData(savedSearch: SavedSearch) {
     const [{ uiSettings }, { data }] = await Rx.firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
@@ -104,7 +104,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const query = savedSearch.searchSource.getField('query');
+    const query = savedSearch?.searchSource.getField('query');
 
     // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
     if (query && Boolean(query && 'sql' in query)) {
@@ -121,15 +121,19 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       throw new IncompatibleActionError();
     }
 
-    if (this.isDownloading) {
+    const savedSearch = embeddable.getSavedSearch();
+
+    if (!savedSearch || this.isDownloading) {
       return;
     }
 
-    const savedSearch = embeddable.getSavedSearch();
-    const { columns, getSearchSource } = await this.getSearchSource(savedSearch, embeddable);
+    const { columns, getSearchSource } = await this.getSharingData(savedSearch);
 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
-      searchSource: getSearchSource(true),
+      searchSource: getSearchSource({
+        addGlobalTimeFilter: !embeddable.hasTimeRange(),
+        absoluteTime: true,
+      }),
       columns,
       title: savedSearch.title || '',
       objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType

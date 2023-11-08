@@ -15,7 +15,7 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const wrapHitsFactory =

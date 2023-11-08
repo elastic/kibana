@@ -14,7 +14,7 @@ import type {
   InstalledPackage,
   InstalledPackageArray,
   InstalledPackageBasicInfo,
-} from '../../../../../../common/detection_engine/fleet_integrations';
+} from '../../../../../../common/api/detection_engine/fleet_integrations';
 
 export interface IInstalledIntegrationSet {
   addPackage(fleetPackage: PackageListItem): void;

@@ -12,7 +12,7 @@ import { useStatusAction } from './use_status_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
-import { CaseStatuses } from '../../../../common';
+import { CaseStatuses } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/api');
 

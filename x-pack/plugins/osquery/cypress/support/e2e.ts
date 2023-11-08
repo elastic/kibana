@@ -25,18 +25,41 @@
 // force ESM in this module
 export {};
 
+// @ts-expect-error ts(2306)  module has some interesting ways of importing, see https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
+import registerCypressGrep from '@cypress/grep';
+
+registerCypressGrep();
+
+import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
+import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
+
+import { ServerlessRoleName } from './roles';
+
 import 'cypress-react-selector';
-// import './coverage';
+import { waitUntil } from '../tasks/wait_until';
+import { isServerless } from '../tasks/serverless';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
+    interface SuiteConfigOverrides {
+      env?: {
+        ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
+      };
+    }
+
     interface Chainable {
       getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+
       getBySelContains(
         ...args: Parameters<Cypress.Chainable['get']>
       ): Chainable<JQuery<HTMLElement>>;
+
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
+
+      login(role: ServerlessRoleName): void;
+
+      waitUntil(fn: () => Cypress.Chainable): Cypress.Chainable | undefined;
     }
   }
 }
@@ -55,6 +78,26 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
+Cypress.Commands.add('login', (role) => {
+  if (isServerless) {
+    return login.with(role, 'changeme');
+  }
+
+  // @ts-expect-error hackish way to provide a new role in Osquery ESS only (Reader)
+  return login(role);
+});
+
+Cypress.Commands.add('waitUntil', waitUntil);
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 Cypress.on('uncaught:exception', () => false);
+
+// Login as a SOC_MANAGER to properly initialize Security Solution App
+before(() => {
+  cy.login(ServerlessRoleName.SOC_MANAGER);
+  cy.visit('/app/security/alerts');
+  cy.getBySel('globalLoadingIndicator').should('exist');
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
+  cy.getBySel('manage-alert-detection-rules').should('exist');
+});

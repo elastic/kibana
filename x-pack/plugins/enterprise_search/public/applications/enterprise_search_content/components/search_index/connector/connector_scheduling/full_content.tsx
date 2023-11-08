@@ -23,7 +23,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncJobType } from '../../../../../../../common/types/connectors';
+import { SyncJobType } from '@kbn/search-connectors';
 
 import { ConnectorViewIndex, CrawlerViewIndex } from '../../../../types';
 
@@ -118,6 +118,9 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
   const isDocumentLevelSecurityDisabled =
     !index.connector.configuration.use_document_level_security?.value;
 
+  const isEnableSwitchDisabled =
+    type === SyncJobType.ACCESS_CONTROL && (!hasPlatinumLicense || isDocumentLevelSecurityDisabled);
+
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder>
@@ -165,7 +168,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EnableSwitch
-                    disabled={isGated || isDocumentLevelSecurityDisabled}
+                    disabled={isEnableSwitchDisabled}
                     checked={scheduling[type].enabled}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -187,7 +190,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
               </EuiFlexGroup>
             ) : (
               <EnableSwitch
-                disabled={isGated || isDocumentLevelSecurityDisabled}
+                disabled={isEnableSwitchDisabled}
                 checked={scheduling[type].enabled}
                 onChange={(e) => {
                   if (e.target.checked) {
@@ -212,6 +215,9 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
             <EuiFlexItem>
               <ConnectorCronEditor
                 disabled={isGated}
+                frequencyBlockList={
+                  type === SyncJobType.ACCESS_CONTROL || type === SyncJobType.FULL ? [] : undefined
+                }
                 scheduling={scheduling[type]}
                 type={type}
                 onReset={() => {

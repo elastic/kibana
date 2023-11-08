@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/security-api-integration-helpers",
-  "owner": "@elastic/kibana-core",
+  "owner": "@elastic/kibana-security",
   "devOnly": true
 }

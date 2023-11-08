@@ -9,21 +9,25 @@
 import { createCopyToClipboardActionFactory } from './copy_to_clipboard';
 import type { CellActionExecutionContext } from '../../types';
 import type { NotificationsStart } from '@kbn/core/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 const mockSuccessToast = jest.fn();
+const mockWarningToast = jest.fn();
 
 const mockCopy = jest.fn((text: string) => true);
 jest.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
 
 describe('Default createCopyToClipboardActionFactory', () => {
   const copyToClipboardActionFactory = createCopyToClipboardActionFactory({
-    notifications: { toasts: { addSuccess: mockSuccessToast } } as unknown as NotificationsStart,
+    notifications: {
+      toasts: { addSuccess: mockSuccessToast, addWarning: mockWarningToast },
+    } as unknown as NotificationsStart,
   });
   const copyToClipboardAction = copyToClipboardActionFactory({ id: 'testAction' });
   const context = {
     data: [
       {
-        field: { name: 'user.name', type: 'text' },
+        field: { name: 'user.name', type: 'string' },
         value: 'the value',
       },
     ],
@@ -44,6 +48,20 @@ describe('Default createCopyToClipboardActionFactory', () => {
   describe('isCompatible', () => {
     it('should return true if everything is okay', async () => {
       expect(await copyToClipboardAction.isCompatible(context)).toEqual(true);
+    });
+
+    it('should return false if Kbn type is unsupported', async () => {
+      expect(
+        await copyToClipboardAction.isCompatible({
+          ...context,
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, type: KBN_FIELD_TYPES.NUMBER_RANGE },
+            },
+          ],
+        })
+      ).toEqual(false);
     });
   });
 
@@ -110,6 +128,20 @@ describe('Default createCopyToClipboardActionFactory', () => {
       });
       expect(mockCopy).toHaveBeenCalledWith('user.name: true AND false AND true');
       expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
+    it('should notify the user when value type is unsupported', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: {},
+          },
+        ],
+      });
+      expect(mockCopy).not.toHaveBeenCalled();
+      expect(mockWarningToast).toHaveBeenCalled();
     });
   });
 });

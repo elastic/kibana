@@ -54,4 +54,8 @@ export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${Manag
 // Combined
 export type AppId = MonitoringAppId | IntegrationsAppId | ManagementAppId;
 export type LinkId = ManagementId;
-export type DeepLinkId = MonitoringDeepLinkId | IntegrationsDeepLinkId | ManagementDeepLinkId;
+export type DeepLinkId =
+  | AppId
+  | MonitoringDeepLinkId
+  | IntegrationsDeepLinkId
+  | ManagementDeepLinkId;

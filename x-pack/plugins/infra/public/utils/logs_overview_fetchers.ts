@@ -12,7 +12,7 @@ import {
   FetchDataParams,
   LogsFetchDataResponse,
 } from '@kbn/observability-plugin/public';
-import { DEFAULT_LOG_VIEW } from '../../common/log_views';
+import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
 import { TIMESTAMP_FIELD } from '../../common/constants';
 import { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
 
@@ -38,9 +38,11 @@ type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
 
 export function getLogsHasDataFetcher(getStartServices: InfraClientStartServicesAccessor) {
   return async () => {
-    const [, , { logViews }] = await getStartServices();
-    const resolvedLogView = await logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
-    const logViewStatus = await logViews.client.getResolvedLogViewStatus(resolvedLogView);
+    const [, { logsShared }] = await getStartServices();
+    const resolvedLogView = await logsShared.logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
+    const logViewStatus = await logsShared.logViews.client.getResolvedLogViewStatus(
+      resolvedLogView
+    );
 
     const hasData = logViewStatus.index === 'available';
     const indices = resolvedLogView.indices;
@@ -56,8 +58,8 @@ export function getLogsOverviewDataFetcher(
   getStartServices: InfraClientStartServicesAccessor
 ): FetchData<LogsFetchDataResponse> {
   return async (params) => {
-    const [, { data }, { logViews }] = await getStartServices();
-    const resolvedLogView = await logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
+    const [, { data, logsShared }] = await getStartServices();
+    const resolvedLogView = await logsShared.logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
 
     const { stats, series } = await fetchLogsOverview(
       {

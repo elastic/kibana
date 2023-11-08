@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '../../common/constants';
 import { DEFAULT_POLICY } from '../screens/fleet';
 import {
   ADD_POLICY_BTN,
@@ -12,6 +13,7 @@ import {
   CONFIRM_MODAL_BTN_SEL,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
   DATA_COLLECTION_SETUP_STEP,
+  DATE_PICKER_ABSOLUTE_TAB,
   DATE_PICKER_ABSOLUTE_TAB_SEL,
   TOAST_CLOSE_BTN,
   TOAST_CLOSE_BTN_SEL,
@@ -97,7 +99,7 @@ export function closeModalIfVisible() {
 export function closeDateTabIfVisible() {
   cy.get('body').then(($body) => {
     if ($body.find(DATE_PICKER_ABSOLUTE_TAB_SEL).length) {
-      cy.getBySel(DATE_PICKER_ABSOLUTE_TAB_SEL).clickOutside();
+      cy.getBySel(DATE_PICKER_ABSOLUTE_TAB).clickOutside();
     }
   });
 }
@@ -125,7 +127,7 @@ export const deleteIntegrations = async (integrationName: string) => {
     .then(() => {
       cy.request({
         url: `/api/fleet/package_policies/delete`,
-        headers: { 'kbn-xsrf': 'cypress' },
+        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
         method: 'POST',
       });
@@ -135,7 +137,7 @@ export const deleteIntegrations = async (integrationName: string) => {
 export const installPackageWithVersion = (integration: string, version: string) => {
   cy.request({
     url: `/api/fleet/epm/packages/${integration}-${version}`,
-    headers: { 'kbn-xsrf': 'cypress' },
+    headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': API_VERSIONS.public.v1 },
     body: '{ "force": true }',
     method: 'POST',
   });

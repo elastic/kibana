@@ -29,10 +29,13 @@ interface Props {
   matchedIndices$: Observable<MatchedIndicesSet>;
 }
 
-const requireTimestampOptionValidator = (options: TimestampOption[]): ValidationConfig => ({
-  validator: async ({ value }) => {
+export const requireTimestampOptionValidator = (
+  options: TimestampOption[]
+): ValidationConfig<any, string, { value?: any }> => ({
+  validator: async ({ value: selectedOption }) => {
     const isValueRequired = !!options.length;
-    if (isValueRequired && !value) {
+    const valueSelected = options.find((item) => item.fieldName === selectedOption?.value);
+    if (isValueRequired && (!selectedOption || !valueSelected)) {
       return {
         message: i18n.translate(
           'indexPatternEditor.requireTimestampOption.ValidationErrorMessage',

@@ -16,8 +16,8 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
+  formatNumber,
 } from '@elastic/eui';
-import { formatNumber } from '@elastic/eui/lib/services/format';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -16,6 +16,7 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddablePackageState,
+  EmbeddableAppContext,
 } from '@kbn/embeddable-plugin/public';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -55,9 +56,11 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardReturn) => boolean;
+  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
 
   isEmbeddedExternally?: boolean;
+
+  getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
 
 export class DashboardContainerFactoryDefinition
@@ -95,7 +98,7 @@ export class DashboardContainerFactoryDefinition
     parent?: Container,
     creationOptions?: DashboardCreationOptions,
     savedObjectId?: string
-  ): Promise<DashboardContainer | ErrorEmbeddable> => {
+  ): Promise<DashboardContainer | ErrorEmbeddable | undefined> => {
     const dashboardCreationStartTime = performance.now();
     const { createDashboard } = await import('./create/create_dashboard');
     try {

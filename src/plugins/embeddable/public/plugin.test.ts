@@ -25,6 +25,7 @@ test('can set custom embeddable factory provider', async () => {
   setup.setCustomEmbeddableFactoryProvider(customProvider);
   setup.registerEmbeddableFactory('test', {
     type: 'test',
+    latestVersion: '1.0.0',
     create: () => Promise.resolve(undefined),
     getDisplayName: () => 'Test',
     isEditable: () => Promise.resolve(true),
@@ -66,6 +67,7 @@ test('custom embeddable factory provider test for intercepting embeddable creati
   setup.setCustomEmbeddableFactoryProvider(customProvider);
   setup.registerEmbeddableFactory('test', {
     type: 'test',
+    latestVersion: '1.0.0',
     create: (input, parent) => Promise.resolve(new HelloWorldEmbeddable(input, parent)),
     getDisplayName: () => 'Test',
     isEditable: () => Promise.resolve(true),
@@ -98,6 +100,7 @@ describe('embeddable factory', () => {
     extract: jest.fn().mockImplementation((state) => ({ state, references: [] })),
     inject: jest.fn().mockImplementation((state) => state),
     telemetry: jest.fn().mockResolvedValue({}),
+    latestVersion: '7.11.0',
     migrations: { '7.11.0': jest.fn().mockImplementation((state) => state) },
   } as any;
   const embeddableState = {
@@ -109,6 +112,7 @@ describe('embeddable factory', () => {
   const containerEmbeddableFactoryId = 'CONTAINER';
   const containerEmbeddableFactory = {
     type: containerEmbeddableFactoryId,
+    latestVersion: '1.0.0',
     create: jest.fn(),
     getDisplayName: () => 'Container',
     isContainer: true,

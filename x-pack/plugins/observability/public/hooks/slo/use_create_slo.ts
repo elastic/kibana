@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { v1 as uuidv1 } from 'uuid';
-
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useCreateSlo() {
   const {
@@ -23,34 +25,42 @@ export function useCreateSlo() {
   } = useKibana().services;
   const queryClient = useQueryClient();
 
-  return useMutation(
-    ({ slo }: { slo: CreateSLOInput }) => {
+  return useMutation<
+    CreateSLOResponse,
+    ServerError,
+    { slo: CreateSLOInput },
+    { previousData?: FindSLOResponse; queryKey?: QueryKey }
+  >(
+    ['createSlo'],
+    ({ slo }) => {
       const body = JSON.stringify(slo);
       return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
     },
     {
-      mutationKey: ['createSlo'],
       onMutate: async ({ slo }) => {
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(sloKeys.lists());
+        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
 
-        const latestQueriesData = (
-          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) ?? []
-        ).at(0);
+        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
+          queryKey: sloKeys.lists(),
+          exact: false,
+        });
 
-        const [queryKey, data] = latestQueriesData || [];
+        const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
-        const newItem = { ...slo, id: uuidv1() };
+        const newItem = { ...slo, id: uuidv1(), summary: undefined };
+
         const optimisticUpdate = {
-          ...data,
-          results: [...(data?.results ?? []), newItem],
-          total: data?.total ? data.total + 1 : 1,
+          page: previousData?.page ?? 1,
+          perPage: previousData?.perPage ?? 25,
+          total: previousData?.total ? previousData.total + 1 : 1,
+          results: [...(previousData?.results ?? []), newItem],
         };
 
-        queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
+        if (queryKey) {
+          queryClient.setQueryData(queryKey, optimisticUpdate);
+        }
 
-        // Return a context object with the snapshotted value
-        return { previousSloList: data };
+        return { queryKey, previousData };
       },
       onSuccess: (_data, { slo }) => {
         toasts.addSuccess(
@@ -59,10 +69,15 @@ export function useCreateSlo() {
             values: { name: slo.name },
           })
         );
-        queryClient.invalidateQueries(sloKeys.lists());
+
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
       },
-      onError: (error, { slo }) => {
-        toasts.addError(new Error(String(error)), {
+      onError: (error, { slo }, context) => {
+        if (context?.previousData && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previousData);
+        }
+
+        toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.slo.create.errorNotification', {
             defaultMessage: 'Something went wrong while creating {name}',
             values: { name: slo.name },

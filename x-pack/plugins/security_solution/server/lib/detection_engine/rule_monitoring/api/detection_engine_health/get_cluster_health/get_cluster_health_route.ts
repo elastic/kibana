@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -14,11 +14,11 @@ import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type {
   GetClusterHealthRequest,
   GetClusterHealthResponse,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   GET_CLUSTER_HEALTH_URL,
   GetClusterHealthRequestBody,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { IDetectionEngineHealthClient } from '../../../logic/detection_engine_health';
 import { calculateHealthTimings } from '../health_timings';
 import { validateGetClusterHealthRequest } from './get_cluster_health_request';
@@ -26,55 +26,67 @@ import { validateGetClusterHealthRequest } from './get_cluster_health_request';
 /**
  * Get health overview of the whole cluster. Scope: all detection rules in all Kibana spaces.
  * Returns:
- * - health stats at the moment of the API call
+ * - health state at the moment of the API call
  * - health stats over a specified period of time ("health interval")
  * - health stats history within the same interval in the form of a histogram
  *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
  */
 export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: GET_CLUSTER_HEALTH_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      return handleClusterHealthRequest({
-        response,
-        resolveParameters: () => validateGetClusterHealthRequest({}),
-        resolveDependencies: async () => {
-          const ctx = await context.resolve(['securitySolution']);
-          const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
-          return { healthClient };
-        },
-      });
-    }
-  );
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {},
+      },
+      async (context, request, response) => {
+        return handleClusterHealthRequest({
+          response,
+          resolveParameters: () => validateGetClusterHealthRequest({}),
+          resolveDependencies: async () => {
+            const ctx = await context.resolve(['securitySolution']);
+            const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+            return { healthClient };
+          },
+        });
+      }
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: GET_CLUSTER_HEALTH_URL,
-      validate: {
-        body: buildRouteValidation(GetClusterHealthRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      return handleClusterHealthRequest({
-        response,
-        resolveParameters: () => validateGetClusterHealthRequest(request.body),
-        resolveDependencies: async () => {
-          const ctx = await context.resolve(['securitySolution']);
-          const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
-          return { healthClient };
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: buildRouteValidation(GetClusterHealthRequestBody),
+          },
         },
-      });
-    }
-  );
+      },
+      async (context, request, response): Promise<IKibanaResponse<GetClusterHealthResponse>> => {
+        return handleClusterHealthRequest({
+          response,
+          resolveParameters: () => validateGetClusterHealthRequest(request.body),
+          resolveDependencies: async () => {
+            const ctx = await context.resolve(['securitySolution']);
+            const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+            return { healthClient };
+          },
+        });
+      }
+    );
 };
 
 interface ClusterHealthRouteDependencies {
@@ -99,8 +111,6 @@ const handleClusterHealthRequest = async (args: HandleClusterHealthRequestArgs) 
     const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 
     const responseBody: GetClusterHealthResponse = {
-      // TODO: https://github.com/elastic/kibana/issues/125642 Implement the endpoint and remove the `message` property
-      message: 'Not implemented',
       timings: calculateHealthTimings(params.requestReceivedAt),
       parameters: clusterHealthParameters,
       health: {

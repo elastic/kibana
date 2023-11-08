@@ -17,9 +17,13 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
   handler: async ({ context, server, savedObjectsClient }): Promise<any> => {
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
 
-    return Promise.allSettled([
+    const [statusRule, tlsRule] = await Promise.all([
       defaultAlertService.updateStatusRule(),
       defaultAlertService.updateTlsRule(),
     ]);
+    return {
+      statusRule,
+      tlsRule,
+    };
   },
 });

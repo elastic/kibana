@@ -188,7 +188,18 @@ describe('mappingFromFieldMap', () => {
       dynamic: 'strict',
       properties: {
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
+        },
+        event: {
+          properties: {
+            action: {
+              type: 'keyword',
+            },
+            kind: {
+              type: 'keyword',
+            },
+          },
         },
         kibana: {
           properties: {
@@ -305,6 +316,9 @@ describe('mappingFromFieldMap', () => {
             },
           },
         },
+        tags: {
+          type: 'keyword',
+        },
       },
     });
     expect(mappingFromFieldMap(legacyAlertFieldMap)).toEqual({
@@ -355,8 +369,6 @@ describe('mappingFromFieldMap', () => {
           },
         },
         ecs: { properties: { version: { type: 'keyword' } } },
-        event: { properties: { action: { type: 'keyword' }, kind: { type: 'keyword' } } },
-        tags: { type: 'keyword' },
       },
     });
   });

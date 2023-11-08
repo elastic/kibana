@@ -1,0 +1,13 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+from logs-*
+| where process.name == "curl.exe"
+| stats bytes = sum(destination.bytes) by destination.address
+| eval kb =  bytes/1024
+| sort kb desc
+| limit 10
+| keep kb,destination.address
+```

@@ -18,6 +18,7 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -267,7 +268,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   if (chromeStyle === 'project' && !isVisible) {
     return (
-      <EuiButtonIcon
+      <EuiHeaderSectionItemButton
         aria-label={i18nStrings.showSearchAriaText}
         buttonRef={visibilityButtonRef}
         color="text"
@@ -317,6 +318,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
+      listProps={{
+        className: 'eui-yScroll',
+        css: css`
+          max-block-size: 75vh;
+        `,
+      }}
       searchProps={{
         autoFocus: chromeStyle === 'project',
         value: searchValue,

@@ -9,7 +9,6 @@
 export { FieldList, type FieldListProps } from './src/components/field_list';
 export { FieldListGrouped, type FieldListGroupedProps } from './src/components/field_list_grouped';
 export { FieldListFilters, type FieldListFiltersProps } from './src/components/field_list_filters';
-export { FieldIcon, type FieldIconProps, getFieldIconProps } from './src/components/field_icon';
 export { FieldItemButton, type FieldItemButtonProps } from './src/components/field_item_button';
 export type {
   FieldTopValuesBucketProps,
@@ -48,10 +47,10 @@ export type {
   AddFieldFilterHandler,
   FieldListGroups,
   FieldsGroupDetails,
-  FieldTypeKnown,
   FieldListItem,
   GetCustomFieldType,
   RenderFieldItemParams,
+  SearchMode,
 } from './src/types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
 
@@ -80,14 +79,13 @@ export {
 export {
   useQuerySubscriber,
   hasQuerySubscriberData,
+  getSearchMode,
   type QuerySubscriberResult,
   type QuerySubscriberParams,
 } from './src/hooks/use_query_subscriber';
 
 export {
-  getFieldTypeName,
-  getFieldTypeDescription,
-  KNOWN_FIELD_TYPES,
-  getFieldType,
-  getFieldIconType,
-} from './src/utils/field_types';
+  UnifiedFieldListSidebarContainer,
+  type UnifiedFieldListSidebarContainerApi,
+  type UnifiedFieldListSidebarContainerProps,
+} from './src/containers/unified_field_list_sidebar';

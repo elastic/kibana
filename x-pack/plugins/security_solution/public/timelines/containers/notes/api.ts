@@ -6,7 +6,7 @@
  */
 
 import { NOTE_URL } from '../../../../common/constants';
-import type { BareNote, Note } from '../../../../common/types/timeline/note/api';
+import type { BareNote, Note } from '../../../../common/api/timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistNote = async ({
@@ -30,6 +30,7 @@ export const persistNote = async ({
   const response = await KibanaServices.get().http.patch<Note[]>(NOTE_URL, {
     method: 'PATCH',
     body: requestBody,
+    version: '2023-10-31',
   });
   return response;
 };

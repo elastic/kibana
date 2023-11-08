@@ -40,7 +40,7 @@ import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/
 import {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
@@ -50,7 +50,11 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { layerTypes, Visualization } from '../..';
 import { set } from '@kbn/safer-lodash-set';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { getAnnotationsLayers } from './visualization_helpers';
+import {
+  getAnnotationsLayers,
+  isAnnotationsLayer,
+  isByReferenceAnnotationsLayer,
+} from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
@@ -217,8 +221,10 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
+              "colorMapping": undefined,
               "layerId": "l1",
               "layerType": "data",
+              "palette": undefined,
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
@@ -433,6 +439,11 @@ describe('xy_visualization', () => {
           annotations: [], // different from the persisted group
         },
         {
+          cachedMetadata: {
+            title: 'Local title',
+            description: '',
+            tags: [],
+          },
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
           persistanceType: 'linked',
@@ -474,6 +485,7 @@ describe('xy_visualization', () => {
         {
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          cachedMetadata: persistedAnnotationLayers[1].cachedMetadata,
           annotationGroupId: annotationGroupId2,
           ignoreGlobalFilters: persistedAnnotationLayers[1].ignoreGlobalFilters,
           annotations: persistedAnnotationLayers[1].annotations,
@@ -704,12 +716,14 @@ describe('xy_visualization', () => {
           },
         };
       });
+
       it('when there is no date histogram annotation layer is disabled', () => {
         const supportedAnnotationLayer = xyVisualization
           .getSupportedLayers(exampleState())
           .find((a) => a.type === 'annotations');
         expect(supportedAnnotationLayer?.disabled).toBeTruthy();
       });
+
       it('for data with date histogram annotation layer is enabled and calculates initial dimensions', () => {
         const supportedAnnotationLayer = xyVisualization
           .getSupportedLayers(exampleState(), frame)
@@ -3189,6 +3203,34 @@ describe('xy_visualization', () => {
     });
 
     describe('info', () => {
+      function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
+        return {
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              splitAccessor: undefined,
+              xAccessor: DATE_HISTORGRAM_COLUMN_ID,
+              accessors: ['b'],
+            },
+            {
+              layerId: 'layerId',
+              layerType: 'annotations',
+              indexPatternId: 'first',
+              annotations: [
+                {
+                  label: 'Event',
+                  id: '1',
+                  type: 'query',
+                  timeField: 'start_date',
+                  ...annotation,
+                },
+              ],
+            },
+          ],
+        } as XYState;
+      }
       function getFrameMock() {
         const datasourceMock = createMockDatasource('testDatasource');
         datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
@@ -3212,21 +3254,47 @@ describe('xy_visualization', () => {
         });
       }
 
-      it('should return an info message if annotation layer is ignoring the global filters', () => {
-        const initialState = exampleState();
+      it('should not return an info message if annotation layer is ignoring the global filters but contains only manual annotations', () => {
+        const initialState = createStateWithAnnotationProps({});
         const state: State = {
           ...initialState,
           layers: [
-            ...initialState.layers,
+            // replace the existing annotation layers with a new one
+            ...initialState.layers.filter(({ layerType }) => layerType !== layerTypes.ANNOTATIONS),
             {
               layerId: 'annotation',
               layerType: layerTypes.ANNOTATIONS,
-              annotations: [exampleAnnotation2],
+              annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'an3' }],
               ignoreGlobalFilters: true,
               indexPatternId: 'myIndexPattern',
             },
           ],
         };
+        expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() })).toHaveLength(0);
+      });
+
+      it("should return an info message if the annotation layer is ignoring filters and there's at least a query annotation", () => {
+        const state = createStateWithAnnotationProps({
+          filter: {
+            language: 'kuery',
+            query: 'agent.keyword: *',
+            type: 'kibana_query',
+          },
+          id: 'newColId',
+          key: {
+            type: 'point_in_time',
+          },
+          label: 'agent.keyword: *',
+          timeField: 'timestamp',
+          type: 'query',
+        });
+
+        const annotationLayer = state.layers.find(
+          ({ layerType }) => layerType === layerTypes.ANNOTATIONS
+        )! as XYAnnotationLayerConfig;
+        annotationLayer.ignoreGlobalFilters = true;
+        annotationLayer.annotations.push(exampleAnnotation2);
+
         expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() })).toContainEqual(
           expect.objectContaining({
             displayLocations: [{ id: 'embeddableBadge' }],
@@ -3237,6 +3305,83 @@ describe('xy_visualization', () => {
           })
         );
       });
+
+      it('should not return an info message if annotation layer is not ignoring the global filters', () => {
+        const state = createStateWithAnnotationProps({
+          filter: {
+            language: 'kuery',
+            query: 'agent.keyword: *',
+            type: 'kibana_query',
+          },
+          id: 'newColId',
+          key: {
+            type: 'point_in_time',
+          },
+          label: 'agent.keyword: *',
+          timeField: 'timestamp',
+          type: 'query',
+        });
+
+        const annotationLayer = state.layers.find(
+          ({ layerType }) => layerType === layerTypes.ANNOTATIONS
+        )! as XYAnnotationLayerConfig;
+        annotationLayer.ignoreGlobalFilters = false;
+        annotationLayer.annotations.push(exampleAnnotation2);
+        expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() })).toHaveLength(0);
+      });
+    });
+  });
+
+  describe('#cloneLayer', () => {
+    it('should turned cloned by-reference annotation groups into by-value', () => {
+      const state = exampleState();
+      const layer: XYByValueAnnotationLayerConfig = {
+        layerId: 'layer-id',
+        layerType: 'annotations',
+        indexPatternId: 'some-index-pattern',
+        ignoreGlobalFilters: false,
+        annotations: [
+          {
+            id: 'some-annotation-id',
+            type: 'manual',
+            key: {
+              type: 'point_in_time',
+              timestamp: 'timestamp',
+            },
+          } as PointInTimeEventAnnotationConfig,
+        ],
+      };
+
+      state.layers = [
+        {
+          ...layer,
+          annotationGroupId: 'some-group-id',
+          __lastSaved: {
+            ...layer,
+            title: '',
+            description: '',
+            tags: [],
+          },
+        },
+      ];
+
+      const newLayerId = 'new-layer-id';
+
+      const stateWithClonedLayer = xyVisualization.cloneLayer!(
+        state,
+        layer.layerId,
+        newLayerId,
+        new Map()
+      );
+
+      expect(
+        isAnnotationsLayer(stateWithClonedLayer.layers[0]) &&
+          isByReferenceAnnotationsLayer(stateWithClonedLayer.layers[0])
+      ).toBe(true);
+      expect(
+        isAnnotationsLayer(stateWithClonedLayer.layers[1]) &&
+          isByReferenceAnnotationsLayer(stateWithClonedLayer.layers[1])
+      ).toBe(false);
     });
   });
 
@@ -3558,6 +3703,12 @@ describe('xy_visualization', () => {
           layerId: 'layer-id',
           layerType: 'annotations',
           persistanceType: 'linked',
+          // stores "cached" or "local" metadata
+          cachedMetadata: {
+            description: 'some description',
+            tags: [],
+            title: 'My saved object title',
+          },
           annotations: layers[0].annotations,
           ignoreGlobalFilters: layers[0].ignoreGlobalFilters,
         },
@@ -3566,6 +3717,11 @@ describe('xy_visualization', () => {
           layerId: 'layer-id2',
           layerType: 'annotations',
           persistanceType: 'linked',
+          cachedMetadata: {
+            description: 'some description',
+            tags: [],
+            title: 'My saved object title',
+          },
           annotations: layers[1].annotations,
           ignoreGlobalFilters: layers[1].ignoreGlobalFilters,
         },
@@ -3576,7 +3732,7 @@ describe('xy_visualization', () => {
   describe('getSupportedActionsForLayer', () => {
     it('should return no actions for a data layer', () => {
       expect(
-        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn())
+        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn(), jest.fn())
       ).toHaveLength(0);
     });
 
@@ -3598,6 +3754,7 @@ describe('xy_visualization', () => {
               ...baseState,
               layers: [annotationLayer],
             },
+            jest.fn(),
             jest.fn()
           )
         ).toEqual([]);
@@ -3631,6 +3788,7 @@ describe('xy_visualization', () => {
                 layers: [annotationLayer],
               },
               jest.fn(),
+              jest.fn(),
               true
             )
           ).toMatchInlineSnapshot(`
@@ -3638,7 +3796,7 @@ describe('xy_visualization', () => {
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_saveToLibrary",
                 "description": "Saves annotation group as separate saved object",
-                "displayName": "Save annotation group",
+                "displayName": "Save to library",
                 "execute": [Function],
                 "icon": "save",
                 "isCompatible": true,
@@ -3679,6 +3837,7 @@ describe('xy_visualization', () => {
                   layers: [annotationLayer],
                 },
                 jest.fn(),
+                jest.fn(),
                 false
               )
               .some((action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary')
@@ -3700,6 +3859,7 @@ describe('xy_visualization', () => {
                     },
                   ],
                 },
+                jest.fn(),
                 jest.fn(),
                 false
               )
@@ -3897,6 +4057,54 @@ describe('xy_visualization', () => {
           annotationGroups
         )
       ).not.toThrowError();
+    });
+  });
+
+  describe('#getCustomRemoveLayerText', () => {
+    it('should NOT return custom text for the remove layer button if not by-reference', () => {
+      expect(xyVisualization.getCustomRemoveLayerText!('first', exampleState())).toBeUndefined();
+    });
+
+    it('should return custom text for the remove layer button if by-reference', () => {
+      const layerId = 'layer-id';
+
+      const commonProps = {
+        layerId,
+        layerType: 'annotations' as const,
+        indexPatternId: 'some-index-pattern',
+        ignoreGlobalFilters: false,
+        annotations: [
+          {
+            id: 'some-annotation-id',
+            type: 'manual',
+            key: {
+              type: 'point_in_time',
+              timestamp: 'timestamp',
+            },
+          } as PointInTimeEventAnnotationConfig,
+        ],
+      };
+
+      const layer: XYByReferenceAnnotationLayerConfig = {
+        ...commonProps,
+        annotationGroupId: 'some-group-id',
+        __lastSaved: {
+          ...commonProps,
+          title: 'My saved object title',
+          description: 'some description',
+          tags: [],
+        },
+      };
+      expect(
+        xyVisualization.getCustomRemoveLayerText!(layerId, {
+          ...exampleState(),
+          layers: [layer],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "title": "Delete \\"My saved object title\\"",
+        }
+      `);
     });
   });
 });

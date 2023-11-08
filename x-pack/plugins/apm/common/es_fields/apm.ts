@@ -101,6 +101,7 @@ export const PARENT_ID = 'parent.id';
 
 export const ERROR_ID = 'error.id';
 export const ERROR_GROUP_ID = 'error.grouping_key';
+export const ERROR_GROUP_NAME = 'error.grouping_name';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';
 export const ERROR_LOG_MESSAGE = 'error.log.message';

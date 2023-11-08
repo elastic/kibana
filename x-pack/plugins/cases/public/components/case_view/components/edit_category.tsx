@@ -95,9 +95,7 @@ export const EditCategory = React.memo(({ isLoading, onSubmit, category }: EditC
     const { isValid, data } = await formState.submit();
 
     if (isValid) {
-      const newCategory = data.category != null ? data.category : null;
-
-      onSubmit(newCategory);
+      onSubmit(data.category?.trim() ?? null);
     }
 
     setIsEditCategory(false);

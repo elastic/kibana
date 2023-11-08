@@ -83,6 +83,7 @@ export const spacesManagementApp = Object.freeze({
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
+              allowFeatureVisibility={config.allowFeatureVisibility}
             />
           );
         };
@@ -108,6 +109,7 @@ export const spacesManagementApp = Object.freeze({
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
               history={history}
+              allowFeatureVisibility={config.allowFeatureVisibility}
             />
           );
         };

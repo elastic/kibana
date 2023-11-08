@@ -4,8 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
@@ -48,6 +52,7 @@ export const registerSyntheticsStatusCheckRule = (
 
   return createLifecycleRuleType({
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
     name: STATUS_RULE_NAME,
     validate: {
@@ -90,7 +95,7 @@ export const registerSyntheticsStatusCheckRule = (
       );
 
       Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
-        const locationId = statusRule.getLocationId(ping.observer?.geo?.name!) ?? '';
+        const locationId = ping.observer.name ?? '';
         const alertId = idWithLocation;
         const monitorSummary = getMonitorSummary(
           ping,
@@ -155,5 +160,7 @@ export const registerSyntheticsStatusCheckRule = (
       };
     },
     alerts: UptimeRuleTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 };

@@ -8,9 +8,13 @@
 
 import expect from '@kbn/expect';
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { getErrorCodeFromErrorReason } from '@kbn/data-view-field-editor-plugin/public/lib/runtime_field_validation';
+import {
+  FIELD_PREVIEW_PATH,
+  INITIAL_REST_VERSION,
+} from '@kbn/data-view-field-editor-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { API_BASE_PATH } from './constants';
 
 const INDEX_NAME = 'api-integration-test-field-preview';
 
@@ -83,7 +87,8 @@ export default function ({ getService }: FtrProviderContext) {
           };
 
           const { body: response } = await supertest
-            .post(`${API_BASE_PATH}/field_preview`)
+            .post(FIELD_PREVIEW_PATH)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
             .send(payload)
             .set('kbn-xsrf', 'xxx')
             .expect(200);
@@ -96,7 +101,8 @@ export default function ({ getService }: FtrProviderContext) {
     describe('payload validation', () => {
       it('should require a script', async () => {
         await supertest
-          .post(`${API_BASE_PATH}/field_preview`)
+          .post(FIELD_PREVIEW_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             context: 'keyword_field',
             index: INDEX_NAME,
@@ -107,7 +113,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should require a context', async () => {
         await supertest
-          .post(`${API_BASE_PATH}/field_preview`)
+          .post(FIELD_PREVIEW_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             script: { source: 'emit("hello")' },
             index: INDEX_NAME,
@@ -118,7 +125,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should require an index', async () => {
         await supertest
-          .post(`${API_BASE_PATH}/field_preview`)
+          .post(FIELD_PREVIEW_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             script: { source: 'emit("hello")' },
             context: 'keyword_field',
@@ -134,7 +142,8 @@ export default function ({ getService }: FtrProviderContext) {
       // If this test fail we'll need to update the "getErrorCodeFromErrorReason()" handler
       it('should detect a script casting error', async () => {
         const { body: response } = await supertest
-          .post(`${API_BASE_PATH}/field_preview`)
+          .post(FIELD_PREVIEW_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             script: { source: 'emit(123)' }, // We send a long but the type is "keyword"
             context: 'keyword_field',

@@ -1,34 +1,70 @@
 {
   "cat.ml_data_frame_analytics": {
     "url_params": {
+      "format": [
+        "text"
+      ],
+      "h": [
+        "assignment_explanation",
+        "create_time",
+        "description",
+        "dest_index",
+        "failure_reason",
+        "id",
+        "model_memory_limit",
+        "node.address",
+        "node.ephemeral_id",
+        "node.id",
+        "node.name",
+        "progress",
+        "source_index",
+        "state",
+        "type",
+        "version"
+      ],
+      "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "s": [
+        "assignment_explanation",
+        "create_time",
+        "description",
+        "dest_index",
+        "failure_reason",
+        "id",
+        "model_memory_limit",
+        "node.address",
+        "node.ephemeral_id",
+        "node.id",
+        "node.name",
+        "progress",
+        "source_index",
+        "state",
+        "type",
+        "version"
+      ],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
       "bytes": [
         "b",
-        "k",
         "kb",
-        "m",
         "mb",
-        "g",
         "gb",
-        "t",
         "tb",
-        "p",
         "pb"
       ],
-      "format": "",
-      "h": [],
-      "help": "__flag__",
-      "s": [],
       "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
-      ],
-      "v": "__flag__"
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -37,6 +73,10 @@
       "_cat/ml/data_frame/analytics",
       "_cat/ml/data_frame/analytics/{id}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/cat-dfanalytics.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-dfanalytics.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

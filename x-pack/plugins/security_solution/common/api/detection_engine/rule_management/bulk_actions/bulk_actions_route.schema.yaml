@@ -1,0 +1,462 @@
+openapi: 3.0.0
+info:
+  title: Bulk Actions API endpoint
+  version: 2023-10-31
+paths:
+  /api/detection_engine/rules/_bulk_action:
+    post:
+      operationId: PerformBulkAction
+      x-codegen-enabled: false
+      summary: Applies a bulk action to multiple rules
+      description: The bulk action is applied to all rules that match the filter or to the list of rules by their IDs.
+      tags:
+        - Bulk API
+      parameters:
+        - name: dry_run
+          in: query
+          description: Enables dry run mode for the request call.
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformBulkActionRequest'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BulkEditActionResponse'
+
+components:
+  x-codegen-enabled: false
+  schemas:
+    BulkEditSkipReason:
+      type: string
+      enum:
+        - RULE_NOT_MODIFIED
+
+    BulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        skip_reason:
+          $ref: '#/components/schemas/BulkEditSkipReason'
+      required:
+        - id
+        - skip_reason
+
+    RuleDetailsInError:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+
+    BulkActionsDryRunErrCode:
+      type: string
+
+    NormalizedRuleError:
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          type: integer
+        err_code:
+          $ref: '#/components/schemas/BulkActionsDryRunErrCode'
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleDetailsInError'
+      required:
+        - message
+        - status_code
+        - rules
+
+    BulkEditActionResults:
+      type: object
+      properties:
+        updated:
+          type: array
+          items:
+            $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+        created:
+          type: array
+          items:
+            $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+        deleted:
+          type: array
+          items:
+            $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkActionSkipResult'
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+
+    BulkEditActionSummary:
+      type: object
+      properties:
+        failed:
+          type: integer
+        skipped:
+          type: integer
+        succeeded:
+          type: integer
+        total:
+          type: integer
+      required:
+        - failed
+        - skipped
+        - succeeded
+        - total
+
+    BulkEditActionSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        rules_count:
+          type: integer
+        attributes:
+          type: object
+          properties:
+            results:
+              $ref: '#/components/schemas/BulkEditActionResults'
+            summary:
+              $ref: '#/components/schemas/BulkEditActionSummary'
+          required:
+            - results
+            - summary
+      required:
+        - success
+        - rules_count
+        - attributes
+
+    BulkEditActionErrorResponse:
+      type: object
+      properties:
+        status_code:
+          type: integer
+        message:
+          type: string
+        attributes:
+          type: object
+          properties:
+            results:
+              $ref: '#/components/schemas/BulkEditActionResults'
+            summary:
+              $ref: '#/components/schemas/BulkEditActionSummary'
+            errors:
+              type: array
+              items:
+                $ref: '#/components/schemas/NormalizedRuleError'
+          required:
+            - results
+            - summary
+      required:
+        - status_code
+        - message
+        - attributes
+
+    BulkEditActionResponse:
+      oneOf:
+        - $ref: '#/components/schemas/BulkEditActionSuccessResponse'
+        - $ref: '#/components/schemas/BulkEditActionErrorResponse'
+
+    BulkActionBase:
+      oneOf:
+        - type: object
+          properties:
+            query:
+              type: string
+              description: Query to filter rules
+          required:
+            - query
+          additionalProperties: false
+
+        - type: object
+          properties:
+            ids:
+              type: array
+              description: Array of rule IDs
+              minItems: 1
+              items:
+                type: string
+          additionalProperties: false
+
+    BulkDeleteRules:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [delete]
+          required:
+            - action
+
+    BulkDisableRules:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [disable]
+          required:
+            - action
+
+    BulkEnableRules:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [enable]
+          required:
+            - action
+
+    BulkExportRules:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [export]
+          required:
+            - action
+
+    BulkDuplicateRules:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [duplicate]
+            duplicate:
+              type: object
+              properties:
+                include_exceptions:
+                  type: boolean
+                  description: Whether to copy exceptions from the original rule
+                include_expired_exceptions:
+                  type: boolean
+                  description: Whether to copy expired exceptions from the original rule
+          required:
+            - action
+
+    RuleActionSummary:
+      type: boolean
+      description: Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
+
+    RuleActionNotifyWhen:
+      type: string
+      description: "The condition for throttling the notification: 'onActionGroupChange', 'onActiveAlert',  or 'onThrottleInterval'"
+      enum:
+        - onActionGroupChange
+        - onActiveAlert
+        - onThrottleInterval
+
+    RuleActionThrottle:
+      type: string
+      description: "The condition for throttling the notification: 'rule', 'no_actions', or time duration"
+
+    RuleActionFrequency:
+      type: object
+      properties:
+        summary:
+          $ref: '#/components/schemas/RuleActionSummary'
+        notifyWhen:
+          $ref: '#/components/schemas/RuleActionNotifyWhen'
+        throttle:
+          $ref: '#/components/schemas/RuleActionThrottle'
+          nullable: true
+
+    BulkActionType:
+      type: string
+      enum:
+        - enable
+        - disable
+        - export
+        - delete
+        - duplicate
+        - edit
+
+    BulkActionEditType:
+      type: string
+      enum:
+        - add_tags
+        - delete_tags
+        - set_tags
+        - add_index_patterns
+        - delete_index_patterns
+        - set_index_patterns
+        - set_timeline
+        - add_rule_actions
+        - set_rule_actions
+        - set_schedule
+
+    BulkActionEditPayloadRuleActions:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [add_rule_actions, set_rule_actions]
+        value:
+          type: object
+          properties:
+            throttle:
+              $ref: '#/components/schemas/RuleActionThrottle'
+            actions:
+              type: array
+              items:
+                type: object
+                properties:
+                  group:
+                    type: string
+                    description: Action group
+                  id:
+                    type: string
+                    description: Action ID
+                  params:
+                    type: object
+                    description: Action parameters
+                  frequency:
+                    $ref: '#/components/schemas/RuleActionFrequency'
+                    description: Action frequency
+                required:
+                  - group
+                  - id
+                  - params
+          required:
+            - actions
+      required:
+        - type
+        - value
+
+    BulkActionEditPayloadSchedule:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [set_schedule]
+        value:
+          type: object
+          properties:
+            interval:
+              type: string
+              description: Interval in which the rule is executed
+            lookback:
+              type: string
+              description: Lookback time for the rule
+          required:
+            - interval
+            - lookback
+
+    BulkActionEditPayloadIndexPatterns:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - add_index_patterns
+            - delete_index_patterns
+            - set_index_patterns
+        value:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/IndexPatternArray'
+        overwrite_data_views:
+          type: boolean
+      required:
+        - type
+        - value
+
+    BulkActionEditPayloadTags:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - add_tags
+            - delete_tags
+            - set_tags
+        value:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleTagArray'
+      required:
+        - type
+        - value
+
+    BulkActionEditPayloadTimeline:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - set_timeline
+        value:
+          type: object
+          properties:
+            timeline_id:
+              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimelineTemplateId'
+            timeline_title:
+              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/TimelineTemplateTitle'
+          required:
+            - timeline_id
+            - timeline_title
+      required:
+        - type
+        - value
+
+    BulkActionEditPayload:
+      anyOf:
+        - $ref: '#/components/schemas/BulkActionEditPayloadTags'
+        - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
+        - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
+        - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
+
+    BulkEditRules:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              x-type: literal
+              enum: [edit]
+            edit:
+              type: array
+              description: Array of objects containing the edit operations
+              items:
+                $ref: '#/components/schemas/BulkActionEditPayload'
+          required:
+            - action
+            - rule
+
+    PerformBulkActionRequest:
+      oneOf:
+        - $ref: '#/components/schemas/BulkDeleteRules'
+        - $ref: '#/components/schemas/BulkDisableRules'
+        - $ref: '#/components/schemas/BulkEnableRules'
+        - $ref: '#/components/schemas/BulkExportRules'
+        - $ref: '#/components/schemas/BulkDuplicateRules'
+        - $ref: '#/components/schemas/BulkEditRules'

@@ -6,10 +6,9 @@
  */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { assertLogContains, forceSyncLogFile } from '../test_utils';
+import { readLogFile, assertLogContains } from '../test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
   const supertest = getService('supertest');
 
   describe('Log Correlation', () => {
@@ -24,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response2.body.traceId).not.to.be(response1.body.traceId);
 
-      await forceSyncLogFile();
+      const logs = await readLogFile();
 
       let responseTraceId: string | undefined;
       await assertLogContains({
@@ -41,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
           return false;
         },
-        retry,
+        logs,
       });
 
       expect(responseTraceId).to.be.a('string');
@@ -56,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
               record.message?.includes('HEAD /')
           ),
 
-        retry,
+        logs,
       });
     });
   });

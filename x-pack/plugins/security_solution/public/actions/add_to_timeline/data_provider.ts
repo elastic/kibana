@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CellActionFieldValue } from '@kbn/cell-actions/src/types';
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import type { Serializable } from '@kbn/utility-types';
 
@@ -61,7 +60,7 @@ export interface CreateDataProviderParams {
   field?: string;
   fieldFormat?: string;
   fieldType?: string;
-  values: CellActionFieldValue;
+  values: string | string[] | number | number[] | boolean | boolean[];
   sourceParamType?: Serializable;
   negate?: boolean;
 }
@@ -78,7 +77,11 @@ export const createDataProviders = ({
 }: CreateDataProviderParams) => {
   if (field == null) return null;
 
-  const arrayValues = Array.isArray(values) ? (values.length > 0 ? values : [null]) : [values];
+  const arrayValues: Array<string | number | boolean | null> = Array.isArray(values)
+    ? values.length > 0
+      ? values
+      : [null]
+    : [values];
 
   return arrayValues.reduce<DataProvider[]>((dataProviders, rawValue, index) => {
     let id: string = '';

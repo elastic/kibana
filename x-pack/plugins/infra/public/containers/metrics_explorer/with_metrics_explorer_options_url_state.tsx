@@ -10,11 +10,11 @@ import React, { useMemo } from 'react';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { UrlStateContainer } from '../../utils/url_state';
 import {
-  MetricsExplorerOptions,
+  type MetricsExplorerOptions,
+  type MetricsExplorerTimeOptions,
+  type MetricsExplorerChartOptions,
   useMetricsExplorerOptionsContainerContext,
-  MetricsExplorerTimeOptions,
-  MetricsExplorerChartOptions,
-  metricExplorerOptionsRT,
+  metricsExplorerOptionsRT,
   metricsExplorerChartOptionsRT,
   metricsExplorerTimeOptionsRT,
 } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
@@ -73,7 +73,7 @@ export const WithMetricsExplorerOptionsUrlState = () => {
 };
 
 function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOptions {
-  const result = metricExplorerOptionsRT.decode(subject);
+  const result = metricsExplorerOptionsRT.decode(subject);
 
   try {
     ThrowReporter.report(result);

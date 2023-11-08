@@ -12,8 +12,10 @@ import { Client } from '@elastic/elasticsearch';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
+  METADATA_CURRENT_TRANSFORM_V2,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
+  METADATA_UNITED_TRANSFORM_V2,
   HOST_METADATA_GET_ROUTE,
   METADATA_DATASTREAM,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
@@ -22,6 +24,8 @@ import {
   IndexedHostsAndAlertsResponse,
   indexHostsAndAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/endpoint/utils/package';
+import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/package_v2';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
@@ -116,11 +120,23 @@ export class EndpointTestResources extends FtrService {
       customIndexFn,
     } = options;
 
+    let currentTransformName = metadataTransformPrefix;
+    let unitedTransformName = METADATA_UNITED_TRANSFORM;
+    if (waitUntilTransformed && customIndexFn) {
+      const endpointPackage = await getEndpointPackageInfo(this.kbnClient);
+      const isV2 = isEndpointPackageV2(endpointPackage.version);
+
+      if (isV2) {
+        currentTransformName = METADATA_CURRENT_TRANSFORM_V2;
+        unitedTransformName = METADATA_UNITED_TRANSFORM_V2;
+      }
+    }
+
     if (waitUntilTransformed && customIndexFn) {
       // need this before indexing docs so that the united transform doesn't
       // create a checkpoint with a timestamp after the doc timestamps
-      await this.stopTransform(metadataTransformPrefix);
-      await this.stopTransform(METADATA_UNITED_TRANSFORM);
+      await this.stopTransform(currentTransformName);
+      await this.stopTransform(unitedTransformName);
     }
 
     // load data into the system
@@ -139,14 +155,18 @@ export class EndpointTestResources extends FtrService {
           alertsPerHost,
           enableFleetIntegration,
           undefined,
-          CurrentKibanaVersionDocGenerator
+          CurrentKibanaVersionDocGenerator,
+          undefined,
+          undefined,
+          undefined,
+          this.log
         );
 
     if (waitUntilTransformed && customIndexFn) {
-      await this.startTransform(metadataTransformPrefix);
+      await this.startTransform(currentTransformName);
       const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
       await this.waitForEndpoints(metadataIds, waitTimeout);
-      await this.startTransform(METADATA_UNITED_TRANSFORM);
+      await this.startTransform(unitedTransformName);
     }
 
     if (waitUntilTransformed) {
@@ -272,7 +292,7 @@ export class EndpointTestResources extends FtrService {
   async installOrUpgradeEndpointFleetPackage(): ReturnType<
     typeof installOrUpgradeEndpointFleetPackage
   > {
-    return installOrUpgradeEndpointFleetPackage(this.kbnClient);
+    return installOrUpgradeEndpointFleetPackage(this.kbnClient, this.log);
   }
 
   /**
@@ -337,5 +357,10 @@ export class EndpointTestResources extends FtrService {
     this.log.info(`Endpoint metadata doc update done: \n${JSON.stringify(response)}`);
 
     return response;
+  }
+
+  async isEndpointPackageV2(): Promise<boolean> {
+    const endpointPackage = await getEndpointPackageInfo(this.kbnClient);
+    return isEndpointPackageV2(endpointPackage.version);
   }
 }

@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const SNOOZE_SUCCESS_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess',
   {
-    defaultMessage: 'Rule successfully snoozed',
+    defaultMessage: 'Rules notification successfully snoozed',
   }
 );
 
 export const UNSNOOZE_SUCCESS_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.unsnoozeSuccess',
   {
-    defaultMessage: 'Rule successfully unsnoozed',
+    defaultMessage: 'Rules notification successfully unsnoozed',
   }
 );
 

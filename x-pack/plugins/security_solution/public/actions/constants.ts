@@ -10,6 +10,14 @@ export enum SecurityCellActionsTrigger {
   ALERTS_COUNT = 'security-alertsCount-cellActions',
 }
 
+export enum EsqlInTimelineTrigger {
+  HISTOGRAM_TRIGGER = 'security-discoverInTimeline-histogramTrigger',
+}
+
+export enum EsqlInTimelineAction {
+  VIS_FILTER_ACTION = 'security-discoverInTimeline-visFilterAction',
+}
+
 export enum SecurityCellActionType {
   FILTER = 'security-cellAction-type-filter',
   COPY = 'security-cellAction-type-copyToClipboard',

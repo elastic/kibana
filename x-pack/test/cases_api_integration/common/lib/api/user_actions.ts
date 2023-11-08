@@ -6,17 +6,19 @@
  */
 
 import {
-  UserActionFindResponse,
   getCaseFindUserActionsUrl,
-  UserActionFindRequest,
   getCaseUserActionUrl,
-  CaseUserActionDeprecatedResponse,
-  CaseUserActionsDeprecatedResponse,
   getCaseUserActionStatsUrl,
-  CaseUserActionStatsResponse,
-  GetCaseUsersResponse,
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
+import {
+  CaseUserActionDeprecatedResponse,
+  CaseUserActionsDeprecatedResponse,
+  CaseUserActionStatsResponse,
+  GetCaseUsersResponse,
+  UserActionFindRequest,
+  UserActionFindResponse,
+} from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 

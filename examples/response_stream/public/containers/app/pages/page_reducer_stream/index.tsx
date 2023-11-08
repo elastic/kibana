@@ -21,14 +21,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { useFetchStream } from '@kbn/aiops-utils';
+import { useFetchStream } from '@kbn/ml-response-stream/client';
 
-import { ApiReducerStream } from '../../../../../common/api';
 import {
   initialState,
   resetStream,
   reducerStreamReducer,
 } from '../../../../../common/api/reducer_stream/reducer';
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
 
 import { Page } from '../../../../components/page';
 
@@ -41,18 +41,15 @@ export const PageReducerStream: FC = () => {
     core: { http, notifications },
   } = useDeps();
 
-  const basePath = http?.basePath.get() ?? '';
-
   const [simulateErrors, setSimulateErrors] = useState(false);
   const [compressResponse, setCompressResponse] = useState(true);
+  const [flushFix, setFlushFix] = useState(false);
 
-  const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream<
-    ApiReducerStream,
-    typeof basePath
-  >(
-    `${basePath}/internal/response_stream/reducer_stream`,
+  const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream(
+    http,
+    RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
     '1',
-    { compressResponse, simulateErrors },
+    { compressResponse, flushFix, simulateErrors },
     { reducer: reducerStreamReducer, initialState }
   );
 
@@ -151,6 +148,13 @@ export const PageReducerStream: FC = () => {
           label="Toggle compression setting for response stream."
           checked={compressResponse}
           onChange={(e) => setCompressResponse(!compressResponse)}
+          compressed
+        />
+        <EuiCheckbox
+          id="responseStreamFlushFixCheckbox"
+          label="Toggle flushFix setting for response stream."
+          checked={flushFix}
+          onChange={(e) => setFlushFix(!flushFix)}
           compressed
         />
       </EuiText>

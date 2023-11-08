@@ -29,7 +29,7 @@ import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';
 import { createExternalService } from './service';
 
-const supportedSubActions = ['getChannels', 'postMessage'];
+const supportedSubActions = ['getAllowedChannels', 'validChannelId', 'postMessage'];
 
 export const getConnectorType = (): SlackApiConnectorType => {
   return {
@@ -105,16 +105,16 @@ const slackApiExecutor = async ({
 
   const externalService = createExternalService(
     {
-      config,
       secrets,
     },
     logger,
     configurationUtilities
   );
 
-  if (subAction === 'getChannels') {
-    return await api.getChannels({
+  if (subAction === 'validChannelId') {
+    return await api.validChannelId({
       externalService,
+      params: params.subActionParams,
     });
   }
 

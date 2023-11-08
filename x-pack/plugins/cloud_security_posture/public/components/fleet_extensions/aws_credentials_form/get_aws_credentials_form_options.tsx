@@ -10,6 +10,7 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { AwsCredentialsType } from '../../../../common/types';
 
 const AssumeRoleDescription = (
   <div>
@@ -69,13 +70,6 @@ const AWS_FIELD_LABEL = {
   }),
 };
 
-export type AwsCredentialsType =
-  | 'assume_role'
-  | 'direct_access_keys'
-  | 'temporary_keys'
-  | 'shared_credentials'
-  | 'cloud_formation';
-
 export type AwsCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
 
 export interface AwsOptionValue {
@@ -103,10 +97,12 @@ export const getAwsCredentialsFormManualOptions = (): Array<{
   value: AwsCredentialsType;
   text: string;
 }> => {
-  return Object.entries(getAwsCredentialsFormOptions()).map(([key, value]) => ({
-    value: key as AwsCredentialsType,
-    text: value.label,
-  }));
+  return Object.entries(getAwsCredentialsFormOptions())
+    .map(([key, value]) => ({
+      value: key as AwsCredentialsType,
+      text: value.label,
+    }))
+    .filter(({ value }) => value !== 'cloud_formation');
 };
 
 export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE = 'assume_role';

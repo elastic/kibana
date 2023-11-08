@@ -8,10 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
-import {
-  aws as awsRequiredMetrics,
-  nginx as nginxRequireMetrics,
-} from '../shared/metrics/required_metrics';
 
 export { hostSnapshotMetricTypes } from './metrics';
 
@@ -38,19 +34,5 @@ export const host: InventoryModel = {
     cloudProvider: 'cloud.provider',
   },
   metrics,
-  requiredMetrics: [
-    'hostSystemOverview',
-    'hostCpuUsage',
-    'hostLoad',
-    'hostMemoryUsage',
-    'hostNetworkTraffic',
-    'hostK8sOverview',
-    'hostK8sCpuCap',
-    'hostK8sMemoryCap',
-    'hostK8sDiskCap',
-    'hostK8sPodCap',
-    ...awsRequiredMetrics,
-    ...nginxRequireMetrics,
-  ],
   tooltipMetrics: ['cpu', 'memory', 'tx', 'rx'],
 };

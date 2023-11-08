@@ -7,13 +7,13 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
 import type {
-  AttributesTypeAlerts,
-  AttributesTypeUser,
-  CommentAttributesWithoutRefs,
-  ExternalReferenceWithoutRefs,
-} from '../../../common/api';
-import { ExternalReferenceStorageType, CommentType } from '../../../common/api';
+  UserCommentAttachmentAttributes,
+  AlertAttachmentAttributes,
+  AttachmentAttributesWithoutRefs,
+  ExternalReferenceWithoutRefsAttachmentPayload,
+} from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -33,15 +33,17 @@ export const createErrorSO = () =>
     },
     references: [],
     // casting because this complains about attributes not being there
-  } as unknown as SavedObject<AttributesTypeUser>);
+  } as unknown as SavedObject<UserCommentAttachmentAttributes>);
 
-export const createUserAttachment = (attributes?: object): SavedObject<AttributesTypeUser> => {
+export const createUserAttachment = (
+  attributes?: object
+): SavedObject<UserCommentAttachmentAttributes> => {
   return {
     id: '1',
     type: CASE_COMMENT_SAVED_OBJECT,
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
-      type: CommentType.user as const,
+      type: AttachmentType.user as const,
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',
@@ -63,7 +65,9 @@ export const createUserAttachment = (attributes?: object): SavedObject<Attribute
   };
 };
 
-export const createAlertAttachment = (attributes?: object): SavedObject<AttributesTypeAlerts> => {
+export const createAlertAttachment = (
+  attributes?: object
+): SavedObject<AlertAttachmentAttributes> => {
   return {
     id: '1',
     type: CASE_COMMENT_SAVED_OBJECT,
@@ -74,7 +78,7 @@ export const createAlertAttachment = (attributes?: object): SavedObject<Attribut
         id: 'ruleid',
         name: 'name',
       },
-      type: CommentType.alert as const,
+      type: AttachmentType.alert as const,
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',
@@ -107,9 +111,9 @@ const fileAttachmentMetadata = () => ({
   files: [fileMetadata()],
 });
 
-const getFilesAttachmentReq = (): ExternalReferenceWithoutRefs => {
+const getFilesAttachmentReq = (): ExternalReferenceWithoutRefsAttachmentPayload => {
   return {
-    type: CommentType.externalReference,
+    type: AttachmentType.externalReference,
     owner: 'securitySolutionFixture',
     externalReferenceStorage: {
       type: ExternalReferenceStorageType.savedObject as const,
@@ -122,7 +126,7 @@ const getFilesAttachmentReq = (): ExternalReferenceWithoutRefs => {
 
 export const createFileAttachment = (
   attributes?: object
-): SavedObject<CommentAttributesWithoutRefs> => {
+): SavedObject<AttachmentAttributesWithoutRefs> => {
   return {
     id: '1',
     type: CASE_COMMENT_SAVED_OBJECT,

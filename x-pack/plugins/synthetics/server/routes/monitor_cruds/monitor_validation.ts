@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isLeft } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import {
   BrowserFieldsCodec,
   ProjectMonitorCodec,
@@ -22,7 +23,6 @@ import {
   TCPFieldsCodec,
   SyntheticsMonitor,
   Locations,
-  PrivateLocation,
 } from '../../../common/runtime_types';
 
 import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../common/constants/monitor_defaults';
@@ -111,7 +111,7 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
 export function validateProjectMonitor(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: PrivateLocation[]
+  privateLocations: PrivateLocationAttributes[]
 ): ValidationResult {
   const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
@@ -143,7 +143,7 @@ export function validateProjectMonitor(
 export function validateLocation(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: PrivateLocation[]
+  privateLocations: PrivateLocationAttributes[]
 ) {
   const hasPublicLocationsConfigured = (monitorFields.locations || []).length > 0;
   const hasPrivateLocationsConfigured = (monitorFields.privateLocations || []).length > 0;

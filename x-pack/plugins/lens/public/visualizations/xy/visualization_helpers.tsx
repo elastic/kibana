@@ -161,7 +161,7 @@ export const isPersistedByValueAnnotationsLayer = (
   (layer.persistanceType === 'byValue' || !layer.persistanceType);
 
 export const isByReferenceAnnotationsLayer = (
-  layer: XYAnnotationLayerConfig
+  layer: XYLayerConfig
 ): layer is XYByReferenceAnnotationLayerConfig =>
   'annotationGroupId' in layer && '__lastSaved' in layer;
 
@@ -177,6 +177,23 @@ export const isPersistedLinkedByValueAnnotationsLayer = (
 
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
+
+export const getGroupMetadataFromAnnotationLayer = (
+  layer: XYAnnotationLayerConfig
+): { title: string; description: string; tags: string[] } => {
+  if (layer.cachedMetadata) {
+    return layer.cachedMetadata;
+  }
+  if (isByReferenceAnnotationsLayer(layer)) {
+    const { title, description, tags } = layer.__lastSaved;
+    return { title, description, tags };
+  }
+  return { title: '', description: '', tags: [] };
+};
+
+export const getAnnotationLayerTitle = (layer: XYAnnotationLayerConfig): string => {
+  return getGroupMetadataFromAnnotationLayer(layer).title;
+};
 
 export interface LayerTypeToLayer {
   [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;

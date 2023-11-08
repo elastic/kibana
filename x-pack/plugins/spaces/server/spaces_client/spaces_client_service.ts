@@ -14,9 +14,9 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 
-import type { ConfigType } from '../config';
 import type { ISpacesClient } from './spaces_client';
 import { SpacesClient } from './spaces_client';
+import type { ConfigType } from '../config';
 
 /**
  * For consumption by the security plugin only.

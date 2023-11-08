@@ -22,7 +22,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
   SEARCH_ON_PAGE_LOAD_SETTING,
-} from '../../common';
+} from '@kbn/discover-utils';
 import {
   UI_SETTINGS,
   calculateBounds,
@@ -92,15 +92,55 @@ export function createDiscoverServicesMock(): DiscoverServices {
     return searchSource;
   });
 
+  const corePluginMock = coreMock.createStart();
+
+  const uiSettingsMock: Partial<typeof corePluginMock.uiSettings> = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    get: jest.fn((key: string): any => {
+      if (key === 'fields:popularLimit') {
+        return 5;
+      } else if (key === DEFAULT_COLUMNS_SETTING) {
+        return ['default_column'];
+      } else if (key === UI_SETTINGS.META_FIELDS) {
+        return [];
+      } else if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
+        return false;
+      } else if (key === CONTEXT_STEP_SETTING) {
+        return 5;
+      } else if (key === SORT_DEFAULT_ORDER_SETTING) {
+        return 'desc';
+      } else if (key === FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE) {
+        return false;
+      } else if (key === SAMPLE_SIZE_SETTING) {
+        return 250;
+      } else if (key === SAMPLE_ROWS_PER_PAGE_SETTING) {
+        return 150;
+      } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
+        return 50;
+      } else if (key === HIDE_ANNOUNCEMENTS) {
+        return false;
+      } else if (key === SEARCH_ON_PAGE_LOAD_SETTING) {
+        return true;
+      }
+    }),
+    isDefault: jest.fn((key: string) => {
+      return true;
+    }),
+  };
+
+  corePluginMock.uiSettings = {
+    ...corePluginMock.uiSettings,
+    ...uiSettingsMock,
+  };
+
   const theme = {
     theme$: of({ darkMode: false }),
   };
 
+  corePluginMock.theme = theme;
+
   return {
-    core: {
-      ...coreMock.createStart(),
-      theme,
-    },
+    core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
     chrome: chromeServiceMock.createStartContract(),
     history: () => ({
@@ -128,50 +168,20 @@ export function createDiscoverServicesMock(): DiscoverServices {
       open: jest.fn(),
     },
     uiActions: uiActionsPluginMock.createStartContract(),
-    uiSettings: {
-      get: jest.fn((key: string) => {
-        if (key === 'fields:popularLimit') {
-          return 5;
-        } else if (key === DEFAULT_COLUMNS_SETTING) {
-          return ['default_column'];
-        } else if (key === UI_SETTINGS.META_FIELDS) {
-          return [];
-        } else if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
-          return false;
-        } else if (key === CONTEXT_STEP_SETTING) {
-          return 5;
-        } else if (key === SORT_DEFAULT_ORDER_SETTING) {
-          return 'desc';
-        } else if (key === FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE) {
-          return false;
-        } else if (key === SAMPLE_SIZE_SETTING) {
-          return 250;
-        } else if (key === SAMPLE_ROWS_PER_PAGE_SETTING) {
-          return 150;
-        } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
-          return 50;
-        } else if (key === HIDE_ANNOUNCEMENTS) {
-          return false;
-        } else if (key === SEARCH_ON_PAGE_LOAD_SETTING) {
-          return true;
-        }
-      }),
-      isDefault: (key: string) => {
-        return true;
-      },
-    },
+    uiSettings: uiSettingsMock,
     http: {
       basePath: '/',
     },
     dataViewEditor: {
+      openEditor: jest.fn(),
       userPermissions: {
-        editDataView: () => true,
+        editDataView: jest.fn(() => true),
       },
     },
     dataViewFieldEditor: {
       openEditor: jest.fn(),
       userPermissions: {
-        editIndexPattern: jest.fn(),
+        editIndexPattern: jest.fn(() => true),
       },
     },
     navigation: {
@@ -211,6 +221,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       useUrl: jest.fn(() => ''),
       navigate: jest.fn(),
       getUrl: jest.fn(() => Promise.resolve('')),
+      getRedirectUrl: jest.fn(() => ''),
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },

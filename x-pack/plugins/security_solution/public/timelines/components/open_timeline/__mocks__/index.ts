@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 
 export const mockTimeline = {
   data: {

@@ -9,10 +9,7 @@ import React, { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import {
-  isAlertFromEndpointEvent,
-  isTimelineEventItemAnAlert,
-} from '../../../common/utils/endpoint_alert_check';
+import { isTimelineEventItemAnAlert } from '../../../common/utils/endpoint_alert_check';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
 import { useResponderActionData } from './use_responder_action_data';
@@ -28,17 +25,13 @@ export const useResponderActionItem = (
     return isTimelineEventItemAnAlert(eventDetailsData || []);
   }, [eventDetailsData]);
 
-  const isEndpointAlert = useMemo(() => {
-    return isAlertFromEndpointEvent({ data: eventDetailsData || [] });
-  }, [eventDetailsData]);
-
   const endpointId = useMemo(
     () => getFieldValue({ category: 'agent', field: 'agent.id' }, eventDetailsData),
     [eventDetailsData]
   );
 
   const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
-    endpointId: isEndpointAlert ? endpointId : '',
+    endpointId,
     onClick,
   });
 

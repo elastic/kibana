@@ -6,8 +6,8 @@
  */
 
 import { Moment } from 'moment';
-import { RRuleFrequency, RRuleFrequencyMap } from '../types';
-import { Frequency, ISO_WEEKDAYS_TO_RRULE } from '../constants';
+import { Frequency } from '@kbn/rrule';
+import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import { RecurringScheduleFormProps } from '../components/schema';
 import { getPresets } from './get_presets';
@@ -30,7 +30,7 @@ export const convertToRRule = (
       ...rRule,
       // default to yearly and a count of 1
       // if the maintenance window is not recurring
-      freq: RRuleFrequency.YEARLY,
+      freq: Frequency.YEARLY,
       count: 1,
     };
 
@@ -39,8 +39,8 @@ export const convertToRRule = (
     form = { ...recurringForm, ...presets[recurringForm.frequency] };
   }
 
-  const frequency = form.customFrequency ? form.customFrequency : (form.frequency as Frequency);
-  rRule.freq = RRuleFrequencyMap[frequency];
+  const frequency = form.customFrequency ?? (form.frequency as Frequency);
+  rRule.freq = frequency;
 
   rRule.interval = form.interval;
 

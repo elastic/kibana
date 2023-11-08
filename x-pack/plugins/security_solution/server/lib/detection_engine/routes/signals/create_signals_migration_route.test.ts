@@ -7,9 +7,9 @@
 
 import { requestMock, serverMock } from '../__mocks__';
 import type { SetupPlugins } from '../../../../plugin';
-import type { SignalsReindexOptions } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
+import type { SignalsReindexOptions } from '../../../../../common/api/detection_engine/signals_migration';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
-import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema.mock';
+import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration_route.mock';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 import { createMigration } from '../../migrations/create_migration';

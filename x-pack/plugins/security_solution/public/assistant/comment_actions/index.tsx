@@ -6,11 +6,12 @@
  */
 
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { Message } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
@@ -27,6 +28,8 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   const toasts = useToasts();
   const { cases } = useKibana().services;
   const dispatch = useDispatch();
+
+  const { showAssistantOverlay } = useAssistantContext();
 
   const associateNote = useCallback(
     (noteId: string) => dispatch(timelineActions.addNote({ id: TimelineId.active, noteId })),
@@ -57,16 +60,18 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   });
 
   const onAddToExistingCase = useCallback(() => {
+    showAssistantOverlay({ showOverlay: false });
+
     selectCaseModal.open({
       getAttachments: () => [
         {
           comment: message.content,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: i18n.ELASTIC_AI_ASSISTANT,
         },
       ],
     });
-  }, [message.content, selectCaseModal]);
+  }, [message.content, selectCaseModal, showAssistantOverlay]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">

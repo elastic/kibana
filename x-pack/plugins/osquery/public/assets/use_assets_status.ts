@@ -7,6 +7,7 @@
 
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { useQuery } from '@tanstack/react-query';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { INTEGRATION_ASSETS_STATUS_ID } from './constants';
 
@@ -17,8 +18,12 @@ export const useAssetsStatus = () => {
     install: KibanaAssetReference[];
     update: KibanaAssetReference[];
     upToDate: KibanaAssetReference[];
-  }>([INTEGRATION_ASSETS_STATUS_ID], () => http.get('/internal/osquery/assets'), {
-    keepPreviousData: true,
-    retry: false,
-  });
+  }>(
+    [INTEGRATION_ASSETS_STATUS_ID],
+    () => http.get('/internal/osquery/assets', { version: API_VERSIONS.internal.v1 }),
+    {
+      keepPreviousData: true,
+      retry: false,
+    }
+  );
 };

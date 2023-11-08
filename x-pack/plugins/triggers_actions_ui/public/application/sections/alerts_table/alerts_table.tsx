@@ -10,21 +10,15 @@ import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect, useRe
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiButtonIcon,
   EuiDataGridStyle,
   EuiSkeletonText,
   EuiDataGridRefProps,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
-import {
-  ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
-  ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
-} from './translations';
+import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
@@ -109,6 +103,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
     refresh: alertsRefresh,
+    featureIds: props.featureIds,
   });
 
   const refreshData = useCallback(() => {
@@ -142,6 +137,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     updatedAt,
     browserFields,
     onChangeVisibleColumns,
+    onColumnResize,
     showAlertStatusWithFlapping = false,
     showInspectButton = false,
   } = props;
@@ -207,12 +203,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   ])();
 
   const leadingControlColumns = useMemo(() => {
-    const isActionButtonsColumnActive =
-      props.showExpandToDetails || Boolean(renderCustomActionsRow);
-
     let controlColumns = [...props.leadingControlColumns];
 
-    if (isActionButtonsColumnActive) {
+    if (renderCustomActionsRow) {
       controlColumns = [
         {
           id: 'expandColumn',
@@ -229,38 +222,24 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               visibleRowIndex: number;
             };
 
+            if (!ecsAlertsData[visibleRowIndex]) {
+              return null;
+            }
+
             return (
               <EuiFlexGroup gutterSize="none" responsive={false}>
-                {props.showExpandToDetails && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
-                      <EuiButtonIcon
-                        size="s"
-                        iconType="expand"
-                        color="primary"
-                        onClick={() => {
-                          setFlyoutAlertIndex(visibleRowIndex);
-                        }}
-                        data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
-                        aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-                {renderCustomActionsRow &&
-                  ecsAlertsData[visibleRowIndex] &&
-                  renderCustomActionsRow({
-                    alert: alerts[visibleRowIndex],
-                    ecsAlert: ecsAlertsData[visibleRowIndex],
-                    nonEcsData: oldAlertsData[visibleRowIndex],
-                    rowIndex: visibleRowIndex,
-                    setFlyoutAlert: handleFlyoutAlert,
-                    id: props.id,
-                    cveProps,
-                    setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
-                    refresh,
-                    clearSelection,
-                  })}
+                {renderCustomActionsRow({
+                  alert: alerts[visibleRowIndex],
+                  ecsAlert: ecsAlertsData[visibleRowIndex],
+                  nonEcsData: oldAlertsData[visibleRowIndex],
+                  rowIndex: visibleRowIndex,
+                  setFlyoutAlert: handleFlyoutAlert,
+                  id: props.id,
+                  cveProps,
+                  setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
+                  refresh,
+                  clearSelection,
+                })}
               </EuiFlexGroup>
             );
           },
@@ -284,9 +263,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     isBulkActionsColumnActive,
     props.id,
     props.leadingControlColumns,
-    props.showExpandToDetails,
     renderCustomActionsRow,
-    setFlyoutAlertIndex,
     getSetIsActionLoadingCallback,
     refresh,
     clearSelection,
@@ -307,17 +284,32 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     if (shouldHighlightRowCheck) {
       mappedRowClasses = alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
         (rowClasses, alert, index) => {
+          if (props.gridStyle?.stripes && index % 2 !== 0) {
+            // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
+            // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
+            // Adding strips only on even rows. It will be replace by alertsTableHighlightedRow if
+            // shouldHighlightRow is correct
+            rowClasses[index + pagination.pageIndex * pagination.pageSize] =
+              'euiDataGridRow--striped';
+          }
           if (shouldHighlightRowCheck(alert)) {
             rowClasses[index + pagination.pageIndex * pagination.pageSize] =
               'alertsTableHighlightedRow';
           }
+
           return rowClasses;
         },
         {}
       );
     }
     return mappedRowClasses;
-  }, [props.shouldHighlightRow, alerts, pagination.pageIndex, pagination.pageSize]);
+  }, [
+    props.shouldHighlightRow,
+    alerts,
+    pagination.pageIndex,
+    pagination.pageSize,
+    props.gridStyle,
+  ]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
@@ -486,6 +478,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               onChangePage: onChangePageIndex,
             }}
             rowHeightsOptions={props.rowHeightsOptions}
+            onColumnResize={onColumnResize}
             ref={dataGridRef}
           />
         )}

@@ -25,9 +25,16 @@ import {
   PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
-import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
+import {
+  composeHttpHandlerMocks,
+  httpHandlerMockFactory,
+} from '../../common/mock/endpoint/http_handler_mock_factory';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import type { GetPolicyListResponse, GetPolicyResponse } from '../pages/policy/types';
+import type {
+  GetPolicyListResponse,
+  GetPolicyResponse,
+  UpdatePolicyResponse,
+} from '../pages/policy/types';
 import { FleetAgentPolicyGenerator } from '../../../common/endpoint/data_generators/fleet_agent_policy_generator';
 import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 
@@ -169,7 +176,7 @@ export const fleetGetEndpointPackagePolicyHttpMock =
       method: 'get',
       handler: () => {
         const response: GetPolicyResponse = {
-          item: new EndpointDocGenerator('seed').generatePolicyPackagePolicy(),
+          item: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy(),
         };
         return response;
       },
@@ -250,12 +257,12 @@ export const fleetGetAgentPolicyListHttpMock =
   ]);
 
 export type FleetBulkGetAgentPolicyListHttpMockInterface = ResponseProvidersInterface<{
-  agentPolicy: () => BulkGetAgentPoliciesResponse;
+  bulkAgentPolicy: () => BulkGetAgentPoliciesResponse;
 }>;
 export const fleetBulkGetAgentPolicyListHttpMock =
-  httpHandlerMockFactory<FleetGetAgentPolicyListHttpMockInterface>([
+  httpHandlerMockFactory<FleetBulkGetAgentPolicyListHttpMockInterface>([
     {
-      id: 'agentPolicy',
+      id: 'bulkAgentPolicy',
       path: AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN,
       method: 'post',
       handler: ({ body }) => {
@@ -288,12 +295,12 @@ export const fleetBulkGetAgentPolicyListHttpMock =
   ]);
 
 export type FleetBulkGetPackagePoliciesListHttpMockInterface = ResponseProvidersInterface<{
-  packagePolicies: () => BulkGetPackagePoliciesResponse;
+  bulkPackagePolicies: () => BulkGetPackagePoliciesResponse;
 }>;
 export const fleetBulkGetPackagePoliciesListHttpMock =
   httpHandlerMockFactory<FleetBulkGetPackagePoliciesListHttpMockInterface>([
     {
-      id: 'packagePolicies',
+      id: 'bulkPackagePolicies',
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
       method: 'post',
       handler: ({ body }) => {
@@ -427,3 +434,49 @@ export const fleetGetAgentStatusHttpMock =
       },
     },
   ]);
+
+export type FleetPutEndpointPackagePolicyHttpMockInterface = ResponseProvidersInterface<{
+  updateEndpointPolicy: () => UpdatePolicyResponse;
+}>;
+export const fleetPutEndpointPackagePolicyHttpMock =
+  httpHandlerMockFactory<FleetPutEndpointPackagePolicyHttpMockInterface>([
+    {
+      id: 'updateEndpointPolicy',
+      path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
+      method: 'put',
+      handler: ({ body }) => {
+        const updatedPolicy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy(
+          JSON.parse(body as string)
+        );
+
+        return {
+          item: updatedPolicy,
+        };
+      },
+    },
+  ]);
+
+export type AllFleetHttpMocksInterface = FleetGetAgentStatusHttpMockInterface &
+  FleetGetEndpointPackagePolicyHttpMockInterface &
+  FleetGetEndpointPackagePolicyListHttpMockInterface &
+  FleetGetPackageHttpMockInterface &
+  FleetBulkGetAgentPolicyListHttpMockInterface &
+  FleetGetAgentPolicyListHttpMockInterface &
+  FleetGetPackageListHttpMockInterface &
+  FleetGetPackagePoliciesListHttpMockInterface &
+  FleetBulkGetPackagePoliciesListHttpMockInterface &
+  FleetPutEndpointPackagePolicyHttpMockInterface;
+
+export const allFleetHttpMocks = composeHttpHandlerMocks<AllFleetHttpMocksInterface>([
+  fleetGetAgentStatusHttpMock,
+  fleetGetEndpointPackagePolicyHttpMock,
+  fleetGetEndpointPackagePolicyListHttpMock,
+  fleetGetPackageHttpMock,
+  fleetBulkGetAgentPolicyListHttpMock,
+  fleetGetAgentPolicyListHttpMock,
+  fleetGetPackageListHttpMock,
+  fleetGetPackageListHttpMock,
+  fleetGetPackagePoliciesListHttpMock,
+  fleetBulkGetPackagePoliciesListHttpMock,
+  fleetPutEndpointPackagePolicyHttpMock,
+]);

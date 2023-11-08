@@ -21,6 +21,17 @@ export const INDICATOR_CUSTOM_METRIC = i18n.translate(
   }
 );
 
+export const INDICATOR_TIMESLICE_METRIC = i18n.translate(
+  'xpack.observability.slo.indicators.timesliceMetric',
+  {
+    defaultMessage: 'Timeslice Metric',
+  }
+);
+
+export const INDICATOR_HISTOGRAM = i18n.translate('xpack.observability.slo.indicators.histogram', {
+  defaultMessage: 'Histogram Metric',
+});
+
 export const INDICATOR_APM_LATENCY = i18n.translate(
   'xpack.observability.slo.indicators.apmLatency',
   { defaultMessage: 'APM latency' }
@@ -47,8 +58,14 @@ export function toIndicatorTypeLabel(
     case 'sli.metric.custom':
       return INDICATOR_CUSTOM_METRIC;
 
+    case 'sli.histogram.custom':
+      return INDICATOR_HISTOGRAM;
+
+    case 'sli.metric.timeslice':
+      return INDICATOR_TIMESLICE_METRIC;
+
     default:
-      assertNever(indicatorType);
+      assertNever(indicatorType as never);
   }
 }
 
@@ -105,13 +122,6 @@ export function toDurationLabel(durationStr: string): string {
           duration: duration.value,
         },
       });
-    case 'Y':
-      return i18n.translate('xpack.observability.slo.duration.year', {
-        defaultMessage: '{duration, plural, one {1 year} other {# years}}',
-        values: {
-          duration: duration.value,
-        },
-      });
   }
 }
 
@@ -138,10 +148,6 @@ export function toDurationAdverbLabel(durationStr: string): string {
     case 'M':
       return i18n.translate('xpack.observability.slo.duration.monthly', {
         defaultMessage: 'Monthly',
-      });
-    case 'Y':
-      return i18n.translate('xpack.observability.slo.duration.yearly', {
-        defaultMessage: 'Yearly',
       });
   }
 }

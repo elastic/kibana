@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
-import { CommentType } from '@kbn/cases-plugin/common/api';
+import type { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
 import { APP_ID } from '../../../../../common';
@@ -34,7 +34,7 @@ export const updateCases = async ({
   if (createActionPayload.alert_ids && createActionPayload.alert_ids.length > 0) {
     const newIDs: string[][] = await Promise.all(
       createActionPayload.alert_ids.map(async (alertID: string) => {
-        const cases: CasesByAlertId = await casesClient.cases.getCasesByAlertID({
+        const cases: GetRelatedCasesByAlertResponse = await casesClient.cases.getCasesByAlertID({
           alertID,
           options: { owner: APP_ID },
         });
@@ -55,7 +55,7 @@ export const updateCases = async ({
     }));
 
     const attachments = caseIDs.map(() => ({
-      type: CommentType.actions,
+      type: AttachmentType.actions,
       comment: createActionPayload.comment || '',
       actions: {
         targets,

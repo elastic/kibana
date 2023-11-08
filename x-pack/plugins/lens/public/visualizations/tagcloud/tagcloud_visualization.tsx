@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { render } from 'react-dom';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -19,10 +16,12 @@ import {
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
-import { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import type { OperationMetadata, Visualization } from '../..';
+import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
@@ -34,10 +33,10 @@ const METRIC_GROUP_ID = 'metric';
 
 export const getTagcloudVisualization = ({
   paletteService,
-  theme,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
-  theme: ThemeServiceStart;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<TagcloudState> => ({
   id: 'lnsTagcloud',
 
@@ -49,7 +48,6 @@ export const getTagcloudVisualization = ({
       groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
         defaultMessage: 'Proportion',
       }),
-      showExperimentalBadge: true,
     },
   ],
 
@@ -92,20 +90,46 @@ export const getTagcloudVisualization = ({
           },
         };
   },
+  getMainPalette: (state) => {
+    if (!state) return;
+
+    return state.colorMapping
+      ? { type: 'colorMapping', value: state.colorMapping }
+      : state.palette
+      ? { type: 'legacyPalette', value: state.palette }
+      : undefined;
+  },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
-  initialize(addNewLayer, state) {
+  initialize(addNewLayer, state, mainPalette) {
     return (
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         ...DEFAULT_STATE,
+        colorMapping:
+          mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
       }
     );
   },
 
   getConfiguration({ state }) {
+    const canUseColorMapping = state.colorMapping ? true : false;
+    let colors: string[] = [];
+    if (canUseColorMapping) {
+      kibanaTheme.theme$
+        .subscribe({
+          next(theme) {
+            colors = getColorsFromMapping(theme.darkMode, state.colorMapping);
+          },
+        })
+        .unsubscribe();
+    } else {
+      colors = paletteService
+        .get(state.palette?.name || 'default')
+        .getCategoricalColors(10, state.palette?.params);
+    }
     return {
       groups: [
         {
@@ -119,9 +143,7 @@ export const getTagcloudVisualization = ({
                 {
                   columnId: state.tagAccessor,
                   triggerIconType: 'colorBy',
-                  palette: paletteService
-                    .get(state.palette?.name || 'default')
-                    .getCategoricalColors(10, state.palette?.params),
+                  palette: colors,
                 },
               ]
             : [],
@@ -200,6 +222,7 @@ export const getTagcloudVisualization = ({
                 ),
           ]).toAst(),
           showLabel: state.showLabel,
+          colorMapping: state.colorMapping ? JSON.stringify(state.colorMapping) : undefined,
         }).toAst(),
       ],
     };
@@ -238,6 +261,7 @@ export const getTagcloudVisualization = ({
                 ),
           ]).toAst(),
           showLabel: false,
+          colorMapping: state.colorMapping ? JSON.stringify(state.colorMapping) : undefined,
         }).toAst(),
       ],
     };
@@ -268,31 +292,25 @@ export const getTagcloudVisualization = ({
     return update;
   },
 
-  renderDimensionEditor(domElement, props) {
+  DimensionEditorComponent(props) {
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     if (props.groupId === TAG_GROUP_ID) {
-      render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <I18nProvider>
-            <TagsDimensionEditor
-              paletteService={paletteService}
-              state={props.state}
-              setState={props.setState}
-            />
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <TagsDimensionEditor
+          isDarkMode={isDarkMode}
+          paletteService={paletteService}
+          state={props.state}
+          setState={props.setState}
+          frame={props.frame}
+          panelRef={props.panelRef}
+          isInlineEditing={props.isInlineEditing}
+        />
       );
     }
+    return null;
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <TagcloudToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <TagcloudToolbar {...props} />;
   },
 });

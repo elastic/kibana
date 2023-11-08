@@ -7,34 +7,37 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { useKibanaVersion } from './use_kibana_version';
-import { useGetSettings } from './use_request';
+import type {
+  CloudFormationProps,
+  CloudSecurityIntegrationAwsAccountType,
+} from '../components/agent_enrollment_flyout/types';
+
+import { useAgentVersion } from './use_agent_version';
+
+const CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE = 'single-account';
 
 export const useCreateCloudFormationUrl = ({
   enrollmentAPIKey,
-  cloudFormationTemplateUrl,
+  cloudFormationProps,
+  fleetServerHost,
 }: {
-  enrollmentAPIKey: string | undefined;
-  cloudFormationTemplateUrl: string;
+  enrollmentAPIKey?: string;
+  cloudFormationProps?: CloudFormationProps;
+  fleetServerHost?: string;
 }) => {
-  const { data, isLoading } = useGetSettings();
-
-  const kibanaVersion = useKibanaVersion();
+  const agentVersion = useAgentVersion();
 
   let isError = false;
   let error: string | undefined;
 
-  // Default fleet server host
-  const fleetServerHost = data?.item.fleet_server_hosts?.[0];
-
-  if (!fleetServerHost && !isLoading) {
+  if (!fleetServerHost) {
     isError = true;
     error = i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noFleetServerHost', {
       defaultMessage: 'No Fleet Server host found',
     });
   }
 
-  if (!enrollmentAPIKey && !isLoading) {
+  if (!enrollmentAPIKey) {
     isError = true;
     error = i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noApiKey', {
       defaultMessage: 'No enrollment token found',
@@ -42,17 +45,17 @@ export const useCreateCloudFormationUrl = ({
   }
 
   const cloudFormationUrl =
-    enrollmentAPIKey && fleetServerHost && cloudFormationTemplateUrl
+    enrollmentAPIKey && fleetServerHost && cloudFormationProps?.templateUrl && agentVersion
       ? createCloudFormationUrl(
-          cloudFormationTemplateUrl,
+          cloudFormationProps?.templateUrl,
           enrollmentAPIKey,
           fleetServerHost,
-          kibanaVersion
+          agentVersion,
+          cloudFormationProps?.awsAccountType
         )
       : undefined;
 
   return {
-    isLoading,
     cloudFormationUrl,
     isError,
     error,
@@ -63,12 +66,29 @@ const createCloudFormationUrl = (
   templateURL: string,
   enrollmentToken: string,
   fleetUrl: string,
-  kibanaVersion: string
+  agentVersion: string,
+  awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined
 ) => {
-  const cloudFormationUrl = templateURL
+  let cloudFormationUrl;
+
+  /*
+    template url has `&param_ElasticAgentVersion=KIBANA_VERSION` part. KIBANA_VERSION is used for templating as agent version used to match Kibana version, but now it's not necessarily the case
+   */
+  cloudFormationUrl = templateURL
     .replace('FLEET_ENROLLMENT_TOKEN', enrollmentToken)
     .replace('FLEET_URL', fleetUrl)
-    .replace('KIBANA_VERSION', kibanaVersion);
+    .replace('KIBANA_VERSION', agentVersion);
+
+  if (cloudFormationUrl.includes('ACCOUNT_TYPE')) {
+    cloudFormationUrl = cloudFormationUrl.replace(
+      'ACCOUNT_TYPE',
+      getAwsAccountType(awsAccountType)
+    );
+  }
 
   return new URL(cloudFormationUrl).toString();
+};
+
+const getAwsAccountType = (awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined) => {
+  return awsAccountType ? awsAccountType : CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE;
 };

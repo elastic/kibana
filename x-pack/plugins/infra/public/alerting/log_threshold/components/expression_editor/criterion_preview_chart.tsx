@@ -7,6 +7,7 @@
 
 import React, { ReactElement, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import {
   ScaleType,
   AnnotationDomainType,
@@ -21,9 +22,8 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getChartTheme } from '../../../../utils/get_chart_theme';
-import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
-import { PersistedLogViewReference } from '../../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
 import { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,
@@ -143,7 +143,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   annotations,
   filterSeriesByGroupName,
 }) => {
-  const isDarkMode = useIsDarkMode();
+  const chartTheme = useTimelineChartTheme();
   const timezone = useKibanaTimeZoneSetting();
 
   const {
@@ -331,7 +331,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             tickFormat={yAxisFormatter}
             domain={chartDomain}
           />
-          <Settings theme={getChartTheme(isDarkMode)} />
+          <Settings baseTheme={chartTheme.baseTheme} locale={i18n.getLocale()} />
           <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>

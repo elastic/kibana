@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
-import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isErr, tryAsResult } from './lib/result_type';
+import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 
 /*
  * Type definitions and validations for tasks.
@@ -47,6 +47,7 @@ export type SuccessfulRunResult = {
    * recurring task). See the RunContext type definition for more details.
    */
   state: Record<string, unknown>;
+  hasError?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -83,18 +84,40 @@ export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
 
 export interface FailedTaskResult {
-  status: TaskStatus.Failed;
+  status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
+type IndirectParamsType = Record<string, unknown>;
+
+export interface LoadedIndirectParams<
+  IndirectParams extends IndirectParamsType = IndirectParamsType
+> {
+  [key: string]: unknown;
+  indirectParams: IndirectParams;
+}
+
+export type LoadIndirectParamsResult<T extends LoadedIndirectParams = LoadedIndirectParams> =
+  | {
+      data: T;
+      error?: never;
+    }
+  | {
+      data?: never;
+      error: Error;
+    };
+export type LoadIndirectParamsFunction = () => Promise<LoadIndirectParamsResult>;
 export type RunFunction = () => Promise<RunResult | undefined | void>;
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
-export interface CancellableTask {
+export interface CancellableTask<T = never> {
+  loadIndirectParams?: LoadIndirectParamsFunction;
   run: RunFunction;
   cancel?: CancelFunction;
   cleanup?: () => Promise<void>;
 }
 
-export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask;
+export type TaskRunCreatorFunction = (
+  context: RunContext
+) => CancellableTask<RunContext['taskInstance']>;
 
 export const taskDefinitionSchema = schema.object(
   {
@@ -147,6 +170,10 @@ export const taskDefinitionSchema = schema.object(
         })
       )
     ),
+
+    paramsSchema: schema.maybe(schema.any()),
+    // schema of the data fetched by the task runner (in loadIndirectParams) e.g. rule, action etc.
+    indirectParamsSchema: schema.maybe(schema.any()),
   },
   {
     validate({ timeout }) {
@@ -161,7 +188,7 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
+export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
@@ -174,6 +201,8 @@ export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
       up: (state: Record<string, unknown>) => Record<string, unknown>;
     }
   >;
+  paramsSchema?: ObjectType;
+  indirectParamsSchema?: ObjectType;
 };
 
 export enum TaskStatus {
@@ -182,6 +211,7 @@ export enum TaskStatus {
   Running = 'running',
   Failed = 'failed',
   Unrecognized = 'unrecognized',
+  DeadLetter = 'dead_letter',
 }
 
 export enum TaskLifecycleResult {
@@ -291,6 +321,11 @@ export interface TaskInstance {
    * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
    */
   enabled?: boolean;
+
+  /**
+   * Indicates the number of skipped executions.
+   */
+  numSkippedRuns?: number;
 }
 
 /**

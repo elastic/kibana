@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LatestTaskStateSchema } from './task_state';
+
 export interface ScoreByPolicyTemplateBucket {
   score_by_policy_template: {
     buckets: Array<{
@@ -62,11 +64,6 @@ export interface VulnSeverityAggs {
   };
 }
 
-export type TaskHealthStatus = 'ok' | 'warning' | 'error';
-
 export interface FindingsStatsTaskResult {
-  state: {
-    runs: number;
-    health_status: TaskHealthStatus;
-  };
+  state: LatestTaskStateSchema;
 }

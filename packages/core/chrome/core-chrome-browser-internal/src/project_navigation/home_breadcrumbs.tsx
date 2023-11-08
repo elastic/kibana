@@ -20,5 +20,6 @@ export const createHomeBreadcrumb = ({
     text: <EuiIcon type="home" />,
     title: i18n.translate('core.ui.chrome.breadcrumbs.homeLink', { defaultMessage: 'Home' }),
     href: homeHref,
+    'data-test-subj': 'breadcrumb-home',
   };
 };

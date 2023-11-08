@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import type { EmbeddableLegacyUrlConflictProps } from '../types';
 import type { InternalProps } from './embeddable_legacy_url_conflict_internal';
+import type { EmbeddableLegacyUrlConflictProps } from '../types';
 
 export const getEmbeddableLegacyUrlConflict = async (
   internalProps: InternalProps

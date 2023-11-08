@@ -9,3 +9,5 @@
 export { OBSERVABILITY_ONBOARDING_APP_ID } from './constants';
 
 export type { AppId, DeepLinkId } from './deep_links';
+
+export * from './locators';

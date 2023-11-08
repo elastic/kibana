@@ -23,33 +23,32 @@ export type MlNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, Navigation
 export const defaultNavigation: MlNodeDefinition = {
   id: 'rootNav:ml',
   title: i18n.translate('defaultNavigation.ml.machineLearning', {
-    defaultMessage: 'Machine learning',
+    defaultMessage: 'Machine Learning',
   }),
-  icon: 'indexMapping',
+  icon: 'machineLearningApp',
   children: [
     {
-      title: '',
-      id: 'root',
-      children: [
-        {
-          link: 'ml:overview',
-        },
-        {
-          link: 'ml:notifications',
-        },
-      ],
+      link: 'ml:overview',
+    },
+    {
+      link: 'ml:notifications',
+    },
+    {
+      link: 'ml:memoryUsage',
     },
     {
       title: i18n.translate('defaultNavigation.ml.anomalyDetection', {
         defaultMessage: 'Anomaly Detection',
       }),
-      id: 'anomaly_detection',
+      link: 'ml:anomalyDetection',
+      renderAs: 'accordion',
       children: [
         {
           title: i18n.translate('defaultNavigation.ml.jobs', {
             defaultMessage: 'Jobs',
           }),
           link: 'ml:anomalyDetection',
+          breadcrumbStatus: 'hidden',
         },
         {
           link: 'ml:anomalyExplorer',
@@ -63,14 +62,16 @@ export const defaultNavigation: MlNodeDefinition = {
       ],
     },
     {
-      id: 'data_frame_analytics',
+      link: 'ml:dataFrameAnalytics',
       title: i18n.translate('defaultNavigation.ml.dataFrameAnalytics', {
-        defaultMessage: 'Data frame analytics',
+        defaultMessage: 'Data Frame Analytics',
       }),
+      renderAs: 'accordion',
       children: [
         {
           title: 'Jobs',
           link: 'ml:dataFrameAnalytics',
+          breadcrumbStatus: 'hidden',
         },
         {
           link: 'ml:resultExplorer',
@@ -83,8 +84,9 @@ export const defaultNavigation: MlNodeDefinition = {
     {
       id: 'model_management',
       title: i18n.translate('defaultNavigation.ml.modelManagement', {
-        defaultMessage: 'Model management',
+        defaultMessage: 'Model Management',
       }),
+      renderAs: 'accordion',
       children: [
         {
           link: 'ml:nodesOverview',
@@ -97,8 +99,9 @@ export const defaultNavigation: MlNodeDefinition = {
     {
       id: 'data_visualizer',
       title: i18n.translate('defaultNavigation.ml.dataVisualizer', {
-        defaultMessage: 'Data visualizer',
+        defaultMessage: 'Data Visualizer',
       }),
+      renderAs: 'accordion',
       children: [
         {
           title: i18n.translate('defaultNavigation.ml.file', {
@@ -111,6 +114,21 @@ export const defaultNavigation: MlNodeDefinition = {
             defaultMessage: 'Data view',
           }),
           link: 'ml:indexDataVisualizer',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return (
+              pathNameSerialized.includes(prepend('/app/ml/datavisualizer')) ||
+              pathNameSerialized.includes(prepend('/app/ml/jobs/new_job/datavisualizer'))
+            );
+          },
+        },
+        {
+          title: i18n.translate('defaultNavigation.ml.dataComparison', {
+            defaultMessage: 'Data drift',
+          }),
+          link: 'ml:dataDrift',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('/app/ml/data_drift'));
+          },
         },
       ],
     },
@@ -119,15 +137,25 @@ export const defaultNavigation: MlNodeDefinition = {
       title: i18n.translate('defaultNavigation.ml.aiopsLabs', {
         defaultMessage: 'AIOps labs',
       }),
+      renderAs: 'accordion',
       children: [
         {
-          title: i18n.translate('defaultNavigation.ml.explainLogRateSpikes', {
-            defaultMessage: 'Explain log rate spikes',
-          }),
-          link: 'ml:explainLogRateSpikes',
+          link: 'ml:logRateAnalysis',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
+          },
         },
         {
           link: 'ml:logPatternAnalysis',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('/app/ml/aiops/log_categorization'));
+          },
+        },
+        {
+          link: 'ml:changePointDetections',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('/app/ml/aiops/change_point_detection'));
+          },
         },
       ],
     },

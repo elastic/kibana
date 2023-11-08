@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   GraphState,
   hasDatasourceSelector,
@@ -75,9 +76,11 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   const { onFillWorkspace, onOpenFieldPicker, onIndexPatternSelected, hasDatasource, hasFields } =
     props;
 
-  const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const kibana = useKibana<
+    IUnifiedSearchPluginServices & { contentManagement: ContentManagementPublicStart }
+  >();
   const { services, overlays } = kibana;
-  const { http, uiSettings, application, data, savedObjectsManagement } = services;
+  const { application, data, contentManagement, uiSettings } = services;
   const [hasDataViews, setHasDataViews] = useState<boolean>(true);
 
   useEffect(() => {
@@ -90,7 +93,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   if (!overlays || !application) return null;
 
   const onOpenDatasourcePicker = () => {
-    openSourceModal({ overlays, http, uiSettings, savedObjectsManagement }, onIndexPatternSelected);
+    openSourceModal({ overlays, contentManagement, uiSettings }, onIndexPatternSelected);
   };
 
   let content = (

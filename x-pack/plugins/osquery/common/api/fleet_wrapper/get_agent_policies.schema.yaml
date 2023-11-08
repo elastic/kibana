@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  title: Get agent policies schema
+  version: '1'
+paths: { }
+components:
+  parameters:
+   GetAgentPoliciesRequestQueryParameter:
+      name: query
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/GetAgentPoliciesRequestParams'
+   GetAgentPoliciesRequestParameter:
+      name: query
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/GetAgentPoliciesRequestParams'
+  schemas:
+    GetAgentPoliciesRequestParams:
+      type: object
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

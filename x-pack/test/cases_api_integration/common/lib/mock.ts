@@ -6,26 +6,25 @@
  */
 
 import {
-  CasePostRequest,
   Case,
-  CasesFindResponse,
-  Comment,
-  ConnectorTypes,
-  CommentRequestUserType,
-  CommentRequestAlertType,
-  CommentType,
+  AttachmentType,
   CaseStatuses,
-  CommentRequest,
-  CommentRequestActionsType,
   CaseSeverity,
   ExternalReferenceStorageType,
-  CommentRequestExternalReferenceSOType,
-  CommentRequestExternalReferenceNoSOType,
-  CommentRequestPersistableStateType,
   FileAttachmentMetadata,
-} from '@kbn/cases-plugin/common/api';
+  AlertAttachmentPayload,
+  UserCommentAttachmentPayload,
+  ActionsAttachmentPayload,
+  ExternalReferenceNoSOAttachmentPayload,
+  ExternalReferenceSOAttachmentPayload,
+  PersistableStateAttachmentPayload,
+  Attachment,
+} from '@kbn/cases-plugin/common/types/domain';
+import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**
@@ -59,29 +58,29 @@ export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequ
   ...req,
 });
 
-export const postCommentUserReq: CommentRequestUserType = {
+export const postCommentUserReq: UserCommentAttachmentPayload = {
   comment: 'This is a cool comment',
-  type: CommentType.user,
+  type: AttachmentType.user,
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentAlertReq: CommentRequestAlertType = {
+export const postCommentAlertReq: AlertAttachmentPayload = {
   alertId: 'test-id',
   index: 'test-index',
   rule: { id: 'test-rule-id', name: 'test-index-id' },
-  type: CommentType.alert,
+  type: AttachmentType.alert,
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentAlertMultipleIdsReq: CommentRequestAlertType = {
+export const postCommentAlertMultipleIdsReq: AlertAttachmentPayload = {
   alertId: ['test-id-1', 'test-id-2'],
   index: ['test-index', 'test-index-2'],
   rule: { id: 'test-rule-id', name: 'test-index-id' },
-  type: CommentType.alert,
+  type: AttachmentType.alert,
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentActionsReq: CommentRequestActionsType = {
+export const postCommentActionsReq: ActionsAttachmentPayload = {
   comment: 'comment text',
   actions: {
     targets: [
@@ -92,11 +91,11 @@ export const postCommentActionsReq: CommentRequestActionsType = {
     ],
     type: 'isolate',
   },
-  type: CommentType.actions,
+  type: AttachmentType.actions,
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentActionsReleaseReq: CommentRequestActionsType = {
+export const postCommentActionsReleaseReq: ActionsAttachmentPayload = {
   comment: 'comment text',
   actions: {
     targets: [
@@ -107,12 +106,12 @@ export const postCommentActionsReleaseReq: CommentRequestActionsType = {
     ],
     type: 'unisolate',
   },
-  type: CommentType.actions,
+  type: AttachmentType.actions,
   owner: 'securitySolutionFixture',
 };
 
-export const postExternalReferenceESReq: CommentRequestExternalReferenceNoSOType = {
-  type: CommentType.externalReference,
+export const postExternalReferenceESReq: ExternalReferenceNoSOAttachmentPayload = {
+  type: AttachmentType.externalReference,
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
   externalReferenceId: 'my-id',
   externalReferenceAttachmentTypeId: '.test',
@@ -120,7 +119,7 @@ export const postExternalReferenceESReq: CommentRequestExternalReferenceNoSOType
   owner: 'securitySolutionFixture',
 };
 
-export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType = {
+export const postExternalReferenceSOReq: ExternalReferenceSOAttachmentPayload = {
   ...postExternalReferenceESReq,
   externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
 };
@@ -137,8 +136,8 @@ export const fileAttachmentMetadata: FileAttachmentMetadata = {
 };
 
 export const getFilesAttachmentReq = (
-  req?: Partial<CommentRequestExternalReferenceSOType>
-): CommentRequestExternalReferenceSOType => {
+  req?: Partial<ExternalReferenceSOAttachmentPayload>
+): ExternalReferenceSOAttachmentPayload => {
   return {
     ...postExternalReferenceSOReq,
     externalReferenceStorage: {
@@ -151,8 +150,8 @@ export const getFilesAttachmentReq = (
   };
 };
 
-export const persistableStateAttachment: CommentRequestPersistableStateType = {
-  type: CommentType.persistableState,
+export const persistableStateAttachment: PersistableStateAttachmentPayload = {
+  type: AttachmentType.persistableState,
   owner: 'securitySolutionFixture',
   persistableStateAttachmentTypeId: '.test',
   persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
@@ -175,18 +174,19 @@ export const postCaseResp = (
   status: CaseStatuses.open,
   updated_by: null,
   category: null,
+  customFields: [],
 });
 
 interface CommentRequestWithID {
   id: string;
-  comment: CommentRequest;
+  comment: AttachmentRequest;
 }
 
 export const commentsResp = ({
   comments,
 }: {
   comments: CommentRequestWithID[];
-}): Array<Partial<Comment>> => {
+}): Array<Partial<Attachment>> => {
   return comments.map(({ comment, id }) => {
     const baseFields = {
       id,

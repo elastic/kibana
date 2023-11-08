@@ -5,7 +5,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   class="euiBadgeGroup emotion-euiBadgeGroup-xs"
 >
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
     href="/?filters=[[\\"tags\\",[\\"red\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -21,7 +21,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     </span>
   </a>
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
     href="/?filters=[[\\"tags\\",[\\"green\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -37,7 +37,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     </span>
   </a>
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
     href="/?filters=[[\\"tags\\",[\\"blue\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -53,7 +53,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     </span>
   </a>
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
     href="/?filters=[[\\"tags\\",[\\"black\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -69,7 +69,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
     </span>
   </a>
   <a
-    class="euiBadge eui-textTruncate emotion-euiBadge-clickable-hollow"
+    class="euiBadge eui-textTruncate emotion-euiBadge-hollow-clickable"
     href="/?filters=[[\\"tags\\",[\\"purple\\"]]]"
     rel="noreferrer"
     style="max-width:120px"
@@ -86,7 +86,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
   </a>
   <button
     aria-label="Click to view remaining tags"
-    class="euiBadge emotion-euiBadge-clickable-hollow"
+    class="euiBadge emotion-euiBadge-hollow-clickable"
   >
     <span
       class="euiBadge__content emotion-euiBadge__content"

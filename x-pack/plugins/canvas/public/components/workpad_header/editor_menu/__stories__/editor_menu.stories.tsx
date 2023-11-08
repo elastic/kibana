@@ -19,6 +19,7 @@ const testFactories: EmbeddableFactoryDefinition[] = [
     getIconType: () => '',
     getDescription: () => 'Description for anomaly swimlane',
     isEditable: () => Promise.resolve(true),
+    latestVersion: '1.0.0',
     create: () => Promise.resolve({ id: 'swimlane_embeddable' } as IEmbeddable),
     grouping: [
       {
@@ -35,6 +36,7 @@ const testFactories: EmbeddableFactoryDefinition[] = [
     getDescription: () => 'Description for anomaly chart',
     isEditable: () => Promise.resolve(true),
     create: () => Promise.resolve({ id: 'anomaly_chart_embeddable' } as IEmbeddable),
+    latestVersion: '1.0.0',
     grouping: [
       {
         id: 'ml',
@@ -48,6 +50,7 @@ const testFactories: EmbeddableFactoryDefinition[] = [
     getDisplayName: () => 'Log stream',
     getIconType: () => '',
     getDescription: () => 'Description for log stream',
+    latestVersion: '1.0.0',
     isEditable: () => Promise.resolve(true),
     create: () => Promise.resolve({ id: 'anomaly_chart_embeddable' } as IEmbeddable),
   },

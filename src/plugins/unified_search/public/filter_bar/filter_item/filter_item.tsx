@@ -44,6 +44,7 @@ import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
 } from '../filter_editor';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
@@ -59,6 +60,7 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   readOnly?: boolean;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -394,6 +396,7 @@ function FilterItemComponent(props: FilterItemProps) {
                 onCancel={() => setIsPopoverOpen(false)}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
                 filtersForSuggestions={props.filtersForSuggestions}
+                suggestionsAbstraction={props.suggestionsAbstraction}
                 docLinks={docLinks}
               />
             </div>,

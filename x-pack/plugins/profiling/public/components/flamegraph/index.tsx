@@ -18,7 +18,9 @@ import {
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ElasticFlameGraph } from '../../../common/flamegraph';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import type { ElasticFlameGraph } from '@kbn/profiling-utils';
+import { i18n } from '@kbn/i18n';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
 import { FlameGraphLegend } from './flame_graph_legend';
 import { FrameInformationWindow } from '../frame_information_window';
@@ -33,10 +35,9 @@ interface Props {
   comparisonFlamegraph?: ElasticFlameGraph;
   baseline?: number;
   comparison?: number;
-  showInformationWindow: boolean;
-  toggleShowInformationWindow: () => void;
   searchText?: string;
   onChangeSearchText?: FlameSpec['onSearchTextChange'];
+  isEmbedded?: boolean;
 }
 
 export function FlameGraph({
@@ -46,12 +47,16 @@ export function FlameGraph({
   comparisonFlamegraph,
   baseline,
   comparison,
-  showInformationWindow,
-  toggleShowInformationWindow,
   searchText,
   onChangeSearchText,
+  isEmbedded = false,
 }: Props) {
+  const [showInformationWindow, setShowInformationWindow] = useState(false);
+  function toggleShowInformationWindow() {
+    setShowInformationWindow((prev) => !prev);
+  }
   const theme = useEuiTheme();
+  const trackProfilingEvent = useUiTracker({ app: 'profiling' });
 
   const columnarData = useMemo(() => {
     return getFlamegraphModel({
@@ -122,6 +127,7 @@ export function FlameGraph({
                         setHighlightedVmIndex(selectedElement!.vmIndex);
                       }
                     }}
+                    locale={i18n.getLocale()}
                   />
                   <Tooltip
                     actions={[{ label: '', onSelect: () => {} }]}
@@ -136,8 +142,15 @@ export function FlameGraph({
                       const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
                       const totalSeconds = primaryFlamegraph.TotalSeconds;
                       const nodeID = primaryFlamegraph.ID[valueIndex];
-
+                      const inline = primaryFlamegraph.Inline[valueIndex];
                       const comparisonNode = columnarData.comparisonNodesById[nodeID];
+
+                      const parentLabel = inline
+                        ? // If it's an inline frame, look up for its parent frame
+                          primaryFlamegraph.Label[
+                            primaryFlamegraph.Edges.findIndex((edge) => edge.includes(valueIndex))
+                          ]
+                        : undefined;
 
                       return (
                         <FlameGraphTooltip
@@ -154,11 +167,12 @@ export function FlameGraph({
                           baselineScaleFactor={baseline}
                           comparisonScaleFactor={comparison}
                           onShowMoreClick={() => {
-                            if (!showInformationWindow) {
-                              toggleShowInformationWindow();
-                            }
+                            trackProfilingEvent({ metric: 'flamegraph_node_details_click' });
+                            toggleShowInformationWindow();
                             setHighlightedVmIndex(valueIndex);
                           }}
+                          inline={inline}
+                          parentLabel={parentLabel}
                         />
                       );
                     }}
@@ -191,7 +205,7 @@ export function FlameGraph({
           frame={selected}
           totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
           totalSamples={totalSamples}
-          samplingRate={primaryFlamegraph?.SamplingRate ?? 1.0}
+          showSymbolsStatus={!isEmbedded}
         />
       )}
     </>

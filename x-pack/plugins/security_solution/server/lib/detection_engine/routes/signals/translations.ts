@@ -13,3 +13,10 @@ export const ALERT_TAGS_VALIDATION_ERROR = (duplicates: string) =>
     defaultMessage:
       'Duplicate tags { duplicates } were found in the tags_to_add and tags_to_remove parameters.',
   });
+
+export const NO_IDS_VALIDATION_ERROR = i18n.translate(
+  'xpack.securitySolution.api.alertTags.noAlertIds',
+  {
+    defaultMessage: 'No alert ids were provided',
+  }
+);
