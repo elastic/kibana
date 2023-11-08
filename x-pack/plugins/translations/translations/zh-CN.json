@@ -7925,7 +7925,6 @@
     "xpack.apm.customLink.empty": "未找到定制链接。设置自己的定制链接，如特定仪表板的链接或外部链接。",
     "xpack.apm.data_view.creation_failed": "创建数据视图时出错",
     "xpack.apm.dataView.alreadyExistsInActiveSpace": "活动工作区中已存在数据视图",
-    "xpack.apm.dataView.alreadyExistsInAnotherSpace": "数据视图已在另一工作区中存在，但在此工作区中不可用",
     "xpack.apm.dataView.autoCreateDisabled": "已通过“autoCreateApmDataView”配置选项禁止自动创建数据视图",
     "xpack.apm.dataView.noApmData": "无 APM 数据",
     "xpack.apm.dependecyOperationDetailView.header.backLinkLabel": "所有操作",

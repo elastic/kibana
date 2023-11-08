@@ -20,6 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
   const synthtrace = getService('synthtraceEsClient');
+  const logger = getService('log');
   const dataViewPattern = 'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*';
 
   function createDataViewWithWriteUser({ spaceId }: { spaceId: string }) {
@@ -36,9 +37,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  function deleteDataView() {
+  function deleteDataView(spaceId: string) {
     return supertest
-      .delete(`/api/saved_objects/index-pattern/${getDataViewId('default')}?force=true`)
+      .delete(`/s/${spaceId}/api/saved_objects/index-pattern/${getDataViewId(spaceId)}?force=true`)
       .set('kbn-xsrf', 'foo');
   }
 
@@ -90,7 +91,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await deleteDataView();
+      try {
+        await Promise.all([deleteDataView('default'), deleteDataView('foo')]);
+      } catch (e) {
+        logger.error(`Could not delete data views ${e.message}`);
+      }
     });
 
     describe('when creating data view with write user', () => {
@@ -108,9 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(dataView.id).to.be('apm_static_data_view_id_default');
         expect(dataView.name).to.be('APM');
-        expect(dataView.getIndexPattern()).to.be(
-          'traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*'
-        );
+        expect(dataView.title).to.be('traces-apm*,apm-*,logs-apm*,apm-*,metrics-apm*,apm-*');
       });
     });
 
@@ -127,7 +130,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('has correct id', () => {
-        expect(dataViewResponse.body.id).to.be('apm_static_data_view_id');
+        expect(dataViewResponse.body.id).to.be('apm_static_data_view_id_default');
       });
 
       it('has correct title', () => {
@@ -196,24 +199,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(res.status).to.be(200);
         expect(res.body).to.eql({
           created: false,
-          reason: 'Dataview already exists in the active space',
+          reason: 'Dataview already exists in the active space and does not need to be updated',
         });
       });
     });
 
     describe('when creating data view in "default" space', async () => {
-      it('can be retrieved from the "default space"', async () => {
+      it('can be retrieved from the "default" space', async () => {
         await createDataViewWithWriteUser({ spaceId: 'default' });
         const res = await getDataView({ spaceId: 'default' });
         expect(res.body.id).to.eql('apm_static_data_view_id_default');
-        expect(res.body.namespaces).to.eql(['*', 'default']);
+        expect(res.body.namespaces).to.eql(['default']);
       });
 
-      it('can be retrieved from the "foo" space', async () => {
+      it('cannot be retrieved from the "foo" space', async () => {
         await createDataViewWithWriteUser({ spaceId: 'default' });
         const res = await getDataView({ spaceId: 'foo' });
+        expect(res.body.statusCode).to.be(404);
+      });
+    });
+
+    describe('when creating data view in "foo" space', async () => {
+      it('can be retrieved from the "foo" space', async () => {
+        await createDataViewWithWriteUser({ spaceId: 'foo' });
+        const res = await getDataView({ spaceId: 'foo' });
         expect(res.body.id).to.eql('apm_static_data_view_id_foo');
-        expect(res.body.namespaces).to.eql(['*', 'default']);
+        expect(res.body.namespaces).to.eql(['foo']);
+      });
+
+      it('cannot be retrieved from the "default" space', async () => {
+        await createDataViewWithWriteUser({ spaceId: 'foo' });
+        const res = await getDataView({ spaceId: 'default' });
+        expect(res.body.statusCode).to.be(404);
       });
     });
   });

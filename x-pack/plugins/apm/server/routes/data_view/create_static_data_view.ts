@@ -40,8 +40,8 @@ export async function createStaticDataView({
   spaceId: string;
 }): CreateDataViewResponse {
   const { config } = resources;
-
   const dataViewId = getDataViewId(spaceId);
+  console.log(`create static data view ${dataViewId}`);
 
   return withApmSpan('create_static_data_view', async () => {
     // don't auto-create APM data view if it's been disabled via the config
