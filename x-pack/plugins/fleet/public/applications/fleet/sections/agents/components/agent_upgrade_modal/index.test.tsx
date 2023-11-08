@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
@@ -51,8 +51,9 @@ describe('AgentUpgradeAgentModal', () => {
       agentCount: 3,
     });
 
-    const el = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
-    expect(el?.textContent).toBe('Immediately');
+    const container = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
+    const input = within(container).getByRole<HTMLInputElement>('combobox');
+    expect(input?.value).toBe('Immediately');
   });
 
   it('should set the default to Immediately if there is less than 10 agents using selected agents', async () => {
@@ -61,8 +62,9 @@ describe('AgentUpgradeAgentModal', () => {
       agentCount: 3,
     });
 
-    const el = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
-    expect(el?.textContent).toBe('Immediately');
+    const container = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
+    const input = within(container).getByRole<HTMLInputElement>('combobox');
+    expect(input?.value).toBe('Immediately');
   });
 
   it('should set the default to 1 hour if there is more than 10 agents', async () => {
@@ -71,8 +73,9 @@ describe('AgentUpgradeAgentModal', () => {
       agentCount: 13,
     });
 
-    const el = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
-    expect(el?.textContent).toBe('1 hour');
+    const container = utils.getByTestId('agentUpgradeModal.MaintenanceCombobox');
+    const input = within(container).getByRole<HTMLInputElement>('combobox');
+    expect(input?.value).toBe('1 hour');
   });
 
   it('should enable the version combo if agents is a query', async () => {
@@ -93,9 +96,11 @@ describe('AgentUpgradeAgentModal', () => {
       agentCount: 1,
     });
 
-    const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+    const container = utils.getByTestId('agentUpgradeModal.VersionCombobox')
+    const input = within(container).getByRole<HTMLInputElement>('combobox');
+
     await waitFor(() => {
-      expect(el.textContent).toEqual('8.10.2');
+      expect(input?.value).toEqual('8.10.2');
     });
   });
 
