@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import type { AgentsRequestOptions } from '../../../../../../target/types/common/search_strategy';
+import type { AgentsRequestOptions } from '../../../../../../common/search_strategy/osquery/agents';
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
 
