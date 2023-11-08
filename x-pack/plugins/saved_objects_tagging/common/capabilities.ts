@@ -18,7 +18,6 @@ export interface TagsCapabilities {
   delete: boolean;
   assign: boolean;
   viewConnections: boolean;
-  shareIntoSpace: boolean;
 }
 
 export const getTagsCapabilities = (capabilities: Capabilities): TagsCapabilities => {
@@ -30,6 +29,5 @@ export const getTagsCapabilities = (capabilities: Capabilities): TagsCapabilitie
     delete: (rawTagCapabilities?.delete as boolean) ?? false,
     assign: (rawTagCapabilities?.assign as boolean) ?? false,
     viewConnections: (capabilities.savedObjectsManagement?.read as boolean) ?? false,
-    shareIntoSpace: (capabilities.savedObjectsManagement?.shareIntoSpace as boolean) ?? false,
   };
 };

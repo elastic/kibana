@@ -10,7 +10,6 @@ import { Tag, TagSavedObject } from '../../../common/types';
 export const savedObjectToTag = (savedObject: TagSavedObject): Tag => {
   return {
     id: savedObject.id,
-    namespaces: savedObject.namespaces,
     ...savedObject.attributes,
   };
 };

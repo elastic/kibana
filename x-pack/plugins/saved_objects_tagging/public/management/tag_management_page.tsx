@@ -12,7 +12,6 @@ import { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener } from '../components/edition_modal';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
@@ -28,7 +27,6 @@ interface TagManagementPageParams {
   tagClient: ITagInternalClient;
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
-  spaces?: SpacesApi;
   capabilities: TagsCapabilities;
   assignableTypes: string[];
 }
@@ -41,7 +39,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   assignmentService,
   capabilities,
   assignableTypes,
-  spaces,
 }) => {
   const { overlays, notifications, application, http, theme } = core;
   const [loading, setLoading] = useState<boolean>(false);
@@ -209,7 +206,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
           setQuery(newQuery);
           setSelectedTags([]);
         }}
-        reloadTags={fetchTags}
         allowSelection={bulkActions.length > 0}
         selectedTags={selectedTags}
         onSelectionChange={(tags) => {
@@ -219,7 +215,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
         onShowRelations={(tag) => {
           showTagRelations(tag);
         }}
-        spaces={spaces}
       />
     </>
   );

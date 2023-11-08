@@ -9,11 +9,9 @@ import React, { useRef, useEffect, FC, ReactNode } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { TagsCapabilities, TagWithRelations } from '../../../common';
 import { TagBadge } from '../../components';
 import { TagAction } from '../actions';
-import { SpacesList } from './spaces_list';
 
 interface TagTableProps {
   loading: boolean;
@@ -21,7 +19,6 @@ interface TagTableProps {
   tags: TagWithRelations[];
   initialQuery?: Query;
   allowSelection: boolean;
-  reloadTags: () => void;
   onQueryChange: (query?: Query) => void;
   selectedTags: TagWithRelations[];
   onSelectionChange: (selection: TagWithRelations[]) => void;
@@ -29,7 +26,6 @@ interface TagTableProps {
   onShowRelations: (tag: TagWithRelations) => void;
   actions: TagAction[];
   actionBar: ReactNode;
-  spaces?: SpacesApi;
 }
 
 const tablePagination = {
@@ -53,7 +49,6 @@ export const TagTable: FC<TagTableProps> = ({
   tags,
   initialQuery,
   allowSelection,
-  reloadTags,
   onQueryChange,
   selectedTags,
   onSelectionChange,
@@ -61,7 +56,6 @@ export const TagTable: FC<TagTableProps> = ({
   getTagRelationUrl,
   actionBar,
   actions,
-  spaces,
 }) => {
   const tableRef = useRef<EuiInMemoryTable<TagWithRelations>>(null);
 
@@ -70,29 +64,6 @@ export const TagTable: FC<TagTableProps> = ({
       tableRef.current.setSelection(selectedTags);
     }
   }, [selectedTags]);
-
-  const spacesColumn: EuiBasicTableColumn<TagWithRelations> | undefined = spaces
-    ? {
-        field: 'spaces',
-        name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.spaces', {
-          defaultMessage: 'Spaces',
-        }),
-        width: '20%',
-        render: (_, tag) => {
-          return (
-            <SpacesList
-              spacesApi={spaces}
-              canShareIntoSpace={capabilities.shareIntoSpace}
-              spaceIds={tag.namespaces ?? []}
-              id={tag.id}
-              title={tag.name}
-              // TODO handle refresh
-              refresh={reloadTags}
-            />
-          );
-        },
-      }
-    : undefined;
 
   const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
@@ -155,7 +126,6 @@ export const TagTable: FC<TagTableProps> = ({
         );
       },
     },
-    ...(spacesColumn ? [spacesColumn] : []),
     ...(actions.length
       ? [
           {

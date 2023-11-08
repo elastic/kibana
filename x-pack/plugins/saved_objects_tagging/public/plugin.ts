@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kbn/core/public';
-import { SpacesApi, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SavedObjectTaggingOssPluginSetup } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { tagManagementSectionId } from '../common/constants';
@@ -22,17 +21,12 @@ interface SetupDeps {
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginSetup;
 }
 
-interface StartDeps {
-  spaces?: SpacesPluginStart;
-}
-
 export class SavedObjectTaggingPlugin
-  implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, StartDeps>
+  implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}>
 {
   private tagClient?: TagsClient;
   private tagCache?: TagsCache;
   private assignmentService?: TagAssignmentService;
-  private spaces?: SpacesApi;
   private readonly config: SavedObjectsTaggingClientConfig;
 
   constructor(context: PluginInitializerContext) {
@@ -62,7 +56,6 @@ export class SavedObjectTaggingPlugin
           core,
           mountParams,
           title,
-          spaces: this.spaces,
         });
       },
     });
@@ -74,17 +67,13 @@ export class SavedObjectTaggingPlugin
     return {};
   }
 
-  public start(
-    { http, application, overlays, theme, analytics, notifications }: CoreStart,
-    { spaces }: StartDeps
-  ) {
+  public start({ http, application, overlays, theme, analytics, notifications }: CoreStart) {
     this.tagCache = new TagsCache({
       refreshHandler: () => this.tagClient!.getAll({ asSystemRequest: true }),
       refreshInterval: this.config.cacheRefreshInterval,
     });
     this.tagClient = new TagsClient({ analytics, http, changeListener: this.tagCache });
     this.assignmentService = new TagAssignmentService({ http });
-    this.spaces = spaces;
 
     // do not fetch tags on anonymous page
     if (!http.anonymousPaths.isAnonymous(window.location.pathname)) {

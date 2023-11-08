@@ -17,8 +17,7 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "security",
-      "spaces"
+      "security"
     ],
     "requiredBundles": [
       "kibanaReact"
