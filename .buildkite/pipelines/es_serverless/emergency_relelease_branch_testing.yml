@@ -1,6 +1,8 @@
 # https://buildkite.com/elastic/kibana-serverless-emergency-release-branch-testing
 
 ## Triggers the artifacts container image build for emergency releases
+agents:
+  queue: kibana-default
 
 notify:
   - slack: "#kibana-mission-control"
