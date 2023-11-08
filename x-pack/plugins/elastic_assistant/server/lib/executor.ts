@@ -8,9 +8,10 @@
 import { get } from 'lodash/fp';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { PassThrough, Readable } from 'stream';
 import { RequestBody } from './langchain/types';
 
-interface Props {
+export interface Props {
   actions: ActionsPluginStart;
   connectorId: string;
   request: KibanaRequest<unknown, unknown, RequestBody>;
@@ -25,11 +26,20 @@ export const executeAction = async ({
   actions,
   request,
   connectorId,
-}: Props): Promise<StaticResponse> => {
+}: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
+
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
-    params: request.body.params,
+    params: {
+      ...request.body.params,
+      subActionParams:
+        // TODO: Remove in part 2 of streaming work for security solution
+        // tracked here: https://github.com/elastic/security-team/issues/7363
+        request.body.params.subAction === 'invokeAI'
+          ? request.body.params.subActionParams
+          : { body: JSON.stringify(request.body.params.subActionParams), stream: true },
+    },
   });
 
   if (actionResult.status === 'error') {
@@ -38,14 +48,18 @@ export const executeAction = async ({
     );
   }
   const content = get('data.message', actionResult);
-  if (typeof content !== 'string') {
-    throw new Error(
-      `Action result status is error: content should be a string, but it had an unexpected type: ${typeof content}`
-    );
+  if (typeof content === 'string') {
+    return {
+      connector_id: connectorId,
+      data: content, // the response from the actions framework
+      status: 'ok',
+    };
   }
-  return {
-    connector_id: connectorId,
-    data: content, // the response from the actions framework
-    status: 'ok',
-  };
+  const readable = get('data', actionResult) as Readable;
+
+  if (typeof readable?.read !== 'function') {
+    throw new Error('Action result status is error: result is not streamable');
+  }
+
+  return readable.pipe(new PassThrough());
 };
