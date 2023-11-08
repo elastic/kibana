@@ -26,7 +26,8 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     login();
   });
 
-  describe('File operations: get-file and upload', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/170482
+  describe.skip('File operations:', () => {
     const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
 
     const fileContent = 'This is a test file for the get-file command.';

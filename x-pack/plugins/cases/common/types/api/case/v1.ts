@@ -135,6 +135,27 @@ export const CasePostRequestRt = rt.intersection([
   ),
 ]);
 
+/**
+ * Bulk create cases
+ */
+
+const CaseCreateRequestWithOptionalId = rt.intersection([
+  CasePostRequestRt,
+  rt.exact(rt.partial({ id: rt.string })),
+]);
+
+export const BulkCreateCasesRequestRt = rt.strict({
+  cases: rt.array(CaseCreateRequestWithOptionalId),
+});
+
+export const BulkCreateCasesResponseRt = rt.strict({
+  cases: rt.array(CaseRt),
+});
+
+/**
+ * Find cases
+ */
+
 export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
   title: null,
@@ -480,3 +501,5 @@ export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
 export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
+export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
+export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;

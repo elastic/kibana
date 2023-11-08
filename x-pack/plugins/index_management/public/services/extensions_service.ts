@@ -6,25 +6,42 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FunctionComponent } from 'react';
+import { ApplicationStart } from '@kbn/core-application-browser';
+import { EuiBadgeProps } from '@elastic/eui';
 import type { IndexDetailsTab } from '../../common/constants';
+import { Index } from '..';
+
+export interface IndexOverviewContent {
+  renderContent: (args: {
+    index: Index;
+    getUrlForApp: ApplicationStart['getUrlForApp'];
+  }) => ReturnType<FunctionComponent>;
+}
+
+export interface IndexBadge {
+  matchIndex: (index: Index) => boolean;
+  label: string;
+  // a parseable search bar filter expression, for example "isFollowerIndex:true"
+  filterExpression?: string;
+  color: EuiBadgeProps['color'];
+}
 
 export interface ExtensionsSetup {
-  addSummary(summary: any): void;
   addAction(action: any): void;
   addBanner(banner: any): void;
   addFilter(filter: any): void;
-  addBadge(badge: any): void;
+  addBadge(badge: IndexBadge): void;
   addToggle(toggle: any): void;
   addIndexDetailsTab(tab: IndexDetailsTab): void;
+  setIndexOverviewContent(content: IndexOverviewContent): void;
 }
 
 export class ExtensionsService {
-  private _indexDetailsTabs: IndexDetailsTab[] = [];
-  private _summaries: any[] = [];
   private _actions: any[] = [];
   private _banners: any[] = [];
   private _filters: any[] = [];
-  private _badges: any[] = [
+  private _badges: IndexBadge[] = [
     {
       matchIndex: (index: { isFrozen: boolean }) => {
         return index.isFrozen;
@@ -37,6 +54,8 @@ export class ExtensionsService {
     },
   ];
   private _toggles: any[] = [];
+  private _indexDetailsTabs: IndexDetailsTab[] = [];
+  private _indexOverviewContent: IndexOverviewContent | null = null;
   private service?: ExtensionsSetup;
 
   public setup(): ExtensionsSetup {
@@ -45,16 +64,12 @@ export class ExtensionsService {
       addBadge: this.addBadge.bind(this),
       addBanner: this.addBanner.bind(this),
       addFilter: this.addFilter.bind(this),
-      addSummary: this.addSummary.bind(this),
       addToggle: this.addToggle.bind(this),
       addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
+      setIndexOverviewContent: this.setIndexOverviewMainContent.bind(this),
     };
 
     return this.service;
-  }
-
-  private addSummary(summary: any) {
-    this._summaries.push(summary);
   }
 
   private addAction(action: any) {
@@ -69,7 +84,7 @@ export class ExtensionsService {
     this._filters.push(filter);
   }
 
-  private addBadge(badge: any) {
+  private addBadge(badge: IndexBadge) {
     this._badges.push(badge);
   }
 
@@ -81,8 +96,12 @@ export class ExtensionsService {
     this._indexDetailsTabs.push(tab);
   }
 
-  public get summaries() {
-    return this._summaries;
+  private setIndexOverviewMainContent(content: IndexOverviewContent) {
+    if (this._indexOverviewContent) {
+      throw new Error(`The content for index overview has already been set.`);
+    } else {
+      this._indexOverviewContent = content;
+    }
   }
 
   public get actions() {
@@ -107,5 +126,9 @@ export class ExtensionsService {
 
   public get indexDetailsTabs() {
     return this._indexDetailsTabs;
+  }
+
+  public get indexOverviewContent() {
+    return this._indexOverviewContent;
   }
 }
