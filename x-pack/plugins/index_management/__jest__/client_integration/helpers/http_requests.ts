@@ -169,6 +169,9 @@ const registerHttpRequestMockHelpers = (
       error
     );
 
+  const setGetPrivilegesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${INTERNAL_API_BASE_PATH}/enrich_policies/privileges`, response, error);
+
   const setCreateEnrichPolicy = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${INTERNAL_API_BASE_PATH}/enrich_policies`, response, error);
 
@@ -226,6 +229,7 @@ const registerHttpRequestMockHelpers = (
     setCreateIndexResponse,
     setGetMatchingIndices,
     setGetFieldsFromIndices,
+    setGetPrivilegesResponse,
     setCreateEnrichPolicy,
   };
 };
