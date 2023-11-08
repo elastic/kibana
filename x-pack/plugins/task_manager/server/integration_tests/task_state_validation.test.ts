@@ -266,7 +266,6 @@ describe('task state validation', () => {
     let esServer: TestElasticsearchUtils;
     let kibanaServer: TestKibanaUtils;
     let taskManagerPlugin: TaskManagerStartContract;
-    let pollingLifecycleOpts: TaskPollingLifecycleOpts;
 
     beforeAll(async () => {
       const setupResult = await setupTestServers({
@@ -283,7 +282,6 @@ describe('task state validation', () => {
       taskManagerPlugin = taskManagerStartSpy.mock.results[0].value;
 
       expect(TaskPollingLifecycleMock).toHaveBeenCalledTimes(1);
-      pollingLifecycleOpts = TaskPollingLifecycleMock.mock.calls[0][0];
     });
 
     afterAll(async () => {
