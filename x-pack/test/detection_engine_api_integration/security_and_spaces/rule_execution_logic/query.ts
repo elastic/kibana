@@ -28,7 +28,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   QueryRuleCreateProps,
-  BulkActionType,
+  BulkActionTypeEnum,
   AlertSuppressionMissingFieldsStrategyEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
@@ -2296,7 +2296,7 @@ export default ({ getService }: FtrProviderContext) => {
           .post(DETECTION_ENGINE_RULES_BULK_ACTION)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
-          .send({ query: '', action: BulkActionType.enable })
+          .send({ query: '', action: BulkActionTypeEnum.enable })
           .expect(200);
 
         // Confirming that enabling did not migrate rule, so rule
