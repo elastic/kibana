@@ -26,7 +26,7 @@ export function ExpandButton({
 }: Props) {
   // isLoading indicates at least one layer is loading.
   // Expand button should never be disabled.
-  // Not using EuiButton* because EuiButton* disables button when isLoading prop is true.
+  // Not using EuiButton* with iconType props because EuiButton* disables button when isLoading prop is true.
   return (
     <EuiButtonEmpty 
       aria-label={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
