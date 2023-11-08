@@ -188,6 +188,38 @@ function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Pr
   return pRetry(fetchHealthStatusAttempt, retryOptions);
 }
 
+function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise<void> {
+  const fetchEsAccessAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if can be accessed.`);
+
+    const response = await axios.get(`${esUrl}`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error('Cannot access. Retrying in 20s...');
+    } else {
+      log.info('Access performed successfully');
+    }
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info(
+          `${runnerId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
+        );
+      }
+    },
+    retries: 100,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+
+  return pRetry(fetchEsAccessAttempt, retryOptions);
+}
+
 // Wait until Kibana is available
 function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): Promise<void> {
   const fetchKibanaStatusAttempt = async (attemptNum: number) => {
@@ -252,7 +284,11 @@ function waitForProject(projectId: string, apiKey: string): Promise<void> {
 }
 
 // Wait until application is ready
-function waitForLoginToWork(kbUrl: string, username: string, password: string): Promise<void> {
+function waitForKibanaLoginToWork(
+  kbUrl: string,
+  username: string,
+  password: string
+): Promise<void> {
   const body = {
     providerType: 'basic',
     providerName: 'cloud-basic',
@@ -439,8 +475,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               return process.exit(1);
             }
 
-            await waitForProject(environment.id, API_KEY);
-
             // Reset credentials for elastic user
             const credentials = await resetCredentials(environment.id, id, API_KEY);
 
@@ -449,6 +483,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               // eslint-disable-next-line no-process-exit
               return process.exit(1);
             }
+
+            await waitForProject(environment.id, API_KEY);
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = btoa(`${credentials.username}:${credentials.password}`);
@@ -459,8 +495,11 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             // Wait until Kibana is available
             await waitForKibanaAvailable(environment.kb_url, auth, id);
 
-            // Wait for Login
-            await waitForLoginToWork(
+            // Wait for being able to access elasticsearch
+            await waitForEsAccess(environment.es_url, auth, id);
+
+            // Wait for being able to log-in kibana
+            await waitForKibanaLoginToWork(
               environment.kb_url,
               credentials.username,
               credentials.password
