@@ -28,10 +28,6 @@
 # The maximum payload size in bytes for incoming server requests.
 #server.maxPayload: 1048576
 
-# Keep deeplinks visible so that they are shown in the sidenav
-dev_tools.deeplinks.navLinkStatus: visible
-management.deeplinks.navLinkStatus: visible
-
 # The Kibana server's name. This is used for display purposes.
 #server.name: "your-hostname"
 

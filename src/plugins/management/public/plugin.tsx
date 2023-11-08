@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n as kbnI18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -27,6 +27,7 @@ import {
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -64,32 +65,11 @@ export class ManagementPlugin
 {
   private readonly managementSections = new ManagementSectionsService();
 
-  private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const config = this.initializerContext.config.get();
-    const navLinkStatus =
-      AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus];
-
-    const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
-      (section: ManagementSection) => ({
-        id: section.id,
-        title: section.title,
-        navLinkStatus,
-        deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
-          id: mgmtApp.id,
-          title: mgmtApp.title,
-          path: mgmtApp.basePath,
-          keywords: mgmtApp.keywords,
-          navLinkStatus,
-        })),
-      })
-    );
-
-    return { deepLinks };
-  });
+  private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => undefined);
 
   private hasAnyEnabledApps = true;
 
-  private isSidebarEnabled$ = new BehaviorSubject<boolean>(false);
+  private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
   private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
     enabled: false,
     hideLinksTo: [],
@@ -163,18 +143,11 @@ export class ManagementPlugin
 
   public start(core: CoreStart, plugins: ManagementStartDependencies): ManagementStart {
     this.managementSections.start({ capabilities: core.application.capabilities });
-    this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
-      .getSectionsEnabled()
-      .some((section) => section.getAppsEnabled().length > 0);
+    this.setupDeeplinks(core.chrome.getChromeStyle$());
 
-    if (!this.hasAnyEnabledApps) {
-      this.appUpdater.next(() => {
-        return {
-          status: AppStatus.inaccessible,
-          navLinkStatus: AppNavLinkStatus.hidden,
-        };
-      });
-    }
+    core.chrome.getChromeStyle$().subscribe((style) => {
+      this.isSidebarEnabled$.next(style === 'classic');
+    });
 
     // Register the Settings app only if in serverless, until we integrate the SettingsApplication into the Advanced settings plugin
     // Otherwise, it will be double registered from the Advanced settings plugin
@@ -209,5 +182,46 @@ export class ManagementPlugin
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
     };
+  }
+
+  private setupDeeplinks(chromeStyle$: Observable<ChromeStyle>) {
+    chromeStyle$.subscribe((chromeStyle) => {
+      this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
+        .getSectionsEnabled()
+        .some((section) => section.getAppsEnabled().length > 0);
+
+      if (!this.hasAnyEnabledApps) {
+        this.appUpdater.next(() => {
+          return {
+            status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          };
+        });
+        return;
+      }
+
+      const config = this.initializerContext.config.get();
+      const navLinkStatus =
+        chromeStyle === 'project'
+          ? AppNavLinkStatus.visible // Always visible for project style
+          : AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus];
+
+      const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
+        (section: ManagementSection) => ({
+          id: section.id,
+          title: section.title,
+          navLinkStatus,
+          deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
+            id: mgmtApp.id,
+            title: mgmtApp.title,
+            path: mgmtApp.basePath,
+            keywords: mgmtApp.keywords,
+            navLinkStatus,
+          })),
+        })
+      );
+
+      this.appUpdater.next(() => ({ deepLinks }));
+    });
   }
 }
