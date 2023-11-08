@@ -15,6 +15,7 @@
       "data",
       "discover",
       "logExplorer",
+      "logsShared",
       "observabilityShared",
       "share",
       "kibanaUtils",

@@ -5,85 +5,30 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-// TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-import { DefaultSortOrderAsc, DefaultSortOrderDesc } from './sorting_legacy';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { SortOrder } from './sorting.gen';
 
-describe('Common sorting schemas', () => {
-  describe('DefaultSortOrderAsc', () => {
-    describe('Validation succeeds', () => {
-      it('when valid sort order is passed', () => {
-        const payload = 'desc';
-        const decoded = DefaultSortOrderAsc.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-    });
-
-    describe('Validation fails', () => {
-      it('when invalid sort order is passed', () => {
-        const payload = 'behind_you';
-        const decoded = DefaultSortOrderAsc.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "behind_you" supplied to "DefaultSortOrderAsc"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
-    });
-
-    describe('Validation sets the default sort order "asc"', () => {
-      it('when sort order is not passed', () => {
-        const payload = undefined;
-        const decoded = DefaultSortOrderAsc.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual('asc');
-      });
-    });
+describe('SortOrder schema', () => {
+  it('accepts asc value', () => {
+    const payload = 'asc';
+    const result = SortOrder.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
-  describe('DefaultSortOrderDesc', () => {
-    describe('Validation succeeds', () => {
-      it('when valid sort order is passed', () => {
-        const payload = 'asc';
-        const decoded = DefaultSortOrderDesc.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
+  it('accepts desc value', () => {
+    const payload = 'desc';
+    const result = SortOrder.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
+  });
 
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-    });
-
-    describe('Validation fails', () => {
-      it('when invalid sort order is passed', () => {
-        const payload = 'behind_you';
-        const decoded = DefaultSortOrderDesc.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "behind_you" supplied to "DefaultSortOrderDesc"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
-    });
-
-    describe('Validation sets the default sort order "desc"', () => {
-      it('when sort order is not passed', () => {
-        const payload = null;
-        const decoded = DefaultSortOrderDesc.decode(payload);
-        const message = pipe(decoded, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual('desc');
-      });
-    });
+  it('fails on unknown value', () => {
+    const payload = 'invalid';
+    const result = SortOrder.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "Invalid enum value. Expected 'asc' | 'desc', received 'invalid'"
+    );
   });
 });
