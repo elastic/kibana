@@ -220,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
-              namespaceType: 'multiple-isolated',
+              namespaceType: 'multiple',
             });
           }));
 
@@ -238,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
-              namespaceType: 'multiple-isolated',
+              namespaceType: 'multiple',
             });
           }));
 
@@ -256,7 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
-              namespaceType: 'multiple-isolated',
+              namespaceType: 'multiple',
             });
             expect(resp.body.saved_objects[1].meta).to.eql({
               icon: 'visualizeApp',
@@ -266,7 +266,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
-              namespaceType: 'multiple-isolated',
+              namespaceType: 'multiple',
             });
           }));
 

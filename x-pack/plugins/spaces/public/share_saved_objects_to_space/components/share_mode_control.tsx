@@ -221,8 +221,7 @@ export const ShareModeControl = (props: Props) => {
           onChange={onChange}
           enableCreateNewSpaceLink={enableCreateNewSpaceLink}
           enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
-          // prohibitedSpaces={prohibitedSpaces}
-          prohibitedSpaces={new Set()}
+          prohibitedSpaces={prohibitedSpaces}
         />
       </EuiFlexGroup>
     </>
