@@ -59,7 +59,7 @@ async function getAvgLaunchTimeTimeseries({
   });
 
   const aggs = {
-    launchTime: {
+    launchTimeAvg: {
       avg: { field: APP_LAUNCH_TIME },
     },
   };
