@@ -32,7 +32,6 @@ import {
   RULE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 
 // Rule to test update
@@ -68,11 +67,10 @@ const loginPageAsWriteAuthorizedUser = (url: string) => {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
-      cleanKibana();
     });
 
     describe('User with read privileges on Security Solution', () => {

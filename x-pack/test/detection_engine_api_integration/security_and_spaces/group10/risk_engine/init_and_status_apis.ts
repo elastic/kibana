@@ -360,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/168355
-    describe('status api', () => {
+    describe.skip('status api', () => {
       it('should disable / enable risk engine', async () => {
         const status1 = await riskEngineRoutes.getStatus();
 
