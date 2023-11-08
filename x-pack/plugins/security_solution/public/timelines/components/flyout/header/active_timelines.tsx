@@ -70,8 +70,6 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
     ? UNTITLED_TEMPLATE
     : UNTITLED_TIMELINE;
 
-  const timelineChangeStatus = useMemo(() => {}, []);
-
   const tooltipContent = useMemo(() => {
     if (timelineStatus === TimelineStatus.draft) {
       return <>{i18n.UNSAVED}</>;

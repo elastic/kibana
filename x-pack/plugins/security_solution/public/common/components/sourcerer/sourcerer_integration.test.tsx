@@ -21,7 +21,6 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore } from '../../store';
-import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 import { useSourcererDataView } from '../../containers/sourcerer';
 
@@ -61,8 +60,6 @@ jest.mock('../../utils/global_query_string', () => {
   };
 });
 
-const mockOptions = DEFAULT_INDEX_PATTERN.map((index) => ({ label: index, value: index }));
-
 const defaultProps = {
   scope: sourcererModel.SourcererScopeName.default,
 };
@@ -75,7 +72,7 @@ const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) =>
   ),
 });
 
-const { id, patternList, title } = mockGlobalState.sourcerer.defaultDataView;
+const { id, patternList } = mockGlobalState.sourcerer.defaultDataView;
 const patternListNoSignals = sortWithExcludesAtEnd(
   patternList.filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
 );

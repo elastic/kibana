@@ -59,7 +59,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     show,
     filters,
     kqlMode,
-    changed,
+    changed = false,
   } = useDeepEqualSelector((state) =>
     pick(
       [
