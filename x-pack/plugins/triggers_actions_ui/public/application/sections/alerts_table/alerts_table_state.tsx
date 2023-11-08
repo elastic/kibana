@@ -28,8 +28,7 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
-import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { EmptyState } from './empty_state';
@@ -50,7 +49,7 @@ import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
-import { useGetMutedAlerts } from './hooks/use_get_muted_alerts';
+import { useGetMutedAlerts } from './hooks/alert_toggling/use_get_muted_alerts';
 import { AlertsTableContext } from './contexts/alerts_table_context';
 
 const DefaultPagination = {
@@ -74,6 +73,8 @@ export type AlertsTableStateProps = {
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
   shouldHighlightRow?: (alert: Alert) => boolean;
+  resolveRulePagePath?: (ruleId: string) => string;
+  resolveAlertPagePath?: (alertId: string) => string;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -147,10 +148,10 @@ const AlertsTableStateWithQueryProvider = ({
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
+  resolveRulePagePath,
+  resolveAlertPagePath,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
-  const queryClient = useQueryClient();
-
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
 
@@ -251,10 +252,6 @@ const AlertsTableStateWithQueryProvider = ({
   const { data: mutedAlerts } = useGetMutedAlerts([
     ...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0])),
   ]);
-
-  const onMutedAlertsChange = useCallback(() => {
-    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts());
-  }, [queryClient]);
 
   useEffect(() => {
     alertsTableConfigurationRegistry.update(configurationId, {
@@ -437,8 +434,9 @@ const AlertsTableStateWithQueryProvider = ({
     <AlertsTableContext.Provider
       value={{
         mutedAlerts: mutedAlerts ?? {},
-        onMutedAlertsChange,
         bulkActions: initialBulkActionsState,
+        resolveRulePagePath,
+        resolveAlertPagePath,
       }}
     >
       {!isLoading && alertsCount === 0 && (

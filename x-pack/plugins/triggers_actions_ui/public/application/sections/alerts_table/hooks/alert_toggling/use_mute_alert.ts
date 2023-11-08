@@ -7,9 +7,9 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import { muteAlertInstance } from '../../../lib/rule_api/mute_alert';
-import { useKibana } from '../../../..';
-import { ServerError, ToggleAlertParams } from '../types';
+import { muteAlertInstance } from '../../../../lib/rule_api/mute_alert';
+import { useKibana } from '../../../../..';
+import { ServerError, ToggleAlertParams } from '../../types';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.muteAlert.error', {
   defaultMessage: 'Error muting alert',

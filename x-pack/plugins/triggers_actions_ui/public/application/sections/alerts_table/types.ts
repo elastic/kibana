@@ -81,9 +81,10 @@ export interface ToggleAlertParams {
 
 export interface AlertsTableContextType {
   mutedAlerts: MutedAlerts;
-  onMutedAlertsChange: () => void;
   bulkActions: [
     ReducerState<typeof bulkActionsReducer>,
     Dispatch<ReducerAction<typeof bulkActionsReducer>>
   ];
+  resolveRulePagePath?: (ruleId: string) => string;
+  resolveAlertPagePath?: (alertId: string) => string;
 }

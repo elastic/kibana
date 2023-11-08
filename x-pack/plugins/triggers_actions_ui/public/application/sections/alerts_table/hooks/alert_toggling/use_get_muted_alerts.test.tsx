@@ -6,14 +6,14 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import * as api from './apis/get_rules_muted_alerts';
+import * as api from '../apis/get_rules_muted_alerts';
 import { waitFor } from '@testing-library/dom';
-import { useKibana } from '../../../../common/lib/kibana';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
 import { useGetMutedAlerts } from './use_get_muted_alerts';
 
-jest.mock('./apis/get_rules_muted_alerts');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../apis/get_rules_muted_alerts');
+jest.mock('../../../../../common/lib/kibana');
 
 const ruleIds = ['a', 'b'];
 

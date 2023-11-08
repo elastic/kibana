@@ -6,18 +6,18 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import * as api from '../../../lib/rule_api/mute_alert';
+import * as api from '../../../../lib/rule_api/unmute_alert';
 import { waitFor } from '@testing-library/dom';
-import { useKibana } from '../../../../common/lib/kibana';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
-import { useMuteAlert } from './use_mute_alert';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
+import { useUnmuteAlert } from './use_unmute_alert';
 
-jest.mock('../../../lib/rule_api/mute_alert');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../lib/rule_api/mute_alert');
+jest.mock('../../../../../common/lib/kibana');
 
 const params = { ruleId: '', alertInstanceId: '' };
 
-describe('useMuteAlert', () => {
+describe('useUnmuteAlert', () => {
   const addErrorMock = useKibana().services.notifications.toasts.addError as jest.Mock;
 
   let appMockRender: AppMockRenderer;
@@ -28,9 +28,9 @@ describe('useMuteAlert', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const muteAlertInstanceSpy = jest.spyOn(api, 'muteAlertInstance');
+    const muteAlertInstanceSpy = jest.spyOn(api, 'unmuteAlertInstance');
 
-    const { waitForNextUpdate, result } = renderHook(() => useMuteAlert(), {
+    const { waitForNextUpdate, result } = renderHook(() => useUnmuteAlert(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -48,9 +48,9 @@ describe('useMuteAlert', () => {
   });
 
   it('shows a toast error when the api returns an error', async () => {
-    const spy = jest.spyOn(api, 'muteAlertInstance').mockRejectedValue(new Error('An error'));
+    const spy = jest.spyOn(api, 'unmuteAlertInstance').mockRejectedValue(new Error('An error'));
 
-    const { result } = renderHook(() => useMuteAlert(), {
+    const { result } = renderHook(() => useUnmuteAlert(), {
       wrapper: appMockRender.AppWrapper,
     });
 

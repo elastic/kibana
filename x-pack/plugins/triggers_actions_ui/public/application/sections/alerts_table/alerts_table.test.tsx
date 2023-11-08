@@ -37,7 +37,6 @@ import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
 import { AlertsTableContext } from './contexts/alerts_table_context';
-import { noop } from 'lodash';
 
 const mockCaseService = createCasesServiceMock();
 
@@ -339,7 +338,6 @@ describe('AlertsTable', () => {
         <AlertsTableContext.Provider
           value={{
             mutedAlerts: {},
-            onMutedAlertsChange: noop,
             bulkActions: initialBulkActionsState,
           }}
         >

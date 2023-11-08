@@ -25,7 +25,6 @@ import { getCasesMockMap } from '../cases/index.mock';
 import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import { createCasesServiceMock } from '../index.mock';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
-import { noop } from 'lodash';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -258,7 +257,6 @@ describe('AlertsTable.BulkActions', () => {
         <AlertsTableContext.Provider
           value={{
             mutedAlerts: {},
-            onMutedAlertsChange: noop,
             bulkActions: initialBulkActionsState,
           }}
         >

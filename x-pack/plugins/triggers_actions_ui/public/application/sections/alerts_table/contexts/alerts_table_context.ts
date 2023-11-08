@@ -11,6 +11,5 @@ import { AlertsTableContextType } from '../types';
 
 export const AlertsTableContext = createContext<AlertsTableContextType>({
   mutedAlerts: {},
-  onMutedAlertsChange: noop,
-  bulkActions: [] as unknown as AlertsTableContextType['bulkActions'],
+  bulkActions: [{}, noop] as unknown as AlertsTableContextType['bulkActions'],
 });

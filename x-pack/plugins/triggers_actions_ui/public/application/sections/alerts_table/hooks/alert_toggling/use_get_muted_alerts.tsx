@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { getMutedAlerts } from './apis/get_rules_muted_alerts';
-import { useKibana } from '../../../../common';
-import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
-import { MutedAlerts, ServerError } from '../types';
+import { getMutedAlerts } from '../apis/get_rules_muted_alerts';
+import { useKibana } from '../../../../../common';
+import { triggersActionsUiQueriesKeys } from '../../../../hooks/constants';
+import { MutedAlerts, ServerError } from '../../types';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.mutedAlerts.api.get', {
   defaultMessage: 'Error fetching muted alerts data',
