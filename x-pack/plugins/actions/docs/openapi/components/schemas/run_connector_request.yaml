@@ -7,7 +7,8 @@ properties:
   params:
     oneOf:
       - $ref: 'run_connector_params_documents.yaml'
-      - $ref: 'run_connector_params_level_message.yaml'
+      - $ref: 'run_connector_params_message_email.yaml'
+      - $ref: 'run_connector_params_message_serverlog.yaml'
       - title: Subaction parameters
         description: Test an action that involves a subaction.
         oneOf:
