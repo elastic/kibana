@@ -8,10 +8,11 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { SpacesApi, SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { getTagsCapabilities } from '../../common';
+import { getTagsCapabilities, tagFeatureId } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
 import { TagManagementPage } from './tag_management_page';
@@ -20,6 +21,7 @@ interface MountSectionParams {
   tagClient: ITagInternalClient;
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
+  spaces?: SpacesApi;
   core: CoreSetup<{}, SavedObjectTaggingPluginStart>;
   mountParams: ManagementAppMountParams;
   title: string;
@@ -36,6 +38,8 @@ const RedirectToHomeIfUnauthorized: FC<{
   return children! as React.ReactElement;
 };
 
+const getEmptyFunctionComponent: FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+
 export const mountSection = async ({
   tagClient,
   tagCache,
@@ -43,6 +47,7 @@ export const mountSection = async ({
   core,
   mountParams,
   title,
+  spaces,
 }: MountSectionParams) => {
   const [coreStart] = await core.getStartServices();
   const { element, setBreadcrumbs, theme$ } = mountParams;
@@ -50,20 +55,27 @@ export const mountSection = async ({
   const assignableTypes = await assignmentService.getAssignableTypes();
   coreStart.chrome.docTitle.change(title);
 
+  const SpacesContextWrapper = spaces
+    ? spaces.ui.components.getSpacesContextProvider
+    : getEmptyFunctionComponent;
+
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
-        <RedirectToHomeIfUnauthorized applications={coreStart.application}>
-          <TagManagementPage
-            setBreadcrumbs={setBreadcrumbs}
-            core={coreStart}
-            tagClient={tagClient}
-            tagCache={tagCache}
-            assignmentService={assignmentService}
-            capabilities={capabilities}
-            assignableTypes={assignableTypes}
-          />
-        </RedirectToHomeIfUnauthorized>
+        <SpacesContextWrapper feature={tagFeatureId}>
+          <RedirectToHomeIfUnauthorized applications={coreStart.application}>
+            <TagManagementPage
+              setBreadcrumbs={setBreadcrumbs}
+              core={coreStart}
+              tagClient={tagClient}
+              tagCache={tagCache}
+              assignmentService={assignmentService}
+              capabilities={capabilities}
+              assignableTypes={assignableTypes}
+              spaces={spaces}
+            />
+          </RedirectToHomeIfUnauthorized>
+        </SpacesContextWrapper>
       </KibanaThemeProvider>
     </I18nProvider>,
     element

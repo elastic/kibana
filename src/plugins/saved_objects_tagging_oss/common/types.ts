@@ -8,6 +8,7 @@
 
 export interface Tag {
   id: string;
+  namespaces?: string[];
   name: string;
   description: string;
   color: string;

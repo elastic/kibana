@@ -76,7 +76,7 @@ describe('SavedObjectTaggingPlugin', () => {
     });
 
     it('creates its cache with correct parameters', () => {
-      plugin.start(coreMock.createStart());
+      plugin.start(coreMock.createStart(), {});
 
       expect(MockedTagsCache).toHaveBeenCalledTimes(1);
       expect(MockedTagsCache).toHaveBeenCalledWith({
@@ -94,7 +94,7 @@ describe('SavedObjectTaggingPlugin', () => {
       const coreStart = coreMock.createStart();
       coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
 
-      plugin.start(coreStart);
+      plugin.start(coreStart, {});
 
       expect(MockedTagsCache.mock.instances[0].initialize).not.toHaveBeenCalled();
     });
@@ -103,7 +103,7 @@ describe('SavedObjectTaggingPlugin', () => {
       const coreStart = coreMock.createStart();
       coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
 
-      plugin.start(coreStart);
+      plugin.start(coreStart, {});
 
       expect(MockedTagsCache.mock.instances[0].initialize).not.toHaveBeenCalled();
     });
