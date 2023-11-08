@@ -12,7 +12,7 @@ import { EuiBadgeProps } from '@elastic/eui';
 import type { IndexDetailsTab } from '../../common/constants';
 import { Index } from '..';
 
-export interface IndexOverviewContent {
+export interface IndexContent {
   renderContent: (args: {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
@@ -34,7 +34,8 @@ export interface ExtensionsSetup {
   addBadge(badge: IndexBadge): void;
   addToggle(toggle: any): void;
   addIndexDetailsTab(tab: IndexDetailsTab): void;
-  setIndexOverviewContent(content: IndexOverviewContent): void;
+  setIndexOverviewContent(content: IndexContent): void;
+  setIndexMappingsContent(content: IndexContent): void;
 }
 
 export class ExtensionsService {
@@ -55,7 +56,8 @@ export class ExtensionsService {
   ];
   private _toggles: any[] = [];
   private _indexDetailsTabs: IndexDetailsTab[] = [];
-  private _indexOverviewContent: IndexOverviewContent | null = null;
+  private _indexOverviewContent: IndexContent | null = null;
+  private _indexMappingsContent: IndexContent | null = null;
   private service?: ExtensionsSetup;
 
   public setup(): ExtensionsSetup {
@@ -66,7 +68,8 @@ export class ExtensionsService {
       addFilter: this.addFilter.bind(this),
       addToggle: this.addToggle.bind(this),
       addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
-      setIndexOverviewContent: this.setIndexOverviewMainContent.bind(this),
+      setIndexOverviewContent: this.setIndexOverviewContent.bind(this),
+      setIndexMappingsContent: this.setIndexMappingsContent.bind(this),
     };
 
     return this.service;
@@ -96,11 +99,19 @@ export class ExtensionsService {
     this._indexDetailsTabs.push(tab);
   }
 
-  private setIndexOverviewMainContent(content: IndexOverviewContent) {
+  private setIndexOverviewContent(content: IndexContent) {
     if (this._indexOverviewContent) {
       throw new Error(`The content for index overview has already been set.`);
     } else {
       this._indexOverviewContent = content;
+    }
+  }
+
+  private setIndexMappingsContent(content: IndexContent) {
+    if (this._indexMappingsContent) {
+      throw new Error(`The content for index mappings has already been set.`);
+    } else {
+      this._indexMappingsContent = content;
     }
   }
 
@@ -130,5 +141,9 @@ export class ExtensionsService {
 
   public get indexOverviewContent() {
     return this._indexOverviewContent;
+  }
+
+  public get indexMappingsContent() {
+    return this._indexMappingsContent;
   }
 }
