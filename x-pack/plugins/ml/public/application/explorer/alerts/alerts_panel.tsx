@@ -60,7 +60,9 @@ export const AlertsPanel: FC = () => {
     },
     {
       id: `alertsTable`,
-      label: 'Details',
+      label: i18n.translate('xpack.ml.explorer.alertsPanel.detailsLabel', {
+        defaultMessage: 'Details',
+      }),
     },
   ];
 
