@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiFlexGrid,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
 import React, { useMemo } from 'react';
@@ -29,7 +36,7 @@ export const AlertsSummary: React.FC = () => {
   }, [alertsData]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGrid columns={3} gutterSize={'m'}>
       {sortedAlertsByRule.map(([ruleName, ruleSummary]) => {
         return (
           <EuiFlexItem key={ruleName} grow={false}>
@@ -84,6 +91,6 @@ export const AlertsSummary: React.FC = () => {
           </EuiFlexItem>
         );
       })}
-    </EuiFlexGroup>
+    </EuiFlexGrid>
   );
 };
