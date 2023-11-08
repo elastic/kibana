@@ -94,7 +94,7 @@ export function ActionMenuContent(): React.ReactElement {
 
       <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
         <EuiHeaderLink
-          aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
+          aria-label={i18n.translate('xpack.uptime.page_header.ViewAlerts.label', {
             defaultMessage: 'Navigate to the "Explore Data" view to visualize Synthetics/User data',
           })}
           href={syntheticExploratoryViewLink}

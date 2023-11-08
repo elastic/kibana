@@ -7,25 +7,29 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const GET_STARTED_PAGE_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.title',
-  {
-    defaultMessage: `Welcome!`,
-  }
-);
+export const GET_STARTED_PAGE_TITLE = (userName: string) =>
+  i18n.translate('xpack.securitySolutionServerless.getStarted.Title', {
+    defaultMessage: `Hi {userName}!`,
+    values: { userName },
+  });
 
 export const GET_STARTED_PAGE_SUBTITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.subTitle',
   {
-    defaultMessage: `Let's get started`,
+    defaultMessage: `Get started with Security`,
   }
 );
 
 export const GET_STARTED_PAGE_DESCRIPTION = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.description',
   {
-    defaultMessage: `Set up your Elastic Security workspace.  Use the toggles below to curate a list of tasks that best fits your environment`,
+    defaultMessage: `This area shows you everything you need to know. Feel free to explore all content. You can always come back later at any time.`,
   }
+);
+
+export const PROGRESS_TRACKER_LABEL = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.progressTracker.label',
+  { defaultMessage: 'Progress' }
 );
 
 export const STEP_TIME_MIN = (min: number) =>
@@ -46,10 +50,10 @@ export const STEPS_LEFT = (steps: number) =>
     }
   );
 
-export const GET_SET_UP_TITLE = i18n.translate(
+export const QUICK_START_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.getSetUp.title',
   {
-    defaultMessage: 'Get set up',
+    defaultMessage: 'Quick start',
   }
 );
 
@@ -60,25 +64,25 @@ export const INTRODUCTION_TITLE = i18n.translate(
   }
 );
 
-export const INTRODUCTION_STEP1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step',
+export const CREATE_FIRST_PROJECT_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step1',
   {
-    defaultMessage: 'Get to know Elastic Security',
+    defaultMessage: 'Create your first project',
   }
 );
 
-export const INTRODUCTION_STEP1_DESCRIPTION1 = i18n.translate(
+export const WATCH_THE_OVERVIEW_VIDEO_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step2',
+  {
+    defaultMessage: 'Watch the overview video',
+  }
+);
+
+export const WATCH_THE_OVERVIEW_VIDEO_DESCRIPTION = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step1.description1',
   {
-    defaultMessage: `Elastic Security unifies analytics, EDR, cloud security capabilities, and more into a SaaS solution that helps you improve your organization’s security posture, defend against a wide range of threats, and prevent breaches.
+    defaultMessage: `Learn about how Elastic Security’s unified analytics, EDR, and cloud security capabilities help organizations protect their data from attack
     `,
-  }
-);
-
-export const INTRODUCTION_STEP1_DESCRIPTION2 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.step1.description2',
-  {
-    defaultMessage: `To explore the platform’s core features, watch the video:`,
   }
 );
 
@@ -104,9 +108,38 @@ export const PRODUCT_BADGE_EDR = i18n.translate(
 );
 
 export const WATCH_OVERVIEW_VIDEO_HEADER = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.getToKnowElasticSecurity.header',
+  'xpack.securitySolutionServerless.getStarted.togglePanel.watchVideo.header',
   {
     defaultMessage: 'Elastic Security',
+  }
+);
+
+export const WATCH_OVERVIEW_VIDEO_MODAL_HEADER = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.watchVideoModal.header',
+  {
+    defaultMessage: 'Welcome to Elastic Security',
+  }
+);
+
+export const WATCH_OVERVIEW_VIDEO_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.watchVideo.description',
+  {
+    defaultMessage:
+      'Elastic Security unifies analytics, EDR, cloud security capabilities, and more into a SaaS solution that helps you improve your organization’s security posture, defend against a wide range of threats, and prevent breaches.',
+  }
+);
+
+export const WATCH_OVERVIEW_VIDEO_CLOSE_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.watchVideo.closeButton.title',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const ADD_AND_VALIDATE_DATA_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.section.addAndValidate.title',
+  {
+    defaultMessage: 'Add and validate your data',
   }
 );
 
@@ -117,18 +150,31 @@ export const CONFIGURE_TITLE = i18n.translate(
   }
 );
 
-export const CONFIGURE_STEP1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1',
+export const START_BUTTON_TEXT = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.startButton.title',
   {
-    defaultMessage: 'Learn about Elastic Agent',
+    defaultMessage: 'Start',
   }
 );
 
-export const CONFIGURE_STEP1_DESCRIPTION1 = i18n.translate(
+export const ALL_DONE_TEXT = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.done.title',
+  {
+    defaultMessage: 'All done here!',
+  }
+);
+
+export const ADD_INTEGRATION_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1',
+  {
+    defaultMessage: 'Add integrations',
+  }
+);
+
+export const ADD_INTEGRATION_DESCRIPTION = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step1.description1',
   {
-    defaultMessage:
-      'Deploy the Elastic Agent to each endpoint you want to protect. This allows it to monitor and protect them by collecting data and enforcing your security policies. It sends that data to the Elastic Stack for analysis and storage.',
+    defaultMessage: 'Ingest data via Elastic’s integrations',
   }
 );
 
@@ -139,17 +185,17 @@ export const CONFIGURE_STEP1_DESCRIPTION2 = i18n.translate(
   }
 );
 
-export const CONFIGURE_STEP2 = i18n.translate(
+export const VIEW_AND_ANALYZE_DATA_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2',
   {
-    defaultMessage: 'Deploy Elastic Agent to protect your endpoints',
+    defaultMessage: 'View and analyze your data using dashboards',
   }
 );
 
-export const CONFIGURE_STEP2_DESCRIPTION1 = i18n.translate(
+export const VIEW_AND_ANALYZE_DATA_DESCRIPTION = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.configure.step2.description1',
   {
-    defaultMessage: 'Deploy the Elastic Agent to each endpoint you want to monitor or protect.',
+    defaultMessage: 'Stay informed and automatically initiate action',
   }
 );
 
@@ -204,33 +250,40 @@ export const EXPLORE_TITLE = i18n.translate(
   }
 );
 
-export const EXPLORE_STEP1 = i18n.translate(
+export const ENABLE_PREBUILT_RULES_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1',
+  {
+    defaultMessage: 'Enable prebuilt rules',
+  }
+);
+
+export const GET_STARTED_WITH_ALERTS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.getStartedWithAlerts.title',
+  {
+    defaultMessage: 'Get started with alerts',
+  }
+);
+
+export const ENABLE_PREBUILT_RULES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description1',
+  {
+    defaultMessage:
+      'View process data from your Kubernetes clusters and get details in the context of your monitored infrastructure',
+  }
+);
+
+export const VIEW_ALERTS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2',
   {
     defaultMessage: 'View alerts',
   }
 );
 
-export const EXPLORE_STEP1_DESCRIPTION1 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description1',
-  {
-    defaultMessage:
-      'Visualize, sort, filter, and investigate alerts from across your infrastructure. Examine individual alerts of interest, and discover general patterns in alert volume and severity.',
-  }
-);
-
-export const EXPLORE_STEP2 = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2',
-  {
-    defaultMessage: 'Analyze data using dashboards',
-  }
-);
-
-export const EXPLORE_STEP2_DESCRIPTION1 = i18n.translate(
+export const VIEW_ALERTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.explore.step2.description1',
   {
     defaultMessage:
-      'Use dashboards to visualize data and stay up-to-date with key information. Create your own, or use Elastic’s default dashboards — including alerts, user authentication events, known vulnerabilities, and more.',
+      'View alerts from across your infrastructure. Examine individual alerts of interest, and discover general patterns in alert volume and severity.',
   }
 );
 

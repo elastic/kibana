@@ -11,12 +11,14 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 import React from 'react';
 
-const AlertsButtonComponent = () => (
-  <LinkButton id={SecurityPageName.alerts} fill>
-    <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
-      defaultMessage="View alerts"
-    />
+const AlertsButtonComponent = ({ title }: { title?: string }) => (
+  <LinkButton id={SecurityPageName.alerts}>
+    {title ?? (
+      <FormattedMessage
+        id="xpack.securitySolutionServerless.getStarted.togglePanel.explore.step1.description2.button"
+        defaultMessage="View alerts"
+      />
+    )}
   </LinkButton>
 );
 

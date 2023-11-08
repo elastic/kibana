@@ -5,57 +5,15 @@
  * 2.0.
  */
 
-import {
-  getCardTimeInMinutes,
-  getCardStepsLeft,
-  setupActiveSections,
-  updateActiveSections,
-  isStepActive,
-} from './helpers';
-import type { ActiveSections, Card, CardId, Section, Step, StepId } from './types';
-import {
-  ExploreSteps,
-  ConfigureSteps,
-  GetSetUpCardId,
-  IntroductionSteps,
-  SectionId,
-} from './types';
+import { getCardStepsLeft, setupActiveSections, updateActiveSections } from './helpers';
+import type { ActiveSections, Card, CardId, Section, StepId } from './types';
+import { SectionId } from './types';
 
 import * as sectionsConfigs from './sections';
 import { ProductLine } from '../../common/product';
 const mockSections = jest.spyOn(sectionsConfigs, 'getSections');
-describe('getCardTimeInMinutes', () => {
-  it('should calculate the total time in minutes for a card correctly', () => {
-    const card = {
-      steps: [
-        { id: 'step1', timeInMinutes: 30 },
-        { id: 'step2', timeInMinutes: 45 },
-        { id: 'step3', timeInMinutes: 15 },
-      ],
-    } as unknown as Card;
-    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
-    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
-    const stepsDone = new Set(['step1', 'step3']) as unknown as Set<StepId>;
 
-    const timeInMinutes = getCardTimeInMinutes(activeSteps, stepsDone);
-
-    expect(timeInMinutes).toEqual(45);
-  });
-
-  it('should return 0 if the card is null or has no steps', () => {
-    const card = {} as Card;
-
-    const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
-    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
-    const stepsDone = new Set(['step1']) as unknown as Set<StepId>;
-
-    const timeInMinutes = getCardTimeInMinutes(activeSteps, stepsDone);
-
-    expect(timeInMinutes).toEqual(0);
-  });
-});
-
-describe('getCardStepsLeft', () => {
+describe('getLeftCards', () => {
   it('should calculate the number of steps left for a card correctly', () => {
     const card = { steps: ['step1', 'step2', 'step3'] } as unknown as Card;
     const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);

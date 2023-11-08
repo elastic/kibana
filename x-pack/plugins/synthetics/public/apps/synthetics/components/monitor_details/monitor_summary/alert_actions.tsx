@@ -129,6 +129,9 @@ export const ACTIONS_LABEL = i18n.translate('xpack.synthetics.management.actions
   defaultMessage: 'Actions',
 });
 
-export const VIEW_ALERTS_LABEL = i18n.translate('xpack.synthetics.management.actions.viewAlerts', {
-  defaultMessage: 'View alerts',
-});
+export const VIEW_ALERTS_LABEL = i18n.translate(
+  'xpack.synthetics.management.actions.enablePrebuiltRules',
+  {
+    defaultMessage: 'View alerts',
+  }
+);

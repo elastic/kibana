@@ -25,6 +25,6 @@ export const AlertsLink = () => {
   );
 };
 
-const VIEW_ALERTS = i18n.translate('xpack.synthetics.monitorSummary.viewAlerts', {
+const VIEW_ALERTS = i18n.translate('xpack.synthetics.monitorSummary.enablePrebuiltRules', {
   defaultMessage: 'View alerts',
 });

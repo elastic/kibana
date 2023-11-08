@@ -10,12 +10,14 @@ import React from 'react';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { ExternalPageName } from '../../navigation/links/constants';
 
-const AddIntegrationButtonComponent = () => (
-  <LinkButton id={ExternalPageName.integrationsSecurity} fill>
-    <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.button"
-      defaultMessage="Add integrations"
-    />
+const AddIntegrationButtonComponent = ({ title }: { title?: string }) => (
+  <LinkButton id={ExternalPageName.integrationsSecurity}>
+    {title ?? (
+      <FormattedMessage
+        id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.button"
+        defaultMessage="Add integrations"
+      />
+    )}
   </LinkButton>
 );
 

@@ -16,7 +16,6 @@ const ProductTierBadgeComponent = ({ productTier }: { productTier: ProductTier |
   return productTier ? (
     <EuiBadge
       color="warning"
-      className="eui-alignMiddle"
       css={css`
         font-size: ${euiTheme.size.m};
         line-height: ${euiTheme.size.m};

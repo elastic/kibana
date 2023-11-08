@@ -5,144 +5,140 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import type {
-  CardId,
-  ExpandedCardSteps,
-  OnCardClicked,
-  OnStepButtonClicked,
-  OnStepClicked,
-  SectionId,
-  StepId,
-} from './types';
-import * as i18n from './translations';
-import { CardStep } from './card_step';
-import { getCard } from './helpers';
-import type { ProductLine } from '../../common/product';
+import type { Card, CardId } from './types';
+
+import { ALL_DONE_TEXT } from './translations';
+import { useModalContext } from '../common/hooks/modal_context';
+
+const hasCardDone = (cardId: CardId, finishedCards: Set<CardId>) => finishedCards.has(cardId);
 
 const CardItemComponent: React.FC<{
-  activeProducts: Set<ProductLine>;
-  activeStepIds: StepId[] | undefined;
-  cardId: CardId;
+  card: Card;
   euiTheme: EuiThemeComputed;
-  expandedCardSteps: ExpandedCardSteps;
-  finishedSteps: Record<CardId, Set<StepId>>;
-  onCardClicked: OnCardClicked;
-  onStepButtonClicked: OnStepButtonClicked;
-  onStepClicked: OnStepClicked;
-  sectionId: SectionId;
+  finishedCards: Set<CardId>;
   shadow?: string;
-  stepsLeft?: number;
-  timeInMins?: number;
-}> = ({
-  activeProducts,
-  activeStepIds,
-  cardId,
-  euiTheme,
-  expandedCardSteps,
-  finishedSteps,
-  onCardClicked,
-  onStepButtonClicked,
-  onStepClicked,
-  sectionId,
-  shadow,
-  stepsLeft,
-  timeInMins,
-}) => {
-  const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
-  const expandCard = expandedCardSteps[cardId]?.isExpanded ?? false;
-  const expandedSteps = useMemo(
-    () => new Set(expandedCardSteps[cardId]?.expandedSteps ?? []),
-    [cardId, expandedCardSteps]
-  );
-  const toggleCard = useCallback(
-    (e) => {
-      e.preventDefault();
-      const isExpanded = !expandCard;
-      onCardClicked({ cardId, isExpanded });
-    },
-    [cardId, expandCard, onCardClicked]
-  );
-  const hasActiveSteps = activeStepIds != null && activeStepIds.length > 0;
-  return cardItem && hasActiveSteps ? (
+}> = ({ card, euiTheme, finishedCards, shadow }) => {
+  const { toggleFinishedCard } = useModalContext();
+  const isCardDone = hasCardDone(card.id, finishedCards);
+  const undoFinishedCard = useCallback(() => {
+    if (card.allowUndo !== false) {
+      toggleFinishedCard({ cardId: card.id, undo: true });
+    }
+  }, [card.allowUndo, card.id, toggleFinishedCard]);
+
+  return card ? (
     <EuiPanel
       hasBorder
       paddingSize="none"
       css={css`
         ${shadow ?? ''};
-        padding: ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
+        padding: ${euiTheme.size.l} ${euiTheme.size.l} ${euiTheme.size.l};
         margin-bottom: ${euiTheme.size.xs};
         border-radius: ${euiTheme.size.xs};
       `}
-      data-test-subj={`card-${cardItem.id}`}
+      data-test-subj={`card-${card.id}`}
       borderRadius="none"
     >
       <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            onClick={toggleCard}
-            css={css`
-              cursor: pointer;
-            `}
-            gutterSize="m"
-          >
-            <EuiFlexItem grow={false}>
-              {cardItem.icon && (
-                <EuiIcon {...cardItem.icon} size="xl" className="eui-alignMiddle" />
-              )}
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                align-self: center;
+              `}
+            >
+              {card.icon && <EuiIcon {...card.icon} size="xl" className="eui-alignMiddle" />}
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem
+              grow={true}
+              css={css`
+                align-self: center;
+              `}
+            >
               <EuiTitle
                 size="xxs"
                 css={css`
                   line-height: ${euiTheme.base * 2}px;
                 `}
               >
-                <h4>{cardItem.title}</h4>
+                <>
+                  <h4
+                    css={css`
+                      font-size: ${euiTheme.base * 0.875}px;
+                      font-weight: ${euiTheme.font.weight.bold};
+                    `}
+                  >
+                    {card.title}
+                  </h4>
+                  {card.description && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <h4
+                        css={css`
+                          font-size: ${euiTheme.size.m};
+                        `}
+                      >
+                        {card.description}
+                      </h4>
+                    </>
+                  )}
+                </>
               </EuiTitle>
             </EuiFlexItem>
-            {(timeInMins != null || stepsLeft != null) && (
+            {!isCardDone && card.startButton && (
               <EuiFlexItem
+                grow={false}
                 css={css`
-                  align-items: end;
+                  align-self: center;
                 `}
               >
-                <EuiText
-                  size="s"
-                  css={css`
-                    line-height: ${euiTheme.base * 2}px;
-                  `}
-                >
-                  {stepsLeft != null && stepsLeft > 0 && (
-                    <strong>{i18n.STEPS_LEFT(stepsLeft)}</strong>
-                  )}
-                </EuiText>
+                {card.startButton}
+              </EuiFlexItem>
+            )}
+            {isCardDone && (
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  align-self: center;
+                `}
+              >
+                <EuiButtonEmpty onClick={undoFinishedCard}>
+                  <span
+                    className="eui-alignMiddle"
+                    css={css`
+                      font-size: ${euiTheme.base * 0.875}px;
+                      color: #69707d;
+                    `}
+                  >
+                    {ALL_DONE_TEXT}
+                  </span>
+                  <EuiIcon
+                    className="eui-alignMiddle"
+                    css={css`
+                      padding-left: ${euiTheme.size.xs};
+                    `}
+                    type="checkInCircleFilled"
+                    color="#00BFB3"
+                    size="l"
+                  />
+                </EuiButtonEmpty>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {expandCard && hasActiveSteps && (
-          <EuiFlexItem>
-            {[...activeStepIds].map((stepId) => {
-              return (
-                <CardStep
-                  activeProducts={activeProducts}
-                  cardId={cardItem.id}
-                  expandedSteps={expandedSteps}
-                  finishedStepsByCard={finishedSteps[cardItem.id]}
-                  key={stepId}
-                  onStepButtonClicked={onStepButtonClicked}
-                  onStepClicked={onStepClicked}
-                  sectionId={sectionId}
-                  stepId={stepId}
-                />
-              );
-            })}
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiPanel>
   ) : null;
