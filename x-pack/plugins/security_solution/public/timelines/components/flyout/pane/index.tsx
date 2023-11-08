@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { EuiOverlayMask, useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 
 import { StatefulTimeline } from '../../timeline';
 import type { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 import { defaultRowRenderers } from '../../timeline/body/renderers';
 import { DefaultCellRenderer } from '../../timeline/cell_rendering/default_cell_renderer';
-import { EuiPortal } from './custom_portal';
+
 interface FlyoutPaneComponentProps {
   timelineId: TimelineId;
   visible?: boolean;
@@ -25,7 +25,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   visible = true,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const ref = useRef<HTMLDivElement>(null);
   const timeline = useMemo(
     () => (
       <StatefulTimeline
@@ -37,29 +36,40 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
     [timelineId]
   );
 
+  const backgroundColor = useEuiBackgroundColor('plain');
+
+  if (!visible) {
+    return null;
+  }
   return (
-    <div data-test-subj="flyout-pane" ref={ref}>
-      <EuiPortal insert={{ sibling: !visible ? ref?.current : null, position: 'after' }}>
-        <div
-          aria-label={i18n.TIMELINE_DESCRIPTION}
-          data-test-subj="timeline-flyout"
-          css={css`
-            min-width: 150px;
-            height: inherit;
-            bottom: 0;
-            top: var(--euiFixedHeadersOffset, 0);
-            left: 0;
-            background: ${useEuiBackgroundColor('plain')};
-            position: fixed;
-            width: 100%;
-            z-index: ${euiTheme.levels.flyout};
-            display: ${visible ? 'block' : 'none'};
-          `}
-        >
-          {timeline}
-        </div>
-      </EuiPortal>
-    </div>
+    <EuiOverlayMask
+      headerZindexLocation="above"
+      css={css`
+        margin-top: var(--euiFixedHeadersOffset, 0);
+        // z-index !important is needed to take preference over euiOverlayMask-aboveHeader
+        z-index: ${euiTheme.levels.flyout} !important;
+      `}
+    >
+      <div
+        aria-label={i18n.TIMELINE_DESCRIPTION}
+        data-test-subj="timeline-flyout"
+        css={css`
+          min-width: 150px;
+          height: inherit;
+          border-radius: ${euiTheme.border.radius.medium};
+          top: var(--euiFixedHeadersOffset, 0);
+          right: 0;
+          bottom: 0;
+          left: 0;
+          margin: ${euiTheme.size.m};
+          padding: 0 ${euiTheme.size.s};
+          background: ${backgroundColor};
+          position: fixed;
+        `}
+      >
+        {timeline}
+      </div>
+    </EuiOverlayMask>
   );
 };
 
