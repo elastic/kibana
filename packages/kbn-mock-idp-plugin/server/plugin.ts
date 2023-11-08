@@ -38,12 +38,31 @@ export const plugin: PluginInitializer<void, void> = (): Plugin => ({
           });
         }
 
-        const samlResponse = await createSAMLResponse({
-          authnRequestId: samlRequest.ID,
-          kibanaUrl: samlRequest.AssertionConsumerServiceURL,
-          username: 'test_user',
-          roles: ['superuser'],
-        });
+        const userRoles = [
+          ['superuser', 'elastic_serverless'],
+          ['system_indices_superuser', 'system_indices_superuser'],
+          ['t1_analyst', 't1_analyst'],
+          ['t2_analyst', 't2_analyst'],
+          ['t3_analyst', 't3_analyst'],
+          ['threat_intelligence_analyst', 'threat_intelligence_analyst'],
+          ['rule_author', 'rule_author'],
+          ['soc_manager', 'soc_manager'],
+          ['detections_admin', 'detections_admin'],
+          ['platform_engineer', 'platform_engineer'],
+          ['endpoint_operations_analyst', 'endpoint_operations_analyst'],
+          ['endpoint_policy_manager', 'endpoint_policy_manager'],
+        ] as const;
+
+        const samlResponses = await Promise.all(
+          userRoles.map((entries) =>
+            createSAMLResponse({
+              authnRequestId: samlRequest.ID,
+              kibanaUrl: samlRequest.AssertionConsumerServiceURL,
+              username: entries[0],
+              roles: [entries[1]],
+            })
+          )
+        );
 
         return response.renderHtml({
           body: `
@@ -51,10 +70,22 @@ export const plugin: PluginInitializer<void, void> = (): Plugin => ({
             <title>Kibana SAML Login</title>
             <link rel="icon" href="data:,">
             <body>
-              <pre>${samlRequest.ID}</pre>
-              <form id="loginForm" method="post" action="${samlRequest.AssertionConsumerServiceURL}">
-                  <input name="SAMLResponse" type="text" value="${samlResponse}" />
-                  <button>Login</button>
+              <h1>Mock Identity Provider</h1>
+              <form id="loginForm" method="post" action="${
+                samlRequest.AssertionConsumerServiceURL
+              }">
+                <ul>
+                  ${userRoles
+                    .map(
+                      (entries, i) =>
+                        `
+                    <li>
+                      <button name="SAMLResponse" value="${samlResponses[i]}">Login as ${entries[0]}</button>
+                    </li>
+                    `
+                    )
+                    .join('')}
+                </ul>
               </form>
             </body>
           `,
