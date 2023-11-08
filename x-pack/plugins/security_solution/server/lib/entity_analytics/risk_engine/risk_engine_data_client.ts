@@ -26,13 +26,13 @@ import {
 import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
-import type { InitRiskEngineResult } from '../../../common/risk_engine';
+import type { InitRiskEngineResult } from '../../../../common/risk_engine';
 import {
   RiskEngineStatus,
   getRiskScoreLatestIndex,
   MAX_SPACES_COUNT,
   RiskScoreEntity,
-} from '../../../common/risk_engine';
+} from '../../../../common/risk_engine';
 import {
   getLegacyTransforms,
   getLatestTransformId,
@@ -48,7 +48,7 @@ import {
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { removeRiskScoringTask, startRiskScoringTask } from './tasks';
 import { createIndex } from './utils/create_index';
-import { bulkDeleteSavedObjects } from '../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
+import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
 
 interface InitOpts {
   namespace: string;

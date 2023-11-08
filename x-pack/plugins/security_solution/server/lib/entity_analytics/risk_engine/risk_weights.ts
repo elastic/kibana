@@ -12,8 +12,8 @@ import type {
   RiskCategoryRiskWeight,
   RiskWeight,
   RiskWeights,
-} from '../../../common/risk_engine';
-import { RiskCategories, RiskWeightTypes } from '../../../common/risk_engine';
+} from '../../../../common/risk_engine';
+import { RiskCategories, RiskWeightTypes } from '../../../../common/risk_engine';
 
 const RISK_CATEGORIES = Object.values(RiskCategories);
 

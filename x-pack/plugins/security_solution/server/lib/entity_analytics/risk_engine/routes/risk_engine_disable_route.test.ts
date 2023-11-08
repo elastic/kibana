@@ -8,12 +8,12 @@
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { riskEngineDisableRoute } from './risk_engine_disable_route';
 
-import { RISK_ENGINE_DISABLE_URL } from '../../../../common/constants';
+import { RISK_ENGINE_DISABLE_URL } from '../../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
   requestMock,
-} from '../../detection_engine/routes/__mocks__';
+} from '../../../detection_engine/routes/__mocks__';
 import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
 
 describe('risk score disable route', () => {

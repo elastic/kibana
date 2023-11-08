@@ -8,10 +8,10 @@
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../common/constants';
-import type { StartPlugins } from '../../../plugin';
+import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
+import type { StartPlugins } from '../../../../plugin';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 export const riskEngineInitRoute = (
   router: SecuritySolutionPluginRouter,
