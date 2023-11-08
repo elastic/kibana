@@ -18,6 +18,7 @@
     "@kbn/ci-stats-reporter",
     "@kbn/mock-idp-plugin",
     "@kbn/jest-serializers",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/mock-idp-plugin"
   ]
 }
