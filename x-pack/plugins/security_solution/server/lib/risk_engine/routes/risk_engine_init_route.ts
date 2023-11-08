@@ -10,7 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../common/constants';
 import type { StartPlugins } from '../../../plugin';
-
+import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
 export const riskEngineInitRoute = (
@@ -36,10 +36,7 @@ export const riskEngineInitRoute = (
         if (!taskManager) {
           return siemResponse.error({
             statusCode: 400,
-            body: {
-              message:
-                'Task Manager is unavailable, but is required to initialize the risk engine. Please enable the taskManager plugin and try again.',
-            },
+            body: TASK_MANAGER_UNAVAILABLE_ERROR,
           });
         }
 
@@ -67,6 +64,7 @@ export const riskEngineInitRoute = (
               message: initResultResponse.errors.join('\n'),
               full_error: initResultResponse,
             },
+            bypassErrorFormat: true,
           });
         }
         return response.ok({ body: { result: initResultResponse } });
@@ -76,6 +74,7 @@ export const riskEngineInitRoute = (
         return siemResponse.error({
           statusCode: error.statusCode,
           body: { message: error.message, full_error: JSON.stringify(e) },
+          bypassErrorFormat: true,
         });
       }
     });
