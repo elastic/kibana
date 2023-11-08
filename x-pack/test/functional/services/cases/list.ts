@@ -184,11 +184,11 @@ export function CasesTableServiceProvider(
 
     async filterByOwner(owner: string) {
       await common.clickAndValidate(
-        'solution-filter-popover-button',
-        `solution-filter-popover-item-${owner}`
+        'options-filter-popover-button-owner',
+        `options-filter-popover-item-${owner}`
       );
 
-      await testSubjects.click(`solution-filter-popover-item-${owner}`);
+      await testSubjects.click(`options-filter-popover-item-${owner}`);
     },
 
     async refreshTable() {

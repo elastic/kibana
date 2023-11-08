@@ -13,11 +13,7 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
 import { CaseStatuses } from '../../../common/types/domain';
-import {
-  OWNER_INFO,
-  SECURITY_SOLUTION_OWNER,
-  OBSERVABILITY_OWNER,
-} from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
@@ -176,86 +172,32 @@ describe('CasesTableFilters ', () => {
   });
 
   describe('Solution filter', () => {
-    const securitySolution = {
-      id: SECURITY_SOLUTION_OWNER,
-      label: OWNER_INFO[SECURITY_SOLUTION_OWNER].label,
-      iconType: OWNER_INFO[SECURITY_SOLUTION_OWNER].iconType,
-    };
-    const observabilitySolution = {
-      id: OBSERVABILITY_OWNER,
-      label: OWNER_INFO[OBSERVABILITY_OWNER].label,
-      iconType: OWNER_INFO[OBSERVABILITY_OWNER].iconType,
-    };
-
     it('shows Solution filter when provided more than 1 availableSolutions', () => {
       appMockRender.render(
         <CasesTableFilters
           {...props}
-          availableSolutions={[securitySolution, observabilitySolution]}
+          availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
         />
       );
-      expect(screen.getByTestId('solution-filter-popover-button')).toBeInTheDocument();
+      expect(screen.getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
     });
 
     it('does not show Solution filter when provided less than 1 availableSolutions', () => {
       appMockRender.render(
-        <CasesTableFilters {...props} availableSolutions={[observabilitySolution]} />
+        <CasesTableFilters {...props} availableSolutions={[OBSERVABILITY_OWNER]} />
       );
-      expect(screen.queryByTestId('solution-filter-popover-button')).not.toBeInTheDocument();
-    });
-
-    it('should call onFilterChange when selected solution changes', async () => {
-      appMockRender.render(
-        <CasesTableFilters
-          {...props}
-          availableSolutions={[securitySolution, observabilitySolution]}
-        />
-      );
-      userEvent.click(screen.getByTestId('solution-filter-popover-button'));
-
-      await waitForEuiPopoverOpen();
-
-      userEvent.click(
-        screen.getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`)
-      );
-
-      expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
-    });
-
-    it('should deselect all solutions', async () => {
-      appMockRender.render(
-        <CasesTableFilters
-          {...props}
-          availableSolutions={[securitySolution, observabilitySolution]}
-        />
-      );
-
-      userEvent.click(screen.getByTestId('solution-filter-popover-button'));
-
-      await waitForEuiPopoverOpen();
-
-      userEvent.click(
-        screen.getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`)
-      );
-
-      expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
-
-      userEvent.click(
-        screen.getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`)
-      );
-
-      expect(onFilterChanged).toBeCalledWith({ owner: [] });
+      expect(screen.queryByTestId('options-filter-popover-button-owner')).not.toBeInTheDocument();
     });
 
     it('does not select a solution on initial render', () => {
       appMockRender.render(
         <CasesTableFilters
           {...props}
-          availableSolutions={[securitySolution, observabilitySolution]}
+          availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
         />
       );
 
-      expect(screen.getByTestId('solution-filter-popover-button')).not.toHaveAttribute(
+      expect(screen.getByTestId('options-filter-popover-button-owner')).not.toHaveAttribute(
         'hasActiveFilters'
       );
     });
