@@ -12,7 +12,6 @@ import { setupAll } from './setup';
 const runSetupAll: RunFn = async (cliContext) => {
   const username = cliContext.flags.username as string;
   const password = cliContext.flags.password as string;
-  const apiKey = cliContext.flags.apiKey as string;
   const kibanaUrl = cliContext.flags.kibanaUrl as string;
   const elasticUrl = cliContext.flags.elasticUrl as string;
   const fleetServerUrl = cliContext.flags.fleetServerUrl as string;
@@ -29,7 +28,6 @@ const runSetupAll: RunFn = async (cliContext) => {
     version,
     policy,
     log,
-    apiKey,
   });
 };
 
