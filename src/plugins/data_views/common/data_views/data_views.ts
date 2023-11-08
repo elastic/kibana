@@ -531,6 +531,8 @@ export class DataViewsService {
       allowNoIndex: true,
       ...options,
       pattern: indexPattern.title as string,
+      allowHidden:
+        (indexPattern as DataViewSpec).allowHidden || (indexPattern as DataView)?.getAllowHidden(),
     });
 
   private getFieldsAndIndicesForDataView = async (dataView: DataView) => {
