@@ -36,18 +36,17 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
     [timelineId]
   );
 
-  const backgroundColor = useEuiBackgroundColor('plain');
-
-  if (!visible) {
-    return null;
-  }
   return (
     <EuiOverlayMask
+      data-test-subj="flyout-pane"
       headerZindexLocation="above"
       css={css`
-        margin-top: var(--euiFixedHeadersOffset, 0);
-        // z-index !important is needed to take preference over euiOverlayMask-aboveHeader
-        z-index: ${euiTheme.levels.flyout} !important;
+        // .euiOverlayMask concatenated to make styles take precedence over .euiOverlayMask-aboveHeader
+        &.euiOverlayMask {
+          margin-top: var(--euiFixedHeadersOffset, 0);
+          z-index: ${euiTheme.levels.flyout};
+          ${visible ? '' : 'display: none;'}
+        }
       `}
     >
       <div
@@ -63,7 +62,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
           left: 0;
           margin: ${euiTheme.size.m};
           padding: 0 ${euiTheme.size.s};
-          background: ${backgroundColor};
+          background: ${useEuiBackgroundColor('plain')};
           position: fixed;
         `}
       >
