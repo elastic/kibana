@@ -178,11 +178,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     });
   }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
 
+  // filters kuery for all tags
+  const kueryAllTags = useMemo(() => {
+    return getKuery({});
+  }, []);
+
   const [agentsOnCurrentPage, setAgentsOnCurrentPage] = useState<Agent[]>([]);
   const [agentsStatus, setAgentsStatus] = useState<
     { [key in SimplifiedAgentStatus]: number } | undefined
   >();
   const [allTags, setAllTags] = useState<string[]>();
+  const [allAddRemoveTags, setAllAddRemoveTags] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [shownAgents, setShownAgents] = useState(0);
   const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
@@ -245,6 +251,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             totalInactiveAgentsResponse,
             managedAgentPoliciesResponse,
             agentTagsResponse,
+            allAgentTagsResponse,
           ] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
@@ -269,6 +276,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               kuery: kuery && kuery !== '' ? kuery : undefined,
               showInactive,
             }),
+            sendGetAgentTags({
+              kuery: kueryAllTags && kueryAllTags !== '' ? kueryAllTags : undefined,
+              showInactive,
+            }),
           ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
@@ -287,10 +298,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           if (managedAgentPoliciesResponse.error) {
             throw new Error(managedAgentPoliciesResponse.error.message);
           }
-          if (agentTagsResponse.error) {
+          if (agentTagsResponse.error || allAgentTagsResponse.error) {
             throw agentTagsResponse.error;
           }
-          if (!agentTagsResponse.data) {
+          if (!agentTagsResponse.data || !allAgentTagsResponse.data) {
             throw new Error('Invalid GET /agent/tags response');
           }
 
@@ -307,6 +318,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           // - Tags are modified (add, remove, edit)
           if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
             setAllTags(newAllTags);
+          }
+
+          const newAllAddRemoveTags = allAgentTagsResponse.data.items;
+          if (!allAddRemoveTags || refreshTags || !isEqual(newAllAddRemoveTags, allAddRemoveTags)) {
+            setAllAddRemoveTags(newAllAddRemoveTags);
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
@@ -554,7 +570,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {showTagsAddRemove && (
         <TagsAddRemove
           agentId={agentToAddRemoveTags?.id!}
-          allTags={allTags ?? []}
+          allTags={allAddRemoveTags ?? []}
           selectedTags={agentToAddRemoveTags?.tags ?? []}
           button={tagsPopoverButton!}
           onTagsUpdated={() => {
