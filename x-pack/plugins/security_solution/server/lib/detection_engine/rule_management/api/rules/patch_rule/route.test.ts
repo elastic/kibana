@@ -199,7 +199,9 @@ describe('Patch rule route', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid input');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", type: Invalid literal value, expected "threshold", and 5 more'
+      );
     });
 
     test('allows rule type of query and custom from and interval', async () => {
