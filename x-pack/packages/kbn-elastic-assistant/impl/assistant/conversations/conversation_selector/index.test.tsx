@@ -58,7 +58,7 @@ describe('Conversation selector', () => {
       </TestProviders>
     );
     expect(getByTestId('conversation-selector')).toBeInTheDocument();
-    expect(getByTestId('euiComboBoxPill')).toHaveTextContent(welcomeConvo.id);
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue(welcomeConvo.id);
   });
   it('On change, selects new item', () => {
     const { getByTestId } = render(
@@ -78,7 +78,7 @@ describe('Conversation selector', () => {
     expect(onConversationSelected).toHaveBeenCalledWith(alertConvo.id);
   });
   it('On clear input, clears selected options', () => {
-    const { getByText, queryByText, getByTestId, queryByTestId } = render(
+    const { getByPlaceholderText, queryByPlaceholderText, getByTestId, queryByTestId } = render(
       <TestProviders
         providerContext={{
           getInitialConversations: () => ({
@@ -90,10 +90,10 @@ describe('Conversation selector', () => {
         <ConversationSelector {...defaultProps} />
       </TestProviders>
     );
-    expect(getByTestId('euiComboBoxPill')).toBeInTheDocument();
-    expect(queryByText(CONVERSATION_SELECTOR_PLACE_HOLDER)).not.toBeInTheDocument();
+    expect(getByTestId('comboBoxSearchInput')).toBeInTheDocument();
+    expect(queryByPlaceholderText(CONVERSATION_SELECTOR_PLACE_HOLDER)).not.toBeInTheDocument();
     fireEvent.click(getByTestId('comboBoxClearButton'));
-    expect(getByText(CONVERSATION_SELECTOR_PLACE_HOLDER)).toBeInTheDocument();
+    expect(getByPlaceholderText(CONVERSATION_SELECTOR_PLACE_HOLDER)).toBeInTheDocument();
     expect(queryByTestId('euiComboBoxPill')).not.toBeInTheDocument();
   });
 
