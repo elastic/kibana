@@ -52,7 +52,9 @@ describe('TreeNav component', () => {
     expect(logicViewButton).toHaveAttribute('aria-pressed', 'true');
     expect(renderResult.getByText(logicalViewPath)).toBeInTheDocument();
 
-    const infraStructureViewRadio = renderResult.getByTestId('treeNavType_generated-idinfrastructure');
+    const infraStructureViewRadio = renderResult.getByTestId(
+      'treeNavType_generated-idinfrastructure'
+    );
     infraStructureViewRadio.click();
 
     expect(renderResult.getByText('cluster / node / pod / container image')).toBeInTheDocument();
