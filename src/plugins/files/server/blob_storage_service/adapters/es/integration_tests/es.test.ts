@@ -25,7 +25,7 @@ describe('Elasticsearch blob storage', () => {
   let esRefreshIndexSpy: jest.SpyInstance;
 
   beforeAll(async () => {
-    ElasticsearchBlobStorageClient.configureConcurrentUpload(Infinity);
+    ElasticsearchBlobStorageClient.configureConcurrentTransfers(Infinity);
     const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
     manageES = await startES();
     manageKbn = await startKibana();

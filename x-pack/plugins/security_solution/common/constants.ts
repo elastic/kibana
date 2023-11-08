@@ -8,7 +8,6 @@
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
 import * as i18n from './translations';
-
 export { SecurityPageName } from '@kbn/security-solution-navigation';
 
 /**

@@ -26,6 +26,7 @@ import {
   createMockIdpMetadata,
 } from '@kbn/mock-idp-plugin/common';
 
+import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
 import {
@@ -775,6 +776,10 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
     await readyPromise;
+    if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
+      // If security is not disabled, make sure the security index exists before running the test to avoid flakiness
+      await waitForSecurityIndex({ client, log });
+    }
   }
 
   if (!options.background) {

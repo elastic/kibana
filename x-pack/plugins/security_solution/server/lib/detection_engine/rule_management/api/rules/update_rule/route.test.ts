@@ -23,7 +23,7 @@ import {
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { RESPONSE_ACTION_TYPES } from '../../../../../../../common/api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine/model/rule_response_actions';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -181,7 +181,7 @@ describe('Update rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
     });
   });
   describe('rule containing response actions', () => {
@@ -245,7 +245,7 @@ describe('Update rule route', () => {
             ...getQueryRuleParams(),
             responseActions: [
               {
-                actionTypeId: RESPONSE_ACTION_TYPES.ENDPOINT,
+                actionTypeId: ResponseActionTypesEnum['.endpoint'],
                 params: {
                   command: 'isolate',
                   comment: '',
@@ -284,7 +284,7 @@ describe('Update rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "processes" supplied to "response_actions,params,command"'
+        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "saved_query", saved_id: Required, type: Invalid literal value, expected "threshold", and 18 more'
       );
     });
   });
