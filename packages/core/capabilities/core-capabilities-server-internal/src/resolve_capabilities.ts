@@ -11,6 +11,7 @@ import { withSpan } from '@kbn/apm-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
+import { generateDelta } from './utils';
 
 export type CapabilitiesResolver = (
   request: KibanaRequest,
@@ -54,11 +55,16 @@ export const resolveCapabilities = async (
     }, capabilities.navLinks),
   });
 
-  return switchers.reduce(async (caps, switcher) => {
-    const resolvedCaps = await caps;
-    const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
-    return recursiveApplyChanges(resolvedCaps, changes);
-  }, Promise.resolve(mergedCaps));
+  const deltas = await Promise.all(
+    switchers.map(async (switcher) => {
+      const changes = await switcher(request, mergedCaps, useDefaultCapabilities);
+      return generateDelta(mergedCaps, changes);
+    })
+  );
+
+  return deltas.reduce<Capabilities>((caps, delta) => {
+    return recursiveApplyChanges(caps, delta);
+  }, mergedCaps);
 };
 
 function recursiveApplyChanges<
