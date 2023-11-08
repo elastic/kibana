@@ -22,7 +22,7 @@ import {
 } from '../../mock';
 import { createStore } from '../../store';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId } from '../../../../common/types/timeline';

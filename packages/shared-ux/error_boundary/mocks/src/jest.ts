@@ -10,8 +10,11 @@ import { KibanaErrorService } from '../../src/services/error_service';
 import { KibanaErrorBoundaryServices } from '../../types';
 
 export const getServicesMock = (): KibanaErrorBoundaryServices => {
+  const mockDeps = {
+    analytics: { reportEvent: jest.fn() },
+  };
   return {
     onClickRefresh: jest.fn().mockResolvedValue(undefined),
-    errorService: new KibanaErrorService(),
+    errorService: new KibanaErrorService(mockDeps),
   };
 };

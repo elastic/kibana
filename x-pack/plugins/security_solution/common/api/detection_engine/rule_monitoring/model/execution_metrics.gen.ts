@@ -15,16 +15,19 @@ import { z } from 'zod';
 export type RuleExecutionMetrics = z.infer<typeof RuleExecutionMetrics>;
 export const RuleExecutionMetrics = z.object({
   /**
-   * Total time spent searching for events
+   * Total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response
    */
   total_search_duration_ms: z.number().int().min(0).optional(),
   /**
-   * Total time spent indexing alerts
+   * Total time spent indexing documents during current rule execution cycle
    */
   total_indexing_duration_ms: z.number().int().min(0).optional(),
+  /**
+   * Total time spent enriching documents during current rule execution cycle
+   */
   total_enrichment_duration_ms: z.number().int().min(0).optional(),
   /**
-   * Time gap between last execution and current execution
+   * Duration in seconds of execution gap
    */
   execution_gap_duration_s: z.number().int().min(0).optional(),
 });

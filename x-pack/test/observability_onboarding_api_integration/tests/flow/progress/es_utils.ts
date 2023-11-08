@@ -12,6 +12,7 @@ export function createLogDoc({
   namespace,
   datasetName,
   message,
+  agentId,
 }: {
   time: number;
   logFilepath: string;
@@ -19,6 +20,7 @@ export function createLogDoc({
   namespace: string;
   datasetName: string;
   message: string;
+  agentId?: string;
 }) {
   return {
     input: {
@@ -46,5 +48,12 @@ export function createLogDoc({
     event: {
       dataset: datasetName,
     },
+    ...(agentId
+      ? {
+          agent: {
+            id: agentId,
+          },
+        }
+      : {}),
   };
 }

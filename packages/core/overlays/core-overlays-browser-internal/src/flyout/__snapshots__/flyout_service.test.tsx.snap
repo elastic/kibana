@@ -12,6 +12,20 @@ exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
 Array [
   Array [
     <KibanaRenderContextProvider
+      analytics={
+        Object {
+          "optIn": [MockFunction],
+          "reportEvent": [MockFunction],
+          "telemetryCounter$": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        }
+      }
       i18n={
         Object {
           "Context": [MockFunction],
@@ -45,13 +59,42 @@ exports[`FlyoutService openFlyout() with a currently active flyout replaces the 
 Array [
   Array [
     <KibanaRenderContextProvider
+      analytics={
+        Object {
+          "optIn": [MockFunction],
+          "reportEvent": [MockFunction],
+          "telemetryCounter$": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        }
+      }
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <KibanaErrorBoundaryProvider>
+                  "children": <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
                     <KibanaErrorBoundary>
                       <EuiFlyout
                         onClose={[Function]}
@@ -70,7 +113,22 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider>
+                "value": <KibanaErrorBoundaryProvider
+                  analytics={
+                    Object {
+                      "optIn": [MockFunction],
+                      "reportEvent": [MockFunction],
+                      "telemetryCounter$": Subject {
+                        "closed": false,
+                        "currentObservers": null,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [],
+                        "thrownError": null,
+                      },
+                    }
+                  }
+                >
                   <KibanaErrorBoundary>
                     <EuiFlyout
                       onClose={[Function]}
@@ -108,13 +166,42 @@ Array [
   ],
   Array [
     <KibanaRenderContextProvider
+      analytics={
+        Object {
+          "optIn": [MockFunction],
+          "reportEvent": [MockFunction],
+          "telemetryCounter$": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        }
+      }
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <KibanaErrorBoundaryProvider>
+                  "children": <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
+                    }
+                  >
                     <KibanaErrorBoundary>
                       <EuiFlyout
                         onClose={[Function]}
@@ -133,7 +220,22 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider>
+                "value": <KibanaErrorBoundaryProvider
+                  analytics={
+                    Object {
+                      "optIn": [MockFunction],
+                      "reportEvent": [MockFunction],
+                      "telemetryCounter$": Subject {
+                        "closed": false,
+                        "currentObservers": null,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [],
+                        "thrownError": null,
+                      },
+                    }
+                  }
+                >
                   <KibanaErrorBoundary>
                     <EuiFlyout
                       onClose={[Function]}

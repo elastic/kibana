@@ -106,7 +106,6 @@
     "@kbn/journeys",
     "@kbn/stdio-dev-helpers",
     "@kbn/alerting-api-integration-helpers",
-    "@kbn/securitysolution-ecs",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/security-api-integration-helpers",
@@ -150,5 +149,6 @@
     "@kbn/reporting-export-types-deprecated",
     "@kbn/reporting-export-types-csv",
     "@kbn/reporting-export-types-helpers-server",
+    "@kbn/metrics-data-access-plugin",
   ]
 }
