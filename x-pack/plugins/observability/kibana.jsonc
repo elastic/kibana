@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": "@elastic/actionable-observability",
+  "owner": "@elastic/obs-ux-management-team",
   "plugin": {
     "id": "observability",
     "server": true,
@@ -23,7 +23,6 @@
       "exploratoryView",
       "features",
       "files",
-      "guidedOnboarding",
       "inspector",
       "lens",
       "observabilityShared",
@@ -44,7 +43,8 @@
       "usageCollection",
       "cloud",
       "spaces",
-      "serverless"
+      "serverless",
+      "guidedOnboarding"
     ],
     "requiredBundles": [
       "data",

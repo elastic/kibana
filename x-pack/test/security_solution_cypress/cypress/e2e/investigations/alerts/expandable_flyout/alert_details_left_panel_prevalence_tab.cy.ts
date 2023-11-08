@@ -24,7 +24,6 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_DATE_PICKER,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
-import { cleanKibana } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -37,7 +36,6 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
       login();
       createRule({ ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } });
       visit(ALERTS_URL);

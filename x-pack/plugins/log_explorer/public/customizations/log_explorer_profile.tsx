@@ -14,6 +14,8 @@ import { LogExplorerProfileStateService } from '../state_machines/log_explorer_p
 import { LogExplorerStateContainer } from '../components/log_explorer';
 import { LogExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
+import { LogExplorerCustomizations } from '../components/log_explorer/types';
+import { LogExplorerCustomizationsProvider } from '../hooks/use_log_explorer_customizations';
 
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
@@ -21,12 +23,18 @@ const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'))
 
 export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
+  customizations: LogExplorerCustomizations;
   plugins: LogExplorerStartDeps;
   state$?: BehaviorSubject<LogExplorerStateContainer>;
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({ core, plugins, state$ }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({
+    core,
+    customizations: logExplorerCustomizations,
+    plugins,
+    state$,
+  }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     const { data, dataViews, discover } = plugins;
     // Lazy load dependencies
@@ -127,7 +135,9 @@ export const createLogExplorerProfileCustomizations =
 
         return (
           <KibanaContextProviderForPlugin>
-            <LazyCustomFlyoutContent {...props} dataView={internalState.dataView} />
+            <LogExplorerCustomizationsProvider value={logExplorerCustomizations}>
+              <LazyCustomFlyoutContent {...props} dataView={internalState.dataView} />
+            </LogExplorerCustomizationsProvider>
           </KibanaContextProviderForPlugin>
         );
       },

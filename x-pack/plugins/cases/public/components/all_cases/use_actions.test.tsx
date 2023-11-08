@@ -6,7 +6,7 @@
  */
 
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks/dom';
 
 import { useActions } from './use_actions';
@@ -103,7 +103,9 @@ describe('useActions', () => {
       expect(res.getByTestId('cases-bulk-action-status-closed')).toBeInTheDocument();
     });
 
-    userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'));
+    userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'), undefined, {
+      skipPointerEventsCheck: true,
+    });
 
     await waitFor(() => {
       expect(updateCasesSpy).toHaveBeenCalled();
@@ -137,7 +139,9 @@ describe('useActions', () => {
       expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
     });
 
-    userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'));
+    userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'), undefined, {
+      skipPointerEventsCheck: true,
+    });
 
     await waitFor(() => {
       expect(updateCasesSpy).toHaveBeenCalled();

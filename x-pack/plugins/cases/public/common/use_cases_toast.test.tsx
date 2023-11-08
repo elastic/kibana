@@ -14,7 +14,7 @@ import { alertComment, basicComment, mockCase } from '../containers/mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { SupportedCaseAttachment } from '../types';
-import { getByTestId } from '@testing-library/dom';
+import { getByTestId } from '@testing-library/react';
 import { OWNER_INFO } from '../../common/constants';
 
 jest.mock('./lib/kibana');
