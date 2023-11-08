@@ -10,51 +10,8 @@ import React from 'react';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { isJobV2Params } from '../../common/job_utils';
 import { checkLicense } from '../lib/license_check';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
-import { ScreenCaptureModalContent } from './screen_capture_panel_content_lazy';
-
-const getJobParams =
-  (
-    apiClient: ReportingAPIClient,
-    opts: JobParamsProviderOptions,
-    type?: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
-  ) =>
-  () => {
-    const {
-      objectType,
-      sharingData: { title, layout, locatorParams },
-    } = opts;
-
-    const baseParams = {
-      objectType,
-      layout,
-      title,
-    };
-
-    if (type === 'printablePdfV2') {
-      // multi locator for PDF V2
-      return { ...baseParams, locatorParams: [locatorParams] };
-    } else if (type === 'pngV2') {
-      // single locator for PNG V2
-      return { ...baseParams, locatorParams };
-    }
-
-    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-    // Replace hashes with original RISON values.
-    const relativeUrl = opts.shareableUrl.replace(
-      window.location.origin + apiClient.getServerBasePath(),
-      ''
-    );
-
-    if (type === 'printablePdf') {
-      // multi URL for PDF
-      return { ...baseParams, relativeUrls: [relativeUrl] };
-    }
-
-    // single URL for PNG
-    return { ...baseParams, relativeUrl };
-  };
+import { ReportingModalContent } from './screen_capture_panel_content_lazy';
 
 export const reportingScreenshotShareProvider = ({
   apiClient,
@@ -144,18 +101,17 @@ export const reportingScreenshotShareProvider = ({
         id: 'reportingModal',
         title: reportingModalTitle,
         content: (
-          <ScreenCaptureModalContent
+          <ReportingModalContent
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
-            getJobParams={getJobParams(apiClient, jobProviderOptions)}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}
-          />
-        ),
+            jobProviderOptions={jobProviderOptions}
+          />)
       },
     };
 

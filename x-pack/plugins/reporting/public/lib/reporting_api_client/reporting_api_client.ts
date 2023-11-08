@@ -27,7 +27,7 @@ import { Job } from '../job';
  * Those fields are added in this client as part of the service.
  * TODO: export a type like this to other plugins: https://github.com/elastic/kibana/issues/107085
  */
-type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
+export type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 
 export interface DiagnoseResponse {
   help: string[];

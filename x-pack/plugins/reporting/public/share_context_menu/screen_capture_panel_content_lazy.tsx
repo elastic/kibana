@@ -8,8 +8,8 @@
 import * as React from 'react';
 import { FC, lazy, Suspense } from 'react';
 import { PanelSpinner } from './panel_spinner';
-import type { ScreenCaptureModalProps } from './screen_capture_modal_content';
 import type { Props } from './screen_capture_panel_content';
+import type { Props as ScreenCaptureModalProps } from './reporting_modal_content'
 
 const LazyComponent = lazy(() =>
   import('./screen_capture_panel_content').then(({ ScreenCapturePanelContent }) => ({
@@ -18,8 +18,8 @@ const LazyComponent = lazy(() =>
 );
 
 const LazyModalComponent = lazy(() =>
-  import('./screen_capture_modal_content').then(({ ScreenCaptureModalContent }) => ({
-    default: ScreenCaptureModalContent,
+  import('./reporting_modal_content').then(({ ReportingModalContent }) => ({
+    default: ReportingModalContent,
   }))
 );
 
@@ -31,7 +31,7 @@ export const ScreenCapturePanelContent: FC<Props> = (props) => {
   );
 };
 
-export const ScreenCaptureModalContent: FC<ScreenCaptureModalProps> = (props) => {
+export const ReportingModalContent: FC<ScreenCaptureModalProps> = (props) => {
   return (
     <Suspense fallback={<PanelSpinner />}>
       <LazyModalComponent {...props} />
