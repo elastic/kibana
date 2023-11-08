@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
-import { useSetUpSections } from './use_setup_cards';
+import { useSetUpSections } from './hooks/use_setup_cards';
 import type { CardId } from './types';
 
 const TogglePanelComponent: React.FC<{ finishedCards: Set<CardId> }> = ({ finishedCards }) => {

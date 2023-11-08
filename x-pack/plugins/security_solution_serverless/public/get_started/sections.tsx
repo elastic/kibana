@@ -21,7 +21,7 @@ import { DashboardButton } from './step_links/dashboard_button';
 import { AddIntegrationButton } from './step_links/add_integration_button';
 import { WatchOverviewButton } from './step_links/watch_overview_video_button';
 
-export const sections: Section[] = [
+const sections: Section[] = [
   {
     id: SectionId.quicStart,
     title: i18n.QUICK_START_TITLE,

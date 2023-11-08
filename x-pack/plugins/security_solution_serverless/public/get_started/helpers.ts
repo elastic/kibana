@@ -6,10 +6,7 @@
  */
 
 import { getSections } from './sections';
-import type { Card, CardId, SectionId } from './types';
-
-export const getLeftCards = (cards: Card[] | undefined, cardsDone: Set<CardId>) =>
-  (cards?.length ?? 0) - (cardsDone.size ?? 0);
+import type { CardId, SectionId } from './types';
 
 export const getCard = ({ cardId, sectionId }: { cardId: CardId; sectionId: SectionId }) => {
   const sections = getSections();
@@ -28,11 +25,5 @@ export const getTotalCardsNumber = () =>
 export const getTotalUndoneCardsNumber = (finishedCardNUmber: number) =>
   getTotalCardsNumber() - finishedCardNUmber;
 
-export const setupActiveSections = (finishedCards: Record<SectionId, Set<CardId>>) => {
-  const totalCards = getSections().reduce((acc, curr) => {
-    return (curr.cards ?? []).length + acc;
-  }, 0);
-  const totalFinishedCards = Object.values(finishedCards).reduce((acc, curr) => acc + curr.size, 0);
-  const totalCardsLeft = totalCards - totalFinishedCards;
-  return { totalCardsLeft, totalCards };
-};
+export const hasCardDone = (cardId: CardId, finishedCards: Set<CardId>) =>
+  finishedCards.has(cardId);

@@ -8,7 +8,7 @@
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useModalContext } from '../../common/hooks/modal_context';
-import { WATCH_OVERVIEW_VIDEO_HEADER } from '../translations';
+import { WATCH_THE_OVERVIEW_VIDEO_TITLE } from '../translations';
 import { QuickStart } from '../types';
 
 const WatchOverviewButtonComponent: React.FC<{ title?: string }> = ({ title }) => {
@@ -18,7 +18,7 @@ const WatchOverviewButtonComponent: React.FC<{ title?: string }> = ({ title }) =
     toggleFinishedCard({ cardId: QuickStart.watchTheOverviewVideo });
   }, [openModal, toggleFinishedCard]);
 
-  return <EuiButton onClick={onClick}>{title ?? WATCH_OVERVIEW_VIDEO_HEADER}</EuiButton>;
+  return <EuiButton onClick={onClick}>{title ?? WATCH_THE_OVERVIEW_VIDEO_TITLE}</EuiButton>;
 };
 
 export const WatchOverviewButton = React.memo(WatchOverviewButtonComponent);

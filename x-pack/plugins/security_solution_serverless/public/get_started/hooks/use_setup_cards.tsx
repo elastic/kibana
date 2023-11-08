@@ -9,10 +9,10 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import type { CardId, Section } from './types';
+import type { CardId, Section } from '../types';
 
-import { CardItem } from './card_item';
-import { getSections } from './sections';
+import { CardItem } from '../card_item';
+import { getSections } from '../sections';
 
 const setUpCards = ({
   euiTheme,

@@ -6,11 +6,11 @@
  */
 
 import { useCallback, useMemo, useReducer } from 'react';
-import { getStartedStorage } from './storage';
-import { reducer } from './reducer';
-import type { CardId, ToggleFinishedCard } from './types';
-import { GetStartedPageActions } from './types';
-import { getTotalUndoneCardsNumber } from './helpers';
+import { getStartedStorage } from '../storage';
+import { reducer } from '../reducer';
+import type { CardId, ToggleFinishedCard } from '../types';
+import { GetStartedPageActions } from '../types';
+import { getTotalUndoneCardsNumber } from '../helpers';
 
 export const useTogglePanel = () => {
   const {

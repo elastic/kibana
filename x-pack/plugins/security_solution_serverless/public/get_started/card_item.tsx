@@ -19,10 +19,9 @@ import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { Card, CardId } from './types';
 
-import { ALL_DONE_TEXT } from './translations';
 import { useModalContext } from '../common/hooks/modal_context';
-
-const hasCardDone = (cardId: CardId, finishedCards: Set<CardId>) => finishedCards.has(cardId);
+import { AllDoneText } from './all_done_text';
+import { hasCardDone } from './helpers';
 
 const CardItemComponent: React.FC<{
   card: Card;
@@ -38,7 +37,7 @@ const CardItemComponent: React.FC<{
     }
   }, [card.allowUndo, card.id, toggleFinishedCard]);
 
-  return card ? (
+  return (
     <EuiPanel
       hasBorder
       paddingSize="none"
@@ -115,33 +114,26 @@ const CardItemComponent: React.FC<{
                   align-self: center;
                 `}
               >
-                <EuiButtonEmpty onClick={undoFinishedCard}>
-                  <span
-                    className="eui-alignMiddle"
+                {card.allowUndo === false ? (
+                  <AllDoneText />
+                ) : (
+                  <EuiButtonEmpty
+                    flush="both"
+                    onClick={undoFinishedCard}
                     css={css`
-                      font-size: ${euiTheme.base * 0.875}px;
-                      color: #69707d;
+                      font-weight: ${euiTheme.font.weight.regular};
                     `}
                   >
-                    {ALL_DONE_TEXT}
-                  </span>
-                  <EuiIcon
-                    className="eui-alignMiddle"
-                    css={css`
-                      padding-left: ${euiTheme.size.xs};
-                    `}
-                    type="checkInCircleFilled"
-                    color="#00BFB3"
-                    size="l"
-                  />
-                </EuiButtonEmpty>
+                    <AllDoneText />
+                  </EuiButtonEmpty>
+                )}
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
-  ) : null;
+  );
 };
 
 CardItemComponent.displayName = 'CardItemComponent';

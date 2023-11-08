@@ -11,7 +11,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiProgress,
   EuiOverlayMask,
   EuiFocusTrap,
   EuiModal,
@@ -21,7 +20,7 @@ import {
   EuiModalFooter,
   EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
 import { TogglePanel } from './toggle_panel';
@@ -29,21 +28,19 @@ import {
   GET_STARTED_PAGE_DESCRIPTION,
   GET_STARTED_PAGE_SUBTITLE,
   GET_STARTED_PAGE_TITLE,
-  PROGRESS_TRACKER_LABEL,
   WATCH_OVERVIEW_VIDEO_CLOSE_BUTTON_TITLE,
   WATCH_OVERVIEW_VIDEO_DESCRIPTION,
-  WATCH_OVERVIEW_VIDEO_HEADER,
+  WATCH_THE_OVERVIEW_VIDEO_TITLE,
   WATCH_OVERVIEW_VIDEO_MODAL_HEADER,
 } from './translations';
 import type { SecurityProductTypes } from '../../common/config';
-import { useTogglePanel } from './use_toggle_panel';
+import { useTogglePanel } from './hooks/use_toggle_panel';
 import { ProductLine } from '../../common/product';
-import { useKibana } from '../common/services';
 import launch from './images/launch.png';
-import { ProductTierBadge } from './welcome_panel/product_tier_badge';
-import { ChangePlanLink } from './welcome_panel/change_plan_link';
-import { getTotalCardsNumber } from './helpers';
+
 import { ModalContextProvider } from '../common/hooks/modal_context';
+import { Progress } from './progress';
+import { useUserName } from '../common/hooks/useUserName';
 
 const CONTENT_WIDTH = 1150;
 
@@ -66,21 +63,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
     () => ({ openModal, closeModal, toggleFinishedCard }),
     [closeModal, openModal, toggleFinishedCard]
   );
-  const [userName, setUserName] = useState<string>();
-  const {
-    services: {
-      security: { authc },
-    },
-  } = useKibana();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { username } = await authc.getCurrentUser();
-      setUserName(username);
-    };
-
-    getUser();
-  });
+  const userName = useUserName();
   const productTier = productTypes.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;
@@ -177,23 +160,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
         >
           <>
             <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={true}>
-                <EuiProgress
-                  value={finishedCards.size}
-                  max={getTotalCardsNumber()}
-                  size="m"
-                  label={PROGRESS_TRACKER_LABEL}
-                  valueText={<>{`${finishedCards.size}/${getTotalCardsNumber()}`}</>}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ProductTierBadge productTier={productTier} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ChangePlanLink productTier={productTier} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <Progress finishedCards={finishedCards} productTier={productTier} />
           </>
         </KibanaPageTemplate.Section>
 
@@ -242,7 +209,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
                       sandbox="allow-scripts allow-same-origin"
                       scrolling="no"
                       src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
-                      title={WATCH_OVERVIEW_VIDEO_HEADER}
+                      title={WATCH_THE_OVERVIEW_VIDEO_TITLE}
                     />
                   </div>
                 </EuiModalBody>

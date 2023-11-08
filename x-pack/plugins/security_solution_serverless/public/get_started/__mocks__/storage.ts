@@ -5,15 +5,10 @@
  * 2.0.
  */
 
+import { QuickStart } from '../types';
+
 export const getStartedStorage = {
-  getAllFinishedCardsFromStorage: jest.fn(() => ({})),
-  getFinishedStepsFromStorageByCardId: jest.fn(() => []),
-  getActiveProductsFromStorage: jest.fn(() => []),
-  toggleActiveProductsInStorage: jest.fn(() => []),
-  resetAllExpandedCardStepsToStorage: jest.fn(),
+  getAllFinishedCardsFromStorage: jest.fn(() => [QuickStart.createFirstProject]),
   addFinishedCardToStorage: jest.fn(),
   removeFinishedCardFromStorage: jest.fn(),
-  addExpandedCardStepToStorage: jest.fn(),
-  removeExpandedCardStepFromStorage: jest.fn(),
-  getAllExpandedCardStepsFromStorage: jest.fn(() => ({})),
 };
