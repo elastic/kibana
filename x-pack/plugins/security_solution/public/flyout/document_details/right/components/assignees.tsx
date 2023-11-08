@@ -98,7 +98,7 @@ export const Assignees: FC<AssigneesProps> = memo(
     );
 
     return (
-      <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
+      <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs" data-test-subj={ASSIGNEES_TITLE_TEST_ID}>
             <h3>

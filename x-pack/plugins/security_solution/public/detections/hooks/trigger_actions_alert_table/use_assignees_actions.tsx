@@ -14,7 +14,7 @@ import { useSetAlertAssignees } from '../../../common/components/toolbar/bulk_ac
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import * as i18n from '../translations';
 
-interface UseAssigneesActionItemsProps {
+export interface UseAssigneesActionItemsProps {
   refetch?: () => void;
 }
 
