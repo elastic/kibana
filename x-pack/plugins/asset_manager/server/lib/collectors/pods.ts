@@ -9,10 +9,23 @@ import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 
-export async function collectPods({ client, from, to, sourceIndices, afterKey }: CollectorOptions) {
+export async function collectPods({
+  client,
+  from,
+  to,
+  sourceIndices,
+  filters = [],
+  afterKey,
+}: CollectorOptions) {
   if (!sourceIndices?.metrics || !sourceIndices?.logs) {
     throw new Error('missing required metrics/logs indices');
   }
+
+  const musts = [
+    ...filters,
+    { exists: { field: 'kubernetes.pod.uid' } },
+    { exists: { field: 'kubernetes.node.name' } },
+  ];
 
   const { metrics, logs } = sourceIndices;
   const dsl: estypes.SearchRequest = {
@@ -42,10 +55,7 @@ export async function collectPods({ client, from, to, sourceIndices, afterKey }:
             },
           },
         ],
-        must: [
-          { exists: { field: 'kubernetes.pod.uid' } },
-          { exists: { field: 'kubernetes.node.name' } },
-        ],
+        must: musts,
       },
     },
   };
