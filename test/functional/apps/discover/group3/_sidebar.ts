@@ -697,7 +697,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render even when retrieving documents failed with an error', async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await testSubjects.missingOrFail('discoverNoResultsError');
+        await PageObjects.discover.showsErrorCallout();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           INITIAL_FIELD_LIST_SUMMARY
@@ -708,7 +708,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         // error in fetching documents because of the invalid runtime field
-        await testSubjects.existOrFail('discoverNoResultsError');
+        await PageObjects.discover.showsErrorCallout();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
@@ -721,7 +721,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('discoverNoResultsError'); // still has error
+        await PageObjects.discover.showsErrorCallout(); // still has error
 
         // check that the sidebar is rendered event after a refresh
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -732,7 +732,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.missingOrFail('discoverNoResultsError');
+        await PageObjects.discover.showsErrorCallout();
       });
 
       it('should work correctly when time range is updated', async function () {

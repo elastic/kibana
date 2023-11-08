@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show an error message', async function () {
       await PageObjects.discover.selectIndexPattern('date-nested');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await testSubjects.existOrFail('discoverNoResultsError');
+      await PageObjects.discover.showsErrorCallout();
     });
   });
 }
