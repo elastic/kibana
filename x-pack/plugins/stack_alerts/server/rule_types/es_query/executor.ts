@@ -10,7 +10,6 @@ import { CoreSetup } from '@kbn/core/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 
-import { pick } from 'lodash';
 import { ComparatorFns } from '../../../common';
 import {
   addMessages,
@@ -29,7 +28,7 @@ import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
-import { ALERT_EVALUATION_CONDITIONS, ALERT_SOURCE_FIELDS, ALERT_TITLE } from '..';
+import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
 export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
   const searchSourceRule = isSearchSourceRule(options.params.searchType);
@@ -128,6 +127,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       value,
       hits: result.hits,
       link,
+      sourceFields: result.sourceFields,
     };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
@@ -162,9 +162,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_TITLE]: actionContext.title,
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
-        [ALERT_SOURCE_FIELDS]: actionContext.hits.map((hit) =>
-          pick(hit._source, params.sourceFields || [])
-        ),
+        ...actionContext.sourceFields,
       },
     });
     if (!isGroupAgg) {
@@ -197,6 +195,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         aggField: params.aggField,
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
+      sourceFields: [],
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,

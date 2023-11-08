@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MAX_SOURCE_FIELDS_TO_COPY } from '@kbn/stack-alerts-plugin/common/constants';
 import { DateRangeInfo, getDateRangeInfo } from './date_range_info';
 
 export interface BuildAggregationOpts {
@@ -20,6 +21,7 @@ export interface BuildAggregationOpts {
   aggField?: string;
   termSize?: number;
   termField?: string | string[];
+  sourceFieldsParams?: string[];
   topHitsSize?: number;
   condition?: {
     resultLimit?: number;
@@ -40,6 +42,7 @@ export const buildAggregation = ({
   aggField,
   termField,
   termSize,
+  sourceFieldsParams,
   condition,
   topHitsSize,
 }: BuildAggregationOpts): Record<string, AggregationsAggregationContainer> => {
@@ -126,8 +129,14 @@ export const buildAggregation = ({
         },
       };
     }
-
     aggParent = aggParent.aggs.groupAgg;
+  }
+
+  // add sourceField aggregations
+  if (sourceFieldsParams && sourceFieldsParams.length > 0) {
+    sourceFieldsParams.forEach((field) => {
+      aggParent.aggs[field] = { terms: { field, size: MAX_SOURCE_FIELDS_TO_COPY } };
+    });
   }
 
   // next, add the time window aggregation

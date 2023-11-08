@@ -17,6 +17,7 @@ export interface ParsedAggregationGroup {
   group: string;
   count: number;
   hits: Array<SearchHit<unknown>>;
+  sourceFields: string[];
   value?: number;
 }
 
@@ -30,12 +31,14 @@ interface ParseAggregationResultsOpts {
   isGroupAgg: boolean;
   esResult: SearchResponse<unknown>;
   resultLimit?: number;
+  sourceFieldsParams?: string[];
 }
 export const parseAggregationResults = ({
   isCountAgg,
   isGroupAgg,
   esResult,
   resultLimit,
+  sourceFieldsParams = [],
 }: ParseAggregationResultsOpts): ParsedAggregationResults => {
   const aggregations = esResult?.aggregations || {};
 
@@ -51,6 +54,7 @@ export const parseAggregationResults = ({
               hits: esResult.hits.hits ?? [],
             },
           },
+          ...(esResult.aggregations ? esResult.aggregations : {}), // sourceFields
           ...(!isCountAgg
             ? {
                 metricAgg: {
@@ -77,11 +81,21 @@ export const parseAggregationResults = ({
     if (resultLimit && results.results.length === resultLimit) break;
 
     const groupName: string = `${groupBucket?.key}`;
+    const sourceFields: { [key: string]: string[] } = {};
+    sourceFieldsParams.forEach((field) => {
+      if (groupBucket[field]?.buckets && groupBucket[field].buckets.length > 0) {
+        sourceFields[field] = groupBucket[field].buckets.map(
+          (bucket: { doc_count: number; key: string | number }) => bucket.key
+        );
+      }
+    });
+
     const groupResult: any = {
       group: groupName,
       count: groupBucket?.doc_count,
       hits: groupBucket?.topHitsAgg?.hits?.hits ?? [],
       ...(!isCountAgg ? { value: groupBucket?.metricAgg?.value } : {}),
+      sourceFields,
     };
     results.results.push(groupResult);
   }

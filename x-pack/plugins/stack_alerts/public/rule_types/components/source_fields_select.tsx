@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { validSourceFields } from '../../../common/constants';
 
 interface SourceFieldsOption {
   label: string;
@@ -27,13 +28,15 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
   onChangeSourceFields,
   errors,
 }) => {
-  const sourceFieldsOptions = esFields.map((field) => ({ label: field.name }));
+  const sourceFieldsOptions = esFields.flatMap((field) => {
+    return validSourceFields.includes(field.name) ? [{ label: field.name }] : [];
+  });
   const initialSelectedOptions = sourceFields?.map((field) => ({ label: field }));
   const [selectedSourceFields, setSelectedSourceFields] = useState<SourceFieldsOption[]>(
     initialSelectedOptions || []
   );
 
-  return (
+  return sourceFieldsOptions.length > 0 ? (
     <EuiFormRow
       fullWidth
       isInvalid={errors.length > 0 && sourceFields !== undefined}
@@ -53,5 +56,5 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
         options={sourceFieldsOptions}
       />
     </EuiFormRow>
-  );
+  ) : null;
 };
