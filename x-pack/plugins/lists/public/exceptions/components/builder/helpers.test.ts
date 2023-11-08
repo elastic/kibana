@@ -203,6 +203,7 @@ describe('Exception builder helpers', () => {
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [
+            { ...getField('file.path.text') },
             { ...getField('nestedField.child') },
             { ...getField('nestedField.nestedChild.doublyNestedChild') },
           ],
@@ -212,7 +213,7 @@ describe('Exception builder helpers', () => {
         expect(output).toEqual(expected);
       });
 
-      test('it returns all fields unfiletered if "item.nested" is not "child" or "parent"', () => {
+      test('it returns all fields unfiltered if "item.nested" is not "child" or "parent"', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
@@ -306,6 +307,7 @@ describe('Exception builder helpers', () => {
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [
+            { ...getField('file.path.text') },
             { ...getField('nestedField.child') },
             { ...getField('nestedField.nestedChild.doublyNestedChild') },
             getEndpointField('file.Ext.code_signature.status'),
