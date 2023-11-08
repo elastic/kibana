@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, render, within, fireEvent } from '@testing-library/react';
-import { waitFor } from '@testing-library/dom';
+import { act, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { NONE_CONNECTOR_ID } from '../../../common/constants';

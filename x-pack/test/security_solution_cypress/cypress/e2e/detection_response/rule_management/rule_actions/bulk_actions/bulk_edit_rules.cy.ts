@@ -79,11 +79,7 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../../../tasks/api_calls/timelines';
-import {
-  cleanKibana,
-  resetRulesTableState,
-  deleteAlertsAndRules,
-} from '../../../../../tasks/common';
+import { resetRulesTableState, deleteAlertsAndRules } from '../../../../../tasks/common';
 
 import {
   getEqlRule,
@@ -681,9 +677,6 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
 // Having 2 sets of complete scenarios for both envs would have a high maintenance cost
 // When ES|QL enabled on serverless this rule type can be added to complete set of tests, with minimal changes to tests itself (adding creation of new rule, change number of expected rules, etc)
 describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
   beforeEach(() => {
     login();
     preventPrebuiltRulesPackageInstallation(); // Make sure prebuilt rules aren't pulled from Fleet API
