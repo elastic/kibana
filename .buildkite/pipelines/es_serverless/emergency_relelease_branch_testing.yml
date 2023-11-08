@@ -1,6 +1,6 @@
-# https://buildkite.com/elastic/kibana-serverless-release-branch-testing
+# https://buildkite.com/elastic/kibana-serverless-emergency-release-branch-testing
 
-## Runs regular PR testing and builds the artifacts container image for serverless release
+## Runs regular PR testing and builds the artifacts container image for emergency releases
 
 notify:
   - slack: "#kibana-mission-control"
