@@ -63,6 +63,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     closeDateTabIfVisible();
     cy.getBySel('edit-rule-actions-tab').click();
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.contains('Response actions are run on each rule execution.');
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
