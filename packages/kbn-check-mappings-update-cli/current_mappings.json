@@ -1465,6 +1465,34 @@
     "dynamic": false,
     "properties": {}
   },
+  "cases-oracle": {
+    "dynamic": false,
+    "properties": {
+      "cases": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "counter": {
+        "type": "unsigned_long"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "rules": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "infrastructure-monitoring-log-view": {
     "dynamic": false,
     "properties": {
