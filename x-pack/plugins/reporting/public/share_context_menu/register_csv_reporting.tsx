@@ -23,7 +23,14 @@ export const reportingCsvShareProvider = ({
   usesUiCapabilities,
   theme,
 }: ExportPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, objectId, onClose, shareableUrl, sharingData, ...shareOpts }: ShareContext) => {
+  const getShareMenuItems = ({
+    objectType,
+    objectId,
+    onClose,
+    shareableUrl,
+    sharingData,
+    ...shareOpts
+  }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }

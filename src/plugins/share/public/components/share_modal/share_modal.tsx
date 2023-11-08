@@ -153,7 +153,7 @@ const getTabs = (props: ShareModalProps) => {
         defaultMessage: 'Share this {objectType}',
         values: {
           objectType: objectTypeTitle || objectType,
-        }
+        },
       }),
       id: tabs.length + 1,
       title: i18n.translate('share.contextModalTitle', {
@@ -186,7 +186,7 @@ const getTabs = (props: ShareModalProps) => {
           return menuItem;
         }),
     };
-    menuItems.push(topLevelMenuPanel)
+    menuItems.push(topLevelMenuPanel);
   }
 
   const initialTabTitle = menuItems[menuItems.length - 1].name;
