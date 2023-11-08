@@ -73,7 +73,7 @@ export function registerAlertsTableConfiguration(
       }),
       initialWidth: 150,
       isSortable: true,
-      schema: 'number',
+      schema: 'numeric',
     },
     {
       id: ALERT_START,
@@ -105,6 +105,7 @@ export function registerAlertsTableConfiguration(
         defaultMessage: 'Duration',
       }),
       initialWidth: 150,
+      schema: 'numeric',
     },
   ];
 
