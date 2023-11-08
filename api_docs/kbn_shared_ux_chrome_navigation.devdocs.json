@@ -871,7 +871,15 @@
             "label": "cloudLinks",
             "description": [],
             "signature": [
-              "{ userAndRoles?: { title: string; href: string; } | undefined; performance?: { title: string; href: string; } | undefined; billingAndSub?: { title: string; href: string; } | undefined; deployment?: { title: string; href: string; } | undefined; }"
+              "{ userAndRoles?: ",
+              "CloudLink",
+              " | undefined; performance?: ",
+              "CloudLink",
+              " | undefined; billingAndSub?: ",
+              "CloudLink",
+              " | undefined; deployment?: ",
+              "CloudLink",
+              " | undefined; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/types/index.ts",
             "deprecated": false,
