@@ -127,7 +127,7 @@ export function EventsChartPanel({ slo }: Props) {
                 data={
                   data?.map((datum) => ({
                     key: new Date(datum.date).getTime(),
-                    value: datum.goodEvents,
+                    value: datum.events?.good,
                   })) ?? []
                 }
               />
@@ -150,7 +150,7 @@ export function EventsChartPanel({ slo }: Props) {
                 data={
                   data?.map((datum) => ({
                     key: new Date(datum.date).getTime(),
-                    value: datum.badEvents,
+                    value: datum.events?.bad,
                   })) ?? []
                 }
               />

@@ -110,9 +110,11 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
-      goodEvents: bucket.good?.value ?? 0,
-      badEvents: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
-      totalEvents: bucket.total?.value ?? 0,
+      events: {
+        good: bucket.good?.value ?? 0,
+        bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
+        total: bucket.total?.value ?? 0,
+      },
     }));
   }
 
@@ -188,9 +190,11 @@ export class GetPreviewData {
         !!bucket.good && !!bucket.total
           ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
           : null,
-      goodEvents: bucket.good?.doc_count ?? 0,
-      badEvents: (bucket.total?.doc_count ?? 0) - (bucket.good?.doc_count ?? 0),
-      totalEvents: bucket.total?.doc_count ?? 0,
+      events: {
+        good: bucket.good?.doc_count ?? 0,
+        bad: (bucket.total?.doc_count ?? 0) - (bucket.good?.doc_count ?? 0),
+        total: bucket.total?.doc_count ?? 0,
+      },
     }));
   }
 
@@ -234,9 +238,11 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
-      goodEvents: bucket.good?.value ?? 0,
-      badEvents: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
-      totalEvents: bucket.total?.value ?? 0,
+      events: {
+        good: bucket.good?.value ?? 0,
+        bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
+        total: bucket.total?.value ?? 0,
+      },
     }));
   }
 
@@ -280,9 +286,11 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
-      goodEvents: bucket.good?.value ?? 0,
-      badEvents: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
-      totalEvents: bucket.total?.value ?? 0,
+      events: {
+        good: bucket.good?.value ?? 0,
+        bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
+        total: bucket.total?.value ?? 0,
+      },
     }));
   }
 
@@ -320,9 +328,6 @@ export class GetPreviewData {
     return result.aggregations?.perMinute.buckets.map((bucket) => ({
       date: bucket.key_as_string,
       sliValue: !!bucket.metric ? bucket.metric.value : null,
-      goodEvents: 0,
-      totalEvents: 0,
-      badEvents: 0,
     }));
   }
 
@@ -363,9 +368,11 @@ export class GetPreviewData {
         !!bucket.good && !!bucket.total
           ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
           : null,
-      goodEvents: bucket.good?.doc_count ?? 0,
-      badEvents: (bucket.total?.doc_count ?? 0) - (bucket.good?.doc_count ?? 0),
-      totalEvents: bucket.total?.doc_count ?? 0,
+      events: {
+        good: bucket.good?.doc_count ?? 0,
+        bad: (bucket.total?.doc_count ?? 0) - (bucket.good?.doc_count ?? 0),
+        total: bucket.total?.doc_count ?? 0,
+      },
     }));
   }
 
