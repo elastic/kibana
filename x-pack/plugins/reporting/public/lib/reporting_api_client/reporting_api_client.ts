@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import {
-  ManagementLinkFn,
-} from '@kbn/reporting-export-types-helpers-public';
+import { ManagementLinkFn } from '@kbn/reporting-export-types-helpers-public';
+import type { BaseParams } from '@kbn/reporting-export-types-helpers-server';
+import { buildKibanaPath } from '@kbn/reporting-common';
 import {
   getRedirectAppPath,
   INTERNAL_ROUTES,
@@ -24,8 +24,6 @@ import {
 import { ReportApiJSON } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
-import type { BaseParams } from '@kbn/reporting-export-types-helpers-server';
-import { buildKibanaPath } from '@kbn/reporting-common'
 
 /*
  * For convenience, apps do not have to provide the browserTimezone and Kibana version.
