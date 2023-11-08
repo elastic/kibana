@@ -16,7 +16,6 @@ import type { RecursiveReadonly } from '@kbn/utility-types';
 import { ConfigSchema } from './config';
 import { securityConfigDeprecationProvider } from './config_deprecations';
 import type { PluginSetupDependencies, SecurityPluginSetup, SecurityPluginStart } from './plugin';
-import { SecurityPlugin } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
@@ -63,4 +62,7 @@ export const plugin: PluginInitializer<
   RecursiveReadonly<SecurityPluginSetup>,
   RecursiveReadonly<SecurityPluginStart>,
   PluginSetupDependencies
-> = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);
+> = async (initializerContext: PluginInitializerContext) => {
+  const { SecurityPlugin } = await import('./plugin');
+  return new SecurityPlugin(initializerContext);
+};

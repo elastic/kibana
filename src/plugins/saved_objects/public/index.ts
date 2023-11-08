@@ -19,4 +19,4 @@ export { checkForDuplicateTitle, saveWithConfirmation, isErrorNonFatal } from '.
 export type { SavedObjectSaveOpts, SavedObject, SavedObjectConfig } from './types';
 export type { SavedObjectsStart, SavedObjectSetup } from './plugin';
 
-export const plugin = () => new SavedObjectsPublicPlugin();
+export const plugin = async () => new SavedObjectsPublicPlugin();

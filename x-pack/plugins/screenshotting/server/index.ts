@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { ScreenshottingPlugin } from './plugin';
+import type { ScreenshottingPlugin } from './plugin';
 
 /**
  * Screenshotting plugin entry point.
  */
-export function plugin(...args: ConstructorParameters<typeof ScreenshottingPlugin>) {
+export async function plugin(...args: ConstructorParameters<typeof ScreenshottingPlugin>) {
+  const { ScreenshottingPlugin } = await import('./plugin');
   return new ScreenshottingPlugin(...args);
 }
 

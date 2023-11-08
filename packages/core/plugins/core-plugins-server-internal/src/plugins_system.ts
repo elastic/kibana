@@ -131,6 +131,7 @@ export class PluginsSystem<T extends PluginType> {
         });
       }
 
+      await plugin.init();
       let contract: unknown;
       const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
       if (isPromise(contractOrPromise)) {

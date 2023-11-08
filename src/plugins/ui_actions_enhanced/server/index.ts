@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { AdvancedUiActionsServerPlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { AdvancedUiActionsServerPlugin } = await import('./plugin');
   return new AdvancedUiActionsServerPlugin();
 }
 
-export { AdvancedUiActionsServerPlugin as Plugin };
 export type {
+  AdvancedUiActionsServerPlugin as Plugin,
   SetupContract as AdvancedUiActionsSetup,
   StartContract as AdvancedUiActionsStart,
 } from './plugin';

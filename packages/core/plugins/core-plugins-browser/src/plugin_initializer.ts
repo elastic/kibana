@@ -22,7 +22,9 @@ export type PluginInitializer<
   TStart,
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
-> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+> = (
+  core: PluginInitializerContext
+) => Promise<Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>>;
 
 /**
  * The available core services passed to a `PluginInitializer`
