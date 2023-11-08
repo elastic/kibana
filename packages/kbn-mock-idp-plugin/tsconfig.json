@@ -11,6 +11,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/dev-utils"
   ]
 }
