@@ -14,12 +14,17 @@ import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
+import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 import {
-  CA_CERT_PATH,
-  ES_P12_PASSWORD,
-  ES_P12_PATH,
-  kibanaDevServiceAccount,
-} from '@kbn/dev-utils';
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_ENTITY_ID,
+  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
+  MOCK_IDP_ATTRIBUTE_ROLES,
+  MOCK_IDP_ATTRIBUTE_EMAIL,
+  MOCK_IDP_ATTRIBUTE_NAME,
+  ensureSAMLRoleMapping,
+  createMockIdpMetadata,
+} from '@kbn/mock-idp-plugin/common';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
@@ -27,6 +32,7 @@ import {
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
   SERVERLESS_JWKS_PATH,
+  SERVERLESS_IDP_METADATA_PATH,
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_FILES_PATH,
   SERVERLESS_SECRETS_SSL_PATH,
@@ -68,6 +74,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
+  /** Fully qualified URL where Kibana is hosted (including base path). Required for mock identity provider to function */
+  kibanaUrl?: string;
   /**
    * Resource file(s) to overwrite
    * (see list of files that can be overwritten under `packages/kbn-es/src/serverless_resources/users`)
@@ -445,6 +453,48 @@ export function resolveEsArgs(
     });
   }
 
+  // Configure mock identify provider
+  if ('kibanaUrl' in options && options.kibanaUrl) {
+    esArgs.set('xpack.security.authc.token.enabled', 'true');
+    esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path`,
+      `${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml`
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id`,
+      MOCK_IDP_ENTITY_ID
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id`,
+      options.kibanaUrl
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs`,
+      `${options.kibanaUrl}/api/security/saml/callback`
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout`,
+      `${options.kibanaUrl}/logout`
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal`,
+      MOCK_IDP_ATTRIBUTE_PRINCIPAL
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups`,
+      MOCK_IDP_ATTRIBUTE_ROLES
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name`,
+      MOCK_IDP_ATTRIBUTE_EMAIL
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
+      MOCK_IDP_ATTRIBUTE_NAME
+    );
+  }
+
   if (customEsArgs) {
     const args = typeof customEsArgs === 'string' ? [customEsArgs] : customEsArgs;
 
@@ -550,6 +600,16 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     );
   }
 
+  // Create and add meta data for mock identity provider
+  if (options.kibanaUrl) {
+    const metadata = await createMockIdpMetadata(options.kibanaUrl);
+    await Fsp.writeFile(SERVERLESS_IDP_METADATA_PATH, metadata);
+    volumeCmds.push(
+      '--volume',
+      `${SERVERLESS_IDP_METADATA_PATH}:${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml:z`
+    );
+  }
+
   volumeCmds.push(
     ...getESp12Volume(),
     ...serverlessResources,
@@ -558,7 +618,6 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     `${
       ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
     }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
-
     '--volume',
     `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`
   );
@@ -660,33 +719,62 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
   }
 
+  const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
+    0,
+    portCmd[1].lastIndexOf(':')
+  )}`;
+
+  const client = getESClient({
+    node: esNodeUrl,
+    auth: {
+      username: ELASTIC_SERVERLESS_SUPERUSER,
+      password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+    },
+    ...(options.ssl
+      ? {
+          tls: {
+            ca: [fs.readFileSync(CA_CERT_PATH)],
+            // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+            // for the ip which is not validated. As such we are getting the error
+            // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+            // To work around that we are overriding the function checkServerIdentity too
+            checkServerIdentity: () => {
+              return undefined;
+            },
+          },
+        }
+      : {}),
+  });
+  const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(() => {
+    if (!options.ssl) {
+      return;
+    }
+
+    if (!options.kibanaUrl) {
+      log.warning(
+        `Unable to configure mock identity provider. 
+  
+    Run Elasticsearch with ${chalk.bold.cyan(
+      '--kibanaUrl <kibana-url>'
+    )} option to be able to login using ${chalk.bold.cyan(MOCK_IDP_REALM_NAME)} realm`
+      );
+      return;
+    }
+
+    const roleMappingPromise = ensureSAMLRoleMapping(client);
+
+    log.success(
+      `Created role mapping for mock identity provider. You can now login using ${chalk.bold.cyan(
+        MOCK_IDP_REALM_NAME
+      )} realm`
+    );
+
+    return roleMappingPromise;
+  });
+
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
-
-    const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
-      0,
-      portCmd[1].lastIndexOf(':')
-    )}`;
-
-    const client = getESClient({
-      node: esNodeUrl,
-      auth: { bearer: kibanaDevServiceAccount.token },
-      ...(options.ssl
-        ? {
-            tls: {
-              ca: [fs.readFileSync(CA_CERT_PATH)],
-              // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
-              // for the ip which is not validated. As such we are getting the error
-              // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
-              // To work around that we are overriding the function checkServerIdentity too
-              checkServerIdentity: () => {
-                return undefined;
-              },
-            },
-          }
-        : {}),
-    });
-    await waitUntilClusterReady({ client, expectedStatus: 'green', log });
+    await readyPromise;
   }
 
   if (!options.background) {

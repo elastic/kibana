@@ -15,6 +15,7 @@ import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
+import { MOCK_IDP_PLUGIN_PATH, MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-plugin/common';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
@@ -107,8 +108,18 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   delete extraCliOptions.env;
 
   if (opts.dev) {
-    if (opts.serverless) {
+    if (opts.serverless && opts.ssl) {
       setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+
+      // Load mock identity provider plugin and configure realm
+      set('plugins.paths', _.compact([].concat(get('plugins.paths'), MOCK_IDP_PLUGIN_PATH)));
+      set(`xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
+        order: Number.MAX_SAFE_INTEGER,
+        realm: MOCK_IDP_REALM_NAME,
+        icon: 'user',
+        description: 'Continue as Test User',
+        hint: 'Allows testing serverless user roles',
+      });
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
