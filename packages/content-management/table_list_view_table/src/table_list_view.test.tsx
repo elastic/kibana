@@ -141,6 +141,7 @@ describe('TableListView', () => {
       const hits: UserContentCommonSchema[] = [
         {
           id: 'item-1',
+          namespaces: ['default'],
           type: 'dashboard',
           updatedAt: '2020-01-01T00:00:00Z',
           attributes: {
@@ -188,6 +189,7 @@ describe('TableListView', () => {
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
+        namespaces: ['default'],
         updatedAt: twoDaysAgo.toISOString(),
         type: 'dashboard',
         attributes: {
@@ -198,6 +200,7 @@ describe('TableListView', () => {
       },
       {
         id: '456',
+        namespaces: ['default'],
         // This is the latest updated and should come first in the table
         updatedAt: yesterday.toISOString(),
         type: 'dashboard',
@@ -330,6 +333,7 @@ describe('TableListView', () => {
 
     const hits: UserContentCommonSchema[] = [...Array(totalItems)].map((_, i) => ({
       id: `item${i}`,
+      namespaces: ['default'],
       type: 'dashboard',
       updatedAt,
       attributes: {
@@ -438,6 +442,7 @@ describe('TableListView', () => {
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
+        namespaces: ['default'],
         updatedAt: twoDaysAgo.toISOString(), // first asc, last desc
         type: 'dashboard',
         attributes: {
@@ -447,6 +452,7 @@ describe('TableListView', () => {
       },
       {
         id: '456',
+        namespaces: ['default'],
         updatedAt: yesterday.toISOString(), // first desc, last asc
         type: 'dashboard',
         attributes: {
@@ -639,6 +645,7 @@ describe('TableListView', () => {
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
+        namespaces: ['default'],
         updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
         attributes: {
           title: 'Item 1',
@@ -649,6 +656,7 @@ describe('TableListView', () => {
       },
       {
         id: '456',
+        namespaces: ['default'],
         updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
         attributes: {
           title: 'Item 2',
@@ -697,6 +705,7 @@ describe('TableListView', () => {
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
+        namespaces: ['default'],
         updatedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
         type: 'dashboard',
         attributes: {
@@ -710,6 +719,7 @@ describe('TableListView', () => {
       },
       {
         id: '456',
+        namespaces: ['default'],
         updatedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
         type: 'dashboard',
         attributes: {
@@ -890,6 +900,7 @@ describe('TableListView', () => {
     const hits: UserContentCommonSchema[] = [
       {
         id: 'item-1',
+        namespaces: ['default'],
         type: 'dashboard',
         updatedAt,
         attributes: {
@@ -899,6 +910,7 @@ describe('TableListView', () => {
       },
       {
         id: 'item-2',
+        namespaces: ['default'],
         type: 'dashboard',
         updatedAt,
         attributes: {
@@ -1075,6 +1087,7 @@ describe('TableListView', () => {
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
+        namespaces: ['default'],
         updatedAt: yesterday.toISOString(),
         type: 'dashboard',
         attributes: {
@@ -1085,6 +1098,7 @@ describe('TableListView', () => {
       },
       {
         id: '456',
+        namespaces: ['default'],
         updatedAt: twoDaysAgo.toISOString(),
         type: 'dashboard',
         attributes: {
@@ -1344,6 +1358,7 @@ describe('TableListView', () => {
     const hits: UserContentCommonSchema[] = [
       {
         id: '123',
+        namespaces: ['default'],
         updatedAt: twoDaysAgo.toISOString(),
         type: 'dashboard',
         attributes: {
@@ -1354,6 +1369,7 @@ describe('TableListView', () => {
       },
       {
         id: '456',
+        namespaces: ['default'],
         updatedAt: yesterday.toISOString(),
         type: 'dashboard',
         attributes: {
@@ -1467,6 +1483,7 @@ describe('TableList', () => {
     const originalHits: UserContentCommonSchema[] = [
       {
         id: `item`,
+        namespaces: ['default'],
         type: 'dashboard',
         updatedAt: 'original timestamp',
         attributes: {
@@ -1491,6 +1508,7 @@ describe('TableList', () => {
     const hits: UserContentCommonSchema[] = [
       {
         id: `item`,
+        namespaces: ['default'],
         type: 'dashboard',
         updatedAt: 'updated timestamp',
         attributes: {
