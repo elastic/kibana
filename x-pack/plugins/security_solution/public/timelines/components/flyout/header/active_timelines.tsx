@@ -33,6 +33,7 @@ interface ActiveTimelinesProps {
   timelineType: TimelineType;
   isOpen: boolean;
   updated?: number;
+  changed: boolean;
 }
 
 const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
@@ -54,8 +55,10 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   timelineTitle,
   updated,
   isOpen,
+  changed,
 }) => {
   const dispatch = useDispatch();
+
   const handleToggleOpen = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: !isOpen }));
     focusActiveTimelineButton();
@@ -66,6 +69,8 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
     : timelineType === TimelineType.template
     ? UNTITLED_TEMPLATE
     : UNTITLED_TIMELINE;
+
+  const timelineChangeStatus = useMemo(() => {}, []);
 
   const tooltipContent = useMemo(() => {
     if (timelineStatus === TimelineStatus.draft) {
@@ -108,13 +113,11 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
             <TimelineEventsCountBadge />
           </EuiFlexItem>
         )}
-        {timelineStatus === TimelineStatus.draft ? (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" content={tooltipContent}>
-              <EuiHealthStyled color="warning" />
-            </EuiToolTip>
-          </EuiFlexItem>
-        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="top" content={tooltipContent}>
+            <EuiHealthStyled color="warning" />
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </StyledEuiButtonEmpty>
   );

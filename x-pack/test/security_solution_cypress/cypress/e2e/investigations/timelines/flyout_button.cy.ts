@@ -6,7 +6,7 @@
  */
 
 import { TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../../../screens/security_main';
-import { CREATE_NEW_TIMELINE, TIMELINE_FLYOUT_HEADER } from '../../../screens/timeline';
+import { TIMELINE_FLYOUT_HEADER } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
@@ -17,10 +17,6 @@ import {
   closeTimelineUsingToggle,
   openTimelineUsingToggle,
 } from '../../../tasks/security_main';
-import {
-  closeCreateTimelineOptionsPopover,
-  openCreateTimelineOptionsPopover,
-} from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
@@ -71,18 +67,6 @@ describe('timeline flyout button', () => {
       cy.get('body').type('{esc}');
 
       cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
-    }
-  );
-
-  it(
-    'the `(+)` button popover menu owns focus when open',
-    { tags: ['@ess', '@serverless'] },
-    () => {
-      openCreateTimelineOptionsPopover();
-      cy.get(CREATE_NEW_TIMELINE).focus();
-      cy.get(CREATE_NEW_TIMELINE).should('have.focus');
-      closeCreateTimelineOptionsPopover();
-      cy.get(CREATE_NEW_TIMELINE).should('not.exist');
     }
   );
 

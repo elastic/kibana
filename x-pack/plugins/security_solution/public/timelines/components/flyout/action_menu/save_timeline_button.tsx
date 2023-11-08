@@ -92,10 +92,11 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
           fill
           color="primary"
           onClick={openEditTimeline}
+          size="s"
           iconType="save"
           isLoading={isSaving}
           disabled={!canEditTimeline}
-          data-test-subj="save-timeline-btn"
+          data-test-subj="save-timeline-action-btn"
           id={SAVE_BUTTON_ELEMENT_ID}
         >
           {timelineTranslations.SAVE}

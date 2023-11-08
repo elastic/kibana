@@ -141,35 +141,33 @@ export const QueryBar = memo<QueryBarComponentProps>(
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
     return (
-      <>
-        <SearchBar
-          showSubmitButton={false}
-          dateRangeFrom={dateRangeFrom}
-          dateRangeTo={dateRangeTo}
-          filters={filters}
-          indexPatterns={arrDataView}
-          isLoading={isLoading}
-          isRefreshPaused={isRefreshPaused}
-          query={query}
-          onClearSavedQuery={onClearSavedQuery}
-          onFiltersUpdated={onFiltersUpdated}
-          onQueryChange={onQueryChange}
-          onQuerySubmit={onQuerySubmit}
-          onSaved={onSavedQuery}
-          onSavedQueryUpdated={onSavedQueryUpdated}
-          refreshInterval={refreshInterval}
-          showAutoRefreshOnly={false}
-          showFilterBar={true}
-          showDatePicker={false}
-          showQueryInput={true}
-          showSaveQuery={true}
-          timeHistory={timeHistory}
-          dataTestSubj={dataTestSubj}
-          savedQuery={savedQuery}
-          displayStyle={displayStyle}
-          isDisabled={isDisabled}
-        />
-      </>
+      <SearchBar
+        showSubmitButton={false}
+        dateRangeFrom={dateRangeFrom}
+        dateRangeTo={dateRangeTo}
+        filters={filters}
+        indexPatterns={arrDataView}
+        isLoading={isLoading}
+        isRefreshPaused={isRefreshPaused}
+        query={query}
+        onClearSavedQuery={onClearSavedQuery}
+        onFiltersUpdated={onFiltersUpdated}
+        onQueryChange={onQueryChange}
+        onQuerySubmit={onQuerySubmit}
+        onSaved={onSavedQuery}
+        onSavedQueryUpdated={onSavedQueryUpdated}
+        refreshInterval={refreshInterval}
+        showAutoRefreshOnly={false}
+        showFilterBar={!hideSavedQuery}
+        showDatePicker={false}
+        showQueryInput={true}
+        showSaveQuery={true}
+        timeHistory={timeHistory}
+        dataTestSubj={dataTestSubj}
+        savedQuery={savedQuery}
+        displayStyle={displayStyle}
+        isDisabled={isDisabled}
+      />
     );
   }
 );

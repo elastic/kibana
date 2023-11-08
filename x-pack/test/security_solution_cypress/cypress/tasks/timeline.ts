@@ -54,7 +54,6 @@ import {
   CREATE_NEW_TIMELINE_TEMPLATE,
   OPEN_TIMELINE_TEMPLATE_ICON,
   TIMELINE_SAVE_MODAL,
-  TIMELINE_SAVE_MODAL_OPEN_BUTTON,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
   TIMELINE_PROGRESS_BAR,
   QUERY_TAB_BUTTON,
@@ -92,6 +91,7 @@ import {
   NEW_TIMELINE_ACTION,
   SAVE_TIMELINE_ACTION,
   TOGGLE_DATA_PROVIDER_BTN,
+  SAVE_TIMELINE_ACTION_BTN,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -105,7 +105,7 @@ export const addDescriptionToTimeline = (
   modalAlreadyOpen: boolean = false
 ) => {
   if (!modalAlreadyOpen) {
-    cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
+    cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
   }
   cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled').type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
@@ -114,7 +114,7 @@ export const addDescriptionToTimeline = (
 };
 
 export const addNameToTimelineAndSave = (name: string) => {
-  cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
+  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
@@ -351,7 +351,7 @@ export const expandFirstTimelineEventDetails = () => {
  * before you're using this task. Otherwise it will fail to save.
  */
 export const saveTimeline = () => {
-  cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
+  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
 
   cy.get(TIMELINE_SAVE_MODAL).within(() => {
     cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');

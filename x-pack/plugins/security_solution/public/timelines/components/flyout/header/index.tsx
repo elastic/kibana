@@ -32,6 +32,7 @@ import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
+import { TimelineStatusInfoComponent } from './timeline_status_info';
 
 interface FlyoutHeaderPanelProps {
   timelineId: string;
@@ -58,6 +59,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     show,
     filters,
     kqlMode,
+    changed,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -71,6 +73,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
         'show',
         'filters',
         'kqlMode',
+        'changed',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -141,8 +144,16 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
                   timelineStatus={timelineStatus}
                   isOpen={show}
                   updated={updated}
+                  changed={changed}
                 />
               </ActiveTimelinesContainer>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TimelineStatusInfoComponent
+                status={timelineStatus}
+                updated={updated}
+                changed={changed}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AddToFavoritesButton timelineId={timelineId} compact />
@@ -151,7 +162,12 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
         </EuiFlexItem>
         {show && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+            >
               <TimelineActionMenu
                 timelineId={timelineId}
                 activeTab={activeTab}
