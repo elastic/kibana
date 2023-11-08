@@ -7,30 +7,13 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  RiskScoreEntity,
-  RiskScoreFields,
-  RiskSeverity,
-} from '../../../../../../../common/search_strategy';
-import { RISK_SEVERITY_COLOUR } from '../../../../../../explore/components/risk_score/severity/common';
+  SEVERITY_UI_SORT_ORDER,
+  RISK_SEVERITY_COLOUR,
+} from '../../../../../../entity_analytics/common/utils';
+import { RISK_SCORE_RANGES } from '../../../../../../../common/risk_engine';
+import type { RiskSeverity } from '../../../../../../../common/search_strategy';
+import { RiskScoreEntity, RiskScoreFields } from '../../../../../../../common/search_strategy';
 import type { LensAttributes } from '../../../types';
-
-// TODO move it to constants
-// TODO verify if it is inclusive or exclusive inside risk engine
-const riskScoreRanges = {
-  [RiskSeverity.unknown]: { start: 0, stop: 20 },
-  [RiskSeverity.low]: { start: 20, stop: 40 },
-  [RiskSeverity.moderate]: { start: 40, stop: 70 },
-  [RiskSeverity.high]: { start: 70, stop: 90 },
-  [RiskSeverity.critical]: { start: 90, stop: 100 },
-};
-
-export const sortedRiskSeverities = [
-  RiskSeverity.unknown,
-  RiskSeverity.low,
-  RiskSeverity.moderate,
-  RiskSeverity.high,
-  RiskSeverity.critical,
-];
 
 interface GetRiskScoreMetricAttributesProps {
   query?: string;
@@ -74,13 +57,13 @@ export const getRiskScoreMetricAttributes: (
             rangeMin: 0,
             rangeMax: null,
             progression: 'fixed',
-            colorStops: sortedRiskSeverities.map((riskSeverity) => ({
+            colorStops: SEVERITY_UI_SORT_ORDER.map((riskSeverity) => ({
               color: RISK_SEVERITY_COLOUR[riskSeverity],
-              stop: riskScoreRanges[riskSeverity].start,
+              stop: RISK_SCORE_RANGES[riskSeverity].start,
             })),
-            stops: sortedRiskSeverities.map((riskSeverity) => ({
+            stops: SEVERITY_UI_SORT_ORDER.map((riskSeverity) => ({
               color: RISK_SEVERITY_COLOUR[riskSeverity],
-              stop: riskScoreRanges[riskSeverity].stop,
+              stop: RISK_SCORE_RANGES[riskSeverity].stop,
             })),
             continuity: 'above',
             maxSteps: 5,

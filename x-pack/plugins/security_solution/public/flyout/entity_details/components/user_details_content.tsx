@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import React from 'react';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { EuiFlyoutBody } from '@elastic/eui';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
 import type {
   ManagedUserData,
   ObservedUserData,
 } from '../../../timelines/components/side_panel/new_user_detail/types';
 import type { RiskScoreEntity } from '../../../../common/risk_engine';
-import { ExpandFlyoutButton } from './expand_flyout_button';
-import { useExpandDetailsFlyout } from '../hooks/use_expand_details_flyout';
-
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { UserDetailsBody } from './user_details_body';
+import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
+import { RiskInputsPanelKey } from '../../risk_inputs';
 
 export interface UserDetailsContentProps extends Record<string, unknown> {
   userName: string;
@@ -55,9 +53,16 @@ export const UserDetailsContent = ({
 }: UserDetailsContentProps) => {
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-  const riskInputs = userRiskData?.user.risk.inputs ?? [];
 
-  const { isExpanded, togglePanel } = useExpandDetailsFlyout({ riskInputs });
+  const { openLeftPanel } = useExpandableFlyoutContext();
+  const openPanel = useCallback(() => {
+    openLeftPanel({
+      id: RiskInputsPanelKey,
+      params: {
+        riskInputs: userRiskData?.user.risk.inputs,
+      },
+    });
+  }, [openLeftPanel, userRiskData?.user.risk.inputs]);
 
   if (riskScoreState.loading || observedUser.isLoading || managedUser.isLoading) {
     return <FlyoutLoading />;
@@ -65,44 +70,8 @@ export const UserDetailsContent = ({
 
   return (
     <>
-      <EuiFlyoutHeader
-        hasBorder
-        // Temporary code to force the FlyoutHeader height.
-        // Please delete it when FlyoutHeader supports multiple heights.
-        css={css`
-          &.euiFlyoutHeader {
-            padding: 5px 0;
-            min-height: 34px;
-          }
-        `}
-      >
-        {riskInputs.length > 0 && (
-          <ExpandFlyoutButton
-            isExpanded={isExpanded}
-            onToggle={togglePanel}
-            expandedText={i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.header.expandDetailButtonLabel',
-              {
-                defaultMessage: 'Collapse details',
-              }
-            )}
-            collapsedText={i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.header.collapseDetailButtonLabel',
-              {
-                defaultMessage: 'Expand details',
-              }
-            )}
-          />
-        )}
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody
-        css={css`
-          .euiFlyoutBody__overflowContent {
-            padding: 0;
-          }
-        `}
-      >
+      <FlyoutNavigation flyoutIsExpandable={!!userRiskData?.user.risk} expandDetails={openPanel} />
+      <EuiFlyoutBody>
         <UserDetailsBody
           userName={userName}
           managedUser={managedUser}

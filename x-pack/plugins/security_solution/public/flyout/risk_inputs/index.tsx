@@ -6,13 +6,7 @@
  */
 
 import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
-import {
-  useEuiBackgroundColor,
-  EuiSpacer,
-  EuiInMemoryTable,
-  EuiFlyoutBody,
-  EuiTitle,
-} from '@elastic/eui';
+import { useEuiBackgroundColor, EuiSpacer, EuiInMemoryTable, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,6 +18,7 @@ import { ActionColumn } from './action_column';
 import { PreferenceFormattedDate } from '../../common/components/formatted_date';
 import { RiskInputsUtilityBar } from './utility_bar';
 import { useAlertsByIds } from '../../common/containers/alerts/use_alerts_by_ids';
+import { FlyoutBody } from '../shared/components/flyout_body';
 
 export interface RiskInputsPanelProps extends Record<string, unknown> {
   riskInputs: RiskInputs;
@@ -125,7 +120,7 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
 
   return (
     <>
-      <EuiFlyoutBody
+      <FlyoutBody
         css={css`
           background-color: ${useEuiBackgroundColor('subdued')};
         `}
@@ -153,8 +148,7 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
           isSelectable
           itemId="_id"
         />
-        <></>
-      </EuiFlyoutBody>
+      </FlyoutBody>
     </>
   );
 };

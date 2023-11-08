@@ -103,11 +103,3 @@ export const EMPTY_SEVERITY_COUNT = {
   [RiskSeverity.moderate]: 0,
   [RiskSeverity.unknown]: 0,
 };
-
-export const SEVERITY_UI_SORT_ORDER = [
-  RiskSeverity.unknown,
-  RiskSeverity.low,
-  RiskSeverity.moderate,
-  RiskSeverity.high,
-  RiskSeverity.critical,
-];

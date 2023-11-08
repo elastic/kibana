@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   useEuiTheme,
@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
@@ -27,9 +28,9 @@ import { RiskScoreEntity } from '../../../../common/risk_engine';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getRiskScoreMetricAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_metric';
-import { useExpandDetailsFlyout } from '../hooks/use_expand_details_flyout';
 import { USER_DETAILS_RISK_SCORE_QUERY_ID } from '../user_details';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { RiskInputsPanelKey } from '../../risk_inputs';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;
@@ -46,9 +47,16 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
   const { data: userRisk } = riskScoreData;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   const { euiTheme } = useEuiTheme();
-  const { openPanel } = useExpandDetailsFlyout({
-    riskInputs: userRiskData?.user.risk.inputs ?? [],
-  });
+
+  const { openLeftPanel } = useExpandableFlyoutContext();
+  const openPanel = useCallback(() => {
+    openLeftPanel({
+      id: RiskInputsPanelKey,
+      params: {
+        riskInputs: userRiskData?.user.risk.inputs,
+      },
+    });
+  }, [openLeftPanel, userRiskData?.user.risk.inputs]);
 
   const lensAttributes = useMemo(() => {
     return getRiskScoreMetricAttributes({
