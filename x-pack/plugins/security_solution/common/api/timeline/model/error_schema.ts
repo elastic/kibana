@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import { NonEmptyString, PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
-
-// TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-import { RuleSignatureId } from './rule_schema_legacy';
-
-import { status_code, message } from './schemas';
 
 // We use id: t.string intentionally and _never_ the id from global schemas as
 // sometimes echo back out the id that the user gave us and it is not guaranteed
@@ -20,7 +14,7 @@ import { status_code, message } from './schemas';
 const partial = t.exact(
   t.partial({
     id: t.string,
-    rule_id: RuleSignatureId,
+    rule_id: NonEmptyString,
     list_id: NonEmptyString,
     item_id: NonEmptyString,
   })
@@ -28,8 +22,8 @@ const partial = t.exact(
 const required = t.exact(
   t.type({
     error: t.type({
-      status_code,
-      message,
+      status_code: PositiveInteger,
+      message: t.string,
     }),
   })
 );
