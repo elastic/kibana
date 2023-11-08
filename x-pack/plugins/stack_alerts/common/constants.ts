@@ -7,7 +7,6 @@
 
 export const MAX_SELECTABLE_GROUP_BY_TERMS = 4;
 export const MAX_SELECTABLE_SOURCE_FIELDS = 5;
-export const MAX_SOURCE_FIELDS_TO_COPY = 10;
 
 const HOST_NAME = 'host.name';
 const HOST_HOSTNAME = 'host.hostname';

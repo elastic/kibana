@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MAX_SOURCE_FIELDS_TO_COPY } from '@kbn/stack-alerts-plugin/common/constants';
 import { DateRangeInfo, getDateRangeInfo } from './date_range_info';
 
 export interface BuildAggregationOpts {
@@ -32,6 +31,7 @@ export interface BuildAggregationOpts {
 export const BUCKET_SELECTOR_PATH_NAME = 'compareValue';
 export const BUCKET_SELECTOR_FIELD = `params.${BUCKET_SELECTOR_PATH_NAME}`;
 export const DEFAULT_GROUPS = 100;
+export const MAX_SOURCE_FIELDS_TO_COPY = 10;
 
 export const isCountAggregation = (aggType: string) => aggType === 'count';
 export const isGroupAggregation = (termField?: string | string[]) => !!termField;

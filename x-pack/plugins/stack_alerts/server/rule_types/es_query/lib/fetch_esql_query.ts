@@ -64,6 +64,7 @@ export async function fetchEsqlQuery({
       },
       resultLimit: alertLimit,
       sourceFieldsParams: params.sourceFields,
+      generateSourceFieldsFromHits: true,
     }),
     index: null,
   };

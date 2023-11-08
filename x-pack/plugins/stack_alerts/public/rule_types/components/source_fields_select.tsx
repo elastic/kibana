@@ -6,9 +6,17 @@
  */
 
 import React, { useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { validSourceFields } from '../../../common/constants';
 
 interface SourceFieldsOption {
@@ -42,19 +50,35 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
       isInvalid={errors.length > 0 && sourceFields !== undefined}
       error={errors}
     >
-      <EuiComboBox
-        fullWidth
-        placeholder="Select fields to save"
-        data-test-subj="sourceFields"
-        isInvalid={errors.length > 0 && sourceFields !== undefined}
-        selectedOptions={selectedSourceFields}
-        onChange={(selectedOptions: Array<EuiComboBoxOptionOption<SourceFieldsOption>>) => {
-          setSelectedSourceFields(selectedOptions);
-          const fields = selectedOptions.map((field) => field.label);
-          onChangeSourceFields(fields);
-        }}
-        options={sourceFieldsOptions}
-      />
+      <>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.stackAlerts.components.ui.sourceFieldsSelect.title"
+              defaultMessage="Select fields to copy into alerts "
+            />
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiComboBox
+          fullWidth
+          placeholder={i18n.translate(
+            'xpack.stackAlerts.components.ui.sourceFieldsSelect.placeholder',
+            {
+              defaultMessage: 'Select fields',
+            }
+          )}
+          data-test-subj="sourceFields"
+          isInvalid={errors.length > 0 && sourceFields !== undefined}
+          selectedOptions={selectedSourceFields}
+          onChange={(selectedOptions: Array<EuiComboBoxOptionOption<SourceFieldsOption>>) => {
+            setSelectedSourceFields(selectedOptions);
+            const fields = selectedOptions.map((field) => field.label);
+            onChangeSourceFields(fields);
+          }}
+          options={sourceFieldsOptions}
+        />
+      </>
     </EuiFormRow>
   ) : null;
 };
