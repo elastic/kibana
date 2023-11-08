@@ -27,9 +27,9 @@ import {
   ShareMenuItem,
   UrlParamExtension,
 } from '../../types';
-import { TabContent } from './tab_content';
 import { LinksModalPage } from './links_modal_page';
 import { EmbedModalPage } from './embed_modal_page';
+import { TabContent } from './tab_content';
 
 export interface ShareModalProps {
   allowEmbed: boolean;
@@ -81,13 +81,11 @@ const getTabs = (props: ShareModalProps) => {
       defaultMessage: 'Links',
     }),
     content: (
-      <>
-        <LinksModalPage
-          isEmbedded={props.allowEmbed}
-          allowShortUrl={props.allowShortUrl}
-          objectType={props.objectType}
-        />
-      </>
+      <LinksModalPage
+        isEmbedded={props.allowEmbed}
+        allowShortUrl={props.allowShortUrl}
+        objectType={props.objectType}
+      />
     ),
   };
   menuItems.push({
@@ -151,6 +149,12 @@ const getTabs = (props: ShareModalProps) => {
   });
   if (menuItems.length > 1) {
     const topLevelMenuPanel = {
+      name: i18n.translate('share.contextModalName', {
+        defaultMessage: 'Share this {objectType}',
+        values: {
+          objectType: objectTypeTitle || objectType,
+        }
+      }),
       id: tabs.length + 1,
       title: i18n.translate('share.contextModalTitle', {
         defaultMessage: 'Share this {objectType}',
@@ -182,9 +186,10 @@ const getTabs = (props: ShareModalProps) => {
           return menuItem;
         }),
     };
-    tabs.push(topLevelMenuPanel);
+    menuItems.push(topLevelMenuPanel)
   }
-  const initialTabTitle = tabs[tabs.length - 1].title;
+
+  const initialTabTitle = menuItems[menuItems.length - 1].name;
   return { tabs, initialTabTitle };
 };
 

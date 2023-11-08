@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiCodeBlock, EuiForm, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
 interface LinksModalPageProps {
@@ -15,18 +16,23 @@ interface LinksModalPageProps {
   objectType: string;
 }
 
-const renderRadioButtons = () => {};
-
 export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
-  //   const { isEmbedded, allowShortUrl, objectType } = props;
   return (
-    // <Frame isEmbedded={isEmbedded} allowShortUrl={allowShortUrl} objectType={objectType} />
     <EuiForm>
-      {renderRadioButtons()}
       <EuiSpacer />
-      <EuiCodeBlock isCopyable>
-        <EuiIcon type="copy" />
-      </EuiCodeBlock>
+      <EuiFormRow
+        helpText={
+          <FormattedMessage
+            id="plugins.share.linkModalPage.saveWorkDescription"
+            defaultMessage="One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard."
+          />
+        }
+      >
+        <EuiCodeBlock isCopyable>
+          <EuiSpacer size="xs" />
+          placeholder saved objects href
+        </EuiCodeBlock>
+      </EuiFormRow>
     </EuiForm>
   );
 };
