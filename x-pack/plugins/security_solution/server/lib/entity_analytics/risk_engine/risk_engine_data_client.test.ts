@@ -67,7 +67,7 @@ jest.mock('./utils/create_datastream', () => ({
   createDataStream: jest.fn(),
 }));
 
-jest.mock('../risk_score/transform/helpers/transforms', () => ({
+jest.mock('../../risk_score/transform/helpers/transforms', () => ({
   createAndStartTransform: jest.fn(),
 }));
 
