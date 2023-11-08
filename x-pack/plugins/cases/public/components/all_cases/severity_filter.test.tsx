@@ -10,7 +10,7 @@ import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
