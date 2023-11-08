@@ -15,7 +15,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/screenshotting-plugin",
     "@kbn/config-schema",
     "@kbn/utility-types",
     "@kbn/i18n",

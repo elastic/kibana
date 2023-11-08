@@ -19,5 +19,6 @@
     "@kbn/licensing-plugin",
     "@kbn/screenshotting-plugin",
     "@kbn/reporting-export-types-helpers-server",
+    "@kbn/reporting-export-types-helpers-public",
   ]
 }
