@@ -8,9 +8,7 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-// TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-import { ErrorSchema } from './error_schema_legacy';
+import { ErrorSchema } from './error_schema';
 import { getErrorSchemaMock } from './error_schema.mock';
 
 describe('error_schema', () => {
