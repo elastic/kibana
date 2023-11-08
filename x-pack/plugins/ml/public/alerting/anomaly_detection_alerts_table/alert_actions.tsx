@@ -45,6 +45,10 @@ export function AlertActions({
   refresh,
   setFlyoutAlert,
 }: AlertActionsProps) {
+  const alertDoc = Object.entries(alert).reduce((acc, curr) => {
+    return { ...acc, [curr[0]]: curr[1][0] };
+  });
+
   const {
     cases,
     http: {
@@ -141,7 +145,7 @@ export function AlertActions({
           </EuiContextMenuItem>,
         ]
       : []),
-    ...(casesPrivileges?.update && linkToRule
+    ...(linkToRule
       ? [
           <EuiContextMenuItem
             data-test-subj="viewRuleDetails"
@@ -154,6 +158,18 @@ export function AlertActions({
           </EuiContextMenuItem>,
         ]
       : []),
+    <EuiContextMenuItem
+      data-test-subj="viewAlertDetailsFlyout"
+      key="viewAlertDetailsFlyout"
+      onClick={() => {
+        closeActionsPopover();
+        setFlyoutAlert({ fields: alertDoc });
+      }}
+    >
+      {i18n.translate('xpack.ml.alertsTable.viewAlertDetailsButtonText', {
+        defaultMessage: 'View alert details',
+      })}
+    </EuiContextMenuItem>,
     ...(isActiveAlert
       ? [
           <EuiContextMenuItem
