@@ -4,18 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { arrayQueries, ecsMapping } from '@kbn/osquery-io-ts-types';
 import * as t from 'io-ts';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../endpoint/service/response_actions/constants';
-import { ResponseActionTypesEnum } from './response_actions.gen';
-
-export const RESPONSE_ACTION_TYPES = {
-  OSQUERY: ResponseActionTypesEnum['.osquery'],
-  ENDPOINT: ResponseActionTypesEnum['.endpoint'],
-} as const;
-
-export const SUPPORTED_RESPONSE_ACTION_TYPES = Object.values(RESPONSE_ACTION_TYPES);
 
 // to enable using RESPONSE_ACTION_API_COMMANDS_NAMES as a type
 function keyObject<T extends readonly string[]>(arr: T): { [K in T[number]]: null } {
@@ -47,13 +38,13 @@ export const OsqueryParamsCamelCase = t.type({
 // When we create new response action types, create a union of types
 export type RuleResponseOsqueryAction = t.TypeOf<typeof RuleResponseOsqueryAction>;
 export const RuleResponseOsqueryAction = t.strict({
-  actionTypeId: t.literal(RESPONSE_ACTION_TYPES.OSQUERY),
+  actionTypeId: t.literal('.osquery'),
   params: OsqueryParamsCamelCase,
 });
 
 export type RuleResponseEndpointAction = t.TypeOf<typeof RuleResponseEndpointAction>;
 export const RuleResponseEndpointAction = t.strict({
-  actionTypeId: t.literal(RESPONSE_ACTION_TYPES.ENDPOINT),
+  actionTypeId: t.literal('.endpoint'),
   params: EndpointParams,
 });
 
@@ -67,12 +58,12 @@ export const ResponseActionRuleParamsOrUndefined = t.union([
 
 // When we create new response action types, create a union of types
 const OsqueryResponseAction = t.strict({
-  action_type_id: t.literal(RESPONSE_ACTION_TYPES.OSQUERY),
+  action_type_id: t.literal('.osquery'),
   params: OsqueryParams,
 });
 
 const EndpointResponseAction = t.strict({
-  action_type_id: t.literal(RESPONSE_ACTION_TYPES.ENDPOINT),
+  action_type_id: t.literal('.endpoint'),
   params: EndpointParams,
 });
 
