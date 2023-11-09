@@ -11,6 +11,10 @@ import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/e
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { useObservable } from 'react-use';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { SecuritySolutionFlyout, SecuritySolutionFlyoutContextProvider } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -18,6 +22,7 @@ import { getTimelineShowStatusByIdSelector } from '../../../timelines/components
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { GlobalKQLHeader } from './global_kql_header';
 import { SecuritySolutionBottomBar } from './bottom_bar';
+import { useKibana } from '../../../common/lib/kibana';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 
 /**
@@ -44,6 +49,11 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
 
 export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplateProps, 'ref'>> =
   React.memo(({ children, ...rest }) => {
+    const { chrome } = useKibana().services;
+    const chromeStyle$: Observable<ChromeStyle> = chrome
+      ? chrome.getChromeStyle$()
+      : of('classic' as const);
+    const chromeStyle = useObservable(chromeStyle$, 'classic');
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
@@ -67,7 +77,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           theme={euiTheme}
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
           paddingSize="none"
-          solutionNav={solutionNavProps}
+          solutionNav={chromeStyle === 'classic' ? solutionNavProps : undefined}
           restrictWidth={false}
           {...rest}
         >
