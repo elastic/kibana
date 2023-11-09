@@ -23,7 +23,6 @@ export async function redirectToADJobWizards(
   timeRange: TimeRange,
   share: SharePluginStart
 ) {
-  // const { query, filters, to, from, vis } = await getJobsItemsFromEmbeddable(embeddable, lens);
   const locator = share.url.locators.get(ML_APP_LOCATOR);
 
   const url = await locator?.getUrl({

@@ -79,6 +79,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
         createADJob={createADJob}
         createADJobInWizard={createADJobInWizard}
         embeddable={embeddable}
+        timeRange={embeddable.getInput().timeRange}
         layer={layer}
         layerIndex={layerIndex}
       >

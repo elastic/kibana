@@ -38,15 +38,6 @@ export async function resolver(
   queryRisonString: string
 ) {
   const { mlApiServices, timeFilter, kibanaConfig, dashboardService, data } = deps;
-  // if (lensSavedObjectRisonString === undefined) {
-  //   throw new Error('Cannot create visualization');
-  // }
-  // const vis = rison.decode(lensSavedObjectRisonString) as unknown as LensSavedObjectAttributes;
-
-  // if (!vis) {
-  //   throw new Error('Cannot create visualization');
-  // }
-
   let query: QueryDslQueryContainer;
   try {
     const queryString = rison.decode(queryRisonString) as string;
@@ -81,12 +72,14 @@ export async function resolver(
   } catch (error) {
     dataViewId = '';
   }
+
   let field;
   try {
     field = rison.decode(fieldRisonString) as string;
   } catch (error) {
     field = '';
   }
+
   let partitionField;
   try {
     if (partitionFieldRisonString === null) {

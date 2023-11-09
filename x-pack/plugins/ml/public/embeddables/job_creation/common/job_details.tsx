@@ -32,6 +32,7 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import type { TimeRange } from '@kbn/es-query';
 import { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
@@ -45,7 +46,7 @@ import { useMlFromLensKibanaContext } from './context';
 export interface CreateADJobParams {
   jobId: string;
   bucketSpan: string;
-  embeddable: MapEmbeddable | Embeddable;
+  embeddable: MapEmbeddable | Embeddable | undefined;
   startJob: boolean;
   runInRealTime: boolean;
 }
@@ -56,7 +57,8 @@ interface Props {
   createADJob: (args: CreateADJobParams) => Promise<CreateState>;
   layer?: LayerResult;
   layerIndex: number;
-  embeddable: Embeddable | MapEmbeddable;
+  embeddable: Embeddable | MapEmbeddable | undefined;
+  timeRange: TimeRange | undefined;
   incomingCreateError?: { text: string; errorText: string };
   outerFormComplete?: boolean;
 }
@@ -76,6 +78,7 @@ export const JobDetails: FC<Props> = ({
   layer,
   layerIndex,
   embeddable,
+  timeRange,
   incomingCreateError,
   outerFormComplete,
 }) => {
@@ -123,7 +126,6 @@ export const JobDetails: FC<Props> = ({
 
   const viewResults = useCallback(
     async (type: JOB_TYPE | null) => {
-      const { timeRange } = embeddable.getInput();
       const locator = share.url.locators.get(ML_APP_LOCATOR);
       if (locator) {
         const page = startJob
@@ -146,7 +148,7 @@ export const JobDetails: FC<Props> = ({
         application.navigateToUrl(url);
       }
     },
-    [jobId, embeddable, share, application, startJob]
+    [share, startJob, jobId, timeRange, application]
   );
 
   function setStartJobWrapper(start: boolean) {

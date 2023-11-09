@@ -147,6 +147,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
         createADJob={createGeoJob}
         createADJobInWizard={createGeoJobInWizard}
         embeddable={embeddable}
+        timeRange={embeddable.getInput().timeRange}
         incomingCreateError={createError}
       >
         <>

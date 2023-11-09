@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState, useEffect } from 'react'; // useCallback
+import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Embeddable } from '@kbn/lens-plugin/public';
 
 import {
   EuiCheckableCard,
@@ -23,7 +22,6 @@ import {
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
-// import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { redirectToADJobWizards } from '../../../../application/jobs/new_job/job_from_pattern_analysis/utils';
 import { createFieldOptions } from '../../../../application/jobs/new_job/common/job_creator/util/general';
@@ -33,7 +31,6 @@ import {
   CATEGORIZATION_TYPE,
   QuickCategorizationJobCreator,
 } from '../../../../application/jobs/new_job/job_from_pattern_analysis';
-// import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { useMlFromLensKibanaContext } from '../../common/context';
 import { JobDetails, type CreateADJobParams } from '../../common/job_details';
 
@@ -54,11 +51,6 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       dashboardService,
     },
   } = useMlFromLensKibanaContext();
-
-  // console.log('dataView', dataView);
-  // console.log('field', field);
-  // console.log('query', query);
-  // console.log('timeRange', timeRange);
 
   const [categorizationType, setCategorizationType] = useState<CategorizationType>(
     CATEGORIZATION_TYPE.COUNT
@@ -87,7 +79,6 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         ...o,
       }));
       setCategoryFieldsOptions(options);
-      // setCategoryFields(newJobCapsService.categoryFields);
     });
   }, [dataView, mlApiServices]);
 
@@ -100,8 +91,8 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         data,
         mlApiServices
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, uiSettings]
+
+    [dashboardService, data, mlApiServices, uiSettings]
   );
 
   function createADJobInWizard() {
@@ -131,13 +122,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
     );
   }, [enablePerPartitionCategorization, selectedPartitionFieldOptions]);
 
-  async function createADJob({
-    jobId,
-    bucketSpan,
-    embeddable: lensEmbeddable,
-    startJob,
-    runInRealTime,
-  }: CreateADJobParams) {
+  async function createADJob({ jobId, bucketSpan, startJob, runInRealTime }: CreateADJobParams) {
     const partitionField = selectedPartitionFieldOptions.length
       ? dataView.getFieldByName(selectedPartitionFieldOptions[0].label) ?? null
       : null;
@@ -156,20 +141,13 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
     );
     return result;
   }
-
-  const embeddable: Embeddable = {
-    getInput: () => ({
-      from: '',
-      to: '',
-    }),
-  } as unknown as Embeddable;
-
   return (
     <>
       <JobDetails
         createADJob={createADJob}
         createADJobInWizard={createADJobInWizard}
-        embeddable={embeddable}
+        embeddable={undefined}
+        timeRange={timeRange}
         layer={undefined}
         layerIndex={0}
         outerFormComplete={formComplete}

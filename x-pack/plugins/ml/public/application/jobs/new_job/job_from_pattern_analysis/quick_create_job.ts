@@ -20,11 +20,6 @@ import { createEmptyDatafeed, createEmptyJob } from '../common/job_creator/util/
 import { stashJobForCloning } from '../common/job_creator/util/general';
 import type { JobCreatorType } from '../common/job_creator';
 
-// export enum CATEGORIZATION_TYPE {
-//   COUNT,
-//   RARE,
-// }
-
 export const CATEGORIZATION_TYPE = {
   COUNT: ML_JOB_AGGREGATION.COUNT,
   RARE: ML_JOB_AGGREGATION.RARE,
@@ -56,10 +51,6 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     startJob: boolean,
     runInRealTime: boolean
   ): Promise<CreateState> {
-    // const { query, filters, to, from, dashboard, chartInfo } = await getJobsItemsFromEmbeddable(
-    //   embeddable,
-    //   this.lens
-    // );
     if (query === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');
     }
@@ -153,22 +144,8 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     query: QueryDslQueryContainer,
     bucketSpan: string
   ) {
-    // const { jobConfig, datafeedConfig, jobType } = await this.createADJobFromLensSavedObject(
-    //   chartInfo,
-    //   query,
-    //   filters,
-    //   bucketSpan,
-    //   layerIndex
-    // );
-
     const jobConfig = createEmptyJob();
     const datafeedConfig = createEmptyDatafeed(dataView.getIndexPattern());
-
-    // const combinedFiltersAndQueries = this.combineQueriesAndFilters(
-    //   { query, filters },
-    //   { query: { query: {}, language: 'lucene' }, filters: [] },
-    //   dataView
-    // );
 
     datafeedConfig.query = query;
     jobConfig.analysis_config = {
@@ -189,12 +166,6 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     };
     jobConfig.data_description.time_field = dataView.timeFieldName;
 
-    // jobConfig.analysis_config.detectors = createDetectors(fields, splitField);
-
-    // jobConfig.data_description.time_field = timeField.operation.fields?.[0];
-    // if (splitField && splitField.operation.fields) {
-    //   jobConfig.analysis_config.influencers = [splitField.operation.fields[0]];
-    // }
     let start: number | undefined;
     let end: number | undefined;
     let includeTimeRange = true;
