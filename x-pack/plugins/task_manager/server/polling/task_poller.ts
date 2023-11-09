@@ -13,6 +13,7 @@ import { Observable, Subject } from 'rxjs';
 
 import { Option, none } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
+import { TaskErrorSource } from '../task_running';
 import { Result, asOk, asErr } from '../lib/result_type';
 
 type WorkFn<H> = () => Promise<H>;
@@ -128,10 +129,12 @@ function asPollingError<T>(err: string | Error, type: PollingErrorType, data: Op
 export class PollingError<T> extends Error {
   public readonly type: PollingErrorType;
   public readonly data: Option<T>;
+  public readonly source: TaskErrorSource;
   constructor(message: string, type: PollingErrorType, data: Option<T>) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.type = type;
     this.data = data;
+    this.source = TaskErrorSource.FRAMEWORK;
   }
 }
