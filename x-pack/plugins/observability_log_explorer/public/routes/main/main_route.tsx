@@ -8,7 +8,6 @@ import { useInterpret, useSelector } from '@xstate/react';
 import { CoreStart } from '@kbn/core/public';
 import React, { useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { isDevMode } from '@kbn/xstate-utils';
 import { LogExplorerController, LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils/src';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';

@@ -17,7 +17,7 @@ import {
   ObservabilityLogExplorerEvent,
   ObservabilityLogExplorerTypeState,
 } from './types';
-import { initializeFromUrl, updateUrlFromLogExplorerState } from './url_state_storage_service';
+import { initializeFromUrl } from './url_state_storage_service';
 import { createController } from './controller_service';
 import { initializeFromTimeFilterService } from './time_filter_service';
 

@@ -8,7 +8,7 @@
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
-import { BehaviorSubject, map, ReplaySubject, combineLatest } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { interpret } from 'xstate';
 import { DatasetSelectionPlain, hydrateDatasetSelection } from '../../common';
 import { DatasetsService, IDatasetsClient } from '../services/datasets';

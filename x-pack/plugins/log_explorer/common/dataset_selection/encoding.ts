@@ -7,7 +7,7 @@
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { RisonValue, encode, decode } from '@kbn/rison';
-import { chain as chainE, tryCatch as tryCatchE } from 'fp-ts/lib/Either';
+import { chain as chainE } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
 import * as lz from 'lz-string';
