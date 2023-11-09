@@ -761,22 +761,21 @@ export class TaskManagerRunner implements TaskRunner {
         // when the alerting task fails, so we check for this condition in order
         // to emit the correct task run event for metrics collection
         // taskRunError contains the "source" (TaskErrorSource) data
-        const taskRunEvent =
-          taskRunError !== undefined
-            ? asTaskRunEvent(
-                this.id,
-                asErr({
-                  ...processedResult,
-                  isExpired: taskHasExpired,
-                  error: new Error(`Alerting task failed to run.`),
-                }),
-                taskTiming
-              )
-            : asTaskRunEvent(
-                this.id,
-                asOk({ ...processedResult, isExpired: taskHasExpired }),
-                taskTiming
-              );
+        const taskRunEvent = !!taskRunError
+          ? asTaskRunEvent(
+              this.id,
+              asErr({
+                ...processedResult,
+                isExpired: taskHasExpired,
+                error: new Error(`Alerting task failed to run.`),
+              }),
+              taskTiming
+            )
+          : asTaskRunEvent(
+              this.id,
+              asOk({ ...processedResult, isExpired: taskHasExpired }),
+              taskTiming
+            );
         this.onTaskEvent(taskRunEvent);
       },
       async ({ error }: FailedRunResult) => {
