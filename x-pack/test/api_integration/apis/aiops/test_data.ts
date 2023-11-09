@@ -16,7 +16,7 @@ import { finalSignificantTermGroupsTextfield as artificialLogsSignificantTermGro
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '@kbn/aiops-plugin/common/api/log_rate_analysis/types';
+} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
 
 import type { TestData } from './types';
 

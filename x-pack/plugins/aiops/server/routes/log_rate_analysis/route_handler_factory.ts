@@ -49,7 +49,7 @@ import {
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../common/api/log_rate_analysis/types';
+} from '../../../common/api/log_rate_analysis/schema';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 

@@ -10,7 +10,11 @@ import type { AiopsLogRateAnalysisSchemaV2 } from './schema_v2';
 
 export type AiopsLogRateAnalysisApiVersion = '1' | '2';
 
-export type AiopsLogRateAnalysisSchema<T extends AiopsLogRateAnalysisApiVersion> = T extends '1'
+const LATEST_API_VERSION: AiopsLogRateAnalysisApiVersion = '2';
+
+export type AiopsLogRateAnalysisSchema<
+  T extends AiopsLogRateAnalysisApiVersion = typeof LATEST_API_VERSION
+> = T extends '1'
   ? AiopsLogRateAnalysisSchemaV1
   : T extends '2'
   ? AiopsLogRateAnalysisSchemaV2

@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/v1/schema';
+import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
 import { getQueryWithParams } from './get_query_with_params';
 

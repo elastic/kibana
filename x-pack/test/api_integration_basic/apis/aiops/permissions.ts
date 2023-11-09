@@ -14,11 +14,11 @@ import expect from '@kbn/expect';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '@kbn/aiops-plugin/common/api/log_rate_analysis/types';
+} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export const API_VERSIONS: ApiVersion[] = ['1', '2'];
+const API_VERSIONS: ApiVersion[] = ['1', '2'];
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

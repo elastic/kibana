@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
-import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/log_rate_analysis/types';
+import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema_v2';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 

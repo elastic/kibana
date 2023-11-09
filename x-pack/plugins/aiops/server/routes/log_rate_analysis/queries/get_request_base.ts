@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/v1/schema';
+import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
 export const getRequestBase = ({ index, includeFrozen }: AiopsLogRateAnalysisSchema) => ({
   index,

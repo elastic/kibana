@@ -8,7 +8,7 @@
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '@kbn/aiops-plugin/common/api/log_rate_analysis/types';
+} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';

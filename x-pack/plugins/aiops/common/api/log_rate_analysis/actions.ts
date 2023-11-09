@@ -12,7 +12,7 @@ import type {
   SignificantTermGroupHistogram,
 } from '@kbn/ml-agg-utils';
 
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from './types';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from './schema';
 
 export const API_ACTION_NAME = {
   ADD_SIGNIFICANT_ITEMS: 'add_significant_items',
