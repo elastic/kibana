@@ -44,6 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
+        .set('x-elastic-internal-origin', 'foo')
         .send({})
         .expect(200);
 
@@ -69,6 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'foo')
           .send({})
           .expect(200);
 
@@ -89,6 +91,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'foo')
           .send({})
           .expect(200);
 
@@ -115,6 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'foo')
           .send({})
           .expect(200);
 
@@ -147,6 +151,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 search_term: 'TA002',
@@ -184,6 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 search_term: 'T002',
@@ -221,6 +227,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 search_term: 'T002.002',
@@ -255,6 +262,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 search_term: 'rule-2',
@@ -288,6 +296,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 search_term: 'index-pattern-2',
@@ -323,6 +332,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 activity: ['disabled'],
@@ -360,6 +370,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 activity: ['enabled'],
@@ -399,6 +410,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 activity: ['enabled', 'disabled'],
@@ -449,6 +461,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 source: ['custom'],
@@ -493,6 +506,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 source: ['prebuilt'],
@@ -537,6 +551,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'foo')
             .send({
               filter: {
                 source: ['prebuilt', 'custom'],
@@ -575,6 +590,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'foo')
           .send({ filter: { source: ['give me all the rules'] } })
           .expect(400);
 
