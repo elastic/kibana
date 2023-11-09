@@ -9,12 +9,12 @@ import { riskScoreCalculationRoute } from './risk_score_calculation_route';
 
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { RISK_SCORE_CALCULATION_URL } from '../../../../common/constants';
+import { RISK_SCORE_CALCULATION_URL } from '../../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
   requestMock,
-} from '../../detection_engine/routes/__mocks__';
+} from '../../../detection_engine/routes/__mocks__';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';

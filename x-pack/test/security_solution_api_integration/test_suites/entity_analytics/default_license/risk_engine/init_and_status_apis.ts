@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
+
 import {
   legacyTransformIds,
   createLegacyTransforms,

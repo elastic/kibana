@@ -22,9 +22,9 @@ import type {
   IdentifierType,
   RiskWeights,
   RiskScore,
-} from '../../../common/risk_engine';
-import { RiskCategories } from '../../../common/risk_engine';
-import { withSecuritySpan } from '../../utils/with_security_span';
+} from '../../../../common/risk_engine';
+import { RiskCategories } from '../../../../common/risk_engine';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getAfterKeyForIdentifierType, getFieldForIdentifierAgg } from './helpers';
 import {
   buildCategoryCountDeclarations,
