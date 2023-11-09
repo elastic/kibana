@@ -27,6 +27,7 @@ value:
     "tags":["tag 1"],
     "settings":{"syncAlerts":true},
     "owner":"cases",
+    "category":null,
     "customFields": [
       {
         "type": "text",

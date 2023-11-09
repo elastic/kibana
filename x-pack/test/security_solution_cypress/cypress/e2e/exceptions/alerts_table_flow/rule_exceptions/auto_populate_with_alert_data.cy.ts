@@ -48,7 +48,6 @@ describe.skip(
 
     beforeEach(() => {
       cy.task('esArchiverUnload', 'endpoint');
-      cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
       createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));

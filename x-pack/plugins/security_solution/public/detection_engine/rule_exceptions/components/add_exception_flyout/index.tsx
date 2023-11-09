@@ -157,6 +157,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       selectedRulesToAddTo,
       exceptionListsToAddTo,
       newComment,
+      commentErrorExists,
       itemConditionValidationErrorExists,
       errorSubmitting,
       expireTime,
@@ -262,6 +263,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       dispatch({
         type: 'setComment',
         comment,
+      });
+    },
+    [dispatch]
+  );
+
+  const setCommentError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setCommentError',
+        errorExists,
       });
     },
     [dispatch]
@@ -445,6 +456,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionItemName.trim() === '' ||
       exceptionItems.every((item) => item.entries.length === 0) ||
       itemConditionValidationErrorExists ||
+      commentErrorExists ||
       expireErrorExists ||
       (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)) ||
       (addExceptionToRadioSelection === 'select_rules_to_add_to' &&
@@ -462,6 +474,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       expireErrorExists,
       selectedRulesToAddTo,
       listType,
+      commentErrorExists,
     ]
   );
 
@@ -492,10 +505,19 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         <EuiSkeletonText data-test-subj="loadingAddExceptionFlyout" lines={4} isLoading={isLoading}>
           {errorSubmitting != null && (
             <>
-              <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="warning">
+              <EuiCallOut
+                data-test-subj="addExceptionErrorCallOut"
+                title={i18n.SUBMIT_ERROR_TITLE}
+                color="danger"
+                iconType="warning"
+              >
                 <EuiText>{i18n.SUBMIT_ERROR_DISMISS_MESSAGE}</EuiText>
                 <EuiSpacer size="s" />
-                <EuiButton color="danger" onClick={handleDismissError}>
+                <EuiButton
+                  data-test-subj="addExceptionErrorDismissButton"
+                  color="danger"
+                  onClick={handleDismissError}
+                >
                   {i18n.SUBMIT_ERROR_DISMISS_BUTTON}
                 </EuiButton>
               </EuiCallOut>
@@ -546,6 +568,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             initialIsOpen={!!newComment}
             newCommentValue={newComment}
             newCommentOnChange={setComment}
+            setCommentError={setCommentError}
           />
           {listType !== ExceptionListTypeEnum.ENDPOINT && (
             <>

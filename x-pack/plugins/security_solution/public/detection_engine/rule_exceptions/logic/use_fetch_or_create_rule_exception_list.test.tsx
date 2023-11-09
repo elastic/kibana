@@ -73,7 +73,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   };
   const ruleWithoutExceptionLists = {
     ...savedRuleMock,
-    exceptions_list: undefined,
+    exceptions_list: [],
   };
 
   beforeEach(() => {

@@ -140,6 +140,8 @@ describe('rules_settings_modal', () => {
       addWarning: jest.fn(),
     } as unknown as IToasts;
 
+    useKibanaMock().services.isServerless = true;
+
     getFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
     updateFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
     getQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
@@ -198,6 +200,36 @@ describe('rules_settings_modal', () => {
     expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
     expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     expect(modalProps.onSave).toHaveBeenCalledTimes(1);
+  });
+
+  test('reset flapping settings to initial state on cancel without triggering another server reload', async () => {
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    expect(getFlappingSettingsMock).toHaveBeenCalledTimes(1);
+    expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
+    await waitForModalLoad();
+
+    const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
+    const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
+
+    fireEvent.change(lookBackWindowInput, { target: { value: 15 } });
+    fireEvent.change(statusChangeThresholdInput, { target: { value: 3 } });
+
+    expect(lookBackWindowInput.getAttribute('value')).toBe('15');
+    expect(statusChangeThresholdInput.getAttribute('value')).toBe('3');
+
+    // Try cancelling
+    userEvent.click(result.getByTestId('rulesSettingsModalCancelButton'));
+
+    expect(modalProps.onClose).toHaveBeenCalledTimes(1);
+    expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
+    expect(modalProps.onSave).not.toHaveBeenCalled();
+
+    expect(screen.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    expect(lookBackWindowInput.getAttribute('value')).toBe('10');
+    expect(statusChangeThresholdInput.getAttribute('value')).toBe('10');
+
+    expect(getFlappingSettingsMock).toHaveBeenCalledTimes(1);
+    expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
   });
 
   test('should prevent statusChangeThreshold from being greater than lookBackWindow', async () => {
@@ -405,5 +437,12 @@ describe('rules_settings_modal', () => {
     await waitForModalLoad({ flappingSection: false, queryDelaySection: false });
 
     expect(result.queryByTestId('rulesSettingsQueryDelaySection')).toBe(null);
+  });
+
+  test('hides query delay settings when not serverless', async () => {
+    useKibanaMock().services.isServerless = false;
+    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    await waitForModalLoad({ queryDelaySection: false });
+    expect(result.queryByTestId('rulesSettingsQueryDelaySection')).not.toBeInTheDocument();
   });
 });
