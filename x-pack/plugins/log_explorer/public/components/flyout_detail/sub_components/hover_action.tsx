@@ -7,7 +7,13 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiToolTip,
+  EuiButtonIcon,
+  useEuiTheme,
+  EuiTextTruncate,
+} from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 
 export interface HoverActionType {
@@ -21,18 +27,10 @@ export interface HoverActionType {
 interface HoverActionProps {
   displayText: string;
   actions: HoverActionType[];
+  width: number;
 }
 
-const hoverActionDisplayCss = {
-  ':hover, :focus-within': {
-    '.visibleOnHoverFocus': {
-      opacity: 1,
-      visibility: 'visible',
-    },
-  },
-};
-
-export const HoverAction = ({ displayText, actions }: HoverActionProps) => {
+export const HoverAction = ({ displayText, actions, width }: HoverActionProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
@@ -40,13 +38,16 @@ export const HoverAction = ({ displayText, actions }: HoverActionProps) => {
       alignItems="center"
       justifyContent="flexStart"
       gutterSize="s"
-      css={hoverActionDisplayCss}
+      css={{
+        ':hover, :focus-within': {
+          '.visibleOnHoverFocus': {
+            opacity: 1,
+            visibility: 'visible',
+          },
+        },
+      }}
     >
-      <EuiFlexItem
-        grow={false}
-        // Value returned from formatFieldValue is always sanitized
-        dangerouslySetInnerHTML={{ __html: displayText }}
-      />
+      <EuiTextTruncate text={displayText} truncation="end" width={width} />
       <EuiFlexGroup
         className="visibleOnHoverFocus"
         css={{

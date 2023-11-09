@@ -17,6 +17,7 @@ interface HighlightFieldProps {
   value: unknown;
   formattedValue: string;
   dataTestSubj: string;
+  width: number;
 }
 
 export function HighlightField({
@@ -25,6 +26,7 @@ export function HighlightField({
   value,
   formattedValue,
   dataTestSubj,
+  width,
 }: HighlightFieldProps) {
   const filterForText = flyoutHoverActionFilterForText(value);
   const filterOutText = flyoutHoverActionFilterOutText(value);
@@ -52,12 +54,12 @@ export function HighlightField({
   return formattedValue ? (
     <EuiFlexGroup direction="column" gutterSize="none" data-test-subj={dataTestSubj}>
       <EuiFlexItem grow={false}>
-        <EuiText color="subdued" size="xs">
+        <EuiText color="subdued" size="xs" grow={false}>
           {label}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <HoverAction displayText={formattedValue} actions={hoverActions} />
+        <HoverAction displayText={formattedValue} actions={hoverActions} width={width} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;

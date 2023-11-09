@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel } from '@elastic/eui';
-import React from 'react';
+import React, { useRef } from 'react';
 import { FlyoutContentActions } from '@kbn/discover-plugin/public';
 import { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { FlyoutDoc } from './types';
@@ -33,6 +32,8 @@ import {
 } from './translations';
 import { HighlightSection } from './sub_components/highlight_section';
 import { DiscoverActionsProvider } from '../../hooks/use_discover_action';
+import { HighlightContainer } from './sub_components/highlight_container';
+import { useDimension } from '../../hooks/use_dimensions';
 
 export function FlyoutHighlights({
   formattedDoc,
@@ -43,9 +44,13 @@ export function FlyoutHighlights({
   flattenedDoc: DataTableRecord['flattened'];
   actions: FlyoutContentActions;
 }) {
+  const elementRef = useRef<HTMLDivElement>(null);
+  const [ref, dimensions] = useDimension<HTMLDivElement>(elementRef);
+  const flyoutWidth = dimensions.width ?? 600;
+  const fieldWidth = flyoutWidth / 6;
   return (
     <DiscoverActionsProvider value={actions}>
-      <EuiPanel paddingSize="m" hasShadow={false} hasBorder={true}>
+      <HighlightContainer ref={ref}>
         <HighlightSection title={serviceAccordionTitle}>
           {formattedDoc[constants.SERVICE_NAME_FIELD] && (
             <HighlightField
@@ -54,6 +59,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.SERVICE_NAME_FIELD]}
               formattedValue={formattedDoc[constants.SERVICE_NAME_FIELD]}
               dataTestSubj="logExplorerFlyoutService"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.TRACE_ID_FIELD] && (
@@ -63,6 +69,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.TRACE_ID_FIELD]}
               formattedValue={formattedDoc[constants.TRACE_ID_FIELD]}
               dataTestSubj="logExplorerFlyoutTrace"
+              width={fieldWidth}
             />
           )}
         </HighlightSection>
@@ -75,6 +82,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.HOST_NAME_FIELD]}
               formattedValue={formattedDoc[constants.HOST_NAME_FIELD]}
               dataTestSubj="logExplorerFlyoutHostName"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.ORCHESTRATOR_CLUSTER_NAME_FIELD] && (
@@ -84,6 +92,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
               formattedValue={formattedDoc[constants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
               dataTestSubj="logExplorerFlyoutClusterName"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.ORCHESTRATOR_RESOURCE_ID_FIELD] && (
@@ -93,6 +102,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
               formattedValue={formattedDoc[constants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
               dataTestSubj="logExplorerFlyoutResourceId"
+              width={fieldWidth}
             />
           )}
         </HighlightSection>
@@ -105,6 +115,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.CLOUD_PROVIDER_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_PROVIDER_FIELD]}
               dataTestSubj="logExplorerFlyoutCloudProvider"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.CLOUD_REGION_FIELD] && (
@@ -114,6 +125,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.CLOUD_REGION_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_REGION_FIELD]}
               dataTestSubj="logExplorerFlyoutCloudRegion"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.CLOUD_AVAILABILITY_ZONE_FIELD] && (
@@ -123,6 +135,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.CLOUD_AVAILABILITY_ZONE_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_AVAILABILITY_ZONE_FIELD]}
               dataTestSubj="logExplorerFlyoutCloudAz"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.CLOUD_PROJECT_ID_FIELD] && (
@@ -132,6 +145,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.CLOUD_PROJECT_ID_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_PROJECT_ID_FIELD]}
               dataTestSubj="logExplorerFlyoutCloudProjectId"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.CLOUD_INSTANCE_ID_FIELD] && (
@@ -141,6 +155,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.CLOUD_INSTANCE_ID_FIELD]}
               formattedValue={formattedDoc[constants.CLOUD_INSTANCE_ID_FIELD]}
               dataTestSubj="logExplorerFlyoutCloudInstanceId"
+              width={fieldWidth}
             />
           )}
         </HighlightSection>
@@ -153,6 +168,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.LOG_FILE_PATH_FIELD]}
               formattedValue={formattedDoc[constants.LOG_FILE_PATH_FIELD]}
               dataTestSubj="logExplorerFlyoutLogPathFile"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.DATASTREAM_NAMESPACE_FIELD] && (
@@ -162,6 +178,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.DATASTREAM_NAMESPACE_FIELD]}
               formattedValue={formattedDoc[constants.DATASTREAM_NAMESPACE_FIELD]}
               dataTestSubj="logExplorerFlyoutNamespace"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.DATASTREAM_DATASET_FIELD] && (
@@ -171,6 +188,7 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.DATASTREAM_DATASET_FIELD]}
               formattedValue={formattedDoc[constants.DATASTREAM_DATASET_FIELD]}
               dataTestSubj="logExplorerFlyoutDataset"
+              width={fieldWidth}
             />
           )}
           {formattedDoc[constants.AGENT_NAME_FIELD] && (
@@ -180,10 +198,11 @@ export function FlyoutHighlights({
               value={flattenedDoc[constants.AGENT_NAME_FIELD]}
               formattedValue={formattedDoc[constants.AGENT_NAME_FIELD]}
               dataTestSubj="logExplorerFlyoutLogShipper"
+              width={fieldWidth}
             />
           )}
         </HighlightSection>
-      </EuiPanel>
+      </HighlightContainer>
     </DiscoverActionsProvider>
   );
 }

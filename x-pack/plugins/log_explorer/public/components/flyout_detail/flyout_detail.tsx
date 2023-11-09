@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
 import { FlyoutProps, LogDocument } from './types';
 import { useDocDetail } from './use_doc_detail';
 import { FlyoutHeader } from './flyout_header';
@@ -22,7 +21,6 @@ export function FlyoutDetail({
   return (
     <>
       <FlyoutHeader doc={parsedDoc} />
-      <EuiHorizontalRule margin="xs" />
       <FlyoutHighlights formattedDoc={parsedDoc} flattenedDoc={doc.flattened} actions={actions} />
     </>
   );
