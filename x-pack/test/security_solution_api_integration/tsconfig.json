@@ -30,6 +30,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core",
     "@kbn/alerting-plugin",
-    "@kbn/securitysolution-ecs"
+    "@kbn/securitysolution-ecs",
+    "@kbn/securitysolution-rules"
   ]
 }
