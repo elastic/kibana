@@ -51,9 +51,9 @@ import {
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
 import {
-  FILENAME_WILDCARD_WARNING,
   OperatingSystem,
-  validateFilePathInput,
+  WILDCARD_WARNING,
+  validatePotentialWildcardInput,
 } from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
@@ -431,14 +431,13 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];
           }
-          const warning =
-            entry.field?.name === 'file.path.text'
-              ? validateFilePathInput({ os, value: wildcardValue })
-              : undefined;
+          const warning = validatePotentialWildcardInput({
+            fieldName: entry.field?.name ?? '',
+            os,
+            value: wildcardValue,
+          });
           actualWarning =
-            warning === FILENAME_WILDCARD_WARNING
-              ? warning && getWildcardWarning(warning)
-              : warning;
+            warning === WILDCARD_WARNING ? warning && getWildcardWarning(warning) : warning;
         }
 
         return (

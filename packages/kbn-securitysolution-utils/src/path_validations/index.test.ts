@@ -11,8 +11,8 @@ import {
   hasSimpleExecutableName,
   OperatingSystem,
   ConditionEntryField,
-  validateFilePathInput,
-  FILENAME_WILDCARD_WARNING,
+  validatePotentialWildcardInput,
+  WILDCARD_WARNING,
   FILEPATH_WARNING,
 } from '.';
 
@@ -22,13 +22,13 @@ describe('validateFilePathInput', () => {
 
     it('does not warn on valid filenames', () => {
       expect(
-        validateFilePathInput({
+        validatePotentialWildcardInput({
           os,
           value: 'C:\\Windows\\*\\FILENAME.EXE-1231205124.gz',
         })
       ).not.toBeDefined();
       expect(
-        validateFilePathInput({
+        validatePotentialWildcardInput({
           os,
           value: "C:\\Windows\\*\\test$  as2@13---12!@#A,DS.#$^&$!#~ 'as'd.华语.txt",
         })
@@ -36,26 +36,30 @@ describe('validateFilePathInput', () => {
     });
 
     it('warns on wildcard in file name at the end of the path', () => {
-      expect(validateFilePathInput({ os, value: 'c:\\path*.exe' })).toEqual(
-        FILENAME_WILDCARD_WARNING
+      expect(validatePotentialWildcardInput({ os, value: 'c:\\path*.exe' })).toEqual(
+        WILDCARD_WARNING
       );
       expect(
-        validateFilePathInput({
+        validatePotentialWildcardInput({
           os,
           value: 'C:\\Windows\\*\\FILENAME.EXE-*.gz',
         })
-      ).toEqual(FILENAME_WILDCARD_WARNING);
+      ).toEqual(WILDCARD_WARNING);
     });
 
     it('warns on unix paths or non-windows paths', () => {
-      expect(validateFilePathInput({ os, value: '/opt/bin' })).toEqual(FILEPATH_WARNING);
+      expect(validatePotentialWildcardInput({ os, value: '/opt/bin' })).toEqual(FILEPATH_WARNING);
     });
 
     it('warns on malformed paths', () => {
-      expect(validateFilePathInput({ os, value: 'c:\\path/opt' })).toEqual(FILEPATH_WARNING);
-      expect(validateFilePathInput({ os, value: '1242' })).toEqual(FILEPATH_WARNING);
-      expect(validateFilePathInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
-      expect(validateFilePathInput({ os, value: 'c:\\folder\\' })).toEqual(FILEPATH_WARNING);
+      expect(validatePotentialWildcardInput({ os, value: 'c:\\path/opt' })).toEqual(
+        FILEPATH_WARNING
+      );
+      expect(validatePotentialWildcardInput({ os, value: '1242' })).toEqual(FILEPATH_WARNING);
+      expect(validatePotentialWildcardInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
+      expect(validatePotentialWildcardInput({ os, value: 'c:\\folder\\' })).toEqual(
+        FILEPATH_WARNING
+      );
     });
   });
   describe('unix paths', () => {
@@ -65,32 +69,36 @@ describe('validateFilePathInput', () => {
         : OperatingSystem.LINUX;
 
     it('does not warn on valid filenames', () => {
-      expect(validateFilePathInput({ os, value: '/opt/*/FILENAME.EXE-1231205124.gz' })).not.toEqual(
-        FILENAME_WILDCARD_WARNING
-      );
       expect(
-        validateFilePathInput({
+        validatePotentialWildcardInput({ os, value: '/opt/*/FILENAME.EXE-1231205124.gz' })
+      ).not.toEqual(WILDCARD_WARNING);
+      expect(
+        validatePotentialWildcardInput({
           os,
           value: "/opt/*/test$  as2@13---12!@#A,DS.#$^&$!#~ 'as'd.华语.txt",
         })
-      ).not.toEqual(FILENAME_WILDCARD_WARNING);
+      ).not.toEqual(WILDCARD_WARNING);
     });
     it('warns on wildcard in file name at the end of the path', () => {
-      expect(validateFilePathInput({ os, value: '/opt/bin*' })).toEqual(FILENAME_WILDCARD_WARNING);
-      expect(validateFilePathInput({ os, value: '/opt/FILENAME.EXE-*.gz' })).toEqual(
-        FILENAME_WILDCARD_WARNING
+      expect(validatePotentialWildcardInput({ os, value: '/opt/bin*' })).toEqual(WILDCARD_WARNING);
+      expect(validatePotentialWildcardInput({ os, value: '/opt/FILENAME.EXE-*.gz' })).toEqual(
+        WILDCARD_WARNING
       );
     });
 
     it('warns on windows paths', () => {
-      expect(validateFilePathInput({ os, value: 'd:\\path\\file.exe' })).toEqual(FILEPATH_WARNING);
+      expect(validatePotentialWildcardInput({ os, value: 'd:\\path\\file.exe' })).toEqual(
+        FILEPATH_WARNING
+      );
     });
 
     it('warns on malformed paths', () => {
-      expect(validateFilePathInput({ os, value: 'opt/bin\\file.exe' })).toEqual(FILEPATH_WARNING);
-      expect(validateFilePathInput({ os, value: '1242' })).toEqual(FILEPATH_WARNING);
-      expect(validateFilePathInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
-      expect(validateFilePathInput({ os, value: '/folder/' })).toEqual(FILEPATH_WARNING);
+      expect(validatePotentialWildcardInput({ os, value: 'opt/bin\\file.exe' })).toEqual(
+        FILEPATH_WARNING
+      );
+      expect(validatePotentialWildcardInput({ os, value: '1242' })).toEqual(FILEPATH_WARNING);
+      expect(validatePotentialWildcardInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
+      expect(validatePotentialWildcardInput({ os, value: '/folder/' })).toEqual(FILEPATH_WARNING);
     });
   });
 });

@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FILENAME_WILDCARD_WARNING = i18n.translate('utils.filename.wildcardWarning', {
-  defaultMessage: `Using wildcards in file paths can impact Endpoint performance`,
+export const WILDCARD_WARNING = i18n.translate('utils.wildcardWarning', {
+  defaultMessage: `Using wildcards can impact Endpoint performance`,
 });
 
 export const FILEPATH_WARNING = i18n.translate('utils.filename.pathWarning', {
@@ -52,20 +52,25 @@ export enum OperatingSystem {
 export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
 
-export const validateFilePathInput = ({
+export const validatePotentialWildcardInput = ({
+  fieldName = 'file.path.text',
   os,
   value = '',
 }: {
+  fieldName?: string;
   os: OperatingSystem;
   value?: string;
 }): string | undefined => {
   const textInput = value.trim();
-  const isValidFilePath = isPathValid({
-    os,
-    field: 'file.path.text',
-    type: 'wildcard',
-    value: textInput,
-  });
+  const isFieldFilePath = fieldName === 'file.path.text';
+  const isValidFilePath =
+    isFieldFilePath &&
+    isPathValid({
+      os,
+      field: 'file.path.text',
+      type: 'wildcard',
+      value: textInput,
+    });
   const hasSimpleFileName = hasSimpleExecutableName({
     os,
     type: 'wildcard',
@@ -76,9 +81,12 @@ export const validateFilePathInput = ({
     return FILEPATH_WARNING;
   }
 
-  if (isValidFilePath) {
+  if (
+    (isFieldFilePath && isValidFilePath) ||
+    (!isFieldFilePath && hasSimpleFileName !== undefined)
+  ) {
     if (hasSimpleFileName !== undefined && !hasSimpleFileName) {
-      return FILENAME_WILDCARD_WARNING;
+      return WILDCARD_WARNING;
     }
   } else {
     return FILEPATH_WARNING;
