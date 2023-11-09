@@ -13,7 +13,11 @@ import { mockCreateOrUpgradeSavedConfig } from './ui_settings_client.test.mock';
 import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { UiSettingsClient } from './ui_settings_client';
-import { CannotOverrideError } from '../ui_settings_errors';
+import {
+  CannotOverrideError,
+  ValidationBadValueError,
+  ValidationSettingNotFoundError,
+} from '../ui_settings_errors';
 
 const logger = loggingSystemMock.create().get();
 
@@ -732,29 +736,45 @@ describe('ui settings', () => {
     });
   });
 
-  describe('#getValidationErrorMessage()', () => {
-    it('returns a correct validation error message for an existing setting key and unvalid value', () => {
+  describe('#validate()', () => {
+    it('returns a correct validation response for an existing setting key and an invalid value', async () => {
       const defaults = { foo: { schema: schema.number() } };
       const { uiSettings } = setup({ defaults });
 
-      expect(uiSettings.getValidationErrorMessage('foo', 'testValue')).toBe(
-        'expected value of type [number] but got [string]'
-      );
+      expect(await uiSettings.validate('foo', 'testValue')).toMatchObject({
+        valid: false,
+        errorMessage: 'expected value of type [number] but got [string]',
+      });
     });
 
-    it('returns null for an existing setting key and valid value', () => {
+    it('returns a correct validation response for an existing setting key and a valid value', async () => {
       const defaults = { foo: { schema: schema.number() } };
       const { uiSettings } = setup({ defaults });
 
-      expect(uiSettings.getValidationErrorMessage('foo', 5)).toBe(null);
+      expect(await uiSettings.validate('foo', 5)).toMatchObject({ valid: true });
     });
 
-    it('returns null for a non-existing setting key or null value', () => {
+    it('throws for a non-existing setting key', async () => {
+      const { uiSettings } = setup();
+
+      try {
+        await uiSettings.validate('bar', 5);
+      } catch (error) {
+        expect(error).toBeInstanceOf(ValidationSettingNotFoundError);
+        expect(error.message).toBe('Setting with a key [bar] does not exist.');
+      }
+    });
+
+    it('throws for a null value', async () => {
       const defaults = { foo: { schema: schema.number() } };
       const { uiSettings } = setup({ defaults });
 
-      expect(uiSettings.getValidationErrorMessage('bar', 5)).toBe(null);
-      expect(uiSettings.getValidationErrorMessage('foo', null)).toBe(null);
+      try {
+        await uiSettings.validate('foo', null);
+      } catch (error) {
+        expect(error).toBeInstanceOf(ValidationBadValueError);
+        expect(error.message).toBe('No value was specified.');
+      }
     });
   });
 

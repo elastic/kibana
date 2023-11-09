@@ -122,19 +122,4 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
       });
     });
   });
-
-  describe('validate route', () => {
-    it('returns a 200 and empty response body', async () => {
-      const { supertest } = getServices();
-      const defaultIndex = chance.word();
-
-      const { body } = await supertest('post', '/internal/kibana/settings/defaultIndex/validate')
-        .send({
-          value: defaultIndex,
-        })
-        .expect(200);
-
-      expect(body).toMatchObject({});
-    });
-  });
 };

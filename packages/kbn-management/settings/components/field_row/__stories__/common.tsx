@@ -83,7 +83,7 @@ export const getStory = (
               key,
               value,
             });
-            return null;
+            return { successfulValidation: true, valid: true };
           }}
         >
           <EuiPanel>

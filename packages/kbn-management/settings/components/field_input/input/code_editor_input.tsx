@@ -60,10 +60,10 @@ export const CodeEditorInput = ({
 
         try {
           const parsedUnsavedValue = JSON.parse(newUnsavedValue);
-          const validationError = await validateChange(field.id, parsedUnsavedValue);
-          if (validationError) {
+          const validationResponse = await validateChange(field.id, parsedUnsavedValue);
+          if (validationResponse.successfulValidation && !validationResponse.valid) {
             errorParams = {
-              error: validationError,
+              error: validationResponse.errorMessage,
               isInvalid: true,
             };
           }

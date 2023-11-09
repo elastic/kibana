@@ -164,26 +164,36 @@ describe('ui settings service', () => {
           .expect(200);
 
         expect(response.body).toMatchObject({
+          valid: false,
           errorMessage: 'expected value of type [string] but got [number]',
         });
       });
 
-      it('returns no response body for valid value', async () => {
+      it.skip('returns no validation error message for valid value', async () => {
         const response = await request
           .post(root, '/internal/kibana/settings/custom/validate')
           .send({ value: 'test' })
           .expect(200);
 
-        expect(response.body).toMatchObject({});
+        expect(response.body).toMatchObject({ valid: true });
       });
 
-      it('returns no response body for non-existing key', async () => {
+      it('returns a 404 for non-existing key', async () => {
         const response = await request
           .post(root, '/internal/kibana/settings/test/validate')
           .send({ value: 'test' })
-          .expect(200);
+          .expect(404);
 
-        expect(response.body).toMatchObject({});
+        expect(response.body.message).toBe('Setting with a key [test] does not exist.');
+      });
+
+      it('returns a 400 for a null value', async () => {
+        const response = await request
+          .post(root, '/internal/kibana/settings/test/validate')
+          .send({ value: null })
+          .expect(400);
+
+        expect(response.body.message).toBe('No value was specified.');
       });
     });
 

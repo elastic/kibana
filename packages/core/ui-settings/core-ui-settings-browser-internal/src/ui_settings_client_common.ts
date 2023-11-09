@@ -131,11 +131,13 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   async validateValue(key: string, value: unknown) {
     try {
       const resp = await this.api.validate(key, value);
-      const errorMessage = resp?.errorMessage;
-      return errorMessage ? errorMessage : null;
+      const isValid = resp.valid;
+      return isValid
+        ? { successfulValidation: true, valid: true }
+        : { successfulValidation: true, valid: false, errorMessage: resp.errorMessage };
     } catch (error) {
       this.updateErrors$.next(error);
-      return null;
+      return { successfulValidation: false };
     }
   }
 

@@ -27,6 +27,7 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   }));
   const validate = jest.fn(
     (): ValidationApiResponse => ({
+      valid: false,
       errorMessage: TEST_VALIDATION_ERROR_MESSAGE,
     })
   );
@@ -294,25 +295,25 @@ describe('#getUpdate$', () => {
 });
 
 describe('#validateValue', () => {
-  it('resolves to a string or null on success', async () => {
-    const { client, validate } = setup();
+  it('resolves to a ValueValidation', async () => {
+    const { client } = setup();
 
-    await expect(client.validateValue('foo', 'bar')).resolves.toBe(TEST_VALIDATION_ERROR_MESSAGE);
-
-    validate.mockImplementation(() => {
-      return {};
+    await expect(client.validateValue('foo', 'bar')).resolves.toMatchObject({
+      successfulValidation: true,
+      valid: false,
+      errorMessage: TEST_VALIDATION_ERROR_MESSAGE,
     });
-
-    await expect(client.validateValue('foo', 'bar')).resolves.toBe(null);
   });
 
-  it('resolves to null on failure', async () => {
+  it('resolves to a ValueValidation on failure', async () => {
     const { client, validate } = setup();
 
     validate.mockImplementation(() => {
       throw new Error('Error in request');
     });
 
-    await expect(client.validateValue('foo', 'bar')).resolves.toBe(null);
+    await expect(client.validateValue('foo', 'bar')).resolves.toMatchObject({
+      successfulValidation: false,
+    });
   });
 });

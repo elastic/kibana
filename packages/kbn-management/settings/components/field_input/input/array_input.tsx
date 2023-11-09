@@ -54,8 +54,17 @@ export const ArrayInput = ({
       .replace(REGEX, ',')
       .split(',')
       .filter((v) => v !== '');
-    const error = await validateChange(field.id, blurValue);
-    onUpdate({ type: field.type, unsavedValue: blurValue, isInvalid: !!error, error });
+    const validationResponse = await validateChange(field.id, blurValue);
+    if (validationResponse.successfulValidation) {
+      onUpdate({
+        type: field.type,
+        unsavedValue: blurValue,
+        isInvalid: !validationResponse.valid,
+        error: validationResponse.errorMessage,
+      });
+    } else {
+      onUpdate({ type: field.type, unsavedValue: blurValue });
+    }
     setValue(blurValue.join(', '));
   };
 

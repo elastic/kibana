@@ -17,6 +17,7 @@ export interface UiSettingsApiResponse {
 }
 
 export interface ValidationApiResponse {
+  valid: boolean;
   errorMessage?: string;
 }
 
@@ -101,25 +102,9 @@ export class UiSettingsApi {
   /**
    * Sends a validation request to the server for the provided key+value pair.
    */
-  public validate(key: string, value: any) {
-    return new Promise<ValidationApiResponse>((resolve, reject) => {
-      try {
-        const path = `/internal/kibana/settings/${key}/validate`;
-        const resp = this.sendRequest('POST', path, {
-          value,
-        });
-        resolve(resp);
-      } catch (error) {
-        if (error.response) {
-          if (error.response.status === 400) {
-            throw new Error(error.body.message);
-          }
-          if (error.response.status > 400) {
-            throw new Error(`Request failed with status code: ${error.response.status}`);
-          }
-        }
-        reject(error);
-      }
+  public async validate(key: string, value: any): Promise<ValidationApiResponse> {
+    return await this.sendRequest('POST', `/internal/kibana/settings/${key}/validate`, {
+      value,
     });
   }
 

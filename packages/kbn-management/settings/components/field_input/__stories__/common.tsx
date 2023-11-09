@@ -82,7 +82,7 @@ export const getStory = (title: string, description: string) =>
               key,
               value,
             });
-            return null;
+            return { successfulValidation: true, valid: true };
           }}
         >
           <EuiPanel style={{ width: 500 }}>

@@ -8,21 +8,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { ValidationBadValueError, ValidationSettingNotFoundError } from '../../ui_settings_errors';
 import type {
   InternalUiSettingsRequestHandlerContext,
   InternalUiSettingsRouter,
 } from '../../internal_types';
-
-const validate = {
-  params: schema.object({
-    key: schema.string(),
-  }),
-  body: schema.object({
-    value: schema.any(),
-  }),
-};
 
 export function registerInternalValidateRoute(router: InternalUiSettingsRouter) {
   const validateFromRequest = async (
@@ -40,29 +31,39 @@ export function registerInternalValidateRoute(router: InternalUiSettingsRouter) 
       const { key } = request.params;
       const { value } = request.body;
 
-      const errorMessage = await uiSettingsClient.getValidationErrorMessage(key, value);
+      const { valid, errorMessage } = await uiSettingsClient.validate(key, value);
 
-      if (errorMessage) {
-        return response.ok({
-          body: {
-            errorMessage,
-          },
-        });
-      }
-      return response.ok();
+      return response.ok({
+        body: {
+          valid,
+          errorMessage,
+        },
+      });
     } catch (error) {
-      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-        return response.customError({
-          body: error,
-          statusCode: error.output.statusCode,
-        });
+      if (error instanceof ValidationSettingNotFoundError) {
+        return response.notFound({ body: error });
+      }
+
+      if (error instanceof ValidationBadValueError) {
+        return response.badRequest({ body: error });
       }
 
       throw error;
     }
   };
   router.post(
-    { path: '/internal/kibana/settings/{key}/validate', validate, options: { access: 'internal' } },
+    {
+      path: '/internal/kibana/settings/{key}/validate',
+      validate: {
+        params: schema.object({
+          key: schema.string(),
+        }),
+        body: schema.object({
+          value: schema.any(),
+        }),
+      },
+      options: { access: 'internal' },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await validateFromRequest(uiSettingsClient, context, request, response);

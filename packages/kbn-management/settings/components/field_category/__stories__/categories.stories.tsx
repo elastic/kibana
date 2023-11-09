@@ -58,7 +58,7 @@ export const Categories: Story<Params> = (params) => {
           key,
           value,
         });
-        return null;
+        return { successfulValidation: true, valid: true };
       }}
     >
       <Component

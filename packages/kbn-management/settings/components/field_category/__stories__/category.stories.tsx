@@ -72,7 +72,7 @@ export const Category = ({ isFiltered, category, isSavingEnabled }: FieldCategor
           key,
           value,
         });
-        return null;
+        return { successfulValidation: true, valid: true };
       }}
       {...{ isSavingEnabled, onFieldChange }}
     >

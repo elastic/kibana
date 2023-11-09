@@ -16,6 +16,12 @@ export interface UiSettingsState {
   [key: string]: PublicUiSettingsParams & UserProvidedValues;
 }
 
+export interface ValueValidation {
+  successfulValidation: boolean;
+  valid?: boolean;
+  errorMessage?: string;
+}
+
 /**
  * Client-side client that provides access to the advanced settings stored in elasticsearch.
  * The settings provide control over the behavior of the Kibana application.
@@ -102,9 +108,9 @@ export interface IUiSettingsClient {
   getUpdateErrors$: () => Observable<Error>;
 
   /**
-   * Returns a validation error message if the uiSettings value is invalid.
+   * Validates a uiSettings value and returns a ValueValidation object.
    */
-  validateValue: (key: string, value: any) => Promise<string | null>;
+  validateValue: (key: string, value: any) => Promise<ValueValidation | null>;
 }
 
 /** @public */

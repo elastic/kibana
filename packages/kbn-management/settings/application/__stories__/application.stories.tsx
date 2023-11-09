@@ -45,7 +45,7 @@ export const SettingsApplication: Story = () => {
           key,
           value,
         });
-        return null;
+        return { successfulValidation: true, valid: true };
       }}
     >
       <Component />

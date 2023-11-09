@@ -42,7 +42,7 @@ export default {
             key,
             value,
           });
-          return null;
+          return { successfulValidation: true, valid: true };
         }}
       >
         <Story />

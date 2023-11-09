@@ -14,6 +14,7 @@ import {
 } from '@kbn/management-settings-types';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 
 /**
  * Contextual services used by a {@link FieldInput} component.
@@ -24,7 +25,7 @@ export interface FieldInputServices {
    * @param value The message to display.
    */
   showDanger: (value: string) => void;
-  validateChange: (key: string, value: any) => Promise<string | null>;
+  validateChange: (key: string, value: any) => Promise<ValueValidation>;
 }
 
 /**
