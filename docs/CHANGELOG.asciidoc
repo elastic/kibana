@@ -132,6 +132,7 @@ Alerting::
 * Adds support for the new ES|QL language for {es} query rules ({kibana-pull}165973[#165973]).
 * Elasticsearch query rule can select multiple group-by terms ({kibana-pull}166146[#166146]).
 * Adds a Log tab to the Observability Rules page ({kibana-pull}165115[#165115]).
+* Adds a new Observability Rules type called Custom threshold under technical preview ({kibana-pull}167782[#167782]).
 APM::
 * Adds bulk action to untrack selected alerts ({kibana-pull}167579[#167579]).
 * Introduce custom dashboards tab in service overview ({kibana-pull}166789[#166789]).
