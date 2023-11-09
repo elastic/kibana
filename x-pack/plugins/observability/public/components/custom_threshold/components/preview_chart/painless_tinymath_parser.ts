@@ -13,7 +13,7 @@
 // This parser is using a simple recursive function to parse the expression and replace the characters with the values from aggMap
 
 export interface AggMap {
-  [key: string]: any;
+  [key: string]: string;
 }
 interface PainlessTinyMathParserProps {
   equation: string;
