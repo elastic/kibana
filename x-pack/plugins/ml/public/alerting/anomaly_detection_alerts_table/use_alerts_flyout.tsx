@@ -11,8 +11,9 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { get } from 'lodash';
 import React from 'react';
-import { EuiDescriptionList, type EuiDataGridColumn, EuiPanel, EuiTitle } from '@elastic/eui';
+import { type EuiDataGridColumn, EuiDescriptionList, EuiPanel, EuiTitle } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import { RegisterFormatter } from './render_cell_value';
 
 const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => {
@@ -30,9 +31,11 @@ export const getAlertFlyout =
       <EuiPanel>
         <EuiDescriptionList
           listItems={columns.map((column) => {
+            const value = get(alert, column.id)?.[0];
+
             return {
               title: column.displayAsText as string,
-              description: formatter(column.id, get(alert, column.id)[0]),
+              description: isDefined(value) ? formatter(column.id, value) : '—',
             };
           })}
           type="column"
