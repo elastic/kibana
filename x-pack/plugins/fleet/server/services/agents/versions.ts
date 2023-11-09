@@ -25,6 +25,11 @@ const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_lis
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
 
+// Cache available versions in memory for 1 hour
+const CACHE_DURATION = 1000 * 60 * 60;
+let CACHED_AVAILABLE_VERSIONS: string[] | undefined;
+let LAST_FETCHED: number | undefined;
+
 export const getLatestAvailableVersion = async (
   includeCurrentVersion?: boolean
 ): Promise<string> => {
@@ -35,12 +40,26 @@ export const getLatestAvailableVersion = async (
 
 export const getAvailableVersions = async ({
   includeCurrentVersion,
+  ignoreCache = false, // This is only here to allow us to ignore the cache in tests
 }: {
   includeCurrentVersion?: boolean;
+  ignoreCache?: boolean;
 } = {}): Promise<string[]> => {
   const logger = appContextService.getLogger();
-  const config = appContextService.getConfig();
 
+  if (LAST_FETCHED && !ignoreCache) {
+    const msSinceLastFetched = Date.now() - (LAST_FETCHED || 0);
+
+    if (msSinceLastFetched < CACHE_DURATION && CACHED_AVAILABLE_VERSIONS !== undefined) {
+      logger.debug(`Cache is valid, returning cached available versions`);
+
+      return CACHED_AVAILABLE_VERSIONS;
+    }
+
+    logger.debug('Cache has expired, fetching available versions from disk + API');
+  }
+
+  const config = appContextService.getConfig();
   const kibanaVersion = appContextService.getKibanaVersion();
 
   let availableVersions: string[] = [];
@@ -80,6 +99,9 @@ export const getAvailableVersions = async ({
   if (availableVersions.length === 0 && !config?.internal?.onlyAllowAgentUpgradeToKnownVersions) {
     availableVersions = [kibanaVersion];
   }
+
+  CACHED_AVAILABLE_VERSIONS = availableVersions;
+  LAST_FETCHED = Date.now();
 
   return availableVersions;
 };

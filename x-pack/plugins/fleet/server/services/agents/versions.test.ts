@@ -46,7 +46,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions({ includeCurrentVersion: true });
+    const res = await getAvailableVersions({ includeCurrentVersion: true, ignoreCache: true });
 
     expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
   });
@@ -56,7 +56,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions({ includeCurrentVersion: true });
+    const res = await getAvailableVersions({ includeCurrentVersion: true, ignoreCache: true });
     expect(res).toEqual(['300.0.0-SNAPSHOT', '8.1.0', '8.0.0', '7.17.0']);
   });
 
@@ -70,7 +70,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions();
+    const res = await getAvailableVersions({ ignoreCache: true });
 
     expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
   });
@@ -80,7 +80,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions({ includeCurrentVersion: false });
+    const res = await getAvailableVersions({ includeCurrentVersion: false, ignoreCache: true });
 
     expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
   });
@@ -95,7 +95,7 @@ describe('getAvailableVersions', () => {
     mockedReadFile.mockRejectedValue({ code: 'ENOENT' });
     mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions();
+    const res = await getAvailableVersions({ ignoreCache: true });
 
     expect(res).toEqual(['300.0.0']);
   });
@@ -126,7 +126,7 @@ describe('getAvailableVersions', () => {
       ),
     } as any);
 
-    const res = await getAvailableVersions();
+    const res = await getAvailableVersions({ ignoreCache: true });
 
     // Should sort, uniquify and filter out versions < 7.17
     expect(res).toEqual(['8.10.0', '8.9.2', '8.1.0', '8.0.0', '7.17.0']);
