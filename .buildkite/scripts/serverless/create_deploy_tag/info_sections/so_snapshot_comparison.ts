@@ -11,26 +11,39 @@ import { readFileSync } from 'fs';
 import { exec } from '../shared';
 import { BuildkiteClient, getKibanaDir } from '#pipeline-utils';
 
-export function compareSOSnapshots(previousSha: string, selectedSha: string) {
+export function compareSOSnapshots(
+  previousSha: string,
+  selectedSha: string
+): null | {
+  hasChanges: boolean;
+  changed: string[];
+  command: string;
+} {
   const command = `node scripts/snapshot_plugin_types compare --from ${previousSha} --to ${selectedSha}`;
   const outputPath = path.resolve(getKibanaDir(), 'so_comparison.json');
-  exec(`${command} --outputPath ${outputPath}`, { stdio: 'inherit' });
 
-  const soComparisonResult = JSON.parse(readFileSync(outputPath).toString());
+  try {
+    exec(`${command} --outputPath ${outputPath}`, { stdio: 'inherit' });
 
-  const buildkite = new BuildkiteClient({ exec });
-  buildkite.uploadArtifacts(outputPath);
+    const soComparisonResult = JSON.parse(readFileSync(outputPath).toString());
 
-  return {
-    hasChanges: soComparisonResult.hasChanges,
-    changed: soComparisonResult.changed,
-    command,
-  };
+    const buildkite = new BuildkiteClient({ exec });
+    buildkite.uploadArtifacts(outputPath);
+
+    return {
+      hasChanges: soComparisonResult.hasChanges,
+      changed: soComparisonResult.changed,
+      command,
+    };
+  } catch (ex) {
+    console.error(ex);
+    return null;
+  }
 }
 
 export function toSOComparisonBlockHtml(comparisonResult: {
-  hasChanges: any;
-  changed: any;
+  hasChanges: boolean;
+  changed: string[];
   command: string;
 }): string {
   return `<div>
@@ -38,5 +51,12 @@ export function toSOComparisonBlockHtml(comparisonResult: {
 <div>Changed plugins: ${comparisonResult.changed.join(', ')}</div>
 <i>Find detailed info in the archived artifacts, or run the command yourself: </i>
 <div><pre>${comparisonResult.command}</pre></div>
+</div>`;
+}
+
+export function getSOComparisonErrorHtml(): string {
+  return `<div>
+<h4>Plugin Saved Object migration changes: N/A</h4>
+<div>Could not compare plugin migrations. Check the logs for more info.</div>
 </div>`;
 }

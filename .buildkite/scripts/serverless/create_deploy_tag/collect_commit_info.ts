@@ -23,6 +23,7 @@ import {
 import {
   compareSOSnapshots,
   toSOComparisonBlockHtml,
+  getSOComparisonErrorHtml,
 } from './info_sections/so_snapshot_comparison';
 import { getUsefulLinksHtml } from './info_sections/useful_links';
 
@@ -54,7 +55,11 @@ async function main() {
 
   // Save Object migration comparison
   const comparisonResult = compareSOSnapshots(previousSha, selectedSha);
-  addBuildkiteInfoSection(toSOComparisonBlockHtml(comparisonResult));
+  if (comparisonResult) {
+    addBuildkiteInfoSection(toSOComparisonBlockHtml(comparisonResult));
+  } else {
+    addBuildkiteInfoSection(getSOComparisonErrorHtml());
+  }
 
   // Useful links
   addBuildkiteInfoSection(
