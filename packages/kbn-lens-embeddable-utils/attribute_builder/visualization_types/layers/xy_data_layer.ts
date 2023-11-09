@@ -87,7 +87,6 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
             columnName: HISTOGRAM_COLUMN_NAME,
             options: {
               params: {
-                interval: options.buckets.params?.interval ?? 'auto',
                 ...options.buckets.params,
               },
               sourceField: options.buckets.field ?? dataView.timeFieldName,

@@ -37,7 +37,7 @@ export const getHistogramColumn = ({
   columnName: string;
   options?: Partial<
     Pick<DateHistogramIndexPatternColumn, 'sourceField'> & {
-      params: DateHistogramColumnParams;
+      params: Partial<DateHistogramColumnParams>;
     }
   >;
 }) => {
