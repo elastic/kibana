@@ -52,13 +52,7 @@ export const createLogExplorerControllerFactory =
       http,
     }).client;
 
-    const initialContext = {
-      ...DEFAULT_CONTEXT,
-      ...initialState,
-      ...(initialState?.datasetSelection
-        ? { datasetSelection: hydrateDatasetSelection(initialState.datasetSelection) }
-        : {}),
-    };
+    const initialContext = createInitialContext(initialState);
 
     // State storage container that allows the Log Explorer to act as state storage over the URL
     // const stateStorageContainer = createStateStorageContainer({ initialState: initialContext });
@@ -99,3 +93,22 @@ export const createLogExplorerControllerFactory =
   };
 
 export type CreateLogExplorerController = ReturnType<typeof createLogExplorerControllerFactory>;
+
+const createInitialContext = (
+  initialState: InitialState | undefined
+): LogExplorerControllerContext => {
+  if (initialState != null) {
+    const { datasetSelection, ...remainingInitialState } = initialState;
+
+    return {
+      ...DEFAULT_CONTEXT,
+      ...remainingInitialState,
+      datasetSelection:
+        datasetSelection != null
+          ? hydrateDatasetSelection(datasetSelection)
+          : DEFAULT_CONTEXT.datasetSelection,
+    };
+  }
+
+  return DEFAULT_CONTEXT;
+};

@@ -136,7 +136,7 @@ export const createObservabilityLogExplorerStateMachine = ({
 }: ObservabilityLogExplorerStateMachineDependencies) =>
   createPureObservabilityLogExplorerStateMachine(initialContext).withConfig({
     actions: {
-      // updateUrlFromLogExplorerState: updateUrlFromLogExplorerState({ urlStateStorageContainer }),
+      updateUrlFromLogExplorerState: actions.pure(() => undefined), // updateUrlFromLogExplorerState({ urlStateStorageContainer }),
     },
     services: {
       initializeFromUrl: initializeFromUrl({ urlStateStorageContainer, toastsService: toasts }),

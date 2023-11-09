@@ -40,12 +40,15 @@ export interface WithDiscoverStateContainer {
   discoverStateContainer: DiscoverStateContainer;
 }
 
-export type DefaultLogExplorerControllerState = WithDatasetSelection & WithDisplayOptions;
+export type DefaultLogExplorerControllerState = WithDatasetSelection &
+  WithQueryState &
+  WithDisplayOptions &
+  WithDisplayOptions;
 
 export type LogExplorerControllerTypeState =
   | {
       value: 'uninitialized';
-      context: WithDatasetSelection & WithQueryState & WithDisplayOptions & WithControlPanels;
+      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
     }
   | {
       value: 'initializingDataView';
@@ -154,8 +157,8 @@ export type LogExplorerControllerEvent =
       controlPanels: ControlPanels | null;
     }
   | {
-      type: 'UPDATE_CONTEXT_FROM_STATE_STORAGE_CONTAINER';
-      contextUpdates: Partial<LogExplorerControllerContext>;
+      type: 'RECEIVE_DISCOVER_APP_STATE';
+      appState: DiscoverAppState;
     }
   | DoneInvokeEvent<DatasetSelection>
   | DoneInvokeEvent<ControlPanels>

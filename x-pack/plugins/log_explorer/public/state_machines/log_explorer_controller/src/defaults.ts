@@ -7,8 +7,7 @@
 
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import {
-  DATA_GRID_COLUMNS_PREFERENCES,
-  DATA_GRID_DEFAULT_COLUMNS,
+  DEFAULT_COLUMNS,
   DEFAULT_ROWS_PER_PAGE,
   LOG_LEVEL_FIELD,
 } from '../../../../common/constants';
@@ -17,12 +16,26 @@ import { DefaultLogExplorerControllerState } from './types';
 
 export const DEFAULT_CONTEXT: DefaultLogExplorerControllerState = {
   datasetSelection: AllDatasetSelection.create(),
-  // Display options
-  columns: DATA_GRID_DEFAULT_COLUMNS,
   grid: {
-    columns: DATA_GRID_COLUMNS_PREFERENCES,
+    columns: DEFAULT_COLUMNS,
+    rows: {
+      rowHeight: ROWS_HEIGHT_OPTIONS.single,
+      rowsPerPage: DEFAULT_ROWS_PER_PAGE,
+    },
   },
-  rowHeight: ROWS_HEIGHT_OPTIONS.single,
-  rowsPerPage: DEFAULT_ROWS_PER_PAGE,
   breakdownField: LOG_LEVEL_FIELD,
+  filters: [],
+  query: {
+    language: 'kuery',
+    query: '',
+  },
+  refreshInterval: {
+    pause: true,
+    value: 60000,
+  },
+  time: {
+    mode: 'relative',
+    from: 'now-15m/m',
+    to: 'now',
+  },
 };

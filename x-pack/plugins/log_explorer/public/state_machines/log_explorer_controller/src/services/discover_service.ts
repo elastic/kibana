@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { InvokeCallback } from 'xstate';
+import { isEmpty } from 'lodash';
+import { actions, InvokeCallback } from 'xstate';
 import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
 export const subscribeToDiscoverState =
@@ -21,14 +22,42 @@ export const subscribeToDiscoverState =
     const { appState } = context.discoverStateContainer;
 
     const subscription = appState.state$.subscribe({
-      next: (newAppState) =>
+      next: (newAppState) => {
+        if (isEmpty(newAppState)) {
+          return;
+        }
+
         send({
-          type: 'APP_STATE_CHANGED',
+          type: 'RECEIVE_DISCOVER_APP_STATE',
           appState: newAppState,
-        }),
+        });
+      },
     });
 
     return () => {
       subscription.unsubscribe();
     };
   };
+
+export const updateGridFromDiscoverAppState = actions.assign<
+  LogExplorerControllerContext,
+  LogExplorerControllerEvent
+>((context, event) => {
+  if ('appState' in event && event.type === 'RECEIVE_DISCOVER_APP_STATE') {
+    return {
+      grid: {
+        columns:
+          event.appState.columns?.map((field) => ({
+            field,
+            width: event.appState.grid?.columns?.[field].width,
+          })) ?? context.grid.columns,
+        rows: {
+          rowHeight: event.appState.rowHeight ?? context.grid.rows.rowHeight,
+          rowsPerPage: event.appState.rowsPerPage ?? context.grid.rows.rowsPerPage,
+        },
+      },
+    };
+  }
+
+  return {};
+});

@@ -21,7 +21,10 @@ import {
   LogExplorerControllerEvent,
   LogExplorerControllerTypeState,
 } from './types';
-import { subscribeToDiscoverState } from './services/discover_service';
+import {
+  subscribeToDiscoverState,
+  updateGridFromDiscoverAppState,
+} from './services/discover_service';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
   initializeControlPanels,
@@ -171,8 +174,8 @@ export const createPureLogExplorerControllerStateMachine = (
             },
           },
           on: {
-            DISCOVER_STATE_CHANGED: {
-              actions: 'updateContextFromStateStorageContainer',
+            RECEIVE_DISCOVER_APP_STATE: {
+              actions: 'updateGridFromDiscoverAppState',
             },
           },
         },
@@ -209,12 +212,7 @@ export const createPureLogExplorerControllerStateMachine = (
             : {}
         ),
         notifyDataViewUpdate: raise('DATA_VIEW_UPDATED'),
-        updateContextFromStateStorageContainer: actions.assign((_context, event) => {
-          return 'contextUpdates' in event &&
-            event.type === 'UPDATE_CONTEXT_FROM_STATE_STORAGE_CONTAINER'
-            ? { ...event.contextUpdates }
-            : {};
-        }),
+        updateGridFromDiscoverAppState,
       },
       guards: {
         controlGroupAPIExists: (_context, event) => {
