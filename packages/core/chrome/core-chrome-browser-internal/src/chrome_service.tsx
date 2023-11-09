@@ -49,7 +49,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
-const WORKFLOW_ID = 'core.chrome.workflowId';
+const WORKFLOW_KEY = 'core.chrome.workflowId';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
@@ -205,7 +205,7 @@ export class ChromeService {
     const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
 
     const workflows$ = new BehaviorSubject<Workflows>({});
-    const activeWorkflowId$ = new BehaviorSubject<string>(localStorage.getItem(WORKFLOW_ID) ?? '');
+    const activeWorkflowId$ = new BehaviorSubject<string>(localStorage.getItem(WORKFLOW_KEY) ?? '');
     let workflowInitiated = false;
 
     const onWorkflowChange = (id: string) => {
@@ -220,7 +220,7 @@ export class ChromeService {
 
       chromeStyle$.next(workflow.style);
       activeWorkflowId$.next(id);
-      localStorage.setItem(WORKFLOW_ID, id);
+      localStorage.setItem(WORKFLOW_KEY, id);
     };
 
     const updateWorkflows = (workflows: Workflows, replace: boolean = false) => {
