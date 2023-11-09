@@ -9,11 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { CSV_JOB_TYPE } from '@kbn/reporting-common';
 import { checkLicense } from '../lib/license_check';
 import { ExportPanelShareOpts } from '.';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
-const CSV_JOB_TYPE = 'csv_searchsource';
 export const reportingCsvShareProvider = ({
   apiClient,
   toasts,

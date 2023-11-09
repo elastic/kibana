@@ -18,8 +18,6 @@ export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 
-export const CSV_JOB_TYPE = 'csv_searchsource';
-
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 // Licenses
 export const LICENSE_TYPE_TRIAL = 'trial' as const;
@@ -29,17 +27,11 @@ export const LICENSE_TYPE_GOLD = 'gold' as const;
 export const LICENSE_TYPE_PLATINUM = 'platinum' as const;
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
 
-export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
-
-export const PDF_JOB_TYPE = 'printable_pdf';
-
-export const PNG_JOB_TYPE = 'PNG';
-export const PNG_JOB_TYPE_V2 = 'PNGV2';
 export const USES_HEADLESS_JOB_TYPES = [
-  PDF_JOB_TYPE,
-  PNG_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PNG_JOB_TYPE_V2,
+  jobTypes.PDF_JOB_TYPE,
+  jobTypes.PNG_JOB_TYPE,
+  jobTypes.PDF_JOB_TYPE_V2,
+  jobTypes.PNG_JOB_TYPE_V2,
 ];
 
 type JobTypeDeclaration = typeof jobTypes;
