@@ -23,12 +23,12 @@ import {
   CancellationToken,
 } from '@kbn/reporting-common';
 import {
-  BaseExportTypeSetupDeps,
-  BaseExportTypeStartDeps,
+  type BaseExportTypeSetupDeps,
+  type BaseExportTypeStartDeps,
   decryptJobHeaders,
   ExportType,
   getFieldFormats,
-  ReportingRequestHandlerContext,
+  type ReportingRequestHandlerContext,
 } from '@kbn/reporting-server';
 import {
   JobParamsCsvFromSavedObject,

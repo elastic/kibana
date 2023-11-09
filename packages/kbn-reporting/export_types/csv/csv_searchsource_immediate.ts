@@ -129,7 +129,7 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
 
     const { warnings } = result;
     if (warnings) {
-      warnings.forEach((warning: string | Error) => {
+      warnings.forEach((warning) => {
         this.logger.warn(warning);
       });
     }
