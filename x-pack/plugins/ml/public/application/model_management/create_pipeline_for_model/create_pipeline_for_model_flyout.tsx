@@ -26,6 +26,7 @@ import { AddInferencePipelineFooter } from '../../components/shared';
 import { AddInferencePipelineHorizontalSteps } from '../../components/shared';
 import { getInitialState } from './state';
 import { PipelineDetails } from './pipeline_details';
+import { TestTrainedModel } from './test_trained_model';
 import { OnFailureConfiguration } from '../../components/shared';
 import { ReviewAndCreatePipeline } from '../../components/shared';
 import { useMlApiContext } from '../../contexts/kibana';
@@ -34,7 +35,6 @@ import { validateInferencePipelineConfigurationStep } from '../../components/ml_
 import { type InferecePipelineCreationState } from './state';
 import { useFetchPipelines } from '../../components/ml_inference/hooks/use_fetch_pipelines';
 import { TestTrainedModelsContext } from '../test_models/test_trained_models_context';
-import { TestTrainedModelFlyoutContent } from '../test_models/test_flyout';
 
 export interface CreatePipelineForModelFlyoutProps {
   onClose: () => void;
@@ -155,9 +155,7 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
             onFailure={formState.onFailure}
           />
         )}
-        {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && (
-          <TestTrainedModelFlyoutContent model={model} />
-        )}
+        {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && <TestTrainedModel model={model} />}
         {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
           <ReviewAndCreatePipeline
             inferencePipeline={getPipelineConfig(formState)}
