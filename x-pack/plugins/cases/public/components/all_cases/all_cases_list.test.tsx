@@ -656,12 +656,12 @@ describe('AllCasesListGeneric', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
       });
 
-      userEvent.click(getByTestId('solution-filter-popover-button'));
+      userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
       userEvent.click(
-        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -684,7 +684,7 @@ describe('AllCasesListGeneric', () => {
       });
 
       userEvent.click(
-        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -714,7 +714,7 @@ describe('AllCasesListGeneric', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('solution-filter-popover-button')).toBeFalsy();
+      expect(queryByTestId('options-filter-popover-button-owner')).toBeFalsy();
     });
 
     it('should call useGetCases with the correct owner on initial render', async () => {
