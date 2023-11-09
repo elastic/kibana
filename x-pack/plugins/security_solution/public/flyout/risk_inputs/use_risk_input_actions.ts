@@ -19,8 +19,6 @@ import type { AlertRawData } from '.';
 
 /**
  * The returned actions only support alerts risk inputs.
- * @param riskInput
- * @returns
  */
 export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => void) => {
   const { from, to } = useGlobalTime();

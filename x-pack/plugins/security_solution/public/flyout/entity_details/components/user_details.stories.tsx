@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
@@ -27,7 +27,7 @@ storiesOf('Components/UserDetailsContent', module)
     <StorybookProviders>
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <EuiFlyout size="m" onClose={() => {}}>
-          <EuiFlyoutBody>{storyFn()}</EuiFlyoutBody>
+          {storyFn()}
         </EuiFlyout>
       </ExpandableFlyoutContext.Provider>
     </StorybookProviders>

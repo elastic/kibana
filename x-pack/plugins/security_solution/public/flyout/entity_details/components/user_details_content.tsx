@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { EuiFlyoutBody } from '@elastic/eui';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
@@ -30,16 +29,8 @@ export interface UserDetailsContentProps extends Record<string, unknown> {
   isDraggable: boolean;
 }
 
-export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'user-details';
-  params: UserDetailsContentProps;
-}
-
-export const UserDetailsContentKey: UserDetailsExpandableFlyoutProps['key'] = 'user-details';
-export const USER_DETAILS_RISK_SCORE_QUERY_ID = 'userDetailsRiskScoreQuery';
-
 /**
- * This is a visual component. It doesn't access any external Context or API.
+ * This is a visual component. It doesn't access any external API.
  * It designed for unit testing the UI and previewing changes on storybook.
  */
 export const UserDetailsContent = ({

@@ -49,10 +49,6 @@ interface UserDetailsBodyComponentProps {
   isDraggable: boolean;
 }
 
-/**
- * This is a visual component. It doesn't access any external Context or API.
- * It designed for unit testing the UI and previewing changes on storybook.
- */
 export const UserDetailsBody = ({
   userName,
   observedUser,
@@ -75,7 +71,7 @@ export const UserDetailsBody = ({
       <EuiPanel hasShadow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" data-test-subj={'user-details-content-lastSeen'}>
+            <EuiText size="xs" data-test-subj={'user-details-body-lastSeen'}>
               {lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />}
               <EuiSpacer size="xs" />
             </EuiText>
@@ -108,18 +104,18 @@ export const UserDetailsBody = ({
               gutterSize="s"
               alignItems="center"
               responsive={false}
-              data-test-subj="user-details-content-header"
+              data-test-subj="user-details-body-header"
             >
               <EuiFlexItem grow={false}>
                 {observedUser.lastSeen.date && (
-                  <EuiBadge data-test-subj="user-details-content-observed-badge" color="hollow">
+                  <EuiBadge data-test-subj="user-details-body-observed-badge" color="hollow">
                     {i18n.OBSERVED_BADGE}
                   </EuiBadge>
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {managedUser.lastSeen.date && (
-                  <EuiBadge data-test-subj="user-details-content-managed-badge" color="hollow">
+                  <EuiBadge data-test-subj="user-details-body-managed-badge" color="hollow">
                     {i18n.MANAGED_BADGE}
                   </EuiBadge>
                 )}
@@ -157,5 +153,3 @@ export const UserDetailsBody = ({
     </>
   );
 };
-
-// TODO

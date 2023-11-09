@@ -24,3 +24,10 @@ export const MANAGED_BADGE = i18n.translate(
 export const USER = i18n.translate('xpack.securitySolution.flyout.entityDetails.userLabel', {
   defaultMessage: 'User',
 });
+
+export const ALERTS = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.alertsGroupLabel',
+  {
+    defaultMessage: 'Alerts',
+  }
+);

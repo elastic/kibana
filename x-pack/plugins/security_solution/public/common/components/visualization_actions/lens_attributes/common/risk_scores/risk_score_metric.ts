@@ -15,15 +15,15 @@ import type { RiskSeverity } from '../../../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../../../common/search_strategy';
 import type { LensAttributes } from '../../../types';
 
-interface GetRiskScoreMetricAttributesProps {
+interface GetRiskScoreSummaryAttributesProps {
   query?: string;
   spaceId?: string;
   severity?: RiskSeverity;
   riskEntity: RiskScoreEntity;
 }
 
-export const getRiskScoreMetricAttributes: (
-  props: GetRiskScoreMetricAttributesProps
+export const getRiskScoreSummaryAttributes: (
+  props: GetRiskScoreSummaryAttributesProps
 ) => LensAttributes = ({ spaceId, query, severity, riskEntity }) => {
   const layerIds = [uuidv4(), uuidv4()];
   const internalReferenceId = uuidv4();
@@ -34,7 +34,7 @@ export const getRiskScoreMetricAttributes: (
       : RiskScoreFields.hostRiskScore;
 
   return {
-    title: 'risk score metric',
+    title: 'Risk score summary',
     description: '',
     visualizationType: 'lnsMetric',
     state: {

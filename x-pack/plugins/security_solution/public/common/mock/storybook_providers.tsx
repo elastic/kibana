@@ -39,9 +39,6 @@ const uiSettings = {
 };
 
 const coreMock = {
-  // settings: {
-
-  // },
   application: {
     getUrlForApp: () => {},
     capabilities: { [CASES_FEATURE_ID]: {} },

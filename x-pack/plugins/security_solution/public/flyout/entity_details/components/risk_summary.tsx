@@ -27,10 +27,11 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { RiskScoreEntity } from '../../../../common/risk_engine';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { getRiskScoreMetricAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_metric';
+import { getRiskScoreSummaryAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_metric';
 import { USER_DETAILS_RISK_SCORE_QUERY_ID } from '../user_details';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { RiskInputsPanelKey } from '../../risk_inputs';
+import { ALERTS } from './translations';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;
@@ -40,7 +41,7 @@ interface TableItem {
   category: string;
   count: number;
 }
-const LENS_VISUALIZATION_SIZE = 126;
+const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
 
 export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
@@ -59,7 +60,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
   }, [openLeftPanel, userRiskData?.user.risk.inputs]);
 
   const lensAttributes = useMemo(() => {
-    return getRiskScoreMetricAttributes({
+    return getRiskScoreSummaryAttributes({
       severity: userRiskData?.user?.risk?.calculated_level,
       query: `user.name: ${userRiskData?.user?.name}`,
       spaceId: 'default',
@@ -103,7 +104,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
   const items: TableItem[] = useMemo(
     () => [
       {
-        category: 'Alerts',
+        category: ALERTS,
         count: userRiskData?.user.risk.inputs?.length ?? 0,
       },
     ],
@@ -183,7 +184,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
             <div
               // Improve Visualization loading state by predefining the size
               css={css`
-                height: ${LENS_VISUALIZATION_SIZE}px;
+                height: ${LENS_VISUALIZATION_HEIGHT}px;
               `}
             >
               {userRiskData && (
@@ -193,7 +194,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
                   id={`RiskSummary-risk_score_metric`}
                   timerange={LAST_30_DAYS}
                   width={'100%'}
-                  height={LENS_VISUALIZATION_SIZE}
+                  height={LENS_VISUALIZATION_HEIGHT}
                   inspectTitle={
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.inspectVisualizationTitle"

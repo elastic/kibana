@@ -35,7 +35,7 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('user-details-content-header')).toBeInTheDocument();
+    expect(getByTestId('user-details-body-header')).toBeInTheDocument();
   });
 
   it('renders observed user date when it is bigger than managed user date', () => {
@@ -57,7 +57,7 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('user-details-content-lastSeen').textContent).toContain('Mar 7, 2989');
+    expect(getByTestId('user-details-body-lastSeen').textContent).toContain('Mar 7, 2989');
   });
 
   it('renders managed user date when it is bigger than observed user date', () => {
@@ -79,7 +79,7 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('user-details-content-lastSeen').textContent).toContain('Mar 7, 2989');
+    expect(getByTestId('user-details-body-lastSeen').textContent).toContain('Mar 7, 2989');
   });
 
   it('renders observed and managed badges when lastSeen is defined', () => {
@@ -89,8 +89,8 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('user-details-content-observed-badge')).toBeInTheDocument();
-    expect(getByTestId('user-details-content-managed-badge')).toBeInTheDocument();
+    expect(getByTestId('user-details-body-observed-badge')).toBeInTheDocument();
+    expect(getByTestId('user-details-body-managed-badge')).toBeInTheDocument();
   });
 
   it('does not render observed badge when lastSeen date is undefined', () => {
@@ -111,7 +111,7 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('user-details-content-observed-badge')).not.toBeInTheDocument();
+    expect(queryByTestId('user-details-body-observed-badge')).not.toBeInTheDocument();
   });
 
   it('does not render managed badge when lastSeen date is undefined', () => {
@@ -132,6 +132,6 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('user-details-content-managed-badge')).not.toBeInTheDocument();
+    expect(queryByTestId('user-details-body-managed-badge')).not.toBeInTheDocument();
   });
 });
