@@ -12,7 +12,7 @@ import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { ROLE, login } from '../../tasks/login';
 import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../tasks/alerts';
 
 // Currently it supports only Multipass, so it's not possible to test it on CI, Vagrant support will be added later.
 describe.skip(

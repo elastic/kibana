@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+// @ts-expect-error
 import registerDataSession from 'cypress-data-session/src/plugin';
+import { merge } from 'lodash';
 import { getVideosForFailedSpecs } from './support/filter_videos';
 import { setupToolingLogLevel } from './support/setup_tooling_log_level';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
