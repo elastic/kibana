@@ -254,6 +254,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(ADD_QUERY_BUTTON).click();
 
       cy.contains('Attach next query');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
       cy.getBySel('osquery-interval-field').click().clear().type('5');
       cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
@@ -367,6 +368,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel(ADD_QUERY_BUTTON).click();
 
         cy.contains('Attach next query');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+
         cy.contains('ID must be unique').should('not.exist');
         cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
@@ -670,6 +673,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(/^Edit$/).click();
 
         cy.getBySel(ADD_QUERY_BUTTON).click();
+
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
 
         cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(
           `${multipleMappingsSavedQueryName} {downArrow} {enter}`
