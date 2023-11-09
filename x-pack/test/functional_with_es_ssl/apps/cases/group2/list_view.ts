@@ -674,7 +674,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await browser.clearLocalStorage();
       });
 
-      it('column selection popover exists', async () => {
+      it('column selection popover button exists', async () => {
         await testSubjects.existOrFail('column-selection-popover-button');
       });
 
@@ -692,6 +692,44 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.toggleColumnInPopover('title');
 
         expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+      });
+
+      it('"Hide All" columns works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        await testSubjects.click('column-selection-popover-hide-all-button');
+
+        await cases.casesTable.closeColumnsPopover();
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Assignees')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Tags')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Category')).to.be(false);
+      });
+
+      it('"Show All" columns works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        await testSubjects.click('column-selection-popover-show-all-button');
+
+        await cases.casesTable.closeColumnsPopover();
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Assignees')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Tags')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Category')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(true);
+      });
+
+      it('search and toggle column works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        const input = await testSubjects.find('column-selection-popover-search');
+        await input.type('name');
+
+        await testSubjects.existOrFail('column-selection-switch-title');
+        await testSubjects.missingOrFail('column-selection-switch-closedAt');
+        await testSubjects.missingOrFail('column-selection-switch-category');
       });
     });
   });
