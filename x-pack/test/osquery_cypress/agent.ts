@@ -75,7 +75,7 @@ export class AgentManager extends Manager {
     this.log.info(`agent docker container started:\n${JSON.stringify(startedContainer, null, 2)}`);
 
     this.agentContainerId = startedContainer.stdout;
-    await waitForHostToEnroll(this.kbnClient, containerName, 240000);
+    await waitForHostToEnroll(this.kbnClient, this.log, containerName, 240000);
   }
 
   public cleanup() {

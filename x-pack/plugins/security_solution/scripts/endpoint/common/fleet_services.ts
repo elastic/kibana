@@ -157,14 +157,18 @@ export const fetchFleetAgents = async (
  * Will keep querying Fleet list of agents until the given `hostname` shows up as healthy
  *
  * @param kbnClient
+ * @param log
  * @param hostname
  * @param timeoutMs
  */
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
+  log: ToolingLog,
   hostname: string,
   timeoutMs: number = 30000
 ): Promise<Agent> => {
+  log.info(`Waiting for host [${hostname}] to enroll with fleet`);
+
   const started = new Date();
   const hasTimedOut = (): boolean => {
     const elapsedTime = Date.now() - started.getTime();
@@ -203,6 +207,9 @@ export const waitForHostToEnroll = async (
       { agentId, hostname }
     );
   }
+
+  log.debug(`Host [${hostname}] has been enrolled with fleet`);
+  log.verbose(found);
 
   return found;
 };
@@ -681,8 +688,7 @@ export const enrollHostVmWithFleet = async ({
 
   await hostVm.exec(agentEnrollCommand);
 
-  log.info(`Waiting for Agent to check-in with Fleet`);
-  return waitForHostToEnroll(kbnClient, hostVm.name, timeoutMs);
+  return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs);
 };
 
 interface GetOrCreateDefaultAgentPolicyOptions {

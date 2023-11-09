@@ -325,11 +325,7 @@ const startFleetServerWithDocker = async ({
 
         await waitForFleetServerToRegisterWithElasticsearch(kbnClient, hostname, 120000);
       } else {
-        log.info('Waiting for server to show up in Kibana Fleet');
-
-        const fleetServerAgent = await waitForHostToEnroll(kbnClient, hostname, 120000);
-
-        log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
+        await waitForHostToEnroll(kbnClient, log, hostname, 120000);
       }
 
       fleetServerVersionInfo = (
