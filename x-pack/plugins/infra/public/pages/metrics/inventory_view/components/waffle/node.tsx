@@ -9,6 +9,7 @@ import React from 'react';
 
 import { first } from 'lodash';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useBoolean } from '../../../../../hooks/use_boolean';
 import {
   InfraWaffleMapBounds,
@@ -17,7 +18,6 @@ import {
 } from '../../../../../lib/lib';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { colorFromValue } from '../../lib/color_from_value';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 
 import { NodeContextMenu } from './node_context_menu';
 import { NodeSquare } from './node_square';

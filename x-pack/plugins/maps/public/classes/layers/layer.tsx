@@ -7,10 +7,11 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
@@ -38,6 +39,12 @@ import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
+import { TileErrorsList } from './tile_errors_list';
+
+export interface LayerError {
+  title: string;
+  error: ReactNode;
+}
 
 export interface ILayer {
   getBounds(
@@ -70,7 +77,7 @@ export interface ILayer {
   isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
-  getErrors(): string;
+  getErrors(): LayerError[];
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
@@ -389,13 +396,36 @@ export class AbstractLayer implements ILayer {
   }
 
   hasErrors(): boolean {
-    return _.get(this._descriptor, '__isInErrorState', false);
+    return this.getErrors().length > 0;
   }
 
-  getErrors(): string {
-    return this.hasErrors() && this._descriptor.__errorMessage
-      ? this._descriptor.__errorMessage
-      : '';
+  _getSourceErrorTitle() {
+    return i18n.translate('xpack.maps.layer.sourceErrorTitle', {
+      defaultMessage: `An error occurred when loading layer data`,
+    });
+  }
+
+  getErrors(): LayerError[] {
+    const errors: LayerError[] = [];
+
+    const sourceError = this.getSourceDataRequest()?.getError();
+    if (sourceError) {
+      errors.push({
+        title: this._getSourceErrorTitle(),
+        error: sourceError,
+      });
+    }
+
+    if (this._descriptor.__tileErrors?.length) {
+      errors.push({
+        title: i18n.translate('xpack.maps.layer.tileErrorTitle', {
+          defaultMessage: `An error occurred when loading layer tiles`,
+        }),
+        error: <TileErrorsList tileErrors={this._descriptor.__tileErrors} />,
+      });
+    }
+
+    return errors;
   }
 
   async syncData(syncContext: DataRequestContext) {
@@ -489,8 +519,8 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.parent;
   }
 
-  _getMetaFromTiles(): TileMetaFeature[] {
-    return this._descriptor.__metaFromTiles || [];
+  _getTileMetaFeatures(): TileMetaFeature[] {
+    return this._descriptor.__tileMetaFeatures ?? [];
   }
 
   _isTiled(): boolean {

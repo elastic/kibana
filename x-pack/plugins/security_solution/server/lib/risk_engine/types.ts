@@ -78,19 +78,15 @@ export interface InitRiskEngineResponse {
 
 export interface InitRiskEngineError {
   body: {
-    message: {
-      message: string;
-      full_error: InitRiskEngineResultResponse | undefined;
-    } & string;
+    message: string;
+    full_error: InitRiskEngineResultResponse | undefined;
   };
 }
 
 export interface EnableDisableRiskEngineErrorResponse {
   body: {
-    message: {
-      message: string;
-      full_error: string;
-    };
+    message: string;
+    full_error: string;
   };
 }
 

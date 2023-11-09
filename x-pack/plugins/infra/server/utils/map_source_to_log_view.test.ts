@@ -48,9 +48,6 @@ const basicTestSourceConfiguration: InfraSource = {
       indexPatternId: 'INDEX_PATTERN_ID',
     },
     logColumns: [],
-    fields: {
-      message: [],
-    },
     metricAlias: 'METRIC_ALIAS',
     inventoryDefaultView: 'INVENTORY_DEFAULT_VIEW',
     metricsExplorerDefaultView: 'METRICS_EXPLORER_DEFAULT_VIEW',
