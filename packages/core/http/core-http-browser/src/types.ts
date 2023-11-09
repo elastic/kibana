@@ -97,6 +97,12 @@ export interface IBasePath {
   readonly serverBasePath: string;
 
   /**
+   * Href (hypertext reference) intended to be used as the base for constructing
+   * other hrefs to static assets.
+   */
+  readonly assetsHrefBase: string;
+
+  /**
    * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
    * {@link IBasePath.serverBasePath}.
    *
