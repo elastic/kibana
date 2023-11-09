@@ -34,8 +34,6 @@ import {
 import type {
   TimelineErrorResponse,
   ResponseTimeline,
-  CloneTimelineResponse,
-  ResponseCloneTimeline,
   TimelineResponse,
 } from '../../../../common/api/timeline';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
@@ -43,7 +41,7 @@ import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';
 
-import { cloneTimeline, persistTimeline } from '../../containers/api';
+import { copyTimeline, persistTimeline } from '../../containers/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import * as i18n from '../../pages/translations';
 
@@ -198,7 +196,7 @@ export const createTimelineEpic =
                 ).pipe(
                   withLatestFrom(timeline$, allTimelineQuery$, kibana$),
                   mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
-                    return handleTimelineResponse<TimelineResponse>(
+                    return handleTimelineErrors(
                       result,
                       action,
                       allTimelineQuery,
@@ -390,71 +388,65 @@ function saveAsNewEpic<State>(
   kibana$: TimelineEpicDependencies<State>['kibana$']
 ) {
   return from(
-    cloneTimeline({
+    copyTimeline({
       timelineId,
       timeline,
     })
   ).pipe(
     withLatestFrom(timeline$, allTimelineQuery$, kibana$),
     mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
-      return handleTimelineResponse<CloneTimelineResponse>(
-        result,
-        action,
-        allTimelineQuery,
-        kibana,
-        (response) => {
-          // TODO:
-          // - reset old timeline with originalTimeline, mark it as not changed
-          // - close old timeline
-          // - open new timeline
-          // - set correct date range in new timeline...
+      return handleTimelineErrors(result, action, allTimelineQuery, kibana, (response) => {
+        // TODO:
+        // - rename to copyTimeline?
+        // - update timeline
+        //   - Find out why `updateTimeline` is not accepting the clonedTimeline
+        // - Copy saved search and save as new
+        // - Remove `originalTimeline` from the response and use the regular timeline response parser and types
+        // - Add acceptance tests
+        // - generate endpoint documentation and mark it as private
+        // - Unit test the endpoint
 
-          const { timeline: clonedTimeline } = response;
+        const { timeline: clonedTimeline } = response;
 
-          myEpicTimelineId.setTimelineId(clonedTimeline.savedObjectId);
-          myEpicTimelineId.setTimelineVersion(clonedTimeline.version);
-          myEpicTimelineId.setTemplateTimelineId(clonedTimeline.templateTimelineId);
-          myEpicTimelineId.setTemplateTimelineVersion(clonedTimeline.templateTimelineVersion);
+        myEpicTimelineId.setTimelineId(clonedTimeline.savedObjectId);
+        myEpicTimelineId.setTimelineVersion(clonedTimeline.version);
+        myEpicTimelineId.setTemplateTimelineId(clonedTimeline.templateTimelineId ?? null);
+        myEpicTimelineId.setTemplateTimelineVersion(clonedTimeline.templateTimelineVersion ?? null);
 
-          return [
-            // reset the current timeline
-            updateTimeline({
-              id: action.payload.id,
-              timeline: {
-                ...recentTimeline[action.payload.id],
-                ...clonedTimeline,
-              },
-            }),
-            setChanged({
-              id: action.payload.id,
-              changed: false,
-            }),
-            endTimelineSaving({
-              id: action.payload.id,
-            }),
-          ];
-        }
-      );
+        return [
+          updateTimeline({
+            id: action.payload.id,
+            timeline: {
+              ...recentTimeline[action.payload.id],
+              ...clonedTimeline,
+            },
+          }),
+          setChanged({
+            id: action.payload.id,
+            changed: false,
+          }),
+          endTimelineSaving({
+            id: action.payload.id,
+          }),
+        ];
+      });
     }),
     startWith(startTimelineSaving({ id: action.payload.id }))
   );
 }
 
-type SuccessResponse = TimelineResponse | CloneTimelineResponse;
-type PossibleResponse = SuccessResponse | TimelineErrorResponse;
+type PossibleResponse = TimelineResponse | TimelineErrorResponse;
 
 function isErrorResponse(response: PossibleResponse): response is TimelineErrorResponse {
   return 'status_code' in response;
 }
 
-function handleTimelineResponse<Success extends SuccessResponse>(
+function handleTimelineErrors(
   response: PossibleResponse,
   action: ActionTimeline,
   allTimelineQuery: inputsModel.GlobalQuery,
   kibana: CoreStart,
-  onSuccess: (
-    response: Success extends CloneTimelineResponse ? ResponseCloneTimeline : ResponseTimeline
-  ) => Action[]
+  onSuccess: (response: ResponseTimeline) => Action[]
 ): Action[] {
   if (isErrorResponse(response)) {
     switch (response.status_code) {
@@ -504,7 +496,5 @@ function handleTimelineResponse<Success extends SuccessResponse>(
     (allTimelineQuery.refetch as inputsModel.Refetch)();
   }
 
-  return onSuccess(
-    unwrapped as Success extends CloneTimelineResponse ? ResponseCloneTimeline : ResponseTimeline
-  );
+  return onSuccess(unwrapped as ResponseTimeline);
 }

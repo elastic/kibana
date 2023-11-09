@@ -9,16 +9,16 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
-import { cloneTimelineSchema } from '../../../../../../common/api/timeline';
-import { cloneTimeline } from '../../../saved_object/timelines';
+import { copyTimelineSchema } from '../../../../../../common/api/timeline';
+import { copyTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
-import { TIMELINE_CLONE_URL } from '../../../../../../common/constants';
+import { TIMELINE_COPY_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 
-export const cloneTimelineRoute = async (
+export const copyTimelineRoute = async (
   router: SecuritySolutionPluginRouter,
   startServices: StartServicesAccessor<StartPlugins>,
   _: ConfigType,
@@ -28,7 +28,7 @@ export const cloneTimelineRoute = async (
 
   router.versioned
     .post({
-      path: TIMELINE_CLONE_URL,
+      path: TIMELINE_COPY_URL,
       options: {
         tags: ['access:securitySolution'],
       },
@@ -38,7 +38,7 @@ export const cloneTimelineRoute = async (
       {
         version: '2023-10-31',
         validate: {
-          request: { body: buildRouteValidationWithExcess(cloneTimelineSchema) },
+          request: { body: buildRouteValidationWithExcess(copyTimelineSchema) },
         },
       },
       async (context, request, response) => {
@@ -47,16 +47,16 @@ export const cloneTimelineRoute = async (
         try {
           const searchSourceClient = await data.search.searchSource.asScoped(request);
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
-          const { timeline, timelineIdToClone } = request.body;
-          const clonedTimeline = await cloneTimeline(
+          const { timeline, timelineIdToCopy } = request.body;
+          const copiedTimeline = await copyTimeline(
             frameworkRequest,
             timeline,
-            timelineIdToClone,
+            timelineIdToCopy,
             searchSourceClient
           );
 
           return response.ok({
-            body: { data: { persistTimeline: clonedTimeline } },
+            body: { data: { persistTimeline: copiedTimeline } },
           });
         } catch (err) {
           const error = transformError(err);

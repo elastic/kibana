@@ -15,7 +15,6 @@ import { throwErrors } from '@kbn/cases-plugin/common';
 import type {
   TimelineResponse,
   TimelineErrorResponse,
-  CloneTimelineResponse,
   ImportTimelineResultSchema,
   ResponseFavoriteTimeline,
   AllTimelinesResponse,
@@ -25,7 +24,6 @@ import type {
 } from '../../../common/api/timeline';
 import {
   TimelineResponseType,
-  CloneTimelineResponseType,
   TimelineStatus,
   TimelineErrorResponseType,
   importTimelineResultSchema,
@@ -43,7 +41,7 @@ import {
   TIMELINE_PREPACKAGED_URL,
   TIMELINE_RESOLVE_URL,
   TIMELINES_URL,
-  TIMELINE_CLONE_URL,
+  TIMELINE_COPY_URL,
   TIMELINE_FAVORITE_URL,
 } from '../../../common/constants';
 
@@ -71,14 +69,6 @@ const createToasterPlainError = (message: string) => new ToasterError([message])
 const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorResponse) =>
   pipe(
     TimelineResponseType.decode(respTimeline),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
-const decodeCloneTimelineResponse = (
-  respTimeline?: CloneTimelineResponse | TimelineErrorResponse
-) =>
-  pipe(
-    CloneTimelineResponseType.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
@@ -164,19 +154,23 @@ const patchTimeline = async ({
   return decodeTimelineResponse(response);
 };
 
-export const cloneTimeline = async ({
+/**
+ * Creates a copy of the timeline with the given id. It will also apply changes to the original timeline
+ * which are passed as `timeline` here.
+ */
+export const copyTimeline = async ({
   timelineId,
   timeline,
-}: RequestPersistTimeline): Promise<CloneTimelineResponse | TimelineErrorResponse> => {
+}: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   let response = null;
   let requestBody = null;
   try {
-    requestBody = JSON.stringify({ timeline, timelineIdToClone: timelineId });
+    requestBody = JSON.stringify({ timeline, timelineIdToCopy: timelineId });
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
   try {
-    response = await KibanaServices.get().http.post<CloneTimelineResponse>(TIMELINE_CLONE_URL, {
+    response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_COPY_URL, {
       method: 'POST',
       body: requestBody,
       version: '2023-10-31',
@@ -187,7 +181,7 @@ export const cloneTimeline = async ({
     // the issue we were not able to pass the right object to it so we did manage the error in the success
     return Promise.resolve(decodeTimelineErrorResponse(err.body));
   }
-  return decodeCloneTimelineResponse(response);
+  return decodeTimelineResponse(response);
 };
 
 export const persistTimeline = async ({

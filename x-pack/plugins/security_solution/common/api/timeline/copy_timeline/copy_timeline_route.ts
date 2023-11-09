@@ -9,7 +9,7 @@ import * as rt from 'io-ts';
 
 import { SavedTimelineRuntimeType } from '../model/api';
 
-export const cloneTimelineSchema = rt.type({
+export const copyTimelineSchema = rt.type({
   timeline: SavedTimelineRuntimeType,
-  timelineIdToClone: rt.string,
+  timelineIdToCopy: rt.string,
 });

@@ -26,7 +26,6 @@ import type {
   ResponseTimelines,
   ResponseFavoriteTimeline,
   ResponseTimeline,
-  ResponseCloneTimeline,
   SortTimeline,
   TimelineResult,
   TimelineTypeLiteralWithNull,
@@ -589,17 +588,16 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
   );
 };
 
-export const cloneTimeline = async (
+export const copyTimeline = async (
   request: FrameworkRequest,
   timeline: SavedTimeline,
   timelineId: string,
   searchSource: ISearchStartSearchSource
-): Promise<ResponseCloneTimeline> => {
+): Promise<ResponseTimeline> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const originalTimeline = await getTimeline(request, timelineId, timeline.timelineType);
 
-  // Fetch all objects that need to be cloned
-  // TODO: How to clone saved search?
+  // Fetch all objects that need to be copied
+  // TODO: How to copy saved search?
   const [notes, pinnedEvents] = await Promise.all([
     note.getNotesByTimelineId(request, timelineId),
     pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
@@ -623,7 +621,7 @@ export const cloneTimeline = async (
 
   const newTimelineId = timelineResponse.timeline.savedObjectId;
 
-  const cloneNotes = Promise.all(
+  const copiedNotes = Promise.all(
     notes.map((_note) => {
       return note.persistNote({
         request,
@@ -637,7 +635,7 @@ export const cloneTimeline = async (
     })
   );
 
-  const clonePinnedEvents = pinnedEvents.map((_pinnedEvent) => {
+  const copiedPinnedEvents = pinnedEvents.map((_pinnedEvent) => {
     return pinnedEvent.persistPinnedEventOnTimeline(
       request,
       null,
@@ -646,13 +644,12 @@ export const cloneTimeline = async (
     );
   });
 
-  await Promise.all([cloneNotes, clonePinnedEvents]);
+  await Promise.all([copiedNotes, copiedPinnedEvents]);
 
   return {
     code: 200,
     message: 'success',
     timeline: await getSavedTimeline(request, newTimelineId),
-    originalTimeline,
   };
 };
 
