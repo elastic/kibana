@@ -31,6 +31,7 @@ export type CustomFieldFactory<T extends CaseUICustomField> = () => {
   id: string;
   label: string;
   build: () => CustomFieldType<T>;
+  filterOptions?: string[];
 };
 
 export type CustomFieldBuilderMap = {

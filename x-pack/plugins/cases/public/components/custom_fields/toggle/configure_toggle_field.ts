@@ -23,4 +23,5 @@ export const configureToggleCustomFieldFactory: CustomFieldFactory<CaseCustomFie
     View,
     Create,
   }),
+  filterOptions: ['on', 'off', 'unset'], // FIXME: translate
 });
