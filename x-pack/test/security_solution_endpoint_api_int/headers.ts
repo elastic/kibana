@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const HEADERS = {
-  'kbn-xsrf': 'xxx',
-  'x-elastic-internal-origin': 'xxx',
-};
+export const HEADERS = Object.freeze({
+  'kbn-xsrf': 'security_solution',
+  'x-elastic-internal-origin': 'security_solution',
+});
