@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('@ess @serverless get_prebuilt_timelines_status', () => {
+  describe('@ess @serverless @skipInQA get_prebuilt_timelines_status', () => {
     beforeEach(async () => {
       await deleteAllTimelines(es);
     });

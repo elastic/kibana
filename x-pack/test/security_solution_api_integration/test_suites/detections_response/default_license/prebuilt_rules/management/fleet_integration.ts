@@ -21,7 +21,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless install_prebuilt_rules_from_real_package', () => {
+  describe('@ess @serverless @skipInQA install_prebuilt_rules_from_real_package', () => {
     beforeEach(async () => {
       await deletePrebuiltRulesFleetPackage(supertest);
       await deleteAllRules(supertest, log);
