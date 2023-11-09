@@ -18,6 +18,8 @@ import {
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import moment from 'moment';
+import { calculateAuto } from '../../../public/utils/get_bucket_size/calculate_auto';
 import { APMTransactionDurationIndicator } from '../../domain/models';
 import { computeSLI } from '../../domain/services';
 import { InvalidQueryError } from '../../errors';
@@ -393,9 +395,15 @@ export class GetPreviewData {
 
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
     try {
+      const bucketSize = Math.max(
+        calculateAuto
+          .near(100, moment.duration(params.range.end - params.range.start, 'ms'))
+          ?.asMinutes() ?? 0,
+        1
+      );
       const options: Options = {
         range: params.range,
-        interval: '10m', // use calculateAuto
+        interval: `${bucketSize}m`,
       };
 
       const type = params.indicator.type;
