@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/kbn-reporting/export_types/printable_pdf_v2-common'],
+  roots: ['<rootDir>/packages/kbn-reporting/export_types/pdf_common'],
 };
