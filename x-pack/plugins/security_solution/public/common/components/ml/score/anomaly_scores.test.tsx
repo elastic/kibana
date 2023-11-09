@@ -16,7 +16,7 @@ import { TestProviders } from '../../../mock/test_providers';
 import { getEmptyValue } from '../../empty_value';
 import type { Anomalies } from '../types';
 import { useMountAppended } from '../../../utils/use_mount_appended';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../lib/kibana');
 
