@@ -97,7 +97,7 @@ function PreviewChart({
         data: [
           {
             value: (threshold[0] || 0).toString(),
-            color: '#FF0000',
+            color: euiTheme.colors.danger,
             fill: comparator === Comparator.OUTSIDE_RANGE ? 'below' : 'above',
             format: {
               id: 'number',
@@ -236,7 +236,7 @@ function PreviewChart({
         field: groupBy[0],
         params: {
           size: 3,
-          secondaryFields: groupBy as string[],
+          secondaryFields: (groupBy as string[]).slice(1),
           accuracyMode: false,
         },
       };
