@@ -481,7 +481,7 @@ describe('CasesSearchRequestRt', () => {
     owner: 'cases',
     customFields: {
       toggle_custom_field_key: [true],
-      another_custom_field: [null],
+      another_custom_field: [null, false],
       text_custom_field: ['hello'],
       number_custom_field: [1234]
     },

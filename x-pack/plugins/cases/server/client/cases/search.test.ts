@@ -42,6 +42,12 @@ describe('search', () => {
           label: 'Toggle field',
           required: true,
         },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'another toggle field',
+          required: false,
+        },
       ],
     },
   ];
@@ -96,9 +102,25 @@ describe('search', () => {
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
     });
 
-    it('search with custom fields', async () => {
+    it('search with single custom field', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
+      });
+      await search(findRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+    });
+
+    it('search with single custom field with multiple values', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { second_key: [true, null] },
+      });
+      await search(findRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+    });
+
+    it('search with multiple custom fields', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { second_key: [true], third_key: [true] },
       });
       await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
