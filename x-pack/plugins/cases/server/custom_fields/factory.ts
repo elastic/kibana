@@ -16,5 +16,5 @@ const mapping: Record<CustomFieldTypes, ICasesCustomField | null> = {
 };
 
 export const casesCustomFields: CasesCustomFieldsMap = {
-  get: (type: CustomFieldTypes): ICasesCustomField | undefined | null => mapping[type] ?? undefined,
+  get: (type: CustomFieldTypes): ICasesCustomField | null => mapping[type] ?? null,
 };

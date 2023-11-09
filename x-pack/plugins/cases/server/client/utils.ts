@@ -353,7 +353,7 @@ export const buildCustomFieldsFilter = ({
   }
 
   const customFieldsFilter = Object.entries(customFields).map(([key, value]) => {
-    let customFieldsMapping: ICasesCustomField | null | undefined = null;
+    let customFieldsMapping: ICasesCustomField | null = null;
 
     const customFieldConfig = customFieldsConfiguration.find((config) => config.key === key);
 

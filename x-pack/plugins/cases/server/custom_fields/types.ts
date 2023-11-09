@@ -14,12 +14,12 @@ export interface ICasesCustomField {
 }
 
 export interface CasesCustomFieldsMap {
-  get: (type: CustomFieldTypes) => ICasesCustomField | undefined | null;
+  get: (type: CustomFieldTypes) => ICasesCustomField | null;
 }
 
 interface CustomFieldMapping {
   key: string;
-  mapping: ICasesCustomField | null | undefined;
+  mapping: ICasesCustomField | null;
 }
 
 export type CustomFieldsMappings = CustomFieldMapping[];
