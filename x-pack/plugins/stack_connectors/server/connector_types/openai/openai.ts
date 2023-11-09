@@ -201,9 +201,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * takes an array of messages and a model as input and returns a promise that resolves to a string.
-   * Sends the stringified input to the runApi method. Returns the trimmed completion from the response.
-   * @param body An object containing array of message objects, and possible other OpenAI properties
+   * Deprecated. Use invokeStream instead.
+   * TODO: remove before 8.12 FF
    */
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({ body: JSON.stringify(body) });

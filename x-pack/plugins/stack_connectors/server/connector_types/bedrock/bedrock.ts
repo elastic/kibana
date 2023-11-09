@@ -102,16 +102,21 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
    * @param body The request body to be signed.
    * @param path The path of the request URL.
    */
-  private signRequest(body: string, path: string) {
+  private signRequest(body: string, path: string, stream: boolean) {
     const { host } = new URL(this.url);
     return aws.sign(
       {
         host,
-        headers: {
-          accept: 'application/vnd.amazon.eventstream',
-          'Content-Type': 'application/json',
-          'x-amzn-bedrock-accept': '*/*',
-        },
+        headers: stream
+          ? {
+              accept: 'application/vnd.amazon.eventstream',
+              'Content-Type': 'application/json',
+              'x-amzn-bedrock-accept': '*/*',
+            }
+          : {
+              'Content-Type': 'application/json',
+              Accept: '*/*',
+            },
         body,
         path,
         // Despite AWS docs, this value does not always get inferred. We need to always send it
@@ -132,7 +137,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
     const model = reqModel ? reqModel : this.model;
-    const signed = this.signRequest(body, `/model/${model}/invoke`);
+    const signed = this.signRequest(body, `/model/${model}/invoke`, false);
     const response = await this.request({
       ...signed,
       url: `${this.url}/model/${model}/invoke`,
@@ -160,7 +165,11 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     // set model on per request basis
     const model = reqModel ? reqModel : this.model;
     const formattedBody = JSON.stringify(formatBedrockBody(JSON.parse(body)));
-    const signed = this.signRequest(formattedBody, `/model/${model}/invoke-with-response-stream`);
+    const signed = this.signRequest(
+      formattedBody,
+      `/model/${model}/invoke-with-response-stream`,
+      true
+    );
 
     const response = await this.request({
       ...signed,
@@ -174,7 +183,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     return response.data.pipe(new PassThrough());
   }
 
-  public async invokeStream(body: InvokeAIActionParams): Promise<ReadableStream> {
+  public async invokeStream(body: InvokeAIActionParams): Promise<Transform> {
     const res = (await this.streamApi({
       body: JSON.stringify(body),
       stream: true,
@@ -183,11 +192,9 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * takes in an array of messages and a model as input, and returns a promise that resolves to a string.
-   * The method combines the messages into a single prompt formatted for bedrock,sends a request to the
-   * runApi method with the prompt and model, and returns the trimmed completion from the response.
-   * @param messages An array of message objects, where each object has a role (string) and content (string) property.
-   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   * Deprecated. Use invokeStream instead.
+   * TODO: remove before 8.12 FF
+   * No token tracking implemented for this method
    */
   public async invokeAI({
     messages,
