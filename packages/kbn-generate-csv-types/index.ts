@@ -33,29 +33,3 @@ export interface CsvConfig {
     size: number;
   };
 }
-
-/**
- * @internal
- * Needed to separate dependencies from reporting
- */
-export interface CancellationToken {
-  isCancelled: () => boolean;
-  cancel: () => void;
-}
-
-/**
- * @internal
- * Needed to separate dependencies from reporting
- */
-export interface TaskRunResult {
-  content_type: string;
-  csv_contains_formulas: boolean;
-  max_size_reached: boolean;
-  metrics: {
-    csv: {
-      rows: number;
-    };
-  };
-  warnings: unknown;
-  error_code: unknown;
-}

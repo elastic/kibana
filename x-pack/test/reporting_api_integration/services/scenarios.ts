@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { JobParamsDownloadCSV } from '@kbn/reporting-export-types-helpers-server';
-import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png';
-import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated';
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv';
+import type {
+  JobParamsCSV,
+  JobParamsDownloadCSV,
+} from '@kbn/reporting-export-types-helpers-server';
+import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated';
 import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import rison from '@kbn/rison';
+import { JobParamsPNGV2 } from '@kbn/reporting-export-types-helpers-server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {

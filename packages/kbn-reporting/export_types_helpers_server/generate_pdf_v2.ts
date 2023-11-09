@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { mergeMap, tap } from 'rxjs/operators';
-import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { Observable } from 'rxjs';
+import { mergeMap, tap } from 'rxjs/operators';
+
+import { getFullRedirectAppUrl } from '@kbn/reporting-common';
+import type {
+  LocatorParams,
+  ReportingConfigType,
+  ReportingServerInfo,
+} from '@kbn/reporting-common/types';
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
-import { LocatorParams } from '@kbn/reporting-common';
-import { ReportingServerInfo, TaskPayloadPDFV2 } from './types';
+
 import { getTracker } from './pdf_tracker';
-import { getFullRedirectAppUrl } from '.';
+import { TaskPayloadPDFV2 } from './types';
 
 interface PdfResult {
   buffer: Uint8Array | null;

@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/utility-types",
+    "@kbn/screenshotting-plugin",
     "@kbn/i18n",
   ]
 }

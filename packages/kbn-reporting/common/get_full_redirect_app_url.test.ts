@@ -7,6 +7,7 @@
  */
 
 import { getFullRedirectAppUrl } from './get_full_redirect_app_url';
+import { ReportingConfigType } from './types';
 
 describe('getFullRedirectAppUrl', () => {
   const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;

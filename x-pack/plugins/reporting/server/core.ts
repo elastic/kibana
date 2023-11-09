@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import * as Rx from 'rxjs';
+import { map, switchMap, take } from 'rxjs/operators';
+
 import type {
   CoreSetup,
   DocLinksServiceSetup,
@@ -23,6 +26,17 @@ import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
+import type { ReportingServerInfo } from '@kbn/reporting-common/types';
+import {
+  CsvSearchSourceExportType,
+  CsvSearchSourceImmediateExportType,
+  CsvV2ExportType,
+} from '@kbn/reporting-export-types-csv';
+import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
+import { ExportType } from '@kbn/reporting-export-types-helpers-server';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
+import { PngExportType } from '@kbn/reporting-export-types-png';
 import {
   PdfScreenshotResult,
   PngScreenshotResult,
@@ -37,21 +51,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import * as Rx from 'rxjs';
-import { map, switchMap, take } from 'rxjs/operators';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
-import { ExportType, ReportingServerInfo } from '@kbn/reporting-export-types-helpers-server';
-import {
-  CsvV2ExportType,
-  CsvSearchSourceImmediateExportType,
-  CsvSearchSourceExportType,
-} from '@kbn/reporting-export-types-csv';
-import { PdfExportType } from '@kbn/reporting-export-types-pdf';
-import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
-import { PngExportType } from '@kbn/reporting-export-types-png';
+
 import type { ReportingSetup } from '.';
-import { createConfig, ReportingConfigType } from './config';
-import { checkLicense, ExportTypesRegistry } from './lib';
+import { ReportingConfigType, createConfig } from './config';
+import { ExportTypesRegistry, checkLicense } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';

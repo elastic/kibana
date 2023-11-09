@@ -6,26 +6,28 @@
  * Side Public License, v 1.
  */
 
+import type { IClusterClient } from '@kbn/core-elasticsearch-server';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type {
   FakeRawRequest,
+  Headers,
   HttpServiceSetup,
   IBasePath,
   KibanaRequest,
-  Headers,
 } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/logging';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { Logger } from '@kbn/logging';
+import { ReportingConfigType, ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import type { IClusterClient } from '@kbn/core-elasticsearch-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import { CreateJobFn, ReportingServerInfo, RunTaskFn } from './types';
+
+import { CreateJobFn, RunTaskFn } from './types';
 
 export interface BaseExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;

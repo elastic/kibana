@@ -6,7 +6,8 @@
  */
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { CancellationToken, LocatorParams } from '@kbn/reporting-common';
+import { CancellationToken } from '@kbn/reporting-common';
+import { LocatorParams } from '@kbn/reporting-common/types';
 import {
   generatePdfObservableV2,
   cryptoFactory,

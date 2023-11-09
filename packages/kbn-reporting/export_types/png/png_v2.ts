@@ -7,20 +7,6 @@
  */
 
 import apm from 'elastic-apm-node';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
-import {
-  CancellationToken,
-  LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
-  LICENSE_TYPE_GOLD,
-  LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
-  LocatorParams,
-  PNG_JOB_TYPE_V2,
-  REPORTING_TRANSACTION_TYPE,
-  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
-} from '@kbn/reporting-common';
-import { Writable } from 'stream';
 import {
   finalize,
   fromEventPattern,
@@ -32,18 +18,33 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { SerializableRecord } from '@kbn/utility-types';
-import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-common/report_types';
-import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
+import { Writable } from 'stream';
+
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+import {
+  CancellationToken,
+  getFullRedirectAppUrl,
+  LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_ENTERPRISE,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_TRIAL,
+  PNG_JOB_TYPE_V2,
+  PNG_REPORT_TYPE_V2,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  REPORTING_TRANSACTION_TYPE,
+} from '@kbn/reporting-common';
+import type { LocatorParams, TaskRunResult } from '@kbn/reporting-common/types';
 import {
   decryptJobHeaders,
   ExportType,
-  getFullRedirectAppUrl,
   generatePngObservable,
   JobParamsPNGV2,
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-helpers-server';
+import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
+import { SerializableRecord } from '@kbn/utility-types';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;

@@ -12,9 +12,11 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
-import { ReportingServerInfo, TaskPayloadPDF } from './types';
+
+import { ReportingConfigType, ReportingServerInfo } from '@kbn/reporting-common/types';
 
 import { getAbsoluteUrlFactory } from './get_absolute_url';
+import { TaskPayloadPDF } from './types';
 import { validateUrls } from './validate_urls';
 
 export function getFullUrls(
