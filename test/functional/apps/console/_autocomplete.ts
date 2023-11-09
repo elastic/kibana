@@ -44,8 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/165465
-    describe.skip('Autocomplete behavior', () => {
+    describe('Autocomplete behavior', () => {
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
         await PageObjects.console.pressEnter();
@@ -276,6 +275,7 @@ GET _search
           await PageObjects.console.enterText(char); // i.e. 'GET .kibana/' -> 'GET .kibana/_'
         }
 
+        await PageObjects.console.sleepForDebouncePeriod();
         await retry.waitFor('autocomplete to be visible', () =>
           PageObjects.console.isAutocompleteVisible()
         );
