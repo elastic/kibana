@@ -264,11 +264,13 @@ const startFleetServerWithDocker = async ({
   - version adjusted to [latest] from [${agentVersion}]`);
 
       agentVersion = 'latest';
-      await maybeCreateDockerNetwork(log);
     } else {
       assert.ok(!!policyId, '`policyId` is required');
       assert.ok(!!serviceToken, '`serviceToken` is required');
     }
+
+    // Create the `elastic` network to use with all containers
+    await maybeCreateDockerNetwork(log);
 
     try {
       const dockerArgs = isServerless
@@ -404,6 +406,9 @@ const getFleetServerManagedDockerArgs = ({
 
     '--restart',
     'no',
+
+    '--net',
+    'elastic',
 
     '--add-host',
     'host.docker.internal:host-gateway',
