@@ -54,9 +54,9 @@ interface StartPlugins {
   share: SharePluginStart;
   spacesApi?: SpacesPluginStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionSetup;
-  uiActions: UiActionsStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

@@ -65,7 +65,6 @@ export const ChangePointDetectionPage: FC = () => {
               'share',
               'storage',
               'theme',
-              'uiActions',
               'uiSettings',
               'unifiedSearch',
               'usageCollection',
