@@ -39,8 +39,6 @@ else
   MERGE_QUEUE_TARGET_BRANCH=""
 fi
 export MERGE_QUEUE_TARGET_BRANCH
-echo "MERGE QUEUE TARGET BRANCH"
-echo $MERGE_QUEUE_TARGET_BRANCH
 
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
