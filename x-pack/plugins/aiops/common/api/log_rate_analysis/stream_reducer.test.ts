@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { significantTerms } from '../../../__mocks__/artificial_logs/significant_terms';
-import { finalSignificantTermGroups } from '../../../__mocks__/artificial_logs/final_significant_term_groups';
+import { significantTerms } from '../../__mocks__/artificial_logs/significant_terms';
+import { finalSignificantTermGroups } from '../../__mocks__/artificial_logs/final_significant_term_groups';
 
 import {
-  addSignificantItemsAction,
-  addSignificantItemsGroupAction,
+  addSignificantTermsAction,
+  addSignificantTermsGroupAction,
   resetAllAction,
   resetGroupsAction,
   updateLoadingStateAction,
@@ -37,21 +37,24 @@ describe('streamReducer', () => {
   it('adds significant item, then resets all state again', () => {
     const state1 = streamReducer(
       initialState,
-      addSignificantItemsAction([
-        {
-          key: 'the-field-name:the-field-value',
-          type: 'keyword',
-          fieldName: 'the-field-name',
-          fieldValue: 'the-field-value',
-          doc_count: 10,
-          bg_count: 100,
-          total_doc_count: 1000,
-          total_bg_count: 10000,
-          score: 0.1,
-          pValue: 0.01,
-          normalizedScore: 0.123,
-        },
-      ])
+      addSignificantTermsAction(
+        [
+          {
+            key: 'the-field-name:the-field-value',
+            type: 'keyword',
+            fieldName: 'the-field-name',
+            fieldValue: 'the-field-value',
+            doc_count: 10,
+            bg_count: 100,
+            total_doc_count: 1000,
+            total_bg_count: 10000,
+            score: 0.1,
+            pValue: 0.01,
+            normalizedScore: 0.123,
+          },
+        ],
+        '2'
+      )
     );
 
     expect(state1.significantItems).toHaveLength(1);
@@ -62,14 +65,14 @@ describe('streamReducer', () => {
   });
 
   it('adds significant items and groups, then resets groups only', () => {
-    const state1 = streamReducer(initialState, addSignificantItemsAction(significantTerms));
+    const state1 = streamReducer(initialState, addSignificantTermsAction(significantTerms, '2'));
 
     expect(state1.significantItems).toHaveLength(4);
     expect(state1.significantItemsGroups).toHaveLength(0);
 
     const state2 = streamReducer(
       state1,
-      addSignificantItemsGroupAction(finalSignificantTermGroups)
+      addSignificantTermsGroupAction(finalSignificantTermGroups, '2')
     );
 
     expect(state2.significantItems).toHaveLength(4);

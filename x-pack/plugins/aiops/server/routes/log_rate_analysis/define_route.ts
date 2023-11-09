@@ -16,8 +16,7 @@ import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
 import type { AiopsLicense } from '../../types';
 
-import { routeHandlerFactoryV1 } from './route_handler_factory_v1';
-import { routeHandlerFactoryV2 } from './route_handler_factory_v2';
+import { routeHandlerFactory } from './route_handler_factory';
 
 export const defineRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -40,7 +39,7 @@ export const defineRoute = (
           },
         },
       },
-      routeHandlerFactoryV1(license, logger, coreStart, usageCounter)
+      routeHandlerFactory('1', license, logger, coreStart, usageCounter)
     )
     .addVersion(
       {
@@ -51,6 +50,6 @@ export const defineRoute = (
           },
         },
       },
-      routeHandlerFactoryV2(license, logger, coreStart, usageCounter)
+      routeHandlerFactory('2', license, logger, coreStart, usageCounter)
     );
 };

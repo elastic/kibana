@@ -34,10 +34,10 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { RANDOM_SAMPLER_SEED, AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
-  addSignificantItemsAction,
-  addSignificantItemsGroupAction,
-  addSignificantItemsGroupHistogramAction,
-  addSignificantItemsHistogramAction,
+  addSignificantTermsAction,
+  addSignificantTermsGroupAction,
+  addSignificantTermsGroupHistogramAction,
+  addSignificantTermsHistogramAction,
   addErrorAction,
   pingAction,
   resetAllAction,
@@ -45,8 +45,9 @@ import {
   resetGroupsAction,
   updateLoadingStateAction,
   AiopsLogRateAnalysisApiAction,
-} from '../../../common/api/log_rate_analysis/v2/actions';
-import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/v2/schema';
+} from '../../../common/api/log_rate_analysis/actions';
+import type { AiopsLogRateAnalysisSchema as SchemaV1 } from '../../../common/api/log_rate_analysis/v1/schema';
+import type { AiopsLogRateAnalysisSchema as SchemaV2 } from '../../../common/api/log_rate_analysis/v2/schema';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
@@ -75,16 +76,20 @@ const PROGRESS_STEP_GROUPING = 0.1;
 const PROGRESS_STEP_HISTOGRAMS = 0.1;
 const PROGRESS_STEP_HISTOGRAMS_GROUPS = 0.1;
 
-export const routeHandlerFactoryV2: (
+type ApiVersion = '1' | '2';
+
+type AiopsLogRateAnalysisSchema<T> = T extends '1' ? SchemaV1 : T extends '2' ? SchemaV2 : never;
+
+export function routeHandlerFactory<T extends ApiVersion>(
+  version: T,
   license: AiopsLicense,
   logger: Logger,
   coreStart: CoreStart,
   usageCounter?: UsageCounter
-) => RequestHandler<unknown, unknown, AiopsLogRateAnalysisSchema> =
-  (license, logger, coreStart, usageCounter) =>
-  async (
+): RequestHandler<unknown, unknown, AiopsLogRateAnalysisSchema<T>> {
+  return async (
     context: RequestHandlerContext,
-    request: KibanaRequest<unknown, unknown, AiopsLogRateAnalysisSchema>,
+    request: KibanaRequest<unknown, unknown, AiopsLogRateAnalysisSchema<T>>,
     response: KibanaResponseFactory
   ) => {
     const { headers } = request;
@@ -136,7 +141,7 @@ export const routeHandlerFactoryV2: (
         end: streamEnd,
         push,
         responseWithHeaders,
-      } = streamFactory<AiopsLogRateAnalysisApiAction>(
+      } = streamFactory<AiopsLogRateAnalysisApiAction<T>>(
         request.headers,
         logger,
         request.body.compressResponse,
@@ -289,11 +294,27 @@ export const routeHandlerFactoryV2: (
           // This will store the combined count of detected significant log patterns and keywords
           let fieldValuePairsCount = 0;
 
-          const significantCategories: SignificantTerm[] = request.body.overrides?.significantItems
-            ? request.body.overrides?.significantItems.filter(
+          const significantCategories: SignificantTerm[] = [];
+
+          if (version === '1') {
+            significantCategories.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'1'>
+              ).overrides?.significantTerms?.filter(
                 (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
-              )
-            : [];
+              ) ?? [])
+            );
+          }
+
+          if (version === '2') {
+            significantCategories.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'2'>
+              ).overrides?.significantItems?.filter(
+                (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
+              ) ?? [])
+            );
+          }
 
           // Get significant categories of text fields
           if (textFieldCandidates.length > 0) {
@@ -310,15 +331,31 @@ export const routeHandlerFactoryV2: (
             );
 
             if (significantCategories.length > 0) {
-              push(addSignificantItemsAction(significantCategories));
+              push(addSignificantTermsAction(significantCategories, version));
             }
           }
 
-          const significantTerms: SignificantTerm[] = request.body.overrides?.significantItems
-            ? request.body.overrides?.significantItems.filter(
+          const significantTerms: SignificantTerm[] = [];
+
+          if (version === '1') {
+            significantTerms.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'1'>
+              ).overrides?.significantTerms?.filter(
                 (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
-              )
-            : [];
+              ) ?? [])
+            );
+          }
+
+          if (version === '2') {
+            significantTerms.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'2'>
+              ).overrides?.significantItems?.filter(
+                (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
+              ) ?? [])
+            );
+          }
 
           const fieldsToSample = new Set<string>();
 
@@ -376,7 +413,7 @@ export const routeHandlerFactoryV2: (
               });
               significantTerms.push(...pValues);
 
-              push(addSignificantItemsAction(pValues));
+              push(addSignificantTermsAction(pValues, version));
             }
 
             push(
@@ -415,7 +452,7 @@ export const routeHandlerFactoryV2: (
           fieldValuePairsCount = significantCategories.length + significantTerms.length;
 
           if (fieldValuePairsCount === 0) {
-            logDebugMessage('Stopping analysis, did not find significant items.');
+            logDebugMessage('Stopping analysis, did not find significant terms.');
             endWithUpdatedLoadingState();
             return;
           }
@@ -547,7 +584,7 @@ export const routeHandlerFactoryV2: (
                 const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
 
                 if (maxItems > 1) {
-                  push(addSignificantItemsGroupAction(significantTermGroups));
+                  push(addSignificantTermsGroupAction(significantTermGroups, version));
                 }
 
                 loaded += PROGRESS_STEP_GROUPING;
@@ -616,6 +653,16 @@ export const routeHandlerFactoryV2: (
                         ) ?? {
                           doc_count: 0,
                         };
+
+                        if (version === '1') {
+                          return {
+                            key: o.key,
+                            key_as_string: o.key_as_string ?? '',
+                            doc_count_significant_term: current.doc_count,
+                            doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                          };
+                        }
+
                         return {
                           key: o.key,
                           key_as_string: o.key_as_string ?? '',
@@ -625,12 +672,15 @@ export const routeHandlerFactoryV2: (
                       }) ?? [];
 
                     push(
-                      addSignificantItemsGroupHistogramAction([
-                        {
-                          id: cpg.id,
-                          histogram,
-                        },
-                      ])
+                      addSignificantTermsGroupHistogramAction(
+                        [
+                          {
+                            id: cpg.id,
+                            histogram,
+                          },
+                        ],
+                        version
+                      )
                     );
                   }
                 }, MAX_CONCURRENT_QUERIES);
@@ -718,6 +768,15 @@ export const routeHandlerFactoryV2: (
                     ) ?? {
                       doc_count: 0,
                     };
+                    if (version === '1') {
+                      return {
+                        key: o.key,
+                        key_as_string: o.key_as_string ?? '',
+                        doc_count_significant_term: current.doc_count,
+                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                      };
+                    }
+
                     return {
                       key: o.key,
                       key_as_string: o.key_as_string ?? '',
@@ -731,13 +790,16 @@ export const routeHandlerFactoryV2: (
                 loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
                 pushHistogramDataLoadingState();
                 push(
-                  addSignificantItemsHistogramAction([
-                    {
-                      fieldName,
-                      fieldValue,
-                      histogram,
-                    },
-                  ])
+                  addSignificantTermsHistogramAction(
+                    [
+                      {
+                        fieldName,
+                        fieldValue,
+                        histogram,
+                      },
+                    ],
+                    version
+                  )
                 );
               }
             }, MAX_CONCURRENT_QUERIES);
@@ -810,6 +872,16 @@ export const routeHandlerFactoryV2: (
                   ) ?? {
                     doc_count: 0,
                   };
+
+                  if (version === '1') {
+                    return {
+                      key: o.key,
+                      key_as_string: o.key_as_string ?? '',
+                      doc_count_significant_term: current.doc_count,
+                      doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                    };
+                  }
+
                   return {
                     key: o.key,
                     key_as_string: o.key_as_string ?? '',
@@ -823,13 +895,16 @@ export const routeHandlerFactoryV2: (
               loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
               pushHistogramDataLoadingState();
               push(
-                addSignificantItemsHistogramAction([
-                  {
-                    fieldName,
-                    fieldValue,
-                    histogram,
-                  },
-                ])
+                addSignificantTermsHistogramAction(
+                  [
+                    {
+                      fieldName,
+                      fieldValue,
+                      histogram,
+                    },
+                  ],
+                  version
+                )
               );
             }
           }
@@ -850,3 +925,4 @@ export const routeHandlerFactoryV2: (
       return response.ok(responseWithHeaders);
     });
   };
+}

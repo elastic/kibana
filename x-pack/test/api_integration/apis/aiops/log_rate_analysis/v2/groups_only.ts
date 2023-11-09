@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
   const esArchiver = getService('esArchiver');
 
-  describe('POST /internal/aiops/log_rate_analysis - groups only', () => {
+  describe('v2 POST /internal/aiops/log_rate_analysis - groups only', () => {
     logRateAnalysisTestData.forEach((testData) => {
       const overrides: AiopsLogRateAnalysisSchema['overrides'] = {
         loaded: 0,

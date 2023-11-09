@@ -31,7 +31,7 @@ export const initialState: StreamState = {
 
 export function streamReducer(
   state: StreamState,
-  action: AiopsLogRateAnalysisApiAction | AiopsLogRateAnalysisApiAction[]
+  action: AiopsLogRateAnalysisApiAction<'2'> | Array<AiopsLogRateAnalysisApiAction<'2'>>
 ): StreamState {
   if (Array.isArray(action)) {
     return action.reduce(streamReducer, state);
