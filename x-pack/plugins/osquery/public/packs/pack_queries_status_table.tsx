@@ -450,7 +450,7 @@ const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionI
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge color="subdued">
+        <EuiNotificationBadge color="subdued" data-test-subj="agent-count-badge">
           {lastResultsData?.uniqueAgentsCount ?? 0}
         </EuiNotificationBadge>
       </EuiFlexItem>
