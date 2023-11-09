@@ -38,8 +38,7 @@ export const plugin: PluginInitializer<void, void> = (): Plugin => ({
           });
         }
 
-        const userRoles = [
-          ['superuser', 'elastic_serverless'],
+        const userRoles: Array<[string, string]> = [
           ['system_indices_superuser', 'system_indices_superuser'],
           ['t1_analyst', 't1_analyst'],
           ['t2_analyst', 't2_analyst'],
@@ -51,15 +50,15 @@ export const plugin: PluginInitializer<void, void> = (): Plugin => ({
           ['platform_engineer', 'platform_engineer'],
           ['endpoint_operations_analyst', 'endpoint_operations_analyst'],
           ['endpoint_policy_manager', 'endpoint_policy_manager'],
-        ] as const;
+        ];
 
         const samlResponses = await Promise.all(
-          userRoles.map((entries) =>
+          userRoles.map(([username, role]) =>
             createSAMLResponse({
               authnRequestId: samlRequest.ID,
               kibanaUrl: samlRequest.AssertionConsumerServiceURL,
-              username: entries[0],
-              roles: [entries[1]],
+              username,
+              roles: [role],
             })
           )
         );
@@ -67,20 +66,21 @@ export const plugin: PluginInitializer<void, void> = (): Plugin => ({
         return response.renderHtml({
           body: `
             <!DOCTYPE html>
-            <title>Kibana SAML Login</title>
+            <title>Mock Identity Provider</title>
             <link rel="icon" href="data:,">
             <body>
-              <h1>Mock Identity Provider</h1>
+              <h2>Mock Identity Provider</h2>
               <form id="loginForm" method="post" action="${
                 samlRequest.AssertionConsumerServiceURL
               }">
+                <h3>Pick a role:<h3>
                 <ul>
                   ${userRoles
                     .map(
-                      (entries, i) =>
+                      ([username], i) =>
                         `
                     <li>
-                      <button name="SAMLResponse" value="${samlResponses[i]}">Login as ${entries[0]}</button>
+                      <button name="SAMLResponse" value="${samlResponses[i]}">${username}</button>
                     </li>
                     `
                     )

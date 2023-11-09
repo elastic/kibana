@@ -40,6 +40,7 @@ const parseStringAsync = promisify(parseString);
 export async function createMockIdpMetadata(kibanaUrl: string) {
   const signingKey = await readFile(KBN_CERT_PATH);
   const cert = new X509Certificate(signingKey);
+  const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
   <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
@@ -54,13 +55,13 @@ export async function createMockIdpMetadata(kibanaUrl: string) {
         </ds:KeyInfo>
       </md:KeyDescriptor>
       <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-        Location="${kibanaUrl}${MOCK_IDP_LOGOUT_PATH}" />
+        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGOUT_PATH}" />
       <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-        Location="${kibanaUrl}${MOCK_IDP_LOGOUT_PATH}" />
+        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGOUT_PATH}" />
       <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-        Location="${kibanaUrl}${MOCK_IDP_LOGIN_PATH}" />
+        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGIN_PATH}" />
       <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-        Location="${kibanaUrl}${MOCK_IDP_LOGIN_PATH}" />
+        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGIN_PATH}" />
     </md:IDPSSODescriptor>
   </md:EntityDescriptor>
   `;

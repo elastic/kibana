@@ -75,7 +75,7 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
-  /** Fully qualified URL where Kibana is hosted (including base path). Required for mock identity provider to function */
+  /** Fully qualified URL where Kibana is hosted (including base path) */
   kibanaUrl?: string;
   /**
    * Resource file(s) to overwrite
@@ -452,48 +452,50 @@ export function resolveEsArgs(
     DEFAULT_SSL_ESARGS.forEach((arg) => {
       esArgs.set(arg[0], arg[1]);
     });
-  }
 
-  // Configure mock identify provider
-  if ('kibanaUrl' in options && options.kibanaUrl) {
-    esArgs.set('xpack.security.authc.token.enabled', 'true');
-    esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path`,
-      `${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml`
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id`,
-      MOCK_IDP_ENTITY_ID
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id`,
-      options.kibanaUrl
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs`,
-      `${options.kibanaUrl}/api/security/saml/callback`
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout`,
-      `${options.kibanaUrl}/logout`
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal`,
-      MOCK_IDP_ATTRIBUTE_PRINCIPAL
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups`,
-      MOCK_IDP_ATTRIBUTE_ROLES
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name`,
-      MOCK_IDP_ATTRIBUTE_EMAIL
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
-      MOCK_IDP_ATTRIBUTE_NAME
-    );
+    // Configure mock identify provider (ES only supports SAML when running in SSL mode)
+    if ('kibanaUrl' in options && options.kibanaUrl) {
+      const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
+
+      esArgs.set('xpack.security.authc.token.enabled', 'true');
+      esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path`,
+        `${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml`
+      );
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id`,
+        MOCK_IDP_ENTITY_ID
+      );
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id`,
+        trimTrailingSlash(options.kibanaUrl)
+      );
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs`,
+        `${trimTrailingSlash(options.kibanaUrl)}/api/security/saml/callback`
+      );
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout`,
+        `${trimTrailingSlash(options.kibanaUrl)}/logout`
+      );
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal`,
+        MOCK_IDP_ATTRIBUTE_PRINCIPAL
+      );
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups`,
+        MOCK_IDP_ATTRIBUTE_ROLES
+      );
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name`,
+        MOCK_IDP_ATTRIBUTE_EMAIL
+      );
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
+        MOCK_IDP_ATTRIBUTE_NAME
+      );
+    }
   }
 
   if (customEsArgs) {
@@ -602,7 +604,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
 
   // Create and add meta data for mock identity provider
-  if (options.kibanaUrl) {
+  if (options.ssl && options.kibanaUrl) {
     const metadata = await createMockIdpMetadata(options.kibanaUrl);
     await Fsp.writeFile(SERVERLESS_IDP_METADATA_PATH, metadata);
     volumeCmds.push(
@@ -747,18 +749,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       : {}),
   });
   const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(() => {
-    if (!options.ssl) {
-      return;
-    }
-
-    if (!options.kibanaUrl) {
-      log.warning(
-        `Unable to configure mock identity provider. 
-  
-    Run Elasticsearch with ${chalk.bold.cyan(
-      '--kibanaUrl <kibana-url>'
-    )} option to be able to login using ${chalk.bold.cyan(MOCK_IDP_REALM_NAME)} realm`
-      );
+    if (!options.ssl || !options.kibanaUrl) {
       return;
     }
 

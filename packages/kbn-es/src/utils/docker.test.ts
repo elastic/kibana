@@ -543,6 +543,7 @@ describe('runServerlessEsNode()', () => {
 
 describe('runServerlessCluster()', () => {
   test('should start 3 serverless nodes', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
     });
@@ -568,6 +569,7 @@ describe('runServerlessCluster()', () => {
   });
 
   test(`should wait for the security index`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
     waitForSecurityIndexMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
@@ -580,6 +582,7 @@ describe('runServerlessCluster()', () => {
   });
 
   test(`should not wait for the security index when security is disabled`, async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
     });
