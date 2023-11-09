@@ -357,8 +357,8 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
     const availableVersions = await AgentService.getAvailableVersions();
     const body: GetAvailableVersionsResponse = { items: availableVersions };
 
-    // This endpoint is cached to avoid reaching out to disk for every request for the
-    // available versions, as they're sourced in part from a static file generated at build time
+    // This endpoint is cached to avoid reaching out to disk and the live product versions API
+    // for every single request
     const CACHE_DURATION_SECONDS = 60 * 60 * 2; // 2 hours
 
     return response.ok({
