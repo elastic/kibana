@@ -8,12 +8,12 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import {
+  AlertConsumers,
   ALERT_CASE_IDS,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_UUID,
-  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 

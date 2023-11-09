@@ -6,7 +6,7 @@
  */
 import React, { useMemo, useReducer } from 'react';
 
-import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { BulkActionsContext } from './context';
 import { AlertsTable } from '../alerts_table';
@@ -179,7 +179,6 @@ describe('AlertsTable.BulkActions', () => {
     onChangeVisibleColumns: () => {},
     browserFields: {},
     query: {},
-    hasAccessToLists: true,
   };
 
   const tablePropsWithBulkActions = {

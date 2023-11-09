@@ -310,7 +310,6 @@ describe('AlertsTable', () => {
     onChangeVisibleColumns: () => {},
     browserFields,
     query: {},
-    hasAccessToLists: true,
   };
 
   const defaultBulkActionsState = {

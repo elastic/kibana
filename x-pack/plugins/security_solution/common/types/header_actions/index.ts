@@ -161,7 +161,6 @@ interface AdditionalControlColumnProps {
   checked: boolean;
   onRowSelected: OnRowSelected;
   eventId: string;
-  hasAccessToLists: boolean;
   id: string;
   columnId: string;
   loadingEventIds: Readonly<string[]>;

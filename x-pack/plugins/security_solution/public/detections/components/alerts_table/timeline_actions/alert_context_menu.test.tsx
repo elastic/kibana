@@ -53,7 +53,6 @@ const props = {
     '2021-08-12T11:07:10.552Z Malware Prevention Alert high 73  siem-windows-endpoint SYSTEM powershell.exe mimikatz.exe  ',
   disabled: false,
   ecsRowData,
-  hasAccessToLists: true,
   refetch: jest.fn(),
   timelineId: 'alerts-page',
 };

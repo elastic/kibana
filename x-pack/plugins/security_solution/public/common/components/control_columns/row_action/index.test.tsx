@@ -42,7 +42,6 @@ describe('RowAction', () => {
     controlColumn: getDefaultControlColumn(5)[0],
     data: sampleData,
     disabled: false,
-    hasAccessToLists: true,
     index: 1,
     isEventViewer: false,
     loadingEventIds: [],

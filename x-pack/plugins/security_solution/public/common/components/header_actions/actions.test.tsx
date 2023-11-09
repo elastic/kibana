@@ -97,7 +97,6 @@ const defaultProps = {
   ecsData: mockTimelineData[0].ecs,
   eventId: 'abc',
   eventIdToNoteIds: {},
-  hasAccessToLists: true,
   index: 2,
   isEventPinned: false,
   loadingEventIds: [],

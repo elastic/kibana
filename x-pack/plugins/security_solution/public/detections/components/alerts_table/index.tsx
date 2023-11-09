@@ -9,7 +9,7 @@ import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eu
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
@@ -32,7 +32,6 @@ import {
   useSessionView,
   useSessionViewNavigation,
 } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
-import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -44,6 +43,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { getColumns } from '../../configurations/security_solution_detections';
 import { buildTimeRangeFilter } from './helpers';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
+import type { State } from '../../../common/store';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
 import { getAlertsDefaultModel } from './default_config';
@@ -71,7 +71,6 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
       }};
     }
   }
-
   div .euiDataGridRowCell__contentWrapper {
     display: flex;
     align-items: center;
@@ -81,14 +80,12 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
     flex-grow: 0;
     width: 100%;
   }
-
   div .siemEventsTable__trSupplement--summary {
     display: block;
   }
 
   width: 100%;
 `;
-
 interface DetectionEngineAlertTableProps {
   configId: string;
   inputFilters: Filter[];

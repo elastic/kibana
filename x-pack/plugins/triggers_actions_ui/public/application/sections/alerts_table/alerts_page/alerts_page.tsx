@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { getAlertsTableStateLazy } from '../../../../common/get_alerts_table_state';
 import { PLUGIN_ID } from '../../../../common/constants';
@@ -28,7 +28,6 @@ const AlertsPage: React.FunctionComponent = () => {
     id: `internal-alerts-page`,
     featureIds: consumers,
     query: { bool: { must: [] } },
-    hasAccessToLists: false,
   };
 
   return (
