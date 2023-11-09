@@ -93,6 +93,7 @@ interface DetectionEngineAlertTableProps {
   sourcererScope?: SourcererScopeName;
   isLoading?: boolean;
   onRuleChange?: () => void;
+  hasAccessToLists: boolean;
 }
 
 export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
@@ -102,6 +103,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   sourcererScope = SourcererScopeName.detections,
   isLoading,
   onRuleChange,
+  hasAccessToLists,
 }) => {
   const { triggersActionsUi, uiSettings } = useKibana().services;
 
@@ -271,6 +273,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
       },
+      hasAccessToLists,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
@@ -284,6 +287,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onAlertTableUpdate,
       runtimeMappings,
       isEventRenderedView,
+      hasAccessToLists,
     ]
   );
 

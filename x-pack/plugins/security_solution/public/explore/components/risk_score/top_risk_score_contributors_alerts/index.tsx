@@ -89,13 +89,14 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
     (groupingFilters: Filter[]) => {
       return (
         <AlertsTableComponent
+          hasAccessToLists={hasAccessToLists}
           configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RISK_INPUTS}
           inputFilters={[...inputFilters, ...filters, ...groupingFilters]}
           tableId={TableId.alertsRiskInputs}
         />
       );
     },
-    [inputFilters, filters]
+    [hasAccessToLists, inputFilters, filters]
   );
 
   return (

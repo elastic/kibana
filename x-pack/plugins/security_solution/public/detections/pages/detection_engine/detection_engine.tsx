@@ -390,10 +390,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
           tableId={TableId.alertsOnAlertsPage}
           isLoading={isAlertTableLoading}
+          hasAccessToLists={hasAccessToLists}
         />
       );
     },
-    [alertsTableDefaultFilters, isAlertTableLoading]
+    [alertsTableDefaultFilters, isAlertTableLoading, hasAccessToLists]
   );
 
   if (loading) {

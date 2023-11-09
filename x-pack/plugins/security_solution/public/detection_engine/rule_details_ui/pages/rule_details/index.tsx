@@ -487,10 +487,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           inputFilters={[...alertMergedFilters, ...groupingFilters]}
           tableId={TableId.alertsOnRuleDetailsPage}
           onRuleChange={refreshRule}
+          hasAccessToLists={hasAccessToLists}
         />
       );
     },
-    [alertMergedFilters, refreshRule]
+    [alertMergedFilters, refreshRule, hasAccessToLists]
   );
 
   const {
