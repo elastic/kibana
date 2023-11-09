@@ -11,7 +11,6 @@ import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/log_rate_analysis/types';
-import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema_v2';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -32,30 +31,9 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
   const esArchiver = getService('esArchiver');
 
-  describe('POST /internal/aiops/log_rate_analysis - groups only', () => {
+  describe('POST /internal/aiops/log_rate_analysis - full analysis', () => {
     API_VERSIONS.forEach((apiVersion) => {
       getLogRateAnalysisTestData<typeof apiVersion>().forEach((testData) => {
-        let overrides: AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'] = {};
-
-        if (apiVersion === '1') {
-          overrides = {
-            loaded: 0,
-            remainingFieldCandidates: [],
-            significantTerms: testData.expected.significantTerms,
-            regroupOnly: true,
-          } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
-        }
-
-        if (apiVersion === '2') {
-          overrides = {
-            loaded: 0,
-            remainingFieldCandidates: [],
-            significantItems: testData.expected
-              .significantTerms as AiopsLogRateAnalysisSchemaSignificantItem[],
-            regroupOnly: true,
-          } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
-        }
-
         describe(`with v${apiVersion} - ${testData.testName}`, () => {
           before(async () => {
             if (testData.esArchive) {
@@ -75,26 +53,35 @@ export default ({ getService }: FtrProviderContext) => {
 
           async function assertAnalysisResult(data: any[]) {
             expect(data.length).to.eql(
-              testData.expected.actionsLengthGroupOnly,
-              `Expected 'actionsLengthGroupOnly' to be ${testData.expected.actionsLengthGroupOnly}, got ${data.length}.`
+              testData.expected.actionsLength,
+              `Expected 'actionsLength' to be ${testData.expected.actionsLength}, got ${data.length}.`
             );
             data.forEach((d) => {
               expect(typeof d.type).to.be('string');
             });
 
             const addSignificantItemsActions = getAddSignificationItemsActions(data, apiVersion);
-            expect(addSignificantItemsActions.length).to.eql(
-              0,
-              `Expected significant items actions to be 0, got ${addSignificantItemsActions.length}`
+            expect(addSignificantItemsActions.length).to.greaterThan(0);
+
+            const significantItems = orderBy(
+              addSignificantItemsActions.flatMap((d) => d.payload),
+              ['doc_count'],
+              ['desc']
+            );
+
+            expect(significantItems).to.eql(
+              testData.expected.significantTerms,
+              'Significant terms do not match expected values.'
             );
 
             const histogramActions = getHistogramActions(data, apiVersion);
-
-            // for each significant item we should get a histogram
-            expect(histogramActions.length).to.eql(
-              0,
-              `Expected histogram actions to be 0, got ${histogramActions.length}`
-            );
+            const histograms = histogramActions.flatMap((d) => d.payload);
+            // for each significant term we should get a histogram
+            expect(histogramActions.length).to.be(significantItems.length);
+            // each histogram should have a length of 20 items.
+            histograms.forEach((h, index) => {
+              expect(h.histogram.length).to.be(20);
+            });
 
             const groupActions = getGroupActions(data, apiVersion);
             const groups = groupActions.flatMap((d) => d.payload);
@@ -106,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
 
             const groupHistogramActions = getGroupHistogramActions(data, apiVersion);
             const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
-            // for each significant items group we should get a histogram
+            // for each significant terms group we should get a histogram
             expect(groupHistograms.length).to.be(groups.length);
             // each histogram should have a length of 20 items.
             groupHistograms.forEach((h, index) => {
@@ -137,8 +124,8 @@ export default ({ getService }: FtrProviderContext) => {
             const chunks: string[] = resp.body.toString().split('\n');
 
             expect(chunks.length).to.eql(
-              testData.expected.chunksLengthGroupOnly,
-              `Expected 'chunksLength' to be ${testData.expected.chunksLengthGroupOnly}, got ${chunks.length}.`
+              testData.expected.chunksLength,
+              `Expected 'chunksLength' to be ${testData.expected.chunksLength}, got ${chunks.length}.`
             );
 
             const lastChunk = chunks.pop();
@@ -153,30 +140,21 @@ export default ({ getService }: FtrProviderContext) => {
             await assertAnalysisResult(data);
           }
 
-          it('should return group only data without streaming with compression with flushFix', async () => {
-            await requestWithoutStreaming({ ...testData.requestBody, overrides });
+          it('should return full data without streaming with compression with flushFix', async () => {
+            await requestWithoutStreaming(testData.requestBody);
           });
 
-          it('should return group only  data without streaming with compression without flushFix', async () => {
-            await requestWithoutStreaming({
-              ...testData.requestBody,
-              overrides,
-              flushFix: false,
-            });
+          it('should return full data without streaming with compression without flushFix', async () => {
+            await requestWithoutStreaming({ ...testData.requestBody, flushFix: false });
           });
 
-          it('should return group only  data without streaming without compression with flushFix', async () => {
-            await requestWithoutStreaming({
-              ...testData.requestBody,
-              overrides,
-              compressResponse: false,
-            });
+          it('should return full data without streaming without compression with flushFix', async () => {
+            await requestWithoutStreaming({ ...testData.requestBody, compressResponse: false });
           });
 
-          it('should return group only  data without streaming without compression without flushFix', async () => {
+          it('should return full data without streaming without compression without flushFix', async () => {
             await requestWithoutStreaming({
               ...testData.requestBody,
-              overrides,
               compressResponse: false,
               flushFix: false,
             });
@@ -232,26 +210,21 @@ export default ({ getService }: FtrProviderContext) => {
             }
           }
 
-          it('should return group only in chunks with streaming with compression with flushFix', async () => {
-            await requestWithStreaming({ ...testData.requestBody, overrides });
+          it('should return data in chunks with streaming with compression with flushFix', async () => {
+            await requestWithStreaming(testData.requestBody);
           });
 
-          it('should return group only in chunks with streaming with compression without flushFix', async () => {
-            await requestWithStreaming({ ...testData.requestBody, overrides, flushFix: false });
+          it('should return data in chunks with streaming with compression without flushFix', async () => {
+            await requestWithStreaming({ ...testData.requestBody, flushFix: false });
           });
 
-          it('should return group only in chunks with streaming without compression with flushFix', async () => {
+          it('should return data in chunks with streaming without compression with flushFix', async () => {
+            await requestWithStreaming({ ...testData.requestBody, compressResponse: false });
+          });
+
+          it('should return data in chunks with streaming without compression without flushFix', async () => {
             await requestWithStreaming({
               ...testData.requestBody,
-              overrides,
-              compressResponse: false,
-            });
-          });
-
-          it('should return group only in chunks with streaming without compression without flushFix', async () => {
-            await requestWithStreaming({
-              ...testData.requestBody,
-              overrides,
               compressResponse: false,
               flushFix: false,
             });

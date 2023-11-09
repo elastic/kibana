@@ -20,6 +20,8 @@ import type {
 
 import type { TestData } from './types';
 
+export const API_VERSIONS: ApiVersion[] = ['1', '2'];
+
 export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestData<T>> => [
   {
     testName: 'ecommerce',
