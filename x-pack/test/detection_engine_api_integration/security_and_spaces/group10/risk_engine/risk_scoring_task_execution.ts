@@ -13,18 +13,15 @@ import { dataGeneratorFactory } from '../../../utils/data_generator';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
-  deleteRiskEngineTask,
-  deleteAllRiskScores,
   readRiskScores,
   waitForRiskScoresToBePresent,
   normalizeScores,
   riskEngineRouteHelpersFactory,
   updateRiskEngineConfigSO,
   getRiskEngineTask,
-  cleanRiskEngineConfig,
   waitForRiskEngineTaskToBeGone,
   deleteRiskScoreIndices,
-  clearTransforms,
+  cleanRiskEngine,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -57,21 +54,15 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
-        await cleanRiskEngineConfig({ kibanaServer });
-        await deleteRiskEngineTask({ es, log });
-        await deleteAllRiskScores(log, es);
+        await cleanRiskEngine({ kibanaServer, es, log });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await clearTransforms({ es, log });
       });
 
       afterEach(async () => {
-        await cleanRiskEngineConfig({ kibanaServer });
-        await deleteRiskEngineTask({ es, log });
-        await deleteAllRiskScores(log, es);
+        await cleanRiskEngine({ kibanaServer, es, log });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await clearTransforms({ es, log });
       });
 
       describe('with some alerts containing hosts', () => {

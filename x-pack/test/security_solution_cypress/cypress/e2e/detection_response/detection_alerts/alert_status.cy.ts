@@ -37,10 +37,13 @@ import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169091
-describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
+describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+  });
+
+  after(() => {
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
   context('Opening alerts', { tags: ['@ess', '@serverless'] }, () => {
@@ -54,10 +57,6 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
       cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
       closeAlerts();
       waitForAlerts();
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', 'auditbeat_big');
     });
 
     it('can mark a closed alert as open', () => {
