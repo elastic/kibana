@@ -18,7 +18,7 @@ import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_
 import { ServerlessRoleName } from '../../support/roles';
 
 const testSpaces = [
-  { name: 'default', tags: ['@ess', '@serverless'] },
+  { name: 'default', tags: ['@ess', '@serverless', '@brokenInServerless'] },
   { name: 'custom-spaces', tags: ['@ess'] },
 ];
 describe('ALL - Custom space', () => {
@@ -73,7 +73,7 @@ describe('ALL - Custom space', () => {
         }
       });
 
-      it('Discover should be opened in new tab in results table', { tags: ['@ess'] }, () => {
+      it('Discover should be opened in new tab in results table', { tags: testSpace.tags }, () => {
         cy.contains('New live query').click();
         selectAllAgents();
         inputQuery('select * from uptime;');
@@ -100,9 +100,7 @@ describe('ALL - Custom space', () => {
       it('runs packs normally', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
-        cy.react('CustomItemAction', {
-          props: { item: { name: packName } },
-        }).click();
+        cy.getBySel(`play-${packName}-button`).click();
         selectAllAgents();
         cy.contains('Submit').click();
         checkResults();

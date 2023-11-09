@@ -315,7 +315,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                   size="m"
                   iconType="save"
                   onClick={handleSaveClick}
-                  data-test-subj={`${editMode ? 'update' : 'save'}PackButton`}
+                  data-test-subj={`${editMode ? 'update' : 'save'}-pack-button`}
                 >
                   {editMode ? (
                     <FormattedMessage

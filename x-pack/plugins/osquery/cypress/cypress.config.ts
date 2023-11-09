@@ -21,6 +21,11 @@ const ROLES_YAML_FILE_PATH = path.join(
 const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
 
 export default defineCypressConfig({
+  reporter: '../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './cypress/reporter_config.json',
+  },
+
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
   pageLoadTimeout: 12000,
@@ -40,9 +45,6 @@ export default defineCypressConfig({
   experimentalStudio: true,
 
   env: {
-    'cypress-react-selector': {
-      root: '#osquery-app',
-    },
     grepFilterSpecs: true,
     grepTags: '@ess',
     grepOmitFiltered: true,
