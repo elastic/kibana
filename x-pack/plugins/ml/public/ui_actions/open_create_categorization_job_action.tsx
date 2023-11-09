@@ -17,7 +17,7 @@ import type { MlCoreSetup } from '../plugin';
 export const createCategorizationADJobTrigger: Trigger = {
   id: CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   title: 'Create categorization anomaly detection job',
-  description: 'Triggered when user wants to run pattern analysis on a field.',
+  description: 'Create categorization anomaly detection job',
 };
 
 export function createCategorizationADJobAction(
@@ -39,13 +39,9 @@ export function createCategorizationADJobAction(
       }
 
       try {
-        const [
-          { showPatternAnalysisToADJobFlyout },
-          [coreStart, { share, data, lens, dashboard }],
-        ] = await Promise.all([import('../embeddables/job_creation/aiops'), getStartServices()]);
-        if (lens === undefined) {
-          return;
-        }
+        const [{ showPatternAnalysisToADJobFlyout }, [coreStart, { share, data, dashboard }]] =
+          await Promise.all([import('../embeddables/job_creation/aiops'), getStartServices()]);
+
         await showPatternAnalysisToADJobFlyout(
           dataView,
           field,
@@ -54,7 +50,6 @@ export function createCategorizationADJobAction(
           coreStart,
           share,
           data,
-          lens,
           dashboard
         );
       } catch (e) {

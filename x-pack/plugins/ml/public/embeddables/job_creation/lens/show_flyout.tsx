@@ -20,8 +20,8 @@ export async function showLensVisToADJobFlyout(
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
-  lens: LensPublicStart,
-  dashboardService: DashboardStart
+  dashboardService: DashboardStart,
+  lens: LensPublicStart
 ): Promise<void> {
   const Comp: FC<FlyoutComponentProps> = ({ onClose }) => (
     <LensLayerSelectionFlyout embeddable={embeddable} onClose={onClose} />

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import type { Embeddable } from '@kbn/lens-plugin/public';
 import React, { FC } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -26,8 +25,8 @@ export async function showPatternAnalysisToADJobFlyout(
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
-  lens: LensPublicStart,
-  dashboardService: DashboardStart
+  dashboardService: DashboardStart,
+  lens?: LensPublicStart
 ): Promise<void> {
   const Comp: FC<{ onClose: () => void }> = ({ onClose }) => (
     <CreateCategorizationJobFlyout

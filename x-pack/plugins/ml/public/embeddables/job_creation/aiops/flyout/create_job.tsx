@@ -142,130 +142,127 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
     return result;
   }
   return (
-    <>
-      <JobDetails
-        createADJob={createADJob}
-        createADJobInWizard={createADJobInWizard}
-        embeddable={undefined}
-        timeRange={timeRange}
-        layer={undefined}
-        layerIndex={0}
-        outerFormComplete={formComplete}
-      >
-        <>
-          <EuiCheckableCard
-            id={'count'}
-            label={
-              <>
-                <EuiTitle size="xs">
-                  <h5>
-                    <FormattedMessage
-                      defaultMessage="Count"
-                      id="xpack.ml.newJobFromPatternAnalysisFlyout.count.title"
-                    />
-                  </h5>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <FormattedMessage
-                  defaultMessage="Look for anomalies in the event rate of a category."
-                  id="xpack.ml.newJobFromPatternAnalysisFlyout.count.description"
-                />
-              </>
-            }
-            checked={categorizationType === CATEGORIZATION_TYPE.COUNT}
-            onChange={() => setCategorizationType(CATEGORIZATION_TYPE.COUNT)}
-          />
-
-          <EuiSpacer size="m" />
-
-          <EuiCheckableCard
-            id={'rare'}
-            label={
-              <>
-                <EuiTitle size="xs">
-                  <h5>
-                    <FormattedMessage
-                      defaultMessage="Rare"
-                      id="xpack.ml.newJobFromPatternAnalysisFlyout.rare.title"
-                    />
-                  </h5>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <FormattedMessage
-                  defaultMessage="Look for categories that occur rarely in time."
-                  id="xpack.ml.newJobFromPatternAnalysisFlyout.rare.description"
-                />
-              </>
-            }
-            checked={categorizationType === CATEGORIZATION_TYPE.RARE}
-            onChange={() => setCategorizationType(CATEGORIZATION_TYPE.RARE)}
-          />
-          <EuiSpacer size="m" />
-          <EuiSwitch
-            name="categorizationPerPartitionSwitch"
-            disabled={false}
-            checked={enablePerPartitionCategorization}
-            onChange={toggleEnablePerPartitionCategorization}
-            data-test-subj="mlJobWizardSwitchCategorizationPerPartition"
-            label={
-              <FormattedMessage
-                id="xpack.ml.newJobFromPatternAnalysisFlyout.perPartitionCategorizationSwitchLabel"
-                defaultMessage="Enable per-partition categorization"
-              />
-            }
-          />
-
-          {enablePerPartitionCategorization ? (
+    <JobDetails
+      createADJob={createADJob}
+      createADJobInWizard={createADJobInWizard}
+      embeddable={undefined}
+      timeRange={timeRange}
+      layer={undefined}
+      layerIndex={0}
+      outerFormComplete={formComplete}
+    >
+      <>
+        <EuiCheckableCard
+          id={'count'}
+          label={
             <>
-              <EuiSpacer size="m" />
-
-              <EuiCallOut
-                size="s"
-                title="Determine categories independently for each value of the partition field."
-              />
-
-              <EuiSpacer size="m" />
-
-              <EuiFormRow
-                label={
+              <EuiTitle size="xs">
+                <h5>
                   <FormattedMessage
-                    id="xpack.ml.newJobFromPatternAnalysisFlyout.categorizationPerPartitionFieldLabel"
-                    defaultMessage="Partition field"
+                    defaultMessage="Count"
+                    id="xpack.ml.newJobFromPatternAnalysisFlyout.count.title"
                   />
-                }
-              >
-                <EuiComboBox
-                  singleSelection={{ asPlainText: true }}
-                  options={categoryFieldOptions}
-                  selectedOptions={selectedPartitionFieldOptions}
-                  onChange={setSelectedPartitionFieldOptions}
-                  isClearable={true}
-                  // renderOption={renderOption}
-                />
-              </EuiFormRow>
-
-              <EuiSpacer size="m" />
-
-              <EuiSwitch
-                name="categorizationPerPartitionSwitch"
-                disabled={false}
-                checked={stopOnWarn}
-                onChange={toggleStopOnWarn}
-                label={
-                  <FormattedMessage
-                    id="xpack.ml.newJobFromPatternAnalysisFlyout.stopOnWarnSwitchLabel"
-                    defaultMessage="Stop on warn"
-                  />
-                }
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <FormattedMessage
+                defaultMessage="Look for anomalies in the event rate of a category."
+                id="xpack.ml.newJobFromPatternAnalysisFlyout.count.description"
               />
             </>
-          ) : null}
+          }
+          checked={categorizationType === CATEGORIZATION_TYPE.COUNT}
+          onChange={() => setCategorizationType(CATEGORIZATION_TYPE.COUNT)}
+        />
 
-          <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-          <EuiHorizontalRule margin="m" />
-        </>
-      </JobDetails>
-    </>
+        <EuiCheckableCard
+          id={'rare'}
+          label={
+            <>
+              <EuiTitle size="xs">
+                <h5>
+                  <FormattedMessage
+                    defaultMessage="Rare"
+                    id="xpack.ml.newJobFromPatternAnalysisFlyout.rare.title"
+                  />
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <FormattedMessage
+                defaultMessage="Look for categories that occur rarely in time."
+                id="xpack.ml.newJobFromPatternAnalysisFlyout.rare.description"
+              />
+            </>
+          }
+          checked={categorizationType === CATEGORIZATION_TYPE.RARE}
+          onChange={() => setCategorizationType(CATEGORIZATION_TYPE.RARE)}
+        />
+        <EuiSpacer size="m" />
+        <EuiSwitch
+          name="categorizationPerPartitionSwitch"
+          disabled={false}
+          checked={enablePerPartitionCategorization}
+          onChange={toggleEnablePerPartitionCategorization}
+          data-test-subj="mlNewJobFromPatternAnalysisFlyoutSwitchCategorizationPerPartition"
+          label={
+            <FormattedMessage
+              id="xpack.ml.newJobFromPatternAnalysisFlyout.perPartitionCategorizationSwitchLabel"
+              defaultMessage="Enable per-partition categorization"
+            />
+          }
+        />
+
+        {enablePerPartitionCategorization ? (
+          <>
+            <EuiSpacer size="m" />
+
+            <EuiCallOut
+              size="s"
+              title="Determine categories independently for each value of the partition field."
+            />
+
+            <EuiSpacer size="m" />
+
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ml.newJobFromPatternAnalysisFlyout.categorizationPerPartitionFieldLabel"
+                  defaultMessage="Partition field"
+                />
+              }
+            >
+              <EuiComboBox
+                singleSelection={{ asPlainText: true }}
+                options={categoryFieldOptions}
+                selectedOptions={selectedPartitionFieldOptions}
+                onChange={setSelectedPartitionFieldOptions}
+                isClearable={true}
+              />
+            </EuiFormRow>
+
+            <EuiSpacer size="m" />
+
+            <EuiSwitch
+              name="categorizationPerPartitionSwitch"
+              disabled={false}
+              checked={stopOnWarn}
+              onChange={toggleStopOnWarn}
+              label={
+                <FormattedMessage
+                  id="xpack.ml.newJobFromPatternAnalysisFlyout.stopOnWarnSwitchLabel"
+                  defaultMessage="Stop on warn"
+                />
+              }
+            />
+          </>
+        ) : null}
+
+        <EuiSpacer size="m" />
+
+        <EuiHorizontalRule margin="m" />
+      </>
+    </JobDetails>
   );
 };

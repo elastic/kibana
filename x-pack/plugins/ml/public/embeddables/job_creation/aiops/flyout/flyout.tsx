@@ -6,7 +6,6 @@
  */
 
 import React, { FC } from 'react';
-// import type { Embeddable } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
@@ -20,13 +19,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-// import { Layer } from './layer';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TimeRange } from '@kbn/es-query';
-// import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
-// import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';
-// import { useMlFromLensKibanaContext } from '../../common/context';
 import { CreateJob } from './create_job';
 
 interface Props {
@@ -44,25 +39,6 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
   query,
   timeRange,
 }) => {
-  // const {
-  //   services: { data, lens },
-  // } = useMlFromLensKibanaContext();
-
-  // const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
-
-  // useEffect(() => {
-  //   const visExtractor = new VisualizationExtractor();
-  //   visExtractor
-  //     .getResultLayersFromEmbeddable(embeddable, lens)
-  //     .then(setLayerResults)
-  //     .catch((error) => {
-  //       // eslint-disable-next-line no-console
-  //       console.error('Layers could not be extracted from embeddable', error);
-  //       onClose();
-  //     });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [data, lens, embeddable]);
-
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -85,9 +61,6 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <CreateJob dataView={dataView} field={field} query={query} timeRange={timeRange} />
-        {/* {layerResults.map((layer, i) => (
-          <Layer layer={layer} layerIndex={i} key={layer.id} embeddable={embeddable} />
-        ))} */}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
