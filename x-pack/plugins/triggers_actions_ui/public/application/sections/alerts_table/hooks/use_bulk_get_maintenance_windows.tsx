@@ -16,6 +16,7 @@ import {
   bulkGetMaintenanceWindows,
   BulkGetMaintenanceWindowsResult,
 } from './apis/bulk_get_maintenance_windows';
+import { AlertTableQueryContext } from '../contexts/alerts_table_context';
 
 const ERROR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.api.bulkGetMaintenanceWindow.errorTitle',
@@ -73,6 +74,7 @@ export const useBulkGetMaintenanceWindows = (props: UseBulkGetMaintenanceWindows
     select: transformMaintenanceWindows,
     queryFn,
     onError,
+    context: AlertTableQueryContext,
   });
 
   return {

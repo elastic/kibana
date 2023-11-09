@@ -7,7 +7,10 @@
 
 import { createContext } from 'react';
 import { noop } from 'lodash';
+import { QueryClient } from '@tanstack/react-query';
 import { AlertsTableContextType } from '../types';
+
+export const AlertTableQueryContext = createContext<QueryClient | undefined>(undefined);
 
 export const AlertsTableContext = createContext<AlertsTableContextType>({
   mutedAlerts: {},
