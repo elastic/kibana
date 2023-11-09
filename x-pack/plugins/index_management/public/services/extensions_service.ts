@@ -28,13 +28,21 @@ export interface IndexBadge {
 }
 
 export interface ExtensionsSetup {
+  // adds an option to the "manage index" menu
   addAction(action: any): void;
+  // adds a banner to the indices list
   addBanner(banner: any): void;
+  // adds a filter to the indices list
   addFilter(filter: any): void;
+  // adds a badge to the index name
   addBadge(badge: IndexBadge): void;
+  // adds a toggle to the indices list
   addToggle(toggle: any): void;
+  // adds a tab to the index details page
   addIndexDetailsTab(tab: IndexDetailsTab): void;
+  // sets content to render instead of the code block on the overview tab of the index page
   setIndexOverviewContent(content: IndexContent): void;
+  // sets content to render below the docs link on the mappings tab of the index page
   setIndexMappingsContent(content: IndexContent): void;
 }
 
