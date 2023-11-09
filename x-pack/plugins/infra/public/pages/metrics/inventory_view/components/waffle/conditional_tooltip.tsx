@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { first } from 'lodash';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
@@ -34,7 +34,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { sourceId } = useSourceContext();
   // prevents auto-refresh from cancelling ongoing requests to fetch the data for the tooltip
-  const [requestTs] = useState(currentTime);
+  const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
   const { customMetrics } = useWaffleOptionsContext();
   const requestMetrics = model.tooltipMetrics
@@ -59,7 +59,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       groupBy: [],
       nodeType,
       sourceId,
-      currentTime: requestTs,
+      currentTime: requestCurrentTime.current,
       accountId: '',
       region: '',
       includeTimeseries: false,
@@ -75,7 +75,8 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     <div style={{ minWidth: 200 }} data-test-subj={`conditionalTooltipContent-${node.name}`}>
       <div
         style={{
-          borderBottom: `1px solid ${euiTheme.colors.mediumShade}`,
+          borderBottom: `${euiTheme.border.thin}`,
+          borderBottomColor: `${euiTheme.colors.mediumShade}`,
           paddingBottom: euiTheme.size.xs,
           marginBottom: euiTheme.size.xs,
         }}
