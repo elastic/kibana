@@ -225,24 +225,25 @@ export class SavedObjectFinderUi extends React.Component<
           ['data-test-subj']: 'savedObjectFinderTags',
         }
       : undefined;
-    const spacesColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined = spaces
-      ? {
-          field: 'spaces',
-          name: i18n.translate('savedObjectsFinder.spacesColumnName', {
-            defaultMessage: 'Spaces',
-          }),
-          width: '20%',
-          ['data-test-subj']: 'savedObjectFinderSpaces',
-          render: (_, item) => {
-            return spaces.ui.components.getSpaceList({
-              namespaces: item.namespaces!,
-              displayLimit: 5,
-              behaviorContext: 'outside-space',
-              cursorStyle: 'default',
-            });
-          },
-        }
-      : undefined;
+    const spacesColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined =
+      spaces && !spaces.hasOnlyDefaultSpace
+        ? {
+            field: 'spaces',
+            name: i18n.translate('savedObjectsFinder.spacesColumnName', {
+              defaultMessage: 'Spaces',
+            }),
+            width: '20%',
+            ['data-test-subj']: 'savedObjectFinderSpaces',
+            render: (_, item) => {
+              return spaces.ui.components.getSpaceList({
+                namespaces: item.namespaces!,
+                displayLimit: 5,
+                behaviorContext: 'outside-space',
+                cursorStyle: 'default',
+              });
+            },
+          }
+        : undefined;
     const typeColumn: EuiTableFieldDataColumnType<SavedObjectFinderItem> | undefined =
       savedObjectMetaData.length > 1
         ? {

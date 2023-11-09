@@ -534,7 +534,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       columns.push(customTableColumn);
     }
 
-    if (spacesApi) {
+    if (spacesApi && !spacesApi.hasOnlyDefaultSpace) {
       columns.push({
         field: tableColumnMetadata.spaces.field,
         name: i18n.translate('contentManagement.tableList.spacesColumnTitle', {
