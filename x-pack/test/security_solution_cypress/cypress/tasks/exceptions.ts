@@ -237,8 +237,9 @@ export const addExceptionComment = (comment: string) => {
 
 export const addExceptionHugeComment = (comment: string) => {
   cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).click();
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(` {backspace}`);
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).invoke('val', comment);
-  cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(`!{backspace}`);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(` {backspace}`);
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
 };
 

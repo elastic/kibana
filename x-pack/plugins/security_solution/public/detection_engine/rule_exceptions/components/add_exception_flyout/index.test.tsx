@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
-import { waitFor, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -35,6 +35,7 @@ import {
 import type { AlertData } from '../../utils/types';
 import { useFindRules } from '../../../rule_management/logic/use_find_rules';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
@@ -1304,6 +1305,47 @@ describe('When the add exception modal is opened', () => {
       expect(
         wrapper.find('button[data-test-subj="addExceptionConfirmButton"]').getDOMNode()
       ).toBeDisabled();
+    });
+
+    test('when there is a comment error has submit button disabled', async () => {
+      const { getByLabelText, queryByText, getByTestId } = render(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[
+              {
+                ...getRulesEqlSchemaMock(),
+                query:
+                  'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
+              } as Rule,
+            ]}
+            isBulkAction={false}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+            alertStatus="open"
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      const commentInput = getByLabelText('Comment Input');
+
+      const commentErrorMessage = `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH} characters.`;
+      expect(queryByText(commentErrorMessage)).toBeNull();
+
+      // Put comment with the length above maximum allowed
+      act(() => {
+        fireEvent.change(commentInput, {
+          target: {
+            value: [...new Array(MAX_COMMENT_LENGTH + 1).keys()].map((_) => 'a').join(''),
+          },
+        });
+        fireEvent.blur(commentInput);
+      });
+      expect(queryByText(commentErrorMessage)).not.toBeNull();
+      expect(getByTestId('addExceptionConfirmButton')).toBeDisabled();
     });
   });
 });

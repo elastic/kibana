@@ -81,8 +81,8 @@ import {
   riskEngineInitRoute,
   riskEngineEnableRoute,
   riskEngineStatusRoute,
-} from '../lib/risk_engine/routes';
-import { riskScoreCalculationRoute } from '../lib/risk_engine/routes/risk_score_calculation_route';
+} from '../lib/entity_analytics/risk_engine/routes';
+import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_engine/routes/risk_score_calculation_route';
 import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
 
 export const initRoutes = (
