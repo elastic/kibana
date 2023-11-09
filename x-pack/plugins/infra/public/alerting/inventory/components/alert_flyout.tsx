@@ -41,6 +41,7 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
           filter,
           customMetrics,
         },
+        useRuleProducer: true,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [triggersActionsUI, visible]
