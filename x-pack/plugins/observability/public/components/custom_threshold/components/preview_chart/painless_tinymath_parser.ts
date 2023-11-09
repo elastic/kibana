@@ -112,16 +112,19 @@ export class PainlessTinyMathParser {
         part = part.replace('!=', '==');
       }
       // Strip the part from the parentheses and the NOT characters
-      const stripedPart = part
+      let stripedPart = part
         .replace(this.notRegex, '')
         .replace(this.openParenthesesRegex, '')
         .replace(this.closeParenthesesRegex, '')
         .replace(this.NOT, '')
         .trim();
-
       // Build the ifelse function and switch the true/false position if it is a NOT case
       // Every condition will be evaluated to 0 or 1 and then we will use the ifelse function to return the correct value
       // example: ifelse(A > 0, 1, 0) example for NOT: ifelse(A > 0, 0, 1)
+      // If the condition is a single character e.g. A || B, we will add > 0 to it
+      if(/^[A-Z]$/.test(stripedPart)) {
+        stripedPart = stripedPart + ' > 0';
+      }
       let result = `ifelse(${stripedPart},${isNOT ? '0,1' : '1,0'})`;
 
       const openParentheses = part.match(this.openParenthesesRegex);

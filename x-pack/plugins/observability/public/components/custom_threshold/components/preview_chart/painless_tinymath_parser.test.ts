@@ -23,7 +23,7 @@ describe('PainlessTinyMathParser', () => {
     // ✅ checked with Lens Formula editor
     expect(parser.parse()).toEqual('100*average(system.cpu.system.pct)');
   });
-  it('should parse a simple equation with tow aggregations A and B', () => {
+  it('should parse a simple equation with two aggregations A and B', () => {
     const equation = '100 * A + B / 100';
     const parser = new PainlessTinyMathParser({
       equation,
@@ -62,6 +62,21 @@ describe('PainlessTinyMathParser', () => {
     });
     // ✅ checked with Lens Formula editor
     expect(parser.parse()).toEqual('ifelse(average(system.cpu.system.pct)>0, 10, 20)');
+  });
+
+  it('should parse an equation with two condition one of them is a single chart', () => {
+    const equation = 'A > B || A ? 20 : 30';
+    const parser = new PainlessTinyMathParser({
+      equation,
+      aggMap: {
+        A: 'average(system.cpu.system.pct)',
+        B: 'average(system.cpu.user.pct)',
+      },
+    });
+    // ✅ checked with Lens Formula editor
+    expect(parser.parse()).toEqual(
+      'ifelse(ifelse(average(system.cpu.system.pct)>average(system.cpu.user.pct),1,0) + ifelse(average(system.cpu.system.pct) > 0,1,0) > 0, 20, 30)'
+    );
   });
   it('should parse an equation with one condition that when TRUE is a condition', () => {
     const equation = 'A > 0 ? B > 0 ? 10 : 20 : 30';
