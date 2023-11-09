@@ -27,8 +27,11 @@ import {
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridCellValueElementProps,
+  EuiDataGridCustomToolbarProps,
+  EuiDataGridToolBarVisibilityOptions,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -65,6 +68,17 @@ import {
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
+
+export interface UnifiedDataTableRenderCustomToolbarProps {
+  toolbarProps: EuiDataGridCustomToolbarProps;
+  gridProps: {
+    additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
+  };
+}
+
+export type UnifiedDataTableRenderCustomToolbar = (
+  props: UnifiedDataTableRenderCustomToolbarProps
+) => React.ReactElement;
 
 export type SortOrder = [string, string];
 
@@ -289,6 +303,12 @@ export interface UnifiedDataTableProps {
    */
   renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
   /**
+   * Optional render for the grid toolbar
+   * @param toolbarProps
+   * @param gridProps
+   */
+  renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
+  /**
    * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
    */
   trailingControlColumns?: EuiDataGridControlColumn[];
@@ -360,6 +380,7 @@ export const UnifiedDataTable = ({
   onFieldEdited,
   services,
   renderCustomGridBody,
+  renderCustomToolbar,
   trailingControlColumns,
   totalHits,
   onFetchMoreRecords,
@@ -709,8 +730,12 @@ export const UnifiedDataTable = ({
       : internalControlColumns;
   }, [canSetExpandedDoc, externalControlColumns, controlColumnIds]);
 
-  const additionalControls = useMemo(
-    () => (
+  const additionalControls = useMemo(() => {
+    if (!externalAdditionalControls && !usedSelectedDocs.length) {
+      return null;
+    }
+
+    return (
       <>
         {usedSelectedDocs.length ? (
           <DataTableDocumentToolbarBtn
@@ -723,8 +748,21 @@ export const UnifiedDataTable = ({
         ) : null}
         {externalAdditionalControls}
       </>
-    ),
-    [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]
+    );
+  }, [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]);
+
+  const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+    () =>
+      renderCustomToolbar
+        ? (toolbarProps) =>
+            renderCustomToolbar({
+              toolbarProps,
+              gridProps: {
+                additionalControls,
+              },
+            })
+        : undefined,
+    [renderCustomToolbar, additionalControls]
   );
 
   const showDisplaySelector = useMemo(() => {
@@ -852,10 +890,12 @@ export const UnifiedDataTable = ({
             inMemory={inMemory}
             gridStyle={gridStyleOverride ?? GRID_STYLE}
             renderCustomGridBody={renderCustomGridBody}
+            renderCustomToolbar={renderCustomToolbarFn}
             trailingControlColumns={trailingControlColumns}
           />
         </div>
         {loadingState !== DataLoadingState.loading &&
+          !usedSelectedDocs.length && // hide footer when showing selected documents
           isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
             <UnifiedDataTableFooter
               isLoadingMore={loadingState === DataLoadingState.loadingMore}

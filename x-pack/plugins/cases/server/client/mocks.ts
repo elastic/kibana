@@ -47,6 +47,7 @@ type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 const createCasesSubClientMock = (): CasesSubClientMock => {
   return {
     create: jest.fn(),
+    bulkCreate: jest.fn(),
     find: jest.fn(),
     resolve: jest.fn(),
     get: jest.fn(),

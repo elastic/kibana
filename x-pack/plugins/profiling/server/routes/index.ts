@@ -18,7 +18,7 @@ import {
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
-import { registerSetupRoute } from './setup';
+import { registerSetupRoute } from './setup/route';
 import { registerStorageExplorerRoute } from './storage_explorer/route';
 import {
   registerTraceEventsTopNContainersSearchRoute,

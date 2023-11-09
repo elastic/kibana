@@ -36,7 +36,7 @@ export const ProjectNavigation: React.FC<{
       onCollapseToggle={onCollapseToggle}
       css={
         isCollapsed
-          ? { display: 'none;' }
+          ? undefined
           : { overflow: 'visible', clipPath: 'polygon(0 0, 300% 0, 300% 100%, 0 100%)' }
       }
     >

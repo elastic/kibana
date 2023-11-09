@@ -110,7 +110,6 @@ export function RuleDetailsTabs({
                   featureIds={featureIds}
                   query={esQuery}
                   showAlertStatusWithFlapping
-                  showExpandToDetails={false}
                 />
               )}
             </EuiFlexItem>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiButtonEmptyProps } from '@elastic/eui';
 import { copyToClipboard, EuiButtonEmpty, EuiCopy } from '@elastic/eui';
 import type { FC, ReactElement } from 'react';
 import React from 'react';
@@ -21,15 +22,19 @@ export interface CopyToClipboardProps {
   /**
    * Button main text (next to icon)
    */
-  text: ReactElement;
+  text?: ReactElement;
   /**
    * Icon name (value coming from EUI)
    */
-  iconType: string;
+  iconType: EuiButtonEmptyProps['iconType'];
   /**
    * Button size (values coming from EUI)
    */
-  size?: 's' | 'm' | 'xs';
+  size?: EuiButtonEmptyProps['size'];
+  /**
+   * Optional button color
+   */
+  color?: EuiButtonEmptyProps['color'];
   /**
    * Aria label value for the button
    */
@@ -49,6 +54,7 @@ export const CopyToClipboard: FC<CopyToClipboardProps> = ({
   text,
   iconType,
   size = 'm',
+  color = 'primary',
   ariaLabel,
   'data-test-subj': dataTestSubj,
 }) => {
@@ -68,6 +74,7 @@ export const CopyToClipboard: FC<CopyToClipboardProps> = ({
           }}
           iconType={iconType}
           size={size}
+          color={color}
           aria-label={ariaLabel}
           data-test-subj={dataTestSubj}
         >

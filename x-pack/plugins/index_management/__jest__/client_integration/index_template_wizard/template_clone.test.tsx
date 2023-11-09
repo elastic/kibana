@@ -8,7 +8,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '../../../test/global_mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 import { getComposableTemplate } from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
@@ -41,6 +40,7 @@ const templateToClone = getComposableTemplate({
   template: {
     mappings: MAPPINGS,
   },
+  allowAutoCreate: true,
 });
 
 describe('<TemplateClone />', () => {
@@ -98,7 +98,7 @@ describe('<TemplateClone />', () => {
         actions.clickNextButton();
       });
 
-      const { priority, version, _kbnMeta } = templateToClone;
+      const { priority, version, _kbnMeta, allowAutoCreate } = templateToClone;
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/index_templates`,
         expect.objectContaining({
@@ -107,6 +107,7 @@ describe('<TemplateClone />', () => {
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             priority,
             version,
+            allowAutoCreate,
             _kbnMeta,
           }),
         })

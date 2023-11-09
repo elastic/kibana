@@ -24,5 +24,6 @@
       "job_id": "high_sum_total_sales"
     }
   ],
-  "kibana": {}
+  "kibana": {},
+  "tags": []
 }

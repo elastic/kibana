@@ -19,12 +19,12 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_create',
           path: '/cases/create',
-          title: 'Create New Case',
+          title: 'Create',
         },
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'Configure Cases',
+          title: 'Settings',
         },
       ],
     });
@@ -40,12 +40,12 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_create',
           path: '/test/create',
-          title: 'Create New Case',
+          title: 'Create',
         },
         {
           id: 'cases_configure',
           path: '/test/configure',
-          title: 'Configure Cases',
+          title: 'Settings',
         },
       ],
     });
@@ -75,13 +75,13 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_create',
           path: '/cases/create',
-          title: 'Create New Case',
+          title: 'Create',
           navLinkStatus: AppNavLinkStatus.hidden,
         },
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'Configure Cases',
+          title: 'Settings',
           order: 8002,
         },
       ],
@@ -115,12 +115,12 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_create',
           path: '/cases/create',
-          title: 'Create New Case',
+          title: 'Create',
         },
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'Configure Cases',
+          title: 'Settings',
         },
       ],
     });
@@ -136,7 +136,7 @@ describe('getCasesDeepLinks', () => {
           title: 'My new create cases title',
         },
         cases_configure: {
-          title: 'My new configure cases title',
+          title: 'My new settings title',
         },
       },
     });
@@ -154,7 +154,7 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'My new configure cases title',
+          title: 'My new settings title',
         },
       ],
     });
