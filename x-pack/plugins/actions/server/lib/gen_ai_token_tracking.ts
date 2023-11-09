@@ -36,18 +36,13 @@ export const getGenAiTokenTracking = async ({
         responseStream: result.data.pipe(new PassThrough()),
         body: (validatedParams as { subActionParams: InvokeBody }).subActionParams,
       });
-      console.log('invoke stream', {
-        total_tokens: total,
-        prompt_tokens: prompt,
-        completion_tokens: completion,
-      });
       return {
         total_tokens: total,
         prompt_tokens: prompt,
         completion_tokens: completion,
       };
     } catch (e) {
-      logger.error('Failed to calculate tokens from streaming response');
+      logger.error('Failed to calculate tokens from Invoke Stream subaction streaming response');
       logger.error(e);
     }
   }

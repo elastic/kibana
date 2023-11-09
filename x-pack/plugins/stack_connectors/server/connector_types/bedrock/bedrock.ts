@@ -188,7 +188,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       body: JSON.stringify(body),
       stream: true,
     })) as unknown as IncomingMessage;
-    return res.pipe(new PassThrough()).pipe(transformToSimpleString());
+    return res.pipe(new PassThrough()).pipe(transformToString());
   }
 
   /**
@@ -227,12 +227,12 @@ const formatBedrockBody = ({
   };
 };
 
-const transformToSimpleString = () =>
+const transformToString = () =>
   new Transform({
     transform(chunk, encoding, callback) {
       const encoder = new TextEncoder();
-      const codec = new EventStreamCodec(toUtf8, fromUtf8);
-      const event = codec.decode(chunk);
+      const decoder = new EventStreamCodec(toUtf8, fromUtf8);
+      const event = decoder.decode(chunk);
       const body = JSON.parse(
         Buffer.from(
           JSON.parse(new TextDecoder('utf-8').decode(event.body)).bytes,

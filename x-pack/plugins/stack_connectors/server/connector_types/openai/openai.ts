@@ -197,7 +197,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       body: JSON.stringify(body),
       stream: true,
     })) as unknown as IncomingMessage;
-    return res.compose(new PassThrough()).compose(transformToSimpleString());
+    return res.compose(new PassThrough()).compose(transformToString());
   }
 
   /**
@@ -221,7 +221,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     };
   }
 }
-const transformToSimpleString = () =>
+const transformToString = () =>
   new Transform({
     transform(chunk, encoding, callback) {
       const decoder = new TextDecoder();
@@ -239,7 +239,6 @@ const transformToSimpleString = () =>
         })
         .join('');
       const newChunk = encoder.encode(nextChunk);
-      console.log('still transforming', nextChunk);
       callback(null, newChunk);
     },
   });
