@@ -48,11 +48,11 @@ const defaultHeadersInDefaultEcsCategory = [
 
 describe('Events Viewer', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_big');
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
   context('Fields rendering', () => {

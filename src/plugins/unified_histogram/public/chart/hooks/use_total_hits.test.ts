@@ -15,7 +15,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of, Subject, throwError } from 'rxjs';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewType, SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';

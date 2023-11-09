@@ -132,7 +132,7 @@ export function MetricInput({
                 selectedOptions={
                   !!indexPattern &&
                   !!field.value &&
-                  AGGREGATION_OPTIONS.some((agg) => agg.value === agg.value)
+                  AGGREGATION_OPTIONS.some((agg) => agg.value === field.value)
                     ? [
                         {
                           value: field.value,

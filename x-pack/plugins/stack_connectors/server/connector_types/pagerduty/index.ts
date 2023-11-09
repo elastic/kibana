@@ -79,6 +79,9 @@ const PayloadSeveritySchema = schema.oneOf([
   schema.literal('info'),
 ]);
 
+const LinksSchema = schema.arrayOf(schema.object({ href: schema.string(), text: schema.string() }));
+const customDetailsSchema = schema.recordOf(schema.string(), schema.any());
+
 const ParamsSchema = schema.object(
   {
     eventAction: schema.maybe(EventActionSchema),
@@ -90,6 +93,8 @@ const ParamsSchema = schema.object(
     component: schema.maybe(schema.string()),
     group: schema.maybe(schema.string()),
     class: schema.maybe(schema.string()),
+    links: schema.maybe(LinksSchema),
+    customDetails: schema.maybe(customDetailsSchema),
   },
   { validate: validateParams }
 );
@@ -292,7 +297,9 @@ interface PagerDutyPayload {
     component?: string;
     group?: string;
     class?: string;
+    custom_details?: Record<string, unknown>;
   };
+  links?: Array<{ href: string; text: string }>;
 }
 
 function getBodyForEventAction(actionId: string, params: ActionParamsType): PagerDutyPayload {
@@ -301,6 +308,7 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
   const data: PagerDutyPayload = {
     event_action: eventAction,
   };
+
   if (params.dedupKey) {
     data.dedup_key = params.dedupKey;
   }
@@ -318,7 +326,12 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
     severity: params.severity || 'info',
     ...(validatedTimestamp ? { timestamp: moment(validatedTimestamp).toISOString() } : {}),
     ...omitBy(pick(params, ['component', 'group', 'class']), isUndefined),
+    ...(params.customDetails ? { custom_details: params.customDetails } : {}),
   };
+
+  if (params.links) {
+    data.links = params.links;
+  }
 
   return data;
 }

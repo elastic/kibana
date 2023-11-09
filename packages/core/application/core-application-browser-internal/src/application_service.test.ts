@@ -65,6 +65,7 @@ describe('#setup()', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });
@@ -515,6 +516,7 @@ describe('#start()', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });
@@ -1227,6 +1229,7 @@ describe('#stop()', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });

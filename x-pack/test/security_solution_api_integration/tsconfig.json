@@ -29,6 +29,8 @@
     "@kbn/securitysolution-list-constants",
     "@kbn/core-saved-objects-server",
     "@kbn/core",
-    "@kbn/alerting-plugin"
+    "@kbn/alerting-plugin",
+    "@kbn/core-http-common",
+    "@kbn/securitysolution-ecs"
   ]
 }
