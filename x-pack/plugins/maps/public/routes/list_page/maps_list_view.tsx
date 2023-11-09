@@ -43,22 +43,10 @@ function navigateToNewMap() {
   });
 }
 
-const disableDeleteForSharedItem = ({ namespaces }: MapUserContent) => {
-  if (namespaces && (namespaces.length > 1 || namespaces.includes('*'))) {
-    return {
-      delete: {
-        enabled: false,
-        reason: 'Maps shared to other Spaces can not be deleted.',
-      },
-    };
-  }
-};
-
 const toTableListViewSavedObject = (mapItem: MapItem): MapUserContent => {
   return {
     ...mapItem,
     updatedAt: mapItem.updatedAt!,
-    namespaces: mapItem.namespaces!,
     attributes: {
       ...mapItem.attributes,
       title: mapItem.attributes.title ?? '',
@@ -150,7 +138,6 @@ function MapsListViewComp({ history }: Props) {
       entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
         defaultMessage: 'maps',
       })}
-      rowItemActions={disableDeleteForSharedItem}
       title={APP_NAME}
       onClickTitle={({ id }) => history.push(getEditPath(id))}
     />

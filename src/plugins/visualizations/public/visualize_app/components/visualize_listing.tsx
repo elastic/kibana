@@ -61,17 +61,6 @@ interface VisualizeUserContent extends VisualizationListItem, UserContentCommonS
   };
 }
 
-const disableDeleteForSharedItem = ({ namespaces }: VisualizeUserContent) => {
-  if (namespaces && (namespaces.length > 1 || namespaces.includes('*'))) {
-    return {
-      delete: {
-        enabled: false,
-        reason: 'Visualizations shared to other Spaces can not be deleted.',
-      },
-    };
-  }
-};
-
 const toTableListViewSavedObject = (savedObject: Record<string, unknown>): VisualizeUserContent => {
   return {
     id: savedObject.id as string,
@@ -106,7 +95,6 @@ type CustomTableViewProps = Pick<
   | 'contentEditor'
   | 'emptyPrompt'
   | 'itemIsEditable'
-  | 'rowItemActions'
 >;
 
 const useTableListViewProps = (
@@ -270,7 +258,6 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    rowItemActions: disableDeleteForSharedItem,
     itemIsEditable: ({ attributes: { readOnly } }) => visualizeCapabilities.save && !readOnly,
   };
 
