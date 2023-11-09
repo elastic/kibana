@@ -69,10 +69,6 @@ export const getStreamObservable = (
       reader.cancel();
     };
   }).pipe(
-    // this causes the observable to be hot and unsubscribe does not stop the stream
-    // make sure the request is only triggered once,
-    // even with multiple subscribers
-    // shareReplay(1),
     // append a timestamp of when each value was emitted
     timestamp(),
     // use the previous timestamp to calculate a target
