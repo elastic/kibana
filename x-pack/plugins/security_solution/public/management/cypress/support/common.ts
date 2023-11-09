@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { prefixedOutputLogger } from '../../../../scripts/endpoint/common/utils';
 import type { RuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 
@@ -25,6 +26,11 @@ export const setupStackServicesUsingCypressConfig = async (config: Cypress.Plugi
     esUsername: config.env.ELASTICSEARCH_USERNAME,
     esPassword: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
+  }).then(({ log, ...others }) => {
+    return {
+      ...others,
+      log: prefixedOutputLogger('cy.dfw', log),
+    };
   });
 
   RUNTIME_SERVICES_CACHE.set(config, stackServices);

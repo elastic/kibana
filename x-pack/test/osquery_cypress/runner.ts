@@ -9,6 +9,7 @@ import Url from 'url';
 
 import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { createToolingLogger } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
+import { prefixedOutputLogger } from '@kbn/security-solution-plugin/scripts/endpoint/common/utils';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
@@ -16,12 +17,14 @@ import { FleetManager } from './fleet_server';
 import { createAgentPolicy } from './utils';
 
 async function setupFleetAgent({ getService }: FtrProviderContext) {
+  // Un-comment line below to set tooling log levels to verbose. Useful when debugging
+  createToolingLogger.defaultLogLevel = 'verbose';
+
   // const log = getService('log');
   const config = getService('config');
   const kbnClient = getService('kibanaServer');
 
-  createToolingLogger.defaultLogLevel = 'verbose';
-  const log = createToolingLogger();
+  const log = prefixedOutputLogger('cy.OSQuery', createToolingLogger());
 
   await verifyDockerInstalled(log);
   await maybeCreateDockerNetwork(log);

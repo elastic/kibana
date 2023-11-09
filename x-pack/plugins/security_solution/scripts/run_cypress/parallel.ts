@@ -26,6 +26,7 @@ import {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
+import { prefixedOutputLogger } from '../endpoint/common/utils';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { createKbnClient } from '../endpoint/common/stack_services';
 import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
@@ -71,7 +72,7 @@ ${JSON.stringify(argv, null, 2)}
         createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
       }
 
-      const log = createToolingLogger();
+      const log = prefixedOutputLogger('cy.parallel()', createToolingLogger());
 
       log.info(`
 ----------------------------------------------

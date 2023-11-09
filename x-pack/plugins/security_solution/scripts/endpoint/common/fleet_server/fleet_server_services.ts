@@ -42,7 +42,7 @@ import {
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { captureCallingStack } from '../utils';
+import { captureCallingStack, prefixedOutputLogger } from '../utils';
 import {
   createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
@@ -114,12 +114,14 @@ export interface StartedFleetServer extends StartedServer {
  */
 export const startFleetServer = async ({
   kbnClient,
-  logger,
+  logger: _logger,
   policy,
   version,
   force = false,
   port = 8220,
 }: StartFleetServerOptions): Promise<StartedFleetServer> => {
+  const logger = prefixedOutputLogger('startFleetServer()', _logger);
+
   logger.info(`Starting Fleet Server and connecting it to Kibana`);
   logger.debug(captureCallingStack());
 

@@ -8,6 +8,7 @@
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { prefixedOutputLogger } from './utils';
 import type { HostVm } from './types';
 import type { BaseVmCreateOptions } from './vm_services';
 import { createVm, getHostVmClient } from './vm_services';
@@ -41,7 +42,7 @@ export interface CreateAndEnrollEndpointHostResponse {
  */
 export const createAndEnrollEndpointHost = async ({
   kbnClient,
-  log,
+  log: _log,
   agentPolicyId,
   cpus,
   disk,
@@ -51,6 +52,7 @@ export const createAndEnrollEndpointHost = async ({
   useClosestVersionMatch = false,
   useCache = true,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
+  const log = prefixedOutputLogger('createAndEnrollEndpointHost()', _logger);
   const isRunningInCI = Boolean(process.env.CI);
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
   const { url: agentUrl } = await getAgentDownloadUrl(version, useClosestVersionMatch, log);
