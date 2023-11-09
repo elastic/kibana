@@ -70,13 +70,13 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   const {
     isLoading: agentsLoading,
-    data,
+    data: agentList,
     isFetched: agentsFetched,
   } = useAllAgents(debouncedSearchValue, {
     perPage,
   });
 
-  const { agents, total, groups } = data ?? { agents: [], total: 0, groups: {} };
+  const { agents, total, groups } = agentList ?? { agents: [], total: 0, groups: {} };
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
