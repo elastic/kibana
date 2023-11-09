@@ -76,6 +76,14 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_BLOCKLISTS_WINDOWS = 'endpoint-blocklist-windows-v1';
   const ARTIFACT_NAME_BLOCKLISTS_LINUX = 'endpoint-blocklist-linux-v1';
 
+  const mockPolicyListIdsResponse = (items: string[]) =>
+    jest.fn().mockResolvedValue({
+      items,
+      page: 1,
+      per_page: 100,
+      total: items.length,
+    });
+
   let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
   let ARTIFACTS_BY_ID: { [K: string]: InternalArtifactCompleteSchema } = {};
   let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
@@ -304,14 +312,6 @@ describe('ManifestManager', () => {
     const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
       ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
     ];
-
-    const mockPolicyListIdsResponse = (items: string[]) =>
-      jest.fn().mockResolvedValue({
-        items,
-        page: 1,
-        per_page: 100,
-        total: items.length,
-      });
 
     test('Fails when exception list client fails', async () => {
       const context = buildManifestManagerContextMock({});
@@ -758,14 +758,6 @@ describe('ManifestManager', () => {
       ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
     ];
 
-    const mockPolicyListIdsResponse = (items: string[]) =>
-      jest.fn().mockResolvedValue({
-        items,
-        page: 1,
-        per_page: 100,
-        total: items.length,
-      });
-
     test('when it has endpoint artifact management app feature it should not generate host isolation exceptions', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
@@ -1003,6 +995,94 @@ describe('ManifestManager', () => {
           new Set([TEST_POLICY_ID_1])
         );
       }
+    });
+  });
+
+  describe('buildNewManifest when Endpoint Exceptions contain `matches`', () => {
+    test('when contains only `wildcard`, `event.module=endpoint` is added', async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        entries: [
+          { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
+          { type: 'wildcard', operator: 'excluded', field: 'not_path', value: '*dont_match_me*' },
+        ],
+      });
+      const expectedExceptionListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        entries: [
+          ...exceptionListItem.entries,
+          { type: 'match', operator: 'included', field: 'event.module', value: 'endpoint' },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+      });
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(15);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1'),
+      });
+    });
+
+    test('when contains anything next to `wildcard`, nothing is added', async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        entries: [
+          { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
+          { type: 'wildcard', operator: 'excluded', field: 'path', value: '*dont_match_me*' },
+          { type: 'match', operator: 'included', field: 'path', value: 'something' },
+        ],
+      });
+      const expectedExceptionListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        entries: [...exceptionListItem.entries],
+      });
+
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+      });
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(15);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1'),
+      });
     });
   });
 
@@ -1473,14 +1553,6 @@ describe('ManifestManager', () => {
   });
 
   describe('cleanup artifacts', () => {
-    const mockPolicyListIdsResponse = (items: string[]) =>
-      jest.fn().mockResolvedValue({
-        items,
-        page: 1,
-        per_page: 100,
-        total: items.length,
-      });
-
     test('Successfully removes orphan artifacts', async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);

@@ -52,6 +52,7 @@ interface ArtifactsBuildResult {
 interface BuildArtifactsForOsOptions {
   listId: ArtifactListId;
   name: string;
+  exceptionItemDecorator?: (item: ExceptionListItemSchema) => ExceptionListItemSchema;
 }
 
 const iterateArtifactsBuildResult = (
@@ -153,12 +154,14 @@ export class ManifestManager {
     os,
     policyId,
     schemaVersion,
+    exceptionItemDecorator,
   }: {
     elClient: ExceptionListClient;
     listId: ArtifactListId;
     os: string;
     policyId?: string;
     schemaVersion: string;
+    exceptionItemDecorator?: (item: ExceptionListItemSchema) => ExceptionListItemSchema;
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
@@ -173,6 +176,10 @@ export class ManifestManager {
           os,
           listId,
         });
+
+        if (exceptionItemDecorator) {
+          itemsByListId = itemsByListId.map(exceptionItemDecorator);
+        }
       }
       this.cachedExceptionsListsByOs.set(`${listId}-${os}`, itemsByListId);
     }
@@ -203,6 +210,7 @@ export class ManifestManager {
     name,
     os,
     policyId,
+    exceptionItemDecorator,
   }: {
     os: string;
     policyId?: string;
@@ -214,6 +222,7 @@ export class ManifestManager {
         os,
         policyId,
         listId,
+        exceptionItemDecorator,
       }),
       this.schemaVersion,
       os,
@@ -255,9 +264,27 @@ export class ManifestManager {
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    const decorateWildcardOnlyExceptionItem = (item: ExceptionListItemSchema) => {
+      const isWildcardOnly = item.entries.every(({ type }) => type === 'wildcard');
+
+      // add `event.module=endpoint` to make endpoints older than 8.2 work when only `wildcard` is used
+      if (isWildcardOnly) {
+        item.entries.push({
+          type: 'match',
+          operator: 'included',
+          field: 'event.module',
+          value: 'endpoint',
+        });
+      }
+
+      return item;
+    };
+
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
       listId: ENDPOINT_LIST_ID,
       name: ArtifactConstants.GLOBAL_ALLOWLIST_NAME,
+      exceptionItemDecorator: decorateWildcardOnlyExceptionItem,
     };
 
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
