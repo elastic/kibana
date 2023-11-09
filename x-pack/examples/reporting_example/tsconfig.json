@@ -26,8 +26,5 @@
     "@kbn/utility-types",
     "@kbn/shared-ux-router",
     "@kbn/reporting-common",
-    "@kbn/reporting-export-types-png",
-    "@kbn/reporting-export-types-deprecated",
-    "@kbn/reporting-export-types-helpers-server",
   ]
 }
