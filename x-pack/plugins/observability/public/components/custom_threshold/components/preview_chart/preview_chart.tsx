@@ -259,6 +259,11 @@ function PreviewChart({
       visualization: new XYChart({
         visualOptions: {
           valueLabels: 'hide',
+          axisTitlesVisibilitySettings: {
+            x: true,
+            yLeft: false,
+            yRight: true,
+          },
         },
         layers,
         formulaAPI: formulaAsync.value.formula,

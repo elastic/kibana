@@ -14,6 +14,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 import type { Chart, ChartConfig, ChartLayer } from '../types';
 import { DEFAULT_LAYER_ID } from '../utils';
 
@@ -26,6 +27,7 @@ export interface XYVisualOptions {
   endValues?: XYArgs['endValue'];
   showDottedLine?: boolean;
   valueLabels?: XYArgs['valueLabels'];
+  axisTitlesVisibilitySettings?: AxesSettingsConfig;
 }
 
 export class XYChart implements Chart<XYState> {
@@ -82,6 +84,7 @@ export class XYChart implements Chart<XYState> {
       curveType: this.chartConfig.visualOptions?.lineInterpolation,
       emphasizeFitting: !this.chartConfig.visualOptions?.showDottedLine,
       valueLabels: this.chartConfig.visualOptions?.valueLabels,
+      axisTitlesVisibilitySettings: this.chartConfig.visualOptions?.axisTitlesVisibilitySettings,
     };
   }
 
