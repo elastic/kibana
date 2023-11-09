@@ -19,12 +19,14 @@ interface HighlightSectionProps {
   title: string;
   children: React.ReactNode;
   showBottomRule?: boolean;
+  columns: 1 | 2 | 3;
 }
 
 export function HighlightSection({
   title,
   children,
   showBottomRule = true,
+  columns,
 }: HighlightSectionProps) {
   const validChildren = React.Children.toArray(children).filter(Boolean);
   const shouldRenderSection = validChildren.length > 0;
@@ -51,7 +53,7 @@ export function HighlightSection({
         initialIsOpen={true}
         data-test-subj={`logExplorerFlyoutHighlightSection${title}`}
       >
-        <EuiFlexGrid columns={3}>{flexChildren}</EuiFlexGrid>
+        <EuiFlexGrid columns={columns}>{flexChildren}</EuiFlexGrid>
       </EuiAccordion>
       {showBottomRule && <EuiHorizontalRule margin="xs" />}
     </>

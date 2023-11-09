@@ -151,3 +151,10 @@ export const flyoutHoverActionToggleColumnText = i18n.translate(
     defaultMessage: 'Toggle column in table',
   }
 );
+
+export const flyoutHoverActionCopyToClipboardText = i18n.translate(
+  'xpack.logExplorer.flyoutDetail.value.hover.copyToClipboard',
+  {
+    defaultMessage: 'Copy to clipboard',
+  }
+);

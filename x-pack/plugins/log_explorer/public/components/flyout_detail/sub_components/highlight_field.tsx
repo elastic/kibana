@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, copyToClipboard } from '@elastic/eui';
 import React, { ReactNode, useMemo, useState } from 'react';
 import { HoverAction, HoverActionType } from './hover_action';
 import {
@@ -13,6 +13,7 @@ import {
   flyoutHoverActionFilterOutText,
   flyoutHoverActionFilterForFieldPresentText,
   flyoutHoverActionToggleColumnText,
+  flyoutHoverActionCopyToClipboardText,
 } from '../translations';
 import { useDiscoverActionsContext } from '../../../hooks/use_discover_action';
 
@@ -75,6 +76,13 @@ export function HighlightField({
             setColumnAdded(!columnAdded);
           }
         },
+        display: true,
+      },
+      {
+        id: 'copyToClipboardAction',
+        tooltipContent: flyoutHoverActionCopyToClipboardText,
+        iconType: 'copyClipboard',
+        onClick: () => copyToClipboard(value as string),
         display: true,
       },
     ],

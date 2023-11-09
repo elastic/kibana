@@ -34,6 +34,7 @@ import { HighlightSection } from './sub_components/highlight_section';
 import { DiscoverActionsProvider } from '../../hooks/use_discover_action';
 import { HighlightContainer } from './sub_components/highlight_container';
 import { useDimension } from '../../hooks/use_dimensions';
+import { useFlyoutColumnWidth } from '../../hooks/use_flyouot_column_width';
 
 export function FlyoutHighlights({
   formattedDoc,
@@ -46,11 +47,11 @@ export function FlyoutHighlights({
 }) {
   const elementRef = useRef<HTMLDivElement>(null);
   const [ref, dimensions] = useDimension<HTMLDivElement>(elementRef);
-  const fieldWidth = (dimensions.width - 20) / 7;
+  const { columns, fieldWidth } = useFlyoutColumnWidth(dimensions.width);
   return (
     <DiscoverActionsProvider value={actions}>
       <HighlightContainer ref={ref}>
-        <HighlightSection title={serviceAccordionTitle}>
+        <HighlightSection title={serviceAccordionTitle} columns={columns}>
           {formattedDoc[constants.SERVICE_NAME_FIELD] && (
             <HighlightField
               label={flyoutServiceLabel}
@@ -73,7 +74,7 @@ export function FlyoutHighlights({
           )}
         </HighlightSection>
 
-        <HighlightSection title={infraAccordionTitle}>
+        <HighlightSection title={infraAccordionTitle} columns={columns}>
           {formattedDoc[constants.HOST_NAME_FIELD] && (
             <HighlightField
               label={flyoutHostNameLabel}
@@ -106,7 +107,7 @@ export function FlyoutHighlights({
           )}
         </HighlightSection>
 
-        <HighlightSection title={cloudAccordionTitle}>
+        <HighlightSection title={cloudAccordionTitle} columns={columns}>
           {formattedDoc[constants.CLOUD_PROVIDER_FIELD] && (
             <HighlightField
               label={flyoutCloudProviderLabel}
@@ -159,7 +160,7 @@ export function FlyoutHighlights({
           )}
         </HighlightSection>
 
-        <HighlightSection title={otherAccordionTitle} showBottomRule={false}>
+        <HighlightSection title={otherAccordionTitle} showBottomRule={false} columns={columns}>
           {formattedDoc[constants.LOG_FILE_PATH_FIELD] && (
             <HighlightField
               label={flyoutLogPathFileLabel}
