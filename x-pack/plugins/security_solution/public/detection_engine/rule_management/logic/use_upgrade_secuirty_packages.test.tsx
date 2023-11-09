@@ -95,6 +95,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
   it('should send upgrade request with prerelease:false if build does not include `-SNAPSHOT`', async () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0');
     mockGetKibanaBranch.mockReturnValue('release');
+    mockBuildFlavor.mockReturnValue('traditional');
 
     const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
@@ -114,6 +115,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
   it('should send upgrade request with prerelease:true if not serverless and branch is `main` AND build includes `-SNAPSHOT`', async () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
     mockGetKibanaBranch.mockReturnValue('main');
+    mockBuildFlavor.mockReturnValue('traditional');
 
     const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
@@ -133,6 +135,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
   it('should send upgrade request with prerelease:true if branch is `release` and build includes `-SNAPSHOT`', async () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
     mockGetKibanaBranch.mockReturnValue('release');
+    mockBuildFlavor.mockReturnValue('traditional');
 
     const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,
@@ -152,6 +155,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
   it('should send upgrade request with prerelease:true if branch is `main` and build does not include `-SNAPSHOT`', async () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0');
     mockGetKibanaBranch.mockReturnValue('main');
+    mockBuildFlavor.mockReturnValue('traditional');
 
     const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
       wrapper: TestProviders,

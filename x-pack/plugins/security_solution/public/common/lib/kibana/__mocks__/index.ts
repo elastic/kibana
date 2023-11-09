@@ -37,6 +37,12 @@ export const KibanaServices = {
   }),
   getKibanaVersion: jest.fn(() => '8.0.0'),
   getKibanaBranch: jest.fn(() => 'main'),
+  getBuildFlavor: jest.fn(() => 'traditional'),
+  getEnvMode: jest.fn(() => ({
+    prod: true,
+    dev: false,
+    name: 'production' as const,
+  })),
   getPrebuiltRulesPackageVersion: jest.fn(() => undefined),
 };
 export const useKibana = jest.fn().mockReturnValue({
