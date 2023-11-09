@@ -42,6 +42,7 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
   const { search } = useLocation();
   const { data: activeAlerts } = useFetchActiveAlerts({
     sloIdsAndInstanceIds: [[slo.id, slo.instanceId ?? ALL_VALUE]],
+    shouldRefetch: isAutoRefreshing,
   });
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
