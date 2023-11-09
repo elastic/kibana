@@ -8,17 +8,18 @@
 import React from 'react';
 
 import {
+  CriteriaWithPagination,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSearchBar,
-  EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Connector } from '@kbn/search-connectors';
+
+import { Meta } from '../../../../../common/types/pagination';
 
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import {
@@ -28,8 +29,20 @@ import {
 
 interface ConnectorsTableProps {
   items: Connector[];
+  meta?: Meta;
+  onChange: (criteria: CriteriaWithPagination<Connector>) => void;
 }
-export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({ items }) => {
+export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
+  items,
+  meta = {
+    page: {
+      from: 0,
+      size: 10,
+      total: 0,
+    },
+  },
+  onChange,
+}) => {
   const columns: Array<EuiBasicTableColumn<Connector>> = [
     {
       field: 'name',
@@ -139,28 +152,15 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({ items }) => {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.connectorsTable.h2.availableConnectorsLabel"
-              defaultMessage="Available Connectors"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiSearchBar />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <EuiBasicTable
           items={items}
           columns={columns}
-          onChange={() => {}}
+          onChange={onChange}
           pagination={{
-            pageIndex: 0,
-            pageSize: 10,
-            pageSizeOptions: [10, 0],
-            totalItemCount: 15,
+            pageIndex: meta.page.from / (meta.page.size || 1),
+            pageSize: meta.page.size,
+            showPerPageOptions: false,
+            totalItemCount: meta.page.total,
           }}
         />
       </EuiFlexItem>

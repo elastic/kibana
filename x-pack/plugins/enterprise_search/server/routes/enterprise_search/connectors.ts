@@ -474,18 +474,33 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         query: schema.object({
           connector_type: schema.maybe(schema.string()),
+          from: schema.number({ defaultValue: 0, min: 0 }),
+          searchQuery: schema.string({ defaultValue: '' }),
+          size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const connectorType = request.query.connector_type;
+      const { connector_type, from, size } = request.query;
+
       const result = await fetchConnectors(
         client.asCurrentUser,
         undefined,
-        connectorType as 'connector' | 'crawler' | undefined
+        connector_type as 'connector' | 'crawler' | undefined
       );
-      return response.ok({ body: result });
+      return response.ok({
+        body: {
+          connectors: result.slice(from, from + size),
+          meta: {
+            page: {
+              from,
+              size,
+              total: result.length,
+            },
+          },
+        },
+      });
     })
   );
 }

@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../common/types/api';
 
-import { FetchConnectorsApiLogic } from '../../api/connector/fetch_connectors';
+import { handlePageChange } from '../../../shared/table_pagination';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 import { SelectConnector } from '../new_index/select_connector/select_connector';
 
 import { ConnectorStats } from './connector_stats';
+import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
 
 export const baseBreadcrumbs = [
@@ -29,23 +30,24 @@ export const baseBreadcrumbs = [
   }),
 ];
 export const Connectors: React.FC = () => {
-  const { makeRequest } = useActions(FetchConnectorsApiLogic);
-  const { data = { connectors: [] }, status } = useValues(FetchConnectorsApiLogic);
+  const { makeRequest, onPaginate } = useActions(ConnectorsLogic);
+  const { data, status, searchParams } = useValues(ConnectorsLogic);
+  const [searchQuery, setSearchValue] = useState('');
   useEffect(() => {
-    makeRequest({ connectorType: 'connector' });
-  }, []);
+    makeRequest(searchParams);
+  }, [searchParams.from, searchParams.size]);
+
   // Spinner while loading
   // get filtered endpoint
   // fix pagination
   // add docs count
   // add stats
   // make table searchable
-  const isEmpty = data.connectors.length <= 0;
+  const isEmpty = (data?.connectors?.length ?? 0) <= 0; 
   const isLoading = status === Status.IDLE || status === Status.LOADING;
-  console.log('efe', data.connectors)
   return (
     <>
-      {isEmpty ? (
+      {!isLoading && isEmpty ? (
         <SelectConnector />
       ) : (
         <EnterpriseSearchContentPageTemplate
@@ -82,7 +84,35 @@ export const Connectors: React.FC = () => {
           }}
         >
           <ConnectorStats />
-          <ConnectorsTable items={data.connectors} />
+
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              <EuiTitle>
+                <h2>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.connectorsTable.h2.availableConnectorsLabel"
+                    defaultMessage="Available Connectors"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSearchBar
+                query={searchQuery}
+                box={{ incremental: true, placeholder: 'Filter Connectors' }}
+                aria-label={i18n.translate(
+                  'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsLabel',
+                  { defaultMessage: 'Filter Connectors' }
+                )}
+                onChange={(event) => setSearchValue(event.queryText)}
+              />
+            </EuiFlexItem>
+            <ConnectorsTable
+              items={data?.connectors || []}
+              meta={data?.meta}
+              onChange={handlePageChange(onPaginate)}
+            />
+          </EuiFlexGroup>
         </EnterpriseSearchContentPageTemplate>
       )}
     </>

@@ -6,29 +6,39 @@
  */
 import { Connector } from '@kbn/search-connectors';
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Meta } from '../../../../../common/types/pagination';
+
+import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchConnectorsApiLogicArgs {
   connectorType: 'crawler' | 'connector';
+  from: number;
+  size: number;
 }
 // TODO
 export interface FetchConnectorsApiLogicResponse {
   connectors: Connector[];
+  meta: Meta;
 }
 
 export const fetchConnectors = async ({
   connectorType,
+  from,
+  size,
 }: FetchConnectorsApiLogicArgs): Promise<FetchConnectorsApiLogicResponse> => {
   const route = '/internal/enterprise_search/connectors';
-  const query = { connector_type: connectorType };
-  const result = await HttpLogic.values.http.get<Connector[]>(route, { query });
-  return {
-    connectors: result,
-  };
+  const query = { connector_type: connectorType, from, size };
+  const result = await HttpLogic.values.http.get<FetchConnectorsApiLogicResponse>(route, { query });
+  return result;
 };
 
 export const FetchConnectorsApiLogic = createApiLogic(
   ['fetch_connectors_api_logic'],
   fetchConnectors
 );
+
+export type FetchConnectorsApiLogicActions = Actions<
+  FetchConnectorsApiLogicArgs,
+  FetchConnectorsApiLogicResponse
+>;

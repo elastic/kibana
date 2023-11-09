@@ -66,7 +66,7 @@ export const fetchConnectorByIndexName = async (
 export const fetchConnectors = async (
   client: ElasticsearchClient,
   indexNames?: string[],
-  connectorType?: 'connector' | 'crawler'
+  connectorType?: 'connector' | 'crawler',
 ): Promise<Connector[]> => {
   const query: QueryDslQueryContainer = indexNames
     ? { terms: { index_name: indexNames } }
