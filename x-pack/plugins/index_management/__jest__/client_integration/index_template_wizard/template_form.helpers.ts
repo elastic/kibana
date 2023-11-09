@@ -146,6 +146,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     priority,
     version,
     dataStream,
+    allowAutoCreate,
   }: Partial<TemplateDeserialized> = {}) => {
     const { component, form, find } = testBed;
 
@@ -182,6 +183,10 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
       if (version) {
         form.setInputValue('versionField.input', JSON.stringify(version));
+      }
+
+      if (allowAutoCreate) {
+        form.toggleEuiSwitch('allowAutoCreateField.input');
       }
 
       clickNextButton();
@@ -332,6 +337,7 @@ export type TestSubjects =
   | 'orderField.input'
   | 'priorityField.input'
   | 'dataStreamField.input'
+  | 'allowAutoCreateField.input'
   | 'pageTitle'
   | 'previewTab'
   | 'removeFieldButton'

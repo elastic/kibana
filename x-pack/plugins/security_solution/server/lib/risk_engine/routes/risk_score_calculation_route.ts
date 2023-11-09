@@ -89,6 +89,7 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
           return siemResponse.error({
             statusCode: error.statusCode,
             body: { message: error.message, full_error: JSON.stringify(e) },
+            bypassErrorFormat: true,
           });
         }
       }

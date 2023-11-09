@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryViewOptions } from '../../../../../common/inventory_views/types';
 import {
   type InventoryLegendOptions,
@@ -24,7 +25,6 @@ import type {
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api/snapshot_api';
 import { useUrlState } from '../../../../utils/use_url_state';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
   palette: 'cool',
