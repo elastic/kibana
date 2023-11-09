@@ -5616,6 +5616,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-cloud-ui-bridge@link:packages/shared-ux/cloud_ui_bridge":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-error-boundary@link:packages/shared-ux/error_boundary":
   version "0.0.0"
   uid ""
@@ -7208,6 +7212,18 @@
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/@remix-run/router/-/router-1.6.3.tgz#8205baf6e17ef93be35bf62c37d2d594e9be0dad"
   integrity sha512-EXJysQ7J3veRECd0kZFQwYYd5sJMcq2O/m60zu1W2l3oVQ9xtub8jTOtYRE0+M2iomyG/W3Ps7+vp2kna0C27Q==
+
+"@remote-ui/async-subscription@^2.1.14":
+  version "2.1.14"
+  resolved "https://registry.yarnpkg.com/@remote-ui/async-subscription/-/async-subscription-2.1.14.tgz#100f31a3e7d8d427ed13e064c335692abe320e20"
+  integrity sha512-m4HQ7LmBNN80d5CDG1d0MzESfXQB3tPK3cEFannUoyqZybxZst/AB8TAnwKKZcXUR1eedkZMTqH6BjEgMRzulQ==
+  dependencies:
+    "@remote-ui/rpc" "^1.4.3"
+
+"@remote-ui/rpc@^1.4.3", "@remote-ui/rpc@^1.4.4":
+  version "1.4.4"
+  resolved "https://registry.yarnpkg.com/@remote-ui/rpc/-/rpc-1.4.4.tgz#94e93ee7adab34b599ac516817d78c04177b5be9"
+  integrity sha512-3XVzEZSTxAw6c8ryDmds36M7QWWJW8Q7mxz+xInqkbrpOeSc6m1plGfNRFlbyaTq0puyH07dLjpsnl+HmWIacw==
 
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"

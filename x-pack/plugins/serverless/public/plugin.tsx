@@ -9,6 +9,7 @@ import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { CloudAPIBridge } from '@kbn/shared-ux-cloud-ui-bridge';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
@@ -50,14 +51,14 @@ export class ServerlessPlugin
   ): ServerlessPluginStart {
     const { developer } = this.config;
 
-    if (developer && developer.projectSwitcher && developer.projectSwitcher.enabled) {
+    // if (developer && developer.projectSwitcher && developer.projectSwitcher.enabled) {
       const { currentType } = developer.projectSwitcher;
 
       core.chrome.navControls.registerRight({
         order: 500,
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
-    }
+    // }
 
     core.chrome.setChromeStyle('project');
 
@@ -93,11 +94,13 @@ export class ServerlessPlugin
   ) {
     ReactDOM.render(
       <I18nProvider>
-        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
-            <ProjectSwitcher {...{ currentProjectType }} />
-          </ProjectSwitcherKibanaProvider>
-        </KibanaThemeProvider>
+        <CloudAPIBridge apiSourceUrl="http://localhost:3000">
+          <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+            <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
+              <ProjectSwitcher {...{ currentProjectType }} />
+            </ProjectSwitcherKibanaProvider>
+          </KibanaThemeProvider>
+        </CloudAPIBridge>
       </I18nProvider>,
       targetDomElement
     );
