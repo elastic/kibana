@@ -110,6 +110,15 @@ describe('isLayerLoading', () => {
     dataRequestMetaAtStart: undefined,
     dataRequestToken: undefined,
   };
+  const mockSource = {
+    getMaxZoom: () => {
+      return 24;
+    },
+    getMinZoom: () => {
+      return 0;
+    },
+  } as unknown as IVectorSource;
+
   describe('no joins', () => {
     test('should be true when tile loading has not started', () => {
       const layer = new MvtVectorLayer({
@@ -117,14 +126,7 @@ describe('isLayerLoading', () => {
         layerDescriptor: {
           __dataRequests: [sourceDataRequestDescriptor],
         } as unknown as VectorLayerDescriptor,
-        source: {
-          getMaxZoom: () => {
-            return 24;
-          },
-          getMinZoom: () => {
-            return 0;
-          },
-        } as unknown as IVectorSource,
+        source: mockSource,
       });
       expect(layer.isLayerLoading(1)).toBe(true);
     });
@@ -136,14 +138,7 @@ describe('isLayerLoading', () => {
           __areTilesLoaded: false,
           __dataRequests: [sourceDataRequestDescriptor],
         } as unknown as VectorLayerDescriptor,
-        source: {
-          getMaxZoom: () => {
-            return 24;
-          },
-          getMinZoom: () => {
-            return 0;
-          },
-        } as unknown as IVectorSource,
+        source: mockSource,
       });
       expect(layer.isLayerLoading(1)).toBe(true);
     });
@@ -155,14 +150,7 @@ describe('isLayerLoading', () => {
           __areTilesLoaded: true,
           __dataRequests: [sourceDataRequestDescriptor],
         } as unknown as VectorLayerDescriptor,
-        source: {
-          getMaxZoom: () => {
-            return 24;
-          },
-          getMinZoom: () => {
-            return 0;
-          },
-        } as unknown as IVectorSource,
+        source: mockSource,
       });
       expect(layer.isLayerLoading(1)).toBe(false);
     });
@@ -181,14 +169,6 @@ describe('isLayerLoading', () => {
         return {} as unknown as IJoinSource;
       },
     } as unknown as InnerJoin;
-    const mockSource = {
-      getMaxZoom: () => {
-        return 24;
-      },
-      getMinZoom: () => {
-        return 0;
-      },
-    } as unknown as IVectorSource;
 
     test('should be false when layer is not visible', () => {
       const layer = new MvtVectorLayer({
