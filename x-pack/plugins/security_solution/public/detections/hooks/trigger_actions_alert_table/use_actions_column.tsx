@@ -111,6 +111,7 @@ export const getUseActionColumnHook =
         leadingControlColumn,
         selectedEventIds,
         eventContext,
+        hasAccessToLists,
       ]
     );
 
