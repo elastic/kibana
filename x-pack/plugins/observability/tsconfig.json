@@ -93,7 +93,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-chrome-browser",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/dashboard-plugin"
   ],
   "exclude": [
     "target/**/*"
