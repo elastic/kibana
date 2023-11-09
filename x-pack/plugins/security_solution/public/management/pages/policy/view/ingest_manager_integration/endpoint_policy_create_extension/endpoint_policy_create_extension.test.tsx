@@ -166,7 +166,7 @@ describe('Onboarding Component new section', () => {
     let render: () => ReturnType<AppContextTestRender['render']>;
 
     beforeEach(() => {
-      mockedContext.startServices.upselling.registerSections({
+      mockedContext.startServices.upselling.setSections({
         endpointPolicyProtections: () => <div data-test-subj="paywall">{'pay up!'}</div>,
       });
       newPolicy = getMockNewPackage();

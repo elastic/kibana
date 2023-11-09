@@ -24,8 +24,7 @@ describe('ExceptionsLinkedToRule', () => {
         />
       </TestProviders>
     );
-
     expect(wrapper.find('[data-test-subj="ruleNameCell"]').at(0).text()).toEqual('NameMy rule');
-    expect(wrapper.find('[data-test-subj="ruleAction-viewDetails"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="linkToRuleSecuritySolutionLink"]').exists()).toBeTruthy();
   });
 });

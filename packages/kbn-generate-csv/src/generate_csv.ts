@@ -475,9 +475,13 @@ export class CsvGenerator {
         `ES scroll returned fewer total hits than expected! ` +
           `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}`
       );
-      warnings.push(
-        i18nTexts.csvRowCountError({ expected: totalRecords ?? NaN, received: this.csvRowCount })
-      );
+      if (totalRecords || totalRecords === 0) {
+        warnings.push(
+          i18nTexts.csvRowCountError({ expected: totalRecords, received: this.csvRowCount })
+        );
+      } else {
+        warnings.push(i18nTexts.csvRowCountIndeterminable({ received: this.csvRowCount }));
+      }
     }
 
     return {

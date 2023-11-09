@@ -19,7 +19,7 @@ import { applicationServiceFactory } from './application/application.stub';
 import { chromeServiceFactory } from './chrome/chrome.stub';
 import { coreContextServiceFactory } from './core_context/core_context.stub';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
-import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage.stub';
+import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup.stub';
 import { dataServiceFactory } from './data/data.stub';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links.stub';
@@ -42,6 +42,7 @@ import { customBrandingServiceFactory } from './custom_branding/custom_branding.
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
 import { contentManagementServiceFactory } from './content_management/content_management_service.stub';
 import { serverlessServiceFactory } from './serverless/serverless_service.stub';
+import { noDataPageServiceFactory } from './no_data_page/no_data_page_service.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
@@ -50,7 +51,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   chrome: new PluginServiceProvider(chromeServiceFactory),
   coreContext: new PluginServiceProvider(coreContextServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
-  dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory),
+  dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),
@@ -72,6 +73,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   serverless: new PluginServiceProvider(serverlessServiceFactory),
+  noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);

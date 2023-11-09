@@ -13,10 +13,10 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { defineGetApiKeysRoutes } from './get';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineGetApiKeysRoutes } from './get';
 
 describe('Get API Keys route', () => {
   let routeHandler: RequestHandler<any, any, any, any>;

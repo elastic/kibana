@@ -1,14 +1,27 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-plugin",
-  "owner": "@elastic/obs-ai-assistant",
+  "owner": "@elastic/obs-knowledge-team",
   "plugin": {
     "id": "observabilityAIAssistant",
     "server": true,
     "browser": true,
     "configPath": ["xpack", "observabilityAIAssistant"],
-    "requiredPlugins": ["triggersActionsUi", "actions", "security", "features", "observabilityShared"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "requiredPlugins": [
+      "actions",
+      "dataViews",
+      "features",
+      "lens",
+      "licensing",
+      "observabilityShared",
+      "ruleRegistry",
+      "security",
+      "share",
+      "taskManager",
+      "triggersActionsUi",
+      "dataViews"
+    ],
+    "requiredBundles": ["fieldFormats", "kibanaReact", "kibanaUtils"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

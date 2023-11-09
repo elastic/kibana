@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: any) {
   const log = getService('log');
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/157512
-  describe.skip('Ingest Pipelines Accessibility', async () => {
+  describe('Ingest Pipelines Accessibility', async () => {
     before(async () => {
       await putSamplePipeline(esClient);
       await common.navigateToApp('ingestPipelines');
@@ -29,7 +28,7 @@ export default function ({ getService, getPageObjects }: any) {
       await a11y.testAppSnapshot();
     });
 
-    it('List View', async () => {
+    it('Details View', async () => {
       await testSubjects.click('pipelineDetailsLink');
       await retry.waitFor('testPipeline detail panel to be visible', async () => {
         if (!testSubjects.isDisplayed('pipelineDetails')) {
@@ -50,8 +49,7 @@ export default function ({ getService, getPageObjects }: any) {
     });
 
     it('Create Pipeline Wizard', async () => {
-      await testSubjects.click('emptyStateCreatePipelineDropdown');
-      await testSubjects.click('emptyStateCreatePipelineButton');
+      await common.navigateToUrl('ingestPipelines', 'create', { shouldUseHashForSubUrl: false });
       await retry.waitFor('Create pipeline page one to be visible', async () => {
         return testSubjects.isDisplayed('pageTitle') ? true : false;
       });

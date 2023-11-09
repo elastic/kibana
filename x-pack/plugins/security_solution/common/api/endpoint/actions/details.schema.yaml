@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Details Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/{action_id}:
+    get:
+      summary: Get Action details schema
+      operationId: EndpointGetActionsDetails
+      x-codegen-enabled: false
+      parameters:
+        - name: query
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/DetailsRequestParams'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+components:
+  schemas:
+    DetailsRequestParams:
+      type: object
+      properties:
+        action_id:
+          type: string
+

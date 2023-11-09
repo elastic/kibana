@@ -9,5 +9,6 @@ declare namespace Cypress {
   interface Chainable {
     loginAsElasticUser(path?: string): Cypress.Chainable<Cypress.Response<any>>;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
+    visitKibana(url: string, rangeFrom?: string, rangeTo?: string): void;
   }
 }

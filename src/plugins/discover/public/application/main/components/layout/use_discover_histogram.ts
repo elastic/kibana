@@ -26,6 +26,7 @@ import {
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
@@ -58,6 +59,7 @@ export const useDiscoverHistogram = ({
    */
 
   const [unifiedHistogram, ref] = useState<UnifiedHistogramApi | null>();
+  const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
 
   const getCreationOptions = useCallback(() => {
     const {
@@ -242,6 +244,26 @@ export const useDiscoverHistogram = ({
     columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
   });
 
+  useEffect(() => {
+    if (!isPlainRecord) {
+      return;
+    }
+
+    const fetchStart = stateContainer.dataState.fetch$.subscribe(() => {
+      if (!skipRefetch.current) {
+        setIsSuggestionLoading(true);
+      }
+    });
+    const fetchComplete = textBasedFetchComplete$.subscribe(() => {
+      setIsSuggestionLoading(false);
+    });
+
+    return () => {
+      fetchStart.unsubscribe();
+      fetchComplete.unsubscribe();
+    };
+  }, [isPlainRecord, stateContainer.dataState.fetch$, textBasedFetchComplete$]);
+
   /**
    * Data fetching
    */
@@ -279,7 +301,10 @@ export const useDiscoverHistogram = ({
         textBasedFetchComplete$.pipe(map(() => 'discover'))
       ).pipe(debounceTime(50));
     } else {
-      fetch$ = stateContainer.dataState.fetch$.pipe(map(() => 'discover'));
+      fetch$ = stateContainer.dataState.fetch$.pipe(
+        filter(({ options }) => !options.fetchMore), // don't update histogram for "Load more" in the grid
+        map(() => 'discover')
+      );
     }
 
     const subscription = fetch$.subscribe((source) => {
@@ -299,6 +324,8 @@ export const useDiscoverHistogram = ({
 
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
+  const histogramCustomization = useDiscoverCustomization('unified_histogram');
+
   return {
     ref,
     getCreationOptions,
@@ -309,6 +336,11 @@ export const useDiscoverHistogram = ({
     timeRange,
     relativeTimeRange,
     columns,
+    onFilter: histogramCustomization?.onFilter,
+    onBrushEnd: histogramCustomization?.onBrushEnd,
+    withDefaultActions: histogramCustomization?.withDefaultActions,
+    disabledActions: histogramCustomization?.disabledActions,
+    isChartLoading: isSuggestionLoading,
   };
 };
 

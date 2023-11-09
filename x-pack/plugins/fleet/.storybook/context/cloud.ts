@@ -21,6 +21,7 @@ export const getCloud = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
     isServerlessEnabled: false,
     serverless: {
       projectId: undefined,
+      projectName: undefined,
     },
   };
 

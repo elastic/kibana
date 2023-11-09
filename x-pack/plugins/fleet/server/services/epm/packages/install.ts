@@ -95,13 +95,15 @@ import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
-import { getBundledPackages } from './bundled_packages';
+import { getBundledPackageByPkgKey } from './bundled_packages';
 import { withPackageSpan } from './utils';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
 import { INITIAL_VERSION } from './custom_integrations/constants';
 import { createAssets } from './custom_integrations';
 import { cacheAssets } from './custom_integrations/assets/cache';
 import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
+import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
+import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -298,6 +300,8 @@ interface InstallRegistryPackageParams {
   ignoreConstraints?: boolean;
   prerelease?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -322,6 +326,8 @@ interface InstallUploadedArchiveParams {
   spaceId: string;
   version?: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -354,6 +360,8 @@ async function installPackageFromRegistry({
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
   prerelease = false,
+  ignoreMappingUpdateErrors = false,
+  skipDataStreamRollover = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -427,6 +435,8 @@ async function installPackageFromRegistry({
       paths,
       verificationResult,
       authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     });
   } catch (e) {
     sendEvent({
@@ -462,6 +472,8 @@ async function installPackageCommon(options: {
   verificationResult?: PackageVerificationResult;
   telemetryEvent?: PackageUpdateEvent;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
 }): Promise<InstallResult> {
   const {
     pkgName,
@@ -477,6 +489,8 @@ async function installPackageCommon(options: {
     paths,
     verificationResult,
     authorizationHeader,
+    ignoreMappingUpdateErrors,
+    skipDataStreamRollover,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -566,6 +580,8 @@ async function installPackageCommon(options: {
       installSource,
       authorizationHeader,
       force,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     })
       .then(async (assets) => {
         await removeOldAssets({
@@ -620,6 +636,8 @@ async function installPackageByUpload({
   spaceId,
   version,
   authorizationHeader,
+  ignoreMappingUpdateErrors,
+  skipDataStreamRollover,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -668,6 +686,8 @@ async function installPackageByUpload({
       packageInfo,
       paths,
       authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     });
   } catch (e) {
     return {
@@ -698,15 +718,19 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
 
   const authorizationHeader = args.authorizationHeader;
 
-  const bundledPackages = await getBundledPackages();
-
   if (args.installSource === 'registry') {
-    const { pkgkey, force, ignoreConstraints, spaceId, neverIgnoreVerificationError, prerelease } =
-      args;
+    const {
+      pkgkey,
+      force,
+      ignoreConstraints,
+      spaceId,
+      neverIgnoreVerificationError,
+      prerelease,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
+    } = args;
 
-    const matchingBundledPackage = bundledPackages.find(
-      (pkg) => Registry.pkgToPkgKey(pkg) === pkgkey
-    );
+    const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
 
     if (matchingBundledPackage) {
       logger.debug(
@@ -721,6 +745,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         spaceId,
         version: matchingBundledPackage.version,
         authorizationHeader,
+        ignoreMappingUpdateErrors,
+        skipDataStreamRollover,
       });
 
       return { ...response, installSource: 'bundled' };
@@ -737,10 +763,18 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       ignoreConstraints,
       prerelease,
       authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     });
     return response;
   } else if (args.installSource === 'upload') {
-    const { archiveBuffer, contentType, spaceId } = args;
+    const {
+      archiveBuffer,
+      contentType,
+      spaceId,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
+    } = args;
     const response = await installPackageByUpload({
       savedObjectsClient,
       esClient,
@@ -748,6 +782,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       contentType,
       spaceId,
       authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
     });
     return response;
   } else if (args.installSource === 'custom') {
@@ -780,6 +816,10 @@ export async function installCustomPackage(
     datasets,
     kibanaVersion,
   } = args;
+
+  // Validate that we can create this package, validations will throw if they don't pass
+  await checkForNamingCollision(savedObjectsClient, pkgName);
+  checkDatasetsNameFormat(datasets, pkgName);
 
   // Compose a packageInfo
   const packageInfo = {

@@ -9,6 +9,10 @@ import type { RootSchema } from '@kbn/analytics-client';
 
 export const fleetAgentsSchema: RootSchema<any> = {
   agents_per_version: {
+    _meta: {
+      description: 'Agents per version telemetry',
+      optional: true,
+    },
     properties: {
       version: {
         type: 'keyword',
@@ -56,6 +60,32 @@ export const fleetAgentsSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'The total number of unenrolled agents',
+        },
+      },
+    },
+  },
+  agents_per_output_type: {
+    _meta: {
+      description: 'Agents per output type telemetry',
+      optional: true,
+    },
+    properties: {
+      output_type: {
+        type: 'keyword',
+        _meta: {
+          description: 'Output type used by agent',
+        },
+      },
+      count_as_data: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents enrolled that use this output type as data output',
+        },
+      },
+      count_as_monitoring: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents enrolled that use this output type as monitoring output',
         },
       },
     },
@@ -262,23 +292,26 @@ export const fleetUsagesSchema: RootSchema<any> = {
     },
   },
   agents_per_os: {
-    properties: {
-      name: {
-        type: 'keyword',
-        _meta: {
-          description: 'Agent OS enrolled to this kibana',
+    type: 'array',
+    items: {
+      properties: {
+        name: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS enrolled to this kibana',
+          },
         },
-      },
-      version: {
-        type: 'keyword',
-        _meta: {
-          description: 'Agent OS version enrolled to this kibana',
+        version: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS version enrolled to this kibana',
+          },
         },
-      },
-      count: {
-        type: 'long',
-        _meta: {
-          description: 'Number of agents enrolled that use this OS',
+        count: {
+          type: 'long',
+          _meta: {
+            description: 'Number of agents enrolled that use this OS',
+          },
         },
       },
     },

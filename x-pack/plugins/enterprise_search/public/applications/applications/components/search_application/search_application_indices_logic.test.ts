@@ -38,9 +38,13 @@ const mockSearchApplicationData: EnterpriseSearchApplicationDetails = {
   name: DEFAULT_VALUES.searchApplicationName,
   template: {
     script: {
+      source: '"query":{"term":{"{{field_name}}":["{{field_value}}"',
       lang: 'mustache',
-      params: { query_string: '*' },
-      source: '',
+      options: { content_type: 'application/json;charset=utf-8' },
+      params: {
+        field_name: 'hello',
+        field_value: 'world',
+      },
     },
   },
   updated_at_millis: 1679501369566,
@@ -114,6 +118,7 @@ describe('SearchApplicationViewLogic', () => {
         ).toHaveBeenCalledWith({
           name: DEFAULT_VALUES.searchApplicationName,
           indices: ['search-002'],
+          template: mockSearchApplicationData.template,
         });
       });
     });
@@ -131,6 +136,7 @@ describe('SearchApplicationViewLogic', () => {
         ).toHaveBeenCalledWith({
           name: DEFAULT_VALUES.searchApplicationName,
           indices: ['search-001', 'search-002', 'search-003'],
+          template: mockSearchApplicationData.template,
         });
       });
     });

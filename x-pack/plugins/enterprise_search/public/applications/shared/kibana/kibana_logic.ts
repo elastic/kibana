@@ -21,6 +21,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -32,14 +33,14 @@ import { createHref, CreateHrefOptions } from '../react_router_helpers';
 type RequiredFieldsOnly<T> = {
   [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
 };
-interface KibanaLogicProps {
+export interface KibanaLogicProps {
   application: ApplicationStart;
   capabilities: Capabilities;
   charts: ChartsPluginStart;
   cloud?: CloudSetup;
   config: ClientConfigType;
   data: DataPublicPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   isSidebarEnabled: boolean;
   lens: LensPublicStart;
@@ -52,6 +53,7 @@ interface KibanaLogicProps {
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share: SharePluginStart;
+  ml: MlPluginStart;
   uiSettings: IUiSettingsClient;
 }
 
@@ -92,6 +94,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share, {}],
+    ml: [props.ml, {}],
     uiSettings: [props.uiSettings, {}],
   }),
   selectors: ({ selectors }) => ({

@@ -10,7 +10,6 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -34,10 +33,11 @@ import * as i18n from './translations';
 
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { useRiskScore } from '../../../explore/containers/risk_score';
-import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../explore/components/risk_score/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { RiskScoreDocTooltip } from '../common';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -88,20 +88,9 @@ export const UserOverview = React.memo<UserSummaryProps>(
       [userName]
     );
 
-    const { from, to } = useGlobalTime();
-
-    const timerange = useMemo(
-      () => ({
-        from,
-        to,
-      }),
-      [from, to]
-    );
-
     const { data: userRisk, isAuthorized } = useRiskScore({
       filterQuery,
       skip: userName == null,
-      timerange,
       riskEntity: RiskScoreEntity.user,
     });
 
@@ -138,15 +127,25 @@ export const UserOverview = React.memo<UserSummaryProps>(
         },
         {
           title: (
-            <RiskScoreHeaderTitle
-              title={i18n.USER_RISK_CLASSIFICATION}
-              riskScoreEntity={RiskScoreEntity.host}
-            />
+            <EuiFlexGroup alignItems="flexEnd" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <RiskScoreHeaderTitle
+                  title={i18n.USER_RISK_LEVEL}
+                  riskScoreEntity={RiskScoreEntity.user}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.user} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ),
           description: (
             <>
               {userRiskData ? (
-                <RiskScore severity={userRiskData.user.risk.calculated_level} hideBackgroundColor />
+                <RiskScoreLevel
+                  severity={userRiskData.user.risk.calculated_level}
+                  hideBackgroundColor
+                />
               ) : (
                 getEmptyTagValue()
               )}

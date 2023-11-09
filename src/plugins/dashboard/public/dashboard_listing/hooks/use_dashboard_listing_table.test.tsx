@@ -46,15 +46,13 @@ describe('useDashboardListingTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    getPluginServices.dashboardSessionStorage.dashboardHasUnsavedEdits = jest
-      .fn()
-      .mockReturnValue(true);
+    getPluginServices.dashboardBackup.dashboardHasUnsavedEdits = jest.fn().mockReturnValue(true);
 
-    getPluginServices.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = jest
+    getPluginServices.dashboardBackup.getDashboardIdsWithUnsavedChanges = jest
       .fn()
       .mockReturnValue([]);
 
-    getPluginServices.dashboardSessionStorage.clearState = clearStateMock;
+    getPluginServices.dashboardBackup.clearState = clearStateMock;
     getPluginServices.dashboardCapabilities.showWriteControls = true;
     getPluginServices.dashboardContentManagement.deleteDashboards = deleteDashboards;
     getPluginServices.settings.uiSettings.get = getUiSettingsMock;
@@ -105,6 +103,22 @@ describe('useDashboardListingTable', () => {
     expect(result.current.unsavedDashboardIds).toEqual([]);
   });
 
+  test('should not render the create dashboard button when showCreateDashboardButton is false', () => {
+    const initialFilter = 'myFilter';
+    const { result } = renderHook(() =>
+      useDashboardListingTable({
+        getDashboardUrl,
+        goToDashboard,
+        initialFilter,
+        urlStateEnabled: false,
+        showCreateDashboardButton: false,
+      })
+    );
+
+    const tableListViewTableProps = result.current.tableListViewTableProps;
+    expect(tableListViewTableProps.createItem).toBeUndefined();
+  });
+
   test('should return the correct tableListViewTableProps', () => {
     const initialFilter = 'myFilter';
     const { result } = renderHook(() =>
@@ -133,6 +147,7 @@ describe('useDashboardListingTable', () => {
       initialPageSize: 5,
       listingLimit: 20,
       onFetchSuccess: expect.any(Function),
+      itemIsEditable: expect.any(Function),
       setPageDataTestSubject: expect.any(Function),
       title: 'Dashboard List',
       urlStateEnabled: false,

@@ -9,7 +9,7 @@ import { Story } from '@storybook/react';
 import React, { ComponentType, useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { RuleParams, TransactionErrorRateRuleType } from '.';
+import { ErrorRateRuleParams, TransactionErrorRateRuleType } from '.';
 import { AlertMetadata } from '../../utils/helper';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
@@ -18,7 +18,7 @@ const KibanaReactContext = createKibanaReactContext({
 } as unknown as Partial<CoreStart>);
 
 interface Args {
-  ruleParams: RuleParams;
+  ruleParams: ErrorRateRuleParams;
   metadata?: AlertMetadata;
 }
 
@@ -42,7 +42,7 @@ export const CreatingInApmServiceOverview: Story<Args> = ({
   ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<RuleParams>(ruleParams);
+  const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
@@ -78,7 +78,7 @@ export const CreatingInStackManagement: Story<Args> = ({
   ruleParams,
   metadata,
 }) => {
-  const [params, setParams] = useState<RuleParams>(ruleParams);
+  const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });

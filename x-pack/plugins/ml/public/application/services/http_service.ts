@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import { getHttp } from '../util/dependency_cache';
 
 function getResultHeaders(headers: HeadersInit) {
@@ -57,68 +57,6 @@ function getFetchOptions(options: HttpFetchOptionsWithPath): {
 export async function http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
   const { path, fetchOptions } = getFetchOptions(options);
   return getHttp().fetch<T>(path, fetchOptions);
-}
-
-/**
- * Function for making HTTP requests to Kibana's backend which returns an Observable
- * with request cancellation support.
- *
- * @deprecated use {@link HttpService} instead
- */
-export function http$<T>(options: HttpFetchOptionsWithPath): Observable<T> {
-  const { path, fetchOptions } = getFetchOptions(options);
-  return fromHttpHandler<T>(path, fetchOptions);
-}
-
-/**
- * Creates an Observable from Kibana's HttpHandler.
- */
-function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
-  return new Observable<T>((subscriber) => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    let abortable = true;
-    let unsubscribed = false;
-
-    if (init?.signal) {
-      if (init.signal.aborted) {
-        controller.abort();
-      } else {
-        init.signal.addEventListener('abort', () => {
-          if (!signal.aborted) {
-            controller.abort();
-          }
-        });
-      }
-    }
-
-    const perSubscriberInit: RequestInit = {
-      ...(init ? init : {}),
-      signal,
-    };
-
-    getHttp()
-      .fetch<T>(input, perSubscriberInit)
-      .then((response) => {
-        abortable = false;
-        subscriber.next(response);
-        subscriber.complete();
-      })
-      .catch((err) => {
-        abortable = false;
-        if (!unsubscribed) {
-          subscriber.error(err);
-        }
-      });
-
-    return () => {
-      unsubscribed = true;
-      if (abortable) {
-        controller.abort();
-      }
-    };
-  });
 }
 
 /**

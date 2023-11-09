@@ -8,6 +8,8 @@
 
 export const LOGS_APP_ID = 'logs';
 
+export const OBSERVABILITY_LOG_EXPLORER = 'observability-log-explorer';
+
 export const OBSERVABILITY_OVERVIEW_APP_ID = 'observability-overview';
 
 export const METRICS_APP_ID = 'metrics';

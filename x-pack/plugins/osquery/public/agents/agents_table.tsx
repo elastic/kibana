@@ -7,10 +7,20 @@
 
 import { find } from 'lodash/fp';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiComboBox, EuiHealth, EuiFormRow, EuiHighlight, EuiSpacer } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiHealth,
+  EuiFormRow,
+  EuiHighlight,
+  EuiSpacer,
+  EuiCallOut,
+  EuiLink,
+} from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 
 import useDebounce from 'react-use/lib/useDebounce';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../common/lib/kibana';
 import { useAllAgents } from './use_all_agents';
 import { useAgentGroups } from './use_agent_groups';
 import { AgentGrouper } from './agent_grouper';
@@ -27,6 +37,7 @@ import {
   ALL_AGENTS_LABEL,
   AGENT_POLICY_LABEL,
   AGENT_SELECTION_LABEL,
+  NO_AGENT_AVAILABLE_TITLE,
 } from './translations';
 
 import type { SelectedGroups, AgentOptionValue, GroupOption, AgentSelection } from './types';
@@ -42,6 +53,7 @@ const perPage = 10;
 const DEBOUNCE_DELAY = 300; // ms
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange, error }) => {
+  const { docLinks } = useKibana().services;
   // search related
   const [searchValue, setSearchValue] = useState<string>('');
   const [modifyingSearch, setModifyingSearch] = useState<boolean>(false);
@@ -148,17 +160,23 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   useEffect(() => {
     if (agentsFetched && groupsFetched && agentGroupsData) {
+      // Cap policies to 10 on init dropdown
+      const policies = (agentGroupsData?.groups.policies || []).slice(
+        0,
+        searchValue === '' ? 10 : undefined
+      );
+
       const grouper = new AgentGrouper();
       // update the groups when groups or agents have changed
       grouper.setTotalAgents(agentGroupsData?.total);
       grouper.updateGroup(AGENT_GROUP_KEY.Platform, agentGroupsData?.groups.platforms);
-      grouper.updateGroup(AGENT_GROUP_KEY.Policy, agentGroupsData?.groups.policies);
+      grouper.updateGroup(AGENT_GROUP_KEY.Policy, policies);
       // @ts-expect-error update types
       grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
       const newOptions = grouper.generateOptions();
       setOptions((prevOptions) => (!deepEqual(prevOptions, newOptions) ? newOptions : prevOptions));
     }
-  }, [groupsLoading, agents, agentsFetched, groupsFetched, agentGroupsData]);
+  }, [groupsLoading, agents, agentsFetched, groupsFetched, agentGroupsData, searchValue]);
 
   const renderOption = useCallback((option, searchVal, contentClassName) => {
     const { label, value } = option;
@@ -183,22 +201,58 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     setModifyingSearch(v !== '');
     setSearchValue(v);
   }, []);
+  const isFetched = groupsFetched && agentsFetched && agentGroupsData;
+
+  const renderNoAgentAvailableWarning = () => {
+    if (isFetched && !options.length) {
+      return (
+        <>
+          <EuiCallOut color="danger" size="s" iconType="warning" title={NO_AGENT_AVAILABLE_TITLE}>
+            <FormattedMessage
+              id="xpack.osquery.agents.noAgentAvailableDescription"
+              defaultMessage="Before you can query agents, they must be enrolled in an agent policy with the Osquery integration installed. Refer to {docsLink} for more information."
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{
+                docsLink: (
+                  <EuiLink
+                    href={`${docLinks.links.fleet.agentPolicy}#apply-a-policy`}
+                    target={'_blank'}
+                  >
+                    <FormattedMessage
+                      id="xpack.osquery.agents.noAgentAvailableDescription.docsLink"
+                      defaultMessage="Apply a policy"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <div>
       <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth isInvalid={!!error} error={error}>
-        <EuiComboBox
-          data-test-subj="agentSelection"
-          placeholder={SELECT_AGENT_LABEL}
-          isLoading={modifyingSearch || groupsLoading || agentsLoading}
-          options={options}
-          isClearable={true}
-          fullWidth={true}
-          onSearchChange={onSearchChange}
-          selectedOptions={selectedOptions}
-          onChange={onSelection}
-          renderOption={renderOption}
-        />
+        <>
+          {renderNoAgentAvailableWarning()}
+          <EuiComboBox
+            data-test-subj="agentSelection"
+            placeholder={SELECT_AGENT_LABEL}
+            isLoading={groupsLoading || agentsLoading || modifyingSearch}
+            options={options}
+            isClearable={true}
+            fullWidth={true}
+            onSearchChange={onSearchChange}
+            selectedOptions={selectedOptions}
+            onChange={onSelection}
+            renderOption={renderOption}
+          />
+        </>
       </EuiFormRow>
       <EuiSpacer size="xs" />
       {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}

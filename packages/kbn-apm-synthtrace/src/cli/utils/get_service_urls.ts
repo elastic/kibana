@@ -80,8 +80,8 @@ async function getKibanaUrl({ target, logger }: { target: string; logger: Logger
 export async function getServiceUrls({ logger, target, kibana }: RunOptions & { logger: Logger }) {
   if (!target) {
     // assume things are running locally
-    kibana = kibana || 'http://localhost:5601';
-    target = 'http://localhost:9200';
+    kibana = kibana || 'http://127.0.0.1:5601';
+    target = 'http://127.0.0.1:9200';
   }
 
   if (!target) {

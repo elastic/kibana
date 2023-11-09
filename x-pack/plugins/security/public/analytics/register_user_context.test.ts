@@ -11,10 +11,10 @@ import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Sha256 } from '@kbn/crypto-browser';
 
+import { registerUserContext } from './register_user_context';
 import type { AuthenticationServiceSetup } from '..';
 import { authenticationMock } from '../authentication/index.mock';
 import { securityMock } from '../mocks';
-import { registerUserContext } from './register_user_context';
 
 describe('registerUserContext', () => {
   const username = '1234';

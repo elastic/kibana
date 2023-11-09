@@ -82,10 +82,14 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     });
 
     it('redirects an alias match', async () => {
-      await PageObjects.common.navigateToApp('canvas', {
-        basePath: '/s/custom_space',
-        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-old-id/page/1',
-      });
+      await PageObjects.common.navigateToUrl(
+        'canvas',
+        'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-old-id/page/1',
+        {
+          basePath: '/s/custom_space',
+          shouldUseHashForSubUrl: false,
+        }
+      );
 
       // Wait for the redirect toast
       await retry.try(async () => {
@@ -111,10 +115,14 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     });
 
     it('handles a conflict match', async () => {
-      await PageObjects.common.navigateToApp('canvas', {
-        basePath: '/s/custom_space',
-        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old/page/1',
-      });
+      await PageObjects.common.navigateToUrl(
+        'canvas',
+        'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old/page/1',
+        {
+          basePath: '/s/custom_space',
+          shouldUseHashForSubUrl: false,
+        }
+      );
 
       await testSubjects.click('legacy-url-conflict-go-to-other-button');
 

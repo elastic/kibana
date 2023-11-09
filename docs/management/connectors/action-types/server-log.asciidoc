@@ -3,12 +3,12 @@
 ++++
 <titleabbrev>Server log</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can write in {kib} server logs.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 A server log connector writes an entry to the {kib} server log.
-
-You can create a server log connectors in {kib} or by using the
-<<create-connector-api,create connector API>>. If you are running {kib}
-on-prem, you can also create preconfigured server log connectors.
 
 [float]
 [[define-serverlog-ui]]
@@ -28,28 +28,11 @@ image::management/connectors/images/serverlog-connector.png[Server log connector
 Server log connectors do not have any configuration properties other than a name.
 
 [float]
-[[preconfigured-server-log-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by adding
-`xpack.actions.preconfigured` settings to your `kibana.yml` file. For example:
-
-[source,text]
---
-xpack.actions.preconfigured:
-  my-server-log:
-    name: preconfigured-server-log-connector-type
-    actionTypeId: .server-log
---
-
-For more information, go to <<pre-configured-connectors>>.
-
-[float]
 [[server-log-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}.
+For example:
 
 [role="screenshot"]
 image::management/connectors/images/serverlog-params-test.png[Server log connector test]

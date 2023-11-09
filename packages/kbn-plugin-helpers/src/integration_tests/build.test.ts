@@ -54,7 +54,8 @@ it('builds a generated plugin into a viable archive', async () => {
   };
 
   expect(filterLogs(generateProc.all)).toMatchInlineSnapshot(`
-    " succ 🎉
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
+     succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
     "
@@ -73,12 +74,14 @@ it('builds a generated plugin into a viable archive', async () => {
   );
 
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
-    " info deleting the build and target directories
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
+     info deleting the build and target directories
      info run bazel and build required artifacts for the optimizer
      succ bazel run successfully and artifacts were created
      info running @kbn/optimizer
      │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
      │ info stopping @kbn/optimizer
+     info compressing js and css bundles found at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public to brotli
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies

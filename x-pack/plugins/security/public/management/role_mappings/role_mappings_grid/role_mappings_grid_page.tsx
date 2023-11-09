@@ -31,6 +31,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { EmptyPrompt } from './empty_prompt';
 import type { Role, RoleMapping } from '../../../../common/model';
 import { DisabledBadge, EnabledBadge } from '../../badges';
 import {
@@ -49,7 +50,6 @@ import {
 } from '../components';
 import type { DeleteRoleMappings } from '../components/delete_provider/delete_provider';
 import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
-import { EmptyPrompt } from './empty_prompt';
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;

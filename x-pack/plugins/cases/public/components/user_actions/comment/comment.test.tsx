@@ -587,28 +587,60 @@ describe('createCommentUserActionBuilder', () => {
     });
   });
 
-  it('renders correctly an action', async () => {
-    const userAction = getHostIsolationUserAction();
+  describe('Host isolation action', () => {
+    it('renders correctly an action', async () => {
+      const userAction = getHostIsolationUserAction();
 
-    const builder = createCommentUserActionBuilder({
-      ...builderArgs,
-      caseData: {
-        ...builderArgs.caseData,
-        comments: [hostIsolationComment()],
-      },
-      userAction,
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [hostIsolationComment()],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('endpoint-action')).toBeInTheDocument();
+      expect(screen.getByText('submitted isolate request on host')).toBeInTheDocument();
+      expect(screen.getByText('host1')).toBeInTheDocument();
+      expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
     });
 
-    const createdUserAction = builder.build();
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
-    );
+    it('shows the correct username', async () => {
+      const createdBy = { profileUid: userProfiles[0].uid };
+      const userAction = getHostIsolationUserAction({
+        createdBy,
+      });
 
-    expect(screen.getByText('submitted isolate request on host')).toBeInTheDocument();
-    expect(screen.getByText('host1')).toBeInTheDocument();
-    expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [hostIsolationComment({ createdBy })],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(
+        screen.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
+      ).toBeInTheDocument();
+      expect(screen.getAllByText('DR')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Damaged Raccoon')[0]).toBeInTheDocument();
+    });
   });
 
   describe('Attachment framework', () => {

@@ -1,8 +1,12 @@
 {
   "rollup.rollup_search": {
     "url_params": {
-      "typed_keys": "__flag__",
-      "rest_total_hits_as_int": "__flag__"
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "rest_total_hits_as_int": "__flag__",
+      "typed_keys": "__flag__"
     },
     "methods": [
       "GET",
@@ -11,6 +15,10 @@
     "patterns": [
       "{index}/_rollup_search"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-search.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-search.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

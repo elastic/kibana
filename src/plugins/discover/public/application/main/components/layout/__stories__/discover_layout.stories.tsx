@@ -68,7 +68,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
 );
 
 storiesOf('components/layout/DiscoverLayout', module).add(
-  'SQL view',
+  'ES|QL view',
   withDiscoverServices(() => {
     const props = getPlainRecordLayoutProps(getDataViewMock(false));
     return (

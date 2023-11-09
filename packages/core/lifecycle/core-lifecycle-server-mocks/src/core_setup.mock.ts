@@ -48,6 +48,7 @@ export function createCoreSetupMock({
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
     registerGlobal: uiSettingsServiceMock.createSetupContract().registerGlobal,
+    setAllowlist: uiSettingsServiceMock.createSetupContract().setAllowlist,
   };
 
   const mock: CoreSetupMockType = {
@@ -68,6 +69,10 @@ export function createCoreSetupMock({
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     coreUsageData: {
       registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
+    },
+    plugins: {
+      onSetup: jest.fn(),
+      onStart: jest.fn(),
     },
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()

@@ -29,7 +29,12 @@ export function MissingCredentialsCallout(props: Props) {
 
       <EuiSpacer size="m" />
 
-      <EuiButton fill color="primary" href={props.connectorsManagementHref}>
+      <EuiButton
+        data-test-subj="observabilityAiAssistantMissingCredentialsCalloutConnectAssistantButton"
+        fill
+        color="primary"
+        href={props.connectorsManagementHref}
+      >
         {i18n.translate('xpack.observabilityAiAssistant.missingCredentialsCallout.buttonLabel', {
           defaultMessage: 'Connect Assistant',
         })}

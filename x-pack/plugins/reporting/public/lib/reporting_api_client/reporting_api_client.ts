@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM } from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -17,13 +18,7 @@ import {
   PUBLIC_ROUTES,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import {
-  BaseParams,
-  DownloadReportFn,
-  JobId,
-  ManagementLinkFn,
-  ReportApiJSON,
-} from '../../../common/types';
+import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 
@@ -58,7 +53,6 @@ interface IReportingAPI {
 
   // Function props
   getManagementLink: ManagementLinkFn;
-  getDownloadLink: DownloadReportFn;
 
   // Diagnostic-related API calls
   verifyBrowser(): Promise<DiagnoseResponse>;
@@ -98,7 +92,7 @@ export class ReportingAPIClient implements IReportingAPI {
    */
   public getReportURL(jobId: string) {
     const downloadLink = this.http.basePath.prepend(
-      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`
+      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}?${ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM}=true`
     );
 
     return downloadLink;
@@ -218,8 +212,7 @@ export class ReportingAPIClient implements IReportingAPI {
   public getManagementLink: ManagementLinkFn = () =>
     this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
 
-  public getDownloadLink: DownloadReportFn = (jobId: JobId) =>
-    this.http.basePath.prepend(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`);
+  public getDownloadLink = (jobId: JobId) => this.getReportURL(jobId);
 
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 

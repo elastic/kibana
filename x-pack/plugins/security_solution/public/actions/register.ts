@@ -13,8 +13,12 @@ import type { StartServices } from '../types';
 import {
   createFilterInCellActionFactory,
   createFilterInDiscoverCellActionFactory,
+  createTimelineHistogramFilterInLegendActionFactory,
+  createFilterInHistogramLegendActionFactory,
   createFilterOutCellActionFactory,
   createFilterOutDiscoverCellActionFactory,
+  createFilterOutHistogramLegendActionFactory,
+  createTimelineHistogramFilterOutLegendActionFactory,
 } from './filter';
 import {
   createAddToTimelineLensAction,
@@ -37,6 +41,7 @@ import type {
   SecurityCellActions,
 } from './types';
 import { enhanceActionWithTelemetry } from './telemetry';
+import { registerDiscoverHistogramActions } from './discover_in_timeline/vis_apply_filter';
 
 export const registerUIActions = (
   store: SecurityAppStore,
@@ -46,16 +51,45 @@ export const registerUIActions = (
   registerLensEmbeddableActions(store, services);
   registerDiscoverCellActions(store, services);
   registerCellActions(store, history, services);
+  registerDiscoverHistogramActions(store, history, services);
 };
 
 const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartServices) => {
   const { uiActions } = services;
 
-  const addToTimelineAction = createAddToTimelineLensAction({ store, order: 1 });
+  const addToTimelineAction = createAddToTimelineLensAction({ store, order: 4 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
 
-  const copyToClipboardAction = createCopyToClipboardLensAction({ order: 2 });
+  const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
+
+  const filterInTimelineLegendActions = createTimelineHistogramFilterInLegendActionFactory({
+    store,
+    order: 0,
+    services,
+  });
+  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInTimelineLegendActions);
+
+  const filterOutTimelineLegendActions = createTimelineHistogramFilterOutLegendActionFactory({
+    store,
+    order: 1,
+    services,
+  });
+  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutTimelineLegendActions);
+
+  const filterInLegendActions = createFilterInHistogramLegendActionFactory({
+    store,
+    order: 2,
+    services,
+  });
+  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInLegendActions);
+
+  const filterOutLegendActions = createFilterOutHistogramLegendActionFactory({
+    store,
+    order: 3,
+    services,
+  });
+  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutLegendActions);
 };
 
 const registerDiscoverCellActions = (store: SecurityAppStore, services: StartServices) => {
@@ -105,7 +139,7 @@ const registerCellActions = (
     investigateInNewTimeline: createInvestigateInNewTimelineCellActionFactory({ store, services }),
     showTopN: createShowTopNCellActionFactory({ services }),
     copyToClipboard: createCopyToClipboardCellActionFactory({ services }),
-    toggleColumn: createToggleColumnCellActionFactory({ store }),
+    toggleColumn: createToggleColumnCellActionFactory({ store, services }),
   };
 
   const registerCellActionsTrigger = (

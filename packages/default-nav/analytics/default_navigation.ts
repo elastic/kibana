@@ -19,20 +19,16 @@ export const defaultNavigation: AnalyticsNodeDefinition = {
     defaultMessage: 'Data exploration',
   }),
   icon: 'stats',
+  renderAs: 'accordion',
   children: [
     {
-      id: 'root',
-      children: [
-        {
-          link: 'discover',
-        },
-        {
-          link: 'dashboards',
-        },
-        {
-          link: 'visualize',
-        },
-      ],
+      link: 'discover',
+    },
+    {
+      link: 'dashboards',
+    },
+    {
+      link: 'visualize',
     },
   ],
 };

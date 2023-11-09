@@ -341,6 +341,73 @@
           },
           {
             "parentPluginId": "savedObjectsTagging",
+            "id": "def-server.ITagsClient.findByName",
+            "type": "Function",
+            "tags": [],
+            "label": "findByName",
+            "description": [],
+            "signature": [
+              "(name: string, options?: { exact?: boolean | undefined; } | undefined) => Promise<",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.Tag",
+                "text": "Tag"
+              },
+              " | null>"
+            ],
+            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTagging",
+                "id": "def-server.ITagsClient.findByName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "savedObjectsTagging",
+                "id": "def-server.ITagsClient.findByName.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "savedObjectsTagging",
+                    "id": "def-server.ITagsClient.findByName.$2.exact",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "exact",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjectsTagging",
             "id": "def-server.ITagsClient.delete",
             "type": "Function",
             "tags": [],
@@ -927,6 +994,73 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.ITagsClient.findByName",
+            "type": "Function",
+            "tags": [],
+            "label": "findByName",
+            "description": [],
+            "signature": [
+              "(name: string, options?: { exact?: boolean | undefined; } | undefined) => Promise<",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.Tag",
+                "text": "Tag"
+              },
+              " | null>"
+            ],
+            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTagging",
+                "id": "def-common.ITagsClient.findByName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "savedObjectsTagging",
+                "id": "def-common.ITagsClient.findByName.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "savedObjectsTagging",
+                    "id": "def-common.ITagsClient.findByName.$2.exact",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "exact",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []

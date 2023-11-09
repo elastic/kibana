@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { expectIdsInDoc } from '../../../test/utils';
 import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
 import { SummarySection } from './summary_section';
 import { mockDashboardData } from '../mock';
 import { TestProvider } from '../../../test/test_provider';
-import { screen } from '@testing-library/react';
 import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
 
 describe('<CloudSummarySection />', () => {
@@ -31,11 +30,7 @@ describe('<CloudSummarySection />', () => {
     renderCloudSummarySection();
 
     expectIdsInDoc({
-      be: [
-        DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED,
-        DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED,
-        DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS,
-      ],
+      be: [DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED, DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED],
     });
   });
 
@@ -46,7 +41,6 @@ describe('<CloudSummarySection />', () => {
     expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED)).toHaveTextContent(
       '162'
     );
-    expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS)).toHaveTextContent('17');
   });
 
   it('renders counters value in compact abbreviation if its above one million', () => {
@@ -55,12 +49,5 @@ describe('<CloudSummarySection />', () => {
     expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED)).toHaveTextContent(
       '999,999'
     );
-    expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS)).toHaveTextContent('1M');
-  });
-
-  it('renders N/A as an empty state', () => {
-    renderCloudSummarySection({ stats: { totalFailed: undefined } });
-
-    expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS)).toHaveTextContent('N/A');
   });
 });

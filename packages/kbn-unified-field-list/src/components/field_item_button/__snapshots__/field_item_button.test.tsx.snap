@@ -62,6 +62,36 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly for Records (Lens
 />
 `;
 
+exports[`UnifiedFieldList <FieldItemButton /> renders properly for search with spaces 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview script date: date",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
+  dataTestSubj="field-script date-showDetails"
+  fieldIcon={
+    <WrappedFieldIcon
+      scripted={true}
+      type="date"
+    />
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-script date"
+      search="script date"
+      title="script date"
+    >
+      script date
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-script date"
+  size="s"
+/>
+`;
+
 exports[`UnifiedFieldList <FieldItemButton /> renders properly for text-based column field 1`] = `
 <FieldButton
   buttonProps={
@@ -136,7 +166,20 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly when a conflict f
       type="conflict"
     />
   }
-  fieldInfoIcon={<FieldConflictInfoIcon />}
+  fieldInfoIcon={
+    <FieldConflictInfoIcon
+      conflictDescriptions={
+        Object {
+          "keyword": Array [
+            "index_a",
+          ],
+          "long": Array [
+            "index_b",
+          ],
+        }
+      }
+    />
+  }
   fieldName={
     <EuiHighlight
       data-test-subj="field-custom_user_field"
@@ -191,7 +234,7 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly with a drag handl
       "aria-label": "Preview bytes: number",
     }
   }
-  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists custom"
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists unifiedFieldListItemButton--withDragHandle custom"
   dataTestSubj="test-subj"
   dragHandle={
     <span>

@@ -27,7 +27,7 @@ export interface VisualizeFieldContext {
 export interface CategorizeFieldContext {
   field: DataViewField;
   dataView: DataView;
-  originatingApp?: string;
+  originatingApp: string;
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';

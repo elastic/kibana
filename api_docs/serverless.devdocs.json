@@ -41,9 +41,21 @@
           "description": [],
           "signature": [
             "(breadcrumbs: ",
-            "EuiBreadcrumbProps",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-common.ChromeBreadcrumb",
+              "text": "ChromeBreadcrumb"
+            },
             " | ",
-            "EuiBreadcrumbProps",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-common.ChromeBreadcrumb",
+              "text": "ChromeBreadcrumb"
+            },
             "[], params?: Partial<",
             {
               "pluginId": "@kbn/core-chrome-browser",
@@ -66,9 +78,21 @@
               "label": "breadcrumbs",
               "description": [],
               "signature": [
-                "EuiBreadcrumbProps",
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "common",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-common.ChromeBreadcrumb",
+                  "text": "ChromeBreadcrumb"
+                },
                 " | ",
-                "EuiBreadcrumbProps",
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "common",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-common.ChromeBreadcrumb",
+                  "text": "ChromeBreadcrumb"
+                },
                 "[]"
               ],
               "path": "x-pack/plugins/serverless/public/types.ts",
@@ -274,7 +298,40 @@
       "path": "x-pack/plugins/serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "serverless",
+          "id": "def-server.ServerlessPluginSetup.setupProjectSettings",
+          "type": "Function",
+          "tags": [],
+          "label": "setupProjectSettings",
+          "description": [],
+          "signature": [
+            "(keys: string[]) => void"
+          ],
+          "path": "x-pack/plugins/serverless/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "serverless",
+              "id": "def-server.ServerlessPluginSetup.setupProjectSettings.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "keys",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "path": "x-pack/plugins/serverless/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },

@@ -381,7 +381,9 @@ describe('TaskStore', () => {
         index: 'tasky',
         body: {
           size: 0,
-          query: { bool: { filter: [{ term: { type: 'task' } }] } },
+          query: {
+            bool: { filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }] },
+          },
           aggs: { testAgg: { terms: { field: 'task.taskType' } } },
         },
       });
@@ -401,7 +403,11 @@ describe('TaskStore', () => {
           query: {
             bool: {
               must: [
-                { bool: { filter: [{ term: { type: 'task' } }] } },
+                {
+                  bool: {
+                    filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+                  },
+                },
                 { term: { 'task.taskType': 'bar' } },
               ],
             },
@@ -420,7 +426,9 @@ describe('TaskStore', () => {
       expect(args).toMatchObject({
         body: {
           size: 0,
-          query: { bool: { filter: [{ term: { type: 'task' } }] } },
+          query: {
+            bool: { filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }] },
+          },
           aggs: { testAgg: { terms: { field: 'task.taskType' } } },
           runtime_mappings: { testMapping: { type: 'long', script: { source: `` } } },
         },

@@ -1,11 +1,21 @@
 {
   "nodes.clear_repositories_metering_archive": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "DELETE"
     ],
     "patterns": [
       "_nodes/{node_id}/_repositories_metering/{max_archive_version}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/clear-repositories-metering-archive-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/clear-repositories-metering-archive-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

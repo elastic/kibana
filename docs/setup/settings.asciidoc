@@ -606,6 +606,8 @@ Set this value to false to disable the Remote Clusters UI.
 
 `xpack.rollup.ui.enabled`::
 Set this value to false to disable the Rollup Jobs UI. *Default: true*
++
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
 
 `xpack.snapshot_restore.ui.enabled`::
 Set this value to false to disable the Snapshot and Restore UI. *Default: true*
@@ -615,7 +617,7 @@ Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 `i18n.locale` {ess-icon}::
 Set this value to change the {kib} interface language.
-Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
+Valid locales are: `en`, `zh-CN`, `ja-JP`, `fr-FR`. *Default: `en`*
 
 include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[leveloffset=+1]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]

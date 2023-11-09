@@ -40,6 +40,7 @@ export class ProfilingPlugin
     deps.features.registerKibanaFeature(PROFILING_FEATURE);
 
     const config = this.initializerContext.config.get();
+    const stackVersion = this.initializerContext.env.packageInfo.version;
 
     const telemetryUsageCounter = deps.usageCollection?.createUsageCounter(
       PROFILING_SERVER_FEATURE_ID
@@ -61,6 +62,7 @@ export class ProfilingPlugin
           start: depsStart,
           setup: deps,
           config,
+          stackVersion,
           telemetryUsageCounter,
         },
         services: {

@@ -111,6 +111,18 @@ post:
   description: ''
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - in: query
+      name: ignoreMappingUpdateErrors
+      schema:
+        type: boolean
+        default: false
+      description: avoid erroring out on unexpected mapping update errors
+    - in: query
+      name: skipDataStreamRollover
+      schema:
+        type: boolean
+        default: false
+      description: skip data stream rollover during index template mapping or settings update
   requestBody:
     content:
       application/json:
@@ -194,11 +206,17 @@ delete:
   operationId: delete-package
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - schema:
+        type: boolean
+      name: force
+      description: delete package even if policies used by agents
+      in: query
   requestBody:
     content:
       application/json:
         schema:
           type: object
+          deprecated: true
           properties:
             force:
               type: boolean

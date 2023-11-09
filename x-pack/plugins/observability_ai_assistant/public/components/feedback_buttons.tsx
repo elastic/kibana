@@ -32,6 +32,7 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
         <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="observabilityAiAssistantFeedbackButtonsPositiveButton"
               color="success"
               iconType="faceHappy"
               size="s"
@@ -45,6 +46,7 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="observabilityAiAssistantFeedbackButtonsNegativeButton"
               color="danger"
               iconType="faceSad"
               size="s"

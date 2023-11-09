@@ -24,6 +24,7 @@ export const createSharedExceptionList = async ({
   description: string;
 }): Promise<ExceptionListSchema> => {
   const res: ExceptionListSchema = await http.post<ExceptionListSchema>(SHARED_EXCEPTION_LIST_URL, {
+    version: '2023-10-31',
     body: JSON.stringify({ name, description }),
     headers: { 'Content-Type': 'application/json' },
     method: 'POST',

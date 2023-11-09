@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/unified-doc-viewer",
+  "owner": "@elastic/kibana-data-discovery"
+}

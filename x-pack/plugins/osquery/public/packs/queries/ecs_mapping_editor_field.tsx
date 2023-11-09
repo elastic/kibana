@@ -920,7 +920,7 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
               */
 
               const [table, column] = selectItem.name.includes('.')
-                ? selectItem.name?.split('.')
+                ? selectItem.name.split('.')
                 : [Object.keys(astOsqueryTables)[0], selectItem.name];
 
               if (column === '*' && astOsqueryTables[table]) {

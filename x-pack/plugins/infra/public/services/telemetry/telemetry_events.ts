@@ -112,7 +112,70 @@ const hostViewTotalHostCountRetrieved: InfraTelemetryEvent = {
   },
 };
 
+const assetDetailsFlyoutViewed: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED,
+  schema: {
+    componentName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Name of the parent react component for the clicked asset.',
+        optional: false,
+      },
+    },
+    assetType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Asset type for the clicked asset.',
+        optional: false,
+      },
+    },
+    tabId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Tab id for the clicked asset.',
+        optional: true,
+      },
+    },
+  },
+};
+
+const assetDetailsPageViewed: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED,
+  schema: {
+    componentName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Name of the parent react component for the clicked asset.',
+        optional: false,
+      },
+    },
+    assetType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Asset type for the clicked asset.',
+        optional: false,
+      },
+    },
+    tabId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Tab id for the clicked asset.',
+        optional: true,
+      },
+    },
+    integrations: {
+      type: 'pass_through',
+      _meta: {
+        description: 'Integrations enabled for the displayed asset.',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const infraTelemetryEvents = [
+  assetDetailsFlyoutViewed,
+  assetDetailsPageViewed,
   hostsViewQuerySubmittedEvent,
   hostsEntryClickedEvent,
   hostFlyoutRemoveFilter,

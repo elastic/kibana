@@ -78,6 +78,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
           }}
           onBrushEnd={onBrushEnd}
           onElementClick={onBarClicked}
+          locale={i18n.getLocale()}
           {...chartTheme}
         />
         <Axis

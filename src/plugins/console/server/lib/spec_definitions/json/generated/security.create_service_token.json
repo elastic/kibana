@@ -1,6 +1,10 @@
 {
   "security.create_service_token": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "refresh": [
         "true",
         "false",
@@ -15,6 +19,10 @@
       "_security/service/{namespace}/{service}/credential/token/{name}",
       "_security/service/{namespace}/{service}/credential/token"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-service-token.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-service-token.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -22,6 +22,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'getRuleState',
     'getAlertSummary',
     'getExecutionLog',
+    'getActionErrorLog',
     'find',
     'getRuleExecutionKPI',
     'runSoon',

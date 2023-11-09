@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
 import type {
   ThresholdNormalized,
   ThresholdWithCardinality,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { RuleRangeTuple } from '../types';
-import type { ThresholdSignalHistory, ThresholdAlertState } from './types';
+import type { RuleRangeTuple, SignalSearchResponse } from '../types';
+import type {
+  ThresholdSignalHistory,
+  ThresholdAlertState,
+  ThresholdSingleBucketAggregationResult,
+  ThresholdMultiBucketAggregationResult,
+} from './types';
 
 /**
  * Returns a new signal history based on what the previous
@@ -82,3 +88,9 @@ export const getThresholdTermsHash = (
     )
     .digest('hex');
 };
+
+export const searchResultHasAggs = <
+  T extends ThresholdSingleBucketAggregationResult | ThresholdMultiBucketAggregationResult
+>(
+  obj: SignalSearchResponse<Record<estypes.AggregateName, estypes.AggregationsAggregate>>
+): obj is T => obj?.aggregations != null;

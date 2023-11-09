@@ -251,8 +251,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
       case PDF_REPORT_TYPE:
       case PDF_REPORT_TYPE_V2:
         return 'PDF';
-      case 'csv_searchsource':
-        return CSV_REPORT_TYPE;
+      case CSV_REPORT_TYPE:
+        return 'csv';
       case 'png':
       case PNG_REPORT_TYPE_V2:
         return PNG_REPORT_TYPE;

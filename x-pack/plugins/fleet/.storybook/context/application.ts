@@ -15,6 +15,7 @@ const applications = new Map();
 export const getApplication = () => {
   const application: ApplicationStart = {
     currentAppId$: of('fleet'),
+    currentLocation$: of(),
     navigateToUrl: async (url: string) => {
       action(`Navigate to: ${url}`);
     },

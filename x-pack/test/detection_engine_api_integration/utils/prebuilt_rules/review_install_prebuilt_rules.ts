@@ -21,6 +21,7 @@ export const reviewPrebuiltRulesToInstall = async (
   const response = await supertest
     .post(REVIEW_RULE_INSTALLATION_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .send()
     .expect(200);
 

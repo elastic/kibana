@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { transparentize } from 'polished';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
@@ -16,7 +15,6 @@ import {
   LogEntryColumnWidth,
   LogEntryColumnWidths,
 } from './log_entry_column';
-import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
 import { useLogPositionStateContext } from '../../../containers/logs/log_position';
 import { localizedDate } from '../../../../common/formatters/datetime';
 import {
@@ -25,6 +23,7 @@ import {
   isMessageColumnRenderConfiguration,
   isFieldColumnRenderConfiguration,
 } from '../../../utils/log_column_render_configuration';
+import LogColumnHeadersWrapper from './column_headers_wrapper';
 
 export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnRenderConfiguration[];
@@ -112,22 +111,6 @@ export const LogColumnHeader: React.FunctionComponent<{
   </LogColumnHeaderWrapper>
 );
 
-export const LogColumnHeadersWrapper = euiStyled.div.attrs((props) => ({
-  role: props.role ?? 'row',
-}))`
-  align-items: stretch;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  overflow: hidden;
-  padding-right: ${ASSUMED_SCROLLBAR_WIDTH}px;
-  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-  box-shadow: 0 2px 2px -1px ${(props) => transparentize(0.3, props.theme.eui.euiColorLightShade)};
-  position: relative;
-  z-index: 1;
-`;
-
 const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs((props) => ({
   role: props.role ?? 'columnheader',
 }))`
@@ -146,3 +129,6 @@ const LogColumnHeaderContent = euiStyled(LogEntryColumnContent)`
   text-overflow: clip;
   white-space: pre;
 `;
+
+// eslint-disable-next-line import/no-default-export
+export default LogColumnHeader;

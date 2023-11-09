@@ -7,6 +7,7 @@
 
 import React, { FC } from 'react';
 import { Chart, Settings, TooltipType, Tooltip } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { ModelItem, Anomaly } from '../../../../common/results_loader';
 import { Anomalies } from '../common/anomalies';
 import { ModelBounds } from './model_bounds';
@@ -51,6 +52,7 @@ export const AnomalyChart: FC<Props> = ({
           <Settings
             // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
             xDomain={xDomain}
+            locale={i18n.getLocale()}
           />
           <Axes chartData={data} />
           <Anomalies anomalyData={anomalyData} />

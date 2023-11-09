@@ -7,32 +7,33 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { RouteProps } from 'react-router-dom';
-import { UpsellingService } from './common/lib/upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
-import type { AppLinkItems } from './common/links';
+import type { AppLinksSwitcher } from './common/links';
+import type { DeepLinksFormatter } from './common/links/deep_links';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
+import { ContractComponentsService } from './contract_components';
 
 export class PluginContract {
-  public isSidebarEnabled$: BehaviorSubject<boolean>;
-  public getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
+  public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
-  public extraAppLinks$: BehaviorSubject<AppLinkItems>;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
+  public appLinksSwitcher: AppLinksSwitcher;
+  public deepLinksFormatter?: DeepLinksFormatter;
 
-  constructor() {
-    this.extraAppLinks$ = new BehaviorSubject<AppLinkItems>([]);
+  constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
-    this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-    this.getStartedComponent$ = new BehaviorSubject<React.ComponentType | null>(null);
+    this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
+    this.appLinksSwitcher = (appLinks) => appLinks;
   }
 
   public getStartServices(): ContractStartServices {
     return {
       extraRoutes$: this.extraRoutes$.asObservable(),
-      isSidebarEnabled$: this.isSidebarEnabled$.asObservable(),
-      getStartedComponent$: this.getStartedComponent$.asObservable(),
+      getComponent$: this.componentsService.getComponent$.bind(this.componentsService),
       upselling: this.upsellingService,
     };
   }
@@ -40,21 +41,25 @@ export class PluginContract {
   public getSetupContract(): PluginSetup {
     return {
       resolver: lazyResolver,
-      upselling: this.upsellingService,
+      experimentalFeatures: { ...this.experimentalFeatures },
+      setAppLinksSwitcher: (appLinksSwitcher) => {
+        this.appLinksSwitcher = appLinksSwitcher;
+      },
+      setDeepLinksFormatter: (deepLinksFormatter) => {
+        this.deepLinksFormatter = deepLinksFormatter;
+      },
     };
   }
 
   public getStartContract(): PluginStart {
     return {
       getNavLinks$: () => navLinks$,
-      setExtraAppLinks: (extraAppLinks) => this.extraAppLinks$.next(extraAppLinks),
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
-      setGetStartedPage: (getStartedComponent) => {
-        this.getStartedComponent$.next(getStartedComponent);
+      setComponents: (components) => {
+        this.componentsService.setComponents(components);
       },
       getBreadcrumbsNav$: () => breadcrumbsNav$,
+      getUpselling: () => this.upsellingService,
     };
   }
 

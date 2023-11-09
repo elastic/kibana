@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  RuleStats,
+  HealthOverviewState,
   TotalEnabledDisabled,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
@@ -51,7 +51,9 @@ export const getRuleStatsAggregation = (): Record<
   };
 };
 
-export const normalizeRuleStatsAggregation = (aggregations: Record<string, RawData>): RuleStats => {
+export const normalizeRuleStatsAggregation = (
+  aggregations: Record<string, RawData>
+): HealthOverviewState => {
   const rulesByEnabled = aggregations.rulesByEnabled || {};
   const rulesByOrigin = aggregations.rulesByOrigin || {};
   const rulesByType = aggregations.rulesByType || {};

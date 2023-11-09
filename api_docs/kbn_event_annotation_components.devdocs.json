@@ -125,336 +125,6 @@
       },
       {
         "parentPluginId": "@kbn/event-annotation-components",
-        "id": "def-public.EventAnnotationGroupTableList",
-        "type": "Function",
-        "tags": [],
-        "label": "EventAnnotationGroupTableList",
-        "description": [],
-        "signature": [
-          "({ uiSettings, eventAnnotationService, visualizeCapabilities, savedObjectsTagging, parentProps, dataViews, createDataView, queryInputServices, toasts, navigateToLens, }: { uiSettings: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
-          "; eventAnnotationService: ",
-          {
-            "pluginId": "@kbn/event-annotation-components",
-            "scope": "public",
-            "docId": "kibKbnEventAnnotationComponentsPluginApi",
-            "section": "def-public.EventAnnotationServiceType",
-            "text": "EventAnnotationServiceType"
-          },
-          "; visualizeCapabilities: Record<string, boolean | Record<string, boolean>>; savedObjectsTagging: ",
-          {
-            "pluginId": "savedObjectsTaggingOss",
-            "scope": "public",
-            "docId": "kibSavedObjectsTaggingOssPluginApi",
-            "section": "def-public.SavedObjectsTaggingApi",
-            "text": "SavedObjectsTaggingApi"
-          },
-          "; parentProps: ",
-          {
-            "pluginId": "@kbn/content-management-tabbed-table-list-view",
-            "scope": "common",
-            "docId": "kibKbnContentManagementTabbedTableListViewPluginApi",
-            "section": "def-common.TableListTabParentProps",
-            "text": "TableListTabParentProps"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/content-management-table-list-view-table",
-            "scope": "common",
-            "docId": "kibKbnContentManagementTableListViewTablePluginApi",
-            "section": "def-common.UserContentCommonSchema",
-            "text": "UserContentCommonSchema"
-          },
-          ">; dataViews: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "[]; createDataView: (spec: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
-          },
-          ") => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          ">; queryInputServices: ",
-          {
-            "pluginId": "@kbn/visualization-ui-components",
-            "scope": "public",
-            "docId": "kibKbnVisualizationUiComponentsPluginApi",
-            "section": "def-public.QueryInputServices",
-            "text": "QueryInputServices"
-          },
-          "; toasts: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.IToasts",
-            "text": "IToasts"
-          },
-          "; navigateToLens: () => void; }) => JSX.Element"
-        ],
-        "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/event-annotation-components",
-            "id": "def-public.EventAnnotationGroupTableList.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  uiSettings,\n  eventAnnotationService,\n  visualizeCapabilities,\n  savedObjectsTagging,\n  parentProps,\n  dataViews,\n  createDataView,\n  queryInputServices,\n  toasts,\n  navigateToLens,\n}",
-            "description": [],
-            "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.uiSettings",
-                "type": "Object",
-                "tags": [],
-                "label": "uiSettings",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-common.IUiSettingsClient",
-                    "text": "IUiSettingsClient"
-                  }
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.eventAnnotationService",
-                "type": "Object",
-                "tags": [],
-                "label": "eventAnnotationService",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/event-annotation-components",
-                    "scope": "public",
-                    "docId": "kibKbnEventAnnotationComponentsPluginApi",
-                    "section": "def-public.EventAnnotationServiceType",
-                    "text": "EventAnnotationServiceType"
-                  }
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.visualizeCapabilities",
-                "type": "Object",
-                "tags": [],
-                "label": "visualizeCapabilities",
-                "description": [],
-                "signature": [
-                  "{ [x: string]: boolean | Record<string, boolean>; }"
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.savedObjectsTagging",
-                "type": "Object",
-                "tags": [],
-                "label": "savedObjectsTagging",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "savedObjectsTaggingOss",
-                    "scope": "public",
-                    "docId": "kibSavedObjectsTaggingOssPluginApi",
-                    "section": "def-public.SavedObjectsTaggingApi",
-                    "text": "SavedObjectsTaggingApi"
-                  }
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.parentProps",
-                "type": "Object",
-                "tags": [],
-                "label": "parentProps",
-                "description": [],
-                "signature": [
-                  "{ onFetchSuccess: () => void; setPageDataTestSubject: (subject: string) => void; }"
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.dataViews",
-                "type": "Array",
-                "tags": [],
-                "label": "dataViews",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
-                  },
-                  "[]"
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.createDataView",
-                "type": "Function",
-                "tags": [],
-                "label": "createDataView",
-                "description": [],
-                "signature": [
-                  "(spec: ",
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewSpec",
-                    "text": "DataViewSpec"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
-                  },
-                  ">"
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/event-annotation-components",
-                    "id": "def-public.EventAnnotationGroupTableList.$1.createDataView.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "spec",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "dataViews",
-                        "scope": "common",
-                        "docId": "kibDataViewsPluginApi",
-                        "section": "def-common.DataViewSpec",
-                        "text": "DataViewSpec"
-                      }
-                    ],
-                    "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.queryInputServices",
-                "type": "Object",
-                "tags": [],
-                "label": "queryInputServices",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/visualization-ui-components",
-                    "scope": "public",
-                    "docId": "kibKbnVisualizationUiComponentsPluginApi",
-                    "section": "def-public.QueryInputServices",
-                    "text": "QueryInputServices"
-                  }
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.toasts",
-                "type": "Object",
-                "tags": [],
-                "label": "toasts",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.IToasts",
-                    "text": "IToasts"
-                  }
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/event-annotation-components",
-                "id": "def-public.EventAnnotationGroupTableList.$1.navigateToLens",
-                "type": "Function",
-                "tags": [],
-                "label": "navigateToLens",
-                "description": [],
-                "signature": [
-                  "() => void"
-                ],
-                "path": "packages/kbn-event-annotation-components/components/table_list.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [],
-                "returnComment": []
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/event-annotation-components",
         "id": "def-public.getAnnotationAccessor",
         "type": "Function",
         "tags": [],
@@ -1052,7 +722,7 @@
                 "section": "def-common.EventAnnotationGroupConfig",
                 "text": "EventAnnotationGroupConfig"
               },
-              ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]; }) => ",
+              ", \"ignoreGlobalFilters\" | \"annotations\" | \"indexPatternId\">[]; }) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -1104,7 +774,7 @@
                         "section": "def-common.EventAnnotationGroupConfig",
                         "text": "EventAnnotationGroupConfig"
                       },
-                      ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]"
+                      ", \"ignoreGlobalFilters\" | \"annotations\" | \"indexPatternId\">[]"
                     ],
                     "path": "packages/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
@@ -1131,7 +801,15 @@
                 "section": "def-common.SavedObjectCommon",
                 "text": "SavedObjectCommon"
               },
-              "<unknown>; }) => void; onCreateNew: () => void; }) => JSX.Element"
+              "<",
+              {
+                "pluginId": "savedObjectsFinder",
+                "scope": "common",
+                "docId": "kibSavedObjectsFinderPluginApi",
+                "section": "def-common.FinderAttributes",
+                "text": "FinderAttributes"
+              },
+              ">; }) => void; onCreateNew: () => void; }) => JSX.Element"
             ],
             "path": "packages/kbn-event-annotation-components/types.ts",
             "deprecated": false,
@@ -1178,7 +856,15 @@
                         "section": "def-common.SavedObjectCommon",
                         "text": "SavedObjectCommon"
                       },
-                      "<unknown>; }) => void"
+                      "<",
+                      {
+                        "pluginId": "savedObjectsFinder",
+                        "scope": "common",
+                        "docId": "kibSavedObjectsFinderPluginApi",
+                        "section": "def-common.FinderAttributes",
+                        "text": "FinderAttributes"
+                      },
+                      ">; }) => void"
                     ],
                     "path": "packages/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
@@ -1237,13 +923,21 @@
                             "description": [],
                             "signature": [
                               {
-                                "pluginId": "@kbn/core-saved-objects-common",
+                                "pluginId": "@kbn/content-management-utils",
                                 "scope": "common",
-                                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                                "section": "def-common.SavedObject",
-                                "text": "SavedObject"
+                                "docId": "kibKbnContentManagementUtilsPluginApi",
+                                "section": "def-common.SOWithMetadata",
+                                "text": "SOWithMetadata"
                               },
-                              "<unknown>"
+                              "<",
+                              {
+                                "pluginId": "savedObjectsFinder",
+                                "scope": "common",
+                                "docId": "kibSavedObjectsFinderPluginApi",
+                                "section": "def-common.FinderAttributes",
+                                "text": "FinderAttributes"
+                              },
+                              ">"
                             ],
                             "path": "packages/kbn-event-annotation-components/types.ts",
                             "deprecated": false,
@@ -1319,13 +1013,10 @@
       {
         "parentPluginId": "@kbn/event-annotation-components",
         "id": "def-public.defaultAnnotationLabel",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "defaultAnnotationLabel",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "packages/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,

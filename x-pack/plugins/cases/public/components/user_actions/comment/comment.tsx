@@ -248,6 +248,7 @@ const getCreateCommentUserAction = ({
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   appId,
   caseData,
+  casesConfiguration,
   userProfiles,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
@@ -293,6 +294,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       const commentAction = getCreateCommentUserAction({
         appId,
         caseData,
+        casesConfiguration,
         userProfiles,
         userAction: commentUserAction,
         externalReferenceAttachmentTypeRegistry,

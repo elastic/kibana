@@ -12,8 +12,6 @@ import * as kibanaServices from '../kibana_services';
 import { ErrorEmbeddable, IEmbeddable } from '../lib';
 import { useEmbeddablePanel } from './use_embeddable_panel';
 
-jest.mock('../kibana_services');
-
 describe('useEmbeddablePanel', () => {
   afterEach(() => {
     jest.resetAllMocks();

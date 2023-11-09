@@ -7,12 +7,13 @@
 
 import Url from 'url';
 
+import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
-import { getLatestAvailableAgentVersion } from './utils';
+import { createAgentPolicy, getLatestAvailableAgentVersion } from './utils';
 
 async function setupFleetAgent({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -29,6 +30,9 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
 
+  await verifyDockerInstalled(log);
+  await maybeCreateDockerNetwork(log);
+
   await startRuntimeServices({
     log,
     elasticUrl,
@@ -39,11 +43,15 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
     version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
-  const fleetManager = new FleetManager(kbnClient, log);
-  const agentManager = new AgentManager(kbnClient, config.get('servers.fleetserver.port'), log);
+  await new FleetManager(log).setup();
 
-  await fleetManager.setup();
-  await agentManager.setup();
+  const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, 'Default policy');
+  const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
+
+  const port = config.get('servers.fleetserver.port');
+
+  await new AgentManager(policyEnrollmentKey, port, log, kbnClient).setup();
+  await new AgentManager(policyEnrollmentKeyTwo, port, log, kbnClient).setup();
 }
 
 export async function startOsqueryCypress(context: FtrProviderContext) {

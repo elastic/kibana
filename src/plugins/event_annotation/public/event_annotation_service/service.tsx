@@ -218,7 +218,7 @@ export function getEventAnnotationService(
         description,
         ignoreGlobalFilters,
         annotations,
-        dataViewSpec: dataViewSpec || undefined,
+        dataViewSpec,
       },
       references,
     };

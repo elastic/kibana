@@ -1,11 +1,21 @@
 {
   "ccr.unfollow": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "{index}/_ccr/unfollow"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-post-unfollow.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ccr-post-unfollow.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

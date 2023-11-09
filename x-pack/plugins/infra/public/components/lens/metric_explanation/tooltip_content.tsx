@@ -11,14 +11,14 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
 
-interface Props extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {
+export interface TooltipContentProps extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {
   description: string;
   formula?: string;
   showDocumentationLink?: boolean;
 }
 
 export const TooltipContent = React.memo(
-  ({ description, formula, showDocumentationLink = false, style }: Props) => {
+  ({ description, formula, showDocumentationLink = false, style }: TooltipContentProps) => {
     const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       e.stopPropagation();
     };

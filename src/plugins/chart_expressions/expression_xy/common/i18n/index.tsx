@@ -209,6 +209,10 @@ export const strings = {
     i18n.translate('expressionXY.dataLayer.palette.help', {
       defaultMessage: 'Palette',
     }),
+  getColorMappingHelp: () =>
+    i18n.translate('expressionXY.layer.colorMapping.help', {
+      defaultMessage: 'JSON key-value pairs of the color mapping model',
+    }),
   getTableHelp: () =>
     i18n.translate('expressionXY.layers.table.help', {
       defaultMessage: 'Table',

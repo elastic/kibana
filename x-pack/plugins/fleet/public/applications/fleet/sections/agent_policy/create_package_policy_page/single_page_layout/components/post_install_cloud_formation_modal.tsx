@@ -20,9 +20,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
 
+import { useAgentPolicyWithPackagePolicies } from '../../../../../../../components/agent_enrollment_flyout/hooks';
+
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
-import { sendGetEnrollmentAPIKeys, useCreateCloudFormationUrl } from '../../../../../hooks';
-import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../../../../services';
+import {
+  sendGetEnrollmentAPIKeys,
+  useCreateCloudFormationUrl,
+  useFleetServerHostsForPolicy,
+} from '../../../../../hooks';
+import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
 import { CloudFormationGuide } from '../../../../../components';
 
 export const PostInstallCloudFormationModal: React.FunctionComponent<{
@@ -31,7 +37,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
 }> = ({ onConfirm, onCancel, agentPolicy, packagePolicy }) => {
-  const { data: apyKeysData } = useQuery(['cloudFormationApiKeys'], () =>
+  const { data: apiKeysData, isLoading } = useQuery(['cloudFormationApiKeys'], () =>
     sendGetEnrollmentAPIKeys({
       page: 1,
       perPage: 1,
@@ -39,13 +45,16 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
     })
   );
 
-  const cloudFormationTemplateUrl =
-    getCloudFormationTemplateUrlFromPackagePolicy(packagePolicy) || '';
+  const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(agentPolicy.id);
+  const { fleetServerHosts } = useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
+  const fleetServerHost = fleetServerHosts[0];
 
-  const { cloudFormationUrl, error, isError, isLoading } = useCreateCloudFormationUrl({
-    cloudFormationTemplateUrl,
-    enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
-    packagePolicy,
+  const cloudFormationProps = getCloudFormationPropsFromPackagePolicy(packagePolicy);
+
+  const { cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
+    enrollmentAPIKey: apiKeysData?.data?.items[0]?.api_key,
+    cloudFormationProps,
+    fleetServerHost,
   });
 
   return (
@@ -60,7 +69,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
       </EuiModalHeader>
 
       <EuiModalBody>
-        <CloudFormationGuide />
+        <CloudFormationGuide awsAccountType={cloudFormationProps.awsAccountType} />
         {error && isError && (
           <>
             <EuiSpacer size="m" />

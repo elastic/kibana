@@ -66,7 +66,7 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async isApiKeyModalExists() {
-      return await find.existsByCssSelector('[role="dialog"]');
+      return await find.existsByCssSelector('.euiFlyoutHeader');
     },
 
     async getNewApiKeyCreation() {

@@ -17,13 +17,12 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-
 import { has } from 'lodash';
 import {
-  PREVIEW_SECTION,
-  PREVIEW_SECTION_BACK_BUTTON,
-  PREVIEW_SECTION_CLOSE_BUTTON,
-  PREVIEW_SECTION_HEADER,
+  PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
+  PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
+  PREVIEW_SECTION_HEADER_TEST_ID,
+  PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
 import { useExpandableFlyoutContext } from '../..';
 import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
@@ -98,7 +97,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       <EuiButtonIcon
         iconType="cross"
         onClick={() => closePreviewPanel()}
-        data-test-subj={PREVIEW_SECTION_CLOSE_BUTTON}
+        data-test-subj={PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID}
         aria-label={CLOSE_BUTTON}
       />
     </EuiFlexItem>
@@ -111,7 +110,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           iconType="arrowLeft"
           iconSide="left"
           onClick={() => previousPreviewPanel()}
-          data-test-subj={PREVIEW_SECTION_BACK_BUTTON}
+          data-test-subj={PREVIEW_SECTION_BACK_BUTTON_TEST_ID}
           aria-label={BACK_BUTTON}
         >
           {BACK_BUTTON}
@@ -124,31 +123,24 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   );
 
   return (
-    <>
-      <div
-        css={css`
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          right: 0;
-          left: ${left};
-          background-color: ${euiTheme.colors.shadow};
-          opacity: 0.5;
-        `}
-      />
+    <div
+      css={css`
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: ${left};
+        z-index: 1000;
+      `}
+    >
       <EuiSplitPanel.Outer
         css={css`
           margin: ${euiTheme.size.xs};
           height: 99%;
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          right: 0;
-          left: ${left};
-          z-index: 1000;
+          box-shadow: 0px 0px 5px 5px ${euiTheme.colors.darkShade};
         `}
         className="eui-yScroll"
-        data-test-subj={PREVIEW_SECTION}
+        data-test-subj={PREVIEW_SECTION_TEST_ID}
       >
         {isPreviewBanner(banner) && (
           <EuiSplitPanel.Inner grow={false} color={banner.backgroundColor} paddingSize="none">
@@ -157,12 +149,16 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
             </EuiText>
           </EuiSplitPanel.Inner>
         )}
-        <EuiSplitPanel.Inner grow={false} paddingSize="s" data-test-subj={PREVIEW_SECTION_HEADER}>
+        <EuiSplitPanel.Inner
+          grow={false}
+          paddingSize="s"
+          data-test-subj={PREVIEW_SECTION_HEADER_TEST_ID}
+        >
           {header}
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none">{component}</EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
-    </>
+    </div>
   );
 };
 

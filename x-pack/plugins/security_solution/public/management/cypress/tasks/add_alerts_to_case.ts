@@ -36,6 +36,9 @@ export const addAlertsToCase = ({
     method: 'GET',
     url: DETECTION_ENGINE_RULES_URL,
     qs: { rule_id: ELASTIC_SECURITY_RULE_ID },
+    headers: {
+      'elastic-api-version': '2023-10-31',
+    },
   }).then((ruleResponse) => {
     const endpointRuleDocId = ruleResponse.body.id;
 

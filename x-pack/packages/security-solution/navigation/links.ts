@@ -11,6 +11,6 @@ export {
   withLink,
   LinkButton,
   LinkAnchor,
-  isExternalId,
+  isSecurityId,
 } from './src/links';
 export type { GetLinkUrl, GetLinkProps, LinkProps } from './src/links';

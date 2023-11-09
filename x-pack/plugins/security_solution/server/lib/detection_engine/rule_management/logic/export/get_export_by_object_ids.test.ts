@@ -28,7 +28,7 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 const exceptionsClient = getExceptionListClientMock();
 import type { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../../../routes/__mocks__/request_context';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 const connectors = [
   {
@@ -132,6 +132,7 @@ describe('get_export_by_object_ids', () => {
           note: '# Investigative notes',
           version: 1,
           exceptions_list: getListArrayMock(),
+          investigation_fields: undefined,
         },
         exportDetails: {
           exported_exception_list_count: 0,
@@ -327,6 +328,7 @@ describe('get_export_by_object_ids', () => {
         version: 1,
         revision: 0,
         exceptions_list: getListArrayMock(),
+        investigation_fields: undefined,
       });
       expect(detailsJson).toEqual({
         exported_exception_list_count: 0,
@@ -523,6 +525,7 @@ describe('get_export_by_object_ids', () => {
             namespace: undefined,
             data_view_id: undefined,
             alert_suppression: undefined,
+            investigation_fields: undefined,
           },
         ],
       };

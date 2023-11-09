@@ -10,7 +10,7 @@ import type { RuleObjectId } from '../../../../../common/api/detection_engine/mo
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings';
+import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings_query';
 import { useRuleSnoozeSettings } from './use_rule_snooze_settings';
 
 interface RuleSnoozeBadgeProps {

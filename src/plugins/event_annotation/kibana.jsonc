@@ -24,7 +24,6 @@
       "data",
       "savedObjectsFinder",
       "dataViews",
-      "kibanaReact",
     ],
     "extraPublicDirs": [
       "common"

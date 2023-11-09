@@ -11,9 +11,9 @@ import ReactDOM from 'react-dom';
 
 import {
   EuiText,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageTemplate,
   EuiCard,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageHeader,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
@@ -44,59 +44,66 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
       });
 
   return (
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiText>
-          <h1>Developer examples</h1>
-          <p>
-            The following examples showcase services and APIs that are available to developers.
+    <>
+      <EuiPageTemplate.Header>
+        <EuiFlexGroup justifyContent={'spaceBetween'}>
+          <EuiFlexItem>
+            <EuiPageHeader pageTitle={'Developer examples'} />
+            <EuiText>
+              The following examples showcase services and APIs that are available to developers.
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiFieldSearch
+              fullWidth
               placeholder="Search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               isClearable={true}
               aria-label="Search developer examples"
             />
-          </p>
-        </EuiText>
-      </EuiPageContentHeader>
-      <EuiFlexGroup wrap>
-        {filteredExamples.map((def) => (
-          <EuiFlexItem style={{ minWidth: 300, maxWidth: 500 }} key={def.appId}>
-            <EuiCard
-              description={
-                <EuiHighlight search={search} highlightAll={true}>
-                  {def.description}
-                </EuiHighlight>
-              }
-              title={
-                <React.Fragment>
-                  <EuiLink
-                    onClick={() => {
-                      navigateToApp(def.appId);
-                    }}
-                  >
-                    <EuiHighlight search={search} highlightAll={true}>
-                      {def.title}
-                    </EuiHighlight>
-                  </EuiLink>
-                  <EuiButtonIcon
-                    iconType="popout"
-                    onClick={() =>
-                      window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')
-                    }
-                  >
-                    Open in new tab
-                  </EuiButtonIcon>
-                </React.Fragment>
-              }
-              image={def.image}
-              footer={def.links ? <EuiListGroup size={'s'} listItems={def.links} /> : undefined}
-            />
           </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </EuiPageContent>
+        </EuiFlexGroup>
+      </EuiPageTemplate.Header>
+      <EuiPageTemplate.Section>
+        <EuiFlexGroup wrap>
+          {filteredExamples.map((def) => (
+            <EuiFlexItem style={{ minWidth: 300, maxWidth: 500 }} key={def.appId}>
+              <EuiCard
+                description={
+                  <EuiHighlight search={search} highlightAll={true}>
+                    {def.description}
+                  </EuiHighlight>
+                }
+                title={
+                  <React.Fragment>
+                    <EuiLink
+                      onClick={() => {
+                        navigateToApp(def.appId);
+                      }}
+                    >
+                      <EuiHighlight search={search} highlightAll={true}>
+                        {def.title}
+                      </EuiHighlight>
+                    </EuiLink>
+                    <EuiButtonIcon
+                      iconType="popout"
+                      onClick={() =>
+                        window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')
+                      }
+                    >
+                      Open in new tab
+                    </EuiButtonIcon>
+                  </React.Fragment>
+                }
+                image={def.image}
+                footer={def.links ? <EuiListGroup size={'s'} listItems={def.links} /> : undefined}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiPageTemplate.Section>
+    </>
   );
 }
 

@@ -62,11 +62,7 @@ const ActionsTableComponent = () => {
   const { data: actionsData } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    filterQuery: {
-      exists: {
-        field: 'user_id',
-      },
-    },
+    kuery: 'user_id: *',
   });
 
   const onTableChange = useCallback(({ page = {} }) => {

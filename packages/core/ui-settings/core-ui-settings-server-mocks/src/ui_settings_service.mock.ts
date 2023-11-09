@@ -49,6 +49,7 @@ const createSetupMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServiceSetup> = {
     register: jest.fn(),
     registerGlobal: jest.fn(),
+    setAllowlist: jest.fn(),
   };
 
   return mocked;

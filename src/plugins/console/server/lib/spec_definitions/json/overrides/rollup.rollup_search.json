@@ -1,5 +1,5 @@
 {
-  "xpack.rollup.rollup_search": {
+  "rollup.rollup_search": {
     "data_autocomplete_rules": {
       "query": {},
       "aggregations": {}

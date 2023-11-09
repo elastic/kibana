@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/xstate-utils",
+  "owner": "@elastic/obs-ux-logs-team"
+}

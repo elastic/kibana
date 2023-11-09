@@ -6,15 +6,15 @@
  */
 
 import * as t from 'io-ts';
-import { DataViewId } from '../../api/detection_engine/model/rule_schema';
 import { afterKeysSchema } from '../after_keys';
 import { identifierTypeSchema } from '../identifier_types';
+import { rangeSchema } from '../range';
 import { riskWeightsSchema } from '../risk_weights/schema';
 
 export const riskScorePreviewRequestSchema = t.exact(
   t.intersection([
     t.type({
-      data_view_id: DataViewId,
+      data_view_id: t.string,
     }),
     t.partial({
       after_keys: afterKeysSchema,
@@ -22,10 +22,7 @@ export const riskScorePreviewRequestSchema = t.exact(
       filter: t.unknown,
       page_size: t.number,
       identifier_type: identifierTypeSchema,
-      range: t.type({
-        start: t.string,
-        end: t.string,
-      }),
+      range: rangeSchema,
       weights: riskWeightsSchema,
     }),
   ])

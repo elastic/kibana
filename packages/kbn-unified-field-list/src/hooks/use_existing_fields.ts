@@ -14,6 +14,7 @@ import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
 
@@ -35,7 +36,7 @@ export interface ExistingFieldsFetcherParams {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   services: {
-    core: Pick<CoreStart, 'uiSettings'>;
+    core: Pick<CoreStart, 'uiSettings' | 'analytics'>;
     data: DataPublicPluginStart;
     dataViews: DataViewsContract;
   };
@@ -178,6 +179,8 @@ export const useExistingFieldsFetcher = (
   const dataViewsHash = getDataViewsHash(params.dataViews);
   const refetchFieldsExistenceInfo = useCallback(
     async (dataViewId?: string) => {
+      const startTime = window.performance.now();
+      const metricEventName = 'fetchFieldsExistenceInfo';
       const fetchId = generateId();
       lastFetchId = fetchId;
 
@@ -192,6 +195,11 @@ export const useExistingFieldsFetcher = (
           ...options,
           dataViewId,
         });
+        reportPerformanceMetricEvent(params.services.core.analytics, {
+          eventName: metricEventName,
+          duration: window.performance.now() - startTime,
+          meta: { dataViewsCount: 1 },
+        });
         return;
       }
       // refetch for all mentioned data views
@@ -203,6 +211,11 @@ export const useExistingFieldsFetcher = (
           })
         )
       );
+      reportPerformanceMetricEvent(params.services.core.analytics, {
+        eventName: metricEventName,
+        duration: window.performance.now() - startTime,
+        meta: { dataViewsCount: params.dataViews.length },
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -212,6 +225,7 @@ export const useExistingFieldsFetcher = (
       params.filters,
       params.fromDate,
       params.toDate,
+      params.services.core,
     ]
   );
 

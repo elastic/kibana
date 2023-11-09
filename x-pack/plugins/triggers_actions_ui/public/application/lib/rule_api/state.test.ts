@@ -82,7 +82,7 @@ describe('loadRuleState', () => {
           meta: {
             lastScheduledActions: {
               group: 'first_group',
-              date: new Date('2020-02-09T23:15:41.941Z'),
+              date: '2020-02-09T23:15:41.941Z',
             },
           },
         },

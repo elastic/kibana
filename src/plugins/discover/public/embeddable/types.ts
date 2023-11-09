@@ -22,7 +22,8 @@ export interface SearchOutput extends EmbeddableOutput {
 }
 
 export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
-  getSavedSearch(): SavedSearch;
+  getSavedSearch(): SavedSearch | undefined;
+  hasTimeRange(): boolean;
 }
 
 export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {

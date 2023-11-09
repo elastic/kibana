@@ -41,7 +41,8 @@
       "screenshotMode",
       "security",
       "spaces",
-      "usageCollection"
+      "usageCollection",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact",

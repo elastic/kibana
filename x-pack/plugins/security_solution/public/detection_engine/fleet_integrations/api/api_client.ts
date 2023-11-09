@@ -22,6 +22,7 @@ export const fleetIntegrationsApi: IFleetIntegrationsApiClient = {
 
     return http().fetch<GetInstalledIntegrationsResponse>(GET_INSTALLED_INTEGRATIONS_URL, {
       method: 'GET',
+      version: '1',
       query: {
         packages: packages?.sort()?.join(','),
       },

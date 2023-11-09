@@ -75,7 +75,6 @@ export const UserRiskScoreQueryTabBody = ({
     loading,
     refetch,
     totalCount,
-    isAuthorized,
   } = useRiskScore({
     filterQuery,
     pagination,
@@ -96,14 +95,6 @@ export const UserRiskScoreQueryTabBody = ({
     isDeprecated: isDeprecated && !loading,
   };
 
-  if (!isAuthorized) {
-    return <>{'TODO: Add RiskScore Upsell'}</>;
-  }
-
-  if (riskScoreEngineStatus?.isUpdateAvailable) {
-    return <RiskScoreUpdatePanel />;
-  }
-
   if (status.isDisabled || status.isDeprecated) {
     return (
       <EnableRiskScore
@@ -120,21 +111,24 @@ export const UserRiskScoreQueryTabBody = ({
   }
 
   return (
-    <UserRiskScoreTableManage
-      deleteQuery={deleteQuery}
-      data={data ?? []}
-      id={UserRiskScoreQueryId.USERS_BY_RISK}
-      inspect={inspect}
-      isInspect={isInspected}
-      loading={loading || isKpiLoading}
-      loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
-      refetch={refetch}
-      setQuery={setQuery}
-      setQuerySkip={setQuerySkip}
-      severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
-      totalCount={totalCount}
-      type={type}
-    />
+    <>
+      {riskScoreEngineStatus?.isUpdateAvailable && <RiskScoreUpdatePanel />}
+      <UserRiskScoreTableManage
+        deleteQuery={deleteQuery}
+        data={data ?? []}
+        id={UserRiskScoreQueryId.USERS_BY_RISK}
+        inspect={inspect}
+        isInspect={isInspected}
+        loading={loading || isKpiLoading}
+        loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
+        refetch={refetch}
+        setQuery={setQuery}
+        setQuerySkip={setQuerySkip}
+        severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
+        totalCount={totalCount}
+        type={type}
+      />
+    </>
   );
 };
 

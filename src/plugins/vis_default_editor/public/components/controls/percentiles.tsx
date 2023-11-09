@@ -42,6 +42,7 @@ function PercentilesEditor({
       id={`visEditorPercentileLabel${agg.id}`}
       isInvalid={showValidation ? !isValid : false}
       display="rowCompressed"
+      data-test-subj="visEditorPercentile"
     >
       <NumberList
         labelledbyId={`visEditorPercentileLabel${agg.id}-legend`}

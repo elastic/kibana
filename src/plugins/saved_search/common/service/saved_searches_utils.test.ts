@@ -25,6 +25,9 @@ describe('saved_searches_utils', () => {
         hideChart: true,
         isTextBasedQuery: false,
         usesAdHocDataView: false,
+        rowsPerPage: 250,
+        sampleSize: 1000,
+        breakdownField: 'extension.keyword',
       };
 
       expect(
@@ -38,7 +41,7 @@ describe('saved_searches_utils', () => {
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "breakdownField": undefined,
+          "breakdownField": "extension.keyword",
           "columns": Array [
             "a",
             "b",
@@ -52,7 +55,8 @@ describe('saved_searches_utils', () => {
           "references": Array [],
           "refreshInterval": undefined,
           "rowHeight": undefined,
-          "rowsPerPage": undefined,
+          "rowsPerPage": 250,
+          "sampleSize": 1000,
           "searchSource": SearchSource {
             "dependencies": Object {
               "aggs": Object {
@@ -60,6 +64,7 @@ describe('saved_searches_utils', () => {
               },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
+              "scriptedFieldsEnabled": true,
               "search": [MockFunction],
             },
             "fields": Object {},
@@ -121,6 +126,7 @@ describe('saved_searches_utils', () => {
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
+          "sampleSize": undefined,
           "sort": Array [
             Array [
               "a",

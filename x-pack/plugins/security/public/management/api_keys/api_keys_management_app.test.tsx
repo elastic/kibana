@@ -11,9 +11,9 @@ import { noop } from 'lodash';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
 
+import { apiKeysManagementApp } from './api_keys_management_app';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
-import { apiKeysManagementApp } from './api_keys_management_app';
 
 const element = document.body.appendChild(document.createElement('div'));
 

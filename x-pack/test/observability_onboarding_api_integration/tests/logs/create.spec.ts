@@ -56,7 +56,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when required privileges are set', () => {
       it('returns a flow id and apiKey encoded', async () => {
-        const request = await callApiWithPrivileges('logFiles');
+        const state = {
+          datasetName: 'my-dataset',
+          serviceName: 'my-service',
+          namespace: 'my-namespace',
+          logFilePaths: ['my-service-logs.log'],
+        };
+
+        const request = await callApiWithPrivileges('logFiles', state);
 
         expect(request.status).to.be(200);
         expect(request.body.apiKeyEncoded).to.not.empty();
@@ -68,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           datasetName: 'my-dataset',
           serviceName: 'my-service',
           namespace: 'my-namespace',
-          logFilePaths: 'my-service-logs.log',
+          logFilePaths: ['my-service-logs.log'],
         };
 
         const request = await callApiWithPrivileges('logFiles', state);

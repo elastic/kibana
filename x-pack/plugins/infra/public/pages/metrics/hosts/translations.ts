@@ -16,8 +16,8 @@ export const TABLE_COLUMN_LABEL = {
     defaultMessage: 'CPU usage (avg.)',
   }),
 
-  diskSpaceUsage: i18n.translate('xpack.infra.hostsViewPage.table.diskSpaceUsageColumnHeader', {
-    defaultMessage: 'Disk Space Usage (avg.)',
+  diskSpaceUsage: i18n.translate('xpack.infra.hostsViewPage.table.diskUsageColumnHeader', {
+    defaultMessage: 'Disk Usage (avg.)',
   }),
 
   tx: i18n.translate('xpack.infra.hostsViewPage.table.txColumnHeader', {

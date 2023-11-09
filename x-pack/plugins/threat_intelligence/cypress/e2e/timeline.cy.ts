@@ -26,7 +26,7 @@ import { login, visit } from '../tasks/login';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Timeline', () => {
+describe('Timeline', { tags: '@ess' }, () => {
   beforeEach(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();

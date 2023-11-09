@@ -93,7 +93,9 @@ export const WithHoverActions = React.memo<Props>(
       setShowHoverContent(false);
 
       if (onCloseRequested != null) {
-        onCloseRequested();
+        setTimeout(() => {
+          onCloseRequested();
+        });
       }
     }, [onCloseRequested]);
 

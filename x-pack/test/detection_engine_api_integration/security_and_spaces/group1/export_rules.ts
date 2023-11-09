@@ -7,7 +7,13 @@
 
 import expect from 'expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+
+import {
+  DETECTION_ENGINE_RULES_URL,
+  UPDATE_OR_CREATE_LEGACY_ACTIONS,
+} from '@kbn/security-solution-plugin/common/constants';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -21,6 +27,10 @@ import {
   getWebHookAction,
   removeServerGeneratedProperties,
   waitForRulePartialFailure,
+  getRuleSavedObjectWithLegacyInvestigationFields,
+  getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  getRuleSOById,
+  createRuleThroughAlertingEndpoint,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -46,6 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .expect('Content-Type', 'application/ndjson')
@@ -66,6 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             objects: [{ rule_id: 'rule-1' }],
           })
@@ -98,6 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -115,6 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -147,6 +161,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -200,6 +215,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -256,6 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -314,6 +331,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -375,6 +393,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200)
           .parse(binaryToString);
@@ -418,8 +437,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // attach the legacy notification
           await supertest
-            .post(`/internal/api/detection/legacy/notifications?alert_id=${rule.id}`)
+            .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${rule.id}`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               name: 'Legacy notification with one action',
               interval: '1h',
@@ -441,6 +461,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send()
             .expect(200)
             .parse(binaryToString);
@@ -486,8 +507,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // attach the legacy notification with actions
           await supertest
-            .post(`/internal/api/detection/legacy/notifications?alert_id=${rule.id}`)
+            .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${rule.id}`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               name: 'Legacy notification with one action',
               interval: '1h',
@@ -518,6 +540,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send()
             .expect(200)
             .parse(binaryToString);
@@ -574,8 +597,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // attach the legacy notification with actions to the first rule
           await supertest
-            .post(`/internal/api/detection/legacy/notifications?alert_id=${rule1.id}`)
+            .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${rule1.id}`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               name: 'Legacy notification with one action',
               interval: '1h',
@@ -604,8 +628,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // attach the legacy notification with actions to the 2nd rule
           await supertest
-            .post(`/internal/api/detection/legacy/notifications?alert_id=${rule2.id}`)
+            .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${rule2.id}`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               name: 'Legacy notification with one action',
               interval: '1h',
@@ -636,6 +661,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await supertest
             .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send()
             .expect(200)
             .parse(binaryToString);
@@ -699,6 +725,123 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(firstRule).toEqual(outputRule2);
           expect(secondRule).toEqual(outputRule1);
         });
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
+      let ruleWithLegacyInvestigationFieldEmptyArray: Rule<BaseRuleParams>;
+
+      beforeEach(async () => {
+        await deleteAllRules(supertest, log);
+        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFields()
+        );
+        ruleWithLegacyInvestigationFieldEmptyArray = await createRuleThroughAlertingEndpoint(
+          supertest,
+          getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray()
+        );
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-with-investigation-field'),
+          name: 'Test investigation fields object',
+          investigation_fields: { field_names: ['host.name'] },
+        });
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('exports a rule that has legacy investigation_field and transforms field in response', async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            objects: [{ rule_id: ruleWithLegacyInvestigationField.params.ruleId }],
+          })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule.investigation_fields).toEqual({
+          field_names: ['client.address', 'agent.name'],
+        });
+        /**
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * NOT include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
+        expect(ruleSO?.alert?.params?.investigationFields).toEqual([
+          'client.address',
+          'agent.name',
+        ]);
+      });
+
+      it('exports a rule that has a legacy investigation field set to empty array and unsets field in response', async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            objects: [{ rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId }],
+          })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule.investigation_fields).toEqual(undefined);
+
+        /**
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * NOT include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, ruleWithLegacyInvestigationFieldEmptyArray.id);
+        expect(ruleSO?.alert?.params?.investigationFields).toEqual([]);
+      });
+
+      it('exports rule with investigation fields as intended object type', async () => {
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send({
+            objects: [{ rule_id: 'rule-with-investigation-field' }],
+          })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule.investigation_fields).toEqual({
+          field_names: ['host.name'],
+        });
+        /**
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * NOT include a migration on SO.
+         */ const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, exportedRule.id);
+        expect(ruleSO?.alert?.params?.investigationFields).toEqual({ field_names: ['host.name'] });
       });
     });
   });

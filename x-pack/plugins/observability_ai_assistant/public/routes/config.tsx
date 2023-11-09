@@ -38,6 +38,9 @@ const observabilityAIAssistantRoutes = {
         }),
         element: <ConversationView />,
       },
+      '/conversations': {
+        element: <Redirect to="/conversations/new" />,
+      },
     },
   },
 };

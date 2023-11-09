@@ -1,8 +1,16 @@
 {
   "transform.start_transform": {
     "url_params": {
-      "from": "",
-      "timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "from": ""
     },
     "methods": [
       "POST"
@@ -10,6 +18,10 @@
     "patterns": [
       "_transform/{transform_id}/_start"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/start-transform.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/start-transform.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

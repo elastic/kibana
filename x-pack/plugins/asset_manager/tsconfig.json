@@ -7,6 +7,7 @@
     "../../../typings/**/*",
     "common/**/*",
     "server/**/*",
+    "public/**/*",
     "types/**/*"
   ],
   "exclude": ["target/**/*"],
@@ -17,5 +18,14 @@
     "@kbn/core-http-server",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/io-ts-utils",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/datemath",
+    "@kbn/apm-data-access-plugin",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/logging",
+    "@kbn/metrics-data-access-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-server-mocks"
   ]
 }

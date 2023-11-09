@@ -9,8 +9,8 @@ import { EuiDataGridColumn, EuiDataGridColumnCellAction } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const vulnerabilitiesByResourceColumns = {
-  resource_id: 'resource.id',
-  resource_name: 'resource.name',
+  resourceId: 'resource.id',
+  resourceName: 'resource.name',
   region: 'cloud.region',
   vulnerabilities_count: 'vulnerabilities_count',
   severity_map: 'severity_map',
@@ -33,7 +33,7 @@ export const getVulnerabilitiesByResourceColumnsGrid = (
 ): EuiDataGridColumn[] => [
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesByResourceColumns.resource_id,
+    id: vulnerabilitiesByResourceColumns.resourceId,
     displayAsText: i18n.translate('xpack.csp.vulnerabilityByResourceTable.column.resourceId', {
       defaultMessage: 'Resource ID',
     }),
@@ -41,7 +41,7 @@ export const getVulnerabilitiesByResourceColumnsGrid = (
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesByResourceColumns.resource_name,
+    id: vulnerabilitiesByResourceColumns.resourceName,
     displayAsText: i18n.translate('xpack.csp.vulnerabilityByResourceTable.column.resourceName', {
       defaultMessage: 'Resource Name',
     }),

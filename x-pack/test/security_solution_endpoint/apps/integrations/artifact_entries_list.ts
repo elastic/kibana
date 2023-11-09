@@ -26,6 +26,7 @@ import {
   MultipleArtifactActionsType,
 } from './mocks';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'artifactEntriesList']);
@@ -52,6 +53,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('For each artifact list under management', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     this.timeout(60_000 * 5);
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
@@ -232,8 +235,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     for (const testData of getArtifactsListTestsData()) {
-      // FLAKY: https://github.com/elastic/kibana/issues/163140
-      describe.skip(`When on the ${testData.title} entries list`, function () {
+      describe(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
           await removeAllArtifacts();

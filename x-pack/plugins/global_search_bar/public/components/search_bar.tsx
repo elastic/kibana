@@ -268,7 +268,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   if (chromeStyle === 'project' && !isVisible) {
     return (
-      <EuiButtonIcon
+      <EuiHeaderSectionItemButton
         aria-label={i18nStrings.showSearchAriaText}
         buttonRef={visibilityButtonRef}
         color="text"

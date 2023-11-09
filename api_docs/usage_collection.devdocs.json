@@ -1942,7 +1942,7 @@
             "section": "def-server.MakeSchemaFrom",
             "text": "MakeSchemaFrom"
           },
-          "<TFetchReturn> | undefined; fetch: ",
+          "<TFetchReturn, false> | undefined; fetch: ",
           {
             "pluginId": "usageCollection",
             "scope": "server",
@@ -1981,9 +1981,9 @@
         "signature": [
           "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: \"array\"; items: ",
           "RecursiveMakeSchemaFrom",
-          "<U>; } : ",
+          "<U, RequireMeta>; } : ",
           "RecursiveMakeSchemaFrom",
-          "<Required<Base>[Key]>; }"
+          "<Required<Base>[Key], RequireMeta>; }"
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
@@ -2025,7 +2025,7 @@
             "section": "def-server.MakeSchemaFrom",
             "text": "MakeSchemaFrom"
           },
-          "<TFetchReturn> | undefined; fetch: ",
+          "<TFetchReturn, false> | undefined; fetch: ",
           {
             "pluginId": "usageCollection",
             "scope": "server",
@@ -2041,7 +2041,7 @@
             "section": "def-server.MakeSchemaFrom",
             "text": "MakeSchemaFrom"
           },
-          "<TFetchReturn> | undefined; fetch: ",
+          "<TFetchReturn, false> | undefined; fetch: ",
           {
             "pluginId": "usageCollection",
             "scope": "server",

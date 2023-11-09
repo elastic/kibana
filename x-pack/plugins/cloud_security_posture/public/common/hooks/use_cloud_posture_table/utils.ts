@@ -50,7 +50,7 @@ export const getPaginationTableParams = (
 export const getPaginationQuery = ({
   pageIndex,
   pageSize,
-}: Pick<Pagination, 'pageIndex' | 'pageSize'>) => ({
+}: Required<Pick<Pagination, 'pageIndex' | 'pageSize'>>) => ({
   from: pageIndex * pageSize,
   size: pageSize,
 });

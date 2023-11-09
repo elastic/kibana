@@ -78,7 +78,7 @@ export interface ReportingInternalStart {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
-  screenshotting: ScreenshottingStart;
+  screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
@@ -134,7 +134,7 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
-      getScreenshots: this.getScreenshots.bind(this),
+      getScreenshots: config.statefulSettings.enabled ? this.getScreenshots.bind(this) : undefined,
       getSpaceId: this.getSpaceId.bind(this),
     });
 
@@ -226,22 +226,27 @@ export class ReportingCore {
    * only CSV export types should be registered in the export types registry for serverless
    */
   private getExportTypes(): ExportType[] {
+    const { csv, pdf, png } = this.config.export_types;
     const exportTypes = [];
-    if (!this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled) {
+
+    if (csv.enabled) {
+      // NOTE: CsvSearchSourceExportType should be deprecated and replaced with V2 in the UI: https://github.com/elastic/kibana/issues/151190
       exportTypes.push(
         new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
       );
       exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
-    } else {
-      exportTypes.push(
-        new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
-      );
-      exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
-      exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
-      exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
-      // deprecated export types for tests
-      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
     }
+
+    if (pdf.enabled) {
+      // NOTE: PdfV1ExportType is deprecated and tagged for removal: https://github.com/elastic/kibana/issues/154601
+      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
+    }
+
+    if (png.enabled) {
+      exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
+    }
+
     return exportTypes;
   }
 
@@ -403,7 +408,7 @@ export class ReportingCore {
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        return screenshotting.getScreenshots({
+        return screenshotting!.getScreenshots({
           ...options,
           urls: options.urls.map((url) =>
             typeof url === 'string'

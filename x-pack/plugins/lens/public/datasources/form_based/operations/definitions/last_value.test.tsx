@@ -175,7 +175,7 @@ describe('last_value', () => {
 
       expect(column).toEqual(
         expect.objectContaining({
-          filter: { language: 'kuery', query: 'bytes: *' },
+          filter: { language: 'kuery', query: '"bytes": *' },
         })
       );
     });
@@ -442,7 +442,7 @@ describe('last_value', () => {
         },
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
-      expect(lastValueColumn.filter).toEqual({ language: 'kuery', query: 'test: *' });
+      expect(lastValueColumn.filter).toEqual({ language: 'kuery', query: '"test": *' });
     });
 
     it('should use indexPattern timeFieldName as a default sortField', () => {

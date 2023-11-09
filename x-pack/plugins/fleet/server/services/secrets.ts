@@ -10,9 +10,16 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
+import type { KafkaOutput, Output, OutputSecretPath } from '../../common/types';
+
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
 
-import type { NewPackagePolicy, RegistryStream, UpdatePackagePolicy } from '../../common';
+import type {
+  NewOutput,
+  NewPackagePolicy,
+  RegistryStream,
+  UpdatePackagePolicy,
+} from '../../common';
 import { SO_SEARCH_LIMIT } from '../../common';
 
 import {
@@ -34,7 +41,7 @@ import type {
 } from '../types';
 
 import { FleetError } from '../errors';
-import { SECRETS_ENDPOINT_PATH } from '../constants';
+import { SECRETS_ENDPOINT_PATH, SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../constants';
 
 import { retryTransientEsErrors } from './epm/elasticsearch/retry';
 
@@ -42,6 +49,8 @@ import { auditLoggingService } from './audit_logging';
 
 import { appContextService } from './app_context';
 import { packagePolicyService } from './package_policy';
+import { settingsService } from '.';
+import { allFleetServerVersionsAreAtLeast } from './fleet_server';
 
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
@@ -115,7 +124,7 @@ export async function deleteSecretsIfNotReferenced(opts: {
     return;
   }
   try {
-    await _deleteSecrets({
+    await deleteSecrets({
       esClient,
       ids: secretsToDelete,
     });
@@ -164,7 +173,7 @@ export async function findPackagePoliciesUsingSecrets(opts: {
   return res;
 }
 
-export async function _deleteSecrets(opts: {
+export async function deleteSecrets(opts: {
   esClient: ElasticsearchClient;
   ids: string[];
 }): Promise<void> {
@@ -235,6 +244,105 @@ export async function extractAndWriteSecrets(opts: {
   };
 }
 
+export async function extractAndWriteOutputSecrets(opts: {
+  output: NewOutput;
+  esClient: ElasticsearchClient;
+}): Promise<{ output: NewOutput; secretReferences: PolicySecretReference[] }> {
+  const { output, esClient } = opts;
+
+  const secretPaths = getOutputSecretPaths(output.type, output).filter(
+    (path) => typeof path.value === 'string'
+  );
+
+  if (secretPaths.length === 0) {
+    return { output, secretReferences: [] };
+  }
+
+  const secrets = await createSecrets({
+    esClient,
+    values: secretPaths.map(({ value }) => value as string),
+  });
+
+  const outputWithSecretRefs = JSON.parse(JSON.stringify(output));
+  secretPaths.forEach((secretPath, i) => {
+    set(outputWithSecretRefs, secretPath.path, { id: secrets[i].id });
+  });
+
+  return {
+    output: outputWithSecretRefs,
+    secretReferences: secrets.map(({ id }) => ({ id })),
+  };
+}
+
+function getOutputSecretPaths(
+  outputType: NewOutput['type'],
+  output: NewOutput | Partial<Output>
+): OutputSecretPath[] {
+  const outputSecretPaths: OutputSecretPath[] = [];
+
+  if ((outputType === 'kafka' || outputType === 'logstash') && output.secrets?.ssl?.key) {
+    outputSecretPaths.push({
+      path: 'secrets.ssl.key',
+      value: output.secrets.ssl.key,
+    });
+  }
+
+  if (outputType === 'kafka') {
+    const kafkaOutput = output as KafkaOutput;
+    if (kafkaOutput?.secrets?.password) {
+      outputSecretPaths.push({
+        path: 'secrets.password',
+        value: kafkaOutput.secrets.password,
+      });
+    }
+  }
+
+  return outputSecretPaths;
+}
+
+export async function deleteOutputSecrets(opts: {
+  output: Output;
+  esClient: ElasticsearchClient;
+}): Promise<void> {
+  const { output, esClient } = opts;
+
+  const outputType = output.type;
+  const outputSecretPaths = getOutputSecretPaths(outputType, output);
+
+  if (outputSecretPaths.length === 0) {
+    return Promise.resolve();
+  }
+
+  const secretIds = outputSecretPaths.map(({ value }) => (value as { id: string }).id);
+
+  try {
+    return deleteSecrets({ esClient, ids: secretIds });
+  } catch (err) {
+    appContextService.getLogger().warn(`Error deleting secrets: ${err}`);
+  }
+}
+
+export function getOutputSecretReferences(output: Output): PolicySecretReference[] {
+  const outputSecretPaths: PolicySecretReference[] = [];
+
+  if (
+    (output.type === 'kafka' || output.type === 'logstash') &&
+    typeof output.secrets?.ssl?.key === 'object'
+  ) {
+    outputSecretPaths.push({
+      id: output.secrets.ssl.key.id,
+    });
+  }
+
+  if (output.type === 'kafka' && typeof output?.secrets?.password === 'object') {
+    outputSecretPaths.push({
+      id: output.secrets.password.id,
+    });
+  }
+
+  return outputSecretPaths;
+}
+
 export async function extractAndUpdateSecrets(opts: {
   oldPackagePolicy: PackagePolicy;
   packagePolicyUpdate: UpdatePackagePolicy;
@@ -270,10 +378,67 @@ export async function extractAndUpdateSecrets(opts: {
     ...createdSecrets.map(({ id }) => ({ id })),
   ];
 
+  const secretsToDelete: PolicySecretReference[] = [];
+
+  toDelete.forEach((secretPath) => {
+    // check if the previous secret is actually a secret refrerence
+    // it may be that secrets were not enabled at the time of creation
+    // in which case they are just stored as plain text
+    if (secretPath.value.value.isSecretRef) {
+      secretsToDelete.push({ id: secretPath.value.value.id });
+    }
+  });
+
   return {
     packagePolicyUpdate: policyWithSecretRefs,
     secretReferences,
-    secretsToDelete: toDelete.map((secretPath) => ({ id: secretPath.value.value.id })),
+    secretsToDelete,
+  };
+}
+export async function extractAndUpdateOutputSecrets(opts: {
+  oldOutput: Output;
+  outputUpdate: Partial<Output>;
+  esClient: ElasticsearchClient;
+}): Promise<{
+  outputUpdate: Partial<Output>;
+  secretReferences: PolicySecretReference[];
+  secretsToDelete: PolicySecretReference[];
+}> {
+  const { oldOutput, outputUpdate, esClient } = opts;
+  const outputType = outputUpdate.type || oldOutput.type;
+  const oldSecretPaths = getOutputSecretPaths(outputType, oldOutput);
+  const updatedSecretPaths = getOutputSecretPaths(outputType, outputUpdate);
+
+  if (!oldSecretPaths.length && !updatedSecretPaths.length) {
+    return { outputUpdate, secretReferences: [], secretsToDelete: [] };
+  }
+
+  const { toCreate, toDelete, noChange } = diffOutputSecretPaths(
+    oldSecretPaths,
+    updatedSecretPaths
+  );
+
+  const createdSecrets = await createSecrets({
+    esClient,
+    values: toCreate.map((secretPath) => secretPath.value as string),
+  });
+
+  const outputWithSecretRefs = JSON.parse(JSON.stringify(outputUpdate));
+  toCreate.forEach((secretPath, i) => {
+    set(outputWithSecretRefs, secretPath.path, { id: createdSecrets[i].id });
+  });
+
+  const secretReferences = [
+    ...noChange.map((secretPath) => ({ id: (secretPath.value as { id: string }).id })),
+    ...createdSecrets.map(({ id }) => ({ id })),
+  ];
+
+  return {
+    outputUpdate: outputWithSecretRefs,
+    secretReferences,
+    secretsToDelete: toDelete.map((secretPath) => ({
+      id: (secretPath.value as { id: string }).id,
+    })),
   };
 }
 
@@ -327,6 +492,36 @@ export function diffSecretPaths(
   return { toCreate: [...toCreate, ...remainingNewPaths], toDelete, noChange };
 }
 
+export function diffOutputSecretPaths(
+  oldPaths: OutputSecretPath[],
+  newPaths: OutputSecretPath[]
+): { toCreate: OutputSecretPath[]; toDelete: OutputSecretPath[]; noChange: OutputSecretPath[] } {
+  const toCreate: OutputSecretPath[] = [];
+  const toDelete: OutputSecretPath[] = [];
+  const noChange: OutputSecretPath[] = [];
+  const newPathsByPath = keyBy(newPaths, 'path');
+
+  for (const oldPath of oldPaths) {
+    if (!newPathsByPath[oldPath.path]) {
+      toDelete.push(oldPath);
+    }
+
+    const newPath = newPathsByPath[oldPath.path];
+    if (newPath && newPath.value) {
+      const newValue = newPath.value;
+      if (typeof newValue === 'string') toCreate.push(newPath);
+      toDelete.push(oldPath);
+    } else {
+      noChange.push(newPath);
+    }
+    delete newPathsByPath[oldPath.path];
+  }
+
+  const remainingNewPaths = Object.values(newPathsByPath);
+
+  return { toCreate: [...toCreate, ...remainingNewPaths], toDelete, noChange };
+}
+
 // Given a package policy and a package,
 // returns an array of lodash style paths to all secrets and their current values
 export function getPolicySecretPaths(
@@ -342,6 +537,58 @@ export function getPolicySecretPaths(
   const inputSecretPaths = _getInputSecretPaths(packagePolicy, packageInfo);
 
   return [...packageLevelVarPaths, ...inputSecretPaths];
+}
+
+export async function isSecretStorageEnabled(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+): Promise<boolean> {
+  const logger = appContextService.getLogger();
+
+  // first check if the feature flag is enabled, if not secrets are disabled
+  const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
+  if (!secretsStorageEnabled) {
+    logger.debug('Secrets storage is disabled by feature flag');
+    return false;
+  }
+
+  // if serverless then secrets will always be supported
+  const isFleetServerStandalone =
+    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
+
+  if (isFleetServerStandalone) {
+    logger.trace('Secrets storage is enabled as fleet server is standalone');
+    return true;
+  }
+
+  // now check the flag in settings to see if the fleet server requirement has already been met
+  // once the requirement has been met, secrets are always on
+  const settings = await settingsService.getSettingsOrUndefined(soClient);
+
+  if (settings && settings.secret_storage_requirements_met) {
+    logger.debug('Secrets storage requirements already met, turned on in settings');
+    return true;
+  }
+
+  // otherwise check if we have the minimum fleet server version and enable secrets if so
+  if (
+    await allFleetServerVersionsAreAtLeast(esClient, soClient, SECRETS_MINIMUM_FLEET_SERVER_VERSION)
+  ) {
+    logger.debug('Enabling secrets storage as minimum fleet server version has been met');
+    try {
+      await settingsService.saveSettings(soClient, {
+        secret_storage_requirements_met: true,
+      });
+    } catch (err) {
+      // we can suppress this error as it will be retried on the next function call
+      logger.warn(`Failed to save settings after enabling secrets storage: ${err.message}`);
+    }
+
+    return true;
+  }
+
+  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
+  return false;
 }
 
 function _getPackageLevelSecretPaths(

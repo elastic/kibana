@@ -15,6 +15,7 @@ const baseConfig = {
   base_url: 'https://cloud.elastic.co',
   deployment_url: '/abc123',
   profile_url: '/user/settings/',
+  projects_url: '/projects/',
   organization_url: '/account/',
 };
 
@@ -42,6 +43,10 @@ describe('Cloud Plugin', () => {
 
   describe('#setup', () => {
     describe('interface', () => {
+      it('snapshot', () => {
+        const { setup } = setupPlugin();
+        expect(setup).toMatchSnapshot();
+      });
       it('exposes isCloudEnabled', () => {
         const { setup } = setupPlugin();
         expect(setup.isCloudEnabled).toBe(true);
@@ -119,11 +124,36 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectId).toBe('my-awesome-project');
       });
+
+      it('exposes `serverless.projectName`', () => {
+        const { setup } = setupPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+            project_name: 'My Awesome Project',
+          },
+        });
+        expect(setup.serverless.projectName).toBe('My Awesome Project');
+      });
+
+      it('exposes `serverless.projectType`', () => {
+        const { setup } = setupPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+            project_name: 'My Awesome Project',
+            project_type: 'security',
+          },
+        });
+        expect(setup.serverless.projectType).toBe('security');
+      });
     });
   });
 
   describe('#start', () => {
     describe('interface', () => {
+      it('snapshot', () => {
+        const { start } = setupPlugin();
+        expect(start).toMatchSnapshot();
+      });
       it('exposes isCloudEnabled', () => {
         const { start } = setupPlugin();
         expect(start.isCloudEnabled).toBe(true);

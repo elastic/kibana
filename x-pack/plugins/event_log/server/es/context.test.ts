@@ -34,8 +34,8 @@ describe('createEsContext', () => {
   test('should return is ready state as falsy if not initialized', () => {
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test0',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
@@ -48,25 +48,25 @@ describe('createEsContext', () => {
   test('should return esNames', () => {
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test-index',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
     const esNames = context.esNames;
     expect(esNames).toStrictEqual({
       base: 'test-index',
-      dataStream: 'test-index-event-log-1.2.3',
+      dataStream: 'test-index-event-log-ds',
       indexPattern: 'test-index-event-log-*',
-      indexTemplate: 'test-index-event-log-1.2.3-template',
+      indexTemplate: 'test-index-event-log-template',
     });
   });
 
   test('should return exist false for esAdapter index template and data stream before initialize', async () => {
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test1',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
@@ -86,8 +86,8 @@ describe('createEsContext', () => {
   test('should return exist true for esAdapter index template and data stream after initialize', async () => {
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test2',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     elasticsearchClient.indices.existsTemplate.mockResponse(true);
@@ -117,8 +117,8 @@ describe('createEsContext', () => {
 
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test2',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     expect(mockCreateReadySignal).toBeCalledTimes(1);
@@ -134,8 +134,8 @@ describe('createEsContext', () => {
     jest.requireMock('./init').initializeEs.mockResolvedValue(false);
     const context = createEsContext({
       logger,
+      shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test2',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     context.initialize();

@@ -15,6 +15,24 @@ import type { CoverageOverviewMitreSubTechnique } from '../../model/coverage_ove
 import type { CoverageOverviewMitreTactic } from '../../model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../model/coverage_overview/mitre_technique';
 
+// The order the tactic columns will appear in on the coverage overview page
+const tacticOrder = [
+  'TA0043',
+  'TA0042',
+  'TA0001',
+  'TA0002',
+  'TA0003',
+  'TA0004',
+  'TA0005',
+  'TA0006',
+  'TA0007',
+  'TA0008',
+  'TA0009',
+  'TA0011',
+  'TA0010',
+  'TA0040',
+];
+
 export function buildCoverageOverviewMitreGraph(
   tactics: MitreTactic[],
   techniques: MitreTechnique[],
@@ -46,17 +64,18 @@ export function buildCoverageOverviewMitreGraph(
   const tacticToTechniquesMap = new Map<string, CoverageOverviewMitreTechnique[]>(); // Map(kebabCase(tactic name) -> CoverageOverviewMitreTechnique)
 
   for (const technique of techniques) {
-    const coverageOverviewMitreTechnique: CoverageOverviewMitreTechnique = {
-      id: technique.id,
-      name: technique.name,
-      reference: technique.reference,
-      subtechniques: techniqueToSubtechniquesMap.get(technique.id) ?? [],
-      enabledRules: [],
-      disabledRules: [],
-      availableRules: [],
-    };
+    const relatedSubtechniques = techniqueToSubtechniquesMap.get(technique.id) ?? [];
 
     for (const kebabCaseTacticName of technique.tactics) {
+      const coverageOverviewMitreTechnique: CoverageOverviewMitreTechnique = {
+        id: technique.id,
+        name: technique.name,
+        reference: technique.reference,
+        subtechniques: relatedSubtechniques,
+        enabledRules: [],
+        disabledRules: [],
+        availableRules: [],
+      };
       const tacticTechniques = tacticToTechniquesMap.get(kebabCaseTacticName);
 
       if (!tacticTechniques) {
@@ -67,9 +86,13 @@ export function buildCoverageOverviewMitreGraph(
     }
   }
 
+  const sortedTactics = tactics.sort(
+    (a, b) => tacticOrder.indexOf(a.id) - tacticOrder.indexOf(b.id)
+  );
+
   const result: CoverageOverviewMitreTactic[] = [];
 
-  for (const tactic of tactics) {
+  for (const tactic of sortedTactics) {
     result.push({
       id: tactic.id,
       name: tactic.name,

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorStatus, SyncJobType } from '../../../../../../common/types/connectors';
+import { ConnectorStatus, SyncJobType } from '@kbn/search-connectors';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';

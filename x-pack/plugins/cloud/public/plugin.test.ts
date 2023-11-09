@@ -148,6 +148,27 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectId).toBe('my-awesome-project');
       });
+
+      it('exposes `serverless.projectName`', () => {
+        const { setup } = setupPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+            project_name: 'My Awesome Project',
+          },
+        });
+        expect(setup.serverless.projectName).toBe('My Awesome Project');
+      });
+
+      it('exposes `serverless.projectType`', () => {
+        const { setup } = setupPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+            project_name: 'My Awesome Project',
+            project_type: 'security',
+          },
+        });
+        expect(setup.serverless.projectType).toBe('security');
+      });
     });
   });
 
@@ -185,7 +206,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
       expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "https://cloud.elastic.co/support",
+          "https://support.elastic.co/",
         ]
       `);
     });
@@ -221,6 +242,18 @@ describe('Cloud Plugin', () => {
       const coreStart = coreMock.createStart();
       const start = plugin.start(coreStart);
       expect(start.serverless.projectId).toBe('my-awesome-project');
+    });
+
+    it('exposes `serverless.projectName`', () => {
+      const { plugin } = startPlugin({
+        serverless: {
+          project_id: 'my-awesome-project',
+          project_name: 'My Awesome Project',
+        },
+      });
+      const coreStart = coreMock.createStart();
+      const start = plugin.start(coreStart);
+      expect(start.serverless.projectName).toBe('My Awesome Project');
     });
   });
 });

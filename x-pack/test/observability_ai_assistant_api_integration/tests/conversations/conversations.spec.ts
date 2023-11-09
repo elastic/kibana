@@ -59,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns a 404 for updating conversations', async () => {
         await observabilityAIAssistantAPIClient
           .writeUser({
-            endpoint: 'POST /internal/observability_ai_assistant/conversation/{conversationId}',
+            endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
                 conversationId: 'non-existing-conversation-id',
@@ -88,12 +88,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when creating a conversation with the write user', () => {
       let createResponse: Awaited<
-        SupertestReturnType<'PUT /internal/observability_ai_assistant/conversation'>
+        SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
       >;
       before(async () => {
         createResponse = await observabilityAIAssistantAPIClient
           .writeUser({
-            endpoint: 'PUT /internal/observability_ai_assistant/conversation',
+            endpoint: 'POST /internal/observability_ai_assistant/conversation',
             params: {
               body: {
                 conversation: conversationCreate,
@@ -149,7 +149,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns a 404 for updating a non-existing conversation', async () => {
         await observabilityAIAssistantAPIClient
           .writeUser({
-            endpoint: 'POST /internal/observability_ai_assistant/conversation/{conversationId}',
+            endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
                 conversationId: 'non-existing-conversation-id',
@@ -205,13 +205,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('after updating', () => {
         let updateResponse: Awaited<
-          SupertestReturnType<'POST /internal/observability_ai_assistant/conversation/{conversationId}'>
+          SupertestReturnType<'PUT /internal/observability_ai_assistant/conversation/{conversationId}'>
         >;
 
         before(async () => {
           updateResponse = await observabilityAIAssistantAPIClient
             .writeUser({
-              endpoint: 'POST /internal/observability_ai_assistant/conversation/{conversationId}',
+              endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
               params: {
                 path: {
                   conversationId: createResponse.body.conversation.id,

@@ -58,7 +58,7 @@ const findConversationsRoute = createObservabilityAIAssistantServerRoute({
 });
 
 const createConversationRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'PUT /internal/observability_ai_assistant/conversation',
+  endpoint: 'POST /internal/observability_ai_assistant/conversation',
   params: t.type({
     body: t.type({
       conversation: conversationCreateRt,
@@ -81,7 +81,7 @@ const createConversationRoute = createObservabilityAIAssistantServerRoute({
 });
 
 const updateConversationRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/conversation/{conversationId}',
+  endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
   params: t.type({
     path: t.type({
       conversationId: t.string,
@@ -105,6 +105,68 @@ const updateConversationRoute = createObservabilityAIAssistantServerRoute({
     return client.update(
       merge({}, params.body.conversation, { conversation: { id: params.path.conversationId } })
     );
+  },
+});
+
+const updateConversationTitleBasedOnMessages = createObservabilityAIAssistantServerRoute({
+  endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}/auto_title',
+  params: t.type({
+    path: t.type({
+      conversationId: t.string,
+    }),
+    body: t.type({
+      connectorId: t.string,
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<Conversation> => {
+    const { service, request, params } = resources;
+
+    const client = await service.getClient({ request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    const conversation = await client.autoTitle({
+      conversationId: params.path.conversationId,
+      connectorId: params.body.connectorId,
+    });
+
+    return Promise.resolve(conversation);
+  },
+});
+
+const updateConversationTitle = createObservabilityAIAssistantServerRoute({
+  endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}/title',
+  params: t.type({
+    path: t.type({
+      conversationId: t.string,
+    }),
+    body: t.type({
+      title: t.string,
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<Conversation> => {
+    const { service, request, params } = resources;
+
+    const client = await service.getClient({ request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    const conversation = await client.setTitle({
+      conversationId: params.path.conversationId,
+      title: params.body.title,
+    });
+
+    return Promise.resolve(conversation);
   },
 });
 
@@ -136,5 +198,7 @@ export const conversationRoutes = {
   ...findConversationsRoute,
   ...createConversationRoute,
   ...updateConversationRoute,
+  ...updateConversationTitleBasedOnMessages,
+  ...updateConversationTitle,
   ...deleteConversationRoute,
 };

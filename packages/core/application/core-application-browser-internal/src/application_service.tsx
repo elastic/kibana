@@ -17,7 +17,7 @@ import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type {
   App,
   AppDeepLink,
@@ -55,6 +55,7 @@ export interface SetupDeps {
 
 export interface StartDeps {
   http: HttpStart;
+  analytics: AnalyticsServiceStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
   customBranding: CustomBrandingStart;
@@ -112,6 +113,7 @@ export class ApplicationService {
   private stop$ = new Subject<void>();
   private registrationClosed = false;
   private history?: History<any>;
+  private location$?: Observable<string>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
@@ -136,10 +138,10 @@ export class ApplicationService {
         }),
       });
 
-    const location$ = getLocationObservable(window.location, this.history);
+    this.location$ = getLocationObservable(window.location, this.history);
     registerAnalyticsContextProvider({
       analytics,
-      location$,
+      location$: this.location$,
     });
 
     this.navigate = (url, state, replace) => {
@@ -224,6 +226,7 @@ export class ApplicationService {
   }
 
   public async start({
+    analytics,
     http,
     overlays,
     theme,
@@ -311,6 +314,7 @@ export class ApplicationService {
         shareReplay(1)
       ),
       capabilities,
+      currentLocation$: this.location$!.pipe(takeUntil(this.stop$)),
       currentAppId$: this.currentAppId$.pipe(
         filter((appId) => appId !== undefined),
         distinctUntilChanged(),
@@ -362,6 +366,7 @@ export class ApplicationService {
         }
         return (
           <AppRouter
+            analytics={analytics}
             history={this.history}
             theme$={theme.theme$}
             mounters={availableMounters}

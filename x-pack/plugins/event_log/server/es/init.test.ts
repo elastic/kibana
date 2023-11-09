@@ -74,6 +74,12 @@ describe('initializeEs', () => {
     expect(esContext.esAdapter.setLegacyIndexTemplateToHidden).not.toHaveBeenCalled();
   });
 
+  test(`should not read or update existing index templates when specifying shouldSetExistingAssetsToHidden=false`, async () => {
+    await initializeEs({ ...esContext, shouldSetExistingAssetsToHidden: false });
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.setLegacyIndexTemplateToHidden).not.toHaveBeenCalled();
+  });
+
   test(`should continue initialization if getting existing index templates throws an error`, async () => {
     esContext.esAdapter.getExistingLegacyIndexTemplates.mockRejectedValue(new Error('Fail'));
 
@@ -198,6 +204,12 @@ describe('initializeEs', () => {
     expect(esContext.esAdapter.setIndexToHidden).not.toHaveBeenCalled();
   });
 
+  test(`should not read or update existing index settings when specifying shouldSetExistingAssetsToHidden=false`, async () => {
+    await initializeEs({ ...esContext, shouldSetExistingAssetsToHidden: false });
+    expect(esContext.esAdapter.getExistingIndices).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexToHidden).not.toHaveBeenCalled();
+  });
+
   test(`should continue initialization if getting existing index settings throws an error`, async () => {
     esContext.esAdapter.getExistingIndices.mockRejectedValue(new Error('Fail'));
 
@@ -284,6 +296,12 @@ describe('initializeEs', () => {
 
     await initializeEs(esContext);
     expect(esContext.esAdapter.getExistingIndexAliases).toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexAliasToHidden).not.toHaveBeenCalled();
+  });
+
+  test(`should not read or update existing index aliases when specifying shouldSetExistingAssetsToHidden=false`, async () => {
+    await initializeEs({ ...esContext, shouldSetExistingAssetsToHidden: false });
+    expect(esContext.esAdapter.getExistingIndexAliases).not.toHaveBeenCalled();
     expect(esContext.esAdapter.setIndexAliasToHidden).not.toHaveBeenCalled();
   });
 

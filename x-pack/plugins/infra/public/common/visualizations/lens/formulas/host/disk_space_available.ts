@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskSpaceAvailable: FormulaConfig = {
-  label: 'Disk Space Available',
+export const diskSpaceAvailable: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.diskSpaceAvailable', {
+    defaultMessage: 'Disk Space Available',
+  }),
   value: 'average(system.filesystem.free)',
   format: {
     id: 'bytes',

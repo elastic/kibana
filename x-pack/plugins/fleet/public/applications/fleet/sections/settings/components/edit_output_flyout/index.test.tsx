@@ -10,6 +10,7 @@ import React from 'react';
 import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
+import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { EditOutputFlyout } from '.';
 
@@ -43,9 +44,6 @@ const logstashInputsLabels = [
 ];
 
 const kafkaInputsLabels = [
-  'Username',
-  'Password',
-  'SASL Mechanism',
   'Partitioning strategy',
   'Number of events',
   'Default topic',
@@ -53,7 +51,6 @@ const kafkaInputsLabels = [
   'Value',
   'Broker timeout',
   'Broker reachability timeout',
-  'Channel buffer size',
   'ACK Reliability',
   'Key (optional)',
 ];
@@ -66,6 +63,8 @@ const kafkaSectionsLabels = [
   'Compression',
   'Broker settings',
 ];
+
+const remoteEsOutputLabels = ['Hosts', 'Service Token'];
 
 describe('EditOutputFlyout', () => {
   it('should render the flyout if there is not output provided', async () => {
@@ -143,7 +142,7 @@ describe('EditOutputFlyout', () => {
     });
 
     // Does not show logstash inputs
-    logstashInputsLabels.forEach((label) => {
+    ['Client SSL certificate key', 'Client SSL certificate'].forEach((label) => {
       expect(utils.queryByLabelText(label)).toBeNull();
     });
   });
@@ -162,5 +161,21 @@ describe('EditOutputFlyout', () => {
 
     // Show logstash SSL inputs
     expect(utils.getByText('Additional setup required')).not.toBeNull();
+  });
+
+  it('should render the flyout if the output provided is a remote ES output', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ remoteESOutput: true });
+    const { utils } = renderFlyout({
+      type: 'remote_elasticsearch',
+      name: 'remote es output',
+      id: 'outputR',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    remoteEsOutputLabels.forEach((label) => {
+      expect(utils.queryByLabelText(label)).not.toBeNull();
+    });
+    expect(utils.queryByTestId('serviceTokenCallout')).not.toBeNull();
   });
 });

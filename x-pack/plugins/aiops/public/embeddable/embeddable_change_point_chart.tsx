@@ -13,7 +13,7 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { type CoreStart, IUiSettingsClient } from '@kbn/core/public';
@@ -21,15 +21,17 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { EmbeddableInputTracker } from './embeddable_chart_component_wrapper';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE, EMBEDDABLE_ORIGIN } from '../../common/constants';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
 
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 
 export type EmbeddableChangePointChartInput = EmbeddableInput & EmbeddableChangePointChartProps;
 
-export type EmbeddableChangePointChartOutput = EmbeddableOutput;
+export type EmbeddableChangePointChartOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
 
 export interface EmbeddableChangePointChartDeps {
   theme: ThemeServiceStart;
@@ -39,6 +41,7 @@ export interface EmbeddableChangePointChartDeps {
   notifications: CoreStart['notifications'];
   i18n: CoreStart['i18n'];
   lens: LensPublicStart;
+  usageCollection: UsageCollectionSetup;
 }
 
 export type IEmbeddableChangePointChart = typeof EmbeddableChangePointChart;
@@ -57,12 +60,31 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
 
   private node?: HTMLElement;
 
+  // Need to defer embeddable load in order to resolve data views
+  deferEmbeddableLoad = true;
+
   constructor(
     private readonly deps: EmbeddableChangePointChartDeps,
     initialInput: EmbeddableChangePointChartInput,
     parent?: IContainer
   ) {
-    super(initialInput, { defaultTitle: initialInput.title }, parent);
+    super(initialInput, {}, parent);
+
+    this.initOutput().finally(() => this.setInitializationFinished());
+  }
+
+  private async initOutput() {
+    const {
+      data: { dataViews: dataViewsService },
+    } = this.deps;
+
+    const { dataViewId } = this.getInput();
+
+    const dataView = await dataViewsService.get(dataViewId);
+
+    this.updateOutput({
+      indexPatterns: [dataView],
+    });
   }
 
   public reportsEmbeddableLoad() {
@@ -91,28 +113,38 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
+    // test subject selector for functional tests
+    this.node.setAttribute('data-test-subj', 'aiopsEmbeddableChangePointChart');
+
     const I18nContext = this.deps.i18n.Context;
 
     const datePickerDeps = {
-      ...pick(this.deps, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-      toMountPoint,
-      wrapWithTheme,
+      ...pick(this.deps, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
       uiSettingsKeys: UI_SETTINGS,
     };
 
     const input = this.getInput();
     const input$ = this.getInput$();
 
+    const aiopsAppContextValue = {
+      ...this.deps,
+      embeddingOrigin: this.parent?.type ?? EMBEDDABLE_ORIGIN,
+    } as unknown as AiopsAppDependencies;
+
     ReactDOM.render(
       <I18nContext>
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <AiopsAppContext.Provider value={this.deps as unknown as AiopsAppDependencies}>
+          <AiopsAppContext.Provider value={aiopsAppContextValue}>
             <DatePickerContextProvider {...datePickerDeps}>
               <Suspense fallback={null}>
                 <EmbeddableInputTracker
                   input$={input$}
                   initialInput={input}
                   reload$={this.reload$}
+                  onOutputChange={this.updateOutput.bind(this)}
+                  onRenderComplete={this.onRenderComplete.bind(this)}
+                  onLoading={this.onLoading.bind(this)}
+                  onError={this.onError.bind(this)}
                 />
               </Suspense>
             </DatePickerContextProvider>

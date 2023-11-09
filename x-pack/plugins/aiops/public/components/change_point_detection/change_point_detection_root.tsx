@@ -16,9 +16,12 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DatePickerContextProvider, mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
+import {
+  DatePickerContextProvider,
+  type DatePickerDependencies,
+  mlTimefilterRefresh$,
+} from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { type Observable } from 'rxjs';
 import { DataSourceContext } from '../../hooks/use_data_source';
@@ -28,9 +31,13 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { PageHeader } from '../page_header';
 
 import { ChangePointDetectionPage } from './change_point_detection_page';
-import { ChangePointDetectionContextProvider } from './change_point_detection_context';
+import {
+  ChangePointDetectionContextProvider,
+  ChangePointDetectionControlsContextProvider,
+} from './change_point_detection_context';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { ReloadContextProvider } from '../../hooks/use_reload';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -44,18 +51,20 @@ export interface ChangePointDetectionAppStateProps {
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
+  /** Optional flag to indicate whether kibana is running in serverless */
+  showFrozenDataTierChoice?: boolean;
 }
 
 export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
+  showFrozenDataTierChoice = true,
 }) => {
-  const datePickerDeps = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
+  const datePickerDeps: DatePickerDependencies = {
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    showFrozenDataTierChoice,
   };
 
   const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
@@ -67,6 +76,8 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   if (warning !== null) {
     return <>{warning}</>;
   }
+
+  appDependencies.embeddingOrigin = AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE;
 
   const PresentationContextProvider =
     appDependencies.presentationUtil?.ContextProvider ?? React.Fragment;
@@ -87,7 +98,9 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
                     <EuiSpacer />
                     <ReloadContextProvider reload$={reload$}>
                       <ChangePointDetectionContextProvider>
-                        <ChangePointDetectionPage />
+                        <ChangePointDetectionControlsContextProvider>
+                          <ChangePointDetectionPage />
+                        </ChangePointDetectionControlsContextProvider>
                       </ChangePointDetectionContextProvider>
                     </ReloadContextProvider>
                   </DatePickerContextProvider>

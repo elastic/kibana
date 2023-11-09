@@ -28,6 +28,5 @@
       "force": true
     },
     "@kbn/rison",
-    "@kbn/osquery-plugin/cypress"
   ]
 }

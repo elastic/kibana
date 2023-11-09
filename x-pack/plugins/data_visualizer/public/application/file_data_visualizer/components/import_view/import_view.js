@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import {
   EuiButton,
   EuiPageBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageHeader,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -37,7 +37,7 @@ import {
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
-const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
+const DEFAULT_INDEX_SETTINGS = {};
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
 
 const DEFAULT_STATE = {
@@ -481,11 +481,11 @@ export class ImportView extends Component {
 
     return (
       <EuiPageBody data-test-subj="dataVisualizerPageFileImport">
-        <EuiPageContentHeader>
+        <EuiPageHeader>
           <EuiTitle>
             <h1>{this.props.fileName}</h1>
           </EuiTitle>
-        </EuiPageContentHeader>
+        </EuiPageHeader>
         <EuiSpacer size="m" />
         <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
           <EuiTitle size="s">

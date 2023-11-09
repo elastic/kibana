@@ -26,13 +26,20 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
+
+import { Status } from '../../../../../../common/types/api';
+
 import { BetaConnectorCallout } from '../../../../shared/beta/beta_connector_callout';
+import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { HttpLogic } from '../../../../shared/http/http_logic';
+import { LicensingLogic } from '../../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
+import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { isConnectorIndex } from '../../../utils/indices';
 
@@ -43,9 +50,8 @@ import { IndexViewLogic } from '../index_view_logic';
 import { SearchIndexTabId } from '../search_index';
 
 import { ApiKeyConfig } from './api_key_configuration';
-import { ConnectorConfigurationConfig } from './connector_configuration_config';
 import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
-import { BETA_CONNECTORS, CONNECTORS } from './constants';
+import { BETA_CONNECTORS, CONNECTORS, getConnectorTemplate } from './constants';
 import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
@@ -53,6 +59,12 @@ export const ConnectorConfiguration: React.FC = () => {
   const { index, recheckIndexLoading } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { recheckIndex } = useActions(IndexViewLogic);
+  const cloudContext = useCloudDetails();
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { status } = useValues(ConnectorConfigurationApiLogic);
+  const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
+  const { http } = useValues(HttpLogic);
+
   if (!isConnectorIndex(index)) {
     return <></>;
   }
@@ -151,15 +163,14 @@ export const ConnectorConfiguration: React.FC = () => {
                       </EuiText>
                       <EuiSpacer />
                       <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
-                        {`connectors:
-  -
-    connector_id: "${index.connector.id}"
-    service_type: "${index.connector.service_type || 'changeme'}"${
-                          apiKeyData?.encoded
-                            ? `
-    api_key: "${apiKeyData?.encoded}"`
-                            : ''
-                        }`}
+                        {getConnectorTemplate({
+                          apiKeyData,
+                          connectorData: {
+                            id: index.connector.id,
+                            service_type: index.connector.service_type,
+                          },
+                          host: cloudContext.elasticsearchUrl,
+                        })}
                       </EuiCodeBlock>
                       <EuiSpacer />
                       <EuiText size="s">
@@ -187,7 +198,22 @@ export const ConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: (
-                    <ConnectorConfigurationConfig>
+                    <ConnectorConfigurationComponent
+                      connector={index.connector}
+                      hasPlatinumLicense={hasPlatinumLicense}
+                      isLoading={status === Status.LOADING}
+                      saveConfig={(configuration) =>
+                        makeRequest({
+                          configuration,
+                          connectorId: index.connector.id,
+                          indexName: index.name,
+                        })
+                      }
+                      subscriptionLink={docLinks.licenseManagement}
+                      stackManagementLink={http.basePath.prepend(
+                        '/app/management/stack/license_management'
+                      )}
+                    >
                       {!index.connector.status ||
                       index.connector.status === ConnectorStatus.CREATED ? (
                         <EuiCallOut
@@ -235,7 +261,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                         />
                       )}
-                    </ConnectorConfigurationConfig>
+                    </ConnectorConfigurationComponent>
                   ),
                   status:
                     index.connector.status === ConnectorStatus.CONNECTED

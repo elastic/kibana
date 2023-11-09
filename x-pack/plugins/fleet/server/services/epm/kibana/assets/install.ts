@@ -53,7 +53,7 @@ export type ArchiveAsset = Pick<
   SavedObject,
   | 'id'
   | 'attributes'
-  | 'migrationVersion'
+  | 'migrationVersion' // deprecated
   | 'references'
   | 'coreMigrationVersion'
   | 'typeMigrationVersion'
@@ -99,15 +99,15 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
     references: asset.references || [],
   };
 
-  if (asset.migrationVersion) {
-    so.migrationVersion = asset.migrationVersion;
-  } else {
-    if (asset.coreMigrationVersion) {
-      so.coreMigrationVersion = asset.coreMigrationVersion;
-    }
-    if (asset.typeMigrationVersion) {
-      so.typeMigrationVersion = asset.typeMigrationVersion;
-    }
+  // migrating deprecated migrationVersion to typeMigrationVersion
+  if (asset.migrationVersion && asset.migrationVersion[asset.type]) {
+    so.typeMigrationVersion = asset.migrationVersion[asset.type];
+  }
+  if (asset.coreMigrationVersion) {
+    so.coreMigrationVersion = asset.coreMigrationVersion;
+  }
+  if (asset.typeMigrationVersion) {
+    so.typeMigrationVersion = asset.typeMigrationVersion;
   }
   return so as SavedObjectToBe;
 }
@@ -140,15 +140,21 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
-  // As we use `import` to create our saved objects, we have to install
-  // their references (the index patterns) at the same time
-  // to prevent a reference error
+  // Create index patterns separately with `overwrite: false` to prevent blowing away users' runtime fields.
+  // These don't get retried on conflict, because we expect that they exist once an integration has been installed.
   const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
+  await savedObjectsImporter.import({
+    overwrite: false,
+    readStream: createListStream(indexPatternSavedObjects),
+    createNewCopies: false,
+    refresh: false,
+    managed: true,
+  });
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
     savedObjectsImporter,
-    kibanaAssets: [...indexPatternSavedObjects, ...assetsToInstall],
+    kibanaAssets: assetsToInstall,
   });
 
   return installedAssets;
@@ -320,6 +326,7 @@ export async function installKibanaSavedObjects({
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
         refresh: false,
+        managed: true,
       })
     );
 
@@ -371,6 +378,7 @@ export async function installKibanaSavedObjects({
         await savedObjectsImporter.resolveImportErrors({
           readStream: createListStream(toBeSavedObjects),
           createNewCopies: false,
+          managed: true,
           retries,
         });
 

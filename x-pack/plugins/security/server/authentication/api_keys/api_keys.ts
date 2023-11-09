@@ -10,6 +10,7 @@
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 
+import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common/licensing';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type {
@@ -25,7 +26,6 @@ import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
-import { getFakeKibanaRequest } from './fake_kibana_request';
 
 export type {
   CreateAPIKeyParams,

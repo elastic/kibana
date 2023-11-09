@@ -13,17 +13,24 @@ import semverGt from 'semver/functions/gt';
 import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
 
+import moment from 'moment';
+
 import type { PostAgentUpgradeResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultFleetErrorHandler } from '../../errors';
-import { isAgentUpgradeable } from '../../../common/services';
+import {
+  getRecentUpgradeInfoForAgent,
+  isAgentUpgradeable,
+  AGENT_UPGRADE_COOLDOWN_IN_MIN,
+} from '../../../common/services';
 import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
 import type { Agent } from '../../types';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
+import { getLatestAvailableVersion } from '../../services/agents/versions';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -35,6 +42,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
+  const latestAgentVersion = await getLatestAvailableVersion();
   try {
     checkKibanaVersion(version, kibanaVersion, force);
   } catch (err) {
@@ -65,6 +73,24 @@ export const postAgentUpgradeHandler: RequestHandler<
       }
     }
 
+    const { hasBeenUpgradedRecently, timeToWaitMs } = getRecentUpgradeInfoForAgent(agent);
+    const timeToWaitString = moment
+      .utc(moment.duration(timeToWaitMs).asMilliseconds())
+      .format('mm[m]ss[s]');
+
+    if (hasBeenUpgradedRecently) {
+      return response.customError({
+        statusCode: 429,
+        body: {
+          message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago. Please wait ${timeToWaitString} before trying again to ensure the upgrade will not be rolled back.`,
+        },
+        headers: {
+          // retry-after expects seconds
+          'retry-after': Math.ceil(timeToWaitMs / 1000).toString(),
+        },
+      });
+    }
+
     if (agent.unenrollment_started_at || agent.unenrolled_at) {
       return response.customError({
         statusCode: 400,
@@ -73,7 +99,7 @@ export const postAgentUpgradeHandler: RequestHandler<
         },
       });
     }
-    if (!force && !isAgentUpgradeable(agent, kibanaVersion, version)) {
+    if (!force && !isAgentUpgradeable(agent, latestAgentVersion, version)) {
       return response.customError({
         statusCode: 400,
         body: {

@@ -24,7 +24,7 @@ import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { getRequestsAndResponses } from './utils';
+import { getRequestsAndResponses, showLegendActionsByActionId } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
@@ -187,7 +187,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
 
   const onFilterCallback = useCallback(
     async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
-      if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
+      if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area') {
         return;
       }
       // Update timerange when clicking on a dot in an area chart
@@ -216,6 +216,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
           }, [] as string[])
         : null,
     [attributes?.state?.adHocDataViews]
+  );
+
+  const shouldShowLegendAction = useCallback(
+    (actionId: string) => showLegendActionsByActionId({ actionId, scopeId }),
+    [scopeId]
   );
 
   if (!searchSessionId) {
@@ -281,6 +286,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             showInspector={false}
             syncTooltips={false}
             syncCursor={false}
+            shouldShowLegendAction={shouldShowLegendAction}
           />
         </LensComponentWrapper>
       )}
@@ -299,6 +305,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       )}
     </>
   );
+};
+
+const isClickTriggerEvent = (
+  e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
+): e is ClickTriggerEvent['data'] => {
+  return Array.isArray(e.data) && 'column' in e.data[0];
 };
 
 export const LensEmbeddable = React.memo(LensEmbeddableComponent);

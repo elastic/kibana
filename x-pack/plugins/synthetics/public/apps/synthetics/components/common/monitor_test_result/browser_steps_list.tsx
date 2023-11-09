@@ -148,6 +148,7 @@ export const BrowserStepsList = ({
             isExpander: true,
             render: (item: JourneyStep) => (
               <EuiButtonIcon
+                data-test-subj="syntheticsColumnsButton"
                 onClick={() => toggleDetails(item)}
                 aria-label={expandedMap[item._id] ? 'Collapse' : 'Expand'}
                 iconType={expandedMap[item._id] ? 'arrowDown' : 'arrowRight'}

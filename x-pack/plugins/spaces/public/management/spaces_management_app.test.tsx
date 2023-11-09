@@ -21,10 +21,10 @@ jest.mock('./edit_space', () => ({
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 
+import { spacesManagementApp } from './spaces_management_app';
 import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { spacesManagementApp } from './spaces_management_app';
 
 const config: ConfigType = {
   maxSpaces: 1000,

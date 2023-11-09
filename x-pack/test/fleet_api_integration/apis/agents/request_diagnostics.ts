@@ -87,7 +87,7 @@ export default function (providerContext: FtrProviderContext) {
         const intervalId = setInterval(async () => {
           if (attempts > 2) {
             clearInterval(intervalId);
-            reject('action timed out');
+            reject(new Error('action timed out'));
           }
           ++attempts;
           const {

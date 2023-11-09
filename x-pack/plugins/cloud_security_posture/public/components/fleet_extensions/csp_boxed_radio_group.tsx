@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip } from '@elastic/eui';
+import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface CspRadioGroupProps {
@@ -17,12 +17,14 @@ export interface CspRadioGroupProps {
   size?: 's' | 'm';
 }
 
-interface CspRadioOption {
+export interface CspRadioOption {
   disabled?: boolean;
   id: string;
   label: string;
   icon?: string;
   tooltip?: string;
+  isBeta?: boolean;
+  testId?: string;
 }
 
 export const RadioGroup = ({
@@ -33,7 +35,6 @@ export const RadioGroup = ({
   onChange,
 }: CspRadioGroupProps) => {
   const { euiTheme } = useEuiTheme();
-
   return (
     <div
       css={css`
@@ -57,7 +58,7 @@ export const RadioGroup = ({
             content={option.tooltip}
             anchorProps={{
               style: {
-                flexGrow: 1,
+                flex: '1 1 0',
               },
             }}
           >
@@ -100,11 +101,21 @@ export const RadioGroup = ({
               `}
             >
               <EuiRadio
+                data-test-subj={option.testId}
                 label={option.label}
                 id={option.id}
                 checked={isChecked}
                 onChange={() => {}}
               />
+              {option.isBeta && (
+                <div
+                  css={css`
+                    margin: auto;
+                  `}
+                >
+                  <EuiBetaBadge label="Beta" alignment="middle" />
+                </div>
+              )}
             </EuiButton>
           </EuiToolTip>
         );

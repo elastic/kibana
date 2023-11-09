@@ -18,7 +18,6 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
@@ -58,6 +57,10 @@ export interface LogRateAnalysisContentWrapperProps {
    * @param d Log rate analysis results data
    */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Optional flag to indicate whether kibana is running in serverless */
+  showFrozenDataTierChoice?: boolean;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
@@ -71,6 +74,8 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  showFrozenDataTierChoice = true,
+  embeddingOrigin,
 }) => {
   if (!dataView) return null;
 
@@ -81,10 +86,9 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   }
 
   const datePickerDeps = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-    toMountPoint,
-    wrapWithTheme,
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    showFrozenDataTierChoice,
   };
 
   return (
@@ -104,6 +108,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}
                   onAnalysisCompleted={onAnalysisCompleted}
+                  embeddingOrigin={embeddingOrigin}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>

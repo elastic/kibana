@@ -118,6 +118,8 @@ export interface DataViewsServiceDeps {
    * Determines whether the user can save advancedSettings (used for defaultIndex)
    */
   getCanSaveAdvancedSettings: () => Promise<boolean>;
+
+  scriptedFieldsEnabled: boolean;
 }
 
 /**
@@ -284,6 +286,11 @@ export interface DataViewsServicePublicMethods {
     ignoreErrors?: boolean,
     displayErrors?: boolean
   ) => Promise<DataView | void | Error>;
+
+  /**
+   * Returns whether a default data view exists.
+   */
+  defaultDataViewExists: () => Promise<boolean>;
 }
 
 /**
@@ -317,6 +324,8 @@ export class DataViewsService {
    * Can the user save data views?
    */
   public getCanSave: () => Promise<boolean>;
+
+  public readonly scriptedFieldsEnabled: boolean;
   /**
    * DataViewsService constructor
    * @param deps Service dependencies
@@ -331,6 +340,7 @@ export class DataViewsService {
       onError,
       getCanSave = () => Promise.resolve(false),
       getCanSaveAdvancedSettings,
+      scriptedFieldsEnabled,
     } = deps;
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -342,6 +352,7 @@ export class DataViewsService {
     this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
     this.dataViewCache = createDataViewCache();
+    this.scriptedFieldsEnabled = scriptedFieldsEnabled;
   }
 
   /**
@@ -548,7 +559,9 @@ export class DataViewsService {
   private refreshFieldsFn = async (indexPattern: DataView) => {
     const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
     fields.forEach((field) => (field.isMapped = true));
-    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+    const scripted = this.scriptedFieldsEnabled
+      ? indexPattern.getScriptedFields().map((field) => field.spec)
+      : [];
     const fieldAttrs = indexPattern.getFieldAttrs();
     const fieldsWithSavedAttrs = Object.values(
       this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
@@ -612,7 +625,9 @@ export class DataViewsService {
     displayErrors: boolean = true
   ) => {
     const fieldsAsArr = Object.values(fields);
-    const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
+    const scriptedFields = this.scriptedFieldsEnabled
+      ? fieldsAsArr.filter((field) => field.scripted)
+      : [];
     try {
       let updatedFieldList: FieldSpec[];
       const { fields: newFields, indices } = await this.getFieldsAndIndicesForWildcard(options);
@@ -1131,24 +1146,7 @@ export class DataViewsService {
     return this.savedObjectsClient.delete(indexPatternId);
   }
 
-  /**
-   * Returns the default data view as an object.
-   * If no default is found, or it is missing
-   * another data view is selected as default and returned.
-   * If no possible data view found to become a default returns null.
-   *
-   * @param {Object} options
-   * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
-   * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
-   * @returns default data view
-   */
-  async getDefaultDataView(
-    options: {
-      displayErrors?: boolean;
-      refreshFields?: boolean;
-    } = {}
-  ): Promise<DataView | null> {
-    const { displayErrors = true, refreshFields } = options;
+  private async getDefaultDataViewId() {
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
@@ -1167,6 +1165,36 @@ export class DataViewsService {
         await this.config.set('defaultIndex', defaultId);
       }
     }
+
+    return defaultId;
+  }
+
+  /**
+   * Returns whether a default data view exists.
+   */
+  async defaultDataViewExists() {
+    return !!(await this.getDefaultDataViewId());
+  }
+
+  /**
+   * Returns the default data view as an object.
+   * If no default is found, or it is missing
+   * another data view is selected as default and returned.
+   * If no possible data view found to become a default returns null.
+   *
+   * @param {Object} options
+   * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
+   * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
+   * @returns default data view
+   */
+  async getDefaultDataView(
+    options: {
+      displayErrors?: boolean;
+      refreshFields?: boolean;
+    } = {}
+  ): Promise<DataView | null> {
+    const { displayErrors = true, refreshFields } = options;
+    const defaultId = await this.getDefaultDataViewId();
 
     if (defaultId) {
       return this.get(defaultId, displayErrors, refreshFields);

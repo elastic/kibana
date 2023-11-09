@@ -23,6 +23,7 @@ export interface EsContext {
   waitTillReady(): Promise<boolean>;
   readonly initialized: boolean;
   readonly retryDelay: number;
+  shouldSetExistingAssetsToHidden: boolean;
 }
 
 export interface EsError {
@@ -37,7 +38,7 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
 export interface EsContextCtorParams {
   logger: Logger;
   indexNameRoot: string;
-  kibanaVersion: string;
+  shouldSetExistingAssetsToHidden: boolean;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
 }
 
@@ -48,13 +49,15 @@ class EsContextImpl implements EsContext {
   private readonly readySignal: ReadySignal<boolean>;
   public initialized: boolean;
   public readonly retryDelay: number;
+  public readonly shouldSetExistingAssetsToHidden: boolean;
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
-    this.esNames = getEsNames(params.indexNameRoot, params.kibanaVersion);
+    this.esNames = getEsNames(params.indexNameRoot);
     this.readySignal = createReadySignal();
     this.initialized = false;
     this.retryDelay = RETRY_DELAY;
+    this.shouldSetExistingAssetsToHidden = params.shouldSetExistingAssetsToHidden;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
       elasticsearchClientPromise: params.elasticsearchClientPromise,

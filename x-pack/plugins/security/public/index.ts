@@ -24,7 +24,6 @@ export type {
   UserProfileBulkGetParams,
   UserProfileGetCurrentParams,
   UserProfileSuggestParams,
-  UpdateUserProfileHook,
 } from './account_management';
 
 export type { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';

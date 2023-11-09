@@ -30,7 +30,8 @@ export const updateRules = async ({
     return null;
   }
 
-  const alertActions = ruleUpdate.actions?.map(transformRuleToAlertAction) ?? [];
+  const alertActions =
+    ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
@@ -45,6 +46,7 @@ export const updateRules = async ({
       ruleId: existingRule.params.ruleId,
       falsePositives: ruleUpdate.false_positives ?? [],
       from: ruleUpdate.from ?? 'now-6m',
+      investigationFields: ruleUpdate.investigation_fields,
       // Unlike the create route, immutable comes from the existing rule here
       immutable: existingRule.params.immutable,
       license: ruleUpdate.license,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getStartedStorage } from './storage';
-import { GetSetUpCardId, IntroductionSteps, type StepId } from './types';
+import { defaultExpandedCards, getStartedStorage } from './storage';
+import { ConfigureSteps, GetSetUpCardId, IntroductionSteps, type StepId } from './types';
 import { storage } from '../common/lib/storage';
 import type { MockStorage } from '../common/lib/__mocks__/storage';
 import { ProductLine } from '../../common/product';
@@ -137,6 +137,104 @@ describe('useStorage', () => {
     getStartedStorage.removeFinishedStepFromStorage(GetSetUpCardId.introduction, 'step2' as StepId);
     expect(mockStorage.set).toHaveBeenCalledWith('FINISHED_STEPS', {
       [GetSetUpCardId.introduction]: [],
+    });
+  });
+
+  it('should get all expanded card steps from storage', () => {
+    (mockStorage.get as jest.Mock).mockReturnValueOnce({
+      [GetSetUpCardId.introduction]: {
+        isExpanded: true,
+        expandedSteps: [IntroductionSteps.getToKnowElasticSecurity],
+      },
+    });
+    const result = getStartedStorage.getAllExpandedCardStepsFromStorage();
+    expect(mockStorage.get).toHaveBeenCalledWith('EXPANDED_CARDS');
+    expect(result).toEqual({
+      [GetSetUpCardId.introduction]: {
+        isExpanded: true,
+        expandedSteps: [IntroductionSteps.getToKnowElasticSecurity],
+      },
+    });
+  });
+
+  it('should get default expanded card steps from storage', () => {
+    (mockStorage.get as jest.Mock).mockReturnValueOnce(null);
+    const result = getStartedStorage.getAllExpandedCardStepsFromStorage();
+    expect(mockStorage.get).toHaveBeenCalledWith('EXPANDED_CARDS');
+    expect(result).toEqual(defaultExpandedCards);
+  });
+
+  it('should reset card steps in storage', () => {
+    (mockStorage.get as jest.Mock).mockReturnValueOnce({
+      [GetSetUpCardId.introduction]: {
+        isExpanded: true,
+        expandedSteps: [IntroductionSteps.getToKnowElasticSecurity],
+      },
+    });
+    getStartedStorage.resetAllExpandedCardStepsToStorage();
+    expect(mockStorage.set).toHaveBeenCalledWith('EXPANDED_CARDS', {
+      [GetSetUpCardId.introduction]: {
+        isExpanded: true,
+        expandedSteps: [],
+      },
+    });
+  });
+
+  it('should add a step to expanded card steps in storage', () => {
+    (mockStorage.get as jest.Mock).mockReturnValueOnce({
+      [GetSetUpCardId.introduction]: {
+        isExpanded: true,
+        expandedSteps: [IntroductionSteps.getToKnowElasticSecurity],
+      },
+    });
+    getStartedStorage.addExpandedCardStepToStorage(
+      GetSetUpCardId.configure,
+      ConfigureSteps.learnAbout
+    );
+    expect(mockStorage.set).toHaveBeenCalledWith('EXPANDED_CARDS', {
+      [GetSetUpCardId.introduction]: {
+        isExpanded: true,
+        expandedSteps: [IntroductionSteps.getToKnowElasticSecurity],
+      },
+      [GetSetUpCardId.configure]: {
+        isExpanded: true,
+        expandedSteps: [ConfigureSteps.learnAbout],
+      },
+    });
+  });
+
+  it('should remove a step from expanded card steps in storage', () => {
+    (mockStorage.get as jest.Mock).mockReturnValueOnce({
+      [GetSetUpCardId.introduction]: {
+        isExpanded: true,
+        expandedSteps: [IntroductionSteps.getToKnowElasticSecurity],
+      },
+    });
+    getStartedStorage.removeExpandedCardStepFromStorage(
+      GetSetUpCardId.introduction,
+      IntroductionSteps.getToKnowElasticSecurity
+    );
+    expect(mockStorage.set).toHaveBeenCalledWith('EXPANDED_CARDS', {
+      [GetSetUpCardId.introduction]: {
+        isExpanded: true,
+        expandedSteps: [],
+      },
+    });
+  });
+
+  it('should update a card from expanded card steps in storage', () => {
+    (mockStorage.get as jest.Mock).mockReturnValueOnce({
+      [GetSetUpCardId.introduction]: {
+        isExpanded: true,
+        expandedSteps: [IntroductionSteps.getToKnowElasticSecurity],
+      },
+    });
+    getStartedStorage.removeExpandedCardStepFromStorage(GetSetUpCardId.introduction);
+    expect(mockStorage.set).toHaveBeenCalledWith('EXPANDED_CARDS', {
+      [GetSetUpCardId.introduction]: {
+        isExpanded: false,
+        expandedSteps: [IntroductionSteps.getToKnowElasticSecurity],
+      },
     });
   });
 });

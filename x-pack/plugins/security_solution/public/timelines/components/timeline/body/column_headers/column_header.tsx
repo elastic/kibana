@@ -8,7 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Draggable } from 'react-beautiful-dnd';
+import { Draggable } from '@hello-pangea/dnd';
 import type { ResizeCallback } from 're-resizable';
 import { Resizable } from 're-resizable';
 import { useDispatch } from 'react-redux';

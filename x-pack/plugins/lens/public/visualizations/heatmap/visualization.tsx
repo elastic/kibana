@@ -197,6 +197,7 @@ export const getHeatmapVisualization = ({
           filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.yAccessor,
           requiredMinDimensionCount: 0,
+          isBreakdownDimension: true,
           dataTestSubj: 'lnsHeatmap_yDimensionPanel',
         },
         {

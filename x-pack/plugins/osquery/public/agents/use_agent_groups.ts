@@ -35,30 +35,13 @@ export const useAgentGroups = () => {
   >(
     ['agentGroups'],
     async () => {
+      const policiesQuery = osqueryPolicies?.reduce((acc, policy) => `${acc} OR ${policy}`);
+
       const responseData = await lastValueFrom(
         data.search.search<AgentsRequestOptions, AgentsStrategyResponse>(
           {
-            filterQuery: { terms: { policy_id: osqueryPolicies } },
+            kuery: `policy_id: ( ${policiesQuery} )`,
             factoryQueryType: OsqueryQueries.agents,
-            aggregations: {
-              platforms: {
-                terms: {
-                  field: 'local_metadata.os.platform',
-                },
-                aggs: {
-                  policies: {
-                    terms: {
-                      field: 'policy_id',
-                    },
-                  },
-                },
-              },
-              policies: {
-                terms: {
-                  field: 'policy_id',
-                },
-              },
-            },
             pagination: generateTablePaginationOptions(0, 9000),
             sort: {
               direction: 'asc',

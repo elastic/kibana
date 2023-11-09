@@ -137,6 +137,7 @@ export const PipelineDetails: FC<Props> = memo(
                 isInvalid={pipelineNameError !== undefined}
               >
                 <EuiFieldText
+                  data-test-subj="mlTrainedModelsInferencePipelineNameInput"
                   fullWidth
                   placeholder={i18n.translate(
                     'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder',
@@ -173,6 +174,7 @@ export const PipelineDetails: FC<Props> = memo(
                 <EuiTextArea
                   compressed
                   fullWidth
+                  data-test-subj="mlTrainedModelsInferencePipelineDescriptionInput"
                   placeholder={i18n.translate(
                     'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.descriptionPlaceholder',
                     {
@@ -208,6 +210,7 @@ export const PipelineDetails: FC<Props> = memo(
               >
                 <EuiFieldText
                   fullWidth
+                  data-test-subj="mlTrainedModelsInferencePipelineTargetFieldInput"
                   value={targetField}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     handleConfigChange(e.target.value, 'targetField')

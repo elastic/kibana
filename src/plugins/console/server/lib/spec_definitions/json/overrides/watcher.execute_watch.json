@@ -1,5 +1,5 @@
 {
-  "xpack.watcher.execute_watch": {
+  "watcher.execute_watch": {
     "data_autocomplete_rules": {
       "trigger_data": {},
       "ignore_condition": { "__one_of": ["true", "false"] },

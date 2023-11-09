@@ -8,10 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
-import { ComponentRegistry } from './component_registry';
+import { SectionRegistry } from '@kbn/management-settings-section-registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
-const component = new ComponentRegistry();
+const { setup: sectionRegistrySetup, start: sectionRegistryStart } = new SectionRegistry();
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
   defaultMessage: 'Advanced Settings',
@@ -37,7 +37,7 @@ export class AdvancedSettingsPlugin
         return mountManagementSection(
           core.getStartServices,
           params,
-          component.start,
+          sectionRegistryStart,
           usageCollection
         );
       },
@@ -59,13 +59,13 @@ export class AdvancedSettingsPlugin
     }
 
     return {
-      component: component.setup,
+      ...sectionRegistrySetup,
     };
   }
 
   public start() {
     return {
-      component: component.start,
+      ...sectionRegistryStart,
     };
   }
 }

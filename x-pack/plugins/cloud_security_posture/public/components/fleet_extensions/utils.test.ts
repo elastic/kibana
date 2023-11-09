@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { getMaxPackageName, getPostureInputHiddenVars, getPosturePolicy } from './utils';
+import {
+  getMaxPackageName,
+  getPostureInputHiddenVars,
+  getPosturePolicy,
+  getCspmCloudShellDefaultValue,
+} from './utils';
 import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS } from './mocks';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
@@ -121,5 +127,128 @@ describe('getMaxPackageName', () => {
     const result = getMaxPackageName(packageName, packagePolicies);
 
     expect(result).toBe('kspm-1');
+  });
+});
+
+describe('getCspmCloudShellDefaultValue', () => {
+  it('should return empty string when policy_templates is missing', () => {
+    const packagePolicy = { name: 'test' } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.name is not cspm', () => {
+    const packagePolicy = { name: 'test', policy_templates: [{ name: 'kspm' }] } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs is missing', () => {
+    const packagePolicy = { name: 'test', policy_templates: [{ name: 'cspm' }] } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs is empty', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: [{}],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs is undefined', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: undefined,
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs.vars does not have cloud_shell_url', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: [{ vars: [{ name: 'cloud_shell_url_FAKE' }] }],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should return empty string when policy_templates.inputs.varshave cloud_shell_url but no default', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: [{ vars: [{ name: 'cloud_shell_url' }] }],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('');
+  });
+
+  it('should cloud shell url when policy_templates.inputs.vars have cloud_shell_url', () => {
+    const packagePolicy = {
+      name: 'test',
+      policy_templates: [
+        {
+          title: '',
+          description: '',
+          name: 'cspm',
+          inputs: [
+            {
+              vars: [
+                { name: 'cloud_shell_url_FAKE', default: 'URL_FAKE' },
+                { name: 'cloud_shell_url', default: 'URL' },
+              ],
+            },
+          ],
+        },
+      ],
+    } as PackageInfo;
+
+    const result = getCspmCloudShellDefaultValue(packagePolicy);
+
+    expect(result).toBe('URL');
   });
 });

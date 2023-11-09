@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { pick, orderBy } from 'lodash';
 import moment from 'moment';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
@@ -29,6 +28,7 @@ import {
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { ALERT_END } from '@kbn/rule-data-utils';
+import { pick, orderBy } from 'lodash';
 import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
@@ -228,19 +228,13 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
           : ''
       }
 
-      Do not mention indidivual p-values from the analysis results. Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
+      Do not mention individual p-values from the analysis results.
+      Do not repeat the full list of field names and field values back to the user.
+      Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
 
-    const now = new Date().toString();
+    const now = new Date().toISOString();
 
     return [
-      {
-        '@timestamp': now,
-        message: {
-          role: MessageRole.System,
-          content: `You are logs-gpt, a helpful assistant for logs-based observability. Answer as
-          concisely as possible.`,
-        },
-      },
       {
         '@timestamp': now,
         message: {
@@ -268,6 +262,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
         <EuiFlexItem>
           <LogRateAnalysisContent
+            embeddingOrigin="observability_log_threshold_alert_details"
             dataView={dataView}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
@@ -289,6 +284,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
               'unifiedSearch',
               'theme',
               'lens',
+              'i18n',
             ])}
           />
         </EuiFlexItem>

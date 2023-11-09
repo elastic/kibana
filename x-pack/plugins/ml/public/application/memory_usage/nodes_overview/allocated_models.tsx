@@ -122,13 +122,27 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       },
     },
     {
-      field: 'node.throughput_last_minute',
-      name: i18n.translate(
-        'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteHeader',
-        {
-          defaultMessage: 'Throughput',
-        }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteTooltip',
+            {
+              defaultMessage: 'The number of requests processed in the last 1 minute.',
+            }
+          )}
+        >
+          <span>
+            {i18n.translate(
+              'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteHeader',
+              {
+                defaultMessage: 'Throughput',
+              }
+            )}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
       ),
+      field: 'node.throughput_last_minute',
       width: '100px',
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableThroughput',

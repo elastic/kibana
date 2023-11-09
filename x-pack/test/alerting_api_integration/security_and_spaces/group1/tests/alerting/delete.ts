@@ -10,8 +10,7 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getUrlPrefix,
   getTestRuleData,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   ObjectRemover,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -57,11 +56,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'delete',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('delete', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
@@ -112,7 +107,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'delete',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -163,7 +158,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'delete',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -176,20 +171,6 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'delete',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
-              // Ensure task still exists
-              await getScheduledTask(createdAlert.scheduled_task_id);
-              break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
@@ -229,7 +210,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('delete', 'test.noop', 'alerts'),
+                message: getUnauthorizedErrorMessage('delete', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
@@ -238,11 +219,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'delete',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('delete', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
@@ -333,11 +310,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'delete',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('delete', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');

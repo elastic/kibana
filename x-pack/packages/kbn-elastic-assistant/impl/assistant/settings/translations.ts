@@ -49,17 +49,17 @@ export const ANONYMIZATION_MENU_ITEM = i18n.translate(
   }
 );
 
-export const FUNCTIONS_MENU_ITEM = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.settingsFunctionsMenuItemTitle',
+export const KNOWLEDGE_BASE_MENU_ITEM = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsKnowledgeBaseMenuItemTitle',
   {
-    defaultMessage: 'Functions',
+    defaultMessage: 'Knowledge Base',
   }
 );
 
-export const ADVANCED_MENU_ITEM = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.settingsAdvancedMenuItemTitle',
+export const EVALUATION_MENU_ITEM = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsEvaluationMenuItemTitle',
   {
-    defaultMessage: 'Advanced',
+    defaultMessage: 'Evaluation',
   }
 );
 

@@ -6,3 +6,4 @@
  */
 
 export { KibanaLogic, mountKibanaLogic } from './kibana_logic';
+export type { KibanaLogicProps } from './kibana_logic';

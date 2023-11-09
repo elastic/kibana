@@ -5,23 +5,29 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
   getAlertUrl,
+  observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
-import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  getParsedFilterQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { firstValueFrom } from 'rxjs';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
@@ -34,7 +40,6 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import {
-  ApmRuleType,
   APM_SERVER_FEATURE_ID,
   formatTransactionErrorRateReason,
   RULE_TYPES_CONFIG,
@@ -45,8 +50,7 @@ import {
   asDecimalOrInteger,
   getAlertUrlTransaction,
 } from '../../../../../common/utils/formatters';
-import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
+import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -63,11 +67,25 @@ import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
+export const transactionErrorRateActionVariables = [
+  apmActionVariables.alertDetailsUrl,
+  apmActionVariables.environment,
+  apmActionVariables.interval,
+  apmActionVariables.reason,
+  apmActionVariables.serviceName,
+  apmActionVariables.threshold,
+  apmActionVariables.transactionName,
+  apmActionVariables.transactionType,
+  apmActionVariables.triggerValue,
+  apmActionVariables.viewInAppUrl,
+];
+
 export function registerTransactionErrorRateRuleType({
   alerting,
   alertsLocator,
+  apmConfig,
   basePath,
-  config$,
+  getApmIndices,
   logger,
   ruleDataClient,
 }: RegisterRuleDependencies) {
@@ -84,20 +102,9 @@ export function registerTransactionErrorRateRuleType({
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: { params: transactionErrorRateParamsSchema },
       actionVariables: {
-        context: [
-          apmActionVariables.alertDetailsUrl,
-          apmActionVariables.environment,
-          apmActionVariables.interval,
-          apmActionVariables.reason,
-          apmActionVariables.serviceName,
-          apmActionVariables.transactionName,
-          apmActionVariables.threshold,
-          apmActionVariables.transactionType,
-          apmActionVariables.transactionName,
-          apmActionVariables.triggerValue,
-          apmActionVariables.viewInAppUrl,
-        ],
+        context: transactionErrorRateActionVariables,
       },
+      category: DEFAULT_APP_CATEGORIES.observability.id,
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -106,13 +113,12 @@ export function registerTransactionErrorRateRuleType({
         spaceId,
         params: ruleParams,
         startedAt,
+        getTimeRange,
       }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.TransactionErrorRate,
           ruleParams.groupBy
         );
-
-        const config = await firstValueFrom(config$);
 
         const {
           getAlertUuid,
@@ -121,21 +127,37 @@ export function registerTransactionErrorRateRuleType({
           scopedClusterClient,
         } = services;
 
-        const indices = await getApmIndices({
-          config,
-          savedObjectsClient,
-        });
+        const indices = await getApmIndices(savedObjectsClient);
 
         // only query transaction events when set to 'never',
         // to prevent (likely) unnecessary blocking request
         // in rule execution
         const searchAggregatedTransactions =
-          config.searchAggregatedTransactions !==
+          apmConfig.searchAggregatedTransactions !==
           SearchAggregatedTransactionSetting.never;
 
         const index = searchAggregatedTransactions
           ? indices.metric
           : indices.transaction;
+
+        const termFilterQuery = !ruleParams.searchConfiguration?.query?.query
+          ? [
+              ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+                queryEmptyString: false,
+              }),
+              ...environmentQuery(ruleParams.environment),
+            ]
+          : [];
+
+        const { dateStart } = getTimeRange(
+          `${ruleParams.windowSize}${ruleParams.windowUnit}`
+        );
 
         const searchParams = {
           index,
@@ -148,11 +170,11 @@ export function registerTransactionErrorRateRuleType({
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                        gte: dateStart,
                       },
                     },
                   },
-                  ...getDocumentTypeFilterForTransactions(
+                  ...getBackwardCompatibleDocumentTypeFilter(
                     searchAggregatedTransactions
                   ),
                   {
@@ -163,16 +185,10 @@ export function registerTransactionErrorRateRuleType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
-                    queryEmptyString: false,
-                  }),
-                  ...environmentQuery(ruleParams.environment),
+                  ...termFilterQuery,
+                  ...getParsedFilterQuery(
+                    ruleParams.searchConfiguration?.query?.query as string
+                  ),
                 ],
               },
             },
@@ -306,6 +322,8 @@ export function registerTransactionErrorRateRuleType({
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
+      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+        observabilityPaths.ruleDetails(rule.id),
     })
   );
 }

@@ -13,17 +13,20 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { EmbeddableChangePointChartProps } from './embeddable';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { EmbeddableChangePointChartInput } from './embeddable/embeddable_change_point_chart';
 
 export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;
   cases: CasesUiSetup;
   licensing: LicensingPluginSetup;
+
+  uiActions: UiActionsSetup;
 }
 
 export interface AiopsPluginStartDeps {
@@ -38,9 +41,10 @@ export interface AiopsPluginStartDeps {
   licensing: LicensingPluginStart;
   executionContext: ExecutionContextStart;
   embeddable: EmbeddableStart;
+  usageCollection: UsageCollectionSetup;
 }
 
 export type AiopsPluginSetup = void;
 export interface AiopsPluginStart {
-  EmbeddableChangePointChart: React.ComponentType<EmbeddableChangePointChartProps>;
+  EmbeddableChangePointChart: React.ComponentType<EmbeddableChangePointChartInput>;
 }

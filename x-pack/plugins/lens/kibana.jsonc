@@ -45,7 +45,8 @@
       "taskManager",
       "globalSearch",
       "savedObjectsTagging",
-      "spaces"
+      "spaces",
+      "serverless"
     ],
     "requiredBundles": [
       "unifiedSearch",

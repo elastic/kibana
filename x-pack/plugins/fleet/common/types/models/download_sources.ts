@@ -9,6 +9,7 @@ export interface DownloadSourceBase {
   name: string;
   host: string;
   is_default: boolean;
+  proxy_id?: string | null;
 }
 
 export type DownloadSource = DownloadSourceBase & {

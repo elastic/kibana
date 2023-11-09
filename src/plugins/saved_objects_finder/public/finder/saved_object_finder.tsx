@@ -75,6 +75,7 @@ interface BaseSavedObjectFinder {
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
+  children?: ReactElement | ReactElement[];
   helpText?: string;
 }
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -42,7 +42,10 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
   return {
     originatingApp: PLUGIN_ID,
     localStorageKeyPrefix: 'discover',
+    compressed: true,
+    showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
+    buttonAddFieldVariant: 'toolbar',
     buttonPropsToTriggerFlyout: {
       contentProps: {
         id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
@@ -88,10 +91,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   documents$: DataDocuments$;
   /**
-   * Has been toggled closed
-   */
-  isClosed?: boolean;
-  /**
    * Callback function when selecting a field
    */
   onAddField: (fieldName: string) => void;
@@ -134,6 +133,9 @@ export interface DiscoverSidebarResponsiveProps {
    * For customization and testing purposes
    */
   fieldListVariant?: UnifiedFieldListSidebarContainerProps['variant'];
+
+  unifiedFieldListSidebarContainerApi: UnifiedFieldListSidebarContainerApi | null;
+  setUnifiedFieldListSidebarContainerApi: (api: UnifiedFieldListSidebarContainerApi) => void;
 }
 
 /**
@@ -154,6 +156,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onChangeDataView,
     onAddField,
     onRemoveField,
+    unifiedFieldListSidebarContainerApi,
+    setUnifiedFieldListSidebarContainerApi,
   } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -162,8 +166,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
-  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
-    useState<UnifiedFieldListSidebarContainerApi | null>(null);
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -380,13 +382,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       ref={initializeUnifiedFieldListSidebarContainerApi}
       variant={fieldListVariant}
       getCreationOptions={getCreationOptions}
-      isSidebarCollapsed={props.isClosed}
       services={fieldListSidebarServices}
       dataView={selectedDataView}
       trackUiMetric={trackUiMetric}
       allFields={sidebarState.allFields}
       showFieldList={showFieldList}
       workspaceSelectedFieldNames={columns}
+      fullWidth
       onAddFieldToWorkspace={onAddFieldToWorkspace}
       onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
       onAddFilter={onAddFilter}

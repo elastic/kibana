@@ -17,6 +17,7 @@ import {
 import DateMath from '@kbn/datemath';
 import { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -26,8 +27,7 @@ import {
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
-import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { useNodeDetailsRedirect } from '../../../link_to';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 
 export interface Props {
@@ -62,20 +62,6 @@ const dateMathExpressionToEpoch = (dateMathExpression: string, roundUp = false):
   return dateObj.valueOf();
 };
 
-export const createNodeDetailLink = (
-  nodeType: InventoryItemType,
-  nodeId: string,
-  from: string,
-  to: string
-) => {
-  return getNodeDetailUrl({
-    nodeType,
-    nodeId,
-    from: dateMathExpressionToEpoch(from),
-    to: dateMathExpressionToEpoch(to, true),
-  });
-};
-
 export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   onFilter,
   options,
@@ -85,6 +71,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
@@ -118,9 +105,19 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
     : [];
 
   const nodeType = source && options.groupBy && fieldToNodeType(source, options.groupBy);
+
   const nodeDetailLinkProps = useLinkProps({
     app: 'metrics',
-    ...(nodeType ? createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to) : {}),
+    ...(nodeType
+      ? getNodeDetailUrl({
+          assetType: nodeType,
+          assetId: series.id,
+          search: {
+            from: dateMathExpressionToEpoch(timeRange.from),
+            to: dateMathExpressionToEpoch(timeRange.to, true),
+          },
+        })
+      : {}),
   });
   const tsvbLinkProps = useLinkProps({
     ...createTSVBLink(source, options, series, timeRange, chartOptions),
@@ -181,7 +178,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   ];
 
   const handleClose = () => setPopoverState(false);
-  const handleOpen = () => setPopoverState(true);
+  const togglePopover = () => setPopoverState((currentIsOpen) => !currentIsOpen);
   const actionAriaLabel = i18n.translate('xpack.infra.metricsExplorer.actionsLabel.aria', {
     defaultMessage: 'Actions for {grouping}',
     values: { grouping: series.id },
@@ -193,7 +190,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
     <EuiButtonEmpty
       data-test-subj="infraMetricsExplorerChartContextMenuButton"
       contentProps={{ 'aria-label': actionAriaLabel }}
-      onClick={handleOpen}
+      onClick={togglePopover}
       size="s"
       iconType="arrowDown"
       iconSide="right"

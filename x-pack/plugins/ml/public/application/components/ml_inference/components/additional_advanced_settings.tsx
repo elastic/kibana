@@ -59,10 +59,14 @@ export const AdditionalAdvancedSettings: FC<Props> = memo(
 
     return (
       <EuiAccordion
+        data-test-subj="mlTrainedModelsInferenceAdvancedSettingsAccordion"
         id={accordionId}
         buttonContent={
           <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              data-test-subj="mlTrainedModelsInferenceAdvancedSettingsAccordionButton"
+            >
               <FormattedMessage
                 id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.additionalSettingsLabel"
                 defaultMessage="Additional settings"
@@ -110,6 +114,7 @@ export const AdditionalAdvancedSettings: FC<Props> = memo(
                 }
               >
                 <EuiTextArea
+                  data-test-subj="mlTrainedModelsInferenceAdvancedSettingsConditionTextArea"
                   aria-label={i18n.translate(
                     'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.conditionAriaLabel',
                     { defaultMessage: 'Optional condition for running the processor' }
@@ -141,6 +146,7 @@ export const AdditionalAdvancedSettings: FC<Props> = memo(
                     }
                   >
                     <EuiFieldText
+                      data-test-subj="mlTrainedModelsInferenceAdvancedSettingsTagInput"
                       value={additionalSettings?.tag ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleAdditionalSettingsChange({ tag: e.target.value })

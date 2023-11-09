@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonEmpty, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -25,14 +25,35 @@ import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_ta
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeInfoForReview>;
 
+interface RuleNameProps {
+  name: string;
+  ruleId: string;
+}
+
+const RuleName = ({ name, ruleId }: RuleNameProps) => {
+  const {
+    actions: { openRulePreview },
+  } = useUpgradePrebuiltRulesTableContext();
+
+  return (
+    <EuiLink
+      onClick={() => {
+        openRulePreview(ruleId);
+      }}
+      data-test-subj="ruleName"
+    >
+      {name}
+    </EuiLink>
+  );
+};
+
 const RULE_NAME_COLUMN: TableColumn = {
-  field: 'rule.name',
+  field: 'current_rule.name',
   name: i18n.COLUMN_RULE,
-  render: (value: RuleUpgradeInfoForReview['rule']['name']) => (
-    <EuiText id={value} size="s">
-      {value}
-    </EuiText>
-  ),
+  render: (
+    value: RuleUpgradeInfoForReview['current_rule']['name'],
+    rule: RuleUpgradeInfoForReview
+  ) => <RuleName name={value} ruleId={rule.id} />,
   sortable: true,
   truncateText: true,
   width: '60%',
@@ -40,7 +61,7 @@ const RULE_NAME_COLUMN: TableColumn = {
 };
 
 const TAGS_COLUMN: TableColumn = {
-  field: 'rule.tags',
+  field: 'current_rule.tags',
   name: null,
   align: 'center',
   render: (tags: Rule['tags']) => {
@@ -69,7 +90,7 @@ const TAGS_COLUMN: TableColumn = {
 };
 
 const INTEGRATIONS_COLUMN: TableColumn = {
-  field: 'rule.related_integrations',
+  field: 'current_rule.related_integrations',
   name: null,
   align: 'center',
   render: (integrations: Rule['related_integrations']) => {
@@ -100,7 +121,14 @@ const createUpgradeButtonColumn = (
         onClick={() => upgradeOneRule(ruleId)}
         data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
       >
-        {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
+        {isRuleUpgrading ? (
+          <EuiLoadingSpinner
+            size="s"
+            data-test-subj={`upgradeSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
+          />
+        ) : (
+          i18n.UPDATE_RULE_BUTTON
+        )}
       </EuiButtonEmpty>
     );
   },
@@ -125,7 +153,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
-        field: 'rule.risk_score',
+        field: 'current_rule.risk_score',
         name: i18n.COLUMN_RISK_SCORE,
         render: (value: Rule['risk_score']) => (
           <EuiText data-test-subj="riskScore" size="s">
@@ -137,10 +165,10 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         width: '85px',
       },
       {
-        field: 'rule.severity',
+        field: 'current_rule.severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: ({ rule: { severity } }: RuleUpgradeInfoForReview) =>
+        sortable: ({ current_rule: { severity } }: RuleUpgradeInfoForReview) =>
           getNormalizedSeverity(severity),
         truncateText: true,
         width: '12%',

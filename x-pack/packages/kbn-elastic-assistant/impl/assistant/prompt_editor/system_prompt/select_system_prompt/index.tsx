@@ -91,7 +91,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
       dropdownDisplay: (
         <EuiFlexGroup gutterSize="none" key={ADD_NEW_SYSTEM_PROMPT}>
           <EuiFlexItem grow={true}>
-            <EuiButtonEmpty iconType="plus" size="xs" data-test-subj="addSystemPrompt">
+            <EuiButtonEmpty href="#" iconType="plus" size="xs" data-test-subj="addSystemPrompt">
               {i18n.ADD_NEW_SYSTEM_PROMPT}
             </EuiButtonEmpty>
           </EuiFlexItem>

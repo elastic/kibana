@@ -20,6 +20,11 @@ const date = {
   type: 'date' as const,
 };
 
+const dynamic = {
+  type: 'object' as const,
+  dynamic: true,
+};
+
 export const kbComponentTemplate: ClusterComponentTemplate['component_template']['template'] = {
   mappings: {
     dynamic: false,
@@ -32,6 +37,7 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
           name: keyword,
         },
       },
+      labels: dynamic,
       conversation: {
         properties: {
           id: keyword,

@@ -59,6 +59,11 @@ const euiProgressCss = {
   marginTop: '-2px',
 };
 
+const resultsTableContainerCss = {
+  width: '100%',
+  maxWidth: '1200px',
+};
+
 export interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
@@ -255,7 +260,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       return;
     }
 
-    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...allResultsData?.columns];
+    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...(allResultsData?.columns || [])];
 
     const newColumns = fields.reduce(
       (acc, fieldName) => {
@@ -435,19 +440,21 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>
-          <EuiDataGrid
-            css={euiDataGridCss}
-            data-test-subj="osqueryResultsTable"
-            aria-label="Osquery results"
-            columns={columns}
-            columnVisibility={columnVisibility}
-            rowCount={allResultsData?.total ?? 0}
-            renderCellValue={renderCellValue}
-            leadingControlColumns={leadingControlColumns}
-            sorting={tableSorting}
-            pagination={tablePagination}
-            toolbarVisibility={toolbarVisibility}
-          />
+          <div css={resultsTableContainerCss}>
+            <EuiDataGrid
+              css={euiDataGridCss}
+              data-test-subj="osqueryResultsTable"
+              aria-label="Osquery results"
+              columns={columns}
+              columnVisibility={columnVisibility}
+              rowCount={allResultsData?.total ?? 0}
+              renderCellValue={renderCellValue}
+              leadingControlColumns={leadingControlColumns}
+              sorting={tableSorting}
+              pagination={tablePagination}
+              toolbarVisibility={toolbarVisibility}
+            />
+          </div>
         </DataContext.Provider>
       )}
     </>

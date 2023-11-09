@@ -27,7 +27,7 @@ export const TextBasedLangEditor = (props: TextBasedLanguagesEditorProps) => {
   return (
     <KibanaContextProvider
       services={{
-        ...deps.core,
+        ...deps,
       }}
     >
       <TextBasedLanguagesEditor {...props} isDarkMode={deps.darkMode} />

@@ -25,7 +25,7 @@ import { uiActions } from '../../kibana_services';
 import { EmbeddablePanelProps, PanelUniversalActions } from '../types';
 import { getContextMenuAriaLabel } from '../embeddable_panel_strings';
 import { useSelectFromEmbeddableInput } from '../use_select_from_embeddable';
-import { IEmbeddable, contextMenuTrigger, CONTEXT_MENU_TRIGGER, ViewMode } from '../..';
+import { IEmbeddable, contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -56,7 +56,6 @@ export const EmbeddablePanelContextMenu = ({
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
   const title = useSelectFromEmbeddableInput('title', embeddable);
-  const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
 
   useEffect(() => {
     /**
@@ -135,7 +134,7 @@ export const EmbeddablePanelContextMenu = ({
       data-test-subj="embeddablePanelToggleMenuIcon"
       aria-label={getContextMenuAriaLabel(title, index)}
       onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
-      iconType={viewMode === ViewMode.VIEW ? 'boxesHorizontal' : 'gear'}
+      iconType={'boxesHorizontal'}
     />
   );
 

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskIOWrite: FormulaConfig = {
-  label: 'Disk Write IOPS',
+export const diskIOWrite: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.diskIOWrite', {
+    defaultMessage: 'Disk Write IOPS',
+  }),
   value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
   format: {
     id: 'number',
@@ -16,4 +19,5 @@ export const diskIOWrite: FormulaConfig = {
       decimals: 0,
     },
   },
+  timeScale: 's',
 };

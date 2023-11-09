@@ -7,13 +7,20 @@
  */
 
 import { SOContentStorage } from '@kbn/content-management-utils';
+import type { Logger } from '@kbn/logging';
 
 import type { SavedSearchCrudTypes } from '../../common/content_management';
 import { SavedSearchType } from '../../common/content_management';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 
 export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
-  constructor() {
+  constructor({
+    logger,
+    throwOnResultValidationError,
+  }: {
+    logger: Logger;
+    throwOnResultValidationError: boolean;
+  }) {
     super({
       savedObjectType: SavedSearchType,
       cmServicesDefinition,
@@ -36,7 +43,10 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
         'refreshInterval',
         'rowsPerPage',
         'breakdownField',
+        'sampleSize',
       ],
+      logger,
+      throwOnResultValidationError,
     });
   }
 }

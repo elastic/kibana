@@ -35,6 +35,10 @@ interface AppendMessageProps {
   conversationId: string;
   message: Message;
 }
+interface AmendMessageProps {
+  conversationId: string;
+  content: string;
+}
 
 interface AppendReplacementsProps {
   conversationId: string;
@@ -56,7 +60,8 @@ interface SetConversationProps {
 }
 
 interface UseConversation {
-  appendMessage: ({ conversationId: string, message: Message }: AppendMessageProps) => Message[];
+  appendMessage: ({ conversationId, message }: AppendMessageProps) => Message[];
+  amendMessage: ({ conversationId, content }: AmendMessageProps) => void;
   appendReplacements: ({
     conversationId,
     replacements,
@@ -64,29 +69,29 @@ interface UseConversation {
   clearConversation: (conversationId: string) => void;
   createConversation: ({ conversationId, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
+  removeLastMessage: (conversationId: string) => Message[];
   setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
   setConversation: ({ conversation }: SetConversationProps) => void;
 }
 
 export const useConversation = (): UseConversation => {
-  const { allSystemPrompts, setConversations } = useAssistantContext();
+  const { allSystemPrompts, assistantTelemetry, setConversations } = useAssistantContext();
 
   /**
-   * Append a message to the conversation[] for a given conversationId
+   * Removes the last message of conversation[] for a given conversationId
    */
-  const appendMessage = useCallback(
-    ({ conversationId, message }: AppendMessageProps): Message[] => {
+  const removeLastMessage = useCallback(
+    (conversationId: string) => {
       let messages: Message[] = [];
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
 
         if (prevConversation != null) {
-          messages = [...prevConversation.messages, message];
+          messages = prevConversation.messages.slice(0, prevConversation.messages.length - 1);
           const newConversation = {
             ...prevConversation,
             messages,
           };
-
           return {
             ...prev,
             [conversationId]: newConversation,
@@ -98,6 +103,65 @@ export const useConversation = (): UseConversation => {
       return messages;
     },
     [setConversations]
+  );
+
+  /**
+   * Updates the last message of conversation[] for a given conversationId with provided content
+   */
+  const amendMessage = useCallback(
+    ({ conversationId, content }: AmendMessageProps) => {
+      setConversations((prev: Record<string, Conversation>) => {
+        const prevConversation: Conversation | undefined = prev[conversationId];
+
+        if (prevConversation != null) {
+          const { messages, ...rest } = prevConversation;
+          const message = messages[messages.length - 1];
+          const updatedMessages = message
+            ? [...messages.slice(0, -1), { ...message, content }]
+            : [...messages];
+          const newConversation = {
+            ...rest,
+            messages: updatedMessages,
+          };
+          return {
+            ...prev,
+            [conversationId]: newConversation,
+          };
+        } else {
+          return prev;
+        }
+      });
+    },
+    [setConversations]
+  );
+
+  /**
+   * Append a message to the conversation[] for a given conversationId
+   */
+  const appendMessage = useCallback(
+    ({ conversationId, message }: AppendMessageProps): Message[] => {
+      assistantTelemetry?.reportAssistantMessageSent({ conversationId, role: message.role });
+      let messages: Message[] = [];
+      setConversations((prev: Record<string, Conversation>) => {
+        const prevConversation: Conversation | undefined = prev[conversationId];
+
+        if (prevConversation != null) {
+          messages = [...prevConversation.messages, message];
+          const newConversation = {
+            ...prevConversation,
+            messages,
+          };
+          return {
+            ...prev,
+            [conversationId]: newConversation,
+          };
+        } else {
+          return prev;
+        }
+      });
+      return messages;
+    },
+    [assistantTelemetry, setConversations]
   );
 
   const appendReplacements = useCallback(
@@ -262,11 +326,13 @@ export const useConversation = (): UseConversation => {
   );
 
   return {
+    amendMessage,
     appendMessage,
     appendReplacements,
     clearConversation,
     createConversation,
     deleteConversation,
+    removeLastMessage,
     setApiConfig,
     setConversation,
   };

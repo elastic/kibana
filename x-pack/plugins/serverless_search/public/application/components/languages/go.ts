@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
-import { LanguageDefinition, Languages } from './types';
 
 export const goDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.goAdvancedConfig,
+  apiReference: docLinks.goApiReference,
   basicConfig: docLinks.goBasicConfig,
   buildSearchQuery: `searchResp, err := es.Search().
   Index("books").
@@ -23,7 +23,7 @@ fmt.Println(searchResp, err)`,
   "fmt"
   "log"
   "strings"
-​
+
   "github.com/elastic/elasticsearch-serverless-go"
 )
 
@@ -38,6 +38,12 @@ func main() {
   }
 }`,
   docLink: docLinks.goClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-go',
+    label: i18n.translate('xpack.serverlessSearch.languages.go.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless-go',
+    }),
+  },
   iconType: 'go.svg',
   id: Languages.GO,
   ingestData: `ingestResult, err := es.Bulk().
@@ -63,10 +69,10 @@ fmt.Println(ingestResult, err)`,
   "fmt"
   "log"
   "strings"
-​
+
   "github.com/elastic/elasticsearch-serverless-go"
 )
-​
+
 func main() {
   cfg := elasticsearch.Config{
     Address: "${url}",
@@ -82,7 +88,7 @@ func main() {
 { "index": { "_id": "1"}}
 {"name": "foo", "title": "bar"}\n\`)).
     Do(context.Background())
-  ​
+
   fmt.Println(res, err)
 }`,
   installClient: 'go get -u github.com/elastic/elasticsearch-serverless-go@latest',

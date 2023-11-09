@@ -80,8 +80,8 @@ import {
   riskEngineInitRoute,
   riskEngineEnableRoute,
   riskEngineStatusRoute,
-} from '../lib/risk_engine/routes';
-import { riskScoreCalculationRoute } from '../lib/risk_engine/routes/risk_score_calculation_route';
+} from '../lib/entity_analytics/risk_engine/routes';
+import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_engine/routes/risk_score_calculation_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -183,9 +183,9 @@ export const initRoutes = (
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
     riskScorePreviewRoute(router, logger);
     riskScoreCalculationRoute(router, logger);
-    riskEngineInitRoute(router, logger, security);
-    riskEngineEnableRoute(router, logger, security);
-    riskEngineStatusRoute(router, logger);
-    riskEngineDisableRoute(router, logger, security);
+    riskEngineStatusRoute(router);
+    riskEngineInitRoute(router, getStartServices);
+    riskEngineEnableRoute(router, getStartServices);
+    riskEngineDisableRoute(router, getStartServices);
   }
 };

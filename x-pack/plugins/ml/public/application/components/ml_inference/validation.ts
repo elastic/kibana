@@ -87,7 +87,7 @@ export const validateInferenceConfig = (
   }
 
   // If populated, inference config must have the correct model type
-  if (inferenceConfig && inferenceConfigKeys.length > 0) {
+  if (modelType && inferenceConfig && inferenceConfigKeys.length > 0) {
     if (modelType === inferenceConfigKeys[0]) {
       return error;
     } else {

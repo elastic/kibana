@@ -53,9 +53,6 @@ const UNAUTHORIZED_CA = fsReadFileSync(UNAUTHORIZED_CA_FILE);
 const Auth = 'elastic:changeme';
 const AuthB64 = Buffer.from(Auth).toString('base64');
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const AxiosDefaultsAadapter = require('axios/lib/adapters/http');
-
 describe('axios connections', () => {
   let testServer: http.Server | https.Server | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,7 +62,7 @@ describe('axios connections', () => {
     // needed to prevent the dreaded Error: Cross origin http://localhost forbidden
     // see: https://github.com/axios/axios/issues/1754#issuecomment-572778305
     savedAxiosDefaultsAdapter = axios.defaults.adapter;
-    axios.defaults.adapter = AxiosDefaultsAadapter;
+    axios.defaults.adapter = 'http';
   });
 
   afterEach(() => {

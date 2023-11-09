@@ -16,11 +16,11 @@ import type {
 } from '@kbn/core/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
+import type { AuditEvent } from './audit_events';
+import { httpRequestEvent } from './audit_events';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
-import type { AuditEvent } from './audit_events';
-import { httpRequestEvent } from './audit_events';
 
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
@@ -93,13 +93,17 @@ interface AuditServiceSetupParams {
   config: ConfigType['audit'];
   logging: Pick<LoggingServiceSetup, 'configure'>;
   http: Pick<HttpServiceSetup, 'registerOnPostAuth'>;
+
   getCurrentUser(
     request: KibanaRequest
   ): ReturnType<SecurityPluginSetup['authc']['getCurrentUser']> | undefined;
+
   getSID(request: KibanaRequest): Promise<string | undefined>;
+
   getSpaceId(
     request: KibanaRequest
   ): ReturnType<SpacesPluginSetup['spacesService']['getSpaceId']> | undefined;
+
   recordAuditLoggingUsage(): void;
 }
 
@@ -154,9 +158,13 @@ export class AuditService {
       }
     };
 
+    const isLoggingEnabled = () => {
+      return this.logger.isLevelEnabled('info');
+    };
+
     const asScoped = (request: KibanaRequest): AuditLogger => ({
       log: async (event) => {
-        if (!event) {
+        if (!event || !isLoggingEnabled()) {
           return;
         }
         const spaceId = getSpaceId(request);
@@ -197,7 +205,7 @@ export class AuditService {
     });
 
     http.registerOnPostAuth((request, response, t) => {
-      if (request.auth.isAuthenticated) {
+      if (request.auth.isAuthenticated && isLoggingEnabled()) {
         asScoped(request).log(httpRequestEvent({ request }));
       }
       return t.next();

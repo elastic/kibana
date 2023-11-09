@@ -6,6 +6,11 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import {
+  SubFeaturePrivilegeGroupConfig,
+  SubFeaturePrivilegeGroupType,
+} from '@kbn/features-plugin/common';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
@@ -19,6 +24,27 @@ const UPTIME_RULE_TYPES = [
   'xpack.uptime.alerts.monitorStatus',
   'xpack.uptime.alerts.durationAnomaly',
 ];
+
+const ruleTypes = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
+
+const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'elastic_managed_locations_enabled',
+      name: i18n.translate('xpack.synthetics.features.elasticManagedLocations', {
+        defaultMessage: 'Elastic managed locations enabled',
+      }),
+      includeIn: 'all',
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['elasticManagedLocationsEnabled'],
+    },
+  ],
+};
+
 export const uptimeFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,
@@ -29,7 +55,7 @@ export const uptimeFeature = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
+  alerting: ruleTypes,
   privileges: {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
@@ -47,10 +73,10 @@ export const uptimeFeature = {
       },
       alerting: {
         rule: {
-          all: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
+          all: ruleTypes,
         },
         alert: {
-          all: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
+          all: ruleTypes,
         },
       },
       management: {
@@ -74,10 +100,10 @@ export const uptimeFeature = {
       },
       alerting: {
         rule: {
-          read: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
+          read: ruleTypes,
         },
         alert: {
-          read: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
+          read: ruleTypes,
         },
       },
       management: {
@@ -86,4 +112,12 @@ export const uptimeFeature = {
       ui: ['show', 'alerting:save'],
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.synthetics.features.app', {
+        defaultMessage: 'Synthetics',
+      }),
+      privilegeGroups: [elasticManagedLocationsEnabledPrivilege],
+    },
+  ],
 };

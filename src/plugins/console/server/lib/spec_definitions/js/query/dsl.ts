@@ -496,6 +496,17 @@ export const query = (specService: SpecDefinitionsService) => {
         format: 'dd/MM/yyyy||yyyy',
       },
     },
+    rule_query: {
+      __template: {
+        organic: {
+          query: {},
+        },
+        ruleset_id: '',
+        match_criteria: {
+          FIELD: 'VALUE',
+        },
+      },
+    },
     span_first: {
       __template: spanFirstTemplate,
       match: SPAN_QUERIES,
