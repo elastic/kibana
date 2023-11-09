@@ -42,11 +42,11 @@ import { ALERTS_URL } from '../../../urls/navigation';
 // Iusse tracked in: https://github.com/elastic/kibana/issues/167809
 describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_big');
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
   context('Opening alerts', () => {

@@ -34,8 +34,11 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
     if (accessToElasticManagedLocations) {
       const elasticManagedLocationsEnabled =
         Boolean(
-          (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime
-            .elasticManagedLocationsEnabled
+          (
+            await server.coreStart?.capabilities.resolveCapabilities(request, {
+              capabilityPath: 'uptime.*',
+            })
+          ).uptime.elasticManagedLocationsEnabled
         ) ?? true;
       if (!elasticManagedLocationsEnabled) {
         return response.customError({
