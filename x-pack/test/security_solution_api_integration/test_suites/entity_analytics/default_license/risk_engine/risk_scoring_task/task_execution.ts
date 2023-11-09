@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await riskEngineRoutes.init();
           });
 
-          it('calculates and persists risk scores for alert documents', async () => {
+          it('@skipInQA calculates and persists risk scores for alert documents', async () => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const scores = await readRiskScores(es);
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
           });
 
-          it('starts the latest transform', async () => {
+          it('@skipInQA starts the latest transform', async () => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const transformStats = await es.transform.getTransformStats({
@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(transformStats.transforms[0].state).to.eql('started');
           });
 
-          describe('disabling and re-enabling the risk engine', () => {
+          describe('@skipInQA disabling and re-enabling the risk engine', () => {
             beforeEach(async () => {
               await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
               await riskEngineRoutes.disable();
@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           });
 
-          describe('disabling the risk engine', () => {
+          describe('@skipInQA disabling the risk engine', () => {
             beforeEach(async () => {
               await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
             });
@@ -215,7 +215,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await riskEngineRoutes.init();
         });
 
-        it('calculates and persists risk scores for both types of entities', async () => {
+        it('@skipInQA calculates and persists risk scores for both types of entities', async () => {
           await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
           const riskScores = await readRiskScores(es);
 
