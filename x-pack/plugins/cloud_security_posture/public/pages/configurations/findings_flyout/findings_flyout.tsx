@@ -22,6 +22,7 @@ import {
   EuiIcon,
   EuiPagination,
   EuiFlyoutFooter,
+  EuiToolTip,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -98,7 +99,9 @@ export const CisKubernetesIcons = ({
 }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiIcon type={cisLogoIcon} size="xxl" />
+      <EuiToolTip content="Center for Internet Security">
+        <EuiIcon type={cisLogoIcon} size="xxl" />
+      </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <CISBenchmarkIcon type={benchmarkId} name={benchmarkName} />
