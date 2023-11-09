@@ -28,6 +28,20 @@ export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
 KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_VERSION
 
+# Detects and exports the final target branch when using a merge queue
+if [[ "$BUILDKITE_BRANCH" == *"gh-readonly-queue"* ]]; then
+  # removes gh-readonly-queue/
+  BKBRANCH_WITHOUT_GH_MQ_PREFIX="${BUILDKITE_BRANCH#gh-readonly-queue/}"
+
+  # extracts target mqueue branch
+  MERGE_QUEUE_TARGET_BRANCH=${BKBRANCH_WITHOUT_GH_MQ_PREFIX%/*}
+else
+  MERGE_QUEUE_TARGET_BRANCH=""
+fi
+export MERGE_QUEUE_TARGET_BRANCH
+echo "MERGE QUEUE TARGET BRANCH"
+echo $MERGE_QUEUE_TARGET_BRANCH
+
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
