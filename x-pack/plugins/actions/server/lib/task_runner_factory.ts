@@ -189,7 +189,7 @@ export class TaskRunnerFactory {
           logger.error(`Action '${actionId}' failed: ${e.message}`);
           if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
-            throwUnrecoverableError(e, TaskErrorSource.CONNECTOR_TYPE);
+            throwUnrecoverableError(e, TaskErrorSource.USER);
           }
           throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
         }

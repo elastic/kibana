@@ -20,7 +20,7 @@ export enum TaskErrorSource {
   USER = 'user',
 }
 
-export interface TaskRunError extends Error {
+export interface DecoratedError extends Error {
   [code]?: string;
   [retry]?: Date | boolean;
   [source]?: TaskErrorSource;
@@ -39,21 +39,21 @@ export class EphemeralTaskRejectedDueToCapacityError extends Error {
   }
 }
 
-function isTaskManagerError(error: unknown): error is TaskRunError {
-  return Boolean(error && (error as TaskRunError)[code]);
+function isTaskManagerError(error: unknown): error is DecoratedError {
+  return Boolean(error && (error as DecoratedError)[code]);
 }
 
-export function isUnrecoverableError(error: Error | TaskRunError) {
+export function isUnrecoverableError(error: Error | DecoratedError) {
   return isTaskManagerError(error) && error[code] === CODE_UNRECOVERABLE;
 }
 
 export function throwUnrecoverableError(error: Error, errorSource = TaskErrorSource.FRAMEWORK) {
-  (error as TaskRunError)[code] = CODE_UNRECOVERABLE;
-  (error as TaskRunError)[source] = errorSource;
+  (error as DecoratedError)[code] = CODE_UNRECOVERABLE;
+  (error as DecoratedError)[source] = errorSource;
   throw error;
 }
 
-export function isRetryableError(error: Error | TaskRunError) {
+export function isRetryableError(error: Error | DecoratedError) {
   if (isTaskManagerError(error) && error[code] === CODE_RETRYABLE) {
     return error[retry];
   }
@@ -61,28 +61,28 @@ export function isRetryableError(error: Error | TaskRunError) {
 }
 
 export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
-  (error as TaskRunError)[code] = CODE_RETRYABLE;
-  (error as TaskRunError)[retry] = shouldRetry;
+  (error as DecoratedError)[code] = CODE_RETRYABLE;
+  (error as DecoratedError)[retry] = shouldRetry;
   throw error;
 }
 
-export function isSkipError(error: Error | TaskRunError) {
+export function isSkipError(error: Error | DecoratedError) {
   if (isTaskManagerError(error) && error[code] === CODE_SKIP) {
     return true;
   }
   return false;
 }
 
-export function createSkipError(error: Error): TaskRunError {
-  (error as TaskRunError)[code] = CODE_SKIP;
+export function createSkipError(error: Error): DecoratedError {
+  (error as DecoratedError)[code] = CODE_SKIP;
   return error;
 }
 
 export function createTaskRunError(
   error: Error,
   errorSource = TaskErrorSource.FRAMEWORK
-): TaskRunError {
-  (error as TaskRunError)[source] = errorSource;
+): DecoratedError {
+  (error as DecoratedError)[source] = errorSource;
   return error;
 }
 

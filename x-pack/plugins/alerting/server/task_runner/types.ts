@@ -9,7 +9,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { TaskRunError } from '@kbn/task-manager-plugin/server/task_running';
+import { DecoratedError } from '@kbn/task-manager-plugin/server/task_running';
 import { IAlertsClient } from '../alerts_client/types';
 import { Alert } from '../alert';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -34,7 +34,7 @@ export interface RuleTaskRunResult {
   state: RuleTaskState;
   schedule: IntervalSchedule | undefined;
   monitoring: RuleMonitoring | undefined;
-  taskRunError?: TaskRunError;
+  taskRunError?: DecoratedError;
 }
 
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
