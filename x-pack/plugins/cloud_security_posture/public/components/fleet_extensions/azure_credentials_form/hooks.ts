@@ -22,7 +22,23 @@ import {
 import { CLOUDBEAT_AZURE } from '../../../../common/constants';
 import { AzureCredentialsType } from '../../../../common/types';
 
-export type SetupFormat = AzureCredentialsType;
+export type SetupFormat = 'arm_template' | 'manual';
+
+const getSetupFormatFromInput = (
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>,
+  hasArmTemplateUrl: boolean
+): SetupFormat => {
+  const credentialsType = getAzureCredentialsType(input);
+  // CloudFormation is the default setup format if the integration has a CloudFormation template
+  if (!credentialsType && hasArmTemplateUrl) {
+    return 'arm_template';
+  }
+  if (credentialsType !== 'arm_template') {
+    return 'manual';
+  }
+
+  return 'arm_template';
+};
 
 const getAzureCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
@@ -107,7 +123,8 @@ export const useAzureCredentialsForm = ({
 
   const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
 
-  const setupFormat = azureCredentialsType;
+  // const setupFormat = azureCredentialsType;
+  const setupFormat = getSetupFormatFromInput(input, hasArmTemplateUrl);
 
   const group = options[azureCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
