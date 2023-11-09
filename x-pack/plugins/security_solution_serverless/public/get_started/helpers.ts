@@ -6,6 +6,7 @@
  */
 
 import { getSections } from './sections';
+import { defaultFinishedCards } from './storage';
 import type { CardId, SectionId } from './types';
 
 export const getCard = ({ cardId, sectionId }: { cardId: CardId; sectionId: SectionId }) => {
@@ -27,3 +28,5 @@ export const getTotalUndoneCardsNumber = (finishedCardNUmber: number) =>
 
 export const hasCardDone = (cardId: CardId, finishedCards: Set<CardId>) =>
   finishedCards.has(cardId);
+
+export const isDefaultFinishedCard = (cardId: CardId) => defaultFinishedCards.indexOf(cardId) >= 0;

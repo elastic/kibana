@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import type { ToggleFinishedCard } from '../../get_started/types';
+import type { ToggleFinishedCard } from '../types';
 
 interface ModalContextValue {
   openModal: () => void;
@@ -19,9 +19,9 @@ const ModalContext = createContext<ModalContextValue | null>(null);
 export const ModalContextProvider: React.FC<{
   children: React.ReactNode;
   context: ModalContextValue;
-}> = ({ children, context }) => {
-  return <ModalContext.Provider value={context}>{children}</ModalContext.Provider>;
-};
+}> = ({ children, context }) => (
+  <ModalContext.Provider value={context}>{children}</ModalContext.Provider>
+);
 
 export const useModalContext = () => {
   const context = useContext(ModalContext);

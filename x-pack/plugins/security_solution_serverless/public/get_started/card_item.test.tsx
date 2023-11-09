@@ -11,6 +11,9 @@ import { CardItem } from './card_item';
 import { QuickStart } from './types';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { ALL_DONE_TEXT, CREATE_FIRST_PROJECT_TITLE } from './translations';
+import { ModalContextProvider } from './hooks/use_modal_context';
+
+jest.mock('./hooks/use_modal_context');
 
 describe('CardItemComponent', () => {
   const card = {
@@ -30,10 +33,19 @@ describe('CardItemComponent', () => {
     colors: { lightestShade: '' },
   } as EuiThemeComputed;
   const finishedCards = new Set([QuickStart.createFirstProject]);
-
+  const mockContext = {
+    openModal: jest.fn(),
+    closeModal: jest.fn(),
+    toggleFinishedCard: jest.fn(),
+  };
   it('should render card', () => {
     const { getByText } = render(
-      <CardItem card={card} euiTheme={mockEuiTheme} finishedCards={finishedCards} />
+      <CardItem card={card} euiTheme={mockEuiTheme} finishedCards={finishedCards} />,
+      {
+        wrapper: ({ children }: { children: React.ReactNode }) => (
+          <ModalContextProvider context={mockContext}>{children}</ModalContextProvider>
+        ),
+      }
     );
 
     const cardTitle = getByText(CREATE_FIRST_PROJECT_TITLE);

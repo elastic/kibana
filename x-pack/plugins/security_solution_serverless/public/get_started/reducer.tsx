@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTotalUndoneCardsNumber } from './helpers';
+import { getTotalUndoneCardsNumber, isDefaultFinishedCard } from './helpers';
 import type { ReducerActions } from './types';
 import { type CardId, type TogglePanelReducer, GetStartedPageActions } from './types';
 
@@ -14,7 +14,6 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
     const finishedCards: Set<CardId> = state.finishedCards.has(action.payload.cardId)
       ? state.finishedCards
       : new Set([...state.finishedCards, action.payload.cardId]);
-
     const totalCardsLeft = getTotalUndoneCardsNumber(finishedCards.size);
 
     return {
@@ -24,7 +23,10 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
   }
 
   if (action.type === GetStartedPageActions.RemoveFinishedCard) {
-    if (state.finishedCards.has(action.payload.cardId)) {
+    if (
+      state.finishedCards.has(action.payload.cardId) &&
+      !isDefaultFinishedCard(action.payload.cardId)
+    ) {
       const finishedCards = new Set([...state.finishedCards]);
       finishedCards.delete(action.payload.cardId);
 

@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useModalContext } from '../../common/hooks/modal_context';
+import { useModalContext } from '../hooks/use_modal_context';
 import { WATCH_THE_OVERVIEW_VIDEO_TITLE } from '../translations';
 import { QuickStart } from '../types';
 

@@ -29,7 +29,6 @@ const sections: Section[] = [
       {
         id: QuickStart.createFirstProject,
         title: i18n.CREATE_FIRST_PROJECT_TITLE,
-        allowUndo: false,
         icon: {
           type: 'addDataApp',
         },

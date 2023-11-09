@@ -24,7 +24,6 @@ export interface Badge {
 export type CardId = QuickStart | AddAndValidateData | GetStartedWithAlerts;
 
 export interface Card {
-  allowUndo?: boolean;
   icon?: EuiIconProps;
   id: CardId;
   title: string;
@@ -87,3 +86,9 @@ export enum GetStartedPageActions {
 }
 
 export type ToggleFinishedCard = ({ cardId, undo }: { cardId: CardId; undo?: boolean }) => void;
+
+export interface ModalContextValue {
+  openModal: () => void;
+  closeModal: () => void;
+  toggleFinishedCard: ToggleFinishedCard;
+}

@@ -38,9 +38,9 @@ import { useTogglePanel } from './hooks/use_toggle_panel';
 import { ProductLine } from '../../common/product';
 import launch from './images/launch.png';
 
-import { ModalContextProvider } from '../common/hooks/modal_context';
+import { ModalContextProvider } from './hooks/use_modal_context';
 import { Progress } from './progress';
-import { useUserName } from '../common/hooks/useUserName';
+import { useUserName } from '../common/hooks/use_user_name';
 
 const CONTENT_WIDTH = 1150;
 

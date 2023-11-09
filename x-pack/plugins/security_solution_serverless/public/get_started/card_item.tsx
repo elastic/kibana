@@ -19,9 +19,9 @@ import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { Card, CardId } from './types';
 
-import { useModalContext } from '../common/hooks/modal_context';
+import { useModalContext } from './hooks/use_modal_context';
 import { AllDoneText } from './all_done_text';
-import { hasCardDone } from './helpers';
+import { hasCardDone, isDefaultFinishedCard } from './helpers';
 
 const CardItemComponent: React.FC<{
   card: Card;
@@ -32,10 +32,8 @@ const CardItemComponent: React.FC<{
   const { toggleFinishedCard } = useModalContext();
   const isCardDone = hasCardDone(card.id, finishedCards);
   const undoFinishedCard = useCallback(() => {
-    if (card.allowUndo !== false) {
-      toggleFinishedCard({ cardId: card.id, undo: true });
-    }
-  }, [card.allowUndo, card.id, toggleFinishedCard]);
+    toggleFinishedCard({ cardId: card.id, undo: true });
+  }, [card.id, toggleFinishedCard]);
 
   return (
     <EuiPanel
@@ -114,7 +112,7 @@ const CardItemComponent: React.FC<{
                   align-self: center;
                 `}
               >
-                {card.allowUndo === false ? (
+                {isDefaultFinishedCard(card.id) ? (
                   <AllDoneText />
                 ) : (
                   <EuiButtonEmpty
@@ -137,4 +135,5 @@ const CardItemComponent: React.FC<{
 };
 
 CardItemComponent.displayName = 'CardItemComponent';
+
 export const CardItem = React.memo(CardItemComponent);
