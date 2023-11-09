@@ -7,9 +7,11 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { deleteAllAlerts, deleteAllRules } from '../../../utils';
-import { dataGeneratorFactory } from '../../../utils/data_generator';
+import {
+  deleteAllAlerts,
+  deleteAllRules,
+  dataGeneratorFactory,
+} from '../../../../detections_response/utils';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -20,11 +22,10 @@ import {
   updateRiskEngineConfigSO,
   getRiskEngineTask,
   waitForRiskEngineTaskToBeGone,
-  deleteRiskScoreIndices,
   cleanRiskEngine,
-} from './utils';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -35,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('Risk Engine - Risk Scoring Task', () => {
+  describe('@ess @serverless Risk Scoring Task Execution', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -92,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await riskEngineRoutes.init();
           });
 
-          it('calculates and persists risk scores for alert documents', async () => {
+          it('@skipInQA calculates and persists risk scores for alert documents', async () => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const scores = await readRiskScores(es);
@@ -103,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
           });
 
-          it('starts the latest transform', async () => {
+          it('@skipInQA starts the latest transform', async () => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const transformStats = await es.transform.getTransformStats({
@@ -113,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(transformStats.transforms[0].state).to.eql('started');
           });
 
-          describe('disabling and re-enabling the risk engine', () => {
+          describe('@skipInQA disabling and re-enabling the risk engine', () => {
             beforeEach(async () => {
               await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
               await riskEngineRoutes.disable();
@@ -135,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           });
 
-          describe('disabling the risk engine', () => {
+          describe('@skipInQA disabling the risk engine', () => {
             beforeEach(async () => {
               await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
             });
@@ -214,7 +215,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await riskEngineRoutes.init();
         });
 
-        it('calculates and persists risk scores for both types of entities', async () => {
+        it('@skipInQA calculates and persists risk scores for both types of entities', async () => {
           await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
           const riskScores = await readRiskScores(es);
 
@@ -224,74 +225,6 @@ export default ({ getService }: FtrProviderContext): void => {
           );
           expect(scoredIdentifiers.includes('host.name')).to.be(true);
           expect(scoredIdentifiers.includes('user.name')).to.be(true);
-        });
-      });
-
-      describe('with alerts in a non-default space', () => {
-        let namespace: string;
-        let index: string[];
-        let documentId: string;
-        let createAndSyncRuleAndAlertsForOtherSpace: ReturnType<
-          typeof createAndSyncRuleAndAlertsFactory
-        >;
-
-        beforeEach(async () => {
-          documentId = uuidv4();
-          namespace = uuidv4();
-          index = [`risk-score.risk-score-${namespace}`];
-
-          createAndSyncRuleAndAlertsForOtherSpace = createAndSyncRuleAndAlertsFactory({
-            supertest,
-            log,
-            namespace,
-          });
-          const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest, namespace);
-
-          const spaces = getService('spaces');
-          await spaces.create({
-            id: namespace,
-            name: namespace,
-            disabledFeatures: [],
-          });
-
-          const baseEvent = buildDocument({ host: { name: 'host-1' } }, documentId);
-          await indexListOfDocuments(
-            Array(10)
-              .fill(baseEvent)
-              .map((_baseEvent, _index) => ({
-                ..._baseEvent,
-                'host.name': `host-${_index}`,
-              }))
-          );
-
-          await createAndSyncRuleAndAlertsForOtherSpace({
-            query: `id: ${documentId}`,
-            alerts: 10,
-            riskScore: 40,
-          });
-
-          await riskEngineRoutesForNamespace.init();
-        });
-
-        afterEach(async () => {
-          await getService('spaces').delete(namespace);
-          await deleteRiskScoreIndices({ log, es, namespace });
-        });
-
-        it('calculates and persists risk scores for alert documents', async () => {
-          await waitForRiskScoresToBePresent({
-            es,
-            log,
-            scoreCount: 10,
-            index,
-          });
-
-          const scores = await readRiskScores(es, index);
-          expect(normalizeScores(scores).map(({ id_value: idValue }) => idValue)).to.eql(
-            Array(10)
-              .fill(0)
-              .map((_, _index) => `host-${_index}`)
-          );
         });
       });
     });

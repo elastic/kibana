@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from '../../test_serverless/api_integration/services';
+export type IndexingInterval = [string | Date, string | Date];
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export type Document = Record<string, unknown>;

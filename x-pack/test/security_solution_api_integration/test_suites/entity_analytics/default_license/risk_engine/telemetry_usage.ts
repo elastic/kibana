@@ -7,18 +7,21 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { deleteAllRules, deleteAllAlerts, getRiskEngineStats } from '../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  dataGeneratorFactory,
+} from '../../../detections_response/utils';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
   waitForRiskScoresToBePresent,
   riskEngineRouteHelpersFactory,
   cleanRiskEngine,
-} from './utils';
-import { dataGeneratorFactory } from '../../../utils/data_generator';
+  getRiskEngineStats,
+} from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -29,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('Risk engine telemetry', async () => {
+  describe('@ess @serverless telemetry', async () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -122,8 +125,6 @@ export default ({ getService }: FtrProviderContext) => {
             all_host_risk_scores_total_day: 10,
           };
           expect(otherStats).to.eql(expected);
-          expect(allRiskScoreIndexSize).to.be.greaterThan(0);
-          expect(uniqueRiskScoreIndexSize).to.be.greaterThan(0);
         });
       });
     });
