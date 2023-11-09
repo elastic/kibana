@@ -11,7 +11,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { EuiToolTip, EuiSuperSelect } from '@elastic/eui';
+import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { createGlobalStyle } from '@kbn/react-kibana-context-styled';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -36,7 +36,6 @@ interface Props {
 
 const DropTargetDataProvidersContainer = styled.div`
   position: relative;
-  padding: 20px 0 0px 0;
 
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
     background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
@@ -117,10 +116,7 @@ const SearchOrFilterGlobalStyle = createGlobalStyle`
 `;
 
 const CustomTooltipDiv = styled.div`
-  position: absolute;
-  left: 20px;
-  transform: translateY(-50%);
-  z-index: 9999;
+  position: relative;
 `;
 
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
@@ -162,39 +158,45 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
         aria-label={i18n.QUERY_AREA_ARIA_LABEL}
         className="drop-target-data-providers-container"
       >
-        <CustomTooltipDiv>
-          <EuiToolTip
-            className="timeline-select-search-filter-tooltip"
-            content={i18n.FILTER_OR_SEARCH_WITH_KQL}
-          >
-            <EuiSuperSelect
-              data-test-subj="timeline-select-search-or-filter"
-              hasDividers={true}
-              itemLayoutAlign="top"
-              itemClassName={timelineSelectModeItemsClassName}
-              onChange={handleChange}
-              options={options}
-              popoverProps={popoverProps}
-              valueOfSelected={kqlMode}
-            />
-          </EuiToolTip>
-        </CustomTooltipDiv>
-        <DropTargetDataProviders
-          className="drop-target-data-providers"
-          data-test-subj="dataProviders"
-        >
-          {dataProviders != null && dataProviders.length ? (
-            <Providers
-              browserFields={browserFields}
-              timelineId={timelineId}
-              dataProviders={dataProviders}
-            />
-          ) : (
-            <DroppableWrapper isDropDisabled={isLoading} droppableId={droppableId}>
-              <Empty browserFields={browserFields} timelineId={timelineId} />
-            </DroppableWrapper>
-          )}
-        </DropTargetDataProviders>
+        <EuiFlexGroup direction={'row'} justifyContent="flexStart" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <CustomTooltipDiv>
+              <EuiToolTip
+                className="timeline-select-search-filter-tooltip"
+                content={i18n.FILTER_OR_SEARCH_WITH_KQL}
+              >
+                <EuiSuperSelect
+                  data-test-subj="timeline-select-search-or-filter"
+                  hasDividers={true}
+                  itemLayoutAlign="top"
+                  itemClassName={timelineSelectModeItemsClassName}
+                  onChange={handleChange}
+                  options={options}
+                  popoverProps={popoverProps}
+                  valueOfSelected={kqlMode}
+                />
+              </EuiToolTip>
+            </CustomTooltipDiv>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <DropTargetDataProviders
+              className="drop-target-data-providers"
+              data-test-subj="dataProviders"
+            >
+              {dataProviders != null && dataProviders.length ? (
+                <Providers
+                  browserFields={browserFields}
+                  timelineId={timelineId}
+                  dataProviders={dataProviders}
+                />
+              ) : (
+                <DroppableWrapper isDropDisabled={isLoading} droppableId={droppableId}>
+                  <Empty browserFields={browserFields} timelineId={timelineId} />
+                </DroppableWrapper>
+              )}
+            </DropTargetDataProviders>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </DropTargetDataProvidersContainer>
     </>
   );
