@@ -350,7 +350,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             const id = crypto.randomBytes(8).toString('hex');
             const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
             const specFileFTRConfig = parseTestFileConfig(filePath);
-
+            log.info(`Running spec file: ${filePath}`);
             if (!API_KEY) {
               log.info('API KEY to create environment could not be retrieved.');
               // eslint-disable-next-line no-process-exit
