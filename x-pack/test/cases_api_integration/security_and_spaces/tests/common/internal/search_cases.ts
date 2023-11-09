@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
-    
+
     describe('basic tests', () => {
       it('filters by single customField', async () => {
         await createConfiguration(

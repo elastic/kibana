@@ -483,7 +483,7 @@ describe('CasesSearchRequestRt', () => {
       toggle_custom_field_key: [true],
       another_custom_field: [null, false],
       text_custom_field: ['hello'],
-      number_custom_field: [1234]
+      number_custom_field: [1234],
     },
   };
 
