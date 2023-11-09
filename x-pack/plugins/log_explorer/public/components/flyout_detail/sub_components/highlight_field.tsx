@@ -6,9 +6,14 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { HoverAction, HoverActionType } from './hover_action';
-import { flyoutHoverActionFilterForText, flyoutHoverActionFilterOutText } from '../translations';
+import {
+  flyoutHoverActionFilterForText,
+  flyoutHoverActionFilterOutText,
+  flyoutHoverActionFilterForFieldPresentText,
+  flyoutHoverActionToggleColumnText,
+} from '../translations';
 import { useDiscoverActionsContext } from '../../../hooks/use_discover_action';
 
 interface HighlightFieldProps {
@@ -31,6 +36,7 @@ export function HighlightField({
   const filterForText = flyoutHoverActionFilterForText(value);
   const filterOutText = flyoutHoverActionFilterOutText(value);
   const actions = useDiscoverActionsContext();
+  const [columnAdded, setColumnAdded] = useState(false);
 
   const hoverActions: HoverActionType[] = useMemo(
     () => [
@@ -48,17 +54,40 @@ export function HighlightField({
         onClick: () => actions?.addFilter && actions.addFilter(field, value, '-'),
         display: true,
       },
+      {
+        id: 'filterForFieldPresentAction',
+        tooltipContent: flyoutHoverActionFilterForFieldPresentText,
+        iconType: 'filter',
+        onClick: () => actions?.addFilter && actions.addFilter('_exists_', field, '+'),
+        display: true,
+      },
+      {
+        id: 'toggleColumnAction',
+        tooltipContent: flyoutHoverActionToggleColumnText,
+        iconType: 'listAdd',
+        onClick: () => {
+          if (actions) {
+            if (columnAdded) {
+              actions?.removeColumn?.(field);
+            } else {
+              actions?.addColumn?.(field);
+            }
+            setColumnAdded(!columnAdded);
+          }
+        },
+        display: true,
+      },
     ],
-    [actions, field, value, filterForText, filterOutText]
+    [filterForText, filterOutText, actions, field, value, columnAdded]
   );
   return formattedValue ? (
     <EuiFlexGroup direction="column" gutterSize="none" data-test-subj={dataTestSubj}>
-      <EuiFlexItem grow={false}>
-        <EuiText color="subdued" size="xs" grow={false}>
+      <EuiFlexItem>
+        <EuiText color="subdued" size="xs">
           {label}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <HoverAction displayText={formattedValue} actions={hoverActions} width={width} />
       </EuiFlexItem>
     </EuiFlexGroup>

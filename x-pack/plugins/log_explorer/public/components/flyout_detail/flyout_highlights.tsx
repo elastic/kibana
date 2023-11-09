@@ -46,8 +46,7 @@ export function FlyoutHighlights({
 }) {
   const elementRef = useRef<HTMLDivElement>(null);
   const [ref, dimensions] = useDimension<HTMLDivElement>(elementRef);
-  const flyoutWidth = dimensions.width ?? 600;
-  const fieldWidth = flyoutWidth / 6;
+  const fieldWidth = (dimensions.width - 20) / 7;
   return (
     <DiscoverActionsProvider value={actions}>
       <HighlightContainer ref={ref}>

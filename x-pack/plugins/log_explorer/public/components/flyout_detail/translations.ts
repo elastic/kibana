@@ -137,3 +137,17 @@ export const flyoutHoverActionFilterOutText = (text: unknown) =>
       value: text as string,
     },
   });
+
+export const flyoutHoverActionFilterForFieldPresentText = i18n.translate(
+  'xpack.logExplorer.flyoutDetail.value.hover.filterForFieldPresent',
+  {
+    defaultMessage: 'Filter for field present',
+  }
+);
+
+export const flyoutHoverActionToggleColumnText = i18n.translate(
+  'xpack.logExplorer.flyoutDetail.value.hover.toggleColumn',
+  {
+    defaultMessage: 'Toggle column in table',
+  }
+);
