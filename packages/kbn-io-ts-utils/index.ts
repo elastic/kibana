@@ -32,3 +32,13 @@ export {
 export { datemathStringRt } from './src/datemath_string_rt';
 
 export { createPlainError, decodeOrThrow, formatErrors, throwErrors } from './src/decode_or_throw';
+
+export {
+  DateFromStringOrNumber,
+  minimalTimeKeyRT,
+  type MinimalTimeKey,
+  type TimeKey,
+  type UniqueTimeKey,
+  compareToTimeKey,
+  getIndexAtTimeKey,
+} from './src/time_key_rt';

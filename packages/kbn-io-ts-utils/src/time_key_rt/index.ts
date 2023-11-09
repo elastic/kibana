@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ascending, bisector } from 'd3-array';
@@ -11,7 +12,7 @@ import moment from 'moment';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { chain } from 'fp-ts/lib/Either';
 
-export const NANO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3,9}Z$/;
+const NANO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3,9}Z$/;
 
 export const DateFromStringOrNumber = new rt.Type<string, number | string>(
   'DateFromStringOrNumber',
@@ -37,8 +38,9 @@ export const minimalTimeKeyRT = rt.type({
   time: DateFromStringOrNumber,
   tiebreaker: rt.number,
 });
+export type MinimalTimeKey = rt.TypeOf<typeof minimalTimeKeyRT>;
 
-export const timeKeyRT = rt.intersection([
+const timeKeyRT = rt.intersection([
   minimalTimeKeyRT,
   rt.partial({
     gid: rt.string,
@@ -51,9 +53,9 @@ export interface UniqueTimeKey extends TimeKey {
   gid: string;
 }
 
-export type Comparator = (firstValue: any, secondValue: any) => number;
+type Comparator = (firstValue: any, secondValue: any) => number;
 
-export function compareTimeKeys(
+function compareTimeKeys(
   firstKey: TimeKey,
   secondKey: TimeKey,
   compareValues: Comparator = ascending

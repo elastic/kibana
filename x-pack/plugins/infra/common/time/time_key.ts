@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { DateFromStringOrNumber } from '@kbn/io-ts-utils';
 import { ascending, bisector } from 'd3-array';
 import * as rt from 'io-ts';
 import { pick } from 'lodash';
-import { DateFromStringOrNumber } from '@kbn/logs-shared-plugin/common';
 
 export const minimalTimeKeyRT = rt.type({
   time: DateFromStringOrNumber,

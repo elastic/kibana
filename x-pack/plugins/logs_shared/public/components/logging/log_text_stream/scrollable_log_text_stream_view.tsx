@@ -9,10 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment, GetDerivedStateFromProps } from 'react';
 import moment from 'moment';
-
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
 import { TextScale } from '../../../../common/log_text_scale';
-import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';

@@ -46,8 +46,6 @@ export * from './log_entry';
 
 export { convertISODateToNanoPrecision } from './utils';
 
-export { DateFromStringOrNumber } from './time';
-
 // Http types
 export type { LogEntriesSummaryBucket, LogEntriesSummaryHighlightsBucket } from './http_api';
 

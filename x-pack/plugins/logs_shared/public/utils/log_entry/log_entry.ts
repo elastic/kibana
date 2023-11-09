@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { TimeKey, UniqueTimeKey, compareToTimeKey, getIndexAtTimeKey } from '@kbn/io-ts-utils';
 import { bisector } from 'd3-array';
-import { compareToTimeKey, getIndexAtTimeKey, TimeKey, UniqueTimeKey } from '../../../common/time';
 import {
   LogEntry,
   LogColumn,
