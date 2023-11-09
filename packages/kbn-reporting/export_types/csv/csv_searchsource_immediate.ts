@@ -23,10 +23,10 @@ import {
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
+import { JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
 import type {
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,
-  JobParamsDownloadCSV,
   ReportingRequestHandlerContext,
 } from '@kbn/reporting-server';
 import { ExportType, getFieldFormats } from '@kbn/reporting-server';

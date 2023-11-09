@@ -35,13 +35,8 @@ import {
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import type { LocatorParams, TaskRunResult } from '@kbn/reporting-common/types';
-import {
-  decryptJobHeaders,
-  ExportType,
-  generatePngObservable,
-  JobParamsPNGV2,
-  TaskPayloadPNGV2,
-} from '@kbn/reporting-server';
+import { decryptJobHeaders, ExportType, generatePngObservable } from '@kbn/reporting-server';
+import { JobParamsPNGV2, TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
 import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { SerializableRecord } from '@kbn/utility-types';
