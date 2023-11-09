@@ -361,7 +361,7 @@ const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] 
     <EuiFlexGroup
       direction="column"
       justifyContent="center"
-      gutterSize="m"
+      gutterSize="xs"
       className="mlAnomalyCategoryExamples"
     >
       {definition !== undefined && definition.terms && (
