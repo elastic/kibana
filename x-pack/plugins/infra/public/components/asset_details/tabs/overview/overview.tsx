@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   MetadataSummaryList,
@@ -15,50 +15,54 @@ import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsSection, MetricsSectionCompact } from './metrics/metrics_section';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
-import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { SectionSeparator } from './section_separator';
 import { MetadataErrorCallout } from '../../components/metadata_error_callout';
+import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 export const Overview = () => {
-  const { getParsedDateRange } = useDateRangeProviderContext();
-  const { asset, assetType, renderMode } = useAssetDetailsRenderPropsContext();
+  const ref = useRef<HTMLDivElement>(null);
+  const { dateRange } = useDatePickerContext();
+  const { asset, renderMode } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-  } = useMetadataStateProviderContext();
+  } = useMetadataStateContext();
+
   const { logs, metrics } = useDataViewsProviderContext();
 
-  const parsedDateRange = useMemo(() => getParsedDateRange(), [getParsedDateRange]);
   const isFullPageView = renderMode.mode !== 'flyout';
+
+  const state = useIntersectingState(ref, { dateRange });
 
   const metricsSection = isFullPageView ? (
     <MetricsSection
-      dateRange={parsedDateRange}
+      dateRange={state.dateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
       assetName={asset.name}
     />
   ) : (
     <MetricsSectionCompact
-      dateRange={parsedDateRange}
+      dateRange={state.dateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
       assetName={asset.name}
     />
   );
   const metadataSummarySection = isFullPageView ? (
-    <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
+    <MetadataSummaryList metadata={metadata} loading={metadataLoading} />
   ) : (
-    <MetadataSummaryListCompact metadata={metadata} metadataLoading={metadataLoading} />
+    <MetadataSummaryListCompact metadata={metadata} loading={metadataLoading} />
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
       <EuiFlexItem grow={false}>
-        <KPIGrid assetName={asset.name} dateRange={parsedDateRange} dataView={metrics.dataView} />
+        <KPIGrid assetName={asset.name} dateRange={state.dateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
@@ -67,8 +71,8 @@ export const Overview = () => {
       <EuiFlexItem grow={false}>
         <AlertsSummaryContent
           assetName={asset.name}
-          assetType={assetType}
-          dateRange={parsedDateRange}
+          assetType={asset.type}
+          dateRange={state.dateRange}
         />
         <SectionSeparator />
       </EuiFlexItem>

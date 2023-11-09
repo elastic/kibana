@@ -7,6 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { UpdateSLOParams } from '@kbn/slo-schema';
+import { cloneDeep, pick, omit } from 'lodash';
 
 import {
   getSLOTransformId,
@@ -36,6 +38,123 @@ describe('UpdateSLO', () => {
     mockTransformManager = createTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     updateSLO = new UpdateSLO(mockRepository, mockTransformManager, mockEsClient);
+  });
+
+  describe('when the update payload does not change the original SLO', () => {
+    function expectNoCallsToAnyMocks() {
+      expect(mockTransformManager.stop).not.toBeCalled();
+      expect(mockTransformManager.uninstall).not.toBeCalled();
+      expect(mockTransformManager.install).not.toBeCalled();
+      expect(mockTransformManager.preview).not.toBeCalled();
+      expect(mockTransformManager.start).not.toBeCalled();
+      expect(mockEsClient.deleteByQuery).not.toBeCalled();
+    }
+
+    it('returns early with a full identical SLO payload', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = omit(cloneDeep(slo), [
+        'id',
+        'revision',
+        'createdAt',
+        'updatedAt',
+        'enabled',
+      ]);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical name', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['name']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical indicator', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['indicator']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical timeWindow', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['timeWindow']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical budgetingMethod', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['budgetingMethod']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical description', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['description']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical groupBy', async () => {
+      const slo = createSLO({ groupBy: 'project.id' });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['groupBy']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical objective', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['objective']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical tags', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['tags']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical settings', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['settings']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
   });
 
   it('updates the settings correctly', async () => {

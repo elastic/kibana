@@ -24,7 +24,6 @@ import {
   filterOutAlertProperty,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -39,7 +38,6 @@ import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     createRule(getNewRule());
   });
 
@@ -107,7 +105,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then((severityVal) => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
           openActiveTimeline();
           cy.get(PROVIDER_BADGE)
@@ -140,7 +138,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
           cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
         });
@@ -159,7 +157,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           cy.window().then((win) => {
             cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
           });

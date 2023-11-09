@@ -64,7 +64,7 @@ export const useRiskScoreKpi = ({
     isEnabled,
     isAuthorized,
     isLoading: isDeprecatedLoading,
-    refetch: refetchDeprecated,
+    refetch: refetchFeatureStatus,
   } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
 
   const { loading, result, search, refetch, inspect, error } =
@@ -79,6 +79,11 @@ export const useRiskScoreKpi = ({
 
   const isModuleDisabled = !!error && isIndexNotFoundError(error);
 
+  const requestTimerange = useMemo(
+    () => (timerange ? { to: timerange.to, from: timerange.from, interval: '' } : undefined),
+    [timerange]
+  );
+
   useEffect(() => {
     if (
       !skip &&
@@ -92,32 +97,28 @@ export const useRiskScoreKpi = ({
         filterQuery,
         defaultIndex: [defaultIndex],
         entity: riskEntity,
+        timerange: requestTimerange,
       });
     }
   }, [
+    defaultIndex,
+    search,
+    filterQuery,
+    skip,
+    riskEntity,
+    requestTimerange,
     isEnabled,
     isDeprecated,
     isAuthorized,
     isDeprecatedLoading,
-    skip,
-    defaultIndex,
-    search,
-    filterQuery,
-    riskEntity,
   ]);
 
   const refetchAll = useCallback(() => {
     if (defaultIndex) {
-      refetchDeprecated(defaultIndex);
+      refetchFeatureStatus(defaultIndex);
       refetch();
     }
-  }, [defaultIndex, refetch, refetchDeprecated]);
-
-  // since query does not take timerange arg, we need to manually refetch when time range updates
-  useEffect(() => {
-    refetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timerange?.to, timerange?.from]);
+  }, [defaultIndex, refetch, refetchFeatureStatus]);
 
   useEffect(() => {
     if (error) {
@@ -141,5 +142,5 @@ export const useRiskScoreKpi = ({
     };
   }, [result, loading, error]);
 
-  return { error, severityCount, loading, isModuleDisabled, refetch, inspect };
+  return { error, severityCount, loading, isModuleDisabled, refetch: refetchAll, inspect };
 };

@@ -21,6 +21,7 @@ import {
   kibanaDevServiceAccount,
 } from '@kbn/dev-utils';
 
+import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
 import {
@@ -687,6 +688,10 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         : {}),
     });
     await waitUntilClusterReady({ client, expectedStatus: 'green', log });
+    if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
+      // If security is not disabled, make sure the security index exists before running the test to avoid flakiness
+      await waitForSecurityIndex({ client, log });
+    }
   }
 
   if (!options.background) {
