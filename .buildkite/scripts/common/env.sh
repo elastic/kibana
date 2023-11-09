@@ -29,7 +29,7 @@ KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_VERSION
 
 # Detects and exports the final target branch when using a merge queue
-if [[ "$BUILDKITE_BRANCH" == *"gh-readonly-queue"* ]]; then
+if [[ "$BUILDKITE_BRANCH" == "gh-readonly-queue"* ]]; then
   # removes gh-readonly-queue/
   BKBRANCH_WITHOUT_GH_MQ_PREFIX="${BUILDKITE_BRANCH#gh-readonly-queue/}"
 
