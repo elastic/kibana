@@ -164,7 +164,6 @@ export function CustomEquationEditor({
                 { defaultMessage: 'Equation and threshold' }
               )}
               error={[errors.equation]}
-              isInvalid={errors.equation != null}
             >
               <>
                 <EuiSpacer size="xs" />
@@ -179,6 +178,7 @@ export function CustomEquationEditor({
                   onClick={() => {
                     setCustomEqPopoverOpen(true);
                   }}
+                  isInvalid={errors.equation != null}
                 />
               </>
             </EuiFormRow>

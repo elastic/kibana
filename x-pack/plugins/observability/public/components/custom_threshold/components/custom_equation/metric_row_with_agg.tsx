@@ -35,6 +35,11 @@ interface MetricRowWithAggProps extends MetricRowBaseProps {
   fields: NormalizedFields;
 }
 
+const DEFAULT_COUNT_FILTER_TITLE = i18n.translate(
+  'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.defaultCountFilterTitle',
+  { defaultMessage: 'all documents' }
+);
+
 export function MetricRowWithAgg({
   name,
   aggType = Aggregators.COUNT,
@@ -118,17 +123,19 @@ export function MetricRowWithAgg({
                   'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
                   { defaultMessage: 'Aggregation {name}', values: { name } }
                 )}
-                isInvalid={aggType !== Aggregators.COUNT && !field}
               >
                 <EuiExpression
                   data-test-subj="aggregationName"
                   description={aggregationTypes[aggType].text}
-                  value={aggType === Aggregators.COUNT ? filter : field}
+                  value={
+                    aggType === Aggregators.COUNT ? filter || DEFAULT_COUNT_FILTER_TITLE : field
+                  }
                   isActive={aggTypePopoverOpen}
                   display="columns"
                   onClick={() => {
                     setAggTypePopoverOpen(true);
                   }}
+                  isInvalid={aggType !== Aggregators.COUNT && !field}
                 />
               </EuiFormRow>
             }
@@ -157,7 +164,6 @@ export function MetricRowWithAgg({
                       'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationType',
                       { defaultMessage: 'Aggregation type' }
                     )}
-                    isInvalid={isAggInvalid}
                   >
                     <EuiSelect
                       data-test-subj="aggregationTypeSelect"
@@ -173,6 +179,7 @@ export function MetricRowWithAgg({
                           value,
                         };
                       })}
+                      isInvalid={isAggInvalid}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -198,7 +205,6 @@ export function MetricRowWithAgg({
                         'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.fieldLabel',
                         { defaultMessage: 'Field name' }
                       )}
-                      isInvalid={isFieldInvalid}
                     >
                       <EuiComboBox
                         fullWidth

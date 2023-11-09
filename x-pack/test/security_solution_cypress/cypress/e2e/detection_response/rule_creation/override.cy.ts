@@ -146,8 +146,8 @@ describe('Rules override', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(ALERTS_COUNT)
       .invoke('text')
       .should('match', /^[1-9].+$/); // Any number of alerts
-    cy.get(ALERT_GRID_CELL).contains('auditbeat');
-    cy.get(ALERT_GRID_CELL).contains('critical');
+    cy.get(ALERT_GRID_CELL).contains('winlogbeat');
+    cy.get(ALERT_GRID_CELL).contains('high');
     cy.get(ALERT_GRID_CELL).contains('80');
   });
 });
