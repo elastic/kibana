@@ -222,7 +222,7 @@ export const TIMELINE_FLYOUT_BODY = '[data-test-subj="query-tab-flyout-body"]';
 
 export const TIMELINE_HEADER = '[data-test-subj="timeline-hide-show-container"]';
 
-export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-icon-button"]`;
+export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-empty-button"]`;
 
 export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 

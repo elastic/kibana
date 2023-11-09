@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { fireEvent, screen, waitFor } from '@testing-library/dom';
+import { render, cleanup } from '@testing-library/react';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from '.';
 import { sourcererModel } from '../../store/sourcerer';
@@ -18,10 +20,8 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore } from '../../store';
-import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
-import { render, cleanup } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 
@@ -74,13 +74,16 @@ describe('timeline sourcerer', () => {
     scope: sourcererModel.SourcererScopeName.timeline,
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const pollForSignalIndexMock = jest.fn();
+
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
+
     (useSignalHelpers as jest.Mock).mockReturnValue({
       pollForSignalIndex: pollForSignalIndexMock,
       signalIndexNeedsInit: false,
     });
+
     render(
       <TestProviders store={store}>
         <Sourcerer {...testProps} />
@@ -89,7 +92,9 @@ describe('timeline sourcerer', () => {
 
     fireEvent.click(screen.getByTestId('timeline-sourcerer-trigger'));
 
-    fireEvent.click(screen.getByTestId(`sourcerer-advanced-options-toggle`));
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId(`sourcerer-advanced-options-toggle`));
+    });
   });
 
   afterEach(() => {
@@ -97,6 +102,7 @@ describe('timeline sourcerer', () => {
   });
 
   it('renders "alerts only" checkbox, unchecked', async () => {
+    screen.debug(undefined, 10000000);
     await waitFor(() => {
       expect(screen.getByTestId('sourcerer-alert-only-checkbox').parentElement).toHaveTextContent(
         'Show only detection alerts'
