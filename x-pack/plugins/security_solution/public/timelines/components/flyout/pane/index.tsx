@@ -14,27 +14,28 @@ import type { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 import { defaultRowRenderers } from '../../timeline/body/renderers';
 import { DefaultCellRenderer } from '../../timeline/cell_rendering/default_cell_renderer';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { inputsSelectors } from '../../../../common/store/selectors';
 
 interface FlyoutPaneComponentProps {
   timelineId: TimelineId;
-  visible?: boolean;
 }
 
-const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
-  timelineId,
-  visible = true,
-}) => {
+const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
   const { euiTheme } = useEuiTheme();
-  const timeline = useMemo(
-    () => (
-      <StatefulTimeline
-        renderCellValue={DefaultCellRenderer}
-        rowRenderers={defaultRowRenderers}
-        timelineId={timelineId}
-      />
-    ),
-    [timelineId]
-  );
+  const isFullScreen = useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
+
+  const background = useEuiBackgroundColor('plain');
+  const modalStyles = useMemo(() => {
+    if (isFullScreen) {
+      return '';
+    }
+    return `
+      margin: ${euiTheme.size.m};
+      border-radius: ${euiTheme.border.radius.medium};
+      padding: 0 ${euiTheme.size.s};
+    `;
+  }, [euiTheme, isFullScreen]);
 
   return (
     <EuiOverlayMask
@@ -44,8 +45,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         // .euiOverlayMask class concatenation to make styles take precedence over .euiOverlayMask-aboveHeader
         &.euiOverlayMask {
           top: var(--euiFixedHeadersOffset, 0);
-          z-index: 1001; // on top of flyout (z-index: 1000)
-          ${visible ? '' : 'display: none;'}
+          z-index: ${euiTheme.levels.flyout};
         }
       `}
     >
@@ -55,18 +55,20 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         css={css`
           min-width: 150px;
           height: inherit;
-          border-radius: ${euiTheme.border.radius.medium};
+          position: fixed;
           top: var(--euiFixedHeadersOffset, 0);
           right: 0;
           bottom: 0;
           left: 0;
-          margin: ${euiTheme.size.m};
-          padding: 0 ${euiTheme.size.s};
-          background: ${useEuiBackgroundColor('plain')};
-          position: fixed;
+          background: ${background};
+          ${!isFullScreen ? modalStyles : ''}
         `}
       >
-        {timeline}
+        <StatefulTimeline
+          renderCellValue={DefaultCellRenderer}
+          rowRenderers={defaultRowRenderers}
+          timelineId={timelineId}
+        />
       </div>
     </EuiOverlayMask>
   );

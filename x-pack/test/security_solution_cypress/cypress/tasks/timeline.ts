@@ -299,12 +299,12 @@ export const clickIdToggleField = () => {
 };
 
 export const closeOpenTimelineModal = () => {
-  cy.get(CLOSE_OPEN_TIMELINE_MODAL_BTN).click({ force: true });
+  cy.get(CLOSE_OPEN_TIMELINE_MODAL_BTN).click();
 };
 
 export const closeTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click();
-  cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
+  cy.get(QUERY_TAB_BUTTON).should('not.exist');
 };
 
 export const removeDataProvider = () => {
@@ -410,7 +410,8 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
 };
 
 export const openActiveTimeline = () => {
-  cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click({ force: true });
+  cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click();
+  cy.get(QUERY_TAB_BUTTON).should('exist');
 };
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {

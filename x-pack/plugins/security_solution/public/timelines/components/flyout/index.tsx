@@ -18,6 +18,7 @@ import { getTimelineShowStatusByIdSelector } from './selectors';
 import { useTimelineSavePrompt } from '../../../common/hooks/timeline/use_timeline_save_prompt';
 import { timelineActions } from '../../store/timeline';
 import { focusActiveTimelineButton } from '../timeline/helpers';
+import { useInitializeTimeline } from '../timeline/use_initialize_timeline';
 
 interface OwnProps {
   timelineId: TimelineId;
@@ -44,13 +45,12 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
     [handleClose]
   );
 
+  useInitializeTimeline({ timelineId });
   useTimelineSavePrompt(timelineId, onAppLeave);
 
   return (
     <>
-      <EuiFocusTrap disabled={!show}>
-        <Pane timelineId={timelineId} visible={show} />
-      </EuiFocusTrap>
+      <EuiFocusTrap disabled={!show}>{show && <Pane timelineId={timelineId} />}</EuiFocusTrap>
       <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
     </>
