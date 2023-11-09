@@ -34,7 +34,8 @@
     "@kbn/field-formats-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/xstate-utils"
   ],
   "exclude": [
     "target/**/*"
