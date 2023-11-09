@@ -7,6 +7,8 @@
 
 import { readFile } from 'fs/promises';
 
+import fetch from 'node-fetch';
+
 let mockKibanaVersion = '300.0.0';
 let mockConfig = {};
 jest.mock('../app_context', () => {
@@ -21,16 +23,30 @@ jest.mock('../app_context', () => {
 });
 
 jest.mock('fs/promises');
+jest.mock('node-fetch');
 
 const mockedReadFile = readFile as jest.MockedFunction<typeof readFile>;
+const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+
+const emptyResponse = {
+  status: 200,
+  text: jest.fn().mockResolvedValue(JSON.stringify({})),
+} as any;
+
 import { getAvailableVersions } from './versions';
 
 describe('getAvailableVersions', () => {
+  beforeEach(() => {
+    mockedReadFile.mockReset();
+    mockedFetch.mockReset();
+  });
+
   it('should return available version and filter version < 7.17', async () => {
     mockKibanaVersion = '300.0.0';
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+    mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions({ cached: false, includeCurrentVersion: true });
+    const res = await getAvailableVersions({ includeCurrentVersion: true });
 
     expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
   });
@@ -38,8 +54,9 @@ describe('getAvailableVersions', () => {
   it('should not strip -SNAPSHOT from kibana version', async () => {
     mockKibanaVersion = '300.0.0-SNAPSHOT';
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+    mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions({ cached: false, includeCurrentVersion: true });
+    const res = await getAvailableVersions({ includeCurrentVersion: true });
     expect(res).toEqual(['300.0.0-SNAPSHOT', '8.1.0', '8.0.0', '7.17.0']);
   });
 
@@ -51,8 +68,9 @@ describe('getAvailableVersions', () => {
       },
     };
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+    mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions({ cached: false });
+    const res = await getAvailableVersions();
 
     expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
   });
@@ -60,8 +78,9 @@ describe('getAvailableVersions', () => {
   it('should not include the current version if includeCurrentVersion = false', async () => {
     mockKibanaVersion = '300.0.0-SNAPSHOT';
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+    mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions({ cached: false, includeCurrentVersion: false });
+    const res = await getAvailableVersions({ includeCurrentVersion: false });
 
     expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
   });
@@ -74,8 +93,9 @@ describe('getAvailableVersions', () => {
       },
     };
     mockedReadFile.mockRejectedValue({ code: 'ENOENT' });
+    mockedFetch.mockResolvedValueOnce(emptyResponse);
 
-    const res = await getAvailableVersions({ cached: false });
+    const res = await getAvailableVersions();
 
     expect(res).toEqual(['300.0.0']);
   });

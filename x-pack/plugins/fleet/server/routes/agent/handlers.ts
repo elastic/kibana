@@ -354,9 +354,17 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
   try {
-    const availableVersions = await AgentService.getAvailableVersions({});
+    const availableVersions = await AgentService.getAvailableVersions();
     const body: GetAvailableVersionsResponse = { items: availableVersions };
-    return response.ok({ body });
+
+    // This endpoint is cached to avoid reaching out to disk for every request for the
+    // available versions, as they're sourced in part from a static file generated at build time
+    const CACHE_DURATION_SECONDS = 60 * 60 * 2; // 2 hours
+
+    return response.ok({
+      body,
+      headers: { 'cache-control': `max-age=${CACHE_DURATION_SECONDS}` },
+    });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
