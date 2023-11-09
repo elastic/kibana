@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { calculateAuto } from '@kbn/calculate-auto';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
@@ -19,7 +20,6 @@ import {
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-import { calculateAuto } from '../../../public/utils/get_bucket_size/calculate_auto';
 import { APMTransactionDurationIndicator } from '../../domain/models';
 import { computeSLI } from '../../domain/services';
 import { InvalidQueryError } from '../../errors';

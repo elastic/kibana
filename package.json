@@ -165,6 +165,7 @@
     "@kbn/banners-plugin": "link:x-pack/plugins/banners",
     "@kbn/bfetch-explorer-plugin": "link:examples/bfetch_explorer",
     "@kbn/bfetch-plugin": "link:src/plugins/bfetch",
+    "@kbn/calculate-auto": "link:packages/kbn-calculate-auto",
     "@kbn/canvas-plugin": "link:x-pack/plugins/canvas",
     "@kbn/cases-api-integration-test-plugin": "link:x-pack/test/cases_api_integration/common/plugins/cases",
     "@kbn/cases-components": "link:packages/kbn-cases-components",

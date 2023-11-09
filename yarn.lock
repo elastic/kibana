@@ -3104,6 +3104,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/calculate-auto@link:packages/kbn-calculate-auto":
+  version "0.0.0"
+  uid ""
+
 "@kbn/canvas-plugin@link:x-pack/plugins/canvas":
   version "0.0.0"
   uid ""
