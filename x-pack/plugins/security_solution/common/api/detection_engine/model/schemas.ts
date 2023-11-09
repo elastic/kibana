@@ -33,12 +33,6 @@ export type Status = t.TypeOf<typeof status>;
 
 export const conflicts = t.keyof({ abort: null, proceed: null });
 
-export const queryFilter = t.string;
-export type QueryFilter = t.TypeOf<typeof queryFilter>;
-
-export const queryFilterOrUndefined = t.union([queryFilter, t.undefined]);
-export type QueryFilterOrUndefined = t.TypeOf<typeof queryFilterOrUndefined>;
-
 export const signal_ids = t.array(t.string);
 export type SignalIds = t.TypeOf<typeof signal_ids>;
 
@@ -48,23 +42,12 @@ export const signal_status_query = t.object;
 export const alert_tag_ids = t.array(t.string);
 export type AlertTagIds = t.TypeOf<typeof alert_tag_ids>;
 
-export const fields = t.array(t.string);
-export type Fields = t.TypeOf<typeof fields>;
-export const fieldsOrUndefined = t.union([fields, t.undefined]);
-export type FieldsOrUndefined = t.TypeOf<typeof fieldsOrUndefined>;
-
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const created_by = t.string;
 export const updated_by = t.string;
 
-export const status_code = PositiveInteger;
-export const message = t.string;
-export const perPage = PositiveInteger;
-export const total = PositiveInteger;
 export const revision = PositiveInteger;
-export const success = t.boolean;
-export const success_count = PositiveInteger;
 
 export const indexRecord = t.record(
   t.string,
