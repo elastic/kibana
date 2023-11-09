@@ -24,11 +24,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('search_cases', () => {
+    afterEach(async () => {
+      await deleteAllCaseItems(es);
+    });
+    
     describe('basic tests', () => {
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
-      });
-
       it('filters by single customField', async () => {
         await createConfiguration(
           supertest,
