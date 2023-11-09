@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-export type { CapabilitiesSwitcher, CapabilitiesProvider } from './src/capabilities';
-export type {
-  CapabilitiesSetup,
-  CapabilitiesStart,
-  ResolveCapabilitiesOptions,
-  CapabilitiesSwitcherOptions,
-} from './src/contracts';
+const actualHelpers = jest.requireActual('./resolve_helpers');
+
+export const splitIntoBucketsMock = jest.fn().mockImplementation(actualHelpers.splitIntoBuckets);
+
+jest.doMock('./resolve_helpers', () => {
+  return {
+    ...actualHelpers,
+    splitIntoBuckets: splitIntoBucketsMock,
+  };
+});
