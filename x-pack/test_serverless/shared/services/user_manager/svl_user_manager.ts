@@ -61,19 +61,22 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     users = new Map(Object.entries(JSON.parse(data)));
   }
 
-  // to be re-used within FTr config run
+  // to be re-used within FTR config run
   const sessionCache = new Map<Role, Session>();
 
   return {
     /*
-     * Returns auth header to pass into API client
+     * Returns auth header to do API calls with 'supertestWithoutAuth' service
      *
-     * Example:
+     * @example Create API call with specific user role authentication
+     *
+     * ```ts
      * const credentials = await svlUserManager.getCredentialsForRole('viewer');
      * const response = await supertestWithoutAuth
      *   .get('/api/status')
      *   .set(credentials)
      *   .set('kbn-xsrf', 'kibana');
+     * ```
      */
     async getCredentialsForRole(role: string) {
       const session = await this.getSessionByRole(role);
@@ -85,16 +88,16 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
         return sessionCache.get(role)!;
       }
 
+      const { username, password } = this.getUserByRole(role);
+      const kbnHost = Url.format({
+        protocol: config.get('servers.kibana.protocol'),
+        hostname: config.get('servers.kibana.hostname'),
+      });
       let session: Session;
 
       if (isCloud) {
-        log.debug(`new SAML authentication with ${role} role`);
-        const { username, password } = this.getUserByRole(role);
+        log.debug(`new SAML authentication with '${role}' role`);
         const kbnVersion = await kibanaServer.version.get();
-        const kbnHost = Url.format({
-          protocol: config.get('servers.kibana.protocol'),
-          hostname: config.get('servers.kibana.hostname'),
-        });
 
         session = await createNewSAMLSession({
           username,
@@ -103,8 +106,17 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
           kbnVersion,
         });
       } else {
-        log.debug(`new fake SAML authentication with ${role} role`);
-        session = await createSessionWithFakeSAMLAuth();
+        log.debug(`new fake SAML authentication with '${role}' role`);
+        const email = username;
+        const fullname = `test ${role}`;
+
+        session = await createSessionWithFakeSAMLAuth({
+          username,
+          email,
+          fullname,
+          role,
+          kbnHost,
+        });
       }
 
       sessionCache.set(role, session);
@@ -112,6 +124,9 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     },
 
     getUserByRole(role: string) {
+      if (!roles.includes(role)) {
+        log.warning(`Role '${role}' is not listed in 'kbn-es/src/serverless_resources/roles.yml'`);
+      }
       if (users.has(role)) {
         return users.get(role)!;
       } else {

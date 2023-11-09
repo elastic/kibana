@@ -8,12 +8,21 @@
 import axios, { AxiosResponse } from 'axios';
 import Url from 'url';
 import * as cheerio from 'cheerio';
+// import { createSAMLResponse as createFakeSAMLResponse } from 'kbn-mock-idp-plugin';
 
-export interface SessionParams {
+export interface SAMLSessionParams {
   username: string;
   password: string;
   kbnHost: string;
   kbnVersion: string;
+}
+
+export interface FakeSAMLSessionParams {
+  username: string;
+  email: string;
+  fullname: string;
+  role: string;
+  kbnHost: string;
 }
 
 const envHosts: { [key: string]: string } = {
@@ -108,17 +117,18 @@ const createSAMLResponse = async (url: string, ecSession: string) => {
 const finishSAMLHandshake = async (
   kbnHost: string,
   samlResponse: string,
-  cloudSessionSid: string
+  cloudSessionSid?: string
 ) => {
   const encodedResponse = encodeURIComponent(samlResponse);
+  const headers = {
+    ...{ 'content-type': 'application/x-www-form-urlencoded' },
+    ...(cloudSessionSid ? { Cookie: `sid=${cloudSessionSid}` } : {}),
+  };
   const authResponse: AxiosResponse = await axios.request({
     url: kbnHost + '/api/security/saml/callback',
     method: 'post',
     data: `SAMLResponse=${encodedResponse}`,
-    headers: {
-      Cookie: `sid=${cloudSessionSid}`,
-      'content-type': 'application/x-www-form-urlencoded',
-    },
+    headers,
     validateStatus: () => true,
     maxRedirects: 0,
   });
@@ -126,7 +136,7 @@ const finishSAMLHandshake = async (
   return getSidCookie(authResponse.headers['set-cookie']!);
 };
 
-export const createNewSAMLSession = async (params: SessionParams) => {
+export const createNewSAMLSession = async (params: SAMLSessionParams) => {
   const { username, password, kbnHost, kbnVersion } = params;
   const hostName = getCloudHostName();
   const ecSession = await createCloudSession(hostName, username, password);
@@ -136,7 +146,15 @@ export const createNewSAMLSession = async (params: SessionParams) => {
   return { username, cookie };
 };
 
-export const createSessionWithFakeSAMLAuth = async () => {
-  // WIP: waiting Kibana-security Team to add capability
-  return { username: 'elastic', cookie: 'test' };
+export const createSessionWithFakeSAMLAuth = async (params: FakeSAMLSessionParams) => {
+  // const { username, email, fullname, role, kbnHost } = params;
+  // const samlResponse = await createFakeSAMLResponse({
+  //   username
+  //   email,
+  //   fullname,
+  //   [role],
+  // });
+  // const cookie = await finishSAMLHandshake(kbnHost, samlResponse);
+  // return { username , cookie };
+  throw new Error('WIP: uncomment when #170852 is merged');
 };
