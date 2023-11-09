@@ -417,6 +417,16 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     ]
   );
 
+  const dataGridPagination = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: props.pageSizeOptions,
+      onChangeItemsPerPage: onChangePageSize,
+      onChangePage: onChangePageIndex,
+    }),
+    [onChangePageIndex, onChangePageSize, pagination, props.pageSizeOptions]
+  );
+
   const { getCellActions, visibleCellActions, disabledCellActions } = props.alertsTableConfiguration
     ?.useCellActions
     ? props.alertsTableConfiguration?.useCellActions({
@@ -531,12 +541,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             gridStyle={actualGridStyle}
             sorting={{ columns: sortingColumns, onSort }}
             toolbarVisibility={toolbarVisibility}
-            pagination={{
-              ...pagination,
-              pageSizeOptions: props.pageSizeOptions,
-              onChangeItemsPerPage: onChangePageSize,
-              onChangePage: onChangePageIndex,
-            }}
+            pagination={dataGridPagination}
             rowHeightsOptions={props.rowHeightsOptions}
             onColumnResize={onColumnResize}
             ref={dataGridRef}
