@@ -53,10 +53,12 @@ export function EmbeddablePanelError({
     [label, title]
   );
 
-  const overrideDisplay = getSearchErrorOverrideDisplay({
-    error,
-    application: core.application,
-  });
+  const overrideDisplay = core
+    ? getSearchErrorOverrideDisplay({
+        error,
+        application: core.application,
+      })
+    : undefined;
 
   const actions = overrideDisplay?.actions ?? [];
   if (isEditable) {
