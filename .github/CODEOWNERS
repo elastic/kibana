@@ -1436,7 +1436,7 @@ x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entit
 x-pack/plugins/security_solution/public/explore/components/risk_score @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/overview/pages/entity_analytics.tsx @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/overview/components/entity_analytics
-x-pack/plugins/security_solution/server/lib/risk_engine @elastic/security-entity-analytics
+x-pack/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
 x-pack/test/detection_engine_api_integration/security_and_spaces/group10/risk_engine @elastic/security-entity-analytics
 
