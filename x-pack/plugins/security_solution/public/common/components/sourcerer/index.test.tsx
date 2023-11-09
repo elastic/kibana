@@ -21,12 +21,11 @@ import {
 } from '../../mock';
 import { createStore } from '../../store';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
-import { fireEvent, waitFor } from '@testing-library/dom';
+import { fireEvent, waitFor, render } from '@testing-library/react';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
-import { render } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 

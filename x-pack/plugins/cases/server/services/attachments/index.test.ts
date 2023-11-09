@@ -21,9 +21,10 @@ import {
   persistableStateAttachmentAttributes,
   persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
-import { createAlertAttachment, createErrorSO, createUserAttachment } from './test_utils';
+import { createAlertAttachment, createUserAttachment } from './test_utils';
 import { AttachmentType } from '../../../common/types/domain';
-import { createSOFindResponse } from '../test_utils';
+import { createErrorSO, createSOFindResponse } from '../test_utils';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../common';
 
 describe('AttachmentService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -135,9 +136,10 @@ describe('AttachmentService', () => {
       it('returns error objects unmodified', async () => {
         const userAttachment = createUserAttachment({ foo: 'bar' });
 
-        const errorResponseObj = createErrorSO();
+        const errorResponseObj = createErrorSO(CASE_COMMENT_SAVED_OBJECT);
 
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          // @ts-expect-error: SO client types are wrong
           saved_objects: [errorResponseObj, userAttachment],
         });
 
@@ -411,9 +413,10 @@ describe('AttachmentService', () => {
       it('returns error objects unmodified', async () => {
         const userAttachment = createUserAttachment({ foo: 'bar' });
 
-        const errorResponseObj = createErrorSO();
+        const errorResponseObj = createErrorSO(CASE_COMMENT_SAVED_OBJECT);
 
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          // @ts-expect-error: SO client types are wrong
           saved_objects: [errorResponseObj, userAttachment],
         });
 

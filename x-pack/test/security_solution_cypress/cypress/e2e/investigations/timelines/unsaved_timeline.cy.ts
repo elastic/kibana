@@ -14,7 +14,6 @@ import {
   OBSERVABILITY_ALERTS_PAGE,
 } from '../../../screens/kibana_navigation';
 import { TIMELINE_SAVE_MODAL } from '../../../screens/timeline';
-import { cleanKibana } from '../../../tasks/common';
 import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,
@@ -33,7 +32,6 @@ import { hostsUrl, MANAGE_URL } from '../../../urls/navigation';
 
 describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
-    cleanKibana();
     login();
     /*
      * When timeline changes are pending, chrome would popup with
