@@ -46,8 +46,10 @@ import {
   updateLoadingStateAction,
   AiopsLogRateAnalysisApiAction,
 } from '../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisSchema as SchemaV1 } from '../../../common/api/log_rate_analysis/v1/schema';
-import type { AiopsLogRateAnalysisSchema as SchemaV2 } from '../../../common/api/log_rate_analysis/v2/schema';
+import type {
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiVersion as ApiVersion,
+} from '../../../common/api/log_rate_analysis/types';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
@@ -75,10 +77,6 @@ const PROGRESS_STEP_P_VALUES = 0.5;
 const PROGRESS_STEP_GROUPING = 0.1;
 const PROGRESS_STEP_HISTOGRAMS = 0.1;
 const PROGRESS_STEP_HISTOGRAMS_GROUPS = 0.1;
-
-type ApiVersion = '1' | '2';
-
-type AiopsLogRateAnalysisSchema<T> = T extends '1' ? SchemaV1 : T extends '2' ? SchemaV2 : never;
 
 export function routeHandlerFactory<T extends ApiVersion>(
   version: T,

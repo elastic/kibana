@@ -12,6 +12,8 @@ import type {
   SignificantTermGroupHistogram,
 } from '@kbn/ml-agg-utils';
 
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from './types';
+
 export const API_ACTION_NAME = {
   ADD_SIGNIFICANT_ITEMS: 'add_significant_items',
   ADD_SIGNIFICANT_ITEMS_HISTOGRAM: 'add_significant_items_histogram',
@@ -29,8 +31,6 @@ export const API_ACTION_NAME = {
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
-
-type ApiVersion = '1' | '2';
 
 interface ApiActionAddSignificantTerms<T extends ApiVersion> {
   type: T extends '1'

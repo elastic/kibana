@@ -10,8 +10,8 @@ import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { aiopsLogRateAnalysisSchema as schemaV1 } from '../../../common/api/log_rate_analysis/v1/schema';
-import { aiopsLogRateAnalysisSchema as schemaV2 } from '../../../common/api/log_rate_analysis/v2/schema';
+import { aiopsLogRateAnalysisSchemaV1 } from '../../../common/api/log_rate_analysis/schema_v1';
+import { aiopsLogRateAnalysisSchemaV2 } from '../../../common/api/log_rate_analysis/schema_v2';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
 import type { AiopsLicense } from '../../types';
@@ -35,7 +35,7 @@ export const defineRoute = (
         version: '1',
         validate: {
           request: {
-            body: schemaV1,
+            body: aiopsLogRateAnalysisSchemaV1,
           },
         },
       },
@@ -46,7 +46,7 @@ export const defineRoute = (
         version: '2',
         validate: {
           request: {
-            body: schemaV2,
+            body: aiopsLogRateAnalysisSchemaV2,
           },
         },
       },

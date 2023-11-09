@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const aiopsLogRateAnalysisSchema = schema.object({
+export const aiopsLogRateAnalysisSchemaV1 = schema.object({
   start: schema.number(),
   end: schema.number(),
   searchQuery: schema.string(),
@@ -38,4 +38,4 @@ export const aiopsLogRateAnalysisSchema = schema.object({
   sampleProbability: schema.maybe(schema.number()),
 });
 
-export type AiopsLogRateAnalysisSchema = TypeOf<typeof aiopsLogRateAnalysisSchema>;
+export type AiopsLogRateAnalysisSchemaV1 = TypeOf<typeof aiopsLogRateAnalysisSchemaV1>;

@@ -34,14 +34,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import {
-  initialState,
-  streamReducer,
-} from '../../../common/api/log_rate_analysis/v2/stream_reducer';
-import type {
-  AiopsLogRateAnalysisSchema,
-  AiopsLogRateAnalysisSchemaSignificantItem,
-} from '../../../common/api/log_rate_analysis/v2/schema';
+import { initialState, streamReducer } from '../../../common/api/log_rate_analysis/stream_reducer';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/types';
+import type { AiopsLogRateAnalysisSchemaSignificantItem } from '../../../common/api/log_rate_analysis/schema_v2';
 import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   getGroupTableItems,
@@ -151,9 +146,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const [groupResults, setGroupResults] = useState<boolean>(false);
   const [groupSkipFields, setGroupSkipFields] = useState<string[]>([]);
   const [uniqueFieldNames, setUniqueFieldNames] = useState<string[]>([]);
-  const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
-    undefined
-  );
+  const [overrides, setOverrides] = useState<
+    AiopsLogRateAnalysisSchema<'2'>['overrides'] | undefined
+  >(undefined);
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
 
@@ -184,7 +179,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     data,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream<AiopsLogRateAnalysisSchema, typeof streamReducer>(
+  } = useFetchStream<AiopsLogRateAnalysisSchema<'2'>, typeof streamReducer>(
     http,
     '/internal/aiops/log_rate_analysis',
     '2',
