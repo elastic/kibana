@@ -111,7 +111,7 @@ describe('Alert Flyout Automated Action Results', () => {
           });
       });
     cy.contains(timelineRegex);
-    cy.getBySel('securitySolutionFlyoutNavigationCollapseDetailButton').click();
+    cy.getBySel('securitySolutionFlyoutHeaderCollapseDetailButton').click();
     cy.getBySel('flyoutBottomBar').contains('Untitled timeline').click();
     cy.contains(filterRegex);
   });
