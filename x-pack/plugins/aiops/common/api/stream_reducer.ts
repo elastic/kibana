@@ -7,7 +7,7 @@
 
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
-import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './actions';
+import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './log_rate_analysis/actions';
 
 interface StreamState {
   ccsWarning: boolean;
