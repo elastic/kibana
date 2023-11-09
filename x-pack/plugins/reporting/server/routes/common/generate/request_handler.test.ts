@@ -12,8 +12,8 @@ import { Report, ReportingStore } from '../../../lib/store';
 import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
 import { ReportingJobResponse, ReportingRequestHandlerContext } from '../../../types';
 import { RequestHandler } from './request_handler';
-import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated/printable_pdf';
-import { CommonReportingSetup, TaskPayloadPDFV2 } from '@kbn/reporting-server';
+import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { CommonReportingSetup } from '@kbn/reporting-server';
 
 jest.mock(
   'puid',

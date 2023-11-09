@@ -10,17 +10,8 @@ import { Writable } from 'stream';
 
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { CancellationToken } from '@kbn/reporting-common';
-import type {
-  BaseParams,
-  BaseParamsV2,
-  BasePayload,
-  BasePayloadV2,
-  LocatorParams,
-  TaskRunResult,
-} from '@kbn/reporting-common/types';
-import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import type { BaseParams, BasePayload, TaskRunResult } from '@kbn/reporting-common/types';
 
 /**
  * @internal
@@ -54,97 +45,3 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
   cancellationToken: CancellationToken,
   stream: Writable
 ) => Promise<TaskRunResult>;
-
-export interface JobParamsDownloadCSV {
-  browserTimezone: string;
-  title: string;
-  searchSource: SerializedSearchSourceFields;
-  columns?: string[];
-}
-
-/**
- * Structure of stored job data provided by create_job
- */
-export interface TaskPayloadPDF extends BasePayload {
-  layout: LayoutParams;
-  forceNow?: string;
-  objects: Array<{ relativeUrl: string }>;
-}
-
-interface BaseParamsPNG {
-  layout: LayoutParams;
-  forceNow?: string;
-  relativeUrl: string;
-}
-
-// Job params: structure of incoming user request data
-/**
- * @deprecated
- */
-export type JobParamsPNGDeprecated = BaseParamsPNG & BaseParams;
-
-// Job payload: structure of stored job data provided by create_job
-export type TaskPayloadPNG = BaseParamsPNG & BasePayload;
-
-interface BaseParamsPDFV2 {
-  layout: LayoutParams;
-
-  /**
-   * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
-   */
-  locatorParams: LocatorParams[];
-}
-
-// Job params: structure of incoming user request data, after being parsed from RISON
-export type JobParamsPDFV2 = BaseParamsPDFV2 & BaseParams;
-
-export type JobAppParamsPDFV2 = Omit<JobParamsPDFV2, 'browserTimezone' | 'version'>;
-
-// Job payload: structure of stored job data provided by create_job
-export interface TaskPayloadPDFV2 extends BasePayload, BaseParamsPDFV2 {
-  layout: LayoutParams;
-  /**
-   * The value of forceNow is injected server-side every time a given report is generated.
-   */
-  forceNow: string;
-}
-interface BaseParamsCSV {
-  searchSource: SerializedSearchSourceFields;
-  columns?: string[];
-}
-
-export type JobParamsCSV = BaseParamsCSV & BaseParams;
-export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
-
-interface CsvFromSavedObjectBase {
-  objectType: 'search';
-}
-
-/**
- * Makes title optional, as it can be derived from the saved search object
- */
-export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
-  Omit<BaseParamsV2, 'title'> & { title?: string };
-
-/**
- *
- */
-export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayloadV2;
-
-export interface JobParamsPNGV2 extends BaseParams {
-  layout: LayoutParams;
-  /**
-   * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
-   */
-  locatorParams: LocatorParams;
-}
-
-// Job payload: structure of stored job data provided by create_job
-export interface TaskPayloadPNGV2 extends BasePayload {
-  layout: LayoutParams;
-  forceNow: string;
-  /**
-   * Even though we only ever handle one locator for a PNG, we store it as an array for consistency with how PDFs are stored
-   */
-  locatorParams: LocatorParams[];
-}

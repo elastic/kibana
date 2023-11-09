@@ -594,7 +594,7 @@ packages/kbn-reporting/export_types/csv @elastic/appex-sharedux
 packages/kbn-reporting/export_types/deprecated @elastic/appex-sharedux
 packages/kbn-reporting/export_types_helpers_public @elastic/appex-sharedux
 packages/kbn-reporting/export_types_helpers_server @elastic/appex-sharedux
-packages/kbn-reporting/export_types/printable_pdf_v2 @elastic/appex-sharedux
+packages/kbn-reporting/export_types/pdf @elastic/appex-sharedux
 packages/kbn-reporting/export_types/png @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 packages/kbn-resizable-layout @elastic/kibana-data-discovery

@@ -35,6 +35,7 @@ import { takeWhile } from 'rxjs/operators';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 import type { LocatorParams } from '@kbn/reporting-common/url';
+import { JobParamsPDFDeprecated, JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';

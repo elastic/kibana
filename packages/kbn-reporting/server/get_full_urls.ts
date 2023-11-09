@@ -14,9 +14,9 @@ import {
 } from 'url';
 
 import { ReportingConfigType, ReportingServerInfo } from '@kbn/reporting-common/types';
+import { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
 
 import { getAbsoluteUrlFactory } from './get_absolute_url';
-import { TaskPayloadPDF } from './types';
 import { validateUrls } from './validate_urls';
 
 export function getFullUrls(
@@ -46,7 +46,7 @@ export function getFullUrls(
   validateUrls(relativeUrls);
 
   const urls = relativeUrls.map((relativeUrl) => {
-    const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl); // FIXME: '(urlStr: string): UrlWithStringQuery' is deprecated
+    const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
       path: parsedRelative.pathname === null ? undefined : parsedRelative.pathname,
       hash: parsedRelative.hash === null ? undefined : parsedRelative.hash,

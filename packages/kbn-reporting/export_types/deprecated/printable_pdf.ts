@@ -23,31 +23,21 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import { BaseParams, TaskRunResult } from '@kbn/reporting-common/types';
+import { TaskRunResult } from '@kbn/reporting-common/types';
+import { JobParamsPDFDeprecated, TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
 import {
   ExportType,
-  TaskPayloadPDF,
   decryptJobHeaders,
   generatePdfObservable,
   getCustomLogo,
   getFullUrls,
   validateUrls,
 } from '@kbn/reporting-server';
-import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-
-interface BaseParamsPDF {
-  layout: LayoutParams;
-  relativeUrls: string[];
-  isDeprecated?: boolean;
-}
-
-// Job params: structure of incoming user request data, after being parsed from RISON
 
 /**
  * @deprecated
  */
-export type JobParamsPDFDeprecated = BaseParamsPDF & BaseParams;
 export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayloadPDF> {
   id = 'printablePdf';
   name = 'PDF';

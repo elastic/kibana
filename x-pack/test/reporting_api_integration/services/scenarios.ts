@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated';
 import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
-import type { JobParamsCSV, JobParamsPNGV2, JobParamsDownloadCSV } from '@kbn/reporting-server';
+import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
+import type { JobParamsCSV, JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
 

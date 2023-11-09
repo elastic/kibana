@@ -8,7 +8,7 @@
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
-import type { JobParamsDownloadCSV } from '@kbn/reporting-server';
+import type { JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ELASTIC_USERNAME = 'elastic_serverless';

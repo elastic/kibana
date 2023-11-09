@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import request from 'supertest';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import type { JobParamsCsvFromSavedObject } from '@kbn/reporting-server';
+import type { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types-csv-common';
 import type { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';

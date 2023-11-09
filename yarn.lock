@@ -5264,7 +5264,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/printable_pdf_v2":
+"@kbn/reporting-export-types-pdf-common@link:packages/kbn-reporting/export_types/pdf_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/pdf":
   version "0.0.0"
   uid ""
 
@@ -5273,10 +5277,6 @@
   uid ""
 
 "@kbn/reporting-export-types-png@link:packages/kbn-reporting/export_types/png":
-  version "0.0.0"
-  uid ""
-
-"@kbn/reporting-export-types-printable_pdf_v2-common@link:packages/kbn-reporting/export_types/printable_pdf_v2_common":
   version "0.0.0"
   uid ""
 

@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
-  "id": "@kbn/reporting-export-types-printable_pdf_v2-common",
+  "id": "@kbn/reporting-export-types-pdf-common",
   "owner": "@elastic/appex-sharedux"
 }

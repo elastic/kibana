@@ -15,11 +15,11 @@ import type {
   ReportingConfigType,
   ReportingServerInfo,
 } from '@kbn/reporting-common/types';
+import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 import { getTracker } from './pdf_tracker';
-import { TaskPayloadPDFV2 } from './types';
 
 interface PdfResult {
   buffer: Uint8Array | null;
