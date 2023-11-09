@@ -398,6 +398,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: monitorId,
             location: { id: testFleetPolicyID },
             namespace: formatKibanaNamespace(SPACE_ID),
+            spaceId: SPACE_ID,
           })
         );
         await supertestWithoutAuth
