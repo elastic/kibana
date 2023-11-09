@@ -13,7 +13,7 @@ import { createMockConfigSchema, createMockReportingCore } from '../../../test_h
 import { ReportingJobResponse, ReportingRequestHandlerContext } from '../../../types';
 import { RequestHandler } from './request_handler';
 import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import { CommonReportingSetup } from '@kbn/reporting-server';
+import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 
 jest.mock(
   'puid',
@@ -90,7 +90,7 @@ describe('Handle request to generate', () => {
     (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
 
     mockContext = getMockContext();
-    mockContext.reporting = Promise.resolve({} as CommonReportingSetup);
+    mockContext.reporting = Promise.resolve({} as ReportingServerPluginSetup);
 
     requestHandler = new RequestHandler(
       reportingCore,

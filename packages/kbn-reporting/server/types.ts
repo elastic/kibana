@@ -16,7 +16,7 @@ import type { BaseParams, BasePayload, TaskRunResult } from '@kbn/reporting-comm
 /**
  * @internal
  */
-export interface CommonReportingSetup {
+export interface ReportingServerPluginSetup {
   registerExportTypes: () => void;
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
@@ -25,7 +25,7 @@ export interface CommonReportingSetup {
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
-  reporting: CommonReportingSetup | null;
+  reporting: ReportingServerPluginSetup | null;
 }>;
 
 /**

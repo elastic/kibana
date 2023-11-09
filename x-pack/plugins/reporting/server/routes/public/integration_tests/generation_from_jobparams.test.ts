@@ -11,7 +11,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import rison from '@kbn/rison';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
-import { CommonReportingSetup } from '@kbn/reporting-server';
+import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
@@ -59,7 +59,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => reportingMock.createStart() as unknown as CommonReportingSetup
+      () => reportingMock.createStart() as unknown as ReportingServerPluginSetup
     );
 
     const mockSetupDeps = createMockPluginSetup({

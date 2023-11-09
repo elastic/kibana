@@ -12,7 +12,7 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-p
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
-import { CommonReportingSetup } from '@kbn/reporting-server';
+import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -92,7 +92,7 @@ export interface ReportingJobResponse {
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
-  reporting: CommonReportingSetup | null;
+  reporting: ReportingServerPluginSetup | null;
 }>;
 
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;

@@ -11,7 +11,7 @@ import supertest from 'supertest';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import type { CommonReportingSetup } from '@kbn/reporting-server';
+import type { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import rison from '@kbn/rison';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
@@ -60,7 +60,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => reportingMock.createStart() as unknown as CommonReportingSetup
+      () => reportingMock.createStart() as unknown as ReportingServerPluginSetup
     );
 
     const mockSetupDeps = createMockPluginSetup({
