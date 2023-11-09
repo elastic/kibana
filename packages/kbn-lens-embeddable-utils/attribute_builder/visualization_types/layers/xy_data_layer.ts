@@ -48,6 +48,9 @@ export interface XYLayerOptions {
   // Add more types as support for them is implemented
   buckets?: DateHistogramBucketedColumn;
   seriesType?: SeriesType;
+  params?: {
+    interval: string;
+  };
 }
 
 export interface XYLayerConfig {
@@ -88,6 +91,9 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
             options: {
               ...options.buckets.params,
               sourceField: options.buckets.field ?? dataView.timeFieldName,
+              params: {
+                interval: this.layerConfig.options?.params?.interval ?? 'auto',
+              },
             },
           })
         : {}),

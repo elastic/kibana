@@ -223,6 +223,9 @@ function PreviewChart({
     const xYDataLayerOptions: XYLayerOptions = {
       buckets: { type: 'date_histogram' },
       seriesType: 'bar',
+      params: {
+        interval: `${timeSize}${timeUnit}`,
+      },
     };
 
     if (groupBy && groupBy?.length) {
@@ -275,13 +278,16 @@ function PreviewChart({
     metrics,
     threshold,
     thresholdReferenceLine,
+    timeSize,
+    timeUnit,
   ]);
 
   if (
     !dataView ||
     !attributes ||
     error?.equation ||
-    Object.keys(error?.metrics || {}).length !== 0
+    Object.keys(error?.metrics || {}).length !== 0 ||
+    !timeSize
   ) {
     return (
       <div style={{ maxHeight: 180, minHeight: 180 }}>
@@ -312,7 +318,7 @@ function PreviewChart({
         onLoad={setChartLoading}
         id="customThresholdPreviewChart"
         style={{ height: 180 }}
-        timeRange={{ from: `now-${timeSize}${timeUnit}`, to: 'now' }}
+        timeRange={{ from: `now-${timeSize * 20}${timeUnit}`, to: 'now' }}
         attributes={attributes}
       />
     </div>
