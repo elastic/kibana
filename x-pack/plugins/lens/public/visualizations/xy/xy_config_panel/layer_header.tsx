@@ -235,13 +235,12 @@ const DataLayerHeaderTrigger = function ({
       onClick={onClick}
       fullWidth
       size="s"
-    >
-      <>
-        <EuiIcon type={currentVisType.icon} />
+      iconType={currentVisType.icon}
+      label={
         <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
           {currentVisType.fullLabel || currentVisType.label}
         </EuiText>
-      </>
-    </ToolbarButton>
+      }
+    />
   );
 };

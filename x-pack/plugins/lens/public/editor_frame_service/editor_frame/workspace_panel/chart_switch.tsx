@@ -429,12 +429,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
             onClick={() => setFlyoutOpen(!flyoutOpen)}
             data-test-subj="lnsChartSwitchPopover"
             fontWeight="bold"
-          >
-            <VisualizationSummary
-              visualization={visualization}
-              visualizationMap={props.visualizationMap}
-            />
-          </ToolbarButton>
+            label={
+              <VisualizationSummary
+                visualization={visualization}
+                visualizationMap={props.visualizationMap}
+              />
+            }
+          />
         }
         isOpen={flyoutOpen}
         closePopover={() => setFlyoutOpen(false)}
