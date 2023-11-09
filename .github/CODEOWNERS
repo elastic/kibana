@@ -591,12 +591,14 @@ packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 packages/kbn-reporting/export_types/csv @elastic/appex-sharedux
+packages/kbn-reporting/export_types/csv_common @elastic/appex-sharedux
 packages/kbn-reporting/export_types/deprecated @elastic/appex-sharedux
-packages/kbn-reporting/export_types_helpers_public @elastic/appex-sharedux
-packages/kbn-reporting/export_types_helpers_server @elastic/appex-sharedux
 packages/kbn-reporting/export_types/pdf @elastic/appex-sharedux
+packages/kbn-reporting/export_types/pdf_common @elastic/appex-sharedux
 packages/kbn-reporting/export_types/png @elastic/appex-sharedux
+packages/kbn-reporting/export_types/png_common @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
+packages/kbn-reporting/server @elastic/appex-sharedux
 packages/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
