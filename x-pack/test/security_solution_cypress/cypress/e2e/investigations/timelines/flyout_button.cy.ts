@@ -7,7 +7,6 @@
 
 import { TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON } from '../../../screens/security_main';
 import { CREATE_NEW_TIMELINE, TIMELINE_FLYOUT_HEADER } from '../../../screens/timeline';
-import { cleanKibana } from '../../../tasks/common';
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 import { login } from '../../../tasks/login';
@@ -25,10 +24,6 @@ import {
 import { hostsUrl } from '../../../urls/navigation';
 
 describe('timeline flyout button', () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));

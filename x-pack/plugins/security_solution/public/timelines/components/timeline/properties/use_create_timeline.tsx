@@ -31,6 +31,10 @@ interface Props {
   timeRange?: TimeRange;
 }
 
+/**
+ * Creates a new empty timeline at the given id.
+ * Can be used to create new timelines or to reset timeline state.
+ */
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
   const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
@@ -64,15 +68,10 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
           indexNames: selectedPatterns,
           show,
           timelineType,
-        })
-      );
-
-      dispatch(
-        timelineActions.setTimelineUpdatedAt({
-          id: TimelineId.active,
           updated: undefined,
         })
       );
+
       dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
       dispatch(appActions.addNotes({ notes: [] }));
 
@@ -138,13 +137,11 @@ export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMen
       title,
       iconType = 'plusInCircle',
       fill = true,
-      isDisabled = false,
     }: {
       outline?: boolean;
       title?: string;
       iconType?: string;
       fill?: boolean;
-      isDisabled?: boolean;
     }) => {
       const buttonProps = {
         iconType,

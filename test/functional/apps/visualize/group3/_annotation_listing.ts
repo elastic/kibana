@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/170578
-  describe.skip('annotation listing page', function () {
+  describe('annotation listing page', function () {
     before(async function () {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/annotation_listing_page_search'
@@ -156,11 +155,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await PageObjects.annotationEditor.saveGroup();
-          await listingTable.clearSearchFilter();
         });
       });
 
       describe('data view switching', () => {
+        before(async () => {
+          await listingTable.clearSearchFilter();
+        });
+
         it('recovers from missing data view', async () => {
           await listingTable.clickItemLink('eventAnnotation', 'missing data view');
 
