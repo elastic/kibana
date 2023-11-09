@@ -2,12 +2,6 @@
 
 set -euo pipefail
 
-if [ -z "$1" ]
-  then
-    echo "No target script from the package.json file, is supplied"
-    exit 1
-fi
-
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/functional/common_cypress.sh
 .buildkite/scripts/bootstrap.sh
