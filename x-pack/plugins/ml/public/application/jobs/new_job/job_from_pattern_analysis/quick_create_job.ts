@@ -72,7 +72,6 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
       datafeedConfig,
       jobConfig,
       createdByLabel,
-      dashboard: undefined,
       start,
       end,
       startJob,

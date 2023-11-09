@@ -69,21 +69,21 @@ export class QuickJobCreatorBase {
     datafeedConfig,
     jobConfig,
     createdByLabel,
-    dashboard,
     start,
     end,
     startJob,
     runInRealTime,
+    dashboard,
   }: {
     jobId: string;
     datafeedConfig: Datafeed;
     jobConfig: Job;
     createdByLabel: CREATED_BY_LABEL;
-    dashboard: Dashboard | undefined;
     start: number | undefined;
     end: number | undefined;
     startJob: boolean;
     runInRealTime: boolean;
+    dashboard?: Dashboard;
   }) {
     const datafeedId = createDatafeedId(jobId);
     const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
