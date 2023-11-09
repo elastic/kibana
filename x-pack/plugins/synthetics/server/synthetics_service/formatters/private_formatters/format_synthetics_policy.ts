@@ -23,7 +23,7 @@ export interface ProcessorFields {
   'monitor.id': string;
   test_run_id: string;
   run_once: boolean;
-  spaceId: string;
+  space_id: string;
 }
 
 export const formatSyntheticsPolicy = (
@@ -71,7 +71,7 @@ export const formatSyntheticsPolicy = (
 
   const processorItem = dataStream?.vars?.processors;
   if (processorItem) {
-    processorItem.value = processorsFormatter(config);
+    processorItem.value = processorsFormatter(config as MonitorFields & ProcessorFields);
   }
 
   // TODO: remove this once we remove legacy support

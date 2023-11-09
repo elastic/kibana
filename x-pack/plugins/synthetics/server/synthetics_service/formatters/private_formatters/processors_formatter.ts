@@ -15,33 +15,22 @@ interface FieldProcessor {
   };
 }
 
-export const processorsFormatter = (config: Partial<MonitorFields & ProcessorFields>) => {
-  const fields: HeartbeatFields = {
-    'monitor.fleet_managed': true,
-    config_id: config.config_id!,
-    meta: {
-      space_id: config.spaceId!,
-    },
-  };
-  if (config.test_run_id) {
-    fields.test_run_id = config.test_run_id;
-  }
-  if (config.run_once) {
-    fields.run_once = config.run_once;
-  }
-  if (config['monitor.project.name']) {
-    fields['monitor.project.name'] = config['monitor.project.name'];
-  }
-  if (config['monitor.project.id']) {
-    fields['monitor.project.id'] = config['monitor.project.id'];
-  }
-  if (config['monitor.id']) {
-    fields['monitor.id'] = config['monitor.id'];
-  }
+export const processorsFormatter = (config: MonitorFields & ProcessorFields) => {
   const processors: FieldProcessor[] = [
     {
       add_fields: {
-        fields,
+        fields: {
+          'monitor.fleet_managed': true,
+          config_id: config.config_id,
+          test_run_id: config.test_run_id,
+          run_once: config.run_once,
+          'monitor.id': config['monitor.id'],
+          'monitor.project.name': config['monitor.project.name'],
+          'monitor.project.id': config['monitor.project.id'],
+          meta: {
+            space_id: config.space_id,
+          },
+        },
         target: '',
       },
     },
