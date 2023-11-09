@@ -938,7 +938,6 @@ x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 /.github/workflows/oblt-github-commands @elastic/observablt-robots
 
 # Infra Monitoring
-/x-pack/plugins/infra @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/plugins/infra/server/routes @elastic/obs-ux-infra_services-team
 /x-pack/plugins/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
 /x-pack/plugins/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
