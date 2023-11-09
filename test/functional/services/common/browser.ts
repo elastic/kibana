@@ -172,7 +172,7 @@ class BrowserService extends FtrService {
    * @param relativeUrl (optional) set to true to return the relative URL (without the hostname and protocol)
    * @return {Promise<string>}
    */
-  public async getCurrentUrl(relativeUrl: boolean = false) {
+  public async getCurrentUrl(relativeUrl: boolean = false): Promise<string> {
     // strip _t=Date query param when url is read
     const current = await this.driver.getCurrentUrl();
     const currentWithoutTime = modifyUrl(current, (parsed) => {
@@ -182,7 +182,7 @@ class BrowserService extends FtrService {
 
     if (relativeUrl) {
       const { path } = Url.parse(currentWithoutTime);
-      return path; // this property includes query params and anchors
+      return path!; // this property includes query params and anchors
     } else {
       return currentWithoutTime;
     }
