@@ -7,6 +7,8 @@
   "scripts": {
     "initialize-server:dr:default": "node ./scripts/index.js server detections_response default_license",
     "run-tests:dr:default": "node ./scripts/index.js runner detections_response default_license",
+    "initialize-server:ea:default": "node ./scripts/index.js server entity_analytics default_license",
+    "run-tests:ea:default": "node ./scripts/index.js runner entity_analytics default_license",
     "exception_workflows:server:serverless": "npm run initialize-server:dr:default exceptions/workflows serverless",
     "exception_workflows:runner:serverless": "npm run run-tests:dr:default exceptions/workflows serverless serverlessEnv",
     "exception_workflows:qa:serverless": "npm run run-tests:dr:default exceptions/workflows serverless qaEnv",
@@ -42,10 +44,16 @@
     "alerts:qa:serverless": "npm run run-tests:dr:default alerts serverless qaEnv",
     "alerts:server:ess": "npm run initialize-server:dr:default alerts ess",
     "alerts:runner:ess": "npm run run-tests:dr:default alerts ess essEnv",
+    "entity_analytics:server:serverless": "npm run initialize-server:ea:default risk_engine serverless",
+    "entity_analytics:runner:serverless": "npm run run-tests:ea:default risk_engine serverless serverlessEnv",
+    "entity_analytics:qa:serverless": "npm run run-tests:ea:default risk_engine serverless qaEnv",
+    "entity_analytics:server:ess": "npm run initialize-server:ea:default risk_engine ess",
+    "entity_analytics:runner:ess": "npm run run-tests:ea:default risk_engine ess essEnv",
     "rule_execution_logic:server:serverless": "npm run initialize-server:dr:default rule_execution_logic serverless",
     "rule_execution_logic:runner:serverless": "npm run run-tests:dr:default rule_execution_logic serverless serverlessEnv",
     "rule_execution_logic:qa:serverless": "npm run run-tests:dr:default rule_execution_logic serverless qaEnv",
     "rule_execution_logic:server:ess": "npm run initialize-server:dr:default rule_execution_logic ess",
     "rule_execution_logic:runner:ess": "npm run run-tests:dr:default rule_execution_logic ess essEnv"
+
   }
 }

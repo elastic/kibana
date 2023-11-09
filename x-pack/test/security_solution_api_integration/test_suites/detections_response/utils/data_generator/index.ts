@@ -11,3 +11,4 @@ export * from './enhance_documents';
 export * from './generate_documents';
 export * from './get_kql_query_from_documents_list';
 export * from './get_timestamp';
+export * from './index_documents';

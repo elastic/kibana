@@ -21,4 +21,5 @@ export * from './count_down_es';
 export * from './update_username';
 export * from './refresh_index';
 export * from './wait_for';
+export * from './route_with_namespace';
 export * from './wait_for_index_to_populate';
