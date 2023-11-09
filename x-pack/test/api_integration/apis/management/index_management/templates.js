@@ -28,7 +28,8 @@ export default function ({ getService }) {
   describe('index templates', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpTemplates()]));
 
-    describe('get all', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/170980
+    describe.skip('get all', () => {
       const templateName = `template-${getRandomString()}`;
       const indexTemplate = getTemplatePayload(templateName, [getRandomString()]);
       const legacyTemplate = getTemplatePayload(templateName, [getRandomString()], true);
