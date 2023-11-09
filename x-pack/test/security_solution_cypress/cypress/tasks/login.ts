@@ -12,7 +12,7 @@ import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
 import { LOGOUT_URL } from '../urls/navigation';
-import { API_HEADERS, rootRequest } from './common';
+import { rootRequest } from './common';
 import {
   CLOUD_SERVERLESS,
   ELASTICSEARCH_PASSWORD,
@@ -211,9 +211,8 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
     const basicProvider = loginState.body.selector.providers.find(
       (provider) => provider.type === 'basic'
     );
-
-    cy.request({
-      url: '/internal/security/login',
+    return rootRequest({
+      url: `${baseUrl}/internal/security/login`,
       method: 'POST',
       body: {
         providerType: basicProvider?.type,
@@ -221,9 +220,6 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
         currentURL: '/',
         params: { username, password },
       },
-      headers: API_HEADERS,
-
-      retryOnStatusCodeFailure: true,
     });
   });
 };
