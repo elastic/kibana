@@ -15,7 +15,7 @@ import {
   visitRuleActions,
 } from '../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
-import { RESPONSE_ACTION_TYPES } from '../../../../../common/api/detection_engine';
+import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
 import { login, ROLE } from '../../tasks/login';
 
 describe(
@@ -78,7 +78,7 @@ describe(
         cy.getByTestSubj(`command-type-${testedCommand}`).click();
         cy.intercept('POST', '/api/detection_engine/rules', (request) => {
           const result = {
-            action_type_id: RESPONSE_ACTION_TYPES.ENDPOINT,
+            action_type_id: ResponseActionTypesEnum['.endpoint'],
             params: {
               command: testedCommand,
               comment: 'example1',
@@ -127,7 +127,7 @@ describe(
         cy.getByTestSubj('ruleEditSubmitButton').click();
         cy.wait('@updateResponseAction').should(({ request }) => {
           const query = {
-            action_type_id: RESPONSE_ACTION_TYPES.ENDPOINT,
+            action_type_id: ResponseActionTypesEnum['.endpoint'],
             params: {
               command: testedCommand,
               comment: newDescription,

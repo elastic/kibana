@@ -6,7 +6,7 @@ paths:
   /api/detection_engine/rules/_bulk_action:
     post:
       operationId: PerformBulkAction
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       summary: Applies a bulk action to multiple rules
       description: The bulk action is applied to all rules that match the filter or to the list of rules by their IDs.
       tags:
@@ -22,19 +22,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PerformBulkActionRequest'
+              oneOf:
+                - $ref: '#/components/schemas/BulkDeleteRules'
+                - $ref: '#/components/schemas/BulkDisableRules'
+                - $ref: '#/components/schemas/BulkEnableRules'
+                - $ref: '#/components/schemas/BulkExportRules'
+                - $ref: '#/components/schemas/BulkDuplicateRules'
+                - $ref: '#/components/schemas/BulkEditRules'
       responses:
         200:
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/BulkEditActionResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/BulkEditActionResponse'
+                  - $ref: '#/components/schemas/BulkExportActionResponse'
 
 components:
-  x-codegen-enabled: false
   schemas:
     BulkEditSkipReason:
       type: string
@@ -66,6 +71,11 @@ components:
 
     BulkActionsDryRunErrCode:
       type: string
+      enum:
+        - IMMUTABLE
+        - MACHINE_LEARNING_AUTH
+        - MACHINE_LEARNING_INDEX_PATTERN
+        - ESQL_INDEX_PATTERN
 
     NormalizedRuleError:
       type: object
@@ -127,35 +137,17 @@ components:
         - succeeded
         - total
 
-    BulkEditActionSuccessResponse:
+    BulkEditActionResponse:
       type: object
       properties:
         success:
           type: boolean
-        rules_count:
-          type: integer
-        attributes:
-          type: object
-          properties:
-            results:
-              $ref: '#/components/schemas/BulkEditActionResults'
-            summary:
-              $ref: '#/components/schemas/BulkEditActionSummary'
-          required:
-            - results
-            - summary
-      required:
-        - success
-        - rules_count
-        - attributes
-
-    BulkEditActionErrorResponse:
-      type: object
-      properties:
         status_code:
           type: integer
         message:
           type: string
+        rules_count:
+          type: integer
         attributes:
           type: object
           properties:
@@ -171,35 +163,23 @@ components:
             - results
             - summary
       required:
-        - status_code
-        - message
         - attributes
 
-    BulkEditActionResponse:
-      oneOf:
-        - $ref: '#/components/schemas/BulkEditActionSuccessResponse'
-        - $ref: '#/components/schemas/BulkEditActionErrorResponse'
+    BulkExportActionResponse:
+      type: string
 
     BulkActionBase:
-      oneOf:
-        - type: object
-          properties:
-            query:
-              type: string
-              description: Query to filter rules
-          required:
-            - query
-          additionalProperties: false
-
-        - type: object
-          properties:
-            ids:
-              type: array
-              description: Array of rule IDs
-              minItems: 1
-              items:
-                type: string
-          additionalProperties: false
+      type: object
+      properties:
+        query:
+          type: string
+          description: Query to filter rules
+        ids:
+          type: array
+          description: Array of rule IDs
+          minItems: 1
+          items:
+            type: string
 
     BulkDeleteRules:
       allOf:
@@ -262,35 +242,20 @@ components:
                 include_expired_exceptions:
                   type: boolean
                   description: Whether to copy expired exceptions from the original rule
+              required:
+                - include_exceptions
+                - include_expired_exceptions
           required:
             - action
 
-    RuleActionSummary:
-      type: boolean
-      description: Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
-
-    RuleActionNotifyWhen:
-      type: string
-      description: "The condition for throttling the notification: 'onActionGroupChange', 'onActiveAlert',  or 'onThrottleInterval'"
-      enum:
-        - onActionGroupChange
-        - onActiveAlert
-        - onThrottleInterval
-
-    RuleActionThrottle:
+    ThrottleForBulkActions:
       type: string
       description: "The condition for throttling the notification: 'rule', 'no_actions', or time duration"
-
-    RuleActionFrequency:
-      type: object
-      properties:
-        summary:
-          $ref: '#/components/schemas/RuleActionSummary'
-        notifyWhen:
-          $ref: '#/components/schemas/RuleActionNotifyWhen'
-        throttle:
-          $ref: '#/components/schemas/RuleActionThrottle'
-          nullable: true
+      enum:
+        - rule
+        - 1h
+        - 1d
+        - 7d
 
     BulkActionType:
       type: string
@@ -316,6 +281,26 @@ components:
         - set_rule_actions
         - set_schedule
 
+    # Per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts) normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
+    NormalizedRuleAction:
+      type: object
+      properties:
+        group:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleActionGroup'
+        id:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleActionId'
+        params:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleActionParams'
+        frequency:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleActionFrequency'
+        alerts_filter:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleActionAlertsFilter'
+      required:
+        - group
+        - id
+        - params
+      additionalProperties: false
+
     BulkActionEditPayloadRuleActions:
       type: object
       properties:
@@ -326,28 +311,11 @@ components:
           type: object
           properties:
             throttle:
-              $ref: '#/components/schemas/RuleActionThrottle'
+              $ref: '#/components/schemas/ThrottleForBulkActions'
             actions:
               type: array
               items:
-                type: object
-                properties:
-                  group:
-                    type: string
-                    description: Action group
-                  id:
-                    type: string
-                    description: Action ID
-                  params:
-                    type: object
-                    description: Action parameters
-                  frequency:
-                    $ref: '#/components/schemas/RuleActionFrequency'
-                    description: Action frequency
-                required:
-                  - group
-                  - id
-                  - params
+                $ref: '#/components/schemas/NormalizedRuleAction'
           required:
             - actions
       required:
@@ -366,12 +334,19 @@ components:
             interval:
               type: string
               description: Interval in which the rule is executed
+              pattern: '^[1-9]\d*[smh]$' # any number except zero followed by one of the suffixes 's', 'm', 'h'
+              example: '1h'
             lookback:
               type: string
               description: Lookback time for the rule
+              pattern: '^[1-9]\d*[smh]$' # any number except zero followed by one of the suffixes 's', 'm', 'h'
+              example: '1h'
           required:
             - interval
             - lookback
+      required:
+        - type
+        - value
 
     BulkActionEditPayloadIndexPatterns:
       type: object
@@ -441,22 +416,13 @@ components:
           properties:
             action:
               type: string
-              x-type: literal
               enum: [edit]
             edit:
               type: array
               description: Array of objects containing the edit operations
               items:
                 $ref: '#/components/schemas/BulkActionEditPayload'
+              minItems: 1
           required:
             - action
-            - rule
-
-    PerformBulkActionRequest:
-      oneOf:
-        - $ref: '#/components/schemas/BulkDeleteRules'
-        - $ref: '#/components/schemas/BulkDisableRules'
-        - $ref: '#/components/schemas/BulkEnableRules'
-        - $ref: '#/components/schemas/BulkExportRules'
-        - $ref: '#/components/schemas/BulkDuplicateRules'
-        - $ref: '#/components/schemas/BulkEditRules'
+            - edit
