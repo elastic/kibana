@@ -42,10 +42,9 @@ import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../..
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-// FLAKY: https://github.com/elastic/kibana/issues/168772
-// FLAKY: https://github.com/elastic/kibana/issues/168771
-describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
+describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     createRule(getNewRule());
   });
 
