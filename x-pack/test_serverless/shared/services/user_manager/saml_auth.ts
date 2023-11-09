@@ -16,8 +16,6 @@ export interface SessionParams {
   kbnVersion: string;
 }
 
-export type CloudEnv = 'qa' | 'staging' | 'production';
-
 const envHosts: { [key: string]: string } = {
   qa: 'console.qa.cld.elstc.co',
   staging: 'staging.found.no',

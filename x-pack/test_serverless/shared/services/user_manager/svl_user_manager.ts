@@ -65,8 +65,19 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   const sessionCache = new Map<Role, Session>();
 
   return {
-    getApiKeyByRole() {
-      // Get API key from cookie for API integration tests
+    /*
+     * Returns auth header to pass into API client
+     *
+     * Example:
+     * const credentials = await svlUserManager.getCredentialsForRole('viewer');
+     * const response = await supertestWithoutAuth
+     *   .get('/api/status')
+     *   .set(credentials)
+     *   .set('kbn-xsrf', 'kibana');
+     */
+    async getCredentialsForRole(role: string) {
+      const session = await this.getSessionByRole(role);
+      return { Cookie: `sid=${session.cookie}` };
     },
 
     async getSessionByRole(role: string) {
