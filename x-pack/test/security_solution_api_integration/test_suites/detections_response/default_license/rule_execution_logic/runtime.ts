@@ -8,19 +8,18 @@
 import expect from '@kbn/expect';
 import { performance } from 'perf_hooks';
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getRuleForSignalTesting,
-  getSignalsById,
+  getRuleForAlertTesting,
+  getAlertsById,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
+  waitForAlertsToBePresent,
 } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -33,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/138923
-  describe('Tests involving runtime fields of source indexes and the signals index', () => {
+  describe('@ess @serverless Tests involving runtime fields of source indexes and the alerts index', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/runtime');
     });
@@ -44,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Regular runtime field mappings', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -53,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should execute a rule to completion and not timeout when there are a lot of runtime fields', async () => {
-        const rule = getRuleForSignalTesting(['runtime']);
+        const rule = getRuleForAlertTesting(['runtime']);
         const { id } = await createRule(supertest, log, rule);
         const start = performance.now();
         await waitForRuleSuccess({ supertest, log, id });
@@ -61,26 +60,26 @@ export default ({ getService }: FtrProviderContext) => {
         expect(end - start).to.be.lessThan(10000);
       });
 
-      it('should copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
-        const rule = getRuleForSignalTesting(['runtime']);
+      it('should copy normal non-runtime data set from the source index into the alerts index in the same position when the target is ECS compatible', async () => {
+        const rule = getRuleForAlertTesting(['runtime']);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, log, id);
-        const hits = signalsOpen.hits.hits
-          .map((signal) => (signal._source?.host as Runtime).name)
+        await waitForAlertsToBePresent(supertest, log, 4, [id]);
+        const alertsOpen = await getAlertsById(supertest, log, id);
+        const hits = alertsOpen.hits.hits
+          .map((alert) => (alert._source?.host as Runtime).name)
           .sort();
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
 
-      it('should copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
-        const rule = getRuleForSignalTesting(['runtime']);
+      it('should copy "runtime mapping" data from a source index into the alerts index in the same position when the target is ECS compatible', async () => {
+        const rule = getRuleForAlertTesting(['runtime']);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, log, id);
-        const hits = signalsOpen.hits.hits
-          .map((signal) => (signal._source?.host as Runtime).hostname)
+        await waitForAlertsToBePresent(supertest, log, 4, [id]);
+        const alertsOpen = await getAlertsById(supertest, log, id);
+        const hits = alertsOpen.hits.hits
+          .map((alert) => (alert._source?.host as Runtime).hostname)
           .sort();
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
@@ -88,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Runtime field mappings that have conflicts within them', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/runtime_conflicting_fields'
         );
@@ -107,14 +106,14 @@ export default ({ getService }: FtrProviderContext) => {
        * risk with overwriting fields in the strategy we are currently using in detection engine. If you swap, change the strategies
        * because we decide to overwrite "_source" values with "fields", then expect to change this test.
        */
-      it('should NOT copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
-        const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
+      it('should NOT copy normal non-runtime data set from the source index into the alerts index in the same position when the target is ECS compatible', async () => {
+        const rule = getRuleForAlertTesting(['runtime_conflicting_fields']);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, log, id);
-        const hits = signalsOpen.hits.hits
-          .map((signal) => signal._source?.host as Array<{ name: string }>)
+        await waitForAlertsToBePresent(supertest, log, 4, [id]);
+        const alertsOpen = await getAlertsById(supertest, log, id);
+        const hits = alertsOpen.hits.hits
+          .map((alert) => alert._source?.host as Array<{ name: string }>)
           .map((host) => {
             // sort the inner array elements first
             return host.sort((a, b) => a.name.localeCompare(b.name));
@@ -164,15 +163,13 @@ export default ({ getService }: FtrProviderContext) => {
        * fields as arrays of objects since the objects are flattened in "fields" and we detect something already there so we skip
        * this shadowed runtime data as it is ambiguous of where we would put it in the array.
        */
-      it('should NOT copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
-        const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
+      it('should NOT copy "runtime mapping" data from a source index into the alerts index in the same position when the target is ECS compatible', async () => {
+        const rule = getRuleForAlertTesting(['runtime_conflicting_fields']);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, log, id);
-        const hits = signalsOpen.hits.hits.map(
-          (signal) => (signal._source?.host as Runtime).hostname
-        );
+        await waitForAlertsToBePresent(supertest, log, 4, [id]);
+        const alertsOpen = await getAlertsById(supertest, log, id);
+        const hits = alertsOpen.hits.hits.map((alert) => (alert._source?.host as Runtime).hostname);
         expect(hits).to.eql([undefined, undefined, undefined, undefined]);
       });
     });

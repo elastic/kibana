@@ -21,12 +21,12 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
   getOpenAlerts,
   getPreviewAlerts,
-  getThresholdRuleForSignalTesting,
+  getThresholdRuleForAlertTesting,
   previewRule,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Threshold type rules', () => {
+  describe('@ess @serverless Threshold type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
@@ -47,9 +47,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // First test creates a real rule - remaining tests use preview API
-    it('generates 1 signal from Threshold rules when threshold is met', async () => {
+    it('generates 1 alert from Threshold rules when threshold is met', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: ['host.id'],
           value: 700,
@@ -58,13 +58,13 @@ export default ({ getService }: FtrProviderContext) => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).eql(1);
-      const fullSignal = alerts.hits.hits[0]._source;
-      if (!fullSignal) {
-        return expect(fullSignal).to.be.ok();
+      const fullAlert = alerts.hits.hits[0]._source;
+      if (!fullAlert) {
+        return expect(fullAlert).to.be.ok();
       }
-      const eventIds = (fullSignal?.[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
-      expect(fullSignal).eql({
-        ...fullSignal,
+      const eventIds = (fullAlert?.[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
+      expect(fullAlert).eql({
+        ...fullAlert,
         'host.id': '8cc95778cce5407c809480e8e32ad76b',
         [EVENT_KIND]: 'signal',
         [ALERT_ANCESTORS]: [
@@ -77,8 +77,8 @@ export default ({ getService }: FtrProviderContext) => {
         ],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_REASON]: 'event created high alert Signal Testing Query.',
-        [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
-        [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
+        [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_DEPTH]: 1,
         [ALERT_THRESHOLD_RESULT]: {
           terms: [
@@ -93,9 +93,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('generates max signals warning when circuit breaker is exceeded', async () => {
+    it('generates max alerts warning when circuit breaker is exceeded', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
           value: 1, // This value generates 7 alerts with the current esArchive
@@ -103,12 +103,12 @@ export default ({ getService }: FtrProviderContext) => {
         max_signals: 5,
       };
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+      expect(logs[0].warnings).contain(getMaxAlertsWarning());
     });
 
-    it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
+    it("doesn't generate max alerts warning when circuit breaker is met but not exceeded", async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
           value: 1, // This value generates 7 alerts with the current esArchive
@@ -116,12 +116,12 @@ export default ({ getService }: FtrProviderContext) => {
         max_signals: 7,
       };
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).not.contain(getMaxSignalsWarning());
+      expect(logs[0].warnings).not.contain(getMaxAlertsWarning());
     });
 
-    it('generates 2 signals from Threshold rules when threshold is met', async () => {
+    it('generates 2 alerts from Threshold rules when threshold is met', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
           value: 100,
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('applies the provided query before bucketing ', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         query: 'host.id:"2ab45fc1c41e4c84bbd02202a7e5761f"',
         threshold: {
           field: 'process.name',
@@ -146,9 +146,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).eql(1);
     });
 
-    it('generates no signals from Threshold rules when threshold is met and cardinality is not met', async () => {
+    it('generates no alerts from Threshold rules when threshold is met and cardinality is not met', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
           value: 100,
@@ -165,9 +165,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).eql(0);
     });
 
-    it('generates no signals from Threshold rules when cardinality is met and threshold is not met', async () => {
+    it('generates no alerts from Threshold rules when cardinality is met and threshold is not met', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
           value: 1000,
@@ -184,9 +184,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).eql(0);
     });
 
-    it('generates signals from Threshold rules when threshold and cardinality are both met', async () => {
+    it('generates alerts from Threshold rules when threshold and cardinality are both met', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
           value: 100,
@@ -201,13 +201,13 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       expect(previewAlerts.length).eql(1);
-      const fullSignal = previewAlerts[0]._source;
-      if (!fullSignal) {
-        return expect(fullSignal).to.be.ok();
+      const fullAlert = previewAlerts[0]._source;
+      if (!fullAlert) {
+        return expect(fullAlert).to.be.ok();
       }
-      const eventIds = (fullSignal?.[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
-      expect(fullSignal).eql({
-        ...fullSignal,
+      const eventIds = (fullAlert?.[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
+      expect(fullAlert).eql({
+        ...fullAlert,
         'host.id': '8cc95778cce5407c809480e8e32ad76b',
         [EVENT_KIND]: 'signal',
         [ALERT_ANCESTORS]: [
@@ -220,8 +220,8 @@ export default ({ getService }: FtrProviderContext) => {
         ],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_REASON]: `event created high alert Signal Testing Query.`,
-        [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
-        [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
+        [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_DEPTH]: 1,
         [ALERT_THRESHOLD_RESULT]: {
           terms: [
@@ -242,9 +242,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should not generate signals if only one field meets the threshold requirement', async () => {
+    it('should not generate alerts if only one field meets the threshold requirement', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: ['host.id', 'process.name'],
           value: 22,
@@ -255,9 +255,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).eql(0);
     });
 
-    it('generates signals from Threshold rules when bucketing by multiple fields', async () => {
+    it('generates alerts from Threshold rules when bucketing by multiple fields', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: ['host.id', 'process.name', 'event.module'],
           value: 21,
@@ -266,13 +266,13 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       expect(previewAlerts.length).eql(1);
-      const fullSignal = previewAlerts[0]._source;
-      if (!fullSignal) {
-        return expect(fullSignal).to.be.ok();
+      const fullAlert = previewAlerts[0]._source;
+      if (!fullAlert) {
+        return expect(fullAlert).to.be.ok();
       }
-      const eventIds = (fullSignal[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
-      expect(fullSignal).eql({
-        ...fullSignal,
+      const eventIds = (fullAlert[ALERT_ANCESTORS] as Ancestor[]).map((event) => event.id);
+      expect(fullAlert).eql({
+        ...fullAlert,
         'event.module': 'system',
         'host.id': '2ab45fc1c41e4c84bbd02202a7e5761f',
         'process.name': 'sshd',
@@ -287,8 +287,8 @@ export default ({ getService }: FtrProviderContext) => {
         ],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_REASON]: `event with process sshd, created high alert Signal Testing Query.`,
-        [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
-        [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
+        [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_DEPTH]: 1,
         [ALERT_THRESHOLD_RESULT]: {
           terms: [
@@ -314,8 +314,8 @@ export default ({ getService }: FtrProviderContext) => {
     // https://github.com/elastic/kibana/issues/149920
     it('generates 1 alert when threshold is met and rule query has wildcard in field name', async () => {
       const rule: ThresholdRuleCreateProps = {
-        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
-        query: 'agent.ty*:auditbeat', // this query should match all documents from index and we will receive 1 alert, similarly to "generates 1 signal from Threshold rules when threshold is met" test case
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
+        query: 'agent.ty*:auditbeat', // this query should match all documents from index and we will receive 1 alert, similarly to "generates 1 alert from Threshold rules when threshold is met" test case
         threshold: {
           field: ['host.id'],
           value: 700,
@@ -341,7 +341,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('applies timestamp override when using single field', async () => {
         const rule: ThresholdRuleCreateProps = {
-          ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
+          ...getThresholdRuleForAlertTesting(['timestamp-fallback-test']),
           threshold: {
             field: 'host.name',
             value: 1,
@@ -369,7 +369,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('applies timestamp override when using multiple fields', async () => {
         const rule: ThresholdRuleCreateProps = {
-          ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
+          ...getThresholdRuleForAlertTesting(['timestamp-fallback-test']),
           threshold: {
             field: ['host.name', 'source.ip'],
             value: 1,
@@ -407,7 +407,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be enriched with host risk score', async () => {
         const rule: ThresholdRuleCreateProps = {
-          ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+          ...getThresholdRuleForAlertTesting(['auditbeat-*']),
           threshold: {
             field: 'host.name',
             value: 100,

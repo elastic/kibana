@@ -35,7 +35,7 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
-import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   previewRule,
   getOpenAlerts,
@@ -149,10 +149,8 @@ export default ({ getService }: FtrProviderContext) => {
    * Specific api integration tests for threat matching rule type
    */
   // FLAKY: https://github.com/elastic/kibana/issues/155304
-  describe('Threat match type rules', () => {
+  describe('@ess @serverless Threat match type rules', () => {
     before(async () => {
-      // await deleteSignalsIndex(supertest, log);
-      // await deleteAllAlerts(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
@@ -163,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // First 2 test creates a real rule - remaining tests use preview API
-    it('should be able to execute and get all signals when doing a specific query (terms query)', async () => {
+    it('should be able to execute and get all alerts when doing a specific query (terms query)', async () => {
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule();
 
       const createdRule = await createRule(supertest, log, rule);
@@ -177,16 +175,15 @@ export default ({ getService }: FtrProviderContext) => {
       );
       expect(alerts.hits.hits.length).equal(88);
       const fullSource = alerts.hits.hits.find(
-        (signal) =>
-          (signal._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
+        (alert) => (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
       );
-      const fullSignal = fullSource?._source;
-      if (!fullSignal) {
-        return expect(fullSignal).to.be.ok();
+      const fullAlert = fullSource?._source;
+      if (!fullAlert) {
+        return expect(fullAlert).to.be.ok();
       }
-      expect(fullSignal).eql({
-        ...fullSignal,
-        '@timestamp': fullSignal['@timestamp'],
+      expect(fullAlert).eql({
+        ...fullAlert,
+        '@timestamp': fullAlert['@timestamp'],
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
           hostname: 'zeek-sensor-amsterdam',
@@ -280,18 +277,18 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_ORIGINAL_EVENT_ACTION]: 'error',
         [ALERT_ORIGINAL_EVENT_CATEGORY]: 'user-login',
         [ALERT_ORIGINAL_EVENT_MODULE]: 'auditd',
-        [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+        [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_REASON]:
           'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
-        [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_STATUS]: 'active',
-        [ALERT_UUID]: fullSignal[ALERT_UUID],
+        [ALERT_UUID]: fullAlert[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_WORKFLOW_TAGS]: [],
         [SPACE_IDS]: ['default'],
-        [VERSION]: fullSignal[VERSION],
+        [VERSION]: fullAlert[VERSION],
         threat: {
-          enrichments: get(fullSignal, 'threat.enrichments'),
+          enrichments: get(fullAlert, 'threat.enrichments'),
         },
         ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
           actions: [],
@@ -319,14 +316,14 @@ export default ({ getService }: FtrProviderContext) => {
           threat: [],
           to: 'now',
           type: 'threat_match',
-          updated_at: fullSignal[ALERT_RULE_UPDATED_AT],
+          updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
           updated_by: 'elastic',
-          uuid: fullSignal[ALERT_RULE_UUID],
+          uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });
     });
-    it('should be able to execute and get all signals when doing a specific query (match query)', async () => {
+    it('should be able to execute and get all alerts when doing a specific query (match query)', async () => {
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
         threat_mapping: [
           // We match host.name against host.name
@@ -358,16 +355,15 @@ export default ({ getService }: FtrProviderContext) => {
       );
       expect(alerts.hits.hits.length).equal(88);
       const fullSource = alerts.hits.hits.find(
-        (signal) =>
-          (signal._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
+        (alert) => (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
       );
-      const fullSignal = fullSource?._source;
-      if (!fullSignal) {
-        return expect(fullSignal).to.be.ok();
+      const fullAlert = fullSource?._source;
+      if (!fullAlert) {
+        return expect(fullAlert).to.be.ok();
       }
-      expect(fullSignal).eql({
-        ...fullSignal,
-        '@timestamp': fullSignal['@timestamp'],
+      expect(fullAlert).eql({
+        ...fullAlert,
+        '@timestamp': fullAlert['@timestamp'],
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
           hostname: 'zeek-sensor-amsterdam',
@@ -461,17 +457,17 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_ORIGINAL_EVENT_ACTION]: 'error',
         [ALERT_ORIGINAL_EVENT_CATEGORY]: 'user-login',
         [ALERT_ORIGINAL_EVENT_MODULE]: 'auditd',
-        [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+        [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_REASON]:
           'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
-        [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_STATUS]: 'active',
-        [ALERT_UUID]: fullSignal[ALERT_UUID],
+        [ALERT_UUID]: fullAlert[ALERT_UUID],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [SPACE_IDS]: ['default'],
-        [VERSION]: fullSignal[VERSION],
+        [VERSION]: fullAlert[VERSION],
         threat: {
-          enrichments: get(fullSignal, 'threat.enrichments'),
+          enrichments: get(fullAlert, 'threat.enrichments'),
         },
         ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
           actions: [],
@@ -499,18 +495,18 @@ export default ({ getService }: FtrProviderContext) => {
           threat: [],
           to: 'now',
           type: 'threat_match',
-          updated_at: fullSignal[ALERT_RULE_UPDATED_AT],
+          updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
           updated_by: 'elastic',
-          uuid: fullSignal[ALERT_RULE_UUID],
+          uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });
     });
 
-    it('generates max signals warning when circuit breaker is hit', async () => {
+    it('generates max alerts warning when circuit breaker is hit', async () => {
       const rule: ThreatMatchRuleCreateProps = { ...createThreatMatchRule(), max_signals: 87 }; // Query generates 88 alerts with current esArchive
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+      expect(logs[0].warnings).contain(getMaxAlertsWarning());
     });
 
     it('terms and match should have the same alerts with pagination', async () => {
@@ -592,7 +588,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).equal(0);
     });
 
-    it('should return 0 signals when using an AND and one of the clauses does not have data', async () => {
+    it('should return 0 alerts when using an AND and one of the clauses does not have data', async () => {
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
         threat_mapping: [
           {
@@ -617,7 +613,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).equal(0);
     });
 
-    it('should return 0 signals when using an AND and one of the clauses has a made up value that does not exist', async () => {
+    it('should return 0 alerts when using an AND and one of the clauses has a made up value that does not exist', async () => {
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
         threat_mapping: [
           {
@@ -667,7 +663,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
       });
 
-      it('enriches signals with the single indicator that matched', async () => {
+      it('enriches alerts with the single indicator that matched', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           threat_mapping: [
             {
@@ -743,9 +739,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      it('enriches signals with multiple indicators if several matched', async () => {
+      it('enriches alerts with multiple indicators if several matched', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
-          query: 'NOT source.port:35326', // specify query to have signals more than treat indicators, but only 1 will match
+          query: 'NOT source.port:35326', // specify query to have alerts more than treat indicators, but only 1 will match
           threat_query: 'threat.indicator.ip: *',
           threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
           threat_mapping: [
@@ -810,7 +806,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('adds a single indicator that matched multiple fields', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
-          query: 'NOT source.port:35326', // specify query to have signals more than treat indicators, but only 1 will match
+          query: 'NOT source.port:35326', // specify query to have alerts more than treat indicators, but only 1 will match
           threat_query: 'threat.indicator.port: 57324 or threat.indicator.ip:45.115.45.3', // narrow our query to a single indicator
           threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
           threat_mapping: [
@@ -906,7 +902,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      it('generates multiple signals with multiple matches', async () => {
+      it('generates multiple alerts with multiple matches', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           threat_query: '*:*',
           threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
@@ -1031,7 +1027,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // https://github.com/elastic/kibana/issues/149920
-      // generates same number of alerts similarly to "enriches signals with the single indicator that matches" test
+      // generates same number of alerts similarly to "enriches alerts with the single indicator that matches" test
       it('generates alerts with single match if queries contain field path wildcards', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           // still matches all documents as default *:*
@@ -1066,7 +1062,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
       });
 
-      it('enriches signals with the single indicator that matched', async () => {
+      it('enriches alerts with the single indicator that matched', async () => {
         const termRule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           query: 'destination.ip:159.89.119.67',
           threat_query: 'threat.indicator.domain: *', // narrow things down to indicators with a domain
@@ -1167,7 +1163,7 @@ export default ({ getService }: FtrProviderContext) => {
         alertsAreTheSame(termPreviewAlerts, matchPrevieAlerts);
       });
 
-      it('enriches signals with multiple indicators if several matched', async () => {
+      it('enriches alerts with multiple indicators if several matched', async () => {
         const termRule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           query: 'source.port: 57324', // narrow our query to a single record that matches two indicatorsthreat_query: 'threat.indicator.ip: *',
           threat_query: 'threat.indicator.ip: *',
@@ -1407,7 +1403,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('generates multiple signals with multiple matches', async () => {
+      it('generates multiple alerts with multiple matches', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           query: '(source.port:57324 and source.ip:45.115.45.3) or destination.ip:159.89.119.67', // narrow our query to a single record that matches two indicators
           threat_query: '*:*',
@@ -1533,7 +1529,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // https://github.com/elastic/kibana/issues/149920
-      // creates same number of alerts similarly to "generates multiple signals with multiple matches" test
+      // creates same number of alerts similarly to "generates multiple alerts with multiple matches" test
       it('generates alerts with multiple matches if queries contain field path wildcards', async () => {
         const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
           // source.po* matches port source.port field
@@ -1604,16 +1600,16 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
         expect(previewAlerts.length).equal(88);
         const fullSource = previewAlerts.find(
-          (signal) =>
-            (signal._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
+          (alert) =>
+            (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
         );
-        const fullSignal = fullSource?._source;
-        if (!fullSignal) {
-          return expect(fullSignal).to.be.ok();
+        const fullAlert = fullSource?._source;
+        if (!fullAlert) {
+          return expect(fullAlert).to.be.ok();
         }
 
-        expect(fullSignal?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(fullSignal?.host?.risk?.calculated_score_norm).to.eql(70);
+        expect(fullAlert?.host?.risk?.calculated_level).to.eql('Critical');
+        expect(fullAlert?.host?.risk?.calculated_score_norm).to.eql(70);
       });
     });
   });

@@ -24,7 +24,7 @@ import {
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { expect } from 'expect';
 import {
   createListsIndex,
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  describe('Machine learning type rules', () => {
+  describe('@ess @serverless Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -87,9 +87,9 @@ export default ({ getService }: FtrProviderContext) => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toBe(1);
-      const signal = alerts.hits.hits[0];
+      const alert = alerts.hits.hits[0];
 
-      expect(signal._source).toEqual(
+      expect(alert._source).toEqual(
         expect.objectContaining({
           '@timestamp': expect.any(String),
           [ALERT_RULE_EXECUTION_UUID]: expect.any(String),
@@ -160,20 +160,20 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('generates max signals warning when circuit breaker is exceeded', async () => {
+    it('generates max alerts warning when circuit breaker is exceeded', async () => {
       const { logs } = await previewRule({
         supertest,
         rule: { ...rule, anomaly_threshold: 1, max_signals: 5 }, // This threshold generates 10 alerts with the current esArchive
       });
-      expect(logs[0].warnings).toContain(getMaxSignalsWarning());
+      expect(logs[0].warnings).toContain(getMaxAlertsWarning());
     });
 
-    it("doesn't generate max signals warning when circuit breaker is met, but not exceeded", async () => {
+    it("doesn't generate max alerts warning when circuit breaker is met, but not exceeded", async () => {
       const { logs } = await previewRule({
         supertest,
         rule: { ...rule, anomaly_threshold: 1, max_signals: 10 },
       });
-      expect(logs[0].warnings).not.toContain(getMaxSignalsWarning());
+      expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());
     });
 
     it('should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });
-      it('generates no signals when an exception is added for an ML rule', async () => {
+      it('generates no alerts when an exception is added for an ML rule', async () => {
         const { previewId } = await previewRuleWithExceptionEntries({
           supertest,
           log,
@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllExceptions(supertest, log);
       });
 
-      it('generates no signals when a value list exception is added for an ML rule', async () => {
+      it('generates no alerts when a value list exception is added for an ML rule', async () => {
         const valueListId = 'value-list-id';
         await importFile(supertest, log, 'keyword', ['mothra'], valueListId);
         const { previewId } = await previewRuleWithExceptionEntries({
@@ -259,10 +259,10 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts.length).toBe(1);
-        const fullSignal = previewAlerts[0]._source;
+        const fullAlert = previewAlerts[0]._source;
 
-        expect(fullSignal?.host?.risk?.calculated_level).toBe('Low');
-        expect(fullSignal?.host?.risk?.calculated_score_norm).toBe(1);
+        expect(fullAlert?.host?.risk?.calculated_level).toBe('Low');
+        expect(fullAlert?.host?.risk?.calculated_score_norm).toBe(1);
       });
     });
   });

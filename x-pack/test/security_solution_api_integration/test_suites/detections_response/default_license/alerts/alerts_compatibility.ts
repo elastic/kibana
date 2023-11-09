@@ -36,7 +36,7 @@ import {
   waitFor,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-  removeRandomValuedProperties,
+  removeRandomValuedPropertiesFromAlert,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -231,7 +231,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
-        const source = removeRandomValuedProperties(hit._source);
+        const source = removeRandomValuedPropertiesFromAlert(hit._source);
         expect(source).to.eql({
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',
@@ -393,7 +393,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
-        const source = removeRandomValuedProperties(hit._source);
+        const source = removeRandomValuedPropertiesFromAlert(hit._source);
         expect(source).to.eql({
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',

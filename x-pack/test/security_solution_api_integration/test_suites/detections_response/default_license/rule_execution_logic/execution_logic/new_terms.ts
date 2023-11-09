@@ -12,7 +12,7 @@ import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/ap
 import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
-import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
   deleteAllRules,
@@ -22,10 +22,9 @@ import {
   previewRule,
   dataGeneratorFactory,
   previewRuleWithExceptionEntries,
+  removeRandomValuedPropertiesFromAlert,
 } from '../../../utils';
 import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
-
-import { removeRandomValuedProperties } from '../../../utils/remove_random_valued_properties';
 
 const historicalWindowStart = '2022-10-13T05:00:04.000Z';
 const ruleExecutionStart = '2022-10-19T05:00:04.000Z';
@@ -72,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
     return testId;
   };
 
-  describe('New terms type rules', () => {
+  describe('@ess @serverless New terms type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');
@@ -102,7 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
       expect(alerts.hits.hits.length).eql(1);
-      expect(removeRandomValuedProperties(alerts.hits.hits[0]._source)).eql({
+      expect(removeRandomValuedPropertiesFromAlert(alerts.hits.hits[0]._source)).eql({
         'kibana.alert.new_terms': ['zeek-newyork-sha-aa8df15'],
         'kibana.alert.rule.category': 'New Terms Rule',
         'kibana.alert.rule.consumer': 'siem',
@@ -229,7 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('generates max signals warning when circuit breaker is exceeded', async () => {
+    it('generates max alerts warning when circuit breaker is exceeded', async () => {
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['process.pid'],
@@ -239,10 +238,10 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { logs } = await previewRule({ supertest, rule });
 
-      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+      expect(logs[0].warnings).contain(getMaxAlertsWarning());
     });
 
-    it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
+    it("doesn't generate max alerts warning when circuit breaker is met but not exceeded", async () => {
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.ip'],
@@ -252,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { logs } = await previewRule({ supertest, rule });
 
-      expect(logs[0].warnings).not.contain(getMaxSignalsWarning());
+      expect(logs[0].warnings).not.contain(getMaxAlertsWarning());
     });
 
     it('should generate 3 alerts when 1 document has 3 new values', async () => {
@@ -990,21 +989,21 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should work for max signals > 100', async () => {
-      const maxSignals = 200;
+    it('should work for max alerts > 100', async () => {
+      const maxAlerts = 200;
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['process.pid'],
         from: '2018-02-19T20:42:00.000Z',
         // Set the history_window_start close to 'from' so we should alert on all terms in the time range
         history_window_start: '2018-02-19T20:41:59.000Z',
-        max_signals: maxSignals,
+        max_signals: maxAlerts,
       };
 
       const { previewId } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxSignals * 2 });
+      const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxAlerts * 2 });
 
-      expect(previewAlerts.length).eql(maxSignals);
+      expect(previewAlerts.length).eql(maxAlerts);
       const processPids = previewAlerts
         .map((signal) => signal._source?.['kibana.alert.new_terms'])
         .sort();

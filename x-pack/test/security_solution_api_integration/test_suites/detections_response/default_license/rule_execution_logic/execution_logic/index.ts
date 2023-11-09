@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('detection engine api security and spaces enabled - rule execution logic', function () {
+  describe('Execution logic', function () {
     loadTestFile(require.resolve('./eql'));
     loadTestFile(require.resolve('./esql'));
     loadTestFile(require.resolve('./machine_learning'));
@@ -17,7 +17,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./threat_match'));
     loadTestFile(require.resolve('./threshold'));
     loadTestFile(require.resolve('./non_ecs_fields'));
-
     loadTestFile(require.resolve('./query'));
   });
 };

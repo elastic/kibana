@@ -10,5 +10,9 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rule execution logic API', function () {
     loadTestFile(require.resolve('./keyword_family'));
+    loadTestFile(require.resolve('./ignore_fields'));
+    loadTestFile(require.resolve('./runtime'));
+    loadTestFile(require.resolve('./timestamps'));
+    loadTestFile(require.resolve('./execution_logic'));
   });
 }

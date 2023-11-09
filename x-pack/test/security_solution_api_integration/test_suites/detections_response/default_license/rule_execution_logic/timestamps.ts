@@ -14,22 +14,21 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
   createRule,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
-  getOpenSignals,
-  getRuleForSignalTesting,
-  getSignalsByIds,
-  getEqlRuleForSignalTesting,
+  waitForAlertsToBePresent,
+  getOpenAlerts,
+  getRuleForAlertTesting,
+  getAlertsByIds,
+  getEqlRuleForAlertTesting,
   waitForRulePartialFailure,
 } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -37,14 +36,14 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   /**
-   * Tests around timestamps within signals such as the copying of timestamps correctly into
-   * the "signal.original_time" field, ensuring that timestamp overrides operate, and ensuring that
+   * Tests around timestamps within alerts such as the copying of timestamps correctly into
+   * the "alert.original_time" field, ensuring that timestamp overrides operate, and ensuring that
    * partial errors happen correctly
    */
-  describe('timestamp tests', () => {
-    describe('Signals generated from events with a timestamp in seconds is converted correctly into the forced ISO8601 format when copying', () => {
+  describe('@ess @serverless timestamp tests', () => {
+    describe('alerts generated from events with a timestamp in seconds is converted correctly into the forced ISO8601 format when copying', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
         );
@@ -66,58 +65,50 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('KQL query', () => {
         it('should convert the @timestamp which is epoch_seconds into the correct ISO format', async () => {
-          const rule = getRuleForSignalTesting(['timestamp_in_seconds']);
+          const rule = getRuleForAlertTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-          const hits = signalsOpen.hits.hits
-            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
-            .sort();
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const alertsOpen = await getAlertsByIds(supertest, log, [id]);
+          const hits = alertsOpen.hits.hits.map((hit) => hit._source?.[ALERT_ORIGINAL_TIME]).sort();
           expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
         });
 
         it('should still use the @timestamp field even with an override field. It should never use the override field', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['myfakeindex-5']),
+            ...getRuleForAlertTesting(['myfakeindex-5']),
             timestamp_override: 'event.ingested',
           };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-          const hits = signalsOpen.hits.hits
-            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
-            .sort();
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const alertsOpen = await getAlertsByIds(supertest, log, [id]);
+          const hits = alertsOpen.hits.hits.map((hit) => hit._source?.[ALERT_ORIGINAL_TIME]).sort();
           expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
         });
       });
 
       describe('EQL query', () => {
         it('should convert the @timestamp which is epoch_seconds into the correct ISO format for EQL', async () => {
-          const rule = getEqlRuleForSignalTesting(['timestamp_in_seconds']);
+          const rule = getEqlRuleForAlertTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-          const hits = signalsOpen.hits.hits
-            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
-            .sort();
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const alertsOpen = await getAlertsByIds(supertest, log, [id]);
+          const hits = alertsOpen.hits.hits.map((hit) => hit._source?.[ALERT_ORIGINAL_TIME]).sort();
           expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
         });
 
         it('should still use the @timestamp field even with an override field. It should never use the override field', async () => {
           const rule: EqlRuleCreateProps = {
-            ...getEqlRuleForSignalTesting(['myfakeindex-5']),
+            ...getEqlRuleForAlertTesting(['myfakeindex-5']),
             timestamp_override: 'event.ingested',
           };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-          const hits = signalsOpen.hits.hits
-            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
-            .sort();
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const alertsOpen = await getAlertsByIds(supertest, log, [id]);
+          const hits = alertsOpen.hits.hits.map((hit) => hit._source?.[ALERT_ORIGINAL_TIME]).sort();
           expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
         });
       });
@@ -129,10 +120,10 @@ export default ({ getService }: FtrProviderContext) => {
      * If no timestamp override field exists in the indices but one was provided to the rule,
      * the rule's query will additionally search for events using the `@timestamp` field
      */
-    describe('Signals generated from events with timestamp override field', async () => {
+    describe('alerts generated from events with timestamp override field', async () => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
         );
@@ -165,9 +156,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('KQL', () => {
-        it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
+        it('should generate alerts with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['myfa*']),
+            ...getRuleForAlertTesting(['myfa*']),
             timestamp_override: 'event.ingested',
           };
 
@@ -178,17 +169,17 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             id,
           });
-          await waitForSignalsToBePresent(supertest, log, 3, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, log, [id], 3);
-          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          await waitForAlertsToBePresent(supertest, log, 3, [id]);
+          const alertsResponse = await getAlertsByIds(supertest, log, [id], 3);
+          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(signalsOrderedByEventId.length).equal(3);
+          expect(alertsOrderedByEventId.length).equal(3);
         });
 
-        it('should generate 2 signals with event.ingested when timestamp fallback is disabled', async () => {
+        it('should generate 2 alerts with event.ingested when timestamp fallback is disabled', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['myfa*']),
+            ...getRuleForAlertTesting(['myfa*']),
             rule_id: 'rule-without-timestamp-fallback',
             timestamp_override: 'event.ingested',
             timestamp_override_fallback_disabled: true,
@@ -201,16 +192,16 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             id,
           });
-          await waitForSignalsToBePresent(supertest, log, 2, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, log, [id], 2);
-          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          await waitForAlertsToBePresent(supertest, log, 2, [id]);
+          const alertsResponse = await getAlertsByIds(supertest, log, [id], 2);
+          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(signalsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId.length).equal(2);
         });
 
-        it('should generate 2 signals with @timestamp', async () => {
-          const rule: QueryRuleCreateProps = getRuleForSignalTesting(['myfa*']);
+        it('should generate 2 alerts with @timestamp', async () => {
+          const rule: QueryRuleCreateProps = getRuleForAlertTesting(['myfa*']);
 
           const { id } = await createRule(supertest, log, rule);
 
@@ -219,17 +210,17 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             id,
           });
-          await waitForSignalsToBePresent(supertest, log, 2, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, log, [id]);
-          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          await waitForAlertsToBePresent(supertest, log, 2, [id]);
+          const alertsResponse = await getAlertsByIds(supertest, log, [id]);
+          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(signalsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId.length).equal(2);
         });
 
-        it('should generate 2 signals when timestamp override does not exist', async () => {
+        it('should generate 2 alerts when timestamp override does not exist', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['myfa*']),
+            ...getRuleForAlertTesting(['myfa*']),
             timestamp_override: 'event.fakeingestfield',
           };
           const { id } = await createRule(supertest, log, rule);
@@ -239,50 +230,50 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             id,
           });
-          await waitForSignalsToBePresent(supertest, log, 2, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
-          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          await waitForAlertsToBePresent(supertest, log, 2, [id]);
+          const alertsResponse = await getAlertsByIds(supertest, log, [id, id]);
+          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(signalsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId.length).equal(2);
         });
 
-        it('should not generate any signals when timestamp override does not exist and timestamp fallback is disabled', async () => {
+        it('should not generate any alerts when timestamp override does not exist and timestamp fallback is disabled', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['myfa*']),
+            ...getRuleForAlertTesting(['myfa*']),
             rule_id: 'rule-without-timestamp-fallback',
             timestamp_override: 'event.fakeingestfield',
             timestamp_override_fallback_disabled: true,
           };
 
           const createdRule = await createRule(supertest, log, rule);
-          const signalsOpen = await getOpenSignals(
+          const alertsOpen = await getOpenAlerts(
             supertest,
             log,
             es,
             createdRule,
             RuleExecutionStatusEnum['partial failure']
           );
-          expect(signalsOpen.hits.hits.length).eql(0);
+          expect(alertsOpen.hits.hits.length).eql(0);
         });
 
         /**
          * We should not use the timestamp override as the "original_time" as that can cause
          * confusion if you have both a timestamp and an override in the source event. Instead the "original_time"
-         * field should only be overridden by the "timestamp" since when we generate a signal
-         * and we add a new timestamp to the signal.
+         * field should only be overridden by the "timestamp" since when we generate a alert
+         * and we add a new timestamp to the alert.
          */
         it('should NOT use the timestamp override as the "original_time"', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['myfakeindex-2']),
+            ...getRuleForAlertTesting(['myfakeindex-2']),
             timestamp_override: 'event.ingested',
           };
           const { id } = await createRule(supertest, log, rule);
 
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
-          const hits = signalsResponse.hits.hits
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const alertsResponse = await getAlertsByIds(supertest, log, [id, id]);
+          const hits = alertsResponse.hits.hits
             .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
             .sort();
           expect(hits).to.eql([undefined]);
@@ -290,8 +281,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('EQL', () => {
-        it('should generate 2 signals with @timestamp', async () => {
-          const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting(['myfa*']);
+        it('should generate 2 alerts with @timestamp', async () => {
+          const rule: EqlRuleCreateProps = getEqlRuleForAlertTesting(['myfa*']);
 
           const { id } = await createRule(supertest, log, rule);
 
@@ -300,17 +291,17 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             id,
           });
-          await waitForSignalsToBePresent(supertest, log, 2, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, log, [id]);
-          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          await waitForAlertsToBePresent(supertest, log, 2, [id]);
+          const alertsResponse = await getAlertsByIds(supertest, log, [id]);
+          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(signalsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId.length).equal(2);
         });
 
-        it('should generate 2 signals when timestamp override does not exist', async () => {
+        it('should generate 2 alerts when timestamp override does not exist', async () => {
           const rule: EqlRuleCreateProps = {
-            ...getEqlRuleForSignalTesting(['myfa*']),
+            ...getEqlRuleForAlertTesting(['myfa*']),
             timestamp_override: 'event.fakeingestfield',
           };
           const { id } = await createRule(supertest, log, rule);
@@ -320,34 +311,34 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             id,
           });
-          await waitForSignalsToBePresent(supertest, log, 2, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
-          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
-          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+          await waitForAlertsToBePresent(supertest, log, 2, [id]);
+          const alertsResponse = await getAlertsByIds(supertest, log, [id, id]);
+          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(signalsOrderedByEventId.length).equal(2);
+          expect(alertsOrderedByEventId.length).equal(2);
         });
 
-        it('should not generate any signals when timestamp override does not exist and timestamp fallback is disabled', async () => {
+        it('should not generate any alerts when timestamp override does not exist and timestamp fallback is disabled', async () => {
           const rule: EqlRuleCreateProps = {
-            ...getEqlRuleForSignalTesting(['myfa*']),
+            ...getEqlRuleForAlertTesting(['myfa*']),
             timestamp_override: 'event.fakeingestfield',
             timestamp_override_fallback_disabled: true,
           };
           const createdRule = await createRule(supertest, log, rule);
-          const signalsOpen = await getOpenSignals(
+          const alertsOpen = await getOpenAlerts(
             supertest,
             log,
             es,
             createdRule,
             RuleExecutionStatusEnum['partial failure']
           );
-          expect(signalsOpen.hits.hits.length).eql(0);
+          expect(alertsOpen.hits.hits.length).eql(0);
         });
       });
     });
 
-    describe('Signals generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
+    describe('alerts generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
@@ -357,7 +348,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -377,9 +368,9 @@ export default ({ getService }: FtrProviderContext) => {
          *
          * ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
          */
-        it('should generate 200 signals when timestamp override does not exist', async () => {
+        it('should generate 200 alerts when timestamp override does not exist', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             timestamp_override: 'event.fakeingested',
             max_signals: 200,
           };
@@ -390,11 +381,11 @@ export default ({ getService }: FtrProviderContext) => {
             log,
             id,
           });
-          await waitForSignalsToBePresent(supertest, log, 200, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, log, [id], 200);
-          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+          await waitForAlertsToBePresent(supertest, log, 200, [id]);
+          const alertsResponse = await getAlertsByIds(supertest, log, [id], 200);
+          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
 
-          expect(signals.length).equal(200);
+          expect(alerts.length).equal(200);
         });
       });
     });

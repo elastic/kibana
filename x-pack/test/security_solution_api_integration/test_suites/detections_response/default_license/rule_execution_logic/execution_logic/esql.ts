@@ -12,7 +12,7 @@ import { orderBy } from 'lodash';
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
-import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
@@ -22,12 +22,10 @@ import {
   getOpenAlerts,
   dataGeneratorFactory,
   previewRuleWithExceptionEntries,
-  removeRandomValuedProperties,
+  removeRandomValuedPropertiesFromAlert,
 } from '../../../utils';
 import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-
-// TODO replace signals
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -46,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('ES|QL rule type', () => {
+  describe('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -83,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
       expect(alerts.hits.hits.length).toBe(1);
-      expect(removeRandomValuedProperties(alerts.hits.hits[0]._source)).toEqual({
+      expect(removeRandomValuedPropertiesFromAlert(alerts.hits.hits[0]._source)).toEqual({
         'kibana.alert.rule.parameters': {
           description: 'Detecting root and admin users',
           risk_score: 55,
@@ -601,8 +599,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('max signals', () => {
-      it('generates max signals warning when circuit breaker is exceeded', async () => {
+    describe('max alerts', () => {
+      it('generates max alerts warning when circuit breaker is exceeded', async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
@@ -628,7 +626,7 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
 
-        expect(logs[0].warnings).toEqual(expect.arrayContaining([getMaxSignalsWarning()]));
+        expect(logs[0].warnings).toEqual(expect.arrayContaining([getMaxAlertsWarning()]));
 
         const previewAlerts = await getPreviewAlerts({
           es,
@@ -639,7 +637,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(100);
       });
 
-      it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
+      it("doesn't generate max alerts warning when circuit breaker is met but not exceeded", async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
@@ -664,7 +662,7 @@ export default ({ getService }: FtrProviderContext) => {
           rule,
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
-        expect(logs[0].warnings).not.toEqual(expect.arrayContaining([getMaxSignalsWarning()]));
+        expect(logs[0].warnings).not.toEqual(expect.arrayContaining([getMaxAlertsWarning()]));
 
         const previewAlerts = await getPreviewAlerts({
           es,
@@ -675,7 +673,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(100);
       });
 
-      it('should work for max signals > 100', async () => {
+      it('should work for max alerts > 100', async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),

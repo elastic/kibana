@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Saved query type rules', () => {
+  describe('@ess @serverless Saved query type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // First test creates a real rule - remaining tests use preview API
-    it('should query and get back expected signal structure using a saved query rule', async () => {
+    it('should query and get back expected alert structure using a saved query rule', async () => {
       const rule: SavedQueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
         type: 'saved_query',
@@ -58,9 +58,9 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-      const signal = alerts.hits.hits[0]._source;
-      expect(signal).eql({
-        ...signal,
+      const alert = alerts.hits.hits[0]._source;
+      expect(alert).eql({
+        ...alert,
         [ALERT_ANCESTORS]: [
           {
             id: 'BhbXBmkBR346wHgn4PeZ',

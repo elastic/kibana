@@ -27,7 +27,7 @@ import {
   ALERT_ORIGINAL_EVENT_CATEGORY,
   ALERT_GROUP_ID,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
   deleteAllRules,
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('EQL type rules', () => {
+  describe('@ess @serverless EQL type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load(
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // First test creates a real rule - remaining tests use preview API
-    it('generates a correctly formatted signal from EQL non-sequence queries', async () => {
+    it('generates a correctly formatted alert from EQL non-sequence queries', async () => {
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
@@ -71,13 +71,13 @@ export default ({ getService }: FtrProviderContext) => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).eql(1);
-      const fullSignal = alerts.hits.hits[0]._source;
-      if (!fullSignal) {
-        return expect(fullSignal).to.be.ok();
+      const fullAlert = alerts.hits.hits[0]._source;
+      if (!fullAlert) {
+        return expect(fullAlert).to.be.ok();
       }
 
-      expect(fullSignal).eql({
-        ...fullSignal,
+      expect(fullAlert).eql({
+        ...fullAlert,
         agent: {
           ephemeral_id: '0010d67a-14f7-41da-be30-489fea735967',
           hostname: 'suricata-zeek-sensor-toronto',
@@ -145,8 +145,8 @@ export default ({ getService }: FtrProviderContext) => {
         },
         [ALERT_REASON]:
           'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
-        [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
-        [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
+        [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_WORKFLOW_TAGS]: [],
         [ALERT_DEPTH]: 1,
@@ -166,23 +166,23 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('generates up to max_signals for non-sequence EQL queries', async () => {
-      const maxSignals = 200;
+    it('generates up to max_alerts for non-sequence EQL queries', async () => {
+      const maxAlerts = 200;
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
-        max_signals: maxSignals,
+        max_signals: maxAlerts,
       };
       const { previewId } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxSignals * 2 });
-      expect(previewAlerts.length).eql(maxSignals);
+      const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxAlerts * 2 });
+      expect(previewAlerts.length).eql(maxAlerts);
     });
 
-    it('generates max signals warning when circuit breaker is hit', async () => {
+    it('generates max alerts warning when circuit breaker is hit', async () => {
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
       };
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+      expect(logs[0].warnings).contain(getMaxAlertsWarning());
     });
 
     it('uses the provided event_category_override', async () => {
@@ -194,13 +194,13 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       expect(previewAlerts.length).eql(1);
-      const fullSignal = previewAlerts[0]._source;
-      if (!fullSignal) {
-        return expect(fullSignal).to.be.ok();
+      const fullAlert = previewAlerts[0]._source;
+      if (!fullAlert) {
+        return expect(fullAlert).to.be.ok();
       }
 
-      expect(fullSignal).eql({
-        ...fullSignal,
+      expect(fullAlert).eql({
+        ...fullAlert,
         auditd: {
           data: {
             audit_enabled: '1',
@@ -236,8 +236,8 @@ export default ({ getService }: FtrProviderContext) => {
         },
         [ALERT_REASON]:
           'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
-        [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
-        [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
+        [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DEPTH]: 1,
         [ALERT_ANCESTORS]: [
@@ -284,7 +284,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(createdAtHits).to.eql(['es', 'pt', 'ua']);
     });
 
-    it('generates building block signals from EQL sequences in the expected form', async () => {
+    it('generates building block alerts from EQL sequences in the expected form', async () => {
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'sequence by host.name [anomoly where true] [any where true]', // TODO: spelling
@@ -297,13 +297,13 @@ export default ({ getService }: FtrProviderContext) => {
           get(alert._source, ALERT_ORIGINAL_EVENT_CATEGORY) === 'anomoly'
       );
       expect(buildingBlock).not.eql(undefined);
-      const fullSignal = buildingBlock?._source;
-      if (!fullSignal) {
-        return expect(fullSignal).to.be.ok();
+      const fullAlert = buildingBlock?._source;
+      if (!fullAlert) {
+        return expect(fullAlert).to.be.ok();
       }
 
-      expect(fullSignal).eql({
-        ...fullSignal,
+      expect(fullAlert).eql({
+        ...fullAlert,
         agent: {
           ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
           hostname: 'zeek-sensor-amsterdam',
@@ -409,9 +409,9 @@ export default ({ getService }: FtrProviderContext) => {
         },
         [ALERT_REASON]:
           'anomoly event with process bro, by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
-        [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
-        [ALERT_GROUP_ID]: fullSignal[ALERT_GROUP_ID],
-        [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+        [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
+        [ALERT_GROUP_ID]: fullAlert[ALERT_GROUP_ID],
+        [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_DEPTH]: 1,
         [ALERT_ANCESTORS]: [
@@ -430,7 +430,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('generates shell signals from EQL sequences in the expected form', async () => {
+    it('generates shell alerts from EQL sequences in the expected form', async () => {
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'sequence by host.name [anomoly where true] [any where true]',
@@ -512,26 +512,26 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('generates up to max_signals with an EQL rule', async () => {
-      const maxSignals = 200;
+    it('generates up to max_alerts with an EQL rule', async () => {
+      const maxAlerts = 200;
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'sequence by host.name [any where true] [any where true]',
-        max_signals: maxSignals,
+        max_signals: maxAlerts,
       };
       const { previewId } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxSignals * 5 });
-      // For EQL rules, max_signals is the maximum number of detected sequences: each sequence has a building block
-      // alert for each event in the sequence, so max_signals=200 results in 400 building blocks in addition to
+      const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxAlerts * 5 });
+      // For EQL rules, max_alerts is the maximum number of detected sequences: each sequence has a building block
+      // alert for each event in the sequence, so max_alerts=200 results in 400 building blocks in addition to
       // 200 regular alerts
-      expect(previewAlerts.length).eql(maxSignals * 3);
-      const shellSignals = previewAlerts.filter((alert) => alert._source?.[ALERT_DEPTH] === 2);
+      expect(previewAlerts.length).eql(maxAlerts * 3);
+      const shellalerts = previewAlerts.filter((alert) => alert._source?.[ALERT_DEPTH] === 2);
       const buildingBlocks = previewAlerts.filter((alert) => alert._source?.[ALERT_DEPTH] === 1);
-      expect(shellSignals.length).eql(maxSignals);
-      expect(buildingBlocks.length).eql(maxSignals * 2);
+      expect(shellalerts.length).eql(maxAlerts);
+      expect(buildingBlocks.length).eql(maxAlerts * 2);
     });
 
-    it('generates signals when an index name contains special characters to encode', async () => {
+    it('generates alerts when an index name contains special characters to encode', async () => {
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*', '<my-index-{now/d}*>']),
         query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
@@ -604,12 +604,12 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts.length).eql(1);
-        const fullSignal = previewAlerts[0]._source;
-        if (!fullSignal) {
-          return expect(fullSignal).to.be.ok();
+        const fullAlert = previewAlerts[0]._source;
+        if (!fullAlert) {
+          return expect(fullAlert).to.be.ok();
         }
-        expect(fullSignal?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(fullSignal?.host?.risk?.calculated_score_norm).to.eql(96);
+        expect(fullAlert?.host?.risk?.calculated_level).to.eql('Critical');
+        expect(fullAlert?.host?.risk?.calculated_score_norm).to.eql(96);
       });
     });
   });

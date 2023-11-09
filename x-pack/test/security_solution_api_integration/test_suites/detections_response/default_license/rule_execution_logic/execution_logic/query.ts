@@ -42,9 +42,9 @@ import {
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
 import {
   createExceptionList,
@@ -76,7 +76,7 @@ const ID = 'BhbXBmkBR346wHgn4PeZ';
 /**
  * Test coverage:
  * [x] - Happy path generating 1 alert
- * [x] - Rule type respects max signals
+ * [x] - Rule type respects max alerts
  * [x] - Alerts on alerts
  */
 
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('Query type rules', () => {
+  describe('@ess @serverless Query type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
@@ -118,37 +118,37 @@ export default ({ getService }: FtrProviderContext) => {
       expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).eql(ID);
     });
 
-    it('generates max signals warning when circuit breaker is hit', async () => {
+    it('generates max alerts warning when circuit breaker is hit', async () => {
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
       };
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+      expect(logs[0].warnings).contain(getMaxAlertsWarning());
     });
 
-    it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
+    it("doesn't generate max alerts warning when circuit breaker is met but not exceeded", async () => {
       const rule = {
         ...getRuleForAlertTesting(['auditbeat-*']),
         query: 'process.executable: "/usr/bin/sudo"',
         max_signals: 10,
       };
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).not.contain(getMaxSignalsWarning());
+      expect(logs[0].warnings).not.contain(getMaxAlertsWarning());
     });
 
     it('should abide by max_signals > 100', async () => {
-      const maxSignals = 200;
+      const maxAlerts = 200;
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
-        max_signals: maxSignals,
+        max_signals: maxAlerts,
       };
       const { previewId } = await previewRule({ supertest, rule });
       // Search for 2x max_signals to make sure we aren't making more than max_signals
-      const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxSignals * 2 });
-      expect(previewAlerts.length).equal(maxSignals);
+      const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxAlerts * 2 });
+      expect(previewAlerts.length).equal(maxAlerts);
     });
 
-    it('should have recorded the rule_id within the signal', async () => {
+    it('should have recorded the rule_id within the alert', async () => {
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
@@ -158,17 +158,17 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]._source?.[ALERT_RULE_RULE_ID]).eql(getSimpleRule().rule_id);
     });
 
-    it('should query and get back expected signal structure using a basic KQL query', async () => {
+    it('should query and get back expected alert structure using a basic KQL query', async () => {
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      const signal = previewAlerts[0]._source;
+      const alert = previewAlerts[0]._source;
 
-      expect(signal).eql({
-        ...signal,
+      expect(alert).eql({
+        ...alert,
         [ALERT_ANCESTORS]: [
           {
             id: 'BhbXBmkBR346wHgn4PeZ',
@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should query and get back expected signal structure when it is a signal on a signal', async () => {
+    it('should query and get back expected alert structure when it is a alert on a alert', async () => {
       const alertId = '30a75fe46d3dbdfab55982036f77a8d60e2d1112e96f277c3b8c22f9bb57817a';
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
@@ -202,14 +202,14 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(previewAlerts.length).to.eql(1);
 
-      const signal = previewAlerts[0]._source;
+      const alert = previewAlerts[0]._source;
 
-      if (!signal) {
-        return expect(signal).to.be.ok();
+      if (!alert) {
+        return expect(alert).to.be.ok();
       }
 
-      expect(signal).eql({
-        ...signal,
+      expect(alert).eql({
+        ...alert,
         [ALERT_ANCESTORS]: [
           {
             id: 'ahEToH8BK09aFtXZFVMq',
@@ -273,7 +273,7 @@ export default ({ getService }: FtrProviderContext) => {
     /**
      * Here we test the functionality of Severity and Risk Score overrides (also called "mappings"
      * in the code). If the rule specifies a mapping, then the final Severity or Risk Score
-     * value of the signal will be taken from the mapped field of the source event.
+     * value of the alert will be taken from the mapped field of the source event.
      */
     it('should get default severity and risk score if there is no mapping', async () => {
       const rule: QueryRuleCreateProps = {
@@ -409,7 +409,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should generate signals with name_override field', async () => {
+    it('should generate alerts with name_override field', async () => {
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
         query: `event.action:boot`,
@@ -418,15 +418,15 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      const fullSignal = previewAlerts[0];
-      if (!fullSignal) {
-        return expect(fullSignal).to.be.ok();
+      const fullAlert = previewAlerts[0];
+      if (!fullAlert) {
+        return expect(fullAlert).to.be.ok();
       }
 
       expect(previewAlerts[0]._source?.['kibana.alert.rule.name']).to.eql('boot');
     });
 
-    it('should not generate duplicate signals', async () => {
+    it('should not generate duplicate alerts', async () => {
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
@@ -859,7 +859,7 @@ export default ({ getService }: FtrProviderContext) => {
           // for suppression purposes.
           const alertIds = alerts.hits.hits.map((alert) => alert._id);
           await supertest
-            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .post(DETECTION_ENGINE_ALERTS_STATUS_URL)
             .set('kbn-xsrf', 'true')
             .send(setAlertStatus({ alertIds, status: 'closed' }))
             .expect(200);

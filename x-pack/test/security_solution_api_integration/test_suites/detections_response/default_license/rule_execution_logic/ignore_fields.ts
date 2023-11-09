@@ -7,16 +7,15 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createRule,
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForSignalTesting,
-  getSignalsById,
+  getEqlRuleForAlertTesting,
+  getAlertsById,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
+  waitForAlertsToBePresent,
 } from '../../utils';
 
 interface Ignore {
@@ -26,7 +25,7 @@ interface Ignore {
   testing_regex?: string;
 }
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext): void => {
   /**
    * See the config file (detection_engine_api_integration/common/config.ts) for which field values were added to be ignored
@@ -47,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_ignored.ts
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_eql_bug_77152.ts
    */
-  describe('ignore_fields', () => {
+  describe('@ess @serverless ignore_fields', () => {
     const supertest = getService('supertest');
     const esArchiver = getService('esArchiver');
     const log = getService('log');
@@ -62,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     afterEach(async () => {
@@ -71,13 +70,13 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should ignore the field of "testing_ignored"', async () => {
-      const rule = getEqlRuleForSignalTesting(['ignore_fields']);
+      const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccess({ supertest, log, id });
-      await waitForSignalsToBePresent(supertest, log, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, log, id);
-      const hits = signalsOpen.hits.hits
+      await waitForAlertsToBePresent(supertest, log, 4, [id]);
+      const alertsOpen = await getAlertsById(supertest, log, id);
+      const hits = alertsOpen.hits.hits
         .map((hit) => (hit._source as Ignore).testing_ignored)
         .sort();
 
@@ -86,26 +85,26 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should ignore the field of "testing_regex"', async () => {
-      const rule = getEqlRuleForSignalTesting(['ignore_fields']);
+      const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccess({ supertest, log, id });
-      await waitForSignalsToBePresent(supertest, log, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, log, id);
-      const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).testing_regex).sort();
+      await waitForAlertsToBePresent(supertest, log, 4, [id]);
+      const alertsOpen = await getAlertsById(supertest, log, id);
+      const hits = alertsOpen.hits.hits.map((hit) => (hit._source as Ignore).testing_regex).sort();
 
       // Value should be "undefined for all records"
       expect(hits).to.eql([undefined, undefined, undefined, undefined]);
     });
 
     it('should have the field of "normal_constant"', async () => {
-      const rule = getEqlRuleForSignalTesting(['ignore_fields']);
+      const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccess({ supertest, log, id });
-      await waitForSignalsToBePresent(supertest, log, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, log, id);
-      const hits = signalsOpen.hits.hits
+      await waitForAlertsToBePresent(supertest, log, 4, [id]);
+      const alertsOpen = await getAlertsById(supertest, log, id);
+      const hits = alertsOpen.hits.hits
         .map((hit) => (hit._source as Ignore).normal_constant)
         .sort();
 
@@ -115,13 +114,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     // TODO: Remove this test once https://github.com/elastic/elasticsearch/issues/77152 is fixed
     it('should ignore the field of "_ignored" when using EQL and index the data', async () => {
-      const rule = getEqlRuleForSignalTesting(['ignore_fields']);
+      const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccess({ supertest, log, id });
-      await waitForSignalsToBePresent(supertest, log, 4, [id]);
-      const signalsOpen = await getSignalsById(supertest, log, id);
-      const hits = signalsOpen.hits.hits.map((hit) => (hit._source as Ignore).small_field).sort();
+      await waitForAlertsToBePresent(supertest, log, 4, [id]);
+      const alertsOpen = await getAlertsById(supertest, log, id);
+      const hits = alertsOpen.hits.hits.map((hit) => (hit._source as Ignore).small_field).sort();
 
       // We just test a constant value to ensure this did not blow up on us and did index data.
       expect(hits).to.eql([
