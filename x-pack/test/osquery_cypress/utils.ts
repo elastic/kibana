@@ -8,19 +8,13 @@
 import axios from 'axios';
 import semver from 'semver';
 import { map } from 'lodash';
-import {
-  PackagePolicy,
-  CreatePackagePolicyResponse,
-  API_VERSIONS,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
+import { PackagePolicy, CreatePackagePolicyResponse, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/test';
 import {
   GetEnrollmentAPIKeysResponse,
   CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import { ToolingLog } from '@kbn/tooling-log';
-import { fetchAgentPolicyList } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',
@@ -52,33 +46,19 @@ export const createAgentPolicy = async (
     data: {
       item: { id: agentPolicyId },
     },
-  } = await fetchAgentPolicyList(kbnClient, {
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${agentPolicyName}"`,
-  }).then((response) => {
-    if (response.items[0]) {
-      log.debug(`Policy with name [${agentPolicyName}] already exists. Re-using it`);
-
-      return {
-        data: {
-          item: response.items[0],
-        },
-      };
-    }
-
-    return kbnClient.request<CreateAgentPolicyResponse>({
-      method: 'POST',
-      path: `/api/fleet/agent_policies?sys_monitoring=true`,
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
-      body: {
-        name: agentPolicyName,
-        description: '',
-        namespace: 'default',
-        monitoring_enabled: ['logs', 'metrics'],
-        inactivity_timeout: 1209600,
-      },
-    });
+  } = await kbnClient.request<CreateAgentPolicyResponse>({
+    method: 'POST',
+    path: `/api/fleet/agent_policies?sys_monitoring=true`,
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
+    body: {
+      name: agentPolicyName,
+      description: '',
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      inactivity_timeout: 1209600,
+    },
   });
 
   log.info(`Adding integration to ${agentPolicyId}`);
