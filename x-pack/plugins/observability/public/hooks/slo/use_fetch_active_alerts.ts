@@ -12,6 +12,7 @@ import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { SLO_LONG_REFETCH_INTERVAL } from '../../constants';
 
 type SLO = Pick<SLOResponse, 'id' | 'instanceId'>;
 
@@ -71,7 +72,6 @@ interface FindApiResponse {
   };
 }
 
-const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 const EMPTY_ACTIVE_ALERTS_MAP = new ActiveAlerts();
 
 export function useFetchActiveAlerts({
@@ -141,7 +141,7 @@ export function useFetchActiveAlerts({
       }
     },
     refetchOnWindowFocus: false,
-    refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
+    refetchInterval: shouldRefetch ? SLO_LONG_REFETCH_INTERVAL : undefined,
     enabled: Boolean(sloIdsAndInstanceIds.length),
   });
 

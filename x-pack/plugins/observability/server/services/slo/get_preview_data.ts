@@ -28,8 +28,11 @@ import {
 } from './aggregations';
 
 interface Options {
-  fromRange: 'now-1h' | 'now-24h';
-  interval: '1m' | '10m';
+  range: {
+    start: number;
+    end: number;
+  };
+  interval: string;
 }
 export class GetPreviewData {
   constructor(private esClient: ElasticsearchClient) {}
@@ -66,7 +69,7 @@ export class GetPreviewData {
       query: {
         bool: {
           filter: [
-            { range: { '@timestamp': { gte: options.fromRange } } },
+            { range: { '@timestamp': { gte: options.range.start, lte: options.range.end } } },
             { terms: { 'processor.event': ['metric'] } },
             { term: { 'metricset.name': 'transaction' } },
             { exists: { field: 'transaction.duration.histogram' } },
@@ -148,7 +151,7 @@ export class GetPreviewData {
       query: {
         bool: {
           filter: [
-            { range: { '@timestamp': { gte: options.fromRange } } },
+            { range: { '@timestamp': { gte: options.range.start, lte: options.range.end } } },
             { term: { 'metricset.name': 'transaction' } },
             { terms: { 'event.outcome': ['success', 'failure'] } },
             ...filter,
@@ -210,7 +213,10 @@ export class GetPreviewData {
       size: 0,
       query: {
         bool: {
-          filter: [{ range: { [timestampField]: { gte: options.fromRange } } }, filterQuery],
+          filter: [
+            { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
+            filterQuery,
+          ],
         },
       },
       aggs: {
@@ -258,7 +264,10 @@ export class GetPreviewData {
       size: 0,
       query: {
         bool: {
-          filter: [{ range: { [timestampField]: { gte: options.fromRange } } }, filterQuery],
+          filter: [
+            { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
+            filterQuery,
+          ],
         },
       },
       aggs: {
@@ -308,7 +317,10 @@ export class GetPreviewData {
       size: 0,
       query: {
         bool: {
-          filter: [{ range: { [timestampField]: { gte: options.fromRange } } }, filterQuery],
+          filter: [
+            { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
+            filterQuery,
+          ],
         },
       },
       aggs: {
@@ -344,7 +356,10 @@ export class GetPreviewData {
       size: 0,
       query: {
         bool: {
-          filter: [{ range: { [timestampField]: { gte: options.fromRange } } }, filterQuery],
+          filter: [
+            { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
+            filterQuery,
+          ],
         },
       },
       aggs: {
@@ -378,10 +393,11 @@ export class GetPreviewData {
 
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
     try {
-      const options: Options =
-        params.range === 'hour'
-          ? { fromRange: 'now-1h', interval: '1m' }
-          : { fromRange: 'now-24h', interval: '10m' };
+      const options: Options = {
+        range: params.range,
+        interval: '10m', // use calculateAuto
+      };
+
       const type = params.indicator.type;
       switch (type) {
         case 'sli.apm.transactionDuration':

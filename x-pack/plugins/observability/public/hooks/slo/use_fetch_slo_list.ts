@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { SLO_LONG_REFETCH_INTERVAL, SLO_SHORT_REFETCH_INTERVAL } from '../../constants';
 
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
@@ -30,9 +31,6 @@ export interface UseFetchSloListResponse {
   data: FindSLOResponse | undefined;
 }
 
-const SHORT_REFETCH_INTERVAL = 1000 * 5; // 5 seconds
-const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
-
 export function useFetchSloList({
   kqlQuery = '',
   page = 1,
@@ -45,7 +43,9 @@ export function useFetchSloList({
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
-  const [stateRefetchInterval, setStateRefetchInterval] = useState<number>(SHORT_REFETCH_INTERVAL);
+  const [stateRefetchInterval, setStateRefetchInterval] = useState<number>(
+    SLO_SHORT_REFETCH_INTERVAL
+  );
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: sloKeys.list({ kqlQuery, page, sortBy, sortDirection }),
@@ -81,9 +81,9 @@ export function useFetchSloList({
       }
 
       if (results.find((slo) => slo.summary.status === 'NO_DATA' || !slo.summary)) {
-        setStateRefetchInterval(SHORT_REFETCH_INTERVAL);
+        setStateRefetchInterval(SLO_SHORT_REFETCH_INTERVAL);
       } else {
-        setStateRefetchInterval(LONG_REFETCH_INTERVAL);
+        setStateRefetchInterval(SLO_LONG_REFETCH_INTERVAL);
       }
     },
     onError: (error: Error) => {
