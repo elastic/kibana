@@ -9,7 +9,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { AGENTS_INDEX } from '../../constants';
+import type { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
+import { appContextService } from '../app_context';
 
 import { auditLoggingService } from '../audit_logging';
 
@@ -41,6 +43,9 @@ describe('Agents CRUD test', () => {
       openPointInTime: jest.fn().mockResolvedValue({ id: '1' }),
       closePointInTime: jest.fn(),
     } as unknown as ElasticsearchClient;
+
+    let mockContract: ReturnType<typeof createAppContextStartContractMock>;
+    appContextService.start(mockContract);
   });
 
   function getEsResponse(ids: string[], total: number) {
