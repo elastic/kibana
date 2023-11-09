@@ -126,6 +126,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
     services.mlServices.mlCapabilities.capabilities$,
     services.mlServices.mlCapabilities.getCapabilities()
   );
+  const chromeStyle = useObservable(services.chrome.getChromeStyle$(), 'classic');
 
   if (!licenseReady || !mlCapabilities) return null;
 
@@ -146,7 +147,11 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
           <KibanaContextProvider services={services}>
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+                <EnabledFeaturesContextProvider
+                  isServerless={isServerless}
+                  mlFeatures={mlFeatures}
+                  chromeStyle={chromeStyle}
+                >
                   <MlRouter pageDeps={pageDeps} />
                 </EnabledFeaturesContextProvider>
               </DatePickerContextProvider>

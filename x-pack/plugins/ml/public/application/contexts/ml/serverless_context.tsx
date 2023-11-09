@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 import React, { createContext, FC, useContext, useMemo } from 'react';
 import type { MlFeatures } from '../../../../common/constants/app';
 
@@ -18,8 +19,7 @@ export interface EnabledFeatures {
 }
 export const EnabledFeaturesContext = createContext({
   showNodeInfo: true,
-  // showMLNavMenu: true,
-  showMLNavMenu: false,
+  showMLNavMenu: true,
   showLicenseInfo: true,
   isADEnabled: true,
   isDFAEnabled: true,
@@ -29,17 +29,18 @@ export const EnabledFeaturesContext = createContext({
 interface Props {
   isServerless: boolean;
   mlFeatures: MlFeatures;
+  chromeStyle: ChromeStyle;
 }
 
 export const EnabledFeaturesContextProvider: FC<Props> = ({
   children,
   isServerless,
+  chromeStyle,
   mlFeatures,
 }) => {
   const features: EnabledFeatures = {
     showNodeInfo: !isServerless,
-    // showMLNavMenu: !isServerless,
-    showMLNavMenu: false,
+    showMLNavMenu: isServerless ? false : chromeStyle === 'classic',
     showLicenseInfo: !isServerless,
     isADEnabled: mlFeatures.ad,
     isDFAEnabled: mlFeatures.dfa,

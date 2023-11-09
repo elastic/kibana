@@ -18,6 +18,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -72,6 +73,7 @@ export const JobsListPage: FC<Props> = ({
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
+  const chromeStyle = useObservable(coreStart.chrome.getChromeStyle$(), 'classic');
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
 
@@ -140,7 +142,11 @@ export const JobsListPage: FC<Props> = ({
             }}
           >
             <ContextWrapper feature={PLUGIN_ID}>
-              <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+              <EnabledFeaturesContextProvider
+                isServerless={isServerless}
+                mlFeatures={mlFeatures}
+                chromeStyle={chromeStyle}
+              >
                 <Router history={history}>
                   <EuiPageTemplate.Header
                     pageTitle={
