@@ -53,6 +53,7 @@ x-pack/plugins/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
 examples/bfetch_explorer @elastic/appex-sharedux
 src/plugins/bfetch @elastic/appex-sharedux
+packages/kbn-calculate-auto @elastic/obs-ux-management-team
 x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
