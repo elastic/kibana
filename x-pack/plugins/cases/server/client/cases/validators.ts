@@ -8,7 +8,6 @@
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import {} from '../../../common/types/domain';
 import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../common/types/api';
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
 import type { ICasesCustomField } from '../../custom_fields';

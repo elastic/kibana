@@ -559,7 +559,7 @@ describe('validators', () => {
     it('throws error when custom fields reach maximum', () => {
       let customFieldsMax = {};
 
-      for (let i = 0; i < MAX_CUSTOM_FIELDS_PER_CASE + 2; i++) {
+      for (let i = 0; i <= MAX_CUSTOM_FIELDS_PER_CASE + 1; i++) {
         customFieldsMax = { ...customFieldsMax, [`test_key_${i}`]: [true] };
       }
 

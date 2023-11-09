@@ -481,7 +481,9 @@ describe('CasesSearchRequestRt', () => {
     owner: 'cases',
     customFields: {
       toggle_custom_field_key: [true],
-      another_custom_field: [false],
+      another_custom_field: [null],
+      text_custom_field: ['hello'],
+      number_custom_field: [1234]
     },
   };
 
@@ -500,60 +502,6 @@ describe('CasesSearchRequestRt', () => {
     expect(query).toStrictEqual({
       _tag: 'Right',
       right: { ...defaultRequest, page: 1, perPage: 10 },
-    });
-  });
-
-  describe('errors', () => {
-    it('throws error when invalid searchField passed', () => {
-      expect(
-        PathReporter.report(
-          CasesFindRequestRt.decode({ ...defaultRequest, searchFields: 'foobar' })
-        )
-      ).not.toContain('No errors!');
-    });
-
-    it('throws error when invalid sortField passed', () => {
-      expect(
-        PathReporter.report(CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'foobar' }))
-      ).not.toContain('No errors!');
-    });
-
-    it('succeeds when valid parameters passed', () => {
-      expect(PathReporter.report(CasesFindRequestRt.decode(defaultRequest))).toContain(
-        'No errors!'
-      );
-    });
-
-    it(`throws an error when the category array has ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
-      const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
-
-      expect(PathReporter.report(CasesFindRequestRt.decode({ category }))).toContain(
-        'The length of the field category is too long. Array must be of length <= 100.'
-      );
-    });
-
-    it(`throws an error when the tags array has ${MAX_TAGS_FILTER_LENGTH} items`, async () => {
-      const tags = Array(MAX_TAGS_FILTER_LENGTH + 1).fill('foobar');
-
-      expect(PathReporter.report(CasesFindRequestRt.decode({ tags }))).toContain(
-        'The length of the field tags is too long. Array must be of length <= 100.'
-      );
-    });
-
-    it(`throws an error when the assignees array has ${MAX_ASSIGNEES_FILTER_LENGTH} items`, async () => {
-      const assignees = Array(MAX_ASSIGNEES_FILTER_LENGTH + 1).fill('foobar');
-
-      expect(PathReporter.report(CasesFindRequestRt.decode({ assignees }))).toContain(
-        'The length of the field assignees is too long. Array must be of length <= 100.'
-      );
-    });
-
-    it(`throws an error when the reporters array has ${MAX_REPORTERS_FILTER_LENGTH} items`, async () => {
-      const reporters = Array(MAX_REPORTERS_FILTER_LENGTH + 1).fill('foobar');
-
-      expect(PathReporter.report(CasesFindRequestRt.decode({ reporters }))).toContain(
-        'The length of the field reporters is too long. Array must be of length <= 100.'
-      );
     });
   });
 });
