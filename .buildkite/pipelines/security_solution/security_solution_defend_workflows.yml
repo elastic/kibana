@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       queue: n2-4-virt

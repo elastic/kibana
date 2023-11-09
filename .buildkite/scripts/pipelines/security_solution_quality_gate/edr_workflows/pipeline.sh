@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-echo "Running the EDR-Workflows testing for Kibana"
+ts-node .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/pipeline.ts
