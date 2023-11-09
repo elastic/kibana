@@ -113,7 +113,8 @@ describe('validate', () => {
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
       const expected: BulkError = {
         error: {
-          message: 'Invalid input',
+          message:
+            'name: Required, type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", name: Required, name: Required, and 22 more',
           status_code: 500,
         },
         rule_id: 'rule-1',
