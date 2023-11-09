@@ -40,6 +40,12 @@ else
 fi
 export MERGE_QUEUE_TARGET_BRANCH
 
+# Exports BUILDKITE_BRANCH_MERGE_QUEUE which will use the value from MERGE_QUEUE_TARGET_BRANCH if defined otherwise
+# will fallback to BUILDKITE_BRANCH.
+BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-$BUILDKITE_BRANCH}"
+export BUILDKITE_BRANCH_MERGE_QUEUE
+
+
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
