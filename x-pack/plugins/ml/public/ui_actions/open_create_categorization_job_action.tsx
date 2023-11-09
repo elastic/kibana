@@ -30,7 +30,7 @@ export function createCategorizationADJobAction(
       return 'machineLearningApp';
     },
     getDisplayName: () =>
-      i18n.translate('xpack.ml.actions.createADJobFromLens', {
+      i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
         defaultMessage: 'Create categorization anomaly detection job',
       }),
     async execute({ dataView, field, query, timeRange }: CreateCategorizationADJobContext) {

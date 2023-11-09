@@ -69,7 +69,7 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.ml.embeddables.lensLayerFlyout.title"
+              id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.title"
               defaultMessage="Create anomaly detection job"
             />
           </h3>
@@ -77,7 +77,7 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
         <EuiSpacer size="m" />
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
+            id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.secondTitle"
             defaultMessage="Create a categorization job for {field}"
             values={{ field: field.name }}
           />
@@ -94,7 +94,7 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.ml.embeddables.lensLayerFlyout.closeButton"
+                id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>

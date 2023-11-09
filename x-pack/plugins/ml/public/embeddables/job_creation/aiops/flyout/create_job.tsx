@@ -181,13 +181,16 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
               <>
                 <EuiTitle size="xs">
                   <h5>
-                    <FormattedMessage defaultMessage="Count" id="xpack.ml.newJob.changeMe" />
+                    <FormattedMessage
+                      defaultMessage="Count"
+                      id="xpack.ml.newJobFromPatternAnalysisFlyout.count.title"
+                    />
                   </h5>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <FormattedMessage
                   defaultMessage="Look for anomalies in the event rate of a category."
-                  id="xpack.ml.newJob.changeMe"
+                  id="xpack.ml.newJobFromPatternAnalysisFlyout.count.description"
                 />
               </>
             }
@@ -203,13 +206,16 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
               <>
                 <EuiTitle size="xs">
                   <h5>
-                    <FormattedMessage defaultMessage="Rare" id="xpack.ml.newJob.changeMe" />
+                    <FormattedMessage
+                      defaultMessage="Rare"
+                      id="xpack.ml.newJobFromPatternAnalysisFlyout.rare.title"
+                    />
                   </h5>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <FormattedMessage
                   defaultMessage="Look for categories that occur rarely in time."
-                  id="xpack.ml.newJob.changeMe"
+                  id="xpack.ml.newJobFromPatternAnalysisFlyout.rare.description"
                 />
               </>
             }
@@ -225,7 +231,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
             data-test-subj="mlJobWizardSwitchCategorizationPerPartition"
             label={
               <FormattedMessage
-                id="xpack.ml.newJob.wizard.perPartitionCategorizationSwitchLabel"
+                id="xpack.ml.newJobFromPatternAnalysisFlyout.perPartitionCategorizationSwitchLabel"
                 defaultMessage="Enable per-partition categorization"
               />
             }
@@ -245,7 +251,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.ml.newJob.wizard.extraStep.categorizationJob.categorizationPerPartitionFieldLabel"
+                    id="xpack.ml.newJobFromPatternAnalysisFlyout.categorizationPerPartitionFieldLabel"
                     defaultMessage="Partition field"
                   />
                 }
@@ -256,7 +262,6 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
                   selectedOptions={selectedPartitionFieldOptions}
                   onChange={setSelectedPartitionFieldOptions}
                   isClearable={true}
-                  data-test-subj="mlJobWizardCategorizationPerPartitionFieldNameSelect"
                   // renderOption={renderOption}
                 />
               </EuiFormRow>
@@ -268,10 +273,9 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
                 disabled={false}
                 checked={stopOnWarn}
                 onChange={toggleStopOnWarn}
-                data-test-subj="mlJobWizardSwitchCategorizationPerPartition"
                 label={
                   <FormattedMessage
-                    id="xpack.ml.newJob.wizard.perPartitionCategorizationSwitchLabel"
+                    id="xpack.ml.newJobFromPatternAnalysisFlyout.stopOnWarnSwitchLabel"
                     defaultMessage="Stop on warn"
                   />
                 }
