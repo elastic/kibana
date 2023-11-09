@@ -76,7 +76,7 @@ const renderDescription = (objectType: string) => {
 };
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
-  const { apiClient, jobProviderOptions, intl, toasts, theme, onClose } = props;
+  const { apiClient, jobProviderOptions, intl, toasts, theme, onClose, objectId } = props;
   const [, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [selectedRadio, setSelectedRadio] = useState<string>('printablePdfV2');
@@ -265,23 +265,9 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   //   }
   //   return null;
   // };
-
-  return (
-    <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-      <EuiSpacer size="xs" />
-      <EuiFormRow>
-        <EuiText size="s">{renderDescription(objectType)}</EuiText>
-      </EuiFormRow>
-      <EuiSpacer size="xs" />
-      <EuiRadioGroup
-        options={[
-          { id: 'printablePdfV2', label: 'PDF' },
-          { id: 'pngV2', label: 'PNG' },
-        ]}
-        onChange={(id) => setSelectedRadio(id)}
-        name="image reporting radio group"
-        idSelected={selectedRadio}
-      />
+console.log({objectId})
+  const saveWarningMessageWithButton =
+    objectId === undefined || objectId === '' ? (
       <EuiFormRow
         helpText={
           <FormattedMessage
@@ -300,10 +286,43 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         >
           <FormattedMessage
             id="xpack.reporting.generateButtonLabel"
-            defaultMessage="Generate Report"
+            defaultMessage="Generate Export"
           />
         </EuiButton>
       </EuiFormRow>
+    ) : (
+      <EuiButton
+        disabled={Boolean(createReportingJob)}
+        fill
+        onClick={() => generateReportingJob()}
+        data-test-subj="generateReportButton"
+        size="s"
+        isLoading={Boolean(createReportingJob)}
+      >
+        <FormattedMessage
+          id="xpack.reporting.generateButtonLabel"
+          defaultMessage="Generate Export"
+        />
+      </EuiButton>
+    );
+
+  return (
+    <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
+      <EuiSpacer size="xs" />
+      <EuiFormRow>
+        <EuiText size="s">{renderDescription(objectType)}</EuiText>
+      </EuiFormRow>
+      <EuiSpacer size="xs" />
+      <EuiRadioGroup
+        options={[
+          { id: 'printablePdfV2', label: 'PDF' },
+          { id: 'pngV2', label: 'PNG' },
+        ]}
+        onChange={(id) => setSelectedRadio(id)}
+        name="image reporting radio group"
+        idSelected={selectedRadio}
+      />
+      {saveWarningMessageWithButton}
     </EuiForm>
   );
 };

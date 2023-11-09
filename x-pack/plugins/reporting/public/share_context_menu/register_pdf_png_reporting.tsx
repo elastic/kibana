@@ -82,7 +82,7 @@ export const reportingScreenshotShareProvider = ({
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
     const reportingModalTitle = i18n.translate('xpack.reporting.shareContextModal.buttonLabel', {
-      defaultMessage: 'Reports',
+      defaultMessage: 'Exports',
     });
 
     const reportingModal = {
@@ -90,7 +90,7 @@ export const reportingScreenshotShareProvider = ({
         name: reportingModalTitle,
         toolTipContent: licenseToolTipContent,
         disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'Reports',
+        ['data-test-subj']: 'Exports',
         sortOrder: 10,
       },
       panel: {
@@ -117,7 +117,7 @@ export const reportingScreenshotShareProvider = ({
   };
 
   return {
-    id: 'screenCaptureReports',
+    id: 'screenCaptureExports',
     getShareMenuItems,
   };
 };

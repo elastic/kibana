@@ -26,7 +26,7 @@ export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPagePro
     <EuiFormRow
       helpText={
         <FormattedMessage
-          id="plugins.share.linkModalPage.saveWorkDescription"
+          id="share.linkModalPage.saveWorkDescription"
           defaultMessage="One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard."
         />
       }
