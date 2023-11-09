@@ -20,14 +20,14 @@ import type {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
-import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
-import type { TaskRunResult } from '@kbn/reporting-common/types';
 import {
   AuthenticationExpiredError,
   CancellationToken,
   ReportingError,
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
+import type { ReportingConfigType, TaskRunResult } from '@kbn/reporting-common/types';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 
 import { CONTENT_TYPE_CSV } from './constants';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
@@ -51,8 +51,8 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: Omit<JobParams, 'version'>,
-    private config: CsvConfig,
+    private job: Omit<JobParamsCSV, 'version'>,
+    private config: ReportingConfigType['csv'],
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,

@@ -4552,10 +4552,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-csv-types@link:packages/kbn-generate-csv-types":
-  version "0.0.0"
-  uid ""
-
 "@kbn/generate-csv@link:packages/kbn-generate-csv":
   version "0.0.0"
   uid ""

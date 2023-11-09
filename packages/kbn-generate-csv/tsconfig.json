@@ -23,7 +23,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/config-schema",
     "@kbn/i18n",
-    "@kbn/generate-csv-types",
     "@kbn/reporting-common",
   ]
 }
