@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { AGENTS_INDEX } from '../../constants';
-import type { createAppContextStartContractMock } from '../../mocks';
+import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
 
@@ -32,6 +32,7 @@ const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof audi
 
 describe('Agents CRUD test', () => {
   const soClientMock = savedObjectsClientMock.create();
+  let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let esClientMock: ElasticsearchClient;
   let searchMock: jest.Mock;
 
@@ -44,7 +45,7 @@ describe('Agents CRUD test', () => {
       closePointInTime: jest.fn(),
     } as unknown as ElasticsearchClient;
 
-    let mockContract: ReturnType<typeof createAppContextStartContractMock>;
+    mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
   });
 
