@@ -46,6 +46,8 @@
     "@kbn/core-http-common",
     "@kbn/react-kibana-context-theme",
     "@kbn/reporting-server",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-csv-common",
   ],
   "exclude": [
     "target/**/*",

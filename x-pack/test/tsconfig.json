@@ -145,9 +145,9 @@
     "@kbn/ecs",
     "@kbn/coloring",
     "@kbn/es",
-    "@kbn/reporting-export-types-deprecated",
-    "@kbn/reporting-export-types-csv",
-    "@kbn/reporting-server",
     "@kbn/metrics-data-access-plugin",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-png-common",
   ]
 }

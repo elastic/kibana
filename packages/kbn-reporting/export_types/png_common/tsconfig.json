@@ -15,5 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/screenshotting-plugin",
+    "@kbn/reporting-common",
   ]
 }

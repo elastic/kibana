@@ -28,11 +28,11 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-server",
     "@kbn/core-ui-settings-server",
-    "@kbn/data-plugin",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-router-server-internal",
     "@kbn/core-http-request-handler-context-server",
+    "@kbn/reporting-export-types-pdf-common",
   ]
 }
