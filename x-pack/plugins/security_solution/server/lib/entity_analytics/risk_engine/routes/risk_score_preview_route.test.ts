@@ -7,13 +7,13 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { RISK_SCORE_PREVIEW_URL } from '../../../../common/constants';
-import { RiskCategories, RiskWeightTypes } from '../../../../common/risk_engine';
+import { RISK_SCORE_PREVIEW_URL } from '../../../../../common/constants';
+import { RiskCategories, RiskWeightTypes } from '../../../../../common/risk_engine';
 import {
   serverMock,
   requestContextMock,
   requestMock,
-} from '../../detection_engine/routes/__mocks__';
+} from '../../../detection_engine/routes/__mocks__';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';

@@ -13,10 +13,10 @@ import {
   APP_ID,
   DEFAULT_RISK_SCORE_PAGE_SIZE,
   RISK_SCORE_PREVIEW_URL,
-} from '../../../../common/constants';
-import { riskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
-import type { SecuritySolutionPluginRouter } from '../../../types';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+} from '../../../../../common/constants';
+import { riskScorePreviewRequestSchema } from '../../../../../common/risk_engine/risk_score_preview/request_schema';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 

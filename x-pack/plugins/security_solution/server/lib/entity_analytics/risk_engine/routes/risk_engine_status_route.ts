@@ -7,9 +7,9 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../common/constants';
+import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../../common/constants';
 
-import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

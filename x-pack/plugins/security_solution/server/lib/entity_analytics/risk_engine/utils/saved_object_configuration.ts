@@ -6,7 +6,7 @@
  */
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { getAlertsIndex } from '../../../../common/utils/risk_score_modules';
+import { getAlertsIndex } from '../../../../../common/utils/risk_score_modules';
 import type { RiskEngineConfiguration } from '../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
 
