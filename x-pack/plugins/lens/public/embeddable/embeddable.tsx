@@ -97,7 +97,7 @@ import {
   GetCompatibleCellValueActions,
   UserMessage,
   IndexPatternRef,
-  FrameDatasourceAPI,
+  FramePublicAPI,
   AddUserMessages,
   isMessageRemovable,
   UserMessagesGetter,
@@ -608,11 +608,14 @@ export class Embeddable
     userMessages.push(
       ...getApplicationUserMessages({
         visualizationType: this.savedVis?.visualizationType,
-        visualization: {
+        visualizationState: {
           state: this.activeVisualizationState,
           activeId: this.activeVisualizationId,
         },
-        visualizationMap: this.deps.visualizationMap,
+        visualization:
+          this.activeVisualizationId && this.deps.visualizationMap[this.activeVisualizationId]
+            ? this.deps.visualizationMap[this.activeVisualizationId]
+            : undefined,
         activeDatasource: this.activeDatasource,
         activeDatasourceState: {
           isLoading: !this.activeDatasourceState,
@@ -631,7 +634,7 @@ export class Embeddable
     }
     const mergedSearchContext = this.getMergedSearchContext();
 
-    const frameDatasourceAPI: FrameDatasourceAPI = {
+    const framePublicAPI: FramePublicAPI = {
       dataViews: {
         indexPatterns: this.indexPatterns,
         indexPatternRefs: this.indexPatternRefs,
@@ -658,14 +661,14 @@ export class Embeddable
     userMessages.push(
       ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
         setState: () => {},
-        frame: frameDatasourceAPI,
+        frame: framePublicAPI,
         visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
           this.activeVisualizationState,
-          frameDatasourceAPI
+          framePublicAPI
         ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
-        frame: frameDatasourceAPI,
+        frame: framePublicAPI,
       }) ?? [])
     );
 
