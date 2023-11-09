@@ -7,59 +7,16 @@
  */
 
 import { Writable } from 'stream';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type {
+  BaseParams,
+  BaseParamsV2,
+  BasePayload,
+  BasePayloadV2,
+  TaskRunResult,
+} from '@kbn/reporting-common/types';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { LocatorParams, ConfigSchema, CancellationToken } from '@kbn/reporting-common';
-import type { Ensure, SerializableRecord } from '@kbn/utility-types';
-import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { TypeOf } from '@kbn/config-schema';
-import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
-
-/**
- * @deprecated
- */
-export type BaseParams = Ensure<
-  {
-    layout?: LayoutParams;
-    objectType: string;
-    title: string;
-    browserTimezone: string; // to format dates in the user's time zone
-    version: string; // to handle any state migrations
-  },
-  SerializableRecord
->;
-
-/**
- * Report job parameters that an application must return from its
- * getSharingData function.
- */
-export type BaseParamsV2 = BaseParams & {
-  locatorParams: LocatorParams[];
-};
-
-/**
- * @deprecated
- */
-export interface BasePayload extends BaseParams {
-  headers: string;
-  spaceId?: string;
-  isDeprecated?: boolean;
-}
-
-export type JobId = string;
-
-/**
- * Report job parameters, after they are processed in the request handler.
- */
-export interface BasePayloadV2 extends BaseParamsV2 {
-  headers: string;
-  spaceId?: string;
-  isDeprecated?: boolean;
-}
-
-// ExportType dependency types
-export type ReportingConfigType = TypeOf<typeof ConfigSchema>;
+import type { LocatorParams, CancellationToken } from '@kbn/reporting-common';
 
 /**
  * @internal
@@ -106,21 +63,25 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
 export interface JobParamsDownloadCSV {
   browserTimezone: string;
   title: string;
-  searchSource: SerializedSearchSourceFields;
+  searchSource: unknown;
   columns?: string[];
+}
+
+interface Layout {
+  id?: 'preserve_layout' | 'print' | 'canvas';
 }
 
 /**
  * Structure of stored job data provided by create_job
  */
 export interface TaskPayloadPDF extends BasePayload {
-  layout: LayoutParams;
+  layout: Layout;
   forceNow?: string;
   objects: Array<{ relativeUrl: string }>;
 }
 
 interface BaseParamsPNG {
-  layout: LayoutParams;
+  layout: Layout;
   forceNow?: string;
   relativeUrl: string;
 }
@@ -135,7 +96,7 @@ export type JobParamsPNGDeprecated = BaseParamsPNG & BaseParams;
 export type TaskPayloadPNG = BaseParamsPNG & BasePayload;
 
 interface BaseParamsPDFV2 {
-  layout: LayoutParams;
+  layout: Layout;
 
   /**
    * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
@@ -150,14 +111,14 @@ export type JobAppParamsPDFV2 = Omit<JobParamsPDFV2, 'browserTimezone' | 'versio
 
 // Job payload: structure of stored job data provided by create_job
 export interface TaskPayloadPDFV2 extends BasePayload, BaseParamsPDFV2 {
-  layout: LayoutParams;
+  layout: Layout;
   /**
    * The value of forceNow is injected server-side every time a given report is generated.
    */
   forceNow: string;
 }
 interface BaseParamsCSV {
-  searchSource: SerializedSearchSourceFields;
+  searchSource: unknown;
   columns?: string[];
 }
 
@@ -180,7 +141,7 @@ export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
 export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayloadV2;
 
 export interface JobParamsPNGV2 extends BaseParams {
-  layout: LayoutParams;
+  layout: Layout;
   /**
    * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
    */
@@ -189,7 +150,7 @@ export interface JobParamsPNGV2 extends BaseParams {
 
 // Job payload: structure of stored job data provided by create_job
 export interface TaskPayloadPNGV2 extends BasePayload {
-  layout: LayoutParams;
+  layout: Layout;
   forceNow: string;
   /**
    * Even though we only ever handle one locator for a PNG, we store it as an array for consistency with how PDFs are stored

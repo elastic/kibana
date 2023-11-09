@@ -12,7 +12,7 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
-import { ReportingConfigType, ReportingServerInfo, TaskPayloadPDF } from './types';
+import { ReportingServerInfo, TaskPayloadPDF } from './types';
 
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';

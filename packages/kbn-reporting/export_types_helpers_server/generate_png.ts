@@ -7,16 +7,16 @@
  */
 
 import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/logging';
-import { finalize, map, tap } from 'rxjs/operators';
-import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { Observable } from 'rxjs';
-import type { PngMetrics } from '@kbn/reporting-export-types-helpers-public';
+import { finalize, map, tap } from 'rxjs/operators';
+
+import type { Logger } from '@kbn/logging';
 import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-common/constants';
+import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 
 interface PngResult {
   buffer: Buffer;
-  metrics?: PngMetrics;
+  metrics?: PngScreenshotResult['metrics'];
   warnings: string[];
 }
 

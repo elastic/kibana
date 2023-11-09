@@ -36,6 +36,5 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/utility-types",
     "@kbn/config-schema",
-    "@kbn/reporting-export-types-helpers-public",
   ]
 }

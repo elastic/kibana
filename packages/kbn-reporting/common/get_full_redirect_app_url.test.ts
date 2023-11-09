@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ReportingConfigType } from '@kbn/reporting-common';
 import { getFullRedirectAppUrl } from './get_full_redirect_app_url';
 
 describe('getFullRedirectAppUrl', () => {

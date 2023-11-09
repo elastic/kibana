@@ -7,9 +7,10 @@
 
 import crypto from 'crypto';
 import ipaddr from 'ipaddr.js';
-import type { CoreSetup, Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
-import type { ReportingConfigType } from '@kbn/reporting-common/schema';
+
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import { ReportingConfigType } from '.';
 
 /*
  * Set up dynamic config defaults

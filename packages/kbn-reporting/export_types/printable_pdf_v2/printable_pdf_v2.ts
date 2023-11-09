@@ -43,7 +43,6 @@ import {
   JobParamsPDFV2,
   TaskPayloadPDFV2,
 } from '@kbn/reporting-export-types-helpers-server';
-import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
 import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {

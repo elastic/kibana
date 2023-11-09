@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-
-export type PngMetrics = PngScreenshotResult['metrics'];
-
-export type PdfMetrics = PdfScreenshotResult['metrics'];
+import type { LocatorParams } from '.';
 
 export interface CsvMetrics {
   rows: number;
@@ -18,8 +14,8 @@ export interface CsvMetrics {
 
 export interface TaskRunMetrics {
   csv?: CsvMetrics;
-  png?: PngMetrics;
-  pdf?: PdfMetrics;
+  png?: unknown;
+  pdf?: unknown;
 }
 
 export interface TaskRunResult {
@@ -37,4 +33,48 @@ export interface TaskRunResult {
    * not complete in the task runner's error handler.
    */
   error_code?: string;
+}
+
+export interface ReportOutput extends TaskRunResult {
+  content: string | null;
+  size: number;
+}
+
+/**
+ * @deprecated
+ */
+export interface BaseParams {
+  layout?: unknown;
+  objectType: string;
+  title: string;
+  browserTimezone: string; // to format dates in the user's time zone
+  version: string; // to handle any state migrations
+}
+
+/**
+ * Report job parameters that an application must return from its
+ * getSharingData function.
+ */
+export type BaseParamsV2 = BaseParams & {
+  locatorParams: LocatorParams[];
+};
+
+/**
+ * @deprecated
+ */
+export interface BasePayload extends BaseParams {
+  headers: string;
+  spaceId?: string;
+  isDeprecated?: boolean;
+}
+
+export type JobId = string;
+
+/**
+ * Report job parameters, after they are processed in the request handler.
+ */
+export interface BasePayloadV2 extends BaseParamsV2 {
+  headers: string;
+  spaceId?: string;
+  isDeprecated?: boolean;
 }

@@ -28,7 +28,6 @@ import type {
   JobParamsDownloadCSV,
 } from '@kbn/reporting-export-types-helpers-server';
 import { getFieldFormats, ExportType } from '@kbn/reporting-export-types-helpers-server';
-import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
 
 type CsvSearchSourceImmediateExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceImmediateExportTypeStartDeps extends BaseExportTypeStartDeps {

@@ -8,7 +8,7 @@
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { BaseParamsV2, TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
+import type { BaseParamsV2 } from '@kbn/reporting-export-types-helpers-public';
 import React from 'react';
 import { JobId, JobTypes, JOB_STATUSES } from '../../common/constants';
 import type { ReportApiJSON, ReportFields, ReportOutput, ReportSource } from '../../common/types';
@@ -16,6 +16,23 @@ import type { ReportApiJSON, ReportFields, ReportOutput, ReportSource } from '..
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;
 
 type ReportPayload = ReportSource['payload'];
+
+interface TaskRunResult {
+  content_type: string | null;
+  csv_contains_formulas?: boolean;
+  max_size_reached?: boolean;
+  warnings?: string[];
+  metrics?: unknown;
+  /**
+   * When running a report task we may finish with warnings that were triggered
+   * by an error. We can pass the error code via the task run result to the
+   * task runner so that it can be recorded for telemetry.
+   *
+   * Alternatively, this field can be populated in the event that the task does
+   * not complete in the task runner's error handler.
+   */
+  error_code?: string;
+}
 
 /*
  * This class represents a report job for the UI

@@ -7,33 +7,34 @@
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/core/server';
+import {
+  CancellationToken,
+  KibanaShuttingDownError,
+  QueueTimeoutError,
+  ReportingError,
+} from '@kbn/reporting-common';
+import type {
+  RunContext,
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
-import type {
-  RunContext,
-  TaskManagerStartContract,
-  TaskRunCreatorFunction,
-} from '@kbn/task-manager-plugin/server';
-import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import {
-  QueueTimeoutError,
-  ReportingError,
-  KibanaShuttingDownError,
-} from '@kbn/generate-csv/src/errors';
-import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
+
+import { REPORTING_EXECUTE_TYPE, ReportTaskParams, ReportingTask, ReportingTaskStatus } from '.';
 import { ExportTypesRegistry, getContentStream } from '..';
 import type { ReportingCore } from '../..';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
-import type { ReportOutput } from '../../../common/types';
+import type { ReportOutput, TaskRunResult } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
 import type { ReportDocument, ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
-import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
