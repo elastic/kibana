@@ -63,6 +63,8 @@ export const CreateCategorizationJobButton: FC<Props> = ({
         data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
         onClick={() => createADJob()}
         flush="left"
+        iconSide="left"
+        iconType={'machineLearningApp'}
       >
         <FormattedMessage
           id="xpack.aiops.categorizeFlyout.findAnomalies"
