@@ -10,15 +10,14 @@ import { mergeMap, tap } from 'rxjs/operators';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { Observable } from 'rxjs';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
-import { LocatorParams, ReportingConfigType } from '@kbn/reporting-common';
-import type { PdfMetrics } from '@kbn/reporting-export-types-helpers-public';
+import { LocatorParams } from '@kbn/reporting-common';
 import { ReportingServerInfo, TaskPayloadPDFV2 } from './types';
 import { getTracker } from './pdf_tracker';
 import { getFullRedirectAppUrl } from '.';
 
 interface PdfResult {
   buffer: Uint8Array | null;
-  metrics?: PdfMetrics;
+  metrics?: PdfScreenshotResult['metrics'];
   warnings: string[];
 }
 

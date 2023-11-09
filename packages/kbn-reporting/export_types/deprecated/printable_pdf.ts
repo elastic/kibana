@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+import apm from 'elastic-apm-node';
+import { Observable, fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
+import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { Writable } from 'stream';
+
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   CancellationToken,
@@ -18,23 +23,18 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import { Writable } from 'stream';
-import apm from 'elastic-apm-node';
-import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { fromEventPattern, lastValueFrom, Observable, of, throwError } from 'rxjs';
-import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import { BaseParams, TaskRunResult } from '@kbn/reporting-common/types';
 import {
-  decryptJobHeaders,
   ExportType,
+  TaskPayloadPDF,
+  decryptJobHeaders,
   generatePdfObservable,
   getCustomLogo,
   getFullUrls,
   validateUrls,
-  BaseParams,
-  TaskPayloadPDF,
 } from '@kbn/reporting-export-types-helpers-server';
-import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 
 interface BaseParamsPDF {
   layout: LayoutParams;

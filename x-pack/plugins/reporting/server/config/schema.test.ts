@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigSchema } from '@kbn/reporting-common';
+import { ConfigSchema } from './schema';
 
 describe('Reporting Config Schema', () => {
   it(`context {"dev":false,"dist":false} produces correct config`, () => {

@@ -11,7 +11,6 @@ export { buildKibanaPath } from './build_kibana_path';
 export * from './constants';
 export * from './errors';
 export * from './schema_utils';
-export * from './schema';
 export * as jobTypes from './job_types';
 export * from './report_types';
 export type {

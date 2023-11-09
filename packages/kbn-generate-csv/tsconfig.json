@@ -21,10 +21,8 @@
     "@kbn/data-plugin",
     "@kbn/expressions-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/reporting-common",
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/generate-csv-types",
-    "@kbn/reporting-export-types-helpers-public",
   ]
 }

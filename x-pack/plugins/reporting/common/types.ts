@@ -7,11 +7,11 @@
 
 import type {
   BasePayload,
+  ReportOutput,
   TaskRunMetrics,
   TaskRunResult,
-} from '@kbn/reporting-export-types-helpers-public';
-import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { JobId } from './constants';
+} from '@kbn/reporting-common/types';
+import type { JobId } from './constants';
 
 export interface ReportDocumentHead {
   _id: string;
@@ -19,15 +19,6 @@ export interface ReportDocumentHead {
   _seq_no: number;
   _primary_term: number;
 }
-
-export interface ReportOutput extends TaskRunResult {
-  content: string | null;
-  size: number;
-}
-
-export type PngMetrics = PngScreenshotResult['metrics'];
-
-export type PdfMetrics = PdfScreenshotResult['metrics'];
 
 export interface ReportFields {
   queue_time_ms?: number[]; // runtime field: started_at - created_at

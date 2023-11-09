@@ -44,7 +44,6 @@ import {
   JobParamsPNGV2,
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-helpers-server';
-import type { TaskRunResult } from '@kbn/reporting-export-types-helpers-public';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;

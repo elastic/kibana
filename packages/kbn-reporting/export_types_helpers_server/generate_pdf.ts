@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { Observable } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import type { PdfMetrics } from '@kbn/reporting-export-types-helpers-public';
+
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { getTracker } from './pdf_tracker';
 
 interface PdfResult {
   buffer: Uint8Array | null;
-  metrics?: PdfMetrics;
+  metrics?: PdfScreenshotResult['metrics'];
   warnings: string[];
 }
 

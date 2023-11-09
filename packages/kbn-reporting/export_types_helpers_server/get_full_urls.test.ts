@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ReportingConfigType } from '@kbn/reporting-common/schema';
 import { TaskPayloadPDF, ReportingServerInfo } from './types';
 import { getFullUrls } from './get_full_urls';
 

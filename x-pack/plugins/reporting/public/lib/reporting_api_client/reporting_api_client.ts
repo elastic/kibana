@@ -11,8 +11,6 @@ import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { ManagementLinkFn } from '@kbn/reporting-export-types-helpers-public';
-import type { BaseParams } from '@kbn/reporting-export-types-helpers-server';
 import { buildKibanaPath } from '@kbn/reporting-common';
 import {
   getRedirectAppPath,
