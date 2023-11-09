@@ -20,6 +20,12 @@ export interface HttpSetup {
   basePath: IBasePath;
 
   /**
+   * APIs for creating hrefs to static assets.
+   * See {@link IStaticAssets}
+   */
+  staticAssets: IStaticAssets;
+
+  /**
    * APIs for denoting certain paths for not requiring authentication
    */
   anonymousPaths: IAnonymousPaths;
@@ -111,6 +117,7 @@ export interface IBasePath {
    */
   readonly publicBaseUrl?: string;
 }
+
 /**
  * APIs for working with external URLs.
  *
@@ -134,6 +141,23 @@ export interface IExternalUrl {
    * @param relativeOrAbsoluteUrl
    */
   validateUrl(relativeOrAbsoluteUrl: string): URL | null;
+}
+
+/**
+ * APIs for creating hrefs to static assets.
+ */
+export interface IStaticAssets {
+  /**
+   * Gets the full href to the current plugin's asset,
+   * given it's path relative to the plugin's `public/assets` folder.
+   *
+   * @example
+   * ```ts
+   * // I want to retrieve the href for the asset stored under `my_plugin/public/assets/some_folder/asset.png`:
+   * const assetHref = core.http.statisAssets.getPluginAssetHref('some_folder/asset.png');
+   * ```
+   */
+  getPluginAssetHref(assetPath: string): string;
 }
 
 /**
@@ -324,10 +348,13 @@ export interface HttpHandler {
     path: string,
     options: HttpFetchOptions & { asResponse: true }
   ): Promise<HttpResponse<TResponseBody>>;
+
   <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
     HttpResponse<TResponseBody>
   >;
+
   <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+
   <TResponseBody = unknown>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
@@ -374,6 +401,7 @@ export interface HttpInterceptorResponseError extends HttpResponse {
   request: Readonly<Request>;
   error: Error | IHttpFetchError;
 }
+
 /** @public */
 export interface HttpInterceptorRequestError {
   fetchOptions: Readonly<HttpFetchOptionsWithPath>;
@@ -435,6 +463,7 @@ export interface HttpInterceptor {
 export interface IHttpInterceptController {
   /** Whether or not this chain has been halted. */
   halted: boolean;
+
   /** Halt the request Promise chain and do not process further interceptors or response handlers. */
   halt(): void;
 }
