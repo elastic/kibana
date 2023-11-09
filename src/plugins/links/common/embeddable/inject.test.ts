@@ -6,21 +6,51 @@
  * Side Public License, v 1.
  */
 
-test('Should return original state and empty references with by-reference embeddable state', () => {
+import { inject } from './inject';
+
+test('Should return original state with by-reference embeddable state', () => {
   const linksByReferenceInput = {
-    id: '2192e502-0ec7-4316-82fb-c9bbf78525c4',
+    id: 'ea40fd4e-216c-49a7-917f-f733c8a2c817',
     type: 'links',
   };
 
-  expect(extract!(linksByReferenceInput)).toEqual({
-    state: linksByReferenceInput,
-    references: [],
-  });
+  const references = [
+    {
+      name: 'panel_ea40fd4e-216c-49a7-917f-f733c8a2c817',
+      type: 'links',
+      id: '7f92d7d0-8e5f-11ec-9477-312c8a6de896',
+    },
+  ];
+
+  expect(inject!(linksByReferenceInput, references)).toEqual(linksByReferenceInput);
 });
 
-test('Should update state with refNames with by-value embeddable state', () => {
+test('Should inject refNames with by-value embeddable state', () => {
   const linksByValueInput = {
-    id: '8d62c3f0-c61f-4c09-ac24-9b8ee4320e20',
+    id: 'c3937cf9-29be-43df-a4af-a4df742d7d35',
+    attributes: {
+      links: [
+        {
+          type: 'dashboardLink',
+          id: 'fc7b8c70-2eb9-40b2-936d-457d1721a438',
+          destinationRefName: 'link_fc7b8c70-2eb9-40b2-936d-457d1721a438_dashboard',
+          order: 0,
+        },
+      ],
+      layout: 'horizontal',
+    },
+    type: 'links',
+  };
+  const references = [
+    {
+      name: 'link_fc7b8c70-2eb9-40b2-936d-457d1721a438_dashboard',
+      type: 'dashboard',
+      id: 'elastic_agent-1a4e7280-6b5e-11ed-98de-67bdecd21824',
+    },
+  ];
+
+  expect(inject!(linksByValueInput, references)).toEqual({
+    id: 'c3937cf9-29be-43df-a4af-a4df742d7d35',
     attributes: {
       links: [
         {
@@ -33,30 +63,5 @@ test('Should update state with refNames with by-value embeddable state', () => {
       layout: 'horizontal',
     },
     type: 'links',
-  };
-
-  expect(extract!(linksByValueInput)).toEqual({
-    references: [
-      {
-        name: 'link_fc7b8c70-2eb9-40b2-936d-457d1721a438_dashboard',
-        type: 'dashboard',
-        id: 'elastic_agent-1a4e7280-6b5e-11ed-98de-67bdecd21824',
-      },
-    ],
-    state: {
-      id: '8d62c3f0-c61f-4c09-ac24-9b8ee4320e20',
-      attributes: {
-        links: [
-          {
-            type: 'dashboardLink',
-            id: 'fc7b8c70-2eb9-40b2-936d-457d1721a438',
-            destinationRefName: 'link_fc7b8c70-2eb9-40b2-936d-457d1721a438_dashboard',
-            order: 0,
-          },
-        ],
-        layout: 'horizontal',
-      },
-      type: 'links',
-    },
   });
 });
