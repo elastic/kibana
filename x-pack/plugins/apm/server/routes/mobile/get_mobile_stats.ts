@@ -94,8 +94,8 @@ async function getMobileStats({
       }) as Timeseries[],
     },
     launchTimes: {
-      value: launchTimes.currentPeriod.value,
-      timeseries: launchTimes.currentPeriod.timeseries as Timeseries[],
+      value: launchTimeAvg.currentPeriod.value,
+      timeseries: launchTimeAvg.currentPeriod.timeseries as Timeseries[],
     },
   };
 }
