@@ -64,7 +64,7 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   const kqlQueryExpression =
     isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) ? ' ' : kqlQueryTimeline;
 
-  const kqlQueryTest = useMemo(
+  const kqlQuery = useMemo(
     () => ({ query: kqlQueryExpression, language: 'kuery' }),
     [kqlQueryExpression]
   );
@@ -97,17 +97,17 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
         indexPattern,
         browserFields,
         filters: filters ? filters : [],
-        kqlQuery: kqlQueryTest,
+        kqlQuery,
         kqlMode,
       }),
-    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryTest]
+    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
   );
 
   const isBlankTimeline: boolean = useMemo(
     () =>
-      (isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQueryTest.query)) ||
+      (isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query)) ||
       combinedQueries?.filterQuery === undefined,
-    [dataProviders, filters, kqlQueryTest, combinedQueries]
+    [dataProviders, filters, kqlQuery, combinedQueries]
   );
 
   const [, kpis] = useTimelineKpis({

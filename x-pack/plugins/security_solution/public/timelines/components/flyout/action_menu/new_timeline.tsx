@@ -36,14 +36,19 @@ export const NewTimelineAction = ({ timelineId }: NewTimelineActionProps) => {
     );
   }, [onActionBtnClick]);
 
+  const panelStyle = useMemo(
+    () => ({
+      padding: 0,
+    }),
+    []
+  );
+
   return (
     <EuiPopover
       button={newTimelineActionbtn}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelStyle={{
-        padding: 0,
-      }}
+      panelStyle={panelStyle}
     >
       <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
         <EuiFlexItem>

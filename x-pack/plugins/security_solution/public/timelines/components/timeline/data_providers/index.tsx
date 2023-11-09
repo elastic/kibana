@@ -147,6 +147,14 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
     [timelineId, dispatch]
   );
 
+  const popoverProps = useMemo(
+    () => ({
+      className: searchOrFilterPopoverClassName,
+      panelClassName: searchOrFilterPopoverClassName,
+    }),
+    []
+  );
+
   return (
     <>
       <SearchOrFilterGlobalStyle />
@@ -166,10 +174,7 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
               itemClassName={timelineSelectModeItemsClassName}
               onChange={handleChange}
               options={options}
-              popoverProps={{
-                className: searchOrFilterPopoverClassName,
-                panelClassName: searchOrFilterPopoverClassName,
-              }}
+              popoverProps={popoverProps}
               valueOfSelected={kqlMode}
             />
           </EuiToolTip>

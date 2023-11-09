@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
@@ -101,6 +101,18 @@ export const SearchOrFilter = React.memo<Props>(
     isDataProviderVisible,
     toggleDataProviderVisibility,
   }) => {
+    const isDataProviderEmpty = useMemo(() => dataProviders?.length === 0, [dataProviders]);
+
+    const dataProviderIconTooltipContent = useMemo(() => {
+      if (isDataProviderVisible) {
+        return DATA_PROVIDER_VISIBLE;
+      }
+      if (isDataProviderEmpty) {
+        return DATA_PROVIDER_HIDDEN_EMPTY;
+      }
+      return DATA_PROVIDER_HIDDEN_POPULATED;
+    }, [isDataProviderEmpty, isDataProviderVisible]);
+
     return (
       <>
         <SearchOrFilterContainer>
@@ -139,15 +151,7 @@ export const SearchOrFilter = React.memo<Props>(
                 alignItems="center"
                 justifyContent="center"
               >
-                <EuiToolTip
-                  content={
-                    dataProviders?.length > 0 && !isDataProviderVisible
-                      ? DATA_PROVIDER_HIDDEN_POPULATED
-                      : dataProviders?.length === 0 && !isDataProviderVisible
-                      ? DATA_PROVIDER_HIDDEN_EMPTY
-                      : DATA_PROVIDER_VISIBLE
-                  }
-                >
+                <EuiToolTip content={dataProviderIconTooltipContent}>
                   <EuiButtonIcon
                     color={
                       dataProviders?.length > 0 && !isDataProviderVisible ? 'warning' : 'primary'
@@ -157,13 +161,7 @@ export const SearchOrFilter = React.memo<Props>(
                     data-test-subj="toggle-data-provider"
                     size="m"
                     display="base"
-                    aria-label={
-                      dataProviders?.length > 0 && !isDataProviderVisible
-                        ? DATA_PROVIDER_HIDDEN_POPULATED
-                        : dataProviders?.length === 0 && !isDataProviderVisible
-                        ? DATA_PROVIDER_HIDDEN_EMPTY
-                        : DATA_PROVIDER_VISIBLE
-                    }
+                    aria-label={dataProviderIconTooltipContent}
                     onClick={toggleDataProviderVisibility}
                   />
                 </EuiToolTip>
