@@ -301,6 +301,7 @@ function PreviewChart({
         <EuiEmptyPrompt
           iconType="visArea"
           titleSize="xxs"
+          data-test-subj="thresholdRuleNoChartData"
           body={
             <FormattedMessage
               id="xpack.observability.customThreshold.rule..charts.noData.title"
@@ -327,6 +328,7 @@ function PreviewChart({
         style={{ height: 180 }}
         timeRange={{ from: `now-${timeSize * 20}${timeUnit}`, to: 'now' }}
         attributes={attributes}
+        disableTriggers={true}
       />
     </div>
   );
