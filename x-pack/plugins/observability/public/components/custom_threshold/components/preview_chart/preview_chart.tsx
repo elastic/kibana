@@ -221,11 +221,13 @@ function PreviewChart({
     };
 
     const xYDataLayerOptions: XYLayerOptions = {
-      buckets: { type: 'date_histogram' },
-      seriesType: 'bar',
-      params: {
-        interval: `${timeSize}${timeUnit}`,
+      buckets: {
+        type: 'date_histogram',
+        params: {
+          interval: `${timeSize}${timeUnit}`,
+        },
       },
+      seriesType: 'bar',
     };
 
     if (groupBy && groupBy?.length) {

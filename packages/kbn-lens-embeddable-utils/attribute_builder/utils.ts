@@ -41,6 +41,7 @@ export const getHistogramColumn = ({
     }
   >;
 }) => {
+  const { interval, ...rest } = options?.params ?? {};
   return {
     [columnName]: {
       dataType: 'date',
@@ -48,9 +49,9 @@ export const getHistogramColumn = ({
       label: '@timestamp',
       operationType: 'date_histogram',
       scale: 'interval',
-      sourceField: '@timestamp',
-      ...options,
-      params: { interval: 'auto', ...options?.params },
+      sourceField: options?.sourceField ?? '@timestamp',
+      ...rest,
+      params: { interval: interval ?? 'auto', ...options?.params },
     } as DateHistogramIndexPatternColumn,
   };
 };
