@@ -11,7 +11,7 @@ import type {
 } from '@kbn/aiops-plugin/common/api/log_rate_analysis/types';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
-import type { LogRateAnalysisDataGenerator } from '../../../../functional/services/aiops/log_rate_analysis_data_generator';
+import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';
 
 export interface TestData<T extends ApiVersion> {
   testName: string;

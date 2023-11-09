@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { getLogRateAnalysisTestData, API_VERSIONS } from './test_data';
 import { getErrorActions } from './test_helpers';

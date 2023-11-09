@@ -14,9 +14,9 @@ import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-plugin/common/api/lo
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema_v2';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-import { parseStream } from '../parse_stream';
+import { parseStream } from './parse_stream';
 import { getLogRateAnalysisTestData, API_VERSIONS } from './test_data';
 import {
   getAddSignificationItemsActions,
