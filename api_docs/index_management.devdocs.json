@@ -218,12 +218,13 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-public.Index.ilm",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "ilm",
             "description": [],
             "signature": [
-              "{ index: string; managed: boolean; } | undefined"
+              "IlmExplainLifecycleLifecycleExplain",
+              " | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false,
@@ -588,12 +589,13 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-server.Index.ilm",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "ilm",
             "description": [],
             "signature": [
-              "{ index: string; managed: boolean; } | undefined"
+              "IlmExplainLifecycleLifecycleExplain",
+              " | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false,
@@ -1939,12 +1941,13 @@
           {
             "parentPluginId": "indexManagement",
             "id": "def-common.Index.ilm",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "ilm",
             "description": [],
             "signature": [
-              "{ index: string; managed: boolean; } | undefined"
+              "IlmExplainLifecycleLifecycleExplain",
+              " | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/indices.ts",
             "deprecated": false,
@@ -2584,6 +2587,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.allowAutoCreate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowAutoCreate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.order",
             "type": "number",
             "tags": [],
@@ -2990,6 +3007,20 @@
             "description": [],
             "signature": [
               "{} | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.allow_auto_create",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allow_auto_create",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
