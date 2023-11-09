@@ -8,6 +8,8 @@
 
 import * as jobTypes from './job_types';
 
+export * from './job_types';
+
 export const PLUGIN_ID = 'reporting';
 
 export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
