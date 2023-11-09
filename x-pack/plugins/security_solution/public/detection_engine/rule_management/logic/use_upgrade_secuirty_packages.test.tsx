@@ -26,6 +26,7 @@ const mockGetPrebuiltRulesPackageVersion =
   KibanaServices.getPrebuiltRulesPackageVersion as jest.Mock;
 const mockGetKibanaVersion = KibanaServices.getKibanaVersion as jest.Mock;
 const mockGetKibanaBranch = KibanaServices.getKibanaBranch as jest.Mock;
+const mockBuildFlavor = KibanaServices.getBuildFlavor as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 describe('When using the `useUpgradeSecurityPackages()` hook', () => {
@@ -51,7 +52,47 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     );
   });
 
-  it('should send upgrade request with prerelease:false if branch is not `main` and build does not include `-SNAPSHOT`', async () => {
+  it('should send upgrade request with prerelease:false if in serverless', async () => {
+    mockGetKibanaVersion.mockReturnValue('8.0.0');
+    mockGetKibanaBranch.mockReturnValue('main');
+    mockBuildFlavor.mockReturnValue('serverless');
+
+    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => (useKibanaMock().services.http.post as jest.Mock).mock.calls.length > 0);
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
+      `${epmRouteService.getBulkInstallPath()}`,
+      expect.objectContaining({
+        body: '{"packages":["endpoint","security_detection_engine"]}',
+        query: expect.objectContaining({ prerelease: false }),
+      })
+    );
+  });
+
+  it('should send upgrade request with prerelease:false if in serverless SNAPSHOT', async () => {
+    mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
+    mockGetKibanaBranch.mockReturnValue('main');
+    mockBuildFlavor.mockReturnValue('serverless');
+
+    const { waitFor } = renderHook(() => useUpgradeSecurityPackages(), {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => (useKibanaMock().services.http.post as jest.Mock).mock.calls.length > 0);
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
+      `${epmRouteService.getBulkInstallPath()}`,
+      expect.objectContaining({
+        body: '{"packages":["endpoint","security_detection_engine"]}',
+        query: expect.objectContaining({ prerelease: false }),
+      })
+    );
+  });
+
+  it('should send upgrade request with prerelease:false if build does not include `-SNAPSHOT`', async () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0');
     mockGetKibanaBranch.mockReturnValue('release');
 
@@ -70,7 +111,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     );
   });
 
-  it('should send upgrade request with prerelease:true if branch is `main` AND build includes `-SNAPSHOT`', async () => {
+  it('should send upgrade request with prerelease:true if not serverless and branch is `main` AND build includes `-SNAPSHOT`', async () => {
     mockGetKibanaVersion.mockReturnValue('8.0.0-SNAPSHOT');
     mockGetKibanaBranch.mockReturnValue('main');
 

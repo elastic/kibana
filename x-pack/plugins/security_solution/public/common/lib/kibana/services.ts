@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, EnvironmentMode } from '@kbn/core/public';
 import type { StartPlugins } from '../../../types';
 
 type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'uiSettings' | 'notifications'> &
   Pick<StartPlugins, 'data' | 'unifiedSearch' | 'expressions'>;
 
 export class KibanaServices {
+  private static buildFlavor?: string;
+  private static envMode?: EnvironmentMode;
   private static kibanaBranch?: string;
   private static kibanaVersion?: string;
   private static prebuiltRulesPackageVersion?: string;
@@ -24,6 +26,8 @@ export class KibanaServices {
     unifiedSearch,
     kibanaBranch,
     kibanaVersion,
+    buildFlavor,
+    envMode,
     prebuiltRulesPackageVersion,
     uiSettings,
     notifications,
@@ -31,6 +35,8 @@ export class KibanaServices {
   }: GlobalServices & {
     kibanaBranch: string;
     kibanaVersion: string;
+    buildFlavor: string;
+    envMode: EnvironmentMode;
     prebuiltRulesPackageVersion?: string;
   }) {
     this.services = {
@@ -44,6 +50,8 @@ export class KibanaServices {
     };
     this.kibanaBranch = kibanaBranch;
     this.kibanaVersion = kibanaVersion;
+    this.buildFlavor = buildFlavor;
+    this.envMode = envMode;
     this.prebuiltRulesPackageVersion = prebuiltRulesPackageVersion;
   }
 
@@ -73,6 +81,20 @@ export class KibanaServices {
 
   public static getPrebuiltRulesPackageVersion(): string | undefined {
     return this.prebuiltRulesPackageVersion;
+  }
+
+  public static getBuildFlavor(): string {
+    if (!this.buildFlavor) {
+      this.throwUninitializedError();
+    }
+    return this.buildFlavor;
+  }
+
+  public static getEnvMode(): EnvironmentMode {
+    if (!this.envMode) {
+      this.throwUninitializedError();
+    }
+    return this.envMode;
   }
 
   private static throwUninitializedError(): never {
