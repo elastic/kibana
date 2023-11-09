@@ -38,8 +38,6 @@ const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
   ...baseObj,
 });
 
-const createMockCancellationToken = () => new CancellationToken();
-
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: IScopedSearchClient;
@@ -154,7 +152,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -189,7 +187,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -228,7 +226,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -276,7 +274,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -335,7 +333,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -405,7 +403,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -443,7 +441,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -490,7 +488,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -544,7 +542,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -586,7 +584,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -624,7 +622,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -662,7 +660,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -702,7 +700,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -740,7 +738,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -785,7 +783,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -814,7 +812,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -872,7 +870,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -916,7 +914,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -965,7 +963,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -1024,7 +1022,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
