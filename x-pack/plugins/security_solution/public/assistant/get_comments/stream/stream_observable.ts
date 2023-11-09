@@ -17,6 +17,7 @@ const MIN_DELAY = 35;
  *
  * @param reader - The ReadableStreamDefaultReader used to read data from the stream.
  * @param setLoading - A function to update the loading state.
+ * @param isError - indicates whether the reader response is an error message or not
  * @returns {Observable<PromptObservableState>} An Observable that emits PromptObservableState
  */
 export const getStreamObservable = (

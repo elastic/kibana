@@ -34,6 +34,7 @@ interface UseStream {
  * @param amendMessage - handles the amended message
  * @param content - the content of the message. If provided, the function will not use the reader to stream data.
  * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
+ * @param isError - indicates whether the reader response is an error message or not
  */
 export const useStream = ({
   amendMessage,
