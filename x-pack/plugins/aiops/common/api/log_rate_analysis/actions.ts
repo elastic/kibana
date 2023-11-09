@@ -15,13 +15,21 @@ import type {
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from './schema';
 
 export const API_ACTION_NAME = {
+  /** @since API v2 */
   ADD_SIGNIFICANT_ITEMS: 'add_significant_items',
+  /** @since API v2 */
   ADD_SIGNIFICANT_ITEMS_HISTOGRAM: 'add_significant_items_histogram',
+  /** @since API v2 */
   ADD_SIGNIFICANT_ITEMS_GROUP: 'add_significant_items_group',
+  /** @since API v2 */
   ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM: 'add_significant_items_group_histogram',
+  /** @deprecated since API v2 */
   ADD_SIGNIFICANT_TERMS: 'add_significant_terms',
+  /** @deprecated since API v2 */
   ADD_SIGNIFICANT_TERMS_HISTOGRAM: 'add_significant_terms_histogram',
+  /** @deprecated since API v2 */
   ADD_SIGNIFICANT_TERMS_GROUP: 'add_significant_terms_group',
+  /** @deprecated since API v2 */
   ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM: 'add_significant_terms_group_histogram',
   ADD_ERROR: 'add_error',
   PING: 'ping',
