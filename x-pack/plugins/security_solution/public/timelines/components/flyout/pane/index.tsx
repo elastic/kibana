@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiOverlayMask, useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
-
+import React from 'react';
+import { css } from '@emotion/css';
+import { EuiOverlayMask, euiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import classNames from 'classnames';
 import { StatefulTimeline } from '../../timeline';
 import type { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
@@ -21,48 +21,54 @@ interface FlyoutPaneComponentProps {
   timelineId: TimelineId;
 }
 
-const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
-  const { euiTheme } = useEuiTheme();
-  const isFullScreen = useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
-
-  const background = useEuiBackgroundColor('plain');
-  const modalStyles = useMemo(() => {
-    if (isFullScreen) {
-      return '';
+export const useStyles = () => {
+  const EuiTheme = useEuiTheme();
+  const { euiTheme } = EuiTheme;
+  return css`
+    // wrap .euiOverlayMask class to make styles take precedence over .euiOverlayMask-aboveHeader
+    &.euiOverlayMask {
+      top: var(--euiFixedHeadersOffset, 0);
+      z-index: ${euiTheme.levels.flyout};
     }
-    return `
+
+    .timeline-flyout {
+      min-width: 150px;
+      height: inherit;
+      position: fixed;
+      top: var(--euiFixedHeadersOffset, 0);
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: ${euiBackgroundColor(EuiTheme, 'plain')};
+    }
+
+    &:not(.timeline-pane--full-screen) .timeline-flyout {
       margin: ${euiTheme.size.m};
       border-radius: ${euiTheme.border.radius.medium};
       padding: 0 ${euiTheme.size.s};
-    `;
-  }, [euiTheme, isFullScreen]);
+    }
+  `;
+};
+
+const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
+  // const { euiTheme } = useEuiTheme();
+  const isFullScreen = useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
+
+  const styles = useStyles();
+  const paneClassName = classNames('timeline-pane', styles, {
+    'timeline-pane--full-screen': isFullScreen,
+  });
 
   return (
     <EuiOverlayMask
       data-test-subj="flyout-pane"
       headerZindexLocation="above"
-      css={`
-        // .euiOverlayMask class concatenation to make styles take precedence over .euiOverlayMask-aboveHeader
-        &.euiOverlayMask {
-          top: var(--euiFixedHeadersOffset, 0);
-          z-index: ${euiTheme.levels.flyout};
-        }
-      `}
+      className={paneClassName}
     >
       <div
         aria-label={i18n.TIMELINE_DESCRIPTION}
         data-test-subj="timeline-flyout"
-        css={css`
-          min-width: 150px;
-          height: inherit;
-          position: fixed;
-          top: var(--euiFixedHeadersOffset, 0);
-          right: 0;
-          bottom: 0;
-          left: 0;
-          background: ${background};
-          ${modalStyles}
-        `}
+        className="timeline-flyout"
       >
         <StatefulTimeline
           renderCellValue={DefaultCellRenderer}

@@ -5,61 +5,56 @@
  * 2.0.
  */
 
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { Pane } from '.';
-import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
-const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
-jest.mock('@kbn/i18n-react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n-react');
-  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
+jest.mock('../../timeline', () => ({
+  StatefulTimeline: () => <div data-test-subj="StatefulTimelineMock" />,
+}));
 
-  return {
-    ...originalModule,
-    FormattedRelative,
-  };
-});
+const mockIsFullScreen = jest.fn(() => false);
+jest.mock('../../../../common/store/selectors', () => ({
+  inputsSelectors: { timelineFullScreenSelector: () => mockIsFullScreen() },
+}));
 
-// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
-// The returned permissions object will indicate that the user does not have permissions by default
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
-mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+describe('Pane', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-jest.mock('../../../../common/utils/normalize_time_range');
-
-jest.mock('../../../../common/hooks/use_resolve_conflict', () => {
-  return {
-    useResolveConflict: jest.fn().mockImplementation(() => null),
-  };
-});
-
-// FLAKY: https://github.com/elastic/kibana/issues/168026
-describe.skip('Pane', () => {
-  test('renders with display block by default', async () => {
-    const EmptyComponent = render(
+  it('should render the timeline', async () => {
+    const wrapper = render(
       <TestProviders>
         <Pane timelineId={TimelineId.test} />
       </TestProviders>
     );
 
-    await waitFor(() => {
-      expect(EmptyComponent.getByTestId('flyout-pane')).toHaveStyle('display: block');
-    });
+    expect(wrapper.getByTestId('StatefulTimelineMock')).toBeInTheDocument();
   });
 
-  test.skip('renders with display none when visibility is set to false', async () => {
-    const EmptyComponent = render(
+  it('should render without fullscreen className', async () => {
+    mockIsFullScreen.mockReturnValue(false);
+    const wrapper = render(
       <TestProviders>
-        <Pane timelineId={TimelineId.test} visible={false} />
+        <Pane timelineId={TimelineId.test} />
       </TestProviders>
     );
-    await waitFor(() => {
-      expect(EmptyComponent.getByTestId('timeline-flyout')).toHaveStyle('display: none');
-    });
+
+    expect(wrapper.getByTestId('flyout-pane')).not.toHaveClass('timeline-pane--full-screen');
+  });
+
+  it('should render with fullscreen className', async () => {
+    mockIsFullScreen.mockReturnValue(true);
+    const wrapper = render(
+      <TestProviders>
+        <Pane timelineId={TimelineId.test} />
+      </TestProviders>
+    );
+
+    expect(wrapper.getByTestId('flyout-pane')).toHaveClass('timeline-pane--full-screen');
   });
 });
