@@ -19,15 +19,16 @@ import {
   getPreviewAlerts,
   previewRule,
   createRule,
-  getOpenSignals as getOpenAlerts,
-} from '../../utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
-import { dataGeneratorFactory } from '../../utils/data_generator';
-import { removeRandomValuedProperties } from './utils';
+  getOpenAlerts,
+  dataGeneratorFactory,
+  previewRuleWithExceptionEntries,
+  removeRandomValuedProperties,
+} from '../../../utils';
+import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
+// TODO replace signals
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

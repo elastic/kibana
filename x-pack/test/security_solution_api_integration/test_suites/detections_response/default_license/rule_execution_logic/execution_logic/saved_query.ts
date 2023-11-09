@@ -20,10 +20,10 @@ import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
-  getOpenSignals,
-  getRuleForSignalTesting,
-} from '../../utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+  getOpenAlerts,
+  getRuleForAlertTesting,
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -31,7 +31,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
  */
 const ID = 'BhbXBmkBR346wHgn4PeZ';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -52,13 +51,13 @@ export default ({ getService }: FtrProviderContext) => {
     // First test creates a real rule - remaining tests use preview API
     it('should query and get back expected signal structure using a saved query rule', async () => {
       const rule: SavedQueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
         type: 'saved_query',
         query: `_id:${ID}`,
         saved_id: 'doesnt-exist',
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       const signal = alerts.hits.hits[0]._source;
       expect(signal).eql({
         ...signal,

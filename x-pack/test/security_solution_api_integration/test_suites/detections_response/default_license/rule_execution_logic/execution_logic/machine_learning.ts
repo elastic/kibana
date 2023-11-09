@@ -31,21 +31,21 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
-} from '../../../lists_api_integration/utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+} from '../../../../../../lists_api_integration/utils';
 import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
   executeSetupModuleRequest,
   forceStartDatafeeds,
-  getOpenSignals,
+  getOpenAlerts,
   getPreviewAlerts,
   previewRule,
   previewRuleWithExceptionEntries,
-} from '../../utils';
+} from '../../../utils';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
     // First test creates a real rule - remaining tests use preview API
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toBe(1);
       const signal = alerts.hits.hits[0];
 

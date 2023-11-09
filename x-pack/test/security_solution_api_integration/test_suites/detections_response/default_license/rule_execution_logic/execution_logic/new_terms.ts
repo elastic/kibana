@@ -17,21 +17,21 @@ import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
-  getOpenSignals,
+  getOpenAlerts,
   getPreviewAlerts,
   previewRule,
-} from '../../utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
-import { dataGeneratorFactory } from '../../utils/data_generator';
+  dataGeneratorFactory,
+  previewRuleWithExceptionEntries,
+} from '../../../utils';
+import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
 
-import { removeRandomValuedProperties } from './utils';
+import { removeRandomValuedProperties } from '../../../utils/remove_random_valued_properties';
 
 const historicalWindowStart = '2022-10-13T05:00:04.000Z';
 const ruleExecutionStart = '2022-10-19T05:00:04.000Z';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
       expect(alerts.hits.hits.length).eql(1);
       expect(removeRandomValuedProperties(alerts.hits.hits[0]._source)).eql({

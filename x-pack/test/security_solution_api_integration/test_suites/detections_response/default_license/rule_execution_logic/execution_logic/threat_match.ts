@@ -38,13 +38,14 @@ import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/ap
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   previewRule,
-  getOpenSignals,
+  getOpenAlerts,
   getPreviewAlerts,
   deleteAllAlerts,
   deleteAllRules,
   createRule,
-} from '../../utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
 // Asserts that each expected value is included in the subject, independent of
@@ -138,8 +139,6 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
 
   expect(sort(alertsA.map(mapAlert))).to.eql(sort(alertsB.map(mapAlert)));
 }
-
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -168,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule();
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenSignals(
+      const alerts = await getOpenAlerts(
         supertest,
         log,
         es,
@@ -349,7 +348,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenSignals(
+      const alerts = await getOpenAlerts(
         supertest,
         log,
         es,
@@ -552,7 +551,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const createdRuleTerm = await createRule(supertest, log, termRule);
       const createdRuleMatch = await createRule(supertest, log, matchRule);
-      const alertsTerm = await getOpenSignals(
+      const alertsTerm = await getOpenAlerts(
         supertest,
         log,
         es,
@@ -560,7 +559,7 @@ export default ({ getService }: FtrProviderContext) => {
         RuleExecutionStatusEnum.succeeded,
         100
       );
-      const alertsMatch = await getOpenSignals(
+      const alertsMatch = await getOpenAlerts(
         supertest,
         log,
         es,

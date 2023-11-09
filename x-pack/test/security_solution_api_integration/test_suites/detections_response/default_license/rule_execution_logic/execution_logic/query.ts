@@ -45,26 +45,27 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
+import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
 import {
   createExceptionList,
   createExceptionListItem,
   createRule,
   deleteAllRules,
   deleteAllAlerts,
-  getOpenSignals,
+  getOpenAlerts,
   getPreviewAlerts,
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
   getSimpleRule,
   previewRule,
-  setSignalStatus,
+  setAlertStatus,
   getRuleSOById,
+  patchRule,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
-} from '../../utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { dataGeneratorFactory } from '../../utils/data_generator';
-import { patchRule } from '../../utils/patch_rule';
+  dataGeneratorFactory,
+} from '../../../utils';
+
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -79,7 +80,6 @@ const ID = 'BhbXBmkBR346wHgn4PeZ';
  * [x] - Alerts on alerts
  */
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -109,18 +109,18 @@ export default ({ getService }: FtrProviderContext) => {
     // First test creates a real rule - most remaining tests use preview API
     it('should have the specific audit record for _id or none of these tests below will pass', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).greaterThan(0);
       expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).eql(ID);
     });
 
     it('generates max signals warning when circuit breaker is hit', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
       };
       const { logs } = await previewRule({ supertest, rule });
       expect(logs[0].warnings).contain(getMaxSignalsWarning());
@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
       const rule = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
         query: 'process.executable: "/usr/bin/sudo"',
         max_signals: 10,
       };
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should abide by max_signals > 100', async () => {
       const maxSignals = 200;
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
         max_signals: maxSignals,
       };
       const { previewId } = await previewRule({ supertest, rule });
@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should have recorded the rule_id within the signal', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
       const { previewId } = await previewRule({ supertest, rule });
@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should query and get back expected signal structure using a basic KQL query', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
       const { previewId } = await previewRule({ supertest, rule });
@@ -192,7 +192,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should query and get back expected signal structure when it is a signal on a signal', async () => {
       const alertId = '30a75fe46d3dbdfab55982036f77a8d60e2d1112e96f277c3b8c22f9bb57817a';
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting([`.alerts-security.alerts-default*`]),
+        ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
         rule_id: 'signal-on-signal',
         query: `_id:${alertId}`,
       };
@@ -238,7 +238,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not have risk score fields without risk indices', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
       const { previewId } = await previewRule({ supertest, rule });
@@ -258,7 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should have host and user risk score fields', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
         };
         const { previewId } = await previewRule({ supertest, rule });
@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
      */
     it('should get default severity and risk score if there is no mapping', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['signal_overrides']),
+        ...getRuleForAlertTesting(['signal_overrides']),
         severity: 'medium',
         risk_score: 75,
       };
@@ -297,7 +297,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should get overridden severity if the rule has a mapping for it', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['signal_overrides']),
+        ...getRuleForAlertTesting(['signal_overrides']),
         severity: 'medium',
         severity_mapping: [
           { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
@@ -334,7 +334,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should get overridden risk score if the rule has a mapping for it', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['signal_overrides']),
+        ...getRuleForAlertTesting(['signal_overrides']),
         severity: 'medium',
         risk_score: 75,
         risk_score_mapping: [
@@ -369,7 +369,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should get overridden severity and risk score if the rule has both mappings', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['signal_overrides']),
+        ...getRuleForAlertTesting(['signal_overrides']),
         severity: 'medium',
         severity_mapping: [
           { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
@@ -411,7 +411,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should generate signals with name_override field', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
         query: `event.action:boot`,
         rule_name_override: 'event.action',
       };
@@ -428,7 +428,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not generate duplicate signals', async () => {
       const rule: QueryRuleCreateProps = {
-        ...getRuleForSignalTesting(['auditbeat-*']),
+        ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
 
@@ -448,7 +448,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate only 1 alert per host name when grouping by host name', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['suppression-data']),
+          ...getRuleForAlertTesting(['suppression-data']),
           query: `host.name: "host-0"`,
           alert_suppression: {
             group_by: ['host.name'],
@@ -481,7 +481,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate multiple alerts when multiple host names are found', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['suppression-data']),
+          ...getRuleForAlertTesting(['suppression-data']),
           query: `host.name: *`,
           alert_suppression: {
             group_by: ['host.name'],
@@ -521,7 +521,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should generate alerts when using multiple group by fields', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['suppression-data']),
+          ...getRuleForAlertTesting(['suppression-data']),
           query: `host.name: *`,
           alert_suppression: {
             group_by: ['host.name', 'source.ip'],
@@ -564,7 +564,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not count documents that were covered by previous alerts', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['suppression-data']),
+          ...getRuleForAlertTesting(['suppression-data']),
           query: `host.name: *`,
           alert_suppression: {
             group_by: ['host.name', 'source.ip'],
@@ -632,7 +632,7 @@ export default ({ getService }: FtrProviderContext) => {
       // so we expect 2 groups to be created from the single document
       it('should generate multiple alerts for a single doc in multiple groups', async () => {
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['suppression-data']),
+          ...getRuleForAlertTesting(['suppression-data']),
           query: `*:*`,
           alert_suppression: {
             group_by: ['destination.ip'],
@@ -689,7 +689,7 @@ export default ({ getService }: FtrProviderContext) => {
         // The last alert, with null for destination.ip, should be found by the first rule run but not duplicated
         // by the second run.
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['suppression-data']),
+          ...getRuleForAlertTesting(['suppression-data']),
           query: `*:*`,
           alert_suppression: {
             group_by: ['destination.ip'],
@@ -760,7 +760,7 @@ export default ({ getService }: FtrProviderContext) => {
           await indexListOfDocuments([firstDocument, firstDocument]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             rule_id: 'rule-2',
             query: `id:${id}`,
             alert_suppression: {
@@ -772,7 +772,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           };
           const createdRule = await createRule(supertest, log, rule);
-          const alerts = await getOpenSignals(supertest, log, es, createdRule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
           expect(alerts.hits.hits.length).eql(1);
           expect(alerts.hits.hits[0]._source).to.eql({
             ...alerts.hits.hits[0]._source,
@@ -802,7 +802,7 @@ export default ({ getService }: FtrProviderContext) => {
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
-          const secondAlerts = await getOpenSignals(
+          const secondAlerts = await getOpenAlerts(
             supertest,
             log,
             es,
@@ -841,7 +841,7 @@ export default ({ getService }: FtrProviderContext) => {
           await indexListOfDocuments([firstDocument, firstDocument]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             rule_id: 'rule-2',
             query: `id:${id}`,
             alert_suppression: {
@@ -853,7 +853,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           };
           const createdRule = await createRule(supertest, log, rule);
-          const alerts = await getOpenSignals(supertest, log, es, createdRule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
           // Close the alert. Subsequent rule executions should ignore this closed alert
           // for suppression purposes.
@@ -861,7 +861,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
             .set('kbn-xsrf', 'true')
-            .send(setSignalStatus({ signalIds: alertIds, status: 'closed' }))
+            .send(setAlertStatus({ alertIds, status: 'closed' }))
             .expect(200);
 
           const secondTimestamp = new Date().toISOString();
@@ -878,7 +878,7 @@ export default ({ getService }: FtrProviderContext) => {
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
-          const secondAlerts = await getOpenSignals(
+          const secondAlerts = await getOpenAlerts(
             supertest,
             log,
             es,
@@ -922,7 +922,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should generate an alert per rule run when duration is less than rule interval', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['suppression-data']),
+            ...getRuleForAlertTesting(['suppression-data']),
             query: `host.name: "host-0"`,
             alert_suppression: {
               group_by: ['host.name'],
@@ -981,7 +981,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should update an existing alert in the time window', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['suppression-data']),
+            ...getRuleForAlertTesting(['suppression-data']),
             query: `host.name: "host-0"`,
             alert_suppression: {
               group_by: ['host.name'],
@@ -1025,7 +1025,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should update the correct alerts based on group_by field-value pair', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['suppression-data']),
+            ...getRuleForAlertTesting(['suppression-data']),
             query: `host.name: *`,
             alert_suppression: {
               group_by: ['host.name'],
@@ -1099,7 +1099,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should update the correct alerts based on group_by field-value pair even when value is null', async () => {
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['suppression-data']),
+            ...getRuleForAlertTesting(['suppression-data']),
             query: `host.name: *`,
             alert_suppression: {
               group_by: ['destination.ip'], // Only 1 document populates destination.ip
@@ -1162,7 +1162,7 @@ export default ({ getService }: FtrProviderContext) => {
           await indexListOfDocuments([docWithoutOverride, docWithOverride]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
@@ -1226,7 +1226,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
@@ -1313,7 +1313,7 @@ export default ({ getService }: FtrProviderContext) => {
           await indexListOfDocuments([firstDoc, secondDoc, thirdDoc]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
@@ -1383,7 +1383,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           it('should be enriched with host risk score', async () => {
             const rule: QueryRuleCreateProps = {
-              ...getRuleForSignalTesting(['suppression-data']),
+              ...getRuleForAlertTesting(['suppression-data']),
               query: `host.name: "host-0"`,
               alert_suppression: {
                 group_by: ['host.name'],
@@ -1474,7 +1474,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
@@ -1545,7 +1545,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
@@ -1600,7 +1600,7 @@ export default ({ getService }: FtrProviderContext) => {
           await indexListOfDocuments([firstDoc, firstDoc]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
@@ -1654,7 +1654,7 @@ export default ({ getService }: FtrProviderContext) => {
           await indexListOfDocuments([firstDoc, firstDoc]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name'],
@@ -1752,7 +1752,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name', 'agent.version'],
@@ -1831,7 +1831,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
 
           const rule: QueryRuleCreateProps = {
-            ...getRuleForSignalTesting(['ecs_compliant']),
+            ...getRuleForAlertTesting(['ecs_compliant']),
             query: `id:${id}`,
             alert_suppression: {
               group_by: ['agent.name', 'agent.version'],
@@ -1898,7 +1898,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
           it('should create suppressed alerts for single host.name when rule configure with suppress', async () => {
             const rule: QueryRuleCreateProps = {
-              ...getRuleForSignalTesting(['ecs_compliant']),
+              ...getRuleForAlertTesting(['ecs_compliant']),
               query: `id:${id}`,
               alert_suppression: {
                 group_by: ['agent.name'],
@@ -1965,7 +1965,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           it('should create unsuppressed alerts for single host.name', async () => {
             const rule: QueryRuleCreateProps = {
-              ...getRuleForSignalTesting(['ecs_compliant']),
+              ...getRuleForAlertTesting(['ecs_compliant']),
               query: `id:${id}`,
               alert_suppression: {
                 group_by: ['agent.name'],
@@ -2076,7 +2076,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
           exceptions_list: [{ id, list_id: listId, type, namespace_type: namespaceType }],
         };
@@ -2119,7 +2119,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
           exceptions_list: [{ id, list_id: listId, type, namespace_type: namespaceType }],
         };
@@ -2157,7 +2157,7 @@ export default ({ getService }: FtrProviderContext) => {
         await indexEnhancedDocuments({ documents: [firstDoc, firstDoc, secondDoc], id });
 
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['ecs_compliant']),
+          ...getRuleForAlertTesting(['ecs_compliant']),
           query: `id:${id} AND agent.n*: test-1`,
           from: 'now-1h',
           interval: '1h',
@@ -2188,7 +2188,7 @@ export default ({ getService }: FtrProviderContext) => {
         await indexEnhancedDocuments({ documents: [firstDoc, firstDoc, secondDoc], id });
 
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['ecs_compliant']),
+          ...getRuleForAlertTesting(['ecs_compliant']),
           query: `id:${id} AND NOT agent.na*: "test-1"`,
           from: 'now-1h',
           interval: '1h',
@@ -2215,7 +2215,7 @@ export default ({ getService }: FtrProviderContext) => {
         await indexEnhancedDocuments({ documents: [firstDoc, secondDoc, thirdDoc], id });
 
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['ecs_compliant']),
+          ...getRuleForAlertTesting(['ecs_compliant']),
           query: `id:${id} AND agent*: "test-1"`,
           from: 'now-1h',
           interval: '1h',
@@ -2249,7 +2249,7 @@ export default ({ getService }: FtrProviderContext) => {
         await indexEnhancedDocuments({ documents: [firstDoc, secondDoc, thirdDoc], id });
 
         const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['ecs_compliant']),
+          ...getRuleForAlertTesting(['ecs_compliant']),
           query: `id:${id} AND agent.\\*: test-1`,
           from: 'now-1h',
           interval: '1h',
@@ -2317,7 +2317,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('elastic-api-version', '2023-10-31')
           .expect(200);
 
-        const alertsAfterEnable = await getOpenSignals(supertest, log, es, ruleBody, 'succeeded');
+        const alertsAfterEnable = await getOpenAlerts(supertest, log, es, ruleBody, 'succeeded');
         expect(alertsAfterEnable.hits.hits.length > 0).eql(true);
       });
     });

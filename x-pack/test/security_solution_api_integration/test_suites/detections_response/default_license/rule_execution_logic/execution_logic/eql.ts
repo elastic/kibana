@@ -32,14 +32,13 @@ import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForSignalTesting,
-  getOpenSignals,
+  getEqlRuleForAlertTesting,
+  getOpenAlerts,
   getPreviewAlerts,
   previewRule,
-} from '../../utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -66,11 +65,11 @@ export default ({ getService }: FtrProviderContext) => {
     // First test creates a real rule - remaining tests use preview API
     it('generates a correctly formatted signal from EQL non-sequence queries', async () => {
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).eql(1);
       const fullSignal = alerts.hits.hits[0]._source;
       if (!fullSignal) {
@@ -170,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('generates up to max_signals for non-sequence EQL queries', async () => {
       const maxSignals = 200;
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
         max_signals: maxSignals,
       };
       const { previewId } = await previewRule({ supertest, rule });
@@ -180,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('generates max signals warning when circuit breaker is hit', async () => {
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
       };
       const { logs } = await previewRule({ supertest, rule });
       expect(logs[0].warnings).contain(getMaxSignalsWarning());
@@ -188,7 +187,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('uses the provided event_category_override', async () => {
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'config_change where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
         event_category_override: 'auditd.message_type',
       };
@@ -259,7 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('uses the provided timestamp_field', async () => {
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['fake.index.1']),
+        ...getEqlRuleForAlertTesting(['fake.index.1']),
         query: 'any where true',
         timestamp_field: 'created_at',
       };
@@ -273,7 +272,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('uses the provided tiebreaker_field', async () => {
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['fake.index.1']),
+        ...getEqlRuleForAlertTesting(['fake.index.1']),
         query: 'any where true',
         tiebreaker_field: 'locale',
       };
@@ -287,7 +286,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('generates building block signals from EQL sequences in the expected form', async () => {
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'sequence by host.name [anomoly where true] [any where true]', // TODO: spelling
       };
       const { previewId } = await previewRule({ supertest, rule });
@@ -433,7 +432,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('generates shell signals from EQL sequences in the expected form', async () => {
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'sequence by host.name [anomoly where true] [any where true]',
       };
       const { previewId } = await previewRule({ supertest, rule });
@@ -516,7 +515,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('generates up to max_signals with an EQL rule', async () => {
       const maxSignals = 200;
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'sequence by host.name [any where true] [any where true]',
         max_signals: maxSignals,
       };
@@ -534,7 +533,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('generates signals when an index name contains special characters to encode', async () => {
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['auditbeat-*', '<my-index-{now/d}*>']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*', '<my-index-{now/d}*>']),
         query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
       };
       const { previewId } = await previewRule({ supertest, rule });
@@ -544,7 +543,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('uses the provided filters', async () => {
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'any where true',
         filters: [
           {
@@ -599,7 +598,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be enriched with host risk score', async () => {
         const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForSignalTesting(['auditbeat-*']),
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
           query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
         };
         const { previewId } = await previewRule({ supertest, rule });

@@ -24,14 +24,13 @@ import {
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
-  getOpenSignals,
+  getOpenAlerts,
   getPreviewAlerts,
   getThresholdRuleForSignalTesting,
   previewRule,
-} from '../../utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -57,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).eql(1);
       const fullSignal = alerts.hits.hits[0]._source;
       if (!fullSignal) {
@@ -323,7 +322,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).eql(1);
     });
 

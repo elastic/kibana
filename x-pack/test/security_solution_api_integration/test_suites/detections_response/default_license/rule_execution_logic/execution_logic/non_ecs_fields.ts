@@ -10,18 +10,18 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getPreviewAlerts,
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
   previewRule,
-} from '../../utils';
-import { dataGeneratorFactory, enhanceDocument } from '../../utils/data_generator';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+  dataGeneratorFactory,
+  enhanceDocument,
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 const getQueryRule = (docIdToQuery: string) => ({
-  ...getRuleForSignalTesting(['ecs_non_compliant']),
+  ...getRuleForAlertTesting(['ecs_non_compliant']),
   query: `id: "${docIdToQuery}"`,
 });
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
