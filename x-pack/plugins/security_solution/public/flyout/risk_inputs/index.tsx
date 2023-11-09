@@ -47,8 +47,6 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
       onSelectionChange: (selected: AlertRawData[]) => {
         setSelectedItems(selected);
       },
-      // TODO
-      selectableMessage: (selectable: boolean) => '',
       initialSelected: [],
       selectable: () => true,
     }),

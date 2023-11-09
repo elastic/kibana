@@ -25,18 +25,7 @@ const mockProps = {
   isDraggable: false,
 };
 
-// const mockEmbeddableComponent = jest
-// .fn()
-// .mockReturnValue(<div data-test-subj="embeddableComponent" />);
-
-// beforeAll(() => {
-// (useKibana as jest.Mock).mockReturnValue({
-//   services: {
-//     lens: {
-//       EmbeddableComponent: mockEmbeddableComponent,
-//     },
-//   },
-// });
+jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('UserDetailsBody', () => {
   it('renders', () => {
