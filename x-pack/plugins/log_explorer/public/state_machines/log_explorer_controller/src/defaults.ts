@@ -23,7 +23,9 @@ export const DEFAULT_CONTEXT: DefaultLogExplorerControllerState = {
       rowsPerPage: DEFAULT_ROWS_PER_PAGE,
     },
   },
-  breakdownField: LOG_LEVEL_FIELD,
+  chart: {
+    breakdownField: LOG_LEVEL_FIELD,
+  },
   filters: [],
   query: {
     language: 'kuery',

@@ -61,3 +61,18 @@ export const updateGridFromDiscoverAppState = actions.assign<
 
   return {};
 });
+
+export const updateChartFromDiscoverAppState = actions.assign<
+  LogExplorerControllerContext,
+  LogExplorerControllerEvent
+>((context, event) => {
+  if ('appState' in event && event.type === 'RECEIVE_DISCOVER_APP_STATE') {
+    return {
+      chart: {
+        breakdownField: event.appState.breakdownField ?? context.chart.breakdownField,
+      },
+    };
+  }
+
+  return {};
+});

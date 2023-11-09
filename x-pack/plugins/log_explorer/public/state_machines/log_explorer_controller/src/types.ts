@@ -9,7 +9,7 @@ import { ControlGroupAPI } from '@kbn/controls-plugin/public';
 import { QueryState } from '@kbn/data-plugin/common';
 import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { DoneInvokeEvent } from 'xstate';
-import { ControlPanels, GridDisplayOptions } from '../../../../common';
+import { ChartDisplayOptions, ControlPanels, GridDisplayOptions } from '../../../../common';
 import type { DatasetEncodingError, DatasetSelection } from '../../../../common/dataset_selection';
 
 export interface WithDatasetSelection {
@@ -33,7 +33,7 @@ export interface WithQueryState {
 
 export interface WithDisplayOptions {
   grid: GridDisplayOptions;
-  breakdownField: DiscoverAppState['breakdownField'];
+  chart: ChartDisplayOptions;
 }
 
 export interface WithDiscoverStateContainer {

@@ -16,4 +16,9 @@ export {
   UnresolvedDatasetSelection,
 } from './dataset_selection';
 export type { DatasetSelectionPlain } from './dataset_selection';
-export type { GridColumnDisplayOptions, GridDisplayOptions, GridRowsDisplayOptions } from './grid';
+export type {
+  ChartDisplayOptions,
+  GridColumnDisplayOptions,
+  GridRowsDisplayOptions,
+  GridDisplayOptions,
+} from './display_options';

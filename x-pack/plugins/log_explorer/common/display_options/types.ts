@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export interface ChartDisplayOptions {
+  breakdownField: string;
+}
+
 export interface GridColumnDisplayOptions {
   field: string;
   width?: number;

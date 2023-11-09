@@ -23,6 +23,7 @@ import {
 } from './types';
 import {
   subscribeToDiscoverState,
+  updateChartFromDiscoverAppState,
   updateGridFromDiscoverAppState,
 } from './services/discover_service';
 import { ControlPanelRT } from '../../../../common/control_panels';
@@ -175,7 +176,7 @@ export const createPureLogExplorerControllerStateMachine = (
           },
           on: {
             RECEIVE_DISCOVER_APP_STATE: {
-              actions: 'updateGridFromDiscoverAppState',
+              actions: ['updateGridFromDiscoverAppState', 'updateChartFromDiscoverAppState'],
             },
           },
         },
@@ -213,6 +214,7 @@ export const createPureLogExplorerControllerStateMachine = (
         ),
         notifyDataViewUpdate: raise('DATA_VIEW_UPDATED'),
         updateGridFromDiscoverAppState,
+        updateChartFromDiscoverAppState,
       },
       guards: {
         controlGroupAPIExists: (_context, event) => {
