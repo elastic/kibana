@@ -449,7 +449,7 @@ describe('resolveCapabilities', () => {
       expect(splitIntoBucketsMock).toHaveBeenCalledTimes(1);
     });
 
-    it('does not cache results between calls for the same capability paths', async () => {
+    it('does not cache results between calls for different capability paths', async () => {
       const resolver = getCapabilitiesResolver(
         () => defaultCaps,
         () => []
