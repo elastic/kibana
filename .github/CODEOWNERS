@@ -927,12 +927,6 @@ packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 
 ### Observability Plugins
 
-# Actionable observability
-x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
-x-pack/test/observability_functional @elastic/obs-ux-management-team
-x-pack/plugins/infra/public/alerting @elastic/obs-ux-management-team
-x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
-
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
 /.github/workflows/oblt-github-commands @elastic/observablt-robots
@@ -994,6 +988,12 @@ x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 /x-pack/plugins/infra/public/services @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
+
+# Actionable observability
+x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
+x-pack/test/observability_functional @elastic/obs-ux-management-team
+x-pack/plugins/infra/public/alerting @elastic/obs-ux-management-team
+x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
 /x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team
