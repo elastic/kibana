@@ -155,7 +155,9 @@ const buildGetAggregatedSwitchers =
         switcherIdsToApply.add(switcherId)
       );
     });
-    const switchersToApply = [...switcherIdsToApply].map((switcherId) => switcherMap.get(switcherId)!);
+    const switchersToApply = [...switcherIdsToApply].map(
+      (switcherId) => switcherMap.get(switcherId)!
+    );
 
     // split the switchers into buckets for parallel execution
     const switcherBuckets = splitIntoBuckets(switchersToApply);
