@@ -8,7 +8,7 @@
 import { DragContextState, DragContextValue } from '@kbn/dom-drag-drop';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { createMockDataViewsState } from '../data_views_service/mocks';
-import { FramePublicAPI, FrameDatasourceAPI } from '../types';
+import { FramePublicAPI } from '../types';
 export { mockDataPlugin } from './data_plugin_mock';
 export {
   visualizationMap,
@@ -32,40 +32,16 @@ export { lensPluginMock } from './lens_plugin_mock';
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
 
-export const createMockFramePublicAPI = ({
-  datasourceLayers,
-  dateRange,
-  dataViews,
-  activeData,
-}: Partial<Omit<FramePublicAPI, 'dataViews'>> & {
-  dataViews?: Partial<FramePublicAPI['dataViews']>;
-} = {}): FrameMock => ({
-  datasourceLayers: datasourceLayers ?? {},
-  dateRange: dateRange ?? {
+export const createMockFramePublicAPI = (overrides: Partial<FramePublicAPI> = {}): FrameMock => ({
+  datasourceLayers: {},
+  dateRange: {
     fromDate: '2022-03-17T08:25:00.000Z',
     toDate: '2022-04-17T08:25:00.000Z',
   },
-  dataViews: createMockDataViewsState(dataViews),
-  activeData,
-});
-
-export type FrameDatasourceMock = jest.Mocked<FrameDatasourceAPI>;
-
-export const createMockFrameDatasourceAPI = ({
-  datasourceLayers,
-  dateRange,
-  dataViews,
-  query,
-  filters,
-}: Partial<FrameDatasourceAPI> = {}): FrameDatasourceMock => ({
-  datasourceLayers: datasourceLayers ?? {},
-  dateRange: dateRange ?? {
-    fromDate: '2022-03-17T08:25:00.000Z',
-    toDate: '2022-04-17T08:25:00.000Z',
-  },
-  query: query ?? { query: '', language: 'lucene' },
-  filters: filters ?? [],
-  dataViews: createMockDataViewsState(dataViews),
+  dataViews: createMockDataViewsState(),
+  query: { query: '', language: 'lucene' },
+  filters: [],
+  ...overrides,
 });
 
 export function createMockedDragDropContext(

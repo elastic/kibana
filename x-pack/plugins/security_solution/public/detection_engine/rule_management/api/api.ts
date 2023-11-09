@@ -27,12 +27,16 @@ import type {
   ReviewRuleInstallationResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import type {
+  BulkDuplicateRules,
+  BulkActionEditPayload,
+  BulkActionType,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   RULE_MANAGEMENT_FILTERS_URL,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+  BulkActionTypeEnum,
 } from '../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
@@ -54,11 +58,6 @@ import {
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
 
-import type {
-  BulkActionDuplicatePayload,
-  BulkActionEditPayload,
-} from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
-import { BulkActionType } from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import type { PreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
 
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -331,18 +330,18 @@ export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefine
 type PlainBulkAction = {
   type: Exclude<
     BulkActionType,
-    BulkActionType.edit | BulkActionType.export | BulkActionType.duplicate
+    BulkActionTypeEnum['edit'] | BulkActionTypeEnum['export'] | BulkActionTypeEnum['duplicate']
   >;
 } & QueryOrIds;
 
 type EditBulkAction = {
-  type: BulkActionType.edit;
+  type: BulkActionTypeEnum['edit'];
   editPayload: BulkActionEditPayload[];
 } & QueryOrIds;
 
 type DuplicateBulkAction = {
-  type: BulkActionType.duplicate;
-  duplicatePayload?: BulkActionDuplicatePayload;
+  type: BulkActionTypeEnum['duplicate'];
+  duplicatePayload?: BulkDuplicateRules['duplicate'];
 } & QueryOrIds;
 
 export type BulkAction = PlainBulkAction | EditBulkAction | DuplicateBulkAction;
@@ -368,9 +367,9 @@ export async function performBulkAction({
     action: bulkAction.type,
     query: bulkAction.query,
     ids: bulkAction.ids,
-    edit: bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
+    edit: bulkAction.type === BulkActionTypeEnum.edit ? bulkAction.editPayload : undefined,
     duplicate:
-      bulkAction.type === BulkActionType.duplicate ? bulkAction.duplicatePayload : undefined,
+      bulkAction.type === BulkActionTypeEnum.duplicate ? bulkAction.duplicatePayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
@@ -392,7 +391,7 @@ export type BulkExportResponse = Blob;
  */
 export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExportResponse> {
   const params = {
-    action: BulkActionType.export,
+    action: BulkActionTypeEnum.export,
     query: queryOrIds.query,
     ids: queryOrIds.ids,
   };
