@@ -179,5 +179,6 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
+    "@kbn/core-chrome-browser",
   ]
 }

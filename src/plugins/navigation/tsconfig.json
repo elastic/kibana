@@ -11,6 +11,12 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-mount",
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/cloud-plugin",
+    "@kbn/serverless",
+    "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/i18n",
   ],
   "exclude": [
     "target/**/*",

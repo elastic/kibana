@@ -37,7 +37,8 @@
     "@kbn/advanced-settings-plugin",
     "@kbn/utility-types",
     "@kbn/share-plugin",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }
