@@ -360,7 +360,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   };
 
   // show this when wildcard filename with matches operator
-  const getWildcardWarning = (precedingWarning: string): React.ReactNode => {
+  const getWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
     return (
       <p>
         {precedingWarning}{' '}
@@ -369,7 +369,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           content={
             <FormattedMessage
               id="xpack.lists.exceptions.builder.exceptionMatchesOperator.warningMessage.wildcardInFilepath"
-              defaultMessage="To make a more efficient event filter, use multiple conditions and make them as specific as possible when using wildcards in the path values. For instance, adding a process.name or file.name field."
+              defaultMessage="To make a more efficient event filter, use multiple conditions and make them as specific as possible when using wildcards in the values. For instance, adding a process.name or file.name field."
             />
           }
           size="m"
@@ -437,7 +437,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             value: wildcardValue,
           });
           actualWarning =
-            warning === WILDCARD_WARNING ? warning && getWildcardWarning(warning) : warning;
+            warning === WILDCARD_WARNING ? warning && getWildcardWarningInfo(warning) : warning;
         }
 
         return (

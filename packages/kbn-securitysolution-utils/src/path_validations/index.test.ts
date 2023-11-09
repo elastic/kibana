@@ -16,7 +16,7 @@ import {
   FILEPATH_WARNING,
 } from '.';
 
-describe('validateFilePathInput', () => {
+describe('validatePotentialWildcardInput', () => {
   describe('windows', () => {
     const os = OperatingSystem.WINDOWS;
 
@@ -44,6 +44,12 @@ describe('validateFilePathInput', () => {
           os,
           value: 'C:\\Windows\\*\\FILENAME.EXE-*.gz',
         })
+      ).toEqual(WILDCARD_WARNING);
+    });
+
+    it('warns on wildcard on fields that are not file paths', () => {
+      expect(
+        validatePotentialWildcardInput({ fieldName: 'event.category', os, value: '*' })
       ).toEqual(WILDCARD_WARNING);
     });
 
@@ -84,6 +90,12 @@ describe('validateFilePathInput', () => {
       expect(validatePotentialWildcardInput({ os, value: '/opt/FILENAME.EXE-*.gz' })).toEqual(
         WILDCARD_WARNING
       );
+    });
+
+    it('warns on wildcard on fields that are not file paths', () => {
+      expect(
+        validatePotentialWildcardInput({ fieldName: 'event.category', os, value: '*' })
+      ).toEqual(WILDCARD_WARNING);
     });
 
     it('warns on windows paths', () => {
