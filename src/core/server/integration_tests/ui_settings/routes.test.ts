@@ -169,7 +169,7 @@ describe('ui settings service', () => {
         });
       });
 
-      it.skip('returns no validation error message for valid value', async () => {
+      it('returns no validation error message for valid value', async () => {
         const response = await request
           .post(root, '/internal/kibana/settings/custom/validate')
           .send({ value: 'test' })

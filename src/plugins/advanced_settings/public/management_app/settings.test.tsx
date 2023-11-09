@@ -201,7 +201,8 @@ function mockConfig() {
         },
       };
     },
-    validateValue: (key: string, value: any) => Promise.resolve(null),
+    validateValue: (key: string, value: any) =>
+      Promise.resolve({ successfulValidation: true, valid: true }),
   };
   return {
     core: {

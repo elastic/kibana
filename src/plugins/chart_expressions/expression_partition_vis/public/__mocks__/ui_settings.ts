@@ -28,5 +28,6 @@ export const uiSettings: IUiSettingsClient = {
   getAll: (): Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>> => {
     return {};
   },
-  validateValue: (key: string, value: any) => Promise.resolve(null),
+  validateValue: (key: string, value: any) =>
+    Promise.resolve({ successfulValidation: true, valid: true }),
 };

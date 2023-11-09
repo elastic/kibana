@@ -87,8 +87,6 @@ describe('ArrayInput', () => {
     expect(defaultProps.onInputChange).toHaveBeenCalledWith({
       type: 'array',
       unsavedValue: ['foo', 'bar', 'baz'],
-      error: null,
-      isInvalid: false,
     });
   });
 

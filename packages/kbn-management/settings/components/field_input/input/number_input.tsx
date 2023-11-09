@@ -49,7 +49,7 @@ export const NumberInput = ({
   const onBlur = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const blurValue = Number(event.target.value);
     const validationResponse = await validateChange(field.id, blurValue);
-    if (validationResponse.successfulValidation) {
+    if (validationResponse.successfulValidation && !validationResponse.valid) {
       onUpdate({
         type: field.type,
         unsavedValue: blurValue,

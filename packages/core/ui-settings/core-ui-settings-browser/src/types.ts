@@ -110,7 +110,7 @@ export interface IUiSettingsClient {
   /**
    * Validates a uiSettings value and returns a ValueValidation object.
    */
-  validateValue: (key: string, value: any) => Promise<ValueValidation | null>;
+  validateValue: (key: string, value: any) => Promise<ValueValidation>;
 }
 
 /** @public */

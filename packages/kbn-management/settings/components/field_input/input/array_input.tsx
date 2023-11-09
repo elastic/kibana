@@ -55,7 +55,7 @@ export const ArrayInput = ({
       .split(',')
       .filter((v) => v !== '');
     const validationResponse = await validateChange(field.id, blurValue);
-    if (validationResponse.successfulValidation) {
+    if (validationResponse.successfulValidation && !validationResponse.valid) {
       onUpdate({
         type: field.type,
         unsavedValue: blurValue,

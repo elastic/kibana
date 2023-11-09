@@ -84,8 +84,6 @@ describe('NumberInput', () => {
     expect(defaultProps.onInputChange).toHaveBeenCalledWith({
       type: 'number',
       unsavedValue: 54321,
-      isInvalid: false,
-      error: null,
     });
   });
 
