@@ -65,7 +65,7 @@ async function getMobileStats({
     offset,
   };
 
-  const [sessions, httpRequests, crashes, launchTimes] = await Promise.all([
+  const [sessions, httpRequests, crashes, launchTimeAvg] = await Promise.all([
     getMobileSessions({ ...commonProps }),
     getMobileHttpRequests({ ...commonProps }),
     getMobileCrashRate({ ...commonProps }),
