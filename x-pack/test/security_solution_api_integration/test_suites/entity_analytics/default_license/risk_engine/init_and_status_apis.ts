@@ -8,17 +8,14 @@
 import expect from '@kbn/expect';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
 import {
-  cleanRiskEngineConfig,
   legacyTransformIds,
   createLegacyTransforms,
   clearLegacyTransforms,
   riskEngineRouteHelpersFactory,
-  clearTransforms,
   installLegacyRiskScore,
   getLegacyRiskScoreDashboards,
   clearLegacyDashboards,
-  deleteRiskEngineTask,
-  deleteAllRiskScores,
+  cleanRiskEngine,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -31,35 +28,15 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless init_and_status_apis', () => {
     beforeEach(async () => {
-      await cleanRiskEngineConfig({ kibanaServer });
-      await deleteRiskEngineTask({ es, log });
-      await deleteAllRiskScores(log, es);
-      await clearTransforms({
-        es,
-        log,
-      });
+      await cleanRiskEngine({ kibanaServer, es, log });
     });
 
     afterEach(async () => {
-      await cleanRiskEngineConfig({
-        kibanaServer,
-      });
-      await clearLegacyTransforms({
-        es,
-        log,
-      });
-      await clearTransforms({
-        es,
-        log,
-      });
-      await clearLegacyDashboards({
-        supertest,
-        log,
-      });
-      await deleteRiskEngineTask({ es, log });
+      await cleanRiskEngine({ kibanaServer, es, log });
+      await clearLegacyTransforms({ es, log });
+      await clearLegacyDashboards({ supertest, log });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168376
     describe('init api', () => {
       it('should return response with success status', async () => {
         const response = await riskEngineRoutes.init();

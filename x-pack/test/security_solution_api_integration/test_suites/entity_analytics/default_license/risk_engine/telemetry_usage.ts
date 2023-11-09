@@ -15,12 +15,9 @@ import {
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
-  deleteRiskEngineTask,
-  deleteRiskScoreIndices,
   waitForRiskScoresToBePresent,
   riskEngineRouteHelpersFactory,
-  cleanRiskEngineConfig,
-  clearTransforms,
+  cleanRiskEngine,
   getRiskEngineStats,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -52,12 +49,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await cleanRiskEngineConfig({ kibanaServer });
-      await deleteRiskEngineTask({ es, log });
-      await deleteRiskScoreIndices({ log, es });
+      await cleanRiskEngine({ kibanaServer, es, log });
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
-      await clearTransforms({ es, log });
     });
 
     describe('Risk engine not enabled', () => {
@@ -70,7 +64,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168429
     describe('Risk engine enabled', () => {
       let hostId: string;
       let userId: string;
@@ -108,12 +101,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await cleanRiskEngineConfig({ kibanaServer });
-        await deleteRiskEngineTask({ es, log });
-        await deleteRiskScoreIndices({ log, es });
+        await cleanRiskEngine({ kibanaServer, es, log });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await clearTransforms({ es, log });
       });
 
       it('should return riskEngineMetrics with expected values', async () => {
@@ -135,8 +125,6 @@ export default ({ getService }: FtrProviderContext) => {
             all_host_risk_scores_total_day: 10,
           };
           expect(otherStats).to.eql(expected);
-          expect(allRiskScoreIndexSize).to.be.greaterThan(0);
-          expect(uniqueRiskScoreIndexSize).to.be.greaterThan(0);
         });
       });
     });

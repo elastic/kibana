@@ -15,19 +15,15 @@ import {
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
-  deleteRiskEngineTask,
-  deleteAllRiskScores,
   readRiskScores,
   waitForRiskScoresToBePresent,
   normalizeScores,
   riskEngineRouteHelpersFactory,
   updateRiskEngineConfigSO,
   getRiskEngineTask,
-  cleanRiskEngineConfig,
   waitForRiskEngineTaskToBeGone,
-  clearTransforms,
+  cleanRiskEngine,
 } from '../../../utils';
-
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -59,21 +55,15 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
-        await cleanRiskEngineConfig({ kibanaServer });
-        await deleteRiskEngineTask({ es, log });
-        await deleteAllRiskScores(log, es);
+        await cleanRiskEngine({ kibanaServer, es, log });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await clearTransforms({ es, log });
       });
 
       afterEach(async () => {
-        await cleanRiskEngineConfig({ kibanaServer });
-        await deleteRiskEngineTask({ es, log });
-        await deleteAllRiskScores(log, es);
+        await cleanRiskEngine({ kibanaServer, es, log });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await clearTransforms({ es, log });
       });
 
       describe('with some alerts containing hosts', () => {
