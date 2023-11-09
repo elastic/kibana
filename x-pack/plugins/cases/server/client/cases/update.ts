@@ -369,7 +369,7 @@ export const update = async (
       );
     }
 
-    const configurations = await casesClient.configure.get({});
+    const configurations = await casesClient.configure.get();
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
       configurations.map((conf) => [conf.owner, conf.customFields])
     );
