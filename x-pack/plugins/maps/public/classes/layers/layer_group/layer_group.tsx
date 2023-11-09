@@ -284,6 +284,10 @@ export class LayerGroup implements ILayer {
   }
 
   isLayerLoading(zoom: number): boolean {
+    if (!this.isVisible()) {
+      return false;
+    }
+
     return this._children.some((child) => {
       return child.isLayerLoading(zoom);
     });
