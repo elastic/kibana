@@ -23,7 +23,10 @@ interface FtrConfigWithOptions {
 interface FtrConfigsManifest {
   defaultQueue: string;
   disabled: string[];
-  enabled: Array<string | FtrConfigWithOptions>;
+  enabled_stateful: Array<string | FtrConfigWithOptions>;
+  enabled_serverless_search: Array<string | FtrConfigWithOptions>;
+  enabled_serverless_security: Array<string | FtrConfigWithOptions>;
+  enabled_serverless_observability: Array<string | FtrConfigWithOptions>;
 }
 
 const ftrConfigsManifest: FtrConfigsManifest = JsYaml.safeLoad(
@@ -31,7 +34,10 @@ const ftrConfigsManifest: FtrConfigsManifest = JsYaml.safeLoad(
 );
 
 export const FTR_CONFIGS_MANIFEST_PATHS = [
-  Object.values(ftrConfigsManifest.enabled),
+  Object.values(ftrConfigsManifest.enabled_stateful),
+  Object.values(ftrConfigsManifest.enabled_serverless_search),
+  Object.values(ftrConfigsManifest.enabled_serverless_security),
+  Object.values(ftrConfigsManifest.enabled_serverless_observability),
   Object.values(ftrConfigsManifest.disabled),
 ]
   .flat()
