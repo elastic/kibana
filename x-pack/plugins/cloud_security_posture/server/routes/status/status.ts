@@ -282,7 +282,6 @@ export const getCspStatus = async ({
       latest: findingsLatestIndexStatusCspm,
       stream: findingsIndexStatusCspm,
       score: scoreIndexStatusCspm,
-      // score: scoreIndexStatus,
     },
     installation,
     healthyAgentsCspm,
