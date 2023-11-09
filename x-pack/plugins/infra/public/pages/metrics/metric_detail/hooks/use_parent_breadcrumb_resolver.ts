@@ -9,13 +9,13 @@ import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/invent
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useLocation } from 'react-router-dom';
 import { hostsTitle, inventoryTitle } from '../../../../translations';
-import { BreadCrumbOptions } from '../types';
+import { BreadcrumbOptions } from '../types';
 
-export function useParentBreadCrumbResolver() {
-  interface LocationStateProps {
-    originPathname: string;
-  }
+interface LocationStateProps {
+  originPathname: string;
+}
 
+export function useParentBreadcrumbResolver() {
   const hostsLinkProps = useLinkProps({
     app: 'metrics',
     pathname: 'hosts',
@@ -26,37 +26,34 @@ export function useParentBreadCrumbResolver() {
     pathname: 'inventory',
   });
 
-  const breadCrumbMap = new Map<string, BreadCrumbOptions>([
+  const breadcrumbMap = new Map<string, BreadcrumbOptions>([
     ['/hosts', { text: hostsTitle, link: hostsLinkProps }],
     ['/inventory', { text: inventoryTitle, link: inventoryLinkProps }],
   ]);
 
-  const defaultOption: BreadCrumbOptions = breadCrumbMap.get('/inventory')!;
+  const defaultOption: BreadcrumbOptions = breadcrumbMap.get('/inventory')!;
 
   const { state } = useLocation();
   const locationState: LocationStateProps = state as LocationStateProps;
 
-  function getOptionsByNodeType(nodeType: InventoryItemType): BreadCrumbOptions {
+  function getOptionsByNodeType(nodeType: InventoryItemType): BreadcrumbOptions {
     if (nodeType === 'host') {
-      return breadCrumbMap.get('/hosts')!;
-    } else {
-      return defaultOption;
+      return breadcrumbMap.get('/hosts')!;
     }
+    return defaultOption;
   }
 
-  function getBreadCrumbOptions(nodeType: InventoryItemType): BreadCrumbOptions {
+  function getBreadcrumbOptions(nodeType: InventoryItemType) {
     if (locationState === undefined) {
       return getOptionsByNodeType(nodeType);
     }
 
-    const originPathName = locationState.originPathname;
+    const originalPathBreadcrumb = locationState.originPathname
+      ? breadcrumbMap.get(locationState.originPathname)
+      : undefined;
 
-    if (originPathName) {
-      return breadCrumbMap.get(originPathName) ?? defaultOption;
-    }
-
-    return defaultOption;
+    return originalPathBreadcrumb ?? defaultOption;
   }
 
-  return { getBreadCrumbOptions };
+  return { getBreadcrumbOptions };
 }

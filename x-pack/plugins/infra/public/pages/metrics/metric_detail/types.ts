@@ -63,7 +63,7 @@ export type VisSectionProps = rt.TypeOf<typeof VisSectionPropsRT> & {
   stopLiveStreaming?: () => void;
 };
 
-export interface BreadCrumbOptions {
+export interface BreadcrumbOptions {
   text: string;
   link: LinkProps;
 }

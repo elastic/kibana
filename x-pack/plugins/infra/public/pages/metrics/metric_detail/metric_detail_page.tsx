@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
@@ -60,12 +59,6 @@ export const MetricDetailPage = () => {
     },
     [sideNav]
   );
-
-  useMetricsBreadcrumbs([
-    {
-      text: name,
-    },
-  ]);
 
   if (metadataLoading && !filteredRequiredMetrics.length) {
     return (

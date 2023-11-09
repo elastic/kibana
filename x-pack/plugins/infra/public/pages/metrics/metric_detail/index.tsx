@@ -13,21 +13,20 @@ import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { AssetDetailPage } from './asset_detail_page';
 import { MetricDetailPage } from './metric_detail_page';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
-import { useParentBreadCrumbResolver } from './hooks/use_parent_breadcrumb_resolver';
+import { useParentBreadcrumbResolver } from './hooks/use_parent_breadcrumb_resolver';
 
 export const NodeDetail = () => {
   const {
     params: { type: nodeType, node: nodeName },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
-  const parentBreadCrumbResolver = useParentBreadCrumbResolver();
+  const parentBreadcrumbResolver = useParentBreadcrumbResolver();
 
-  const breadCrumbOptions = parentBreadCrumbResolver.getBreadCrumbOptions(nodeType);
-
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
   useMetricsBreadcrumbs([
     {
-      ...breadCrumbOptions.link,
-      text: breadCrumbOptions.text,
+      ...breadcrumbOptions.link,
+      text: breadcrumbOptions.text,
     },
     {
       text: nodeName,
