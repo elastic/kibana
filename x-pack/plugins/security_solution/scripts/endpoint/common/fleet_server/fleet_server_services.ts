@@ -42,6 +42,7 @@ import {
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { captureCallingStack } from '../utils';
 import {
   createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
@@ -120,13 +121,7 @@ export const startFleetServer = async ({
   port = 8220,
 }: StartFleetServerOptions): Promise<StartedFleetServer> => {
   logger.info(`Starting Fleet Server and connecting it to Kibana`);
-  logger.debug(
-    `called from:\n${(() => {
-      const s = { stack: '' };
-      Error.captureStackTrace(s);
-      return s.stack;
-    })()}`
-  );
+  logger.debug(captureCallingStack());
 
   return logger.indent(4, async () => {
     // Check if fleet already running if `force` is false
@@ -248,13 +243,15 @@ const startFleetServerWithDocker = async ({
   await verifyDockerInstalled(log);
 
   let agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
+  const localhostRealIp = getLocalhostRealIp();
+  const fleetServerUrl = `https://${localhostRealIp}:${port}`;
 
-  log.info(`Starting a new fleet server using Docker (version: ${agentVersion})`);
+  log.info(
+    `Starting a new fleet server using Docker\n    Agent version: ${agentVersion}\n    Server URL: ${fleetServerUrl}`
+  );
 
   const response: StartedServer = await log.indent(4, async () => {
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
-    const localhostRealIp = getLocalhostRealIp();
-    const fleetServerUrl = `https://${localhostRealIp}:${port}`;
     const esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
     const containerName = `dev-fleet-server.${port}`;
     const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
@@ -341,7 +338,7 @@ const startFleetServerWithDocker = async ({
           containerName,
           '/bin/bash',
           '-c',
-          './elastic-agent version',
+          '/usr/share/elastic-agent/elastic-agent version',
         ]).catch((err) => {
           log.verbose(`Failed to retrieve agent version information from running instance.`, err);
           return { stdout: 'Unable to retrieve version information' };
