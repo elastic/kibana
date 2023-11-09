@@ -77,7 +77,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeScheduled"
             defaultMessage="The agent has been instructed to upgrade.{upgradeStartDelay}"
             values={{
-              upgradeStartDelay: getUpgradeStartDelay(agentUpgradeDetails.metadata.scheduled_at),
+              upgradeStartDelay: getUpgradeStartDelay(agentUpgradeDetails.metadata?.scheduled_at),
             }}
           />
         ),
@@ -97,7 +97,9 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeDownloading"
             defaultMessage="Downloading the new agent artifact version{downloadEstimate}."
             values={{
-              downloadEstimate: getDownloadEstimate(agentUpgradeDetails?.metadata.download_percent),
+              downloadEstimate: getDownloadEstimate(
+                agentUpgradeDetails?.metadata?.download_percent
+              ),
             }}
           />
         ),
@@ -202,7 +204,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeFailed"
             defaultMessage="Upgrade failed: {errorMsg}."
             values={{
-              errorMsg: agentUpgradeDetails?.metadata.error_msg,
+              errorMsg: agentUpgradeDetails?.metadata?.error_msg,
             }}
           />
         ),
