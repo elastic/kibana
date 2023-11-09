@@ -230,7 +230,7 @@ export class QuickJobCreatorBase {
     return mergedQueries;
   }
 
-  protected async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
+  private async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
     const dashboardTitle = dashboard?.getTitle();
     if (dashboardTitle === undefined || dashboardTitle === '') {
       // embeddable may have not been in a dashboard
@@ -274,7 +274,7 @@ export class QuickJobCreatorBase {
     return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
-  protected async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
+  private async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
     const customUrls = await this.createDashboardLink(dashboard, datafeedConfig);
     return dashboard !== undefined && customUrls !== null ? { custom_urls: [customUrls] } : {};
   }
