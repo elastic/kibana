@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
+import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
 import { getCoverageOverviewFilterMock } from '../../../../../common/api/detection_engine/rule_management/coverage_overview/coverage_overview_route.mock';
 import {
   getMockCoverageOverviewMitreSubTechnique,
@@ -45,7 +45,7 @@ describe('helpers', () => {
       expect(getNumOfCoveredSubtechniques(payload)).toEqual(0);
     });
 
-    it('returns number of subtechniques when present', () => {
+    it('returns total number of enabled and disabled subtechniques when no filter is passed', () => {
       const payload = {
         ...getMockCoverageOverviewMitreTechnique(),
         subtechniques: [
@@ -53,7 +53,55 @@ describe('helpers', () => {
           getMockCoverageOverviewMitreSubTechnique(),
         ],
       };
-      expect(getNumOfCoveredSubtechniques(payload)).toEqual(2);
+      expect(getNumOfCoveredSubtechniques(payload)).toEqual(4);
+    });
+
+    it('returns total number of enabled and disabled subtechniques when both filters are passed', () => {
+      const payload = {
+        ...getMockCoverageOverviewMitreTechnique(),
+        subtechniques: [
+          getMockCoverageOverviewMitreSubTechnique(),
+          getMockCoverageOverviewMitreSubTechnique(),
+        ],
+      };
+      expect(
+        getNumOfCoveredSubtechniques(payload, [
+          CoverageOverviewRuleActivity.Enabled,
+          CoverageOverviewRuleActivity.Disabled,
+        ])
+      ).toEqual(4);
+    });
+
+    it('returns total number of enabled subtechniques when enabled filter is passed', () => {
+      const payload = {
+        ...getMockCoverageOverviewMitreTechnique(),
+        subtechniques: [
+          {
+            ...getMockCoverageOverviewMitreSubTechnique(),
+            enabledRules: [],
+          },
+          getMockCoverageOverviewMitreSubTechnique(),
+        ],
+      };
+      expect(getNumOfCoveredSubtechniques(payload, [CoverageOverviewRuleActivity.Enabled])).toEqual(
+        1
+      );
+    });
+
+    it('returns total number of disabled subtechniques when disabled filter is passed', () => {
+      const payload = {
+        ...getMockCoverageOverviewMitreTechnique(),
+        subtechniques: [
+          {
+            ...getMockCoverageOverviewMitreSubTechnique(),
+            disabledRules: [],
+          },
+          getMockCoverageOverviewMitreSubTechnique(),
+        ],
+      };
+      expect(
+        getNumOfCoveredSubtechniques(payload, [CoverageOverviewRuleActivity.Disabled])
+      ).toEqual(1);
     });
   });
 

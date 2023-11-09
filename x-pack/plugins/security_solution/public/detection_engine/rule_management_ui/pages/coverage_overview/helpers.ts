@@ -6,10 +6,8 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import type {
-  CoverageOverviewRuleActivity,
-  CoverageOverviewRuleSource,
-} from '../../../../../common/api/detection_engine';
+import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
+import type { CoverageOverviewRuleSource } from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewCardColorThresholds } from './constants';
@@ -17,8 +15,31 @@ import { coverageOverviewCardColorThresholds } from './constants';
 export const getNumOfCoveredTechniques = (tactic: CoverageOverviewMitreTactic): number =>
   tactic.techniques.filter((technique) => technique.enabledRules.length !== 0).length;
 
-export const getNumOfCoveredSubtechniques = (technique: CoverageOverviewMitreTechnique): number =>
-  technique.subtechniques.filter((subtechnique) => subtechnique.enabledRules.length !== 0).length;
+export const getNumOfCoveredSubtechniques = (
+  technique: CoverageOverviewMitreTechnique,
+  activity?: CoverageOverviewRuleActivity[]
+): number => {
+  let coveredSubtechniqueCount = 0;
+  if (activity === undefined) {
+    return (
+      technique.subtechniques.filter((subtechnique) => subtechnique.enabledRules.length !== 0)
+        .length +
+      technique.subtechniques.filter((subtechnique) => subtechnique.disabledRules.length !== 0)
+        .length
+    );
+  }
+  if (activity.includes(CoverageOverviewRuleActivity.Enabled)) {
+    coveredSubtechniqueCount += technique.subtechniques.filter(
+      (subtechnique) => subtechnique.enabledRules.length !== 0
+    ).length;
+  }
+  if (activity.includes(CoverageOverviewRuleActivity.Disabled)) {
+    coveredSubtechniqueCount += technique.subtechniques.filter(
+      (subtechnique) => subtechnique.disabledRules.length !== 0
+    ).length;
+  }
+  return coveredSubtechniqueCount;
+};
 
 export const getCardBackgroundColor = (value: number) => {
   for (const { threshold, color } of coverageOverviewCardColorThresholds) {

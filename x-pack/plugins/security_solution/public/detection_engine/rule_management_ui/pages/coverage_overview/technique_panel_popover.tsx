@@ -41,7 +41,6 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const coveredSubtechniques = useMemo(() => getNumOfCoveredSubtechniques(technique), [technique]);
   const isEnableButtonDisabled = useMemo(
     () => !canUserCRUD || technique.disabledRules.length === 0,
     [canUserCRUD, technique.disabledRules.length]
@@ -53,9 +52,17 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   );
 
   const {
-    state: { showExpandedCells },
+    state: {
+      showExpandedCells,
+      filter: { activity },
+    },
     actions: { enableAllDisabled },
   } = useCoverageOverviewDashboardContext();
+
+  const coveredSubtechniques = useMemo(
+    () => getNumOfCoveredSubtechniques(technique, activity),
+    [activity, technique]
+  );
 
   const handleEnableAllDisabled = useCallback(async () => {
     setIsLoading(true);
