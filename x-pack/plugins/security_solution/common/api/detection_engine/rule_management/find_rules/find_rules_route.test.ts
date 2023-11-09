@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-
-import { FindRulesRequestQuery } from './find_rules_route';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import type { FindRulesRequestQueryInput } from './find_rules_route.gen';
+import { FindRulesRequestQuery } from './find_rules_route.gen';
 
 describe('Find rules request schema', () => {
   test('empty objects do validate', () => {
-    const payload: FindRulesRequestQuery = {};
+    const payload: FindRulesRequestQueryInput = {};
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual({
       page: 1,
       per_page: 20,
     });
@@ -35,167 +31,126 @@ describe('Find rules request schema', () => {
       sort_order: 'asc',
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
-  test('made up parameters do not validate', () => {
-    const payload: Partial<FindRulesRequestQuery> & { madeUp: string } = {
+  test('made up parameters are ignored', () => {
+    const payload: Partial<FindRulesRequestQueryInput> & { madeUp: string } = {
       madeUp: 'invalid value',
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
-    expect(message.schema).toEqual({});
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual({
+      page: 1,
+      per_page: 20,
+    });
   });
 
   test('per_page validates', () => {
-    const payload: FindRulesRequestQuery = {
+    const payload: FindRulesRequestQueryInput = {
       per_page: 5,
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).per_page).toEqual(payload.per_page);
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data.per_page).toEqual(payload.per_page);
   });
 
   test('page validates', () => {
-    const payload: FindRulesRequestQuery = {
+    const payload: FindRulesRequestQueryInput = {
       page: 5,
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).page).toEqual(payload.page);
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data.page).toEqual(payload.page);
   });
 
   test('sort_field validates', () => {
-    const payload: FindRulesRequestQuery = {
+    const payload: FindRulesRequestQueryInput = {
       sort_field: 'name',
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).sort_field).toEqual('name');
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data.sort_field).toEqual(payload.sort_field);
   });
 
   test('fields validates with a string', () => {
-    const payload: FindRulesRequestQuery = {
+    const payload: FindRulesRequestQueryInput = {
       fields: ['some value'],
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).fields).toEqual(payload.fields);
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data.fields).toEqual(payload.fields);
   });
 
   test('fields validates with multiple strings', () => {
-    const payload: FindRulesRequestQuery = {
+    const payload: FindRulesRequestQueryInput = {
       fields: ['some value 1', 'some value 2'],
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).fields).toEqual(payload.fields);
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data.fields).toEqual(payload.fields);
   });
 
   test('fields does not validate with a number', () => {
-    const payload: Omit<FindRulesRequestQuery, 'fields'> & { fields: number } = {
+    const payload: Omit<FindRulesRequestQueryInput, 'fields'> & { fields: number } = {
       fields: 5,
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "fields"']);
-    expect(message.schema).toEqual({});
-  });
-
-  test('per_page has a default of 20', () => {
-    const payload: FindRulesRequestQuery = {};
-
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).per_page).toEqual(20);
-  });
-
-  test('page has a default of 1', () => {
-    const payload: FindRulesRequestQuery = {};
-
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).page).toEqual(1);
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('fields: Expected array, received number');
   });
 
   test('filter works with a string', () => {
-    const payload: FindRulesRequestQuery = {
+    const payload: FindRulesRequestQueryInput = {
       filter: 'some value 1',
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).filter).toEqual(payload.filter);
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data.filter).toEqual(payload.filter);
   });
 
   test('filter does not work with a number', () => {
-    const payload: Omit<FindRulesRequestQuery, 'filter'> & { filter: number } = {
+    const payload: Omit<FindRulesRequestQueryInput, 'filter'> & { filter: number } = {
       filter: 5,
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "filter"']);
-    expect(message.schema).toEqual({});
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('filter: Expected string, received number');
   });
 
   test('sort_order validates with desc and sort_field', () => {
-    const payload: FindRulesRequestQuery = {
+    const payload: FindRulesRequestQueryInput = {
       sort_order: 'desc',
       sort_field: 'name',
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).sort_order).toEqual(payload.sort_order);
-    expect((message.schema as FindRulesRequestQuery).sort_field).toEqual(payload.sort_field);
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data.sort_order).toEqual(payload.sort_order);
+    expect(result.data.sort_field).toEqual(payload.sort_field);
   });
 
   test('sort_order does not validate with a string other than asc and desc', () => {
-    const payload: Omit<FindRulesRequestQuery, 'sort_order'> & { sort_order: string } = {
+    const payload: Omit<FindRulesRequestQueryInput, 'sort_order'> & { sort_order: string } = {
       sort_order: 'some other string',
       sort_field: 'name',
     };
 
-    const decoded = FindRulesRequestQuery.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "some other string" supplied to "sort_order"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = FindRulesRequestQuery.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "sort_order: Invalid enum value. Expected 'asc' | 'desc', received 'some other string'"
+    );
   });
 });

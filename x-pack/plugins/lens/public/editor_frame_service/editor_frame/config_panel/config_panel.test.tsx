@@ -477,12 +477,14 @@ describe('ConfigPanel', () => {
       expect(visualizationMap.testVis.setDimension).toHaveBeenCalledWith({
         columnId: 'newId',
         frame: {
+          dataViews: expect.anything(),
           activeData: undefined,
           datasourceLayers: {
             a: expect.anything(),
           },
           dateRange: expect.anything(),
-          dataViews: expect.anything(),
+          filters: [],
+          query: undefined,
         },
         groupId: 'a',
         layerId: 'newId',
