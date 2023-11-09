@@ -22,7 +22,7 @@ export type Props = Omit<PromptContext, 'id'> & {
   /** Optionally specify a well known ID, or default to a UUID */
   promptContextId?: string;
   /** Optionally specify color of empty button */
-  color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger' | 'ghost';
+  color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
 };
 
 const NewChatComponent: React.FC<Props> = ({
