@@ -304,6 +304,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             singleSelection={{ asPlainText: true }}
             isClearable={false}
             data-test-subj="filterIndexPatternsSelect"
+            truncationProps={{ truncation: 'middle' }}
           />
         </EuiFormRow>
         <EuiSpacer size="s" />

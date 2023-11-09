@@ -10,11 +10,9 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
-import { TruncatedLabel } from './truncated_label';
 
 interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;
@@ -25,10 +23,6 @@ interface PhraseValueInputProps extends PhraseSuggestorProps {
   disabled?: boolean;
   invalid?: boolean;
 }
-
-const DEFAULT_COMBOBOX_WIDTH = 250;
-const COMBOBOX_PADDINGS = 10;
-const DEFAULT_FONT = '14px Inter';
 
 class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
   comboBoxWrapperRef = React.createRef<HTMLDivElement>();
@@ -96,20 +90,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
           onCreateOption={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phraseParamsComboxBox"
-          renderOption={(option, searchValue) => (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem>
-                <TruncatedLabel
-                  defaultComboboxWidth={DEFAULT_COMBOBOX_WIDTH}
-                  defaultFont={DEFAULT_FONT}
-                  comboboxPaddings={COMBOBOX_PADDINGS}
-                  comboBoxWrapperRef={this.comboBoxWrapperRef}
-                  label={option.label}
-                  search={searchValue}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+          truncationProps={{ truncation: 'middle' }}
         />
       </div>
     );
