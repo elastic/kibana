@@ -241,9 +241,19 @@ export class ComboBoxService extends FtrService {
     this.log.debug(`comboBox.getComboBoxSelectedOptions, comboBoxSelector: ${comboBoxSelector}`);
     const comboBox = await this.testSubjects.find(comboBoxSelector);
     const $ = await comboBox.parseDomContent();
-    return $('.euiComboBoxPill')
+
+    // Single selection combo box values are rendered as inputs
+    const inputOption = $('input[aria-invalid="false"]');
+
+    const options = $('.euiComboBoxPill')
       .toArray()
       .map((option) => $(option).text());
+
+    if (inputOption && inputOption.val()) {
+      options.push(inputOption.val());
+    }
+
+    return options;
   }
 
   /**
