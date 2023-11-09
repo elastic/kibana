@@ -45,23 +45,23 @@ describe('helpers', () => {
       expect(getNumOfCoveredSubtechniques(payload)).toEqual(0);
     });
 
-    it('returns total number of enabled and disabled subtechniques when no filter is passed', () => {
+    it('returns total number of unique enabled and disabled subtechniques when no filter is passed', () => {
       const payload = {
         ...getMockCoverageOverviewMitreTechnique(),
         subtechniques: [
           getMockCoverageOverviewMitreSubTechnique(),
-          getMockCoverageOverviewMitreSubTechnique(),
+          { ...getMockCoverageOverviewMitreSubTechnique(), id: 'test-id' },
         ],
       };
-      expect(getNumOfCoveredSubtechniques(payload)).toEqual(4);
+      expect(getNumOfCoveredSubtechniques(payload)).toEqual(2);
     });
 
-    it('returns total number of enabled and disabled subtechniques when both filters are passed', () => {
+    it('returns total number of unique enabled and disabled subtechniques when both filters are passed', () => {
       const payload = {
         ...getMockCoverageOverviewMitreTechnique(),
         subtechniques: [
           getMockCoverageOverviewMitreSubTechnique(),
-          getMockCoverageOverviewMitreSubTechnique(),
+          { ...getMockCoverageOverviewMitreSubTechnique(), id: 'test-id' },
         ],
       };
       expect(
@@ -69,7 +69,7 @@ describe('helpers', () => {
           CoverageOverviewRuleActivity.Enabled,
           CoverageOverviewRuleActivity.Disabled,
         ])
-      ).toEqual(4);
+      ).toEqual(2);
     });
 
     it('returns total number of enabled subtechniques when enabled filter is passed', () => {

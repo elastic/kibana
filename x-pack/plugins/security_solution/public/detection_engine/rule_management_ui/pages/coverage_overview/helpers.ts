@@ -19,26 +19,23 @@ export const getNumOfCoveredSubtechniques = (
   technique: CoverageOverviewMitreTechnique,
   activity?: CoverageOverviewRuleActivity[]
 ): number => {
-  let coveredSubtechniqueCount = 0;
-  if (activity === undefined) {
-    return (
-      technique.subtechniques.filter((subtechnique) => subtechnique.enabledRules.length !== 0)
-        .length +
-      technique.subtechniques.filter((subtechnique) => subtechnique.disabledRules.length !== 0)
-        .length
-    );
+  const coveredSubtechniques = new Set();
+  if (!activity || activity.includes(CoverageOverviewRuleActivity.Enabled)) {
+    for (const subtechnique of technique.subtechniques) {
+      if (subtechnique.enabledRules.length) {
+        coveredSubtechniques.add(subtechnique.id);
+      }
+    }
   }
-  if (activity.includes(CoverageOverviewRuleActivity.Enabled)) {
-    coveredSubtechniqueCount += technique.subtechniques.filter(
-      (subtechnique) => subtechnique.enabledRules.length !== 0
-    ).length;
+
+  if (!activity || activity.includes(CoverageOverviewRuleActivity.Disabled)) {
+    for (const subtechnique of technique.subtechniques) {
+      if (subtechnique.disabledRules.length) {
+        coveredSubtechniques.add(subtechnique.id);
+      }
+    }
   }
-  if (activity.includes(CoverageOverviewRuleActivity.Disabled)) {
-    coveredSubtechniqueCount += technique.subtechniques.filter(
-      (subtechnique) => subtechnique.disabledRules.length !== 0
-    ).length;
-  }
-  return coveredSubtechniqueCount;
+  return coveredSubtechniques.size;
 };
 
 export const getCardBackgroundColor = (value: number) => {
