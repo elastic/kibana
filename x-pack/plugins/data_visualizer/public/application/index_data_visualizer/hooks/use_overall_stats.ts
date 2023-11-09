@@ -128,6 +128,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         probability
       );
 
+      // @TODO: remove
+      console.log(`--@@documentCountStats`, documentCountStats);
+
       const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
         data.search
           .search<IKibanaSearchRequest, IKibanaSearchResponse>(

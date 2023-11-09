@@ -24,7 +24,7 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 
-export const IndexDataVisualizerPage: FC = () => {
+export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: {
@@ -193,6 +193,7 @@ export const IndexDataVisualizerPage: FC = () => {
           <IndexDataVisualizer
             getAdditionalLinks={getAdditionalLinks}
             showFrozenDataTierChoice={showNodeInfo}
+            esql={esql}
           />
         </>
       ) : null}

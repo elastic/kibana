@@ -12,6 +12,7 @@ import { DataPublicPluginStart, ISearchOptions } from '@kbn/data-plugin/public';
 import seedrandom from 'seedrandom';
 import { isDefined } from '@kbn/ml-is-defined';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { lastValueFrom } from 'rxjs';
 import { RANDOM_SAMPLER_PROBABILITIES } from '../../constants/random_sampler';
 import type {
   DocumentCountStats,
@@ -21,6 +22,63 @@ import type {
 const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
 
+const getESQLDocumentCountStats = async (
+  search: DataPublicPluginStart['search'],
+  params: OverallStatsSearchStrategyParams,
+  searchOptions: ISearchOptions
+): Promise<DocumentCountStats> => {
+  const {
+    index,
+    timeFieldName,
+    earliest: earliestMs,
+    latest: latestMs,
+    runtimeFieldMap,
+    searchQuery,
+    intervalMs,
+  } = params;
+
+  const esqlBaseQuery = `from ${index}`;
+  const aggQuery = `| EVAL _timestamp_=TO_DOUBLE(DATE_TRUNC(${intervalMs} milliseconds, ${timeFieldName})) | stats rows = count(*) by _timestamp_ | LIMIT 10000`;
+
+  const esqlResults = await lastValueFrom(
+    search.search(
+      {
+        params: {
+          query: esqlBaseQuery + aggQuery,
+          time_zone: 'UTC',
+          locale: 'en',
+          filter: {
+            bool: {
+              must: [],
+              filter: [],
+              should: [],
+              must_not: [],
+            },
+          },
+        },
+      },
+      { ...searchOptions, strategy: 'esql' }
+    )
+  );
+
+  let totalCount = 0;
+  const _buckets = {};
+  esqlResults.rawResponse.values.forEach((val) => {
+    const [count, bucket] = val;
+    _buckets[bucket] = count;
+    totalCount += count;
+  });
+  const result: DocumentCountStats = {
+    interval: intervalMs,
+    probability: 1,
+    randomlySampled: false,
+    timeRangeEarliest: earliestMs,
+    timeRangeLatest: latestMs,
+    buckets: _buckets,
+    totalCount,
+  };
+  return result;
+};
 export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
@@ -46,6 +104,8 @@ export const getDocumentCountStats = async (
 
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
+  // @TODO:
+  return await getESQLDocumentCountStats(search, params, searchOptions);
   const query = {
     bool: {
       filter: filterCriteria,
@@ -193,6 +253,7 @@ export const getDocumentCountStats = async (
       }
     }
   }
+
   return result;
 };
 

@@ -88,6 +88,7 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS:
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
+      case ML_PAGES.DATA_VISUALIZER_ESQL:
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
       case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
       case ML_PAGES.AIOPS:

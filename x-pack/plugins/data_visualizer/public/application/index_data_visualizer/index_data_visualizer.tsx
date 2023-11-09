@@ -33,6 +33,8 @@ import {
   type IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
+import { IndexDataVisualizerESQL } from './components/index_data_visualizer_view/index_data_visualizer_esql';
+
 import { useDataVisualizerKibana } from '../kibana_context';
 import type { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
@@ -84,6 +86,8 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
   IndexDataVisualizerComponent,
   getAdditionalLinks,
 }) => {
+  // @TODO: remove
+  console.log(`--@@DataVisualizerStateContextProvider`, DataVisualizerStateContextProvider);
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
@@ -256,9 +260,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
           currentSessionId={currentSessionId}
           getAdditionalLinks={getAdditionalLinks}
         />
-      ) : (
-        <div />
-      )}
+      ) : null}
     </UrlStateContextProvider>
   );
 };
@@ -266,12 +268,15 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
 interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
+  esql?: boolean;
 }
 
 export const IndexDataVisualizer: FC<Props> = ({
   getAdditionalLinks,
   showFrozenDataTierChoice = true,
+  esql,
 }) => {
+  console.log('IndexDataVisualizer props', esql);
   const coreStart = getCoreStart();
   const {
     data,
@@ -320,10 +325,14 @@ export const IndexDataVisualizer: FC<Props> = ({
       <KibanaContextProvider services={{ ...services }}>
         <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
           <DatePickerContextProvider {...datePickerDeps}>
-            <DataVisualizerStateContextProvider
-              IndexDataVisualizerComponent={IndexDataVisualizerView}
-              getAdditionalLinks={getAdditionalLinks}
-            />
+            {!esql ? (
+              <DataVisualizerStateContextProvider
+                IndexDataVisualizerComponent={IndexDataVisualizerView}
+                getAdditionalLinks={getAdditionalLinks}
+              />
+            ) : (
+              <IndexDataVisualizerESQL />
+            )}
           </DatePickerContextProvider>
         </StorageContextProvider>
       </KibanaContextProvider>
