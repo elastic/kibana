@@ -52,12 +52,12 @@ export class ServerlessPlugin
     const { developer } = this.config;
 
     // if (developer && developer.projectSwitcher && developer.projectSwitcher.enabled) {
-      const { currentType } = developer.projectSwitcher;
+    const { currentType } = developer.projectSwitcher;
 
-      core.chrome.navControls.registerRight({
-        order: 500,
-        mount: (target) => this.mountProjectSwitcher(target, core, currentType),
-      });
+    core.chrome.navControls.registerRight({
+      order: 500,
+      mount: (target) => this.mountProjectSwitcher(target, core, currentType),
+    });
     // }
 
     core.chrome.setChromeStyle('project');
