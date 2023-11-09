@@ -33,9 +33,8 @@ import {
   CsvSearchSourceImmediateExportType,
   CsvV2ExportType,
 } from '@kbn/reporting-export-types-csv';
-import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
 import { ExportType } from '@kbn/reporting-server';
-import { PdfExportType } from '@kbn/reporting-export-types-pdf';
+import { PdfV1ExportType, PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import {
   PdfScreenshotResult,

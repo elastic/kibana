@@ -6,13 +6,14 @@
  */
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
-import { generatePdfObservable, cryptoFactory, TaskPayloadPDF } from '@kbn/reporting-server';
+import { PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
+import { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
+import { cryptoFactory, generatePdfObservable } from '@kbn/reporting-server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import { createMockConfigSchema } from '../../test_helpers';
-import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
 import { of } from 'rxjs';
+import { Writable } from 'stream';
+import { createMockConfigSchema } from '../../test_helpers';
 
 jest.mock('@kbn/reporting-server/generate_pdf');
 
