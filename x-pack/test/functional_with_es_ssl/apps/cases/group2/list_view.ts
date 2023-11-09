@@ -660,9 +660,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Column Selection', () => {
       afterEach(async () => {
         await toasts.dismissAllToastsWithChecks();
-
-        // closes the popover
-        await browser.pressKeys(browser.keys.ESCAPE);
       });
 
       before(async () => {
@@ -702,6 +699,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('column-selection-popover-hide-all-button');
 
+        await cases.casesTable.closeColumnsPopover();
+
         expect(await cases.casesTable.hasColumn('Name')).to.be(false);
         expect(await cases.casesTable.hasColumn('Assignees')).to.be(false);
         expect(await cases.casesTable.hasColumn('Tags')).to.be(false);
@@ -712,6 +711,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.openColumnsPopover();
 
         await testSubjects.click('column-selection-popover-show-all-button');
+
+        await cases.casesTable.closeColumnsPopover();
 
         expect(await cases.casesTable.hasColumn('Name')).to.be(true);
         expect(await cases.casesTable.hasColumn('Assignees')).to.be(true);

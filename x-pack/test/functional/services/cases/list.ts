@@ -403,6 +403,11 @@ export function CasesTableServiceProvider(
 
     async openColumnsPopover() {
       await testSubjects.click('column-selection-popover-button');
+      await testSubjects.existOrFail('column-selection-popover-drag-drop-context');
+    },
+
+    async closeColumnsPopover() {
+      await testSubjects.click('column-selection-popover-button');
     },
 
     async toggleColumnInPopover(columnId: string) {
