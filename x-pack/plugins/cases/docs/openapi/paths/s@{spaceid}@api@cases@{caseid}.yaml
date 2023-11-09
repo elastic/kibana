@@ -21,6 +21,8 @@ get:
           examples:
             getCaseResponse:
               $ref: '../components/examples/get_case_response.yaml'
+            getObservabilityCaseReponse:
+              $ref: '../components/examples/get_case_observability_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
