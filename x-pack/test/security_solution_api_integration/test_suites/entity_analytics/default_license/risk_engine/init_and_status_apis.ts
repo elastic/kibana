@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+
 import {
   legacyTransformIds,
   createLegacyTransforms,
@@ -17,9 +17,9 @@ import {
   getLegacyRiskScoreDashboards,
   clearLegacyDashboards,
   cleanRiskEngine,
-} from './utils';
+} from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const log = getService('log');
 
-  describe('Risk Engine', () => {
+  describe('@ess @serverless init_and_status_apis', () => {
     beforeEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
     });
