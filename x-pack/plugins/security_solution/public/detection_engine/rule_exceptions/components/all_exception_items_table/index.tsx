@@ -29,7 +29,6 @@ import {
   buildShowExpiredExceptionsFilter,
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
-import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -85,6 +84,7 @@ export interface GetExceptionItemProps {
 interface ExceptionsViewerProps {
   rule: Rule | null;
   listTypes: ExceptionListTypeEnum[];
+  hasAccessToLists: boolean;
   /* Used for when displaying exceptions for a rule that has since been deleted, forcing read only view */
   isViewReadOnly: boolean;
   onRuleChange?: () => void;
@@ -93,6 +93,7 @@ interface ExceptionsViewerProps {
 const ExceptionsViewerComponent = ({
   rule,
   listTypes,
+  hasAccessToLists,
   isViewReadOnly,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
@@ -122,12 +123,10 @@ const ExceptionsViewerComponent = ({
     [listTypes]
   );
 
-  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
-    useListsConfig();
   const canCrudEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canWriteEndpointExceptions = useMemo(
-    () => canCrudEndpointExceptions && !(listsConfigLoading || needsListsConfiguration),
-    [canCrudEndpointExceptions, listsConfigLoading, needsListsConfiguration]
+    () => canCrudEndpointExceptions && hasAccessToLists,
+    [canCrudEndpointExceptions, hasAccessToLists]
   );
 
   // Reducer state

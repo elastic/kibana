@@ -15,6 +15,7 @@ import { ExceptionsViewer } from '../rule_exceptions/components/all_exception_it
 const RULE_ENDPOINT_EXCEPTION_LIST_TYPE = [ExceptionListTypeEnum.ENDPOINT];
 
 interface EndpointExceptionsViewerProps {
+  hasAccessToLists: boolean;
   isViewReadOnly: boolean;
   onRuleChange: () => void;
   rule: Rule | null;
@@ -23,6 +24,7 @@ interface EndpointExceptionsViewerProps {
 
 export const EndpointExceptionsViewer = memo(
   ({
+    hasAccessToLists,
     isViewReadOnly,
     onRuleChange,
     rule,
@@ -34,6 +36,7 @@ export const EndpointExceptionsViewer = memo(
         {!EndpointExceptionsUnavailableComponent ? (
           <ExceptionsViewer
             rule={rule}
+            hasAccessToLists={hasAccessToLists}
             listTypes={RULE_ENDPOINT_EXCEPTION_LIST_TYPE}
             onRuleChange={onRuleChange}
             isViewReadOnly={isViewReadOnly}

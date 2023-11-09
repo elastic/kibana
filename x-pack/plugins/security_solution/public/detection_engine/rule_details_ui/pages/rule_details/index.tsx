@@ -739,6 +739,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                   <ExceptionsViewer
                     rule={rule}
+                    hasAccessToLists={hasAccessToLists}
                     listTypes={RULE_EXCEPTION_LIST_TYPES}
                     onRuleChange={refreshRule}
                     isViewReadOnly={!isExistingRule}
@@ -750,6 +751,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 >
                   <EndpointExceptionsViewer
                     rule={rule}
+                    hasAccessToLists={hasAccessToLists}
                     onRuleChange={refreshRule}
                     isViewReadOnly={!isExistingRule}
                     data-test-subj="endpointExceptionsTab"
