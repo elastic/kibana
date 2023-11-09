@@ -40,11 +40,11 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
     <EuiOverlayMask
       data-test-subj="flyout-pane"
       headerZindexLocation="above"
-      css={css`
-        // .euiOverlayMask concatenated to make styles take precedence over .euiOverlayMask-aboveHeader
+      css={`
+        // .euiOverlayMask class concatenation to make styles take precedence over .euiOverlayMask-aboveHeader
         &.euiOverlayMask {
-          margin-top: var(--euiFixedHeadersOffset, 0);
-          z-index: ${euiTheme.levels.flyout};
+          top: var(--euiFixedHeadersOffset, 0);
+          z-index: 1001; // on top of flyout (z-index: 1000)
           ${visible ? '' : 'display: none;'}
         }
       `}
