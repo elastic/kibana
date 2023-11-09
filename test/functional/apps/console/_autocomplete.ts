@@ -44,7 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    describe('Autocomplete behavior', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/165465
+    describe.skip('Autocomplete behavior', () => {
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
         await PageObjects.console.pressEnter();
@@ -193,8 +194,7 @@ GET _search
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/164584
-    describe.skip('anti-regression watchdogs', () => {
+    describe('anti-regression watchdogs', () => {
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
       });
