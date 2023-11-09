@@ -13,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
-import { DatasourcePublicAPI, Datasource, FrameDatasourceAPI } from '../../types';
+import { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../types';
 
 jest.mock('../../id_generator');
 
@@ -551,7 +551,7 @@ describe('Textbased Data Source', () => {
       } as unknown as TextBasedPrivateState;
       expect(
         TextBasedDatasource.getUserMessages(state, {
-          frame: { dataViews: indexPatterns } as unknown as FrameDatasourceAPI,
+          frame: { dataViews: indexPatterns } as unknown as FramePublicAPI,
           setState: () => {},
         })
       ).toMatchInlineSnapshot(`
