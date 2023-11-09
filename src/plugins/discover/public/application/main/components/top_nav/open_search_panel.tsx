@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -39,10 +39,9 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
   const hasSavedObjectPermission =
     capabilities.savedObjectsManagement?.edit || capabilities.savedObjectsManagement?.delete;
 
-  const SpacesContextWrapper = useMemo(
-    () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
-    [spaces]
-  );
+  const SpacesContextWrapper = spaces
+    ? spaces.ui.components.getSpacesContextProvider
+    : getEmptyFunctionComponent;
 
   return (
     <SpacesContextWrapper feature={PLUGIN_ID}>
