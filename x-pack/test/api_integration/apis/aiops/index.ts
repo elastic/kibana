@@ -11,12 +11,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('AIOps', function () {
     this.tags(['aiops']);
 
-    loadTestFile(require.resolve('./log_rate_analysis/v1/full_analysis'));
-    loadTestFile(require.resolve('./log_rate_analysis/v1/groups_only'));
-    loadTestFile(require.resolve('./log_rate_analysis/v1/no_index'));
-
-    loadTestFile(require.resolve('./log_rate_analysis/v2/full_analysis'));
-    loadTestFile(require.resolve('./log_rate_analysis/v2/groups_only'));
-    loadTestFile(require.resolve('./log_rate_analysis/v2/no_index'));
+    loadTestFile(require.resolve('./log_rate_analysis/full_analysis'));
+    loadTestFile(require.resolve('./log_rate_analysis/groups_only'));
+    loadTestFile(require.resolve('./log_rate_analysis/no_index'));
   });
 }

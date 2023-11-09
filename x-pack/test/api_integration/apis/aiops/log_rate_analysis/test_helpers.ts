@@ -34,3 +34,5 @@ export const getGroupHistogramActions = (data: any[], apiVersion: ApiVersion) =>
         ? 'add_significant_terms_group_histogram'
         : 'add_significant_items_group_histogram')
   );
+
+export const getErrorActions = (data: any[]) => data.filter((d) => d.type === 'add_error');
