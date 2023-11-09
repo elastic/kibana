@@ -5252,6 +5252,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-export-types-csv-common@link:packages/kbn-reporting/export_types/csv_common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-export-types-csv@link:packages/kbn-reporting/export_types/csv":
   version "0.0.0"
   uid ""
@@ -5260,11 +5264,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-server@link:packages/kbn-reporting/server":
+"@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/printable_pdf_v2":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/printable_pdf_v2":
+"@kbn/reporting-export-types-png-common@link:packages/kbn-reporting/export_types/png_common":
   version "0.0.0"
   uid ""
 
@@ -5272,7 +5276,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-export-types-printable_pdf_v2-common@link:packages/kbn-reporting/export_types/printable_pdf_v2_common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-server@link:packages/kbn-reporting/server":
   version "0.0.0"
   uid ""
 
