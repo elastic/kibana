@@ -86,14 +86,7 @@ export const useRiskScoreKpi = ({
         timerange: requestTimerange,
       });
     }
-  }, [
-    defaultIndex,
-    search,
-    filterQuery,
-    skip,
-    riskEntity,
-    requestTimerange,
-  ]);
+  }, [defaultIndex, search, filterQuery, skip, riskEntity, requestTimerange]);
 
   useEffect(() => {
     if (error) {
