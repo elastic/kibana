@@ -9,7 +9,10 @@
 const nextTick = () => new Promise((res) => process.nextTick(res));
 
 import lodash from 'lodash';
-jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
+jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
+  fn.cancel = jest.fn();
+  return fn;
+});
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -20,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as sinon from 'sinon';
 import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
@@ -27,21 +31,24 @@ import { contentManagementMock } from '@kbn/content-management-plugin/public/moc
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 describe('SavedObjectsFinder', () => {
   const doc = {
     id: '1',
+    namespaces: ['default'],
     type: 'search',
     attributes: { title: 'Example title' },
   };
 
   const doc2 = {
     id: '2',
+    namespaces: ['default'],
     type: 'search',
     attributes: { title: 'Another title' },
   };
 
-  const doc3 = { type: 'vis', id: '3', attributes: { title: 'Vis' } };
+  const doc3 = { type: 'vis', id: '3', namespaces: ['default'], attributes: { title: 'Vis' } };
 
   const searchMetaData = [
     {
@@ -72,6 +79,7 @@ describe('SavedObjectsFinder', () => {
     (contentClient.mSearch as any as jest.SpyInstance).mockClear();
   });
   const coreStart = coreMock.createStart();
+  const spaces = spacesPluginMock.createStartContract();
   const uiSettings = coreStart.uiSettings;
   uiSettings.get.mockImplementation(() => 10);
 
@@ -904,20 +912,36 @@ describe('SavedObjectsFinder', () => {
         hits: [doc, doc2, doc3],
       });
 
-      const wrapper = mount(
+      render(
         <SavedObjectFinder
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('th')).toHaveLength(3);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_type_0')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_title_1')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_references_2')).toHaveLength(1);
+      await waitFor(async () => expect(await screen.findAllByRole('columnheader')).toHaveLength(3));
+      expect(screen.getByTestId('tableHeaderCell_type_0')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_title_1')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_references_2')).toBeInTheDocument();
+    });
+
+    it('should show the Spaces column if spaces is available', async () => {
+      (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
+        hits: [doc, doc2, doc3],
+      });
+
+      render(
+        <SavedObjectFinder
+          services={{ uiSettings, contentClient, savedObjectsTagging, spaces }}
+          savedObjectMetaData={metaDataConfig}
+        />
+      );
+
+      await waitFor(async () => expect(await screen.findAllByRole('columnheader')).toHaveLength(4));
+      expect(screen.getByTestId('tableHeaderCell_type_0')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_title_1')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_references_2')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_spaces_3')).toBeInTheDocument();
     });
 
     it('should hide the type column if there is only one type in the metadata list', async () => {
@@ -925,20 +949,17 @@ describe('SavedObjectsFinder', () => {
         hits: [doc, doc2],
       });
 
-      const wrapper = mount(
+      render(
         <SavedObjectFinder
-          services={{ uiSettings, savedObjectsTagging, contentClient }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('th')).toHaveLength(2);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_type_0')).toHaveLength(0);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_title_0')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_references_1')).toHaveLength(1);
+      await waitFor(async () => expect(await screen.findAllByRole('columnheader')).toHaveLength(2));
+      expect(screen.getByTestId('tableHeaderCell_title_0')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_references_1')).toBeInTheDocument();
+      expect(screen.queryByTestId('tableHeaderCell_type_0')).not.toBeInTheDocument();
     });
 
     it('should hide the tags column if savedObjectsTagging is undefined', async () => {
@@ -946,20 +967,17 @@ describe('SavedObjectsFinder', () => {
         hits: [doc, doc2, doc3],
       });
 
-      const wrapper = mount(
+      render(
         <SavedObjectFinder
           services={{ uiSettings, contentClient, savedObjectsTagging: undefined }}
           savedObjectMetaData={metaDataConfig}
         />
       );
 
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper.update();
-      expect(wrapper.find(EuiInMemoryTable).find('th')).toHaveLength(2);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_type_0')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_title_1')).toHaveLength(1);
-      expect(findTestSubject(wrapper, 'tableHeaderCell_references_2')).toHaveLength(0);
+      await waitFor(async () => expect(await screen.findAllByRole('columnheader')).toHaveLength(2));
+      expect(screen.getByTestId('tableHeaderCell_type_0')).toBeInTheDocument();
+      expect(screen.getByTestId('tableHeaderCell_title_1')).toBeInTheDocument();
+      expect(screen.queryByTestId('tableHeaderCell_references_2')).not.toBeInTheDocument();
     });
   });
 });

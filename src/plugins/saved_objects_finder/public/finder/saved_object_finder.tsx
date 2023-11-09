@@ -232,6 +232,7 @@ export class SavedObjectFinderUi extends React.Component<
             defaultMessage: 'Spaces',
           }),
           width: '20%',
+          ['data-test-subj']: 'savedObjectFinderSpaces',
           render: (_, item) => {
             return spaces.ui.components.getSpaceList({
               namespaces: item.namespaces!,
