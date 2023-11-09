@@ -38,6 +38,8 @@ export interface AlertActionsProps {
   setFlyoutAlert: React.Dispatch<React.SetStateAction<any | undefined>>;
 }
 
+const CASES_ACTIONS_ENABLED = false;
+
 export function AlertActions({
   alert,
   ecsData,
@@ -121,7 +123,7 @@ export function AlertActions({
   }, [untrackAlerts, alertId, ecsData, onSuccess]);
 
   const actionsMenuItems = [
-    ...(casesPrivileges?.create && casesPrivileges.read
+    ...(CASES_ACTIONS_ENABLED && casesPrivileges?.create && casesPrivileges.read
       ? [
           <EuiContextMenuItem
             data-test-subj="add-to-existing-case-action"
