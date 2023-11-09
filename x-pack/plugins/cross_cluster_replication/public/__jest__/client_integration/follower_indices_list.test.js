@@ -228,19 +228,19 @@ describe('<FollowerIndicesList />', () => {
 
     describe('table row action menu', () => {
       test('should open a context menu when clicking on the button of each row', async () => {
-        expect(component.find('.euiContextMenuPanel').length).toBe(0);
+        expect(component.find('div.euiContextMenuPanel').length).toBe(0);
 
         await actions.openTableRowContextMenuAt(0);
 
-        expect(component.find('.euiContextMenuPanel').length).toBe(1);
+        expect(component.find('div.euiContextMenuPanel').length).toBe(1);
       });
 
       test('should have the "pause", "edit" and "unfollow" options in the row context menu', async () => {
         await actions.openTableRowContextMenuAt(0);
 
         const buttonLabels = component
-          .find('.euiContextMenuPanel')
-          .find('.euiContextMenuItem')
+          .find('div.euiContextMenuPanel')
+          .find('button.euiContextMenuItem')
           .map((button) => button.text());
 
         expect(buttonLabels).toEqual([
@@ -255,8 +255,8 @@ describe('<FollowerIndicesList />', () => {
         await actions.openTableRowContextMenuAt(1);
 
         const buttonLabels = component
-          .find('.euiContextMenuPanel')
-          .find('.euiContextMenuItem')
+          .find('div.euiContextMenuPanel')
+          .find('button.euiContextMenuItem')
           .map((button) => button.text());
 
         expect(buttonLabels).toEqual([

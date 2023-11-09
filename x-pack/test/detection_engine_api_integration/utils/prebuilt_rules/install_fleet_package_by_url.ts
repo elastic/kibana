@@ -10,7 +10,7 @@ import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 
 /**
- * Installs prebuilt rules package `security_detection_engine` by version.
+ * Installs latest available non-prerelease prebuilt rules package `security_detection_engine`.
  *
  * @param es Elasticsearch client
  * @param supertest SuperTest instance
@@ -18,13 +18,12 @@ import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
  * @returns Fleet install package response
  */
 
-export const installPrebuiltRulesPackageByVersion = async (
+export const installPrebuiltRulesPackageViaFleetAPI = async (
   es: Client,
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  version: string
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<InstallPackageResponse> => {
   const fleetResponse = await supertest
-    .post(`/api/fleet/epm/packages/security_detection_engine/${version}`)
+    .post(`/api/fleet/epm/packages/security_detection_engine`)
     .set('kbn-xsrf', 'xxxx')
     .type('application/json')
     .send({ force: true })
@@ -44,6 +43,32 @@ export const installPrebuiltRulesPackageByVersion = async (
   // the next refresh. Also, probably the refresh time can be delayed when ES is under load?
   // Anyway, this can cause race condition between a write and subsequent read operation, and to
   // fix it deterministically we have to refresh saved object indices and wait until it's done.
+  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+
+  return fleetResponse.body as InstallPackageResponse;
+};
+/**
+ * Installs prebuilt rules package `security_detection_engine`, passing in the version
+ * of the package as a parameter to the utl.
+ *
+ * @param es Elasticsearch client
+ * @param supertest SuperTest instance
+ * @param version Semver version of the `security_detection_engine` package to install
+ * @returns Fleet install package response
+ */
+
+export const installPrebuiltRulesPackageByVersion = async (
+  es: Client,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  version: string
+): Promise<InstallPackageResponse> => {
+  const fleetResponse = await supertest
+    .post(`/api/fleet/epm/packages/security_detection_engine/${version}`)
+    .set('kbn-xsrf', 'xxxx')
+    .type('application/json')
+    .send({ force: true })
+    .expect(200);
+
   await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
   return fleetResponse.body as InstallPackageResponse;

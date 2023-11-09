@@ -10,7 +10,6 @@ import {
   ENABLE_USER_RISK_SCORE_BUTTON,
 } from '../../../screens/entity_analytics';
 
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { clickEnableRiskScore } from '../../../tasks/risk_scores';
@@ -21,11 +20,6 @@ import { PAGE_TITLE } from '../../../screens/entity_analytics_management';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165644
 describe('Enable risk scores from dashboard', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-  });
-
   beforeEach(() => {
     login();
     visit(ENTITY_ANALYTICS_URL);
