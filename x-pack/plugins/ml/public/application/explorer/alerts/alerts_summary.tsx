@@ -107,14 +107,21 @@ export const AlertsSummary: React.FC = () => {
         })}
       </EuiFlexGrid>
       {sortedAlertsByRule.length > PAGE_SIZE ? (
-        <EuiPagination
-          aria-label={i18n.translate('xpack.ml.explorer.alertsPanel.summary.paginationAreaLabel', {
-            defaultMessage: 'Pagination for alerting rules summary',
-          })}
-          pageCount={Math.ceil(sortedAlertsByRule.length / PAGE_SIZE)}
-          activePage={activePage}
-          onPageClick={setActivePage}
-        />
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiPagination
+              aria-label={i18n.translate(
+                'xpack.ml.explorer.alertsPanel.summary.paginationAreaLabel',
+                {
+                  defaultMessage: 'Pagination for alerting rules summary',
+                }
+              )}
+              pageCount={Math.ceil(sortedAlertsByRule.length / PAGE_SIZE)}
+              activePage={activePage}
+              onPageClick={setActivePage}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : null}
     </>
   );
