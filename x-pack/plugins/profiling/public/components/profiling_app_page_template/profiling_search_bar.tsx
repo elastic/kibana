@@ -12,6 +12,24 @@ import React, { useEffect, useState } from 'react';
 import { INDEX_EVENTS } from '../../../common';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
+interface Props {
+  kuery: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  onQuerySubmit: (
+    payload: {
+      dateRange: TimeRange;
+      query?: Query;
+    },
+    isUpdate?: boolean
+  ) => void;
+  onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
+  onRefreshClick: () => void;
+  showSubmitButton?: boolean;
+  dataTestSubj?: string;
+  showDatePicker?: boolean;
+}
+
 export function ProfilingSearchBar({
   kuery,
   rangeFrom,
@@ -21,22 +39,8 @@ export function ProfilingSearchBar({
   onRefreshClick,
   showSubmitButton = true,
   dataTestSubj = 'profilingUnifiedSearchBar',
-}: {
-  kuery: string;
-  rangeFrom: string;
-  rangeTo: string;
-  onQuerySubmit: (
-    payload: {
-      dateRange: TimeRange;
-      query?: Query;
-    },
-    isUpdate?: boolean
-  ) => void;
-  onRefresh: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
-  onRefreshClick: () => void;
-  showSubmitButton?: boolean;
-  dataTestSubj?: string;
-}) {
+  showDatePicker = true,
+}: Props) {
   const {
     start: { dataViews },
   } = useProfilingDependencies();
@@ -67,7 +71,7 @@ export function ProfilingSearchBar({
         onQuerySubmit({ dateRange, query });
       }}
       showQueryInput
-      showDatePicker
+      showDatePicker={showDatePicker}
       showFilterBar={false}
       showSaveQuery={false}
       submitButtonStyle={!showSubmitButton ? 'iconOnly' : 'auto'}

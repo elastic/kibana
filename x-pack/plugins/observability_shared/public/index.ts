@@ -86,3 +86,5 @@ export {
   EmbeddableFlamegraph,
   EmbeddableFunctions,
 } from './components/profiling/embeddables';
+
+export type { SearchBarParams } from './components/profiling/embeddables';

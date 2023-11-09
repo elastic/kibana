@@ -13,13 +13,19 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
+import {
+  EmbeddableFlamegraph,
+  SearchBarParams,
+} from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { HOST_NAME } from '../../../../common/es_fields/apm';
-import { toKueryFilterFormat } from '../../../../common/utils/to_kuery_filter_format';
+import {
+  mergeKueries,
+  toKueryFilterFormat,
+} from '../../../../common/utils/to_kuery_filter_format';
 import {
   FETCH_STATUS,
   isPending,
@@ -46,6 +52,8 @@ export function ProfilingFlamegraph({
   dataSource,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
+  const [flamegraphSearchBarFilter, setFlamegraphSearchBarFilter] =
+    useState<SearchBarParams>({ id: '', filters: '' });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -61,13 +69,21 @@ export function ProfilingFlamegraph({
                 environment,
                 documentType: dataSource.documentType,
                 rollupInterval: dataSource.rollupInterval,
+                kuery: flamegraphSearchBarFilter.filters,
               },
             },
           }
         );
       }
     },
-    [dataSource, serviceName, start, end, environment]
+    [
+      dataSource,
+      serviceName,
+      start,
+      end,
+      environment,
+      flamegraphSearchBarFilter,
+    ]
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
@@ -86,7 +102,10 @@ export function ProfilingFlamegraph({
             <EuiLink
               data-test-subj="apmProfilingFlamegraphGoToFlamegraphLink"
               href={profilingLocators?.flamegraphLocator.getRedirectUrl({
-                kuery: hostNamesKueryFormat,
+                kuery: mergeKueries(
+                  hostNamesKueryFormat,
+                  flamegraphSearchBarFilter.filters
+                ),
               })}
             >
               {i18n.translate('xpack.apm.profiling.flamegraph.link', {
@@ -113,6 +132,7 @@ export function ProfilingFlamegraph({
           data={data?.flamegraph}
           isLoading={isPending(status)}
           height="60vh"
+          onSearchBarChange={setFlamegraphSearchBarFilter}
         />
       )}
     </>

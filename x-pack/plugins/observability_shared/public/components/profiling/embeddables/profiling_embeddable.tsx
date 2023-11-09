@@ -10,17 +10,25 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useRef, useState } from 'react';
 import { ObservabilitySharedStart } from '../../../plugin';
 
+export interface SearchBarParams {
+  filters: string;
+  /** Is used to force a new api call when refresh button is clicked without any changes in the query value */
+  id: string;
+}
+
 export interface ProfilingEmbeddableProps<T> {
   data?: T;
   embeddableFactoryId: string;
   isLoading: boolean;
   height?: string;
+  onSearchBarChange?: (params: SearchBarParams) => void;
 }
 
 export function ProfilingEmbeddable<T>({
   embeddableFactoryId,
   data,
   isLoading,
+  onSearchBarChange,
   height,
   ...props
 }: ProfilingEmbeddableProps<T>) {
@@ -31,7 +39,7 @@ export function ProfilingEmbeddable<T>({
   useEffect(() => {
     async function createEmbeddable() {
       const factory = embeddablePlugin?.getEmbeddableFactory(embeddableFactoryId);
-      const input = { id: 'embeddable_profiling', data, isLoading };
+      const input = { id: 'embeddable_profiling', data, isLoading, onSearchBarChange };
       const embeddableObject = await factory?.create(input);
       setEmbeddable(embeddableObject);
     }
@@ -47,10 +55,10 @@ export function ProfilingEmbeddable<T>({
 
   useEffect(() => {
     if (embeddable) {
-      embeddable.updateInput({ data, isLoading, ...props });
+      embeddable.updateInput({ data, isLoading, onSearchBarChange, ...props });
       embeddable.reload();
     }
-  }, [data, embeddable, isLoading, props]);
+  }, [data, embeddable, isLoading, onSearchBarChange, props]);
 
   return (
     <div
