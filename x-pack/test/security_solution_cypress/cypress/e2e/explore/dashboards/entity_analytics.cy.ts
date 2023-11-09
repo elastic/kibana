@@ -48,7 +48,7 @@ import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../tasks
 import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../screens/common/filter_group';
 import { setRowsPerPageTo } from '../../../tasks/table_pagination';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
-import { setEndDate, setEndDateNow, updateDates } from '../../../tasks/date_picker';
+import { setEndDate, setEndDateNow, updateDates, setStartDate } from '../../../tasks/date_picker';
 import {
   enableJob,
   navigateToNextPage,
