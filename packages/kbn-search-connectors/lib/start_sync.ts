@@ -74,7 +74,7 @@ export const startConnectorSync = async (
         error: null,
         indexed_document_count: 0,
         indexed_document_volume: 0,
-        job_type: jobType,
+        job_type: jobType || SyncJobType.FULL,
         last_seen: null,
         metadata: {},
         started_at: null,
