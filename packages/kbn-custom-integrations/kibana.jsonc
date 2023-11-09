@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/custom-integrations",
-  "owner": "@elastic/infra-monitoring-ui"
+  "owner": "@elastic/obs-ux-logs-team"
 }

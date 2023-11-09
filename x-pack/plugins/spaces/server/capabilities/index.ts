@@ -18,5 +18,7 @@ export const setupCapabilities = (
   logger: Logger
 ) => {
   core.capabilities.registerProvider(capabilitiesProvider);
-  core.capabilities.registerSwitcher(setupCapabilitiesSwitcher(core, getSpacesService, logger));
+  core.capabilities.registerSwitcher(setupCapabilitiesSwitcher(core, getSpacesService, logger), {
+    capabilityPath: '*',
+  });
 };
