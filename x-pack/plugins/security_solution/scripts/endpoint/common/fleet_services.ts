@@ -197,7 +197,7 @@ export const waitForHostToEnroll = async (
     throw Object.assign(
       new Error(
         `Timed out waiting for host [${hostname}] to show up in Fleet in ${
-          timeoutMs / 60 / 1000
+          timeoutMs / 1000
         } seconds`
       ),
       { agentId, hostname }

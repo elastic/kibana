@@ -65,7 +65,7 @@ export class AgentManager extends Manager {
     ];
 
     this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
-    await waitForHostToEnroll(this.kbnClient, containerName);
+    await waitForHostToEnroll(this.kbnClient, containerName, 240000);
   }
 
   public cleanup() {
