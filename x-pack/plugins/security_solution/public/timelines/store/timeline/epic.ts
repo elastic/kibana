@@ -397,28 +397,25 @@ function saveAsNewEpic<State>(
     mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
       return handleTimelineErrors(result, action, allTimelineQuery, kibana, (response) => {
         // TODO:
-        // - rename to copyTimeline?
         // - update timeline
-        //   - Find out why `updateTimeline` is not accepting the clonedTimeline
-        // - Copy saved search and save as new
-        // - Remove `originalTimeline` from the response and use the regular timeline response parser and types
+        //   - Find out why `updateTimeline` is not accepting the copiedTimeline
         // - Add acceptance tests
         // - generate endpoint documentation and mark it as private
         // - Unit test the endpoint
 
-        const { timeline: clonedTimeline } = response;
+        const { timeline: copiedTimeline } = response;
 
-        myEpicTimelineId.setTimelineId(clonedTimeline.savedObjectId);
-        myEpicTimelineId.setTimelineVersion(clonedTimeline.version);
-        myEpicTimelineId.setTemplateTimelineId(clonedTimeline.templateTimelineId ?? null);
-        myEpicTimelineId.setTemplateTimelineVersion(clonedTimeline.templateTimelineVersion ?? null);
+        myEpicTimelineId.setTimelineId(copiedTimeline.savedObjectId);
+        myEpicTimelineId.setTimelineVersion(copiedTimeline.version);
+        myEpicTimelineId.setTemplateTimelineId(copiedTimeline.templateTimelineId ?? null);
+        myEpicTimelineId.setTemplateTimelineVersion(copiedTimeline.templateTimelineVersion ?? null);
 
         return [
           updateTimeline({
             id: action.payload.id,
             timeline: {
               ...recentTimeline[action.payload.id],
-              ...clonedTimeline,
+              ...copiedTimeline,
             },
           }),
           setChanged({

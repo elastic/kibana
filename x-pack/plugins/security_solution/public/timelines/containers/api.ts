@@ -164,11 +164,30 @@ export const copyTimeline = async ({
 }: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   let response = null;
   let requestBody = null;
+  let newSavedSearchId = null;
+
   try {
-    requestBody = JSON.stringify({ timeline, timelineIdToCopy: timelineId });
+    if (timeline.savedSearchId) {
+      const { savedSearch: savedSearchService } = KibanaServices.get();
+      const savedSearch = await savedSearchService.get(timeline.savedSearchId);
+      // delete the id and change the title to make sure we can copy the saved search
+      delete savedSearch.id;
+      savedSearch.title = `Copy - ${savedSearch.title}`;
+      newSavedSearchId = await savedSearchService.save(savedSearch);
+    }
+  } catch (e) {
+    return Promise.reject(new Error(`Failed to copy saved search: ${timeline.savedSearchId}`));
+  }
+
+  try {
+    requestBody = JSON.stringify({
+      timeline: { ...timeline, savedSearchId: newSavedSearchId || timeline.savedSearchId },
+      timelineIdToCopy: timelineId,
+    });
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
+
   try {
     response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_COPY_URL, {
       method: 'POST',

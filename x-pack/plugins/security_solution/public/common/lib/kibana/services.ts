@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { StartPlugins } from '../../../types';
 
 type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'uiSettings' | 'notifications'> &
-  Pick<StartPlugins, 'data' | 'unifiedSearch' | 'expressions'>;
+  Pick<StartPlugins, 'data' | 'unifiedSearch' | 'expressions' | 'savedSearch'>;
 
 export class KibanaServices {
   private static kibanaBranch?: string;
@@ -28,6 +28,7 @@ export class KibanaServices {
     uiSettings,
     notifications,
     expressions,
+    savedSearch,
   }: GlobalServices & {
     kibanaBranch: string;
     kibanaVersion: string;
@@ -41,6 +42,7 @@ export class KibanaServices {
       unifiedSearch,
       notifications,
       expressions,
+      savedSearch,
     };
     this.kibanaBranch = kibanaBranch;
     this.kibanaVersion = kibanaVersion;
