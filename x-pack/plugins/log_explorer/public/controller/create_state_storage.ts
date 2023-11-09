@@ -7,7 +7,7 @@
 
 import { QueryState } from '@kbn/data-plugin/common';
 import { DiscoverAppState } from '@kbn/discover-plugin/public';
-import { createStateContainer, IStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createStateContainer, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { map } from 'rxjs';
 import { LogExplorerControllerContext } from '../state_machines/log_explorer_controller';
 import { mapContextToStateStorageContainer } from '../state_machines/log_explorer_controller/src/services/discover_service';
@@ -22,14 +22,14 @@ export const createStateStorageContainer = ({
   initialState,
 }: {
   initialState?: LogExplorerControllerContext;
-}): IStateStorage => {
+}): IKbnUrlStateStorage => {
   // Stores a full pseudo representation so that Discover can rely on merging / spreading get() results to set() calls
-  const stateContainer = createStateContainer<PseudoDiscoverUrlState>(
+  const stateContainer = createStateContainer<Record<string, unknown>>(
     initialState ? mapContextToStateStorageContainer(initialState) : {}
   );
 
   return {
-    get: (key: string) => {
+    get: <State>(key: string): State | null => {
       return stateContainer.get()[key] ?? null;
     },
     // This allows us to intercept global and application state (the exception is internal state, this is observed directly via it's change$ observable)

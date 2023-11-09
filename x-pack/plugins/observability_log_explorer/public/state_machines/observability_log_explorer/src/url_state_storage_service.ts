@@ -8,16 +8,12 @@
 import { IToasts } from '@kbn/core-notifications-browser';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import {
-  ControlPanelRT,
-  ControlPanels,
-  decodeDatasetSelection,
-} from '@kbn/log-explorer-plugin/common';
+import { ControlPanels } from '@kbn/log-explorer-plugin/common';
 import * as Either from 'fp-ts/lib/Either';
-import * as rt from 'io-ts';
 import { mapValues } from 'lodash';
 import { InvokeCreator } from 'xstate';
 import type { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
+import * as urlSchemaV1 from './url_schema_v1';
 
 interface ObservabilityLogExplorerUrlStateDependencies {
   toastsService: IToasts;
@@ -26,55 +22,26 @@ interface ObservabilityLogExplorerUrlStateDependencies {
 
 export const updateUrlFromLogExplorerState =
   ({ urlStateStorageContainer }: { urlStateStorageContainer: IKbnUrlStateStorage }) =>
-  (context: ObservabilityLogExplorerContext, _event: ObservabilityLogExplorerEvent) => {
-    if (_event.type !== 'LOG_EXPLORER_STATE_CHANGED') return;
+  (context: ObservabilityLogExplorerContext, event: ObservabilityLogExplorerEvent) => {
+    if (event.type !== 'LOG_EXPLORER_STATE_CHANGED') return;
 
-    if (_event.state?.time) {
-      urlStateStorageContainer.set(TIME_KEY, timeRangeRT.encode(_event.state.time), {
-        replace: true,
-      });
-    }
+    // we want to write in the newest schema
+    const encodedUrlStateValues = urlSchemaV1.urlSchemaRT.encode({
+      v: 1,
+      query: event.state?.query,
+      filters: event.state?.filters,
+      time: event.state?.time,
+      refreshInterval: event.state?.refreshInterval,
+      columns: event.state?.columns,
+      datasetSelection: event.state?.datasetSelection,
+      controlPanels: event.state?.controlPanels
+        ? cleanControlPanels(event.state.controlPanels)
+        : undefined,
+    });
 
-    if (_event.state.refreshInterval) {
-      urlStateStorageContainer.set(
-        REFRESH_INTERVAL_KEY,
-        refreshIntervalRT.encode(_event.state?.refreshInterval),
-        {
-          replace: true,
-        }
-      );
-    }
-    if (_event.state?.query) {
-      urlStateStorageContainer.set(QUERY_KEY, queryRT.encode(_event.state.query), {
-        replace: true,
-      });
-    }
-
-    if (_event.state?.filters) {
-      urlStateStorageContainer.set(FILTERS_KEY, filtersRT.encode(_event.state.filters), {
-        replace: true,
-      });
-    }
-
-    if (_event.state.datasetSelection) {
-      urlStateStorageContainer.set(
-        DATASET_SELECTION_KEY,
-        _event.state.datasetSelection.toURLSelectionId(),
-        {
-          replace: true,
-        }
-      );
-    }
-
-    if (_event.state.controlPanels) {
-      urlStateStorageContainer.set(
-        CONTROL_PANELS_KEY,
-        ControlPanelRT.encode(cleanControlPanels(_event.state.controlPanels)),
-        {
-          replace: true,
-        }
-      );
-    }
+    Object.entries(encodedUrlStateValues).forEach(([stateKey, encodedValue]) =>
+      urlStateStorageContainer.set(stateKey, encodedValue, { replace: true })
+    );
   };
 
 export const initializeFromUrl =
@@ -87,18 +54,15 @@ export const initializeFromUrl =
   > =>
   (_context, _event) =>
   (send) => {
+    // in the future we'll have to distinguish between different schema versions
+    // here based on the "v" value
     const urlStateValues = Object.fromEntries(
-      Object.entries({
-        query: urlStateStorageContainer.get(QUERY_KEY),
-        filters: urlStateStorageContainer.get(FILTERS_KEY),
-        time: urlStateStorageContainer.get(TIME_KEY),
-        refreshInterval: urlStateStorageContainer.get(REFRESH_INTERVAL_KEY),
-        datasetSelection: urlStateStorageContainer.get(DATASET_SELECTION_KEY),
-        controlPanels: urlStateStorageContainer.get(CONTROL_PANELS_KEY),
-      }).filter(([key, value]) => value !== null)
+      Object.keys(urlSchemaV1.urlSchemaRT.props)
+        .map((key) => [key, urlStateStorageContainer.get<unknown>(key)] as const)
+        .filter(([, value]) => value != null)
     );
 
-    const stateValuesE = decodeStateFromUrl(urlStateValues);
+    const stateValuesE = urlSchemaV1.urlSchemaRT.decode(urlStateValues);
 
     if (Either.isLeft(stateValuesE)) {
       withNotifyOnErrors(toastsService).onGetError(
@@ -109,113 +73,12 @@ export const initializeFromUrl =
         stateFromUrl: undefined,
       });
     } else {
-      if ('datasetSelection' in stateValuesE.right) {
-        try {
-          const decodedDatasetSelection = decodeDatasetSelectionFromUrl({
-            datasetSelectionFromUrl: stateValuesE.right.datasetSelection!,
-          });
-
-          send({
-            type: 'INITIALIZED_FROM_URL',
-            stateFromUrl: {
-              ...stateValuesE.right,
-              datasetSelection: decodedDatasetSelection,
-            },
-          });
-        } catch (e) {
-          send({
-            type: 'INITIALIZED_FROM_URL',
-            stateFromUrl: undefined,
-          });
-        }
-      } else {
-        send({
-          type: 'INITIALIZED_FROM_URL',
-          stateFromUrl: stateValuesE.right,
-        });
-      }
+      send({
+        type: 'INITIALIZED_FROM_URL',
+        stateFromUrl: stateValuesE.right,
+      });
     }
   };
-
-const decodeStateFromUrl = (valuesFromUrl: unknown) => {
-  return urlSchemaRT.decode(valuesFromUrl);
-};
-
-export const filterMetaRT = rt.partial({
-  alias: rt.union([rt.string, rt.null]),
-  disabled: rt.boolean,
-  negate: rt.boolean,
-  controlledBy: rt.string,
-  group: rt.string,
-  index: rt.string,
-  isMultiIndex: rt.boolean,
-  type: rt.string,
-  key: rt.string,
-  params: rt.any,
-  value: rt.any,
-});
-
-export const filterRT = rt.intersection([
-  rt.type({
-    meta: filterMetaRT,
-  }),
-  rt.partial({
-    query: rt.UnknownRecord,
-  }),
-]);
-
-export const filtersRT = rt.array(filterRT);
-
-const queryRT = rt.union([
-  rt.strict({
-    language: rt.string,
-    query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
-  }),
-  rt.strict({
-    sql: rt.string,
-  }),
-  rt.strict({
-    esql: rt.string,
-  }),
-]);
-
-const timeRangeRT = rt.strict({
-  from: rt.string,
-  to: rt.string,
-});
-
-const refreshIntervalRT = rt.strict({
-  pause: rt.boolean,
-  value: rt.number,
-});
-
-const urlDatasetSelectionRT = rt.string;
-
-export const urlSchemaRT = rt.partial({
-  query: queryRT,
-  filters: filtersRT,
-  time: timeRangeRT,
-  refreshInterval: refreshIntervalRT,
-  datasetSelection: urlDatasetSelectionRT, // Base64 encoded dataset selection
-  controlPanels: ControlPanelRT,
-});
-
-export type UrlSchema = rt.TypeOf<typeof urlSchemaRT>;
-
-const QUERY_KEY = 'query';
-const FILTERS_KEY = 'filters';
-const TIME_KEY = 'time';
-const REFRESH_INTERVAL_KEY = 'refreshInterval';
-const DATASET_SELECTION_KEY = 'datasetSelection';
-const CONTROL_PANELS_KEY = 'controlPanels';
-
-const decodeDatasetSelectionFromUrl = ({
-  datasetSelectionFromUrl,
-}: {
-  datasetSelectionFromUrl: string;
-}) => {
-  return decodeDatasetSelection(datasetSelectionFromUrl);
-};
 
 // Remove dataViewId from control panels
 const cleanControlPanels = (controlPanels: ControlPanels) => {

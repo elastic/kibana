@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { ScopedHistory } from '@kbn/core-application-browser';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverAppState } from '@kbn/discover-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
-import { CoreStart } from '@kbn/core/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createMemoryHistory } from 'history';
+import React, { useMemo, useState } from 'react';
+import type { BehaviorSubject } from 'rxjs';
+import { LogExplorerController } from '../../controller/create_controller';
 import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
-import { createPropertyGetProxy } from '../../utils/proxies';
 import { LogExplorerControllerContext } from '../../state_machines/log_explorer_controller';
 import { LogExplorerStartDeps } from '../../types';
-import { LogExplorerController } from '../../controller/create_controller';
+import { createPropertyGetProxy } from '../../utils/proxies';
 
 export interface CreateLogExplorerArgs {
   core: CoreStart;
@@ -52,12 +54,16 @@ export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
       [state$, controller]
     );
 
+    // this is not used anywhere outside of the `DiscoverContainer`, but it
+    // prevents Discover from manipulating the URL
+    const [memoryUrlStateStorage] = useState(createMemoryUrlStateStorage);
+
     return (
       <DiscoverContainer
         customizationCallbacks={logExplorerCustomizations}
         overrideServices={overrideServices}
         scopedHistory={scopedHistory}
-        stateStorageContainer={controller.stateStorageContainer}
+        stateStorageContainer={memoryUrlStateStorage}
       />
     );
   };
@@ -82,6 +88,7 @@ const createDataServiceProxy = (data: DataPublicPluginStart) => {
     search: () => searchServiceProxy,
   });
 };
+
 /**
  * Create proxy for the uiSettings service, in which settings preferences are overwritten
  * with custom values
@@ -103,3 +110,13 @@ const createUiSettingsServiceProxy = (uiSettings: IUiSettingsClient) => {
       },
   });
 };
+
+/**
+ * Create a url state storage that's not connected to the real browser location
+ * to isolate the Discover component from these side-effects.
+ */
+const createMemoryUrlStateStorage = () =>
+  createKbnUrlStateStorage({
+    history: createMemoryHistory(),
+    useHash: false,
+  });

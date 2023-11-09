@@ -11,7 +11,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { IStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback } from '../../customizations';
@@ -29,7 +29,7 @@ export interface DiscoverContainerInternalProps {
   getDiscoverServices: () => Promise<DiscoverServices>;
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
-  stateStorageContainer?: IStateStorage;
+  stateStorageContainer?: IKbnUrlStateStorage;
   isDev: boolean;
   isLoading?: boolean;
 }

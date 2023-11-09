@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { isDevMode } from '@kbn/xstate-utils';
 import { LogExplorerController, LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
+import { getDevToolsOptions } from '@kbn/xstate-utils/src';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
 import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
@@ -21,6 +22,7 @@ import {
 import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
 import { createObservabilityLogExplorerStateMachine } from '../../state_machines/observability_log_explorer/src/state_machine';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
+
 export interface ObservablityLogExplorerMainRouteProps {
   appParams: ObservabilityLogExplorerAppMountParameters;
   core: CoreStart;
@@ -47,7 +49,7 @@ export const ObservablityLogExplorerMainRoute = ({
         createLogExplorerController: logExplorer.createLogExplorerController,
         timeFilterService: services.data.query.timefilter.timefilter,
       }),
-    { devTools: isDevMode() }
+    { devTools: getDevToolsOptions() }
   );
 
   const isInitialized = useSelector(ObservabilityLogExplorerService, (state) =>

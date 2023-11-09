@@ -11,7 +11,6 @@ import { History } from 'history';
 import {
   createKbnUrlStateStorage,
   IKbnUrlStateStorage,
-  IStateStorage,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
@@ -73,7 +72,7 @@ interface DiscoverStateContainerParams {
    *
    * */
   mode?: DiscoverDisplayMode;
-  stateStorageContainer?: IStateStorage;
+  stateStorageContainer?: IKbnUrlStateStorage;
 }
 
 export interface LoadParams {

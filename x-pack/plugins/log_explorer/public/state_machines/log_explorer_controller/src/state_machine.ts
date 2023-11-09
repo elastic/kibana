@@ -7,7 +7,6 @@
 
 import { IToasts } from '@kbn/core/public';
 import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { IDatasetsClient } from '../../../services/datasets';
 import { isDatasetSelection } from '../../../../common/dataset_selection';
 import { createAndSetDataView } from './services/data_view_service';
@@ -22,7 +21,7 @@ import {
   LogExplorerControllerEvent,
   LogExplorerControllerTypeState,
 } from './types';
-import { subscribeToStateStorageContainer } from './services/discover_service';
+import { subscribeToDiscoverState } from './services/discover_service';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
   initializeControlPanels,
@@ -33,7 +32,7 @@ import {
 export const createPureLogExplorerControllerStateMachine = (
   initialContext: LogExplorerControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCBhVAOwBdDU88SA6AVwoEt2q2BDPNgL0gBiAEoZSGAJIA1DABEA+gGUAKgEEVGBaQDyAOXWS9GEQG0ADAF1EoHKlhsulGyCyIAtACYAbIwDsAIzmAJwAzH4ArAA0IACeiJ5+AByMwZ6hnokALD6e5kneAL6FMWiYuATEZJQ0dAyEjByOPHz8HFBy3FTc0mxgAO5CEJRgjRQAbqgA1qNl2PhEJOTUtPRMTVy8Au2d3b0DCByTAMZdbJQWlpcudg5OFC5uCAGejObentFxiBHBwYyeLIBX5JfLeX7BCLFUroeaVJY1Vb1MbNLZtCgdLo9PqDEi0Br4LoAMyIAFtGHMKotqis6utOC1thjdtiDkdUKd7pdrkgQLdms5eU9sowAqEkn8IuLIUDvN4YvEEFksqE3hFQaEglkperPNCQJSFlVlrU1g0Noz0VATasAArcChgPCwIYjMaTGYU2FU42Iunmhlo9o2uj2x3Ow4TDlnC5WHm2ewCh5Cjy+YLeJJ+cGfTMS96fBWIJJJAKMULa8wZbzmPyfbxZfWG+E003Ii1BjEhvBhp0uvFERiEqgkwjkpvUrttwOtYN+7sO3uRk4xijcqw3RP3R4JPyqgJZDM14sygJywsIXf-TV+LLBEIFXc5Rveo0I2lmlGbVrCACqtrkGhaLoBgYAAGioCgAGIiDoACyyjqJoCE6CIagAOJAfohjGGY668vyW4ps8AR3qKUpZJWYr5C856JCkaQZNkuRgs+5Svi2SL0qi34QIwEBYrAYBUEoTpgMc9yMOMWz8VwGIiQw4nnBQQjIJIqgYHoCgqDo2gABJqHoGFKPGfKbkp24IMEB6MLeYSBEkPhpEC55ylkor7vkYTKgESShKErFwhOc5TtxAiQHxAlCfJYkSVJfAye00WKZQQh-gBSHpWoSgYBB2XIOIKiSPoJkEeZREPqK4KhJCHkhOC54lqq4IqiWESRB8AQBAFPpvq2XFfmFvEydwgnCaJyUUJJ0lnHJ433EImXZblGD5aQhX6AoYiqChWiQWokjID+YglWZgqgE84KlqEcokVm7zeNe55pCkxaeA5fneHeSQRFCJQGi+zaTv1lrhcNo1JRJbAQAwqX-oBCiLTlygrQVRV6CddxlediAvBmZbXb51ZvbW5YNWKjDNeKwLtZ4nXdexQMBqFghDZFY0KZD0NgAtGhZUjeWoxtW3aWIUH7Ydx14QmmNna4OMROCNnXXe6TKhE5iAmTTURC11MK7TXV-eOvrviFA0sxF3Tg3NSksDgCXMli+yDMMjrutMswA0FpvA2ioNsxDtvMPbM2YnsOJLtGXJxlLpky8m2PPL5TVAnk13qjkoRPemjAQg56bq8kB704DwW+zxlsjVFNuUHbDth6yuKEPig54MSZJemxpc+0z5v+1b1cc0HIeyQ3zuR5ySlrtY+GnQncvPOmKTqyEYQZw9ATnkEkJvGkXlVTWp4l97fW9yDvHHHOaG0MHsAsOw06DUIRiSIVaiqQAWphBgwcgChoTBP8Cg1C2kkBjJMFk8wAkBCRT4yoqZJC3uWCINlV6-FgRrIoRsvYm1Pp+c+jBL7vmvqgW+jQuY83UAoaQkgMAAHUFBpUAnIcBhFE4vGsukW62ofAaj8FvcijBfLCMSG9dIP1j64M4mfP2F8r43xwHfKGMMmFIWAioX+ChbQGRWsZWOpVZZPDFN4PwqRMjVj8GEYILxaYCKsjZfcGY-DOPyLeX6MIu4n2kfg2RhD5GkMUXXUOXYezOldG7dknpja9W8e2CuRDTQkLIcHeuISFwRnZJPWMVx9FzwsrdcwbxGIqnXpqLeWYUjgjvArXcn1EiGw8YFKR-ofHxP8ckkes53yhL7M3AcQ4RxjhwTElpcTBp+OIQou+KTglzh6RPFc08Nzx3yZYtySRtRZFBJgtIN5ynAjeJWLZvw5R-E+MUP6FBUAQDgC4aJHF-TLIgURdwN5-Db3CF8RUlj-B3nMOYbemQbzFkkSMj8rAxksyeWwheOQt4mIBBKP4yKUXplBQ8j8kKdhOxxNCrGC93CljVpqAs3wlQUX8Bs34oQdY6gcuixmrSmTWjmek+As8VkvLyDZLM+tbIooKOeQIblry3nvCY8sepsGeOaZix+UKOXPMTj9V46Y0601+ECbU54VSmNpmESs4p0jNQZWXGRFcwaDxivigx88LqVjLDdYId05SPTJW1UsgRnqQg1mEc50qmlgrNgQy17NrW1zilDUOgdZa2osoEPcrj-npxyDWFyvwASwIcg9Ssb0sGNJ6hi4NvjQ0xsmsosAeLDE421Hqksljvr1nMAeRBZLXLuQohKcsQJk6mp7kyi2paa6TRmaPFkzsq12pxqeUxwJqrigbVZXy2cRU+Gqhqo8xcA2FsZZC8KCTVhJMUZOiy1ZClqtzcCKy+4vk40+LO9Ob0FYHk8MEJIfa8F7rkZMgJ0yH7M0gCeoi9Z6IfEvZqm9SC8bGIiLTOpmCP2xPlfu9pgSK1AfYVKf4r7vD7mdRrDWrbFRimVBTR9p40gIe3QzM1A6UM-o6ak1l4Z2XSyVQvbeeq-ghE+D9et-CyUUcKcm456ZPppF+sUIAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCBhVAOwBdDU88SA6AVwoEt2q2BDPNgL0gBiAEoZSGAJIA1DABEA+gGUAKgEEVGBaQDyAOXWS9GEQG0ADAF1EoHKlhsulGyCyIAtACYAbIwDsAIzmAJwAzH4ArAA0IACeiJ5+AByMwZ6hnokALD6e5kneAL6FMWiYuATEZJQ0dAyEjByOPHz8HFBy3FTc0mxgAO5CEJRgjRQAbqgA1qNl2PhEJOTUtPRMTVy8Au2d3b0DCByTAMZdbJQWlpcudg5OFC5uCAGejObentFxiBHBwYyeLIBX5JfLeX7BCLFUroeaVJY1Vb1MbNLZtCgdLo9PqDEi0Br4LoAMyIAFtGHMKotqis6utOC1thjdtiDkdUKd7pdrkgQLdms5eU9sowAqEkn8IuLIUDvN4YvEEFksqE3hFQaEglkperPNCQJSFlVlrU1g0Noz0VATasAArcChgPCwIYjMaTGYU2FU42Iunmhlo9o2uj2x3Ow4TDlnC5WHm2ewCh5Cjy+YLeJJ+cGfTMS96fBWIJJJAKMULa8wZbzmPyfbxZfWG+E003Ii1BjEhvBhp0uvFERiEqgkwjkpvUrttwOtYN+7sO3uRk4xijcqw3RP3R4JPyqgJZDM14sygJywsIXf-TV+LLBEIFXc5Rveo0I2lmlGbVrCOSSJTxvlN3OZNQCeAIAjvUUpSySsxXyF5z0SFI0gybJcjBZ9ylfFskXpVFvwgRgICxWAwCoJQnTAY57kYcYtmIrgMQohhqOAoRkD-TQ9AUFQdG0AAJNQ9AAcQwf9115fktxTBBggPRhbzCQIkh8NIgXPOUslFfd8jCZUAiSUJQkwuEJznKd8IESAiJIsjmKomi6L4Bj2ns1jKCEABVW05A0LRfPUJQMBUZQMGQcQVEkfQAKk4DtwQB9RXBUJIR0kJwXPEtVXBFUSwiSIPnAkyfTfVs8K-KzCIY7hSPIyj3IoWj6LOJj6vuIQArUIKQqC8LSEi-QFDEVQdDEBQADE1EkZBPLEGKgMFUDEHBUtQjlCCs3ebxr3PNIUmLTwVKM7w7ySCIoRKA0X2bSdystazqtqtyaLYCAGC8ny-IUTrutCvqBr0ea7jimSXgzMs1sM6tDtrctMrFRgcvFYECs8IrLvHX13wsirBCq2y6pYl63rADqNC64K-oiqLuOG3ixsm6bZowIGk3i4FwQUta73SZUInMQF4eyiJcpRiJCoCYrsNugNLLxmzuietrgJYHAXOZLF9kGYZHXdaZZmuszsbutEHoJ56VeYNWWsxPYcSXaMuTjCSE2BxbXEQAyjMRoE8jW9UclCXb00YCEVPTfnkgPKWbvMk2CIVmq7OVyhVfV23WVxQh8UHPBiTJL0sNj43Zdxs3FeTonLetxiM61h3OWAtdrEkhaQI9550xSfmQjCAPtoCc8gkhN40j05Ka1PGOjbK0v7sI4452E2grdgFh2GnSqhCMSRIrUDiAC0tF0AwRB0ZAFGEs-vIUNRbUkVnpKWhLIMyIE0hF0WkiH8sIgU3vfgQTyD4aeWNZ6fnnowRe75l6oFXo0EmZN1AKGkJIDAAB1BQ3kAryEfiDZ+Lx5LpA2tqHwGo-BD2gowQyNDEiHXSOdUBpVcJz1NgvJeK8cBr1eu9bBX0T4qDPhfW0QkwriRbq7NmoM1p+FSJkasfgwjBBeGjShckFL7gzH4bR+RbwXRhEXGeLCIFsKgRwuBXC042y7D2Z0rpdbsk9JjZh-oTEJ2gaaWB8CrbpxsQuCM7JG6xiuC7QCbt25gWCH4cwbxUIqn7pqIeWYUjgjvOLXcJ1EiSwxobMBxj2zuPMd4mus53y2L7NnAcQ4RxjlyS4j8BTKpmJgZwtePjrFznKQ3FczcNzhPZoorSSRtRZFBALTJN4knAjeJWUZvw5R-E+MUS6FBUAQDgC4ZxOF-R9Kkc-dwN5-DD3CF8RUij-ASklIo8WEpQj6KuoYvJrjWCNLxrsp+HcchD28LIw6fx-kAr+EUHJjz6k40tDsTWOJ3n4I7u4UsfNNQFm+EqGCFztR921HclSTDtkNM3laPx4Z4Ct36TJLwMSshZnFoCQFwQCjnkCFpa8t57w-PLHqEFpknn4rlpAGF7snjnVeOmP2aNfhAm1OeFUvygEFHFB8M6SRcUyzcU0x6lcHKwtioK5alYyzrSidWOUO0UX5VLIENIUcfDmAMiquOrCE4asJlq1OTlXo2wtu7HVETECBD3Lo8wlYcp5AoSi1JAI5U+FCJWQ6wKDHcrBfHdV5sU6NR4WAAVvrnjal+SWRRZ16zmAPN-cN9ZtIwVufpQyxkuUlTxeC0xzqvWNXabXFkWss3s1PLI4EKVxQFrkoZYOzLo1pGBEeaOdbpYOrVfLDxqwvFcK7TJasMTRWxuBHJfcpzPafF7WtGVgR8gpWVdO4u4DXnWQXXQJdbSN58ogCu5+9ZkIfE3RKndP9wZimzKeNI4z7UlzndeopliM3Po7n2-4nh0z7iiQLAWpbFRimVIjf2aNMmAfPUY1xV72EtIsW0kpnZOn+JJZIj5YEQi-L+CET45181hpQydGJQbyxnXTCdD+yzChAA */
   createMachine<
     LogExplorerControllerContext,
     LogExplorerControllerEvent,
@@ -80,12 +79,7 @@ export const createPureLogExplorerControllerStateMachine = (
         initialized: {
           type: 'parallel',
           invoke: {
-            src: 'subscribeToStateStorageContainer',
-          },
-          on: {
-            UPDATE_CONTEXT_FROM_STATE_STORAGE_CONTAINER: {
-              actions: 'updateContextFromStateStorageContainer',
-            },
+            src: 'subscribeToDiscoverState',
           },
           states: {
             datasetSelection: {
@@ -176,6 +170,11 @@ export const createPureLogExplorerControllerStateMachine = (
               },
             },
           },
+          on: {
+            DISCOVER_STATE_CHANGED: {
+              actions: 'updateContextFromStateStorageContainer',
+            },
+          },
         },
       },
     },
@@ -229,16 +228,12 @@ export interface LogExplorerControllerStateMachineDependencies {
   initialContext?: LogExplorerControllerContext;
   datasetsClient: IDatasetsClient;
   toasts: IToasts;
-  discoverStateStorageContainer$: ReplaySubject;
-  logExplorerState$: BehaviorSubject<LogExplorerControllerContext>;
 }
 
 export const createLogExplorerControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   datasetsClient,
   toasts,
-  discoverStateStorageContainer$,
-  logExplorerState$,
 }: LogExplorerControllerStateMachineDependencies) =>
   createPureLogExplorerControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -251,9 +246,7 @@ export const createLogExplorerControllerStateMachine = ({
       subscribeControlGroup: subscribeControlGroup(),
       updateControlPanels: updateControlPanels(),
       validateSelection: validateSelection({ datasetsClient }),
-      subscribeToStateStorageContainer: subscribeToStateStorageContainer({
-        stateStorageContainer$: discoverStateStorageContainer$,
-      }),
+      subscribeToDiscoverState: subscribeToDiscoverState(),
     },
   });
 

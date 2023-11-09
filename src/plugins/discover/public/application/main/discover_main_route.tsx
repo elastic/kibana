@@ -9,7 +9,7 @@ import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  IStateStorage,
+  IKbnUrlStateStorage,
   redirectWhenMissing,
   SavedObjectNotFound,
 } from '@kbn/kibana-utils-plugin/public';
@@ -48,7 +48,7 @@ interface DiscoverLandingParams {
 
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
-  stateStorageContainer?: IStateStorage;
+  stateStorageContainer?: IKbnUrlStateStorage;
   isDev: boolean;
   mode?: DiscoverDisplayMode;
 }

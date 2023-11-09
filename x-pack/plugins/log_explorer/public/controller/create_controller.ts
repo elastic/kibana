@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { IStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { getDevToolsOptions } from '@kbn/xstate-utils';
 import { BehaviorSubject, map, ReplaySubject, combineLatest } from 'rxjs';
 import { interpret } from 'xstate';
 import { DatasetSelectionPlain, hydrateDatasetSelection } from '../../common';
@@ -21,8 +21,8 @@ import {
   WithQueryState,
 } from '../state_machines/log_explorer_controller';
 import { DEFAULT_CONTEXT } from '../state_machines/log_explorer_controller/src/defaults';
-import { mapContextFromStateStorageContainer } from '../state_machines/log_explorer_controller/src/services/discover_service';
-import { createStateStorageContainer } from './create_state_storage';
+// import { mapContextFromStateStorageContainer } from '../state_machines/log_explorer_controller/src/services/discover_service';
+// import { createStateStorageContainer } from './create_state_storage';
 
 interface Dependencies {
   http: HttpSetup;
@@ -33,10 +33,6 @@ export interface LogExplorerController {
   stateMachine: LogExplorerControllerStateMachine;
   service: LogExplorerControllerStateService;
   datasetsClient: IDatasetsClient;
-  /**
-   * Acts as state storage for the Discover container, rather than the URL.
-   */
-  stateStorageContainer: IStateStorage;
   logExplorerState$: BehaviorSubject<LogExplorerControllerContext>;
 }
 
@@ -65,29 +61,29 @@ export const createLogExplorerControllerFactory =
     };
 
     // State storage container that allows the Log Explorer to act as state storage over the URL
-    const stateStorageContainer = createStateStorageContainer({ initialState: initialContext });
+    // const stateStorageContainer = createStateStorageContainer({ initialState: initialContext });
 
     const logExplorerState$ = new BehaviorSubject<LogExplorerControllerContext>({});
 
-    const discoverStateStorageContainer$ = new ReplaySubject(1);
+    // const discoverStateStorageContainer$ = new ReplaySubject(1);
 
-    combineLatest([stateStorageContainer.change$('_a'), stateStorageContainer.change$('_g')])
-      .pipe(
-        map(([applicationState, globalState]) => {
-          return mapContextFromStateStorageContainer(applicationState, globalState);
-        })
-      )
-      .subscribe({ next: (value) => discoverStateStorageContainer$.next(value) });
+    // combineLatest([stateStorageContainer.change$('_a'), stateStorageContainer.change$('_g')])
+    //   .pipe(
+    //     map(([applicationState, globalState]) => {
+    //       return mapContextFromStateStorageContainer(applicationState, globalState);
+    //     })
+    //   )
+    //   .subscribe({ next: (value) => discoverStateStorageContainer$.next(value) });
 
     const machine = createLogExplorerControllerStateMachine({
       initialContext,
       datasetsClient,
       toasts,
-      discoverStateStorageContainer$,
-      logExplorerState$,
     });
 
-    const service = interpret(machine).start();
+    const service = interpret(machine, {
+      devTools: getDevToolsOptions(),
+    }).start();
 
     // Notify consumers of changes to the state machine's context
     service.subscribe((state) => {
@@ -98,10 +94,6 @@ export const createLogExplorerControllerFactory =
       stateMachine: machine,
       service,
       datasetsClient,
-      /**
-       * Acts as state storage for the Discover container, rather than the URL.
-       */
-      stateStorageContainer,
       logExplorerState$,
     };
   };
