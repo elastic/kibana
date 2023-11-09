@@ -11,7 +11,7 @@ import SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EcsRiskScore, RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
-import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {
   RISK_ENGINE_INIT_URL,

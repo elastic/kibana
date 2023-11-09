@@ -446,7 +446,7 @@ x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-managemen
 x-pack/plugins/index_management @elastic/platform-deployment-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
-x-pack/plugins/infra @elastic/infra-monitoring-ui
+x-pack/plugins/infra @elastic/infra-monitoring-ui @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
@@ -938,7 +938,6 @@ x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 /.github/workflows/oblt-github-commands @elastic/observablt-robots
 
 # Infra Monitoring
-/x-pack/plugins/infra @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/plugins/infra/server/routes @elastic/obs-ux-infra_services-team
 /x-pack/plugins/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
 /x-pack/plugins/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
@@ -1437,7 +1436,7 @@ x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entit
 x-pack/plugins/security_solution/public/explore/components/risk_score @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/overview/pages/entity_analytics.tsx @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/overview/components/entity_analytics
-x-pack/plugins/security_solution/server/lib/risk_engine @elastic/security-entity-analytics
+x-pack/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
 x-pack/test/detection_engine_api_integration/security_and_spaces/group10/risk_engine @elastic/security-entity-analytics
 
