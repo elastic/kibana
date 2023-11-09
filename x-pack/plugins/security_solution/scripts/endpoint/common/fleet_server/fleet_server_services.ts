@@ -120,6 +120,13 @@ export const startFleetServer = async ({
   port = 8220,
 }: StartFleetServerOptions): Promise<StartedFleetServer> => {
   logger.info(`Starting Fleet Server and connecting it to Kibana`);
+  logger.debug(
+    `called from:\n${(() => {
+      const s = { stack: '' };
+      Error.captureStackTrace(s);
+      return s.stack;
+    })()}`
+  );
 
   return logger.indent(4, async () => {
     // Check if fleet already running if `force` is false
@@ -293,7 +300,7 @@ const startFleetServerWithDocker = async ({
 
       await execa('docker', ['kill', containerName])
         .then(() => {
-          log.debug(
+          log.info(
             `Killed an existing container with name [${containerName}]. New one will be started.`
           );
         })

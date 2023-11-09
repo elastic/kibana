@@ -196,7 +196,7 @@ export const waitForHostToEnroll = async (
   if (!found) {
     throw Object.assign(
       new Error(
-        `Timed out waiting for host [${hostname}] to show up in Fleet in ${
+        `Timed out waiting for host [${hostname}] to show up in Fleet. Waited ${
           timeoutMs / 1000
         } seconds`
       ),

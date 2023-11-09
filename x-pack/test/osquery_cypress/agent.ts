@@ -64,11 +64,9 @@ export class AgentManager extends Manager {
       artifact,
     ];
 
-    this.log.info(`Docker args: \n${JSON.stringify(dockerArgs, null, 2)}`);
-
     const startedContainer = await execa('docker', dockerArgs);
 
-    this.log.info(`started: ${JSON.stringify(startedContainer, null, 2)}`);
+    this.log.info(`agent docker container started:\n${JSON.stringify(startedContainer, null, 2)}`);
 
     this.agentContainerId = startedContainer.stdout;
     await waitForHostToEnroll(this.kbnClient, containerName, 240000);
