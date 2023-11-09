@@ -34,7 +34,7 @@ import {
   CsvV2ExportType,
 } from '@kbn/reporting-export-types-csv';
 import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
-import { ExportType } from '@kbn/reporting-export-types-helpers-server';
+import { ExportType } from '@kbn/reporting-server';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import {

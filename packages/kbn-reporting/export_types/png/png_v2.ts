@@ -41,7 +41,7 @@ import {
   generatePngObservable,
   JobParamsPNGV2,
   TaskPayloadPNGV2,
-} from '@kbn/reporting-export-types-helpers-server';
+} from '@kbn/reporting-server';
 import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { SerializableRecord } from '@kbn/utility-types';

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import supertest from 'supertest';
+
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import type { CommonReportingSetup } from '@kbn/reporting-export-types-helpers-server';
+import type { CommonReportingSetup } from '@kbn/reporting-server';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import rison from '@kbn/rison';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { BehaviorSubject } from 'rxjs';
-import supertest from 'supertest';
 import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { ReportingStore } from '../../../../lib';

@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { cryptoFactory } from '@kbn/reporting-export-types-helpers-server';
+import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { Counters, getCounters } from '..';

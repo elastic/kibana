@@ -43,7 +43,7 @@ import {
   getCustomLogo,
   JobParamsPDFV2,
   TaskPayloadPDFV2,
-} from '@kbn/reporting-export-types-helpers-server';
+} from '@kbn/reporting-server';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 

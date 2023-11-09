@@ -32,7 +32,7 @@ import {
   getCustomLogo,
   getFullUrls,
   validateUrls,
-} from '@kbn/reporting-export-types-helpers-server';
+} from '@kbn/reporting-server';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 

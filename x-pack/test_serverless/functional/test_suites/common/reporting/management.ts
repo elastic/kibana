@@ -7,7 +7,7 @@
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { CSV_REPORT_TYPE_V2 } from '@kbn/reporting-common';
-import { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types-helpers-server';
+import { JobParamsCsvFromSavedObject } from '@kbn/reporting-server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

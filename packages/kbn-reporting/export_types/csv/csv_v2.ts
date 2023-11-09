@@ -31,7 +31,7 @@ import {
   JobParamsCsvFromSavedObject,
   ReportingRequestHandlerContext,
   TaskPayloadCsvFromSavedObject,
-} from '@kbn/reporting-export-types-helpers-server';
+} from '@kbn/reporting-server';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {

@@ -65,6 +65,6 @@
     "@kbn/management-settings-ids",
     "@kbn/reporting-common",
     "@kbn/reporting-export-types-csv",
-    "@kbn/reporting-export-types-helpers-server",
+    "@kbn/reporting-server",
   ]
 }

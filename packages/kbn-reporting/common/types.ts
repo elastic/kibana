@@ -111,3 +111,9 @@ export interface ReportingServerInfo {
   name: string;
   uuid: string;
 }
+
+export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
+
+export interface IlmPolicyStatusResponse {
+  status: IlmPolicyMigrationStatus;
+}

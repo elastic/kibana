@@ -13,13 +13,9 @@ import type { LocatorParams } from '@kbn/reporting-common/types';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import { createMockConfigSchema } from '../../test_helpers';
-import {
-  generatePngObservable,
-  cryptoFactory,
-  TaskPayloadPNGV2,
-} from '@kbn/reporting-export-types-helpers-server';
+import { generatePngObservable, cryptoFactory, TaskPayloadPNGV2 } from '@kbn/reporting-server';
 
-jest.mock('@kbn/reporting-export-types-helpers-server/generate_png');
+jest.mock('@kbn/reporting-server/generate_png');
 
 let content: string;
 let mockPngExportType: PngExportType;

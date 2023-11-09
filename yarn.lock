@@ -5260,11 +5260,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-helpers-public@link:packages/kbn-reporting/export_types_helpers_public":
-  version "0.0.0"
-  uid ""
-
-"@kbn/reporting-export-types-helpers-server@link:packages/kbn-reporting/export_types_helpers_server":
+"@kbn/reporting-server@link:packages/kbn-reporting/server":
   version "0.0.0"
   uid ""
 

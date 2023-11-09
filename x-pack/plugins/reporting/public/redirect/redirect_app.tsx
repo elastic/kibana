@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import type { FunctionComponent } from 'react';
 import { parse } from 'query-string';
-import { i18n } from '@kbn/i18n';
+import type { FunctionComponent } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { ScopedHistory } from '@kbn/core/public';
+import { LocatorParams } from '@kbn/reporting-common/types';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
-import { LocatorParams } from '@kbn/reporting-export-types-helpers-public';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../common/constants';
-
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { SharePluginSetup } from '../shared_imports';
 
