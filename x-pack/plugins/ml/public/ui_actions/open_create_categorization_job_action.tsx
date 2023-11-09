@@ -61,43 +61,11 @@ export function createCategorizationADJobAction(
         return Promise.reject();
       }
     },
-    // async isCompatible(context: { embeddable: Embeddable }) {
-    //   const embeddableType = context.embeddable.type;
-    //   if (embeddableType !== 'map') {
-    //     if (embeddableType !== 'lens' || !context.embeddable.getSavedVis()) {
-    //       return false;
-    //     }
-    //   }
-
-    //   const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart, { lens }]] =
-    //     await Promise.all([
-    //       import('../application/jobs/new_job/job_from_lens'),
-    //       getStartServices(),
-    //     ]);
-    //   const { isCompatibleMapVisualization } = await import(
-    //     '../application/jobs/new_job/job_from_map'
-    //   );
-
-    //   if (
-    //     !coreStart.application.capabilities.ml?.canCreateJob ||
-    //     !coreStart.application.capabilities.ml?.canStartStopDatafeed
-    //   ) {
-    //     return false;
-    //   }
-
-    //   try {
-    //     if (embeddableType === 'lens' && lens) {
-    //       const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable, lens);
-    //       return isCompatibleVisualizationType(chartInfo!);
-    //     } else if (isMapEmbeddable(context.embeddable)) {
-    //       return isCompatibleMapVisualization(context.embeddable);
-    //     }
-    //     return true;
-    //   } catch (error) {
-    //     // eslint-disable-next-line no-console
-    //     console.error('Error attempting to check for ML job compatibility', error);
-    //     return false;
-    //   }
-    // },
+    async isCompatible({ dataView, field }: CreateCategorizationADJobContext) {
+      return (
+        dataView.timeFieldName !== undefined &&
+        dataView.fields.find((f) => f.name === field.name) !== undefined
+      );
+    },
   };
 }
