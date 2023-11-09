@@ -7,15 +7,18 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
-import { services } from './services';
+import { svlServices } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
+  const serverlessTestsConfig = await readConfigFile(
+    require.resolve('../../test_serverless/shared/config.base.ts')
+  );
 
   return generateConfig({
-    baseConfig: xPackAPITestsConfig,
-    junitReportName: 'X-Pack Endpoint API Integration Tests against ESS',
-    target: 'ess',
-    services,
+    baseConfig: serverlessTestsConfig,
+    junitReportName: 'X-Pack Endpoint API Integration Tests against Serverless',
+    target: 'serverless',
+    kbnServerArgs: ['--serverless=security'],
+    services: svlServices,
   });
 }
