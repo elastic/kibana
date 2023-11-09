@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import { MemoryRouter } from 'react-router-dom';
+import { useArgs } from '@storybook/addons';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { type TabIds, type AssetDetailsProps } from './types';
@@ -26,6 +27,7 @@ const stories: Meta<AssetDetailsStoryArgs> = {
   argTypes: {
     tabId: {
       options: assetDetailsProps.tabs.filter(({ id }) => id !== 'linkToApm').map(({ id }) => id),
+      defaultValue: 'overview',
       control: {
         type: 'radio',
       },
@@ -52,7 +54,7 @@ const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
   const [isOpen, setIsOpen] = useState(false);
   const closeFlyout = () => setIsOpen(false);
   const options = assetDetailsProps.tabs.filter(({ id }) => id !== 'linkToApm').map(({ id }) => id);
-  const [tabId, setTabId] = useState(args.tabId ?? 'overview');
+  const [{ tabId }, updateArgs] = useArgs();
 
   return (
     <div>
@@ -65,7 +67,7 @@ const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
         data-test-subj="infraFlyoutTemplateSelect"
         value={tabId}
         onChange={(e) => {
-          setTabId(e.target.value as TabIds);
+          updateArgs({ tabId: e.target.value as TabIds });
         }}
         options={options.map((id) => ({
           text: id,
@@ -82,7 +84,8 @@ const FlyoutTemplate: Story<AssetDetailsStoryArgs> = (args) => {
       <div hidden={!isOpen}>
         {isOpen && (
           <MemoryRouter
-            initialEntries={[`/infra/metrics/hosts?assetDetails=(tabId:${tabId ?? args.tabId})`]}
+            key={tabId}
+            initialEntries={[`/infra/metrics/hosts?assetDetails=(tabId:${tabId ?? args?.tabId})`]}
           >
             <AssetDetails {...args} renderMode={{ mode: 'flyout', closeFlyout }} />
           </MemoryRouter>
