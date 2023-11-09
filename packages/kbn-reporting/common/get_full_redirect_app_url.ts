@@ -9,6 +9,7 @@
 import { format } from 'url';
 import { buildKibanaPath } from './build_kibana_path';
 import { getRedirectAppPath } from './constants';
+import { ReportingConfigType, ReportingServerInfo } from './types';
 
 export function getFullRedirectAppUrl(
   config: ReportingConfigType,

@@ -12,6 +12,7 @@ import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import { buildKibanaPath } from '@kbn/reporting-common';
+import { BaseParams, ManagementLinkFn } from '@kbn/reporting-common/types';
 import {
   getRedirectAppPath,
   INTERNAL_ROUTES,

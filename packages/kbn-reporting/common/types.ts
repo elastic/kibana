@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { LocatorParams } from '.';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import type { PerformanceMetrics as ScreenshotMetrics } from '@kbn/screenshotting-plugin/common/types';
+import type { ByteSizeValue } from '@kbn/config-schema';
+import type { LocatorParams } from './url';
+
+export * from './url';
 
 export interface CsvMetrics {
   rows: number;
@@ -14,8 +19,8 @@ export interface CsvMetrics {
 
 export interface TaskRunMetrics {
   csv?: CsvMetrics;
-  png?: unknown;
-  pdf?: unknown;
+  png?: ScreenshotMetrics;
+  pdf?: ScreenshotMetrics & { pages?: number };
 }
 
 export interface TaskRunResult {
@@ -44,7 +49,7 @@ export interface ReportOutput extends TaskRunResult {
  * @deprecated
  */
 export interface BaseParams {
-  layout?: unknown;
+  layout?: LayoutParams;
   objectType: string;
   title: string;
   browserTimezone: string; // to format dates in the user's time zone
@@ -77,4 +82,32 @@ export interface BasePayloadV2 extends BaseParamsV2 {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
+}
+
+export interface ReportingConfigType {
+  encryptionKey?: string;
+  kibanaServer: {
+    protocol?: string;
+    hostname?: string;
+    port?: number;
+  };
+  csv: {
+    checkForFormulas: boolean;
+    escapeFormulaValues: boolean;
+    useByteOrderMarkEncoding: boolean;
+    maxSizeBytes: number | ByteSizeValue;
+    scroll: {
+      duration: string;
+      size: number;
+    };
+  };
+}
+
+export interface ReportingServerInfo {
+  basePath: string;
+  protocol: string;
+  hostname: string;
+  port: number;
+  name: string;
+  uuid: string;
 }

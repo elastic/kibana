@@ -8,7 +8,8 @@
 import * as Rx from 'rxjs';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { CancellationToken, LocatorParams } from '@kbn/reporting-common';
+import { CancellationToken } from '@kbn/reporting-common';
+import type { LocatorParams } from '@kbn/reporting-common/types';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import { createMockConfigSchema } from '../../test_helpers';

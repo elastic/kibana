@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { identity, range } from 'lodash';
+import * as Rx from 'rxjs';
+import type { Writable } from 'stream';
+
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
@@ -20,25 +24,20 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { identity, range } from 'lodash';
-import * as Rx from 'rxjs';
-import type { Writable } from 'stream';
-import { CsvGenerator } from './generate_csv';
-import { CancellationToken, CsvConfig, JobParams } from '@kbn/generate-csv-types';
+import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
+import { CancellationToken } from '@kbn/reporting-common';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from './constants';
+import { CsvGenerator } from './generate_csv';
 
 const createMockJob = (baseObj: any = {}): JobParams => ({
   ...baseObj,
 });
 
-const createMockCancellationToken = (): CancellationToken => ({
-  isCancelled: () => false,
-  cancel: jest.fn(),
-});
+const createMockCancellationToken = () => new CancellationToken();
 
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;

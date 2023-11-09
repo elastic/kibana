@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { Component, ReactElement } from 'react';
 import url from 'url';
 
 import {
@@ -21,7 +22,14 @@ import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/pub
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import React, { Component, ReactElement } from 'react';
+import type { BaseParams } from '@kbn/reporting-common/types';
+import {
+  CSV_REPORT_TYPE,
+  PDF_REPORT_TYPE,
+  PDF_REPORT_TYPE_V2,
+  PNG_REPORT_TYPE,
+  PNG_REPORT_TYPE_V2,
+} from '@kbn/reporting-common';
 
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';

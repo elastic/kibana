@@ -20,8 +20,15 @@ import type {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
+import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
+import {
+  AuthenticationExpiredError,
+  CancellationToken,
+  ReportingError,
+  byteSizeValueToNumber,
+} from '@kbn/reporting-common';
 
-import { CancellationToken, CsvConfig, JobParams, TaskRunResult } from '@kbn/generate-csv-types';
 import { CONTENT_TYPE_CSV } from './constants';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { i18nTexts } from './i18n_texts';

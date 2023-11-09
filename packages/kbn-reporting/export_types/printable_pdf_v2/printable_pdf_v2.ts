@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Headers } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
 import {
   catchError,
@@ -21,28 +20,31 @@ import {
   throwError,
 } from 'rxjs';
 import { Writable } from 'stream';
+
+import { Headers } from '@kbn/core/server';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
 import {
-  PDF_REPORT_TYPE_V2,
-  PDF_JOB_TYPE_V2,
-  LICENSE_TYPE_TRIAL,
+  CancellationToken,
+  getFullRedirectAppUrl,
   LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_ENTERPRISE,
-  REPORTING_TRANSACTION_TYPE,
-  CancellationToken,
+  LICENSE_TYPE_TRIAL,
+  PDF_JOB_TYPE_V2,
+  PDF_REPORT_TYPE_V2,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import {
-  generatePdfObservableV2,
   decryptJobHeaders,
-  getCustomLogo,
-  getFullRedirectAppUrl,
   ExportType,
+  generatePdfObservableV2,
+  getCustomLogo,
   JobParamsPDFV2,
   TaskPayloadPDFV2,
 } from '@kbn/reporting-export-types-helpers-server';
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {

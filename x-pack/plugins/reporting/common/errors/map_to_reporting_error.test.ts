@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { mapToReportingError } from './map_to_reporting_error';
-import { errors } from '@kbn/screenshotting-plugin/common';
 import {
   BrowserCouldNotLaunchError,
   BrowserScreenshotError,
   BrowserUnexpectedlyClosedError,
   InvalidLayoutParametersError,
   UnknownError,
-} from '@kbn/generate-csv/src/errors';
+} from '@kbn/reporting-common';
+import { mapToReportingError } from './map_to_reporting_error';
+import { errors } from '@kbn/screenshotting-plugin/common';
 
 describe('mapToReportingError', () => {
   test('Non-Error values', () => {
