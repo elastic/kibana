@@ -58,7 +58,7 @@ const visitArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
-describe('Artifact tabs in Policy Details page', { tags: ['@ess'] }, () => {
+describe('Artifact tabs in Policy Details page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     login();
     loadEndpointDataForEventFiltersIfNeeded();
@@ -76,22 +76,32 @@ describe('Artifact tabs in Policy Details page', { tags: ['@ess'] }, () => {
         removeExceptionsList(testData.createRequestBody.list_id);
       });
 
-      it(`[NONE] User cannot see the tab for ${testData.title}`, () => {
-        loginWithPrivilegeNone(testData.privilegePrefix);
-        visitPolicyDetailsPage();
+      it(
+        `[NONE] User cannot see the tab for ${testData.title}`,
+        // there is no such role in Serverless environment that can read policy but cannot read artifacts
+        { tags: ['@skipInServerless'] },
+        () => {
+          loginWithPrivilegeNone(testData.privilegePrefix);
+          visitPolicyDetailsPage();
 
-        cy.get(`#${testData.tabId}`).should('not.exist');
-      });
+          cy.get(`#${testData.tabId}`).should('not.exist');
+        }
+      );
 
       context(`Given there are no ${testData.title} entries`, () => {
-        it(`[READ] User CANNOT add ${testData.title} artifact`, () => {
-          loginWithPrivilegeRead(testData.privilegePrefix);
-          visitArtifactTab(testData.tabId);
+        it(
+          `[READ] User CANNOT add ${testData.title} artifact`,
+          // there is no such role in Serverless environment that only reads artifacts
+          { tags: ['@skipInServerless'] },
+          () => {
+            loginWithPrivilegeRead(testData.privilegePrefix);
+            visitArtifactTab(testData.tabId);
 
-          cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
+            cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
 
-          cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
-        });
+            cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
+          }
+        );
 
         it(`[ALL] User can add ${testData.title} artifact`, () => {
           loginWithPrivilegeAll();
@@ -129,15 +139,20 @@ describe('Artifact tabs in Policy Details page', { tags: ['@ess'] }, () => {
           createPerPolicyArtifact(testData.artifactName, testData.createRequestBody);
         });
 
-        it(`[READ] User CANNOT Manage or Assign ${testData.title} artifacts`, () => {
-          loginWithPrivilegeRead(testData.privilegePrefix);
-          visitArtifactTab(testData.tabId);
+        it(
+          `[READ] User CANNOT Manage or Assign ${testData.title} artifacts`,
+          // there is no such role in Serverless environment that only reads artifacts
+          { tags: ['@skipInServerless'] },
+          () => {
+            loginWithPrivilegeRead(testData.privilegePrefix);
+            visitArtifactTab(testData.tabId);
 
-          cy.getByTestSubj('policy-artifacts-empty-unassigned').should('exist');
+            cy.getByTestSubj('policy-artifacts-empty-unassigned').should('exist');
 
-          cy.getByTestSubj('unassigned-manage-artifacts-button').should('not.exist');
-          cy.getByTestSubj('unassigned-assign-artifacts-button').should('not.exist');
-        });
+            cy.getByTestSubj('unassigned-manage-artifacts-button').should('not.exist');
+            cy.getByTestSubj('unassigned-assign-artifacts-button').should('not.exist');
+          }
+        );
 
         it(`[ALL] User can Manage and Assign ${testData.title} artifacts`, () => {
           loginWithPrivilegeAll();
@@ -173,23 +188,28 @@ describe('Artifact tabs in Policy Details page', { tags: ['@ess'] }, () => {
           });
         });
 
-        it(`[READ] User can see ${testData.title} artifacts but CANNOT assign or remove from policy`, () => {
-          loginWithPrivilegeRead(testData.privilegePrefix);
-          visitArtifactTab(testData.tabId);
+        it(
+          `[READ] User can see ${testData.title} artifacts but CANNOT assign or remove from policy`,
+          // there is no such role in Serverless environment that only reads artifacts
+          { tags: ['@skipInServerless'] },
+          () => {
+            loginWithPrivilegeRead(testData.privilegePrefix);
+            visitArtifactTab(testData.tabId);
 
-          // List of artifacts
-          cy.getByTestSubj('artifacts-collapsed-list-card').should('have.length', 1);
-          cy.getByTestSubj('artifacts-collapsed-list-card-header-titleHolder').contains(
-            testData.artifactName
-          );
+            // List of artifacts
+            cy.getByTestSubj('artifacts-collapsed-list-card').should('have.length', 1);
+            cy.getByTestSubj('artifacts-collapsed-list-card-header-titleHolder').contains(
+              testData.artifactName
+            );
 
-          // Cannot assign artifacts
-          cy.getByTestSubj('artifacts-assign-button').should('not.exist');
+            // Cannot assign artifacts
+            cy.getByTestSubj('artifacts-assign-button').should('not.exist');
 
-          // Cannot remove from policy
-          cy.getByTestSubj('artifacts-collapsed-list-card-header-actions-button').click();
-          cy.getByTestSubj('remove-from-policy-action').should('not.exist');
-        });
+            // Cannot remove from policy
+            cy.getByTestSubj('artifacts-collapsed-list-card-header-actions-button').click();
+            cy.getByTestSubj('remove-from-policy-action').should('not.exist');
+          }
+        );
 
         it(`[ALL] User can see ${testData.title} artifacts and can assign or remove artifacts from policy`, () => {
           loginWithPrivilegeAll();
