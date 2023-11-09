@@ -24,12 +24,14 @@ import { useListWithSearchComponent } from '../../hooks/use_list_with_search';
 import { ListExceptionItems } from '..';
 
 interface ListWithSearchComponentProps {
+  hasAccessToLists: boolean;
   list: ExceptionListSchema;
   isReadOnly: boolean;
   refreshExceptions?: boolean;
 }
 
 const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
+  hasAccessToLists,
   list,
   isReadOnly,
   refreshExceptions,
@@ -116,6 +118,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
               emptyViewerTitle={emptyViewerTitle}
               emptyViewerBody={emptyViewerBody}
               emptyViewerButtonText={emptyViewerButtonText}
+              hasAccessToLists={hasAccessToLists}
               pagination={pagination}
               lastUpdated={lastUpdated}
               onPaginationChange={onPaginationChange}

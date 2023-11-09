@@ -8,18 +8,18 @@
 import React, { memo } from 'react';
 
 import {
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextColor,
-  EuiPanel,
-  EuiText,
   EuiAccordion,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -37,6 +37,7 @@ import { IncludeExpiredExceptionsModal } from '../expired_exceptions_list_items_
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
+  hasAccessToLists: boolean;
   handleDelete: ({
     id,
     listId,
@@ -72,8 +73,10 @@ interface ExceptionsListCardProps {
   }) => () => Promise<void>;
   readOnly: boolean;
 }
+
 const buttonCss = css`
   z-index: 100;
+
   .euiAccordion__buttonContent {
     cursor: pointer;
     width: 100%;
@@ -87,7 +90,7 @@ const ListHeaderContainer = styled(EuiFlexGroup)`
   text-align: initial;
 `;
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
-  ({ exceptionsList, handleDelete, handleExport, handleDuplicate, readOnly }) => {
+  ({ exceptionsList, hasAccessToLists, handleDelete, handleExport, handleDuplicate, readOnly }) => {
     const {
       linkedRules,
       showManageRulesFlyout,
@@ -222,6 +225,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   exceptions={exceptions}
                   listType={exceptionsList.type as ExceptionListTypeEnum}
                   pagination={pagination}
+                  hasAccessToLists={hasAccessToLists}
                   hideUtility
                   viewerStatus={exceptionViewerStatus}
                   ruleReferences={ruleReferences}

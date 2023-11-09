@@ -17,7 +17,6 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { Pagination } from '@elastic/eui';
-import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import { getFormattedComments } from '../../utils/ui.helpers';
 import { LinkToRuleDetails } from '../link_to_rule_details';
@@ -28,6 +27,7 @@ import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_except
 interface ListExceptionItemsProps {
   isReadOnly: boolean;
   exceptions: ExceptionListItemSchema[];
+  hasAccessToLists: boolean;
   listType: ExceptionListTypeEnum;
   lastUpdated: string | number | null;
   pagination: Pagination & { pageSize: number };
@@ -46,6 +46,7 @@ interface ListExceptionItemsProps {
 const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
   isReadOnly,
   exceptions,
+  hasAccessToLists,
   listType,
   lastUpdated,
   pagination,
@@ -60,12 +61,10 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
   onPaginationChange,
   onCreateExceptionListItem,
 }) => {
-  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
-    useListsConfig();
   const canCrudEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canWriteEndpointExceptions = useMemo(
-    () => canCrudEndpointExceptions && !(listsConfigLoading || needsListsConfiguration),
-    [listsConfigLoading, needsListsConfiguration, canCrudEndpointExceptions]
+    () => canCrudEndpointExceptions && hasAccessToLists,
+    [canCrudEndpointExceptions, hasAccessToLists]
   );
 
   const editButtonText = useMemo(() => {

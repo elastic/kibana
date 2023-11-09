@@ -87,9 +87,13 @@ export const SharedLists = React.memo(() => {
   const loading = userInfoLoading || listsConfigLoading;
 
   const canShowEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const hasAccessToLists = useMemo(
+    () => !(needsListsConfiguration || listsConfigLoading),
+    [needsListsConfiguration, listsConfigLoading]
+  );
   const canAccessEndpointExceptions = useMemo(
-    () => canShowEndpointExceptions && !(needsListsConfiguration || listsConfigLoading),
-    [canShowEndpointExceptions, needsListsConfiguration, listsConfigLoading]
+    () => canShowEndpointExceptions && hasAccessToLists,
+    [canShowEndpointExceptions, hasAccessToLists]
   );
 
   const {
@@ -600,6 +604,7 @@ export const SharedLists = React.memo(() => {
                     data-test-subj="exceptionsListCard"
                     readOnly={isReadOnly}
                     exceptionsList={excList}
+                    hasAccessToLists={hasAccessToLists}
                     handleDelete={handleDelete}
                     handleExport={handleExport}
                     handleDuplicate={handleDuplicate}

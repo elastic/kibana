@@ -96,6 +96,7 @@ describe('ExceptionsListCard', () => {
       <TestProviders>
         <ExceptionsListCard
           exceptionsList={{ ...getExceptionListSchemaMock(), rules: [] }}
+          hasAccessToLists={true}
           handleDelete={jest.fn()}
           handleExport={jest.fn()}
           handleDuplicate={jest.fn()}
