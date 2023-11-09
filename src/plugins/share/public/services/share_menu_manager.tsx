@@ -129,24 +129,24 @@ export class ShareMenuManager {
               disabledShareUrl={disabledShareUrl}
             />
             <ShareContextMenu
-                allowEmbed={allowEmbed}
-                allowShortUrl={allowShortUrl}
-                objectId={objectId}
-                objectType={objectType}
-                objectTypeTitle={objectTypeTitle}
-                shareMenuItems={menuItems}
-                sharingData={sharingData}
-                shareableUrl={shareableUrl}
-                shareableUrlForSavedObject={shareableUrlForSavedObject}
-                shareableUrlLocatorParams={shareableUrlLocatorParams}
-                onClose={onClose}
-                embedUrlParamExtensions={embedUrlParamExtensions}
-                anonymousAccess={anonymousAccess}
-                showPublicUrlSwitch={showPublicUrlSwitch}
-                urlService={urlService}
-                snapshotShareWarning={snapshotShareWarning}
-                disabledShareUrl={disabledShareUrl}
-                />
+              allowEmbed={allowEmbed}
+              allowShortUrl={allowShortUrl}
+              objectId={objectId}
+              objectType={objectType}
+              objectTypeTitle={objectTypeTitle}
+              shareMenuItems={menuItems}
+              sharingData={sharingData}
+              shareableUrl={shareableUrl}
+              shareableUrlForSavedObject={shareableUrlForSavedObject}
+              shareableUrlLocatorParams={shareableUrlLocatorParams}
+              onClose={onClose}
+              embedUrlParamExtensions={embedUrlParamExtensions}
+              anonymousAccess={anonymousAccess}
+              showPublicUrlSwitch={showPublicUrlSwitch}
+              urlService={urlService}
+              snapshotShareWarning={snapshotShareWarning}
+              disabledShareUrl={disabledShareUrl}
+            />
           </EuiWrappingPopover>
         </KibanaThemeProvider>
       </I18nProvider>
