@@ -64,7 +64,7 @@ export const search = async (
     }
 
     /**
-     * Verify if custom field type is filterable
+     * Validate custom fields
      */
     if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
       if (configurations.length) {

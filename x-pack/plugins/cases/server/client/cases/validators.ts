@@ -144,7 +144,7 @@ export const validateSearchCasesCustomFields = ({
   customFieldsConfiguration: CustomFieldsConfiguration;
   customFields: CasesSearchRequest['customFields'];
 }) => {
-  let customFieldsMapping: ICasesCustomField | null | undefined = null;
+  let customFieldsMapping: ICasesCustomField | null = null;
 
   if (!customFields || isEmpty(customFields)) {
     return;
