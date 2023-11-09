@@ -309,6 +309,7 @@ export const ElasticsearchOverview = () => {
           docLinks={docLinks}
           application={application}
           sharePlugin={share}
+          http={http}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
