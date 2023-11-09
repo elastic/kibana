@@ -26,17 +26,22 @@ import {
 } from '../../../screens/alerts';
 
 describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+  });
+
+  after(() => {
+    cy.task('esArchiverUnload', 'endpoint');
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
+  });
+
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
     createRule(getNewRule({ rule_id: 'new custom rule' }));
     visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
-  });
-
-  afterEach(() => {
-    cy.task('esArchiverUnload', 'endpoint');
   });
 
   it('Add and remove a tag using the alert bulk action menu', () => {
@@ -66,13 +71,13 @@ describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
     // Then add tags to both alerts
-    selectNumberOfAlerts(2);
+    selectNumberOfAlerts(5);
     openAlertTaggingBulkActionMenu();
     cy.get(MIXED_ALERT_TAG).contains('Duplicate');
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
-    selectNumberOfAlerts(2);
+    selectNumberOfAlerts(5);
     openAlertTaggingBulkActionMenu();
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
   });
