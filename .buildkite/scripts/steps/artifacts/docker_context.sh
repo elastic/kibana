@@ -8,7 +8,7 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Create contexts"
 mkdir -p target
-node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact
+node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact "${BUILD_ARGS[@]}"
 
 echo "--- Setup default context"
 DOCKER_BUILD_FOLDER=$(mktemp -d)
