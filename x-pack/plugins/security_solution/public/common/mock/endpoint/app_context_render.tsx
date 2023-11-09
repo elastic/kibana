@@ -313,6 +313,12 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     ...startServices,
     kibanaVersion: '8.0.0',
     kibanaBranch: 'main',
+    buildFlavor: 'traditional',
+    envMode: {
+      prod: true,
+      dev: false,
+      name: 'production' as const,
+    },
   };
 
   if (jest.isMockFunction(KibanaServices.get)) {
