@@ -299,7 +299,7 @@ export const clickIdToggleField = () => {
 };
 
 export const closeOpenTimelineModal = () => {
-  cy.get(CLOSE_OPEN_TIMELINE_MODAL_BTN).click();
+  cy.get(CLOSE_OPEN_TIMELINE_MODAL_BTN).click({ force: true });
 };
 
 export const closeTimeline = () => {

@@ -61,7 +61,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId })
           bottom: 0;
           left: 0;
           background: ${background};
-          ${!isFullScreen ? modalStyles : ''}
+          ${modalStyles}
         `}
       >
         <StatefulTimeline
