@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { DatePicker } from '../date_picker/date_picker';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Anomalies, Metadata, Processes, Osquery, Logs, Overview } from '../tabs';
+import { Anomalies, Metadata, Processes, Osquery, Logs, Overview, Profiling } from '../tabs';
 import { ContentTabIds } from '../types';
 
 export const Content = () => {
@@ -22,6 +22,7 @@ export const Content = () => {
             ContentTabIds.LOGS,
             ContentTabIds.METADATA,
             ContentTabIds.PROCESSES,
+            ContentTabIds.PROFILING,
             ContentTabIds.ANOMALIES,
           ]}
         />
@@ -44,6 +45,9 @@ export const Content = () => {
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.PROCESSES}>
           <Processes />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.PROFILING}>
+          <Profiling />
         </TabPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
