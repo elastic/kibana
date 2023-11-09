@@ -97,10 +97,14 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   onClickViewAgents,
   agentCount,
   showLoading = false,
+  isCsp = false,
 }) => {
   const { getHref } = useLink();
   const { application } = useStartServices();
   const showViewAgents = !!onClickViewAgents;
+  const listeningMessage = isCsp
+    ? 'Listening for agent... this can take several minutes'
+    : 'Listening for agent';
   const TroubleshootLink = () => (
     <EuiLink target="_blank" external href={troubleshootLink}>
       <FormattedMessage
@@ -141,7 +145,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
           title={
             <FormattedMessage
               id="xpack.fleet.agentEnrollment.loading.listening"
-              defaultMessage="Listening for agent..."
+              defaultMessage={listeningMessage}
             />
           }
         />
