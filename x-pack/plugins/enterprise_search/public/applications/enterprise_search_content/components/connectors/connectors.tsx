@@ -43,7 +43,7 @@ export const Connectors: React.FC = () => {
   // add docs count
   // add stats
   // make table searchable
-  const isEmpty = (data?.connectors?.length ?? 0) <= 0; 
+  const isEmpty = (data?.connectors?.length ?? 0) <= 0;
   const isLoading = status === Status.IDLE || status === Status.LOADING;
   return (
     <>
