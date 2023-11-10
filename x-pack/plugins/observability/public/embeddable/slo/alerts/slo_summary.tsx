@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiText, EuiFlexItem, EuiPanel, EuiStat, EuiBadge } from '@elastic/eui';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
