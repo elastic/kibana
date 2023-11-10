@@ -16,9 +16,6 @@ export const configSchema = schema.object({
       serverless: schema.boolean({
         defaultValue: true,
       }),
-      traditional: schema.boolean({
-        defaultValue: true,
-      }),
       options: {
         defaultValue: false,
       },

@@ -18,7 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -243,14 +244,16 @@ export class Plugin implements InfraClientPluginClass {
     const getInfraDeepLinks = ({
       hostsEnabled,
       metricsExplorerEnabled,
+      chromeStyle = 'classic',
     }: {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
+      chromeStyle?: ChromeStyle;
     }): AppDeepLink[] => {
-      const serverlessNavLinkStatus = AppNavLinkStatus.visible;
-      // const serverlessNavLinkStatus = this.isServerlessEnv
-      //   ? AppNavLinkStatus.visible
-      //   : AppNavLinkStatus.hidden;
+      const serverlessNavLinkStatus =
+        chromeStyle === 'project' || this.isServerlessEnv
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden;
 
       return [
         {
@@ -339,19 +342,38 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
-    startDep$AndHostViewFlag$.subscribe(
-      ([_startServices, isInfrastructureHostsViewEnabled]: [
-        [CoreStart, InfraClientStartDeps, InfraClientStartExports],
-        boolean
-      ]) => {
+    startDep$AndHostViewFlag$
+      .pipe(
+        mergeMap(
+          ([_startServices, isInfrastructureHostsViewEnabled]: [
+            [CoreStart, InfraClientStartDeps, InfraClientStartExports],
+            boolean
+          ]) => {
+            const [{ chrome }] = _startServices;
+            return chrome
+              .getChromeStyle$()
+              .pipe(
+                map(
+                  (chromeStyle) =>
+                    [_startServices, isInfrastructureHostsViewEnabled, chromeStyle] as [
+                      [CoreStart, InfraClientStartDeps, InfraClientStartExports],
+                      boolean,
+                      ChromeStyle
+                    ]
+                )
+              );
+          }
+        )
+      )
+      .subscribe(([_startServices, isInfrastructureHostsViewEnabled, chromeStyle]) => {
         this.appUpdater$.next(() => ({
           deepLinks: getInfraDeepLinks({
             hostsEnabled: isInfrastructureHostsViewEnabled,
             metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+            chromeStyle,
           }),
         }));
-      }
-    );
+      });
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
