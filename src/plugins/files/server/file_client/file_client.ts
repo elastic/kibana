@@ -236,7 +236,6 @@ export class FileClientImpl implements FileClient {
 
     if (hashes && hashes.length) {
       for (const hash of hashes) {
-        console.log(`Adding hash transform for ${hash}`);
         transforms.push(createFileHashTransform(hash));
       }
     }
