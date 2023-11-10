@@ -41,7 +41,12 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
 
     return (
       <>
-        <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
+        <EuiFlexGroup
+          data-test-subj="risk-input-utility-bar"
+          alignItems="center"
+          justifyContent="flexStart"
+          gutterSize="m"
+        >
           <EuiFlexItem
             grow={false}
             css={css`
@@ -59,7 +64,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
                       <b>
                         <FormattedMessage
                           id="xpack.securitySolution.flyout.riskInputs.utilityBar.riskInput"
-                          defaultMessage="Risk inputs"
+                          defaultMessage="Risk input"
                         />
                       </b>
                     ),

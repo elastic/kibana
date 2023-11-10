@@ -27,7 +27,7 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { RiskScoreEntity } from '../../../../common/risk_engine';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { getRiskScoreSummaryAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_metric';
+import { getRiskScoreSummaryAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_summary';
 import { USER_DETAILS_RISK_SCORE_QUERY_ID } from '../user_details';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { RiskInputsPanelKey } from '../../risk_inputs';
@@ -132,6 +132,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
       }
       extraAction={
         <span
+          data-test-subj="risk-summary-updatedAt"
           css={css`
             font-size: ${xsFontSize};
           `}
@@ -231,7 +232,13 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
                     }
                   />
                 </div>
-                <EuiBasicTable responsive={false} columns={columns} items={items} compressed />
+                <EuiBasicTable
+                  data-test-subj="risk-summary-table"
+                  responsive={false}
+                  columns={columns}
+                  items={items}
+                  compressed
+                />
               </div>
             </InspectButtonContainer>
           </EuiFlexItem>

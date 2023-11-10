@@ -83,6 +83,7 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
       },
       {
         field: 'fields',
+        'data-test-subj': 'risk-input-table-description-cell',
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.riskInputs.riskInputColumn"
@@ -122,6 +123,7 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
         css={css`
           background-color: ${useEuiBackgroundColor('subdued')};
         `}
+        data-test-subj="risk-inputs-panel"
       >
         <EuiTitle>
           <h2>

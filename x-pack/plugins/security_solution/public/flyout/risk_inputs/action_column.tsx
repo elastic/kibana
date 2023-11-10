@@ -24,6 +24,7 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({ alert }) => {
 
   return (
     <EuiPopover
+      data-test-subj="risk-inputs-actions"
       button={
         <EuiButtonIcon
           onClick={togglePopover}
