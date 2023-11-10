@@ -46,6 +46,13 @@ var IGNORE_WARNINGS = [
     //  We need to discard that warning
     name: 'ProductNotSupportedSecurityError',
   },
+  // DeprecationWarning: The URL https://github.com:crypto-browserify/browserify-rsa.git
+  // is invalid. Future versions of Node.js will throw an error.
+  // https://github.com/browserify/browserify-rsa/pull/20
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0170',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {
