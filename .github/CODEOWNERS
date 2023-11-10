@@ -595,6 +595,7 @@ packages/kbn-reporting/export_types/pdf @elastic/appex-sharedux
 packages/kbn-reporting/export_types/pdf_common @elastic/appex-sharedux
 packages/kbn-reporting/export_types/png @elastic/appex-sharedux
 packages/kbn-reporting/export_types/png_common @elastic/appex-sharedux
+packages/kbn-reporting/mocks_server @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 packages/kbn-reporting/server @elastic/appex-sharedux
 packages/kbn-resizable-layout @elastic/kibana-data-discovery
