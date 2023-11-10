@@ -27,5 +27,6 @@
     "@kbn/shared-ux-router",
     "@kbn/reporting-common",
     "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-png-common",
   ]
 }
