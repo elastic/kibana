@@ -102,9 +102,6 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   const { getHref } = useLink();
   const { application } = useStartServices();
   const showViewAgents = !!onClickViewAgents;
-  const listeningMessage = isCsp
-    ? 'Listening for agent... this can take several minutes'
-    : 'Listening for agent';
   const TroubleshootLink = () => (
     <EuiLink target="_blank" external href={troubleshootLink}>
       <FormattedMessage
@@ -138,17 +135,31 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   if (showLoading && !agentCount) {
     return (
       <>
-        <EuiCallOut
-          size="m"
-          color="primary"
-          iconType={EuiLoadingSpinner}
-          title={
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.loading.listening"
-              defaultMessage={listeningMessage}
-            />
-          }
-        />
+        {isCsp ? (
+          <EuiCallOut
+            size="m"
+            color="primary"
+            iconType={EuiLoadingSpinner}
+            title={
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.loading.listeningcsp"
+                defaultMessage="Listening for agent... this can take several minutes"
+              />
+            }
+          />
+        ) : (
+          <EuiCallOut
+            size="m"
+            color="primary"
+            iconType={EuiLoadingSpinner}
+            title={
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.loading.listening"
+                defaultMessage="Listening for agent"
+              />
+            }
+          />
+        )}
         <EuiSpacer size="m" />
         <EuiText>
           <FormattedMessage
