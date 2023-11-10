@@ -16,7 +16,7 @@ import { setupUsers } from './setup_users';
 import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
 
 before(() => {
-  cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
+  cy.task('esArchiverLoad', { archiveName: 'auditbeat_single' });
 });
 
 if (!Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
