@@ -1,0 +1,28 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/io-ts-utils",
+    "@kbn/rison",
+    "@kbn/kibana-react-plugin",
+    "@kbn/data-plugin",
+    "@kbn/unified-field-list",
+    "@kbn/core-application-browser",
+    "@kbn/share-plugin",
+    "@kbn/unified-data-table",
+    "@kbn/core-ui-settings-browser"
+  ],
+  "exclude": ["target/**/*"]
+}

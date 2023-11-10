@@ -481,6 +481,7 @@ packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 x-pack/plugins/lists @elastic/security-detection-engine
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
+x-pack/plugins/dataset_quality @elastic/obs-ux-logs-team
 x-pack/plugins/log_explorer @elastic/obs-ux-logs-team
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core

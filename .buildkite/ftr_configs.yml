@@ -270,6 +270,7 @@ enabled:
   - x-pack/test/functional/apps/dashboard/group2/config.ts
   - x-pack/test/functional/apps/dashboard/group3/config.ts
   - x-pack/test/functional/apps/data_views/config.ts
+  - x-pack/test/functional/apps/dataset_quality/config.ts
   - x-pack/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/config.ts
   - x-pack/test/functional/apps/graph/config.ts
@@ -466,9 +467,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/ess.config.ts
-
- 
-
-
-
-

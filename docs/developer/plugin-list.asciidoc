@@ -523,6 +523,10 @@ Plugin server-side only. Plugin has three main functions:
 |The data_visualizer plugin enables you to explore the fields in your data.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/dataset_quality/README.md[datasetQuality]
+|This plugin introduces the concept of dataset health, where users can easily get an overview on the datasets they have.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
 |Contains the enhancements to the OSS discover app.
 
