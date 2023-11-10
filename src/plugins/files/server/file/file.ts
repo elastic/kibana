@@ -75,7 +75,7 @@ export class File<M = unknown> implements IFile {
   private upload(
     content: Readable,
     options?: Partial<Pick<UploadOptions, 'transforms'>>
-  ): Observable<{ size: number }> {
+  ) {
     return defer(() => this.fileClient.upload(this.metadata, content, options));
   }
 
@@ -104,26 +104,17 @@ export class File<M = unknown> implements IFile {
             )
           )
         ),
-        mergeMap(({ size }) => {
+        mergeMap(({ size, hashes }) => {
           const updatedStateAction: Action & { action: 'uploaded' } = {
             action: 'uploaded',
             payload: { size },
           };
 
-          if (options && options.transforms) {
-            options.transforms.some((transform) => {
-              if (isFileHashTransform(transform)) {
-                const fileHash = transform.getFileHash();
-
-                updatedStateAction.payload.hash = {
-                  [fileHash.algorithm]: fileHash.value,
-                };
-
-                return true;
-              }
-
-              return false;
-            });
+          if (hashes && hashes.length) {
+            updatedStateAction.payload.hash = {};
+            for (const {algorithm, value} of hashes) {
+              updatedStateAction.payload.hash[algorithm] = value;
+            }
           }
 
           return this.updateFileState(updatedStateAction);
