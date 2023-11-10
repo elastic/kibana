@@ -6,12 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+
 import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { deleteAllAlerts, deleteAllRules } from '../../../utils';
-import { dataGeneratorFactory } from '../../../utils/data_generator';
+import {
+  deleteAllAlerts,
+  deleteAllRules,
+  dataGeneratorFactory,
+} from '../../../detections_response/utils';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -19,9 +23,9 @@ import {
   readRiskScores,
   normalizeScores,
   waitForRiskScoresToBePresent,
-} from './utils';
+} from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -39,6 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
       .post(RISK_SCORE_CALCULATION_URL)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(body)
       .expect(200);
     return result;
@@ -63,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('Risk Engine - Risk Scoring Calculation API', () => {
+  describe('@ess @serverless Risk Scoring Calculation API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
