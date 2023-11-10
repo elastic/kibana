@@ -30,7 +30,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   const isFullScreen = useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
 
   const styles = usePaneStyles();
-  const paneClassName = classNames('timeline-wrapper', styles, {
+  const wrapperClassName = classNames('timeline-wrapper', styles, {
     'timeline-wrapper--full-screen': isFullScreen,
     'timeline-wrapper--hidden': !visible,
   });
@@ -38,7 +38,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   return (
     <div data-test-subj="flyout-pane" ref={ref}>
       <EuiPortal insert={{ sibling: !visible ? ref?.current : null, position: 'after' }}>
-        <div data-test-subj="timeline-wrapper" className={paneClassName}>
+        <div data-test-subj="timeline-wrapper" className={wrapperClassName}>
           <div
             aria-label={i18n.TIMELINE_DESCRIPTION}
             data-test-subj="timeline-flyout"
