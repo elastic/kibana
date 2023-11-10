@@ -47,7 +47,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   // TODO: add a new service
   const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
