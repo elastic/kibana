@@ -21,6 +21,13 @@ export const INVESTIGATION_GUIDE_TAB_LABEL = i18n.translate(
   }
 );
 
+export const DIFF_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.diffTabLabel',
+  {
+    defaultMessage: 'Updates',
+  }
+);
+
 export const DISMISS_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.dismissButtonLabel',
   {
