@@ -13,7 +13,7 @@ import { safeDump } from 'js-yaml';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
-
+import { API_VERSIONS } from '../../../../common/constants';
 import {
   fullAgentPolicyToYaml,
   agentPolicyRouteService,
@@ -73,10 +73,12 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         ? core.http.basePath.prepend(
             `${agentPolicyRouteService.getInfoFullDownloadPath(
               selectedPolicy?.id
-            )}?kubernetes=true&standalone=true`
+            )}?kubernetes=true&standalone=true&apiVersion=${API_VERSIONS.public.v1}`
           )
         : core.http.basePath.prepend(
-            `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicy?.id)}?standalone=true`
+            `${agentPolicyRouteService.getInfoFullDownloadPath(
+              selectedPolicy?.id
+            )}?standalone=true&apiVersion=${API_VERSIONS.public.v1}`
           );
   }
 
