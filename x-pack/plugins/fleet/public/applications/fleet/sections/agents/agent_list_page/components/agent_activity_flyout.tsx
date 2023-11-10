@@ -26,6 +26,7 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -56,6 +57,8 @@ const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
 const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
   padding: 16px 24px !important;
 `;
+
+const MAX_VIEW_AGENTS_COUNT = 2000;
 
 export const AgentActivityFlyout: React.FunctionComponent<{
   onClose: () => void;
@@ -702,17 +705,42 @@ const ViewAgentsButton: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
 }> = ({ action, onClickViewAgents }) => {
-  return action.type !== 'UPDATE_TAGS' ? (
+  if (action.type === 'UPDATE_TAGS') {
+    return null;
+  }
+
+  const button = (
     <EuiButtonEmpty
       size="m"
       onClick={() => onClickViewAgents(action)}
       flush="left"
       data-test-subj="agentActivityFlyout.viewAgentsButton"
+      disabled={action.nbAgentsActionCreated > MAX_VIEW_AGENTS_COUNT}
     >
       <FormattedMessage
         id="xpack.fleet.agentActivityFlyout.viewAgentsButton"
         defaultMessage="View Agents"
       />
     </EuiButtonEmpty>
-  ) : null;
+  );
+
+  if (action.nbAgentsActionCreated <= MAX_VIEW_AGENTS_COUNT) {
+    return button;
+  }
+
+  return (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="xpack.fleet.agentActivityFlyout.viewAgentsButtonDisabledMaxTooltip"
+          defaultMessage="The view agents feature is only available for action impacting less then {agentCount} agents"
+          values={{
+            agentCount: MAX_VIEW_AGENTS_COUNT,
+          }}
+        />
+      }
+    >
+      {button}
+    </EuiToolTip>
+  );
 };

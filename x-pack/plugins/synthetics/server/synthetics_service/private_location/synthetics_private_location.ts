@@ -105,6 +105,7 @@ export class SyntheticsPrivateLocation {
         config.type,
         {
           ...(config as Partial<MonitorFields>),
+          space_id: spaceId,
           config_id: config.fields?.config_id,
           location_name: stringifyString(privateLocation.label),
           location_id: privateLocation.id,
