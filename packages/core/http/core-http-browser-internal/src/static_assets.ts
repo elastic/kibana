@@ -21,6 +21,6 @@ export class StaticAssets implements InternalStaticAssets {
     if (assetPath.startsWith('/')) {
       assetPath = assetPath.slice(1);
     }
-    return `${this.assetsHrefBase}/plugins/${pluginName}/${assetPath}`;
+    return `${this.assetsHrefBase}/plugins/${pluginName}/assets/${assetPath}`;
   }
 }

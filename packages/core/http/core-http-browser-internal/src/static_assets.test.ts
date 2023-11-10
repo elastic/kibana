@@ -13,21 +13,21 @@ describe('StaticAssets', () => {
     it('returns the expected value when the base is a path', () => {
       const staticAssets = new StaticAssets({ assetsHrefBase: '/base-path' });
       expect(staticAssets.getPluginAssetHref('foo', 'path/to/img.gif')).toEqual(
-        '/base-path/plugins/foo/path/to/img.gif'
+        '/base-path/plugins/foo/assets/path/to/img.gif'
       );
     });
 
     it('returns the expected value when the base is a full url', () => {
       const staticAssets = new StaticAssets({ assetsHrefBase: 'http://cdn/cdn-base-path' });
       expect(staticAssets.getPluginAssetHref('bar', 'path/to/img.gif')).toEqual(
-        'http://cdn/cdn-base-path/plugins/bar/path/to/img.gif'
+        'http://cdn/cdn-base-path/plugins/bar/assets/path/to/img.gif'
       );
     });
 
     it('removes leading slash from the', () => {
       const staticAssets = new StaticAssets({ assetsHrefBase: '/base-path' });
       expect(staticAssets.getPluginAssetHref('dolly', '/path/for/something.svg')).toEqual(
-        '/base-path/plugins/dolly/path/for/something.svg'
+        '/base-path/plugins/dolly/assets/path/for/something.svg'
       );
     });
   });
