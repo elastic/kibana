@@ -265,7 +265,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   //   }
   //   return null;
   // };
-console.log({objectId})
+  console.log({ objectId });
   const saveWarningMessageWithButton =
     objectId === undefined || objectId === '' ? (
       <EuiFormRow
