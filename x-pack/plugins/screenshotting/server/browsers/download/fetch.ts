@@ -7,7 +7,8 @@
 
 import Axios from 'axios';
 import { createHash } from 'crypto';
-import { FileHandle, mkdir, open } from 'fs/promises';
+import { mkdir, open } from 'fs/promises';
+import { writeSync } from 'fs';
 import { dirname } from 'path';
 import { finished, Readable } from 'stream';
 import { promisify } from 'util';
@@ -22,18 +23,16 @@ export async function fetch(url: string, path: string, logger?: Logger): Promise
   const hash = createHash('md5');
 
   await mkdir(dirname(path), { recursive: true });
-
-  let handle: FileHandle | null = null;
+  const handle = await open(path, 'w');
   try {
-    handle = await open(path, 'w');
     const response = await Axios.request<Readable>({
       url,
       method: 'GET',
       responseType: 'stream',
     });
 
-    response.data.on('data', async (chunk: Buffer) => {
-      await handle?.write(chunk);
+    response.data.on('data', (chunk: Buffer) => {
+      writeSync(handle.fd, chunk);
       hash.update(chunk);
     });
 
@@ -44,7 +43,7 @@ export async function fetch(url: string, path: string, logger?: Logger): Promise
 
     throw new Error(`Unable to download ${url}: ${error}`);
   } finally {
-    await handle?.close();
+    await handle.close();
   }
 
   return hash.digest('hex');
