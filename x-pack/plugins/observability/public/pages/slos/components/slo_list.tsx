@@ -8,10 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloListItems } from './slo_list_items';
-import { SloListSearchBar, SortField } from './slo_list_search_bar';
+import { SloListSearchBar, SortField, ViewMode } from './slo_list_search_bar';
+import { SloListTableView } from './table_view/slo_list_table_view';
 
 export interface Props {
   autoRefresh: boolean;
@@ -23,6 +25,7 @@ export function SloList({ autoRefresh }: Props) {
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
   const [direction] = useState<'asc' | 'desc'>(state.sort.direction);
+  const [viewMode, setViewMode] = useState<ViewMode>('default');
 
   const {
     isLoading,
@@ -61,6 +64,10 @@ export function SloList({ autoRefresh }: Props) {
     storeState({ page: 0, sort: { by: newSort, direction: state.sort.direction } });
   };
 
+  const handleChangeViewMode = (newViewMode: ViewMode) => {
+    setViewMode(newViewMode);
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
@@ -68,11 +75,24 @@ export function SloList({ autoRefresh }: Props) {
           loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
+          onChangeViewMode={handleChangeViewMode}
           initialState={state}
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
+        {viewMode === 'table' && (
+          <SloListTableView sloList={results} loading={isLoading || isRefetching} error={isError} />
+        )}
+        {viewMode === 'default' && (
+          <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
+        )}
+        {viewMode === 'card' && (
+          <>
+            {i18n.translate('xpack.observability.sloList.notImplementedYetLabel', {
+              defaultMessage: 'Not implemented yet',
+            })}
+          </>
+        )}
       </EuiFlexItem>
 
       {total > 0 ? (

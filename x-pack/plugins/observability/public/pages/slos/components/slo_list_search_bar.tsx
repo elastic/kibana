@@ -31,6 +31,7 @@ export interface Props {
   initialState: SearchState;
   onChangeQuery: (query: string) => void;
   onChangeSort: (sort: SortField) => void;
+  onChangeViewMode: (viewMode: ViewMode) => void;
 }
 
 export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
@@ -68,7 +69,15 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
   },
 ];
 
-export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initialState }: Props) {
+export type ViewMode = 'default' | 'table' | 'card';
+
+export function SloListSearchBar({
+  loading,
+  onChangeQuery,
+  onChangeSort,
+  onChangeViewMode,
+  initialState,
+}: Props) {
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
   const { dataView } = useCreateDataView({ indexPatternString: '.slo-observability.summary-*' });
@@ -83,7 +92,7 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
   );
   const selectedSort = sortOptions.find((option) => option.checked === 'on');
 
-  const [viewMode, setViewMode] = useState<EuiComboBoxOptionOption<string>>({
+  const [viewModeOption, setViewModeOption] = useState<EuiComboBoxOptionOption<ViewMode>>({
     value: 'default',
     label: 'Default',
   });
@@ -171,7 +180,7 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
             </EuiFilterGroup>
           </EuiFlexItem>
           <EuiFlexItem style={{ maxWidth: 200 }}>
-            <EuiComboBox
+            <EuiComboBox<ViewMode>
               aria-label={i18n.translate(
                 'xpack.observability.sloListSearchBar.euiComboBox.viewModeLabel',
                 { defaultMessage: 'View mode' }
@@ -184,10 +193,11 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
                 { value: 'card', label: 'Card' },
               ]}
               isClearable={false}
-              selectedOptions={[viewMode]}
-              onChange={(selectedOptions: Array<EuiComboBoxOptionOption<string>>) =>
-                setViewMode(selectedOptions[0])
-              }
+              selectedOptions={[viewModeOption]}
+              onChange={(selectedOptions: Array<EuiComboBoxOptionOption<ViewMode>>) => {
+                setViewModeOption(selectedOptions[0]);
+                onChangeViewMode(selectedOptions[0].value!);
+              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
