@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useRef, useState } from 'react';
 import { ObservabilitySharedStart } from '../../../plugin';
 
-export interface SearchBarParams {
+export interface SearchBarFilter {
   filters: string;
   /** Is used to force a new api call when refresh button is clicked without any changes in the query value */
   id: string;
@@ -21,15 +21,17 @@ export interface ProfilingEmbeddableProps<T> {
   embeddableFactoryId: string;
   isLoading: boolean;
   height?: string;
-  onSearchBarChange?: (params: SearchBarParams) => void;
+  searchBarFilter?: SearchBarFilter;
+  onSearchBarFilterChange?: (params: SearchBarFilter) => void;
 }
 
 export function ProfilingEmbeddable<T>({
   embeddableFactoryId,
   data,
   isLoading,
-  onSearchBarChange,
+  onSearchBarFilterChange,
   height,
+  searchBarFilter,
   ...props
 }: ProfilingEmbeddableProps<T>) {
   const { embeddable: embeddablePlugin } = useKibana<ObservabilitySharedStart>().services;
@@ -39,7 +41,13 @@ export function ProfilingEmbeddable<T>({
   useEffect(() => {
     async function createEmbeddable() {
       const factory = embeddablePlugin?.getEmbeddableFactory(embeddableFactoryId);
-      const input = { id: 'embeddable_profiling', data, isLoading, onSearchBarChange };
+      const input = {
+        id: 'embeddable_profiling',
+        data,
+        isLoading,
+        onSearchBarFilterChange,
+        searchBarFilter,
+      };
       const embeddableObject = await factory?.create(input);
       setEmbeddable(embeddableObject);
     }
@@ -55,10 +63,16 @@ export function ProfilingEmbeddable<T>({
 
   useEffect(() => {
     if (embeddable) {
-      embeddable.updateInput({ data, isLoading, onSearchBarChange, ...props });
+      embeddable.updateInput({
+        data,
+        isLoading,
+        onSearchBarFilterChange,
+        searchBarFilter,
+        ...props,
+      });
       embeddable.reload();
     }
-  }, [data, embeddable, isLoading, onSearchBarChange, props]);
+  }, [data, embeddable, isLoading, onSearchBarFilterChange, searchBarFilter, props]);
 
   return (
     <div

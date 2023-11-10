@@ -47,13 +47,17 @@ export function ProfilingEmbeddableProvider({ deps, children }: Props) {
     [deps]
   );
 
+  const i18nCore = deps.coreStart.i18n;
+
   return (
-    <KibanaContextProvider services={{ ...deps.coreStart, ...deps.pluginsStart, storage }}>
-      <ProfilingDependenciesContextProvider value={profilingDependencies}>
-        <ObservabilityAIAssistantProvider value={deps.pluginsStart.observabilityAIAssistant}>
-          {children}
-        </ObservabilityAIAssistantProvider>
-      </ProfilingDependenciesContextProvider>
-    </KibanaContextProvider>
+    <i18nCore.Context>
+      <KibanaContextProvider services={{ ...deps.coreStart, ...deps.pluginsStart, storage }}>
+        <ProfilingDependenciesContextProvider value={profilingDependencies}>
+          <ObservabilityAIAssistantProvider value={deps.pluginsStart.observabilityAIAssistant}>
+            {children}
+          </ObservabilityAIAssistantProvider>
+        </ProfilingDependenciesContextProvider>
+      </KibanaContextProvider>
+    </i18nCore.Context>
   );
 }

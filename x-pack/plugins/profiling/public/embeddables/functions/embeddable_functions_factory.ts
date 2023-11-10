@@ -9,7 +9,7 @@ import {
   EmbeddableInput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { EMBEDDABLE_FUNCTIONS } from '@kbn/observability-shared-plugin/public';
+import { EMBEDDABLE_FUNCTIONS, SearchBarFilter } from '@kbn/observability-shared-plugin/public';
 import type { TopNFunctions } from '@kbn/profiling-utils';
 import { GetProfilingEmbeddableDependencies } from '../profiling_embeddable_provider';
 
@@ -18,6 +18,8 @@ interface EmbeddableFunctionsInput {
   isLoading: boolean;
   rangeFrom: number;
   rangeTo: number;
+  onSearchBarFilterChange?: (filters: SearchBarFilter) => void;
+  searchBarFilter?: SearchBarFilter;
 }
 
 export type EmbeddableFunctionsEmbeddableInput = EmbeddableFunctionsInput & EmbeddableInput;

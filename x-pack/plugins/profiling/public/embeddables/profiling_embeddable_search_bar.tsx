@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import { SearchBarFilter } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 import { v4 } from 'uuid';
-import { SearchBarParams } from '@kbn/observability-shared-plugin/public';
 import { ProfilingSearchBar } from '../components/profiling_app_page_template/profiling_search_bar';
 
 interface Props {
-  onQuerySubmit: (filters: SearchBarParams) => void;
+  onQuerySubmit: (filters: SearchBarFilter) => void;
+  kuery?: string;
 }
 
-export function ProfilingEmbeddableSearchBar({ onQuerySubmit }: Props) {
-  const [kuery, setKuery] = useState('');
+export function ProfilingEmbeddableSearchBar({ onQuerySubmit, kuery = '' }: Props) {
   return (
     <ProfilingSearchBar
       showDatePicker={false}
@@ -23,11 +23,11 @@ export function ProfilingEmbeddableSearchBar({ onQuerySubmit }: Props) {
       kuery={kuery}
       onQuerySubmit={(next) => {
         const filters = String(next.query?.query || '');
-        setKuery(filters);
         onQuerySubmit({ id: v4(), filters });
       }}
-      // No need to implement refresh click as the date picker is not available
-      onRefreshClick={() => {}}
+      onRefreshClick={() => {
+        onQuerySubmit({ id: v4(), filters: kuery });
+      }}
     />
   );
 }

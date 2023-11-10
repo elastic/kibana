@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { SearchBarFilter } from '@kbn/observability-shared-plugin/public';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -43,6 +44,11 @@ export function ProfilingOverview() {
     type: ApmDocumentType.TransactionMetric,
     numBuckets: 20,
   });
+  const [searchBarFilter, setSearchBarFilter] = useState<SearchBarFilter>({
+    id: '',
+    filters: '',
+  });
+
   const [
     apmUniversalProfilingShowCallout,
     setAPMUniversalProfilingShowCallout,
@@ -67,6 +73,8 @@ export function ProfilingOverview() {
               end={end}
               environment={environment}
               dataSource={preferred?.source}
+              searchBarFilter={searchBarFilter}
+              onSearchBarFilterChange={setSearchBarFilter}
             />
           </>
         ),
@@ -87,12 +95,21 @@ export function ProfilingOverview() {
               startIndex={0}
               endIndex={10}
               dataSource={preferred?.source}
+              searchBarFilter={searchBarFilter}
+              onSearchBarFilterChange={setSearchBarFilter}
             />
           </>
         ),
       },
     ];
-  }, [end, environment, preferred?.source, serviceName, start]);
+  }, [
+    end,
+    environment,
+    preferred?.source,
+    searchBarFilter,
+    serviceName,
+    start,
+  ]);
 
   if (!isProfilingAvailable) {
     return null;

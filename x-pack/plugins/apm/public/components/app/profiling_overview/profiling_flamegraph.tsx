@@ -15,10 +15,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   EmbeddableFlamegraph,
-  SearchBarParams,
+  SearchBarFilter,
 } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
-import React, { useState } from 'react';
+import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { HOST_NAME } from '../../../../common/es_fields/apm';
@@ -42,6 +42,8 @@ interface Props {
   dataSource?: ApmDataSourceWithSummary<
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
+  searchBarFilter: SearchBarFilter;
+  onSearchBarFilterChange: (next: SearchBarFilter) => void;
 }
 
 export function ProfilingFlamegraph({
@@ -50,10 +52,10 @@ export function ProfilingFlamegraph({
   serviceName,
   environment,
   dataSource,
+  searchBarFilter,
+  onSearchBarFilterChange,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
-  const [flamegraphSearchBarFilter, setFlamegraphSearchBarFilter] =
-    useState<SearchBarParams>({ id: '', filters: '' });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -69,21 +71,14 @@ export function ProfilingFlamegraph({
                 environment,
                 documentType: dataSource.documentType,
                 rollupInterval: dataSource.rollupInterval,
-                kuery: flamegraphSearchBarFilter.filters,
+                kuery: searchBarFilter.filters,
               },
             },
           }
         );
       }
     },
-    [
-      dataSource,
-      serviceName,
-      start,
-      end,
-      environment,
-      flamegraphSearchBarFilter,
-    ]
+    [dataSource, serviceName, start, end, environment, searchBarFilter]
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
@@ -104,7 +99,7 @@ export function ProfilingFlamegraph({
               href={profilingLocators?.flamegraphLocator.getRedirectUrl({
                 kuery: mergeKueries(
                   hostNamesKueryFormat,
-                  flamegraphSearchBarFilter.filters
+                  searchBarFilter.filters
                 ),
               })}
             >
@@ -132,7 +127,8 @@ export function ProfilingFlamegraph({
           data={data?.flamegraph}
           isLoading={isPending(status)}
           height="60vh"
-          onSearchBarChange={setFlamegraphSearchBarFilter}
+          onSearchBarFilterChange={onSearchBarFilterChange}
+          searchBarFilter={searchBarFilter}
         />
       )}
     </>

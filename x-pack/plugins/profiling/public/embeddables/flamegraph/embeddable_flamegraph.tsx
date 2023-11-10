@@ -36,34 +36,30 @@ export class EmbeddableFlamegraph extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    const { data, isLoading, onSearchBarChange } = this.input;
+    const { data, isLoading, onSearchBarFilterChange, searchBarFilter } = this.input;
     const flamegraph = !isLoading && data ? createFlameGraph(data) : undefined;
-    const i18nCore = this.deps.coreStart.i18n;
 
     render(
       <ProfilingEmbeddableProvider deps={this.deps}>
-        <i18nCore.Context>
-          <EuiFlexGroup direction="column">
-            {onSearchBarChange ? (
-              <EuiFlexItem grow={false}>
-                <ProfilingEmbeddableSearchBar onQuerySubmit={onSearchBarChange} />
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem>
-              <AsyncEmbeddableComponent isLoading={isLoading}>
-                <>
-                  {flamegraph && (
-                    <FlameGraph
-                      primaryFlamegraph={flamegraph}
-                      id="embddable_profiling"
-                      isEmbedded
-                    />
-                  )}
-                </>
-              </AsyncEmbeddableComponent>
+        <EuiFlexGroup direction="column">
+          {onSearchBarFilterChange ? (
+            <EuiFlexItem grow={false}>
+              <ProfilingEmbeddableSearchBar
+                onQuerySubmit={onSearchBarFilterChange}
+                kuery={searchBarFilter?.filters}
+              />
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </i18nCore.Context>
+          ) : null}
+          <EuiFlexItem>
+            <AsyncEmbeddableComponent isLoading={isLoading}>
+              <>
+                {flamegraph && (
+                  <FlameGraph primaryFlamegraph={flamegraph} id="embddable_profiling" isEmbedded />
+                )}
+              </>
+            </AsyncEmbeddableComponent>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </ProfilingEmbeddableProvider>,
       domNode
     );

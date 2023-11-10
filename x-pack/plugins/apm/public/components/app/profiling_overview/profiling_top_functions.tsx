@@ -7,15 +7,21 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
+import {
+  EmbeddableFunctions,
+  SearchBarFilter,
+} from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { ApmDataSourceWithSummary } from '../../../../common/data_source';
+import { ApmDocumentType } from '../../../../common/document_type';
 import { HOST_NAME } from '../../../../common/es_fields/apm';
-import { toKueryFilterFormat } from '../../../../common/utils/to_kuery_filter_format';
+import {
+  mergeKueries,
+  toKueryFilterFormat,
+} from '../../../../common/utils/to_kuery_filter_format';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { HostnamesFilterWarning } from './host_names_filter_warning';
-import { ApmDataSourceWithSummary } from '../../../../common/data_source';
-import { ApmDocumentType } from '../../../../common/document_type';
 
 interface Props {
   serviceName: string;
@@ -27,6 +33,8 @@ interface Props {
   dataSource?: ApmDataSourceWithSummary<
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
+  searchBarFilter: SearchBarFilter;
+  onSearchBarFilterChange: (next: SearchBarFilter) => void;
 }
 
 export function ProfilingTopNFunctions({
@@ -37,6 +45,8 @@ export function ProfilingTopNFunctions({
   startIndex,
   endIndex,
   dataSource,
+  searchBarFilter,
+  onSearchBarFilterChange,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
 
@@ -56,13 +66,23 @@ export function ProfilingTopNFunctions({
                 endIndex,
                 documentType: dataSource.documentType,
                 rollupInterval: dataSource.rollupInterval,
+                kuery: searchBarFilter.filters,
               },
             },
           }
         );
       }
     },
-    [dataSource, serviceName, start, end, environment, startIndex, endIndex]
+    [
+      dataSource,
+      serviceName,
+      start,
+      end,
+      environment,
+      startIndex,
+      endIndex,
+      searchBarFilter,
+    ]
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
@@ -81,7 +101,10 @@ export function ProfilingTopNFunctions({
             <EuiLink
               data-test-subj="apmProfilingTopNFunctionsGoToUniversalProfilingFlamegraphLink"
               href={profilingLocators?.topNFunctionsLocator.getRedirectUrl({
-                kuery: hostNamesKueryFormat,
+                kuery: mergeKueries(
+                  hostNamesKueryFormat,
+                  searchBarFilter.filters
+                ),
               })}
             >
               {i18n.translate('xpack.apm.profiling.topnFunctions.link', {
@@ -97,6 +120,8 @@ export function ProfilingTopNFunctions({
         isLoading={isPending(status)}
         rangeFrom={new Date(start).valueOf()}
         rangeTo={new Date(end).valueOf()}
+        onSearchBarFilterChange={onSearchBarFilterChange}
+        searchBarFilter={searchBarFilter}
       />
     </>
   );
