@@ -20,16 +20,18 @@ const version = '1';
  */
 export class DataViewsApiClient implements IDataViewsApiClient {
   private http: HttpSetup;
+  private getCurrentUserId: () => Promise<string | undefined>;
 
   /**
    * constructor
    * @param http http dependency
    */
-  constructor(http: HttpSetup) {
+  constructor(http: HttpSetup, getCurrentUserId: () => Promise<string | undefined>) {
     this.http = http;
+    this.getCurrentUserId = getCurrentUserId;
   }
 
-  private _request<T = unknown>(
+  private async _request<T = unknown>(
     url: string,
     query?: {},
     body?: string,
@@ -41,10 +43,18 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     // const rawResponse = true;
     const rawResponse = false;
     const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
+    const userId = await this.getCurrentUserId();
 
     const request = body
       ? this.http.post<T>(url, { query, body, version, asResponse })
-      : this.http.fetch<T>(url, { query, version, ...cacheOptions, asResponse, rawResponse });
+      : this.http.fetch<T>(url, {
+          query,
+          version,
+          ...cacheOptions,
+          asResponse,
+          rawResponse,
+          headers: { 'user-hash': userId, Vary: 'user-hash' },
+        });
 
     return request.catch((resp) => {
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {

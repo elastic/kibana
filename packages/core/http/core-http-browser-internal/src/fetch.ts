@@ -118,7 +118,6 @@ export class Fetch {
   private createRequest(options: HttpFetchOptionsWithPath): Request {
     const context = this.params.executionContext.withGlobalContext(options.context);
     const { version } = options;
-
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
       query,

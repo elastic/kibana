@@ -136,8 +136,6 @@ export default function ({ getPageObjects, getService }) {
     describe('filtering', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('MVT documents');
-        console.log('awaiting');
-        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 10));
       });
 
       async function getTileUrl() {
@@ -225,8 +223,6 @@ export default function ({ getPageObjects, getService }) {
           await PageObjects.maps.openLayerPanel('logstash-*');
           await testSubjects.click('mapLayerPanelApplyGlobalTimeCheckbox');
           await PageObjects.maps.waitForLayersToLoad();
-          console.log('HERE HERE HERE');
-          await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 10));
         });
 
         after(async () => {
