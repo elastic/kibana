@@ -30,7 +30,7 @@ export function BudgetConsumed({
   );
   const hasError = errors !== undefined && errors.length > 0;
 
-  const onBurnRateChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onBudgetConsumedChanged = (event: ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
     setBudgetConsumed(value);
     const burnRate = timeWindowInHours * (value / 100 / longWindowInHours);
@@ -61,8 +61,8 @@ export function BudgetConsumed({
         min={0.01}
         max={100}
         value={numeral(budgetConsumed).format('0[.0]')}
-        onChange={(event) => onBurnRateChange(event)}
-        data-test-subj="burnRate"
+        onChange={(event) => onBudgetConsumedChanged(event)}
+        data-test-subj="budgetConsumed"
       />
     </EuiFormRow>
   );
