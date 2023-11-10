@@ -37,6 +37,12 @@ export class CloudFullStoryPlugin implements Plugin {
 
   public setup(core: CoreSetup, { cloud }: CloudFullStorySetupDeps) {
     if (cloud.isCloudEnabled) {
+      if (cloud.isElasticStaffOwned) {
+        this.initializerContext.logger
+          .get()
+          .info('Skipping FullStory setup for a Elastic-owned deployments');
+        return;
+      }
       this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
         // eslint-disable-next-line no-console
         console.debug(`Error setting up FullStory: ${e.toString()}`)

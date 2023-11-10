@@ -20,9 +20,11 @@ describe('Cloud Plugin', () => {
       const setupPlugin = async ({
         config = {},
         isCloudEnabled = true,
+        isElasticStaffOwned = false,
       }: {
         config?: Partial<CloudFullStoryConfigType>;
         isCloudEnabled?: boolean;
+        isElasticStaffOwned?: boolean;
       }) => {
         const initContext = coreMock.createPluginInitializerContext(config);
 
@@ -30,7 +32,7 @@ describe('Cloud Plugin', () => {
 
         const coreSetup = coreMock.createSetup();
 
-        const cloud = { ...cloudMock.createSetup(), isCloudEnabled };
+        const cloud = { ...cloudMock.createSetup(), isCloudEnabled, isElasticStaffOwned };
 
         plugin.setup(coreSetup, { cloud });
 
@@ -57,6 +59,15 @@ describe('Cloud Plugin', () => {
         const { coreSetup } = await setupPlugin({
           config: { org_id: 'foo' },
           isCloudEnabled: false,
+        });
+        expect(coreSetup.analytics.registerShipper).not.toHaveBeenCalled();
+      });
+
+      it('does set up FullStory when isCloudEnabled=true but the deployment is owned by an Elastician', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { org_id: 'foo' },
+          isCloudEnabled: true,
+          isElasticStaffOwned: true,
         });
         expect(coreSetup.analytics.registerShipper).not.toHaveBeenCalled();
       });
