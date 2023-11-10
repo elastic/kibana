@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Writable } from 'stream';
+
 import nodeCrypto from '@elastic/node-crypto';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -18,7 +21,6 @@ import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 import { CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
-import { Writable } from 'stream';
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ExportTypesRegistry } from './lib/export_types_registry';
 import { ReportingPlugin } from './plugin';
