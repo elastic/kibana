@@ -25,5 +25,6 @@
     "@kbn/i18n",
     "@kbn/reporting-common",
     "@kbn/reporting-export-types-csv-common",
+    "@kbn/reporting-config-server",
   ]
 }
