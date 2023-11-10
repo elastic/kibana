@@ -31,13 +31,13 @@ interface ProductType {
   product_tier: string;
 }
 
-interface CreateEnvironmentRequestBody {
+interface CreateProjectRequestBody {
   name: string;
   region_id: string;
   product_types?: ProductType[];
 }
 
-interface Environment {
+interface Project {
   name: string;
   id: string;
   region: string;
@@ -71,13 +71,13 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   }
 };
 
-// Method to invoke the create environment API for serverless.
-async function createEnvironment(
+// Method to invoke the create project API for serverless.
+async function createSecurityProject(
   projectName: string,
   apiKey: string,
   ftrConfig: SecuritySolutionDescribeBlockFtrConfig
-): Promise<Environment | undefined> {
-  const body: CreateEnvironmentRequestBody = {
+): Promise<Project | undefined> {
+  const body: CreateProjectRequestBody = {
     name: projectName,
     region_id: DEFAULT_REGION,
   };
@@ -111,8 +111,8 @@ async function createEnvironment(
   }
 }
 
-// Method to invoke the delete environment API for serverless.
-async function deleteEnvironment(
+// Method to invoke the delete project API for serverless.
+async function deleteSecurityProject(
   projectId: string,
   projectName: string,
   apiKey: string
@@ -123,7 +123,7 @@ async function deleteEnvironment(
         Authorization: `ApiKey ${apiKey}`,
       },
     });
-    log.info(`Environment ${projectName} was successfully deleted!`);
+    log.info(`Project ${projectName} was successfully deleted!`);
   } catch (error) {
     if (error instanceof AxiosError) {
       log.error(`${error.response?.status}:${error.response?.data}`);
@@ -133,16 +133,16 @@ async function deleteEnvironment(
   }
 }
 
-// Method to reset the credentials for the created environment.
+// Method to reset the credentials for the created project.
 async function resetCredentials(
-  environmentId: string,
+  projectId: string,
   runnerId: string,
   apiKey: string
 ): Promise<Credentials | undefined> {
   log.info(`${runnerId} : Reseting credentials`);
   try {
     const response = await axios.post(
-      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${environmentId}/_reset-credentials`,
+      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-credentials`,
       {},
       {
         headers: {
@@ -162,7 +162,7 @@ async function resetCredentials(
 // Wait until elasticsearch status goes green
 function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
   const fetchHealthStatusAttempt = async (attemptNum: number) => {
-    log.info(`Retry number ${attemptNum} to check if es is green.`);
+    log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
     const response = await axios.get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
       headers: {
@@ -176,7 +176,7 @@ function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Pr
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info(
-          `${runnerId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
+          `${runnerId}: The Elasticsearch URL is not yet reachable. A retry will be triggered soon...`
         );
       }
     },
@@ -206,7 +206,7 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info(`${runnerId}: The kibana url is not yet reachable. Retrying in 20s...`);
+        log.info(`${runnerId}: The Kibana URL is not yet reachable. Retrying in 20s...`);
       } else {
         log.info(`${runnerId}: ${error}`);
       }
@@ -228,9 +228,9 @@ export const cli = () => {
 
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
       if (!process.env.CLOUD_QA_API_KEY && !getApiKeyFromElasticCloudJsonFile()) {
-        log.error('The api key for the environment needs to be provided with the env var API_KEY.');
+        log.error('The API key for the environment needs to be provided with the env var API_KEY.');
         log.error(
-          'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the api key.'
+          'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the API key.'
         );
         // eslint-disable-next-line no-process-exit
         return process.exit(1);
@@ -352,23 +352,23 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             const specFileFTRConfig = parseTestFileConfig(filePath);
 
             if (!API_KEY) {
-              log.info('API KEY to create environment could not be retrieved.');
+              log.info('API KEY to create project could not be retrieved.');
               // eslint-disable-next-line no-process-exit
               return process.exit(1);
             }
 
-            log.info(`${id}: Creating environment ${PROJECT_NAME}...`);
-            // Creating environment for the test to run
-            const environment = await createEnvironment(PROJECT_NAME, API_KEY, specFileFTRConfig);
+            log.info(`${id}: Creating project ${PROJECT_NAME}...`);
+            // Creating project for the test to run
+            const project = await createSecurityProject(PROJECT_NAME, API_KEY, specFileFTRConfig);
 
-            if (!environment) {
-              log.info('Failed to create environment.');
+            if (!project) {
+              log.info('Failed to create project.');
               // eslint-disable-next-line no-process-exit
               return process.exit(1);
             }
 
             // Reset credentials for elastic user
-            const credentials = await resetCredentials(environment.id, id, API_KEY);
+            const credentials = await resetCredentials(project.id, id, API_KEY);
 
             if (!credentials) {
               log.info('Credentials could not be reset.');
@@ -376,27 +376,27 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               return process.exit(1);
             }
 
-            // Wait for 8 minutes in order for the environment to be ready
+            // Wait for 8 minutes in order for the project to be ready
             delay(480000);
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = btoa(`${credentials.username}:${credentials.password}`);
 
             // Wait for elasticsearch status to go green.
-            await waitForEsStatusGreen(environment.es_url, auth, id);
+            await waitForEsStatusGreen(project.es_url, auth, id);
 
             // Wait until Kibana is available
-            await waitForKibanaAvailable(environment.kb_url, auth, id);
+            await waitForKibanaAvailable(project.kb_url, auth, id);
 
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
-              CYPRESS_BASE_URL: environment.kb_url,
+              CYPRESS_BASE_URL: project.kb_url,
 
-              ELASTICSEARCH_URL: environment.es_url,
+              ELASTICSEARCH_URL: project.es_url,
               ELASTICSEARCH_USERNAME: credentials.username,
               ELASTICSEARCH_PASSWORD: credentials.password,
 
-              KIBANA_URL: environment.kb_url,
+              KIBANA_URL: project.kb_url,
               KIBANA_USERNAME: credentials.username,
               KIBANA_PASSWORD: credentials.password,
 
@@ -418,7 +418,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 configFile: cypressConfigFilePath,
                 config: {
                   e2e: {
-                    baseUrl: environment.kb_url,
+                    baseUrl: project.kb_url,
                   },
                   env: cyCustomEnv,
                 },
@@ -434,7 +434,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   headed: argv.headed as boolean,
                   config: {
                     e2e: {
-                      baseUrl: environment.kb_url,
+                      baseUrl: project.kb_url,
                     },
                     numTestsKeptInMemory: 0,
                     env: cyCustomEnv,
@@ -445,9 +445,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               }
             }
 
-            // Delete serverless environment
-            log.info(`${id} : Deleting Environment ${PROJECT_NAME}...`);
-            await deleteEnvironment(environment.id, PROJECT_NAME, API_KEY);
+            // Delete serverless project
+            log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
+            await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
 
             return result;
           });
