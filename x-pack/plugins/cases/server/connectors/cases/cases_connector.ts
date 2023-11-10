@@ -101,10 +101,6 @@ export class CasesConnector extends SubActionConnector<
     const { alerts, groupingBy } = params;
     const casesClient = await this.casesParams.getCasesClient(this.kibanaRequest);
 
-    /**
-     * TODO: Handle when grouping is not defined
-     * One case should be created per rule
-     */
     const groupedAlerts = this.groupAlerts({ alerts, groupingBy });
     const groupedAlertsWithOracleKey = this.generateOracleKeys(params, groupedAlerts);
 
@@ -203,8 +199,13 @@ export class CasesConnector extends SubActionConnector<
       ])
     );
 
-    for (const error of bulkGetRecordsErrors) {
-      if (error.id && recordsMap.has(error.id)) {
+    /**
+     * TODO: Throw/retry for other errors
+     */
+    const nonFoundErrors = bulkGetRecordsErrors.filter((error) => error.statusCode === 404);
+
+    for (const error of nonFoundErrors) {
+      if (error.id && error.statusCode === 404 && recordsMap.has(error.id)) {
         bulkCreateReq.push({
           recordId: error.id,
           payload: recordsMap.get(error.id) ?? { cases: [], rules: [], grouping: {} },
@@ -212,14 +213,10 @@ export class CasesConnector extends SubActionConnector<
       }
     }
 
-    /**
-     * TODO: Create records with only 404 errors
-     * All others should throw an error and retry again
-     */
     const bulkCreateRes = await this.casesOracleService.bulkCreateRecord(bulkCreateReq);
 
     /**
-     * TODO: Retry on errors
+     * TODO: Throw/Retry on errors
      */
     const [bulkCreateValidRecords, _] = partitionRecords(bulkCreateRes);
 
@@ -283,18 +280,15 @@ export class CasesConnector extends SubActionConnector<
     }
 
     /**
-     * TODO: Handle different type of errors
+     * TODO: Throw/retry for other errors
      */
-    for (const error of errors) {
-      if (groupedAlertsWithCaseId.has(error.caseId) && error.status === 404) {
-        bulkCreateReq.push({
-          description: '',
-          tags: [],
-          title: '',
-          connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
-          settings: { syncAlerts: false },
-          owner: params.owner,
-        });
+    const nonFoundErrors = errors.filter((error) => error.status === 404);
+
+    for (const error of nonFoundErrors) {
+      if (groupedAlertsWithCaseId.has(error.caseId)) {
+        const data = groupedAlertsWithCaseId.get(error.caseId) as GroupedAlertsWithCaseId;
+
+        bulkCreateReq.push(this.getCreateCaseRequest(params, data));
       }
     }
 
@@ -302,6 +296,9 @@ export class CasesConnector extends SubActionConnector<
       return casesMap;
     }
 
+    /**
+     * TODO: bulkCreate throws an error. Retry on errors.
+     */
     const bulkCreateCasesResponse = await casesClient.cases.bulkCreate({ cases: bulkCreateReq });
 
     for (const res of bulkCreateCasesResponse.cases) {
@@ -312,6 +309,55 @@ export class CasesConnector extends SubActionConnector<
     }
 
     return casesMap;
+  }
+
+  private getCreateCaseRequest(
+    params: CasesConnectorRunParams,
+    groupingData: GroupedAlertsWithCaseId
+  ) {
+    const { grouping } = groupingData;
+
+    const ruleName = params.rule.ruleUrl
+      ? `[${params.rule.name}](${params.rule.ruleUrl})`
+      : params.rule.name;
+
+    const groupingDescription = this.getGroupingDescription(grouping);
+
+    const description = `This case is auto-created by ${ruleName}. \n\n Grouping: ${groupingDescription}`;
+
+    const tags = Array.isArray(params.rule.tags) ? params.rule.tags : [];
+
+    /**
+     * TODO: Add grouping info to
+     */
+    return {
+      description,
+      tags: ['auto-generated', ...tags],
+      /**
+       * TODO: Append the counter to the name
+       */
+      title: `${params.rule.name} (Auto-created)`,
+      connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+      /**
+       * Turn on for Security solution
+       */
+      settings: { syncAlerts: false },
+      owner: params.owner,
+    };
+  }
+
+  private getGroupingDescription(grouping: GroupedAlerts['grouping']) {
+    /**
+     * TODO: Handle multi values
+     */
+    return Object.entries(grouping)
+      .map(([key, value]) => {
+        const keyAsCodeBlock = `\`${key}\``;
+        const valueAsCodeBlock = `\`${value}\``;
+
+        return `${keyAsCodeBlock} equals ${valueAsCodeBlock}`;
+      })
+      .join(' and ');
   }
 
   private async attachAlertsToCases(
@@ -325,9 +371,6 @@ export class CasesConnector extends SubActionConnector<
       groupedAlertsWithCases.values()
     ).map(({ theCase, alerts }) => ({
       caseId: theCase.id,
-      /**
-       * TODO: Verify _id, _index
-       */
       attachments: alerts.map((alert) => ({
         type: AttachmentType.alert,
         alertId: alert._id,

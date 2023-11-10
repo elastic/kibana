@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
   validate: (value) => {
-    if (!Object.hasOwn(value, 'id') || !Object.hasOwn(value, 'index')) {
+    if (!Object.hasOwn(value, '_id') || !Object.hasOwn(value, '_index')) {
       return 'Alert ID and index must be defined';
     }
   },
@@ -27,6 +27,7 @@ const RuleSchema = schema.object({
    * TODO: Verify limits
    */
   tags: schema.arrayOf(schema.string({ minLength: 1, maxLength: 50 }), { minSize: 0, maxSize: 10 }),
+  ruleUrl: schema.nullable(schema.string()),
 });
 
 /**

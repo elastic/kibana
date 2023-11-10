@@ -47,7 +47,12 @@ describe('CasesConnector', () => {
   ];
 
   const groupingBy = ['host.name', 'dest.ip'];
-  const rule = { id: 'rule-test-id', name: 'Test rule', tags: ['rule', 'test'] };
+  const rule = {
+    id: 'rule-test-id',
+    name: 'Test rule',
+    tags: ['rule', 'test'],
+    ruleUrl: 'https://example.com/rules/rule-test-id',
+  };
   const owner = 'cases';
 
   const groupedAlertsWithOracleKey = [
@@ -261,7 +266,7 @@ describe('CasesConnector', () => {
           });
         });
 
-        it('creates non existing cases', async () => {
+        it('creates non existing cases correctly', async () => {
           casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[2]] });
           casesClientMock.cases.bulkGet.mockResolvedValue({
             cases: [cases[0], cases[1]],
@@ -286,13 +291,14 @@ describe('CasesConnector', () => {
           expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
             cases: [
               {
-                title: '',
-                description: '',
+                title: 'Test rule (Auto-created)',
+                description:
+                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.3`',
                 owner: 'cases',
                 settings: {
                   syncAlerts: false,
                 },
-                tags: [],
+                tags: ['auto-generated', ...rule.tags],
                 connector: {
                   fields: null,
                   id: 'none',
