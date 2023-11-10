@@ -29,7 +29,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
     const pipeline = [];
 
     pipeline.push(
-      getPipeline('.buildkite/pipelines/security_solution/security_solution_defend_workflows.yml', false)
+      getPipeline(
+        '.buildkite/pipelines/security_solution/security_solution_defend_workflows.yml',
+        false
+      )
     );
     // remove duplicated steps
     uploadPipeline([...new Set(pipeline)].join('\n'));
