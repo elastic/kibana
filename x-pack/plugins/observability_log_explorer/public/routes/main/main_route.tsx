@@ -6,16 +6,10 @@
  */
 import { CoreStart } from '@kbn/core/public';
 import { LogExplorerController, LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
-import { getDevToolsOptions } from '@kbn/xstate-utils/src';
-import { useInterpret, useSelector } from '@xstate/react';
 import React from 'react';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
-import {
-  createObservabilityLogExplorerStateMachine,
-  ObservabilityLogExplorerPageState,
-  ObservabilityLogExplorerPageStateProvider,
-} from '../../state_machines/observability_log_explorer/src';
+import { ObservabilityLogExplorerPageStateProvider } from '../../state_machines/observability_log_explorer/src';
 import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
 import {
   ObservabilityLogExplorerAppMountParameters,

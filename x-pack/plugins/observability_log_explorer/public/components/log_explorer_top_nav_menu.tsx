@@ -21,10 +21,7 @@ import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability/locators';
 import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import {
-  getDiscoverColumnsFromDisplayOptions,
-  LogExplorerControllerContext,
-} from '@kbn/log-explorer-plugin/public';
+import { getDiscoverColumnsFromDisplayOptions } from '@kbn/log-explorer-plugin/public';
 import { LOG_EXPLORER_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -32,7 +29,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { useActor } from '@xstate/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { filter, Observable, take } from 'rxjs';
+import { filter, take } from 'rxjs';
 import {
   betaBadgeDescription,
   betaBadgeTitle,
