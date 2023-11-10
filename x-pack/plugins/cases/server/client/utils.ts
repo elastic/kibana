@@ -344,22 +344,34 @@ export const buildCustomFieldsFilter = ({
   customFields: CasesSearchParams['customFields'];
   customFieldsConfiguration?: CustomFieldsConfiguration;
 }): KueryNode | undefined => {
-  if (customFields === undefined) {
+  if (!customFields || !customFieldsConfiguration?.length) {
     return;
   }
 
-  if (customFields === null || !customFieldsConfiguration?.length) {
+  const customFieldsMappings: Array<Record<string, ICasesCustomField>> = [];
+
+  Object.keys(customFields).forEach((item: string) => {
+    const customFieldConfig = customFieldsConfiguration.find((config) => config.key === item);
+
+    if (!customFieldConfig) {
+      return;
+    }
+
+    const mapping = casesCustomFields.get(customFieldConfig.type);
+
+    if (!mapping) {
+      return;
+    }
+
+    customFieldsMappings.push({ [item]: mapping });
+  });
+
+  if (!customFieldsMappings.length) {
     return;
   }
 
   const customFieldsFilter = Object.entries(customFields).map(([key, value]) => {
-    let customFieldsMapping: ICasesCustomField | null = null;
-
-    const customFieldConfig = customFieldsConfiguration.find((config) => config.key === key);
-
-    if (customFieldConfig) {
-      customFieldsMapping = casesCustomFields.get(customFieldConfig.type);
-    }
+    const customFieldMapping = customFieldsMappings.find((mapping) => mapping[key]) ?? {};
 
     if (!Object.values(value).length) {
       return fromKueryExpression(`${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key}}`);
@@ -374,7 +386,7 @@ export const buildCustomFieldsFilter = ({
         }
 
         return fromKueryExpression(
-          `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and value.${customFieldsMapping?.savedObjectMappingType}: ${filterValue}}`
+          `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and value.${customFieldMapping[key].savedObjectMappingType}: ${filterValue}}`
         );
       })
     );
