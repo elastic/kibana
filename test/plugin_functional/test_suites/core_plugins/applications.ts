@@ -6,24 +6,17 @@
  * Side Public License, v 1.
  */
 
-import url from 'url';
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
-export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common', 'header']);
+export default function ({ getService, getPageObject }: PluginFunctionalProviderContext) {
+  const common = getPageObject('common');
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const retry = getService('retry');
   const deployment = getService('deployment');
   const esArchiver = getService('esArchiver');
-  const log = getService('log');
-
-  function waitUntilLoadingIsDone() {
-    return PageObjects.header.waitUntilLoadingHasFinished();
-  }
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
@@ -33,33 +26,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     return (await wrapper.getSize()).height;
   };
 
-  const getKibanaUrl = (pathname?: string, search?: string) =>
-    url.format({
-      protocol: 'http:',
-      hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-      port: process.env.TEST_KIBANA_PORT || '5620',
-      pathname,
-      search,
-    });
-
-  async function navigateToAppFromAppsMenu(title: string) {
-    await retry.try(async () => {
-      await appsMenu.clickLink(title);
-      await waitUntilLoadingIsDone();
-    });
-  }
-
-  /** Use retry logic to make URL assertions less flaky */
-  const waitForUrlToBe = (pathname?: string, search?: string) => {
-    const expectedUrl = getKibanaUrl(pathname, search);
-    return retry.waitFor(`Url to be ${expectedUrl}`, async () => {
-      const currentUrl = await browser.getCurrentUrl();
-      if (currentUrl !== expectedUrl)
-        log.debug(`expected url to be ${expectedUrl}, got ${currentUrl}`);
-      return currentUrl === expectedUrl;
-    });
-  };
-
   const navigateTo = async (path: string) =>
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
@@ -67,8 +33,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   describe.skip('ui applications', function describeIndexTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await PageObjects.common.navigateToApp('foo');
-      await PageObjects.common.dismissBanner();
+      await common.navigateToApp('foo');
+      await common.dismissBanner();
     });
 
     it('starts on home page', async () => {
@@ -77,40 +43,37 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('redirects and renders correctly regardless of trailing slash', async () => {
       await navigateTo(`/app/foo`);
-      await waitForUrlToBe('/app/foo/home');
+      await browser.waitForUrlToBe('/app/foo/home');
       await testSubjects.existOrFail('fooAppHome');
       await navigateTo(`/app/foo/`);
-      await waitForUrlToBe('/app/foo/home');
+      await browser.waitForUrlToBe('/app/foo/home');
       await testSubjects.existOrFail('fooAppHome');
     });
 
     it('navigates to its own pages', async () => {
       // Go to page A
       await testSubjects.click('fooNavPageA');
-      await waitForUrlToBe('/app/foo/page-a');
+      await browser.waitForUrlToBe('/app/foo/page-a');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppPageA');
 
       // Go to home page
       await testSubjects.click('fooNavHome');
-      await waitForUrlToBe('/app/foo/home');
+      await browser.waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
 
     it('can use the back button to navigate within an app', async () => {
       await browser.goBack();
-      await waitForUrlToBe('/app/foo/page-a');
+      await browser.waitForUrlToBe('/app/foo/page-a');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppPageA');
     });
 
     it('navigates to app root when navlink is clicked', async () => {
-      await testSubjects.click('fooNavHome');
-
-      navigateToAppFromAppsMenu('Foo');
-
-      await waitForUrlToBe('/app/foo/home');
+      await appsMenu.clickLink('Foo', { category: 'kibana' });
+      await browser.waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
@@ -119,7 +82,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await testSubjects.click('fooNavBarPageB');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('barAppPageB');
-      await waitForUrlToBe('/app/bar/page-b', 'query=here');
+      await browser.waitForUrlToBe('/app/bar/page-b?query=here');
     });
 
     it('preserves query parameters across apps', async () => {
@@ -129,7 +92,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('can use the back button to navigate back to previous app', async () => {
       await browser.goBack();
-      await waitForUrlToBe('/app/foo/home');
+      await browser.waitForUrlToBe('/app/foo/home');
       await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
@@ -139,7 +102,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('navigating to chromeless application hides chrome', async () => {
-      await PageObjects.common.navigateToApp('chromeless');
+      await common.navigateToApp('chromeless');
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
 
@@ -149,7 +112,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('navigating away from chromeless application shows chrome', async () => {
-      await PageObjects.common.navigateToApp('foo');
+      await common.navigateToApp('foo');
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
 
