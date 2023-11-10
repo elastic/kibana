@@ -120,7 +120,7 @@ export const DataViewPicker = ({
   textBasedLanguage,
   onCreateDefaultAdHocDataView,
   isDisabled,
-                                 onRefreshFields,
+  onRefreshFields,
 }: DataViewPickerPropsExtended) => {
   return (
     <ChangeDataView
