@@ -201,6 +201,8 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     {
       field: 'name',
       name: 'SLO name',
+      width: '20%',
+      truncateText: { lines: 2 },
       render: (_, slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
           paths.observability.sloDetails(
@@ -225,6 +227,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     {
       field: 'instance',
       name: 'Instance',
+      truncateText: true,
       render: (_, slo: SLOWithSummaryResponse) => (
         <EuiToolTip
           position="top"
@@ -253,6 +256,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     {
       field: 'sli',
       name: 'SLI value',
+      truncateText: true,
       render: (_, slo: SLOWithSummaryResponse) =>
         slo.summary.status === 'NO_DATA'
           ? NOT_AVAILABLE_LABEL
@@ -285,6 +289,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     {
       field: 'errorBudgetRemaining',
       name: 'Budget remaining',
+      truncateText: true,
       render: (_, slo: SLOWithSummaryResponse) =>
         slo.summary.status === 'NO_DATA'
           ? NOT_AVAILABLE_LABEL
