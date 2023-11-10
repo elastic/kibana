@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import { CaseStatuses } from '../../../common/types/domain';
 import { statuses } from '../status';
-import type { FilterOptions } from '../../../common/ui/types';
 import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
 
@@ -23,7 +22,7 @@ interface Props {
   countInProgressCases: number | null;
   countOpenCases: number | null;
   hiddenStatuses?: CaseStatuses[];
-  onChange: ({ filterId, options }: { filterId: keyof FilterOptions; options: string[] }) => void;
+  onChange: ({ filterId, options }: { filterId: string; options: string[] }) => void;
   selectedOptions: string[];
 }
 

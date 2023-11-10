@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
 import type { CaseSeverity } from '../../../common/types/domain';
-import type { FilterOptions } from '../../containers/types';
 import { severities } from '../severity/config';
 import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
@@ -19,7 +18,7 @@ interface SeverityOption {
 
 interface Props {
   selectedOptions: CaseSeverity[];
-  onChange: ({ filterId, options }: { filterId: keyof FilterOptions; options: string[] }) => void;
+  onChange: ({ filterId, options }: { filterId: string; options: string[] }) => void;
 }
 
 const options = Object.keys(severities) as CaseSeverity[];

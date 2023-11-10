@@ -20,7 +20,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
-import type { FilterOptions } from '../../../common/ui/types';
 import * as i18n from './translations';
 
 const fromRawOptionsToEuiSelectableOptions = (options: string[], selectedOptions: string[]) => {
@@ -44,29 +43,32 @@ const getEuiSelectableCheckedOptions = (options: EuiSelectableOption[]) =>
 
 interface UseFilterParams<T> {
   buttonLabel?: string;
-  id: keyof FilterOptions;
+  hideActiveOptionsNumber?: boolean;
+  id: string;
   limit?: number;
   limitReachedMessage?: string;
-  onChange: ({ filterId, options }: { filterId: keyof FilterOptions; options: string[] }) => void;
+  onChange: ({ filterId, options }: { filterId: string; options: string[] }) => void;
   options: string[];
-  selectedOptions?: string[];
   renderOption?: (option: T) => React.ReactNode;
+  selectedOptions?: string[];
 }
 export const MultiSelectFilter = <T extends EuiSelectableOption>({
   buttonLabel,
+  hideActiveOptionsNumber,
   id,
   limit,
   limitReachedMessage,
   onChange,
   options: rawOptions,
-  selectedOptions = [],
   renderOption,
+  selectedOptions = [],
 }: UseFilterParams<T>) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
   const isInvalid = Boolean(limit && limitReachedMessage && selectedOptions.length >= limit);
   const options = fromRawOptionsToEuiSelectableOptions(rawOptions, selectedOptions);
+  const showActiveOptionsNumber = !hideActiveOptionsNumber;
 
   useEffect(() => {
     const trimmedSelectedOptions = selectedOptions.filter((option) => rawOptions.includes(option));
@@ -99,9 +101,9 @@ export const MultiSelectFilter = <T extends EuiSelectableOption>({
           iconType="arrowDown"
           onClick={toggleIsPopoverOpen}
           isSelected={isPopoverOpen}
-          numFilters={options.length}
-          hasActiveFilters={selectedOptions.length > 0}
-          numActiveFilters={selectedOptions.length}
+          numFilters={showActiveOptionsNumber ? options.length : undefined} // FIXME: add tests to check that the number is not shown
+          hasActiveFilters={showActiveOptionsNumber ? selectedOptions.length > 0 : undefined}
+          numActiveFilters={showActiveOptionsNumber ? selectedOptions.length : undefined}
           aria-label={buttonLabel}
         >
           {buttonLabel}
