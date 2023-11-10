@@ -22,5 +22,7 @@
     "@kbn/screenshotting-plugin",
     "@kbn/reporting-server",
     "@kbn/reporting-export-types-png-common",
+    "@kbn/core",
+    "@kbn/reporting-mocks-server",
   ]
 }
