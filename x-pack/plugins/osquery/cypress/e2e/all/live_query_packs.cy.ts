@@ -67,7 +67,7 @@ describe('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
   it('should run live pack', () => {
     cy.contains('New live query').click();
     cy.contains('Run a set of queries in a pack.').click();
-    cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+    cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
     cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
     cy.contains('This table contains 3 rows.');
     cy.contains('system_memory_linux_elastic');

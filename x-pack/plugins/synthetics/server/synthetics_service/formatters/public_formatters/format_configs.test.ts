@@ -305,6 +305,7 @@ describe('formatHeartbeatRequest', () => {
         monitor: testBrowserConfig as SyntheticsMonitor,
         configId: monitorId,
         heartbeatId,
+        spaceId: 'test-space-id',
       },
       '{"a":"param"}'
     );
@@ -317,6 +318,9 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: undefined,
+        meta: {
+          space_id: 'test-space-id',
+        },
       },
       fields_under_root: true,
     });
@@ -329,6 +333,7 @@ describe('formatHeartbeatRequest', () => {
         monitor: testBrowserConfig as SyntheticsMonitor,
         configId: monitorId,
         heartbeatId: monitorId,
+        spaceId: 'test-space-id',
       },
       JSON.stringify({ key: 'value' })
     );
@@ -341,6 +346,9 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: undefined,
+        meta: {
+          space_id: 'test-space-id',
+        },
       },
       fields_under_root: true,
       params: '{"key":"value"}',
@@ -354,6 +362,7 @@ describe('formatHeartbeatRequest', () => {
       monitor,
       configId: monitorId,
       heartbeatId: monitorId,
+      spaceId: 'test-space-id',
     });
 
     expect(actual).toEqual({
@@ -365,6 +374,9 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': undefined,
         run_once: undefined,
         test_run_id: undefined,
+        meta: {
+          space_id: 'test-space-id',
+        },
       },
       fields_under_root: true,
     });
@@ -377,6 +389,7 @@ describe('formatHeartbeatRequest', () => {
       monitor,
       configId: monitorId,
       heartbeatId: monitorId,
+      spaceId: 'test-space-id',
     });
 
     expect(actual).toEqual({
@@ -388,6 +401,9 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': undefined,
         run_once: undefined,
         test_run_id: undefined,
+        meta: {
+          space_id: 'test-space-id',
+        },
       },
       fields_under_root: true,
     });
@@ -400,6 +416,7 @@ describe('formatHeartbeatRequest', () => {
       configId: monitorId,
       runOnce: true,
       heartbeatId: monitorId,
+      spaceId: 'test-space-id',
     });
 
     expect(actual).toEqual({
@@ -411,6 +428,9 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: true,
         test_run_id: undefined,
+        meta: {
+          space_id: 'test-space-id',
+        },
       },
       fields_under_root: true,
     });
@@ -424,6 +444,7 @@ describe('formatHeartbeatRequest', () => {
       configId: monitorId,
       testRunId,
       heartbeatId: monitorId,
+      spaceId: 'test-space-id',
     });
 
     expect(actual).toEqual({
@@ -435,6 +456,9 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: testRunId,
+        meta: {
+          space_id: 'test-space-id',
+        },
       },
       fields_under_root: true,
     });
@@ -448,6 +472,7 @@ describe('formatHeartbeatRequest', () => {
       configId: monitorId,
       testRunId,
       heartbeatId: monitorId,
+      spaceId: 'test-space-id',
     });
 
     expect(actual).toEqual({
@@ -460,6 +485,9 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: testRunId,
+        meta: {
+          space_id: 'test-space-id',
+        },
       },
       fields_under_root: true,
     });
