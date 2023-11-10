@@ -98,7 +98,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
       }),
       inventoryThresholdAlertRuleEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
       }),
       metricThresholdAlertRuleEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
@@ -110,7 +110,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
       }),
       alertsAndRulesDropdownEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
       }),
     }),
   }),
