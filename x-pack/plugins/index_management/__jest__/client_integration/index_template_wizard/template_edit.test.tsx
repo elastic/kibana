@@ -140,6 +140,7 @@ describe('<TemplateEdit />', () => {
             name: 'test',
             indexPatterns: ['myPattern*'],
             version: 1,
+            allowAutoCreate: false,
             dataStream: {
               hidden: true,
               anyUnknownKey: 'should_be_kept',
@@ -198,6 +199,7 @@ describe('<TemplateEdit />', () => {
         await actions.completeStepOne({
           indexPatterns: UPDATED_INDEX_PATTERN,
           priority: 3,
+          allowAutoCreate: true,
         });
         // Component templates
         await actions.completeStepTwo();
@@ -252,6 +254,7 @@ describe('<TemplateEdit />', () => {
               indexPatterns: UPDATED_INDEX_PATTERN,
               priority: 3,
               version: templateToEdit.version,
+              allowAutoCreate: true,
               _kbnMeta: {
                 type: 'default',
                 hasDatastream: false,

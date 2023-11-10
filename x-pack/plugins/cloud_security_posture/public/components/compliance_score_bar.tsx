@@ -45,7 +45,7 @@ export const ComplianceScoreBar = ({
         gutterSize="none"
         alignItems="center"
         justifyContent="flexEnd"
-        style={{ gap: euiTheme.size.s }}
+        style={{ gap: euiTheme.size.xs }}
       >
         <EuiFlexItem>
           <EuiFlexGroup
@@ -75,7 +75,7 @@ export const ComplianceScoreBar = ({
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ width: euiTheme.size.xxl, textAlign: 'right' }}>
           <EuiText
             size="xs"
             style={{ fontWeight: euiTheme.font.weight.bold }}

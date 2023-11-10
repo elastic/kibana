@@ -20,6 +20,7 @@ export type LensChartProps = UseLensAttributesParams &
   BaseChartProps &
   Pick<EuiPanelProps, 'borderRadius'> & {
     toolTip?: React.ReactElement<TooltipContentProps>;
+    searchSessionId?: string;
   };
 
 export const LensChart = React.memo(
@@ -35,6 +36,7 @@ export const LensChart = React.memo(
     onFilter,
     overrides,
     toolTip,
+    searchSessionId,
     disableTriggers = false,
     height = MIN_HEIGHT,
     loading = false,
@@ -48,6 +50,7 @@ export const LensChart = React.memo(
       timeRange: dateRange,
       query,
       filters,
+      searchSessionId,
     });
 
     const lens = (
@@ -59,12 +62,12 @@ export const LensChart = React.memo(
         extraActions={extraActions}
         filters={filters}
         hidePanelTitles={hidePanelTitles}
-        lastReloadRequestTime={lastReloadRequestTime}
         loading={isLoading}
         style={{ height }}
         query={query}
         overrides={overrides}
         onBrushEnd={onBrushEnd}
+        searchSessionId={searchSessionId}
         onFilter={onFilter}
       />
     );
