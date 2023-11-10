@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-export * from './vector_source';
 import { i18n } from '@kbn/i18n';
-export type { IMvtVectorSource } from './mvt_vector_source';
 
-export const getLayerFeaturesRequestName = (layerName: string) => {
-  return i18n.translate('xpack.maps.vectorSource.featuresRequestName', {
-    defaultMessage: 'load layer features ({layerName})',
+export const getJoinMetricsRequestName = (layerName: string) => {
+  return i18n.translate('xpack.maps.joinSource.joinMetricsRequestName', {
+    defaultMessage: 'load join metrics ({layerName})',
     values: { layerName },
   })
 }

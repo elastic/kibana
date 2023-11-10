@@ -605,27 +605,25 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         dataHasChanged: false,
         join,
         joinIndex,
-        propertiesMap: prevDataRequest?.getData() as PropertiesMap,
+        joinMetrics: prevDataRequest?.getData() as PropertiesMap,
       };
     }
 
     try {
       startLoading(sourceDataId, requestToken, joinRequestMeta);
-      const leftSourceName = await this._source.getDisplayName();
-      const propertiesMap = await joinSource.getPropertiesMap(
+      const { joinMetrics, warnings } = await joinSource.getJoinMetrics(
         joinRequestMeta,
-        leftSourceName,
-        join.getLeftField().getName(),
+        await this.getDisplayName(),
         registerCancelCallback.bind(null, requestToken),
         inspectorAdapters,
         featureCollection
       );
-      stopLoading(sourceDataId, requestToken, propertiesMap);
+      stopLoading(sourceDataId, requestToken, joinMetrics, { warnings });
       return {
         dataHasChanged: true,
         join,
         joinIndex,
-        propertiesMap,
+        joinMetrics,
       };
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {

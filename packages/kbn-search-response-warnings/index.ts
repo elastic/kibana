@@ -15,5 +15,6 @@ export {
   SearchResponseWarningsEmptyPrompt,
 } from './src/components/search_response_warnings';
 
+export { extractWarnings } from './src/extract_warnings';
 export { handleWarnings } from './src/handle_warnings';
 export { hasUnsupportedDownsampledAggregationFailure } from './src/has_unsupported_downsampled_aggregation_failure';

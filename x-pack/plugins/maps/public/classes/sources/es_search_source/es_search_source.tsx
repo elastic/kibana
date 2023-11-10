@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
@@ -58,6 +59,7 @@ import {
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import {
+  getLayerFeaturesRequestName,
   GetFeatureActionsArgs,
   GeoJsonWithMeta,
   IMvtVectorSource,
@@ -377,29 +379,21 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       }
     }
 
+    const warnings: SearchResponseWarning[] = [];
     const resp = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: i18n.translate('xpack.maps.esSearchSource.topHits.requestName', {
-        defaultMessage: '{layerName} top hits request',
-        values: { layerName },
-      }),
+      requestName: getLayerFeaturesRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.esSearchSource.topHits.requestDescription', {
-        defaultMessage:
-          'Get top hits from data view: {dataViewName}, entities: {entitiesFieldName}, geospatial field: {geoFieldName}',
-        values: {
-          dataViewName: indexPattern.getName(),
-          entitiesFieldName: topHitsGroupByTimeseries ? '_tsid' : topHitsSplitFieldName,
-          geoFieldName: this._descriptor.geoField,
-        },
-      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_search_source:top_hits' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
     const allHits: any[] = [];
@@ -424,6 +418,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         areEntitiesTrimmed,
         entityCount: entityBuckets.length,
         totalEntities,
+        warnings,
       },
     };
   }
@@ -471,28 +466,21 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       searchSource.setField('sort', this._buildEsSort());
     }
 
+    const warnings: SearchResponseWarning[] = [];
     const resp = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: i18n.translate('xpack.maps.esSearchSource.requestName', {
-        defaultMessage: '{layerName} documents request',
-        values: { layerName },
-      }),
+      requestName: getLayerFeaturesRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.esSearchSource.requestDescription', {
-        defaultMessage:
-          'Get documents from data view: {dataViewName}, geospatial field: {geoFieldName}',
-        values: {
-          dataViewName: indexPattern.getName(),
-          geoFieldName: this._descriptor.geoField,
-        },
-      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_search_source:doc_search' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
     const isTimeExtentForTimeslice =
@@ -506,6 +494,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           ? requestMeta.timeslice
           : timerangeToTimeextent(requestMeta.timeFilters),
         isTimeExtentForTimeslice,
+        warnings,
       },
     };
   }
@@ -586,7 +575,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           layerName,
           requestMeta,
           registerCancelCallback,
-          inspectorAdapters
+          inspectorAdapters,
         );
 
     const unusedMetaFields = indexPattern.metaFields.filter((metaField) => {

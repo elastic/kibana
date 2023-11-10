@@ -59,8 +59,8 @@ export async function performInnerJoins(
       if (joinKey !== null) {
         joinStatus.keys.push(joinKey);
       }
-      const canJoinOnCurrent = joinState.propertiesMap
-        ? innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap)
+      const canJoinOnCurrent = joinState.joinMetrics
+        ? innerJoin.joinPropertiesToFeature(feature, joinState.joinMetrics)
         : false;
       if (canJoinOnCurrent && !joinStatus.joinedWithAtLeastOneFeature) {
         joinStatus.joinedWithAtLeastOneFeature = true;
@@ -109,7 +109,7 @@ async function getJoinError(joinStatus: {
   }
 
   const hasTerms =
-    joinStatus.joinState.propertiesMap && joinStatus.joinState.propertiesMap.size > 0;
+    joinStatus.joinState.joinMetrics && joinStatus.joinState.joinMetrics.size > 0;
 
   if (!hasTerms || joinStatus.joinedWithAtLeastOneFeature) {
     return;
@@ -130,7 +130,7 @@ async function getJoinError(joinStatus: {
           leftFieldValues: prettyPrintArray(joinStatus.keys),
           rightFieldName,
           rightFieldValues: prettyPrintArray(
-            Array.from(joinStatus.joinState.propertiesMap!.keys())
+            Array.from(joinStatus.joinState.joinMetrics!.keys())
           ),
         },
       });
