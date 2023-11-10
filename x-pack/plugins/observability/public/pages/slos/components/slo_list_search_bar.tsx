@@ -96,7 +96,7 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
   };
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s">
+    <EuiFlexGroup direction="row" gutterSize="s" responsive>
       <EuiFlexItem grow>
         <QueryStringInput
           appName="Observability"
@@ -130,63 +130,67 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <EuiPopover
-            button={
-              <EuiFilterButton
-                disabled={loading}
-                iconType="arrowDown"
-                onClick={handleToggleSortButton}
-                isSelected={isSortPopoverOpen}
+        <EuiFlexGroup direction="row" gutterSize="s" responsive>
+          <EuiFlexItem style={{ maxWidth: 250 }}>
+            <EuiFilterGroup>
+              <EuiPopover
+                button={
+                  <EuiFilterButton
+                    disabled={loading}
+                    iconType="arrowDown"
+                    onClick={handleToggleSortButton}
+                    isSelected={isSortPopoverOpen}
+                  >
+                    {i18n.translate('xpack.observability.slo.list.sortByType', {
+                      defaultMessage: 'Sort by {type}',
+                      values: { type: selectedSort?.label.toLowerCase() ?? '' },
+                    })}
+                  </EuiFilterButton>
+                }
+                isOpen={isSortPopoverOpen}
+                closePopover={handleToggleSortButton}
+                panelPaddingSize="none"
+                anchorPosition="downCenter"
               >
-                {i18n.translate('xpack.observability.slo.list.sortByType', {
-                  defaultMessage: 'Sort by {type}',
-                  values: { type: selectedSort?.label.toLowerCase() ?? '' },
-                })}
-              </EuiFilterButton>
-            }
-            isOpen={isSortPopoverOpen}
-            closePopover={handleToggleSortButton}
-            panelPaddingSize="none"
-            anchorPosition="downCenter"
-          >
-            <div style={{ width: 250 }}>
-              <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('xpack.observability.slo.list.sortBy', {
-                  defaultMessage: 'Sort by',
-                })}
-              </EuiPopoverTitle>
-              <EuiSelectable<Item<SortField>>
-                singleSelection="always"
-                options={sortOptions}
-                onChange={handleChangeSort}
-                isLoading={loading}
-              >
-                {(list) => list}
-              </EuiSelectable>
-            </div>
-          </EuiPopover>
-        </EuiFilterGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiComboBox
-          aria-label={i18n.translate(
-            'xpack.observability.sloListSearchBar.euiComboBox.viewModeLabel',
-            { defaultMessage: 'View mode' }
-          )}
-          placeholder="Select a single option"
-          singleSelection={{ asPlainText: true }}
-          options={[
-            { value: 'default', label: 'Default' },
-            { value: 'table', label: 'Compact' },
-            { value: 'card', label: 'Card' },
-          ]}
-          isClearable={false}
-          selectedOptions={[viewMode]}
-          onChange={(selectedOptions: Array<EuiComboBoxOptionOption<string>>) =>
-            setViewMode(selectedOptions[0])
-          }
-        />
+                <div style={{ width: 250 }}>
+                  <EuiPopoverTitle paddingSize="s">
+                    {i18n.translate('xpack.observability.slo.list.sortBy', {
+                      defaultMessage: 'Sort by',
+                    })}
+                  </EuiPopoverTitle>
+                  <EuiSelectable<Item<SortField>>
+                    singleSelection="always"
+                    options={sortOptions}
+                    onChange={handleChangeSort}
+                    isLoading={loading}
+                  >
+                    {(list) => list}
+                  </EuiSelectable>
+                </div>
+              </EuiPopover>
+            </EuiFilterGroup>
+          </EuiFlexItem>
+          <EuiFlexItem style={{ maxWidth: 200 }}>
+            <EuiComboBox
+              aria-label={i18n.translate(
+                'xpack.observability.sloListSearchBar.euiComboBox.viewModeLabel',
+                { defaultMessage: 'View mode' }
+              )}
+              placeholder="Select a single option"
+              singleSelection={{ asPlainText: true }}
+              options={[
+                { value: 'default', label: 'Default' },
+                { value: 'table', label: 'Compact' },
+                { value: 'card', label: 'Card' },
+              ]}
+              isClearable={false}
+              selectedOptions={[viewMode]}
+              onChange={(selectedOptions: Array<EuiComboBoxOptionOption<string>>) =>
+                setViewMode(selectedOptions[0])
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
