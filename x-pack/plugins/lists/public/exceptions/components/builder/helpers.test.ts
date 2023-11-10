@@ -203,7 +203,6 @@ describe('Exception builder helpers', () => {
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [
-            { ...getField('file.path.text') },
             { ...getField('nestedField.child') },
             { ...getField('nestedField.nestedChild.doublyNestedChild') },
           ],
@@ -307,7 +306,6 @@ describe('Exception builder helpers', () => {
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [
-            { ...getField('file.path.text') },
             { ...getField('nestedField.child') },
             { ...getField('nestedField.nestedChild.doublyNestedChild') },
             getEndpointField('file.Ext.code_signature.status'),

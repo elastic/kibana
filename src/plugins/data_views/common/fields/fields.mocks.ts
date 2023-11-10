@@ -285,17 +285,6 @@ export const fields: FieldSpec[] = [
     readFromDocValues: false,
   },
   {
-    name: 'file.path.text',
-    type: 'string',
-    esTypes: ['text'],
-    count: 0,
-    scripted: false,
-    searchable: true,
-    aggregatable: false,
-    readFromDocValues: false,
-    subType: { nested: { path: 'file.path.text' } },
-  },
-  {
     name: 'nestedField.child',
     type: 'string',
     esTypes: ['text'],

@@ -1057,7 +1057,7 @@ describe('BuilderEntryItem', () => {
         entry={{
           correspondingKeywordField: undefined,
           entryIndex: 0,
-          field: getField('file.path.text'),
+          field: getField('nestedField.nestedChild.doublyNestedChild'),
           id: '123',
           nested: undefined,
           operator: matchesOperator,
@@ -1106,7 +1106,7 @@ describe('BuilderEntryItem', () => {
         entry={{
           correspondingKeywordField: undefined,
           entryIndex: 0,
-          field: getField('file.path.text'),
+          field: getField('nestedField.nestedChild.doublyNestedChild'),
           id: '123',
           nested: undefined,
           operator: matchesOperator,
