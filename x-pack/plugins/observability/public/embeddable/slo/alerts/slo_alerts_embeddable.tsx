@@ -25,6 +25,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SloSummary } from './slo_summary';
 
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
 
@@ -81,12 +82,13 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
         getAlertsStateTable: AlertsStateTable,
       },
     } = this.deps;
-    const { sloId, sloInstanceId } = this.getInput(); // TODO fix types
+    const { slos } = this.getInput(); // TODO fix types
+    console.log(slos, '!!slos');
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={{ ...this.deps, storage: new Storage(localStorage) }}>
           <QueryClientProvider client={queryClient}>
-            <AlertsStateTable
+            {/* <AlertsStateTable
               query={{
                 bool: {
                   filter: [
@@ -104,7 +106,8 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
               id={ALERTS_TABLE_ID}
               pageSize={ALERTS_PER_PAGE}
               showAlertStatusWithFlapping
-            />
+            /> */}
+            <SloSummary slos={slos} />
           </QueryClientProvider>
         </KibanaContextProvider>
       </I18nContext>,

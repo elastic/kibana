@@ -39,15 +39,15 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
     return true;
   }
 
-  //   public async getExplicitInput(): Promise<Partial<SloEmbeddableInput>> {
-  //     const [coreStart, pluginStart] = await this.getStartServices();
-  //     try {
-  //       const { resolveEmbeddableSloUserInput } = await import('./handle_explicit_input');
-  //       return await resolveEmbeddableSloUserInput(coreStart, pluginStart);
-  //     } catch (e) {
-  //       return Promise.reject();
-  //     }
-  //   }
+  public async getExplicitInput(): Promise<Partial<SloEmbeddableInput>> {
+    const [coreStart, pluginStart] = await this.getStartServices();
+    try {
+      const { resolveEmbeddableSloUserInput } = await import('./handle_explicit_input');
+      return await resolveEmbeddableSloUserInput(coreStart, pluginStart);
+    } catch (e) {
+      return Promise.reject();
+    }
+  }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
     try {
@@ -87,6 +87,6 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
   }
 
   public getIconType() {
-    return 'visGauge';
+    return 'alert';
   }
 }
