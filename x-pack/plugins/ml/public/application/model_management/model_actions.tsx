@@ -142,6 +142,7 @@ export function useModelActions({
         icon: 'visTable',
         type: 'icon',
         available: (item) => !!item.metadata?.analytics_config?.id,
+        enabled: (item) => item.origin_job_exists === true,
         onClick: async (item) => {
           if (item.metadata?.analytics_config === undefined) return;
 

@@ -79,6 +79,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   type?: string[];
   stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
+  origin_job_exists?: boolean;
   deployment_ids: string[];
   putModelConfig?: object;
   state: ModelState;
@@ -214,6 +215,7 @@ export const ModelsList: FC<Props> = ({
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
         with_indices: true,
+        with_origin_job_check: true,
       });
 
       const newItems: ModelItem[] = [];

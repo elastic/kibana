@@ -90,6 +90,7 @@ export function trainedModelsRoutes(
           const {
             with_pipelines: withPipelines,
             with_indices: withIndicesRaw,
+            with_origin_job_check: withOriginJobCheck,
             ...getTrainedModelsRequestParams
           } = request.query;
 
@@ -191,10 +192,26 @@ export function trainedModelsRoutes(
             mlLog.debug(e);
           }
 
-          const body = filterForEnabledFeatureModels(result, getEnabledFeatures());
+          try {
+            if (withOriginJobCheck) {
+              for (const model of result) {
+                if (typeof model.metadata?.analytics_config?.id === 'string') {
+                  const jobExistsResult = await mlClient.getDataFrameAnalytics({
+                    id: model.metadata?.analytics_config?.id,
+                    size: 1,
+                  });
+                  model.origin_job_exists = jobExistsResult.count === 1;
+                }
+              }
+            }
+          } catch (e) {
+            // Swallow error to prevent blocking trained models result
+          }
+
+          const filteredModels = filterForEnabledFeatureModels(result, getEnabledFeatures());
 
           return response.ok({
-            body,
+            body: filteredModels,
           });
         } catch (e) {
           return response.customError(wrapError(e));
