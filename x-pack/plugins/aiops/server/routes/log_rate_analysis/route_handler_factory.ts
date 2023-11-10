@@ -21,23 +21,23 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type {
-  SignificantTerm,
-  SignificantTermGroup,
-  SignificantTermHistogramItem,
+  SignificantItem,
+  SignificantItemGroup,
+  SignificantItemHistogramItem,
   NumericChartData,
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
-import { SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+import { SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { RANDOM_SAMPLER_SEED, AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
-  addSignificantTermsAction,
-  addSignificantTermsGroupAction,
-  addSignificantTermsGroupHistogramAction,
-  addSignificantTermsHistogramAction,
+  addSignificantItemsAction,
+  addSignificantItemsGroupAction,
+  addSignificantItemsGroupHistogramAction,
+  addSignificantItemsHistogramAction,
   addErrorAction,
   pingAction,
   resetAllAction,
@@ -65,7 +65,7 @@ import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { fetchTerms2CategoriesCounts } from './queries/fetch_terms_2_categories_counts';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
-import { getSignificantTermGroups } from './queries/get_significant_term_groups';
+import { getSignificantItemGroups } from './queries/get_significant_item_groups';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 
 // 10s ping frequency to keep the stream alive.
@@ -287,19 +287,19 @@ export function routeHandlerFactory<T extends ApiVersion>(
             }
           }
 
-          // Step 2: Significant Categories and Terms
+          // Step 2: Significant Categories and Items
 
           // This will store the combined count of detected significant log patterns and keywords
           let fieldValuePairsCount = 0;
 
-          const significantCategories: SignificantTerm[] = [];
+          const significantCategories: SignificantItem[] = [];
 
           if (version === '1') {
             significantCategories.push(
               ...((
                 request.body as AiopsLogRateAnalysisSchema<'1'>
               ).overrides?.significantTerms?.filter(
-                (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
+                (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
               ) ?? [])
             );
           }
@@ -309,7 +309,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
               ...((
                 request.body as AiopsLogRateAnalysisSchema<'2'>
               ).overrides?.significantItems?.filter(
-                (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
+                (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
               ) ?? [])
             );
           }
@@ -329,18 +329,18 @@ export function routeHandlerFactory<T extends ApiVersion>(
             );
 
             if (significantCategories.length > 0) {
-              push(addSignificantTermsAction(significantCategories, version));
+              push(addSignificantItemsAction(significantCategories, version));
             }
           }
 
-          const significantTerms: SignificantTerm[] = [];
+          const significantTerms: SignificantItem[] = [];
 
           if (version === '1') {
             significantTerms.push(
               ...((
                 request.body as AiopsLogRateAnalysisSchema<'1'>
               ).overrides?.significantTerms?.filter(
-                (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
+                (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
               ) ?? [])
             );
           }
@@ -350,7 +350,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
               ...((
                 request.body as AiopsLogRateAnalysisSchema<'2'>
               ).overrides?.significantItems?.filter(
-                (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
+                (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
               ) ?? [])
             );
           }
@@ -411,7 +411,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
               });
               significantTerms.push(...pValues);
 
-              push(addSignificantTermsAction(pValues, version));
+              push(addSignificantItemsAction(pValues, version));
             }
 
             push(
@@ -571,7 +571,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
               }
 
               if (fields.length > 0 && itemSets.length > 0) {
-                const significantTermGroups = getSignificantTermGroups(
+                const significantItemGroups = getSignificantItemGroups(
                   itemSets,
                   [...significantTerms, ...significantCategories],
                   fields
@@ -579,10 +579,10 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
                 // We'll find out if there's at least one group with at least two items,
                 // only then will we return the groups to the clients and make the grouping option available.
-                const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
+                const maxItems = Math.max(...significantItemGroups.map((g) => g.group.length));
 
                 if (maxItems > 1) {
-                  push(addSignificantTermsGroupAction(significantTermGroups, version));
+                  push(addSignificantItemsGroupAction(significantItemGroups, version));
                 }
 
                 loaded += PROGRESS_STEP_GROUPING;
@@ -595,9 +595,9 @@ export function routeHandlerFactory<T extends ApiVersion>(
                   return;
                 }
 
-                logDebugMessage(`Fetch ${significantTermGroups.length} group histograms.`);
+                logDebugMessage(`Fetch ${significantItemGroups.length} group histograms.`);
 
-                const groupHistogramQueue = queue(async function (cpg: SignificantTermGroup) {
+                const groupHistogramQueue = queue(async function (cpg: SignificantItemGroup) {
                   if (shouldStop) {
                     logDebugMessage('shouldStop abort fetching group histograms.');
                     groupHistogramQueue.kill();
@@ -644,7 +644,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                       }
                       return;
                     }
-                    const histogram: SignificantTermHistogramItem[] =
+                    const histogram: SignificantItemHistogramItem[] =
                       overallTimeSeries.data.map((o) => {
                         const current = cpgTimeSeries.data.find(
                           (d1) => d1.key_as_string === o.key_as_string
@@ -670,7 +670,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                       }) ?? [];
 
                     push(
-                      addSignificantTermsGroupHistogramAction(
+                      addSignificantItemsGroupHistogramAction(
                         [
                           {
                             id: cpg.id,
@@ -683,7 +683,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                   }
                 }, MAX_CONCURRENT_QUERIES);
 
-                groupHistogramQueue.push(significantTermGroups);
+                groupHistogramQueue.push(significantItemGroups);
                 await groupHistogramQueue.drain();
               }
             } catch (e) {
@@ -706,7 +706,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             overallTimeSeries !== undefined &&
             !request.body.overrides?.regroupOnly
           ) {
-            const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
+            const fieldValueHistogramQueue = queue(async function (cp: SignificantItem) {
               if (shouldStop) {
                 logDebugMessage('shouldStop abort fetching field/value histograms.');
                 fieldValueHistogramQueue.kill();
@@ -759,7 +759,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                   return;
                 }
 
-                const histogram: SignificantTermHistogramItem[] =
+                const histogram: SignificantItemHistogramItem[] =
                   overallTimeSeries.data.map((o) => {
                     const current = cpTimeSeries.data.find(
                       (d1) => d1.key_as_string === o.key_as_string
@@ -788,7 +788,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                 loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
                 pushHistogramDataLoadingState();
                 push(
-                  addSignificantTermsHistogramAction(
+                  addSignificantItemsHistogramAction(
                     [
                       {
                         fieldName,
@@ -863,7 +863,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
                 return;
               }
 
-              const histogram: SignificantTermHistogramItem[] =
+              const histogram: SignificantItemHistogramItem[] =
                 overallTimeSeries.data.map((o) => {
                   const current = catTimeSeries.data.find(
                     (d1) => d1.key_as_string === o.key_as_string
@@ -893,7 +893,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
               loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
               pushHistogramDataLoadingState();
               push(
-                addSignificantTermsHistogramAction(
+                addSignificantItemsHistogramAction(
                   [
                     {
                       fieldName,
