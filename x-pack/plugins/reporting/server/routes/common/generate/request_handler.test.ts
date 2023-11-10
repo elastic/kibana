@@ -5,19 +5,6 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
-
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { ReportingServerPluginSetup } from '@kbn/reporting-server';
-import { ReportingCore } from '../../..';
-import { Report, ReportingStore } from '../../../lib/store';
-import { createMockReportingCore } from '../../../test_helpers';
-import { ReportingJobResponse, ReportingRequestHandlerContext } from '../../../types';
-import { RequestHandler } from './request_handler';
-
 jest.mock(
   'puid',
   () =>
@@ -27,6 +14,20 @@ jest.mock(
       }
     }
 );
+
+import rison from '@kbn/rison';
+
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { ReportingServerPluginSetup } from '@kbn/reporting-server';
+
+import { ReportingCore } from '../../..';
+import { Report, ReportingStore } from '../../../lib/store';
+import { createMockReportingCore } from '../../../test_helpers';
+import { ReportingJobResponse, ReportingRequestHandlerContext } from '../../../types';
+import { RequestHandler } from './request_handler';
 
 jest.mock('@kbn/reporting-server/crypto', () => ({
   cryptoFactory: () => ({
