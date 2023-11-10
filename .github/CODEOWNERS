@@ -36,14 +36,14 @@ packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/analytics/shippers/gainsight @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
-x-pack/plugins/apm_data_access @elastic/apm-ui
-x-pack/plugins/apm @elastic/apm-ui
-packages/kbn-apm-synthtrace @elastic/apm-ui
-packages/kbn-apm-synthtrace-client @elastic/apm-ui
-packages/kbn-apm-utils @elastic/apm-ui
+x-pack/plugins/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+x-pack/plugins/apm @elastic/obs-ux-infra_services-team
+packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team
+packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team
+packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
-x-pack/plugins/asset_manager @elastic/infra-monitoring-ui
+x-pack/plugins/asset_manager @elastic/obs-knowledge-team
 x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
@@ -300,7 +300,7 @@ x-pack/plugins/cross_cluster_replication @elastic/platform-deployment-management
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 x-pack/plugins/custom_branding @elastic/appex-sharedux
-packages/kbn-custom-integrations @elastic/infra-monitoring-ui
+packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 src/plugins/custom_integrations @elastic/fleet
 packages/kbn-cypress-config @elastic/kibana-operations
 x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
@@ -314,12 +314,13 @@ src/plugins/data_view_field_editor @elastic/kibana-data-discovery
 src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
+x-pack/plugins/dataset_quality @elastic/obs-ux-logs-team
 packages/kbn-datemath @elastic/kibana-data-discovery
 packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/devtools @elastic/platform-deployment-management
 packages/deeplinks/management @elastic/platform-deployment-management
 packages/deeplinks/ml @elastic/ml-ui
-packages/deeplinks/observability @elastic/apm-ui
+packages/deeplinks/observability @elastic/obs-ux-logs-team
 packages/deeplinks/search @elastic/enterprise-search-frontend
 packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/default-nav/devtools @elastic/platform-deployment-management
@@ -353,18 +354,19 @@ src/plugins/embeddable @elastic/kibana-presentation
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
 x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
+examples/error_boundary @elastic/appex-sharedux
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-es-errors @elastic/kibana-core
 packages/kbn-es-query @elastic/kibana-data-discovery
-packages/kbn-es-types @elastic/kibana-core @elastic/apm-ui
+packages/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
 src/plugins/es_ui_shared @elastic/platform-deployment-management
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
-packages/kbn-eslint-plugin-i18n @elastic/actionable-observability
+packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
-packages/kbn-eslint-plugin-telemetry @elastic/actionable-observability
+packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 packages/kbn-event-annotation-common @elastic/kibana-visualizations
 packages/kbn-event-annotation-components @elastic/kibana-visualizations
@@ -374,8 +376,8 @@ x-pack/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/plugins/event_log @elastic/response-ops
 packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
-x-pack/examples/exploratory_view_example @elastic/uptime
-x-pack/plugins/exploratory_view @elastic/uptime
+x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
+x-pack/plugins/exploratory_view @elastic/obs-ux-infra_services-team
 src/plugins/expression_error @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_heatmap @elastic/kibana-visualizations
@@ -444,15 +446,15 @@ packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-management
 x-pack/plugins/index_management @elastic/platform-deployment-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
-x-pack/packages/kbn-infra-forge @elastic/actionable-observability
-x-pack/plugins/infra @elastic/infra-monitoring-ui
+x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
+x-pack/plugins/infra @elastic/infra-monitoring-ui @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
-packages/kbn-io-ts-utils @elastic/apm-ui
+packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
@@ -469,7 +471,7 @@ src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 packages/kbn-language-documentation-popover @elastic/kibana-visualizations
-packages/kbn-lens-embeddable-utils @elastic/infra-monitoring-ui
+packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/license_api_guard @elastic/platform-deployment-management
 x-pack/plugins/license_management @elastic/platform-deployment-management
@@ -480,10 +482,10 @@ packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 x-pack/plugins/lists @elastic/security-detection-engine
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
-x-pack/plugins/log_explorer @elastic/infra-monitoring-ui
+x-pack/plugins/log_explorer @elastic/obs-ux-logs-team
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
-x-pack/plugins/logs_shared @elastic/infra-monitoring-ui
+x-pack/plugins/logs_shared @elastic/obs-ux-logs-team
 x-pack/plugins/logstash @elastic/logstash
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
@@ -506,7 +508,7 @@ x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
-x-pack/plugins/metrics_data_access @elastic/infra-monitoring-ui
+x-pack/plugins/metrics_data_access @elastic/obs-knowledge-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/category_validator @elastic/ml-ui
@@ -533,24 +535,24 @@ x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
 packages/kbn-monaco @elastic/appex-sharedux
-x-pack/plugins/monitoring_collection @elastic/infra-monitoring-ui
-x-pack/plugins/monitoring @elastic/infra-monitoring-ui
+x-pack/plugins/monitoring_collection @elastic/obs-ux-infra_services-team
+x-pack/plugins/monitoring @elastic/obs-ux-infra_services-team
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
-x-pack/plugins/observability_ai_assistant @elastic/obs-ai-assistant
+x-pack/plugins/observability_ai_assistant @elastic/obs-knowledge-team
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/packages/observability/alerting_test_data @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
-x-pack/plugins/observability_log_explorer @elastic/infra-monitoring-ui
-x-pack/plugins/observability_onboarding @elastic/apm-ui
-x-pack/plugins/observability @elastic/actionable-observability
+x-pack/plugins/observability_log_explorer @elastic/obs-ux-logs-team
+x-pack/plugins/observability_onboarding @elastic/obs-ux-logs-team
+x-pack/plugins/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
-test/common/plugins/otel_metrics @elastic/infra-monitoring-ui
+test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
@@ -567,9 +569,9 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 src/plugins/presentation_util @elastic/kibana-presentation
-x-pack/plugins/profiling_data_access @elastic/profiling-ui
-x-pack/plugins/profiling @elastic/profiling-ui
-packages/kbn-profiling-utils @elastic/profiling-ui
+x-pack/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
+x-pack/plugins/profiling @elastic/obs-ux-infra_services-team
+packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
 packages/react/kibana_context/common @elastic/appex-sharedux
@@ -598,8 +600,8 @@ packages/kbn-rison @elastic/kibana-operations
 x-pack/plugins/rollup @elastic/platform-deployment-management
 examples/routing_example @elastic/kibana-core
 packages/kbn-rrule @elastic/response-ops
-packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
-x-pack/plugins/rule_registry @elastic/response-ops @elastic/actionable-observability
+packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
+x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/runtime_fields @elastic/platform-deployment-management
 packages/kbn-safer-lodash-set @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
@@ -656,11 +658,11 @@ packages/kbn-securitysolution-rules @elastic/security-detection-engine
 packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 packages/kbn-securitysolution-utils @elastic/security-detection-engine
 packages/kbn-server-http-tools @elastic/kibana-core
-packages/kbn-server-route-repository @elastic/apm-ui
+packages/kbn-server-route-repository @elastic/obs-knowledge-team @elastic/obs-ux-management-team
 x-pack/plugins/serverless @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/platform-deployment-management
-x-pack/plugins/serverless_observability @elastic/appex-sharedux @elastic/apm-ui
-packages/serverless/settings/observability_project @elastic/appex-sharedux @elastic/apm-ui @elastic/platform-deployment-management
+x-pack/plugins/serverless_observability @elastic/appex-sharedux @elastic/obs-ux-management-team
+packages/serverless/settings/observability_project @elastic/appex-sharedux @elastic/platform-deployment-management @elastic/obs-ux-management-team
 packages/serverless/project_switcher @elastic/appex-sharedux
 x-pack/plugins/serverless_search @elastic/enterprise-search-frontend
 packages/serverless/settings/search_project @elastic/enterprise-search-frontend @elastic/platform-deployment-management
@@ -672,7 +674,7 @@ x-pack/plugins/session_view @elastic/kibana-cloud-security-posture
 packages/kbn-set-map @elastic/kibana-operations
 examples/share_examples @elastic/appex-sharedux
 src/plugins/share @elastic/appex-sharedux
-packages/kbn-shared-svg @elastic/apm-ui
+packages/kbn-shared-svg @elastic/obs-ux-infra_services-team
 packages/shared-ux/avatar/solution @elastic/appex-sharedux
 packages/shared-ux/button/exit_full_screen @elastic/appex-sharedux
 packages/shared-ux/button_toolbar @elastic/appex-sharedux
@@ -721,7 +723,7 @@ packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
-x-pack/packages/kbn-slo-schema @elastic/actionable-observability
+x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/platform-deployment-management
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
@@ -738,7 +740,7 @@ packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
 packages/kbn-subscription-tracking @elastic/security-threat-hunting-investigations
-x-pack/plugins/synthetics @elastic/uptime
+x-pack/plugins/synthetics @elastic/obs-ux-infra_services-team
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/plugins/task_manager @elastic/response-ops
@@ -768,7 +770,7 @@ x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
-packages/kbn-typed-react-router-config @elastic/apm-ui
+packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-management-team
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 src/plugins/ui_actions_enhanced @elastic/appex-sharedux
@@ -788,20 +790,20 @@ examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
-x-pack/plugins/uptime @elastic/uptime
+x-pack/plugins/uptime @elastic/obs-ux-infra_services-team
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 src/plugins/url_forwarding @elastic/kibana-visualizations
 packages/kbn-url-state @elastic/security-threat-hunting-investigations
 src/plugins/usage_collection @elastic/kibana-core
 test/plugin_functional/plugins/usage_collection @elastic/kibana-core
-packages/kbn-use-tracked-promise @elastic/infra-monitoring-ui
+packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 packages/kbn-user-profile-components @elastic/kibana-security
 examples/user_profile_examples @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
-x-pack/plugins/ux @elastic/uptime
+x-pack/plugins/ux @elastic/obs-ux-infra_services-team
 examples/v8_profiler_examples @elastic/response-ops
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 src/plugins/vis_default_editor @elastic/kibana-visualizations
@@ -822,7 +824,7 @@ src/plugins/visualizations @elastic/kibana-visualizations
 x-pack/plugins/watcher @elastic/platform-deployment-management
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
-packages/kbn-xstate-utils @elastic/infra-monitoring-ui
+packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/kbn-zod-helpers @elastic/security-detection-rule-management
 ####
@@ -926,25 +928,79 @@ packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 
 ### Observability Plugins
 
-# Actionable observability
-x-pack/packages/observability/alert_details @elastic/actionable-observability
-x-pack/test/observability_functional @elastic/actionable-observability
-x-pack/plugins/infra/public/alerting @elastic/actionable-observability
-x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
-
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
 /.github/workflows/oblt-github-commands @elastic/observablt-robots
 
 # Infra Monitoring
-/x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui
-/x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui
+/x-pack/plugins/infra/server/routes @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/server/saved_objects/metrics_explorer_view @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/server/saved_objects/inventory_view @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/server/services @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/server/lib @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/server/lib/log_analysis @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/docs/state_machines @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/common/inventory_models @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/http_api/metrics_api.ts @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/http_api/snapshot_api.ts @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/http_api/log_analysis @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/common/http_api/metrics_explorer_views @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/http_api/host_details @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/http_api/log_alerts @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/common/snapshot_metric_i18n.ts @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/inventory_views @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/color_palette.test.ts @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/performance_tracing.ts @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/common/log_search_summary @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/common/metrics_sources @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/saved_views @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/infra_ml @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/formatters @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/log_text_scale @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/common/log_analysis @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/common/search_strategies/log_entries @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/common/metrics_explorer_views @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/source_configuration @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/color_palette.ts @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/common/log_search_result @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/public/apps/logs_app.tsx @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/public/apps/metrics_app.tsx @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/components/lens @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/components/try_it_button.tsx @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/components/fixed_datepicker.tsx
+/x-pack/plugins/infra/public/components/logging @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/public/components/infrastructure_node_metrics_tables @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/components/saved_views @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/components/feature_feedback_button.tsx @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/components/log_stream @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/public/components/source_configuration @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/components/asset_details @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/containers/logs @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/public/containers/metrics_source @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/containers/metrics_explorer @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/containers/ml @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/pages/logs @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/public/pages/metrics @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/common @elastic/obs-ux-infra_services-team
+/x-pack/plugins/infra/public/observability_logs @elastic/obs-ux-logs-team
+/x-pack/plugins/infra/public/services @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
+
+# Actionable observability
+x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
+x-pack/test/observability_functional @elastic/obs-ux-management-team
+x-pack/plugins/infra/public/alerting @elastic/obs-ux-management-team
+x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
-/x-pack/test/functional/apps/monitoring @elastic/infra-monitoring-ui
-/x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
-/x-pack/test/api_integration/apis/monitoring_collection @elastic/infra-monitoring-ui
-/x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer @elastic/infra-monitoring-ui
+/x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/apis/monitoring @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/apis/monitoring_collection @elastic/obs-ux-infra_services-team
+/x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer @elastic/obs-ux-logs-team
 
 # Fleet
 /fleet_packages.json @elastic/fleet
@@ -955,29 +1011,27 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /x-pack/plugins/fleet/server/services/elastic_agent_manifest.ts @elastic/fleet @elastic/obs-cloudnative-monitoring
 
 # APM
-/x-pack/test/functional/apps/apm/  @elastic/apm-ui
-/x-pack/test/apm_api_integration/ @elastic/apm-ui
+/x-pack/test/functional/apps/apm/  @elastic/obs-ux-infra_services-team
+/x-pack/test/apm_api_integration/ @elastic/obs-ux-infra_services-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
-/src/core/types/elasticsearch @elastic/apm-ui
 /packages/kbn-utility-types/src/dot.ts @dgieselaar
 /packages/kbn-utility-types/src/dot_test.ts @dgieselaar
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
 # Uptime
-/x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/uptime/ @elastic/uptime
-/x-pack/test/functional/apps/uptime @elastic/uptime
-/x-pack/test/functional/es_archives/uptime @elastic/uptime
-/x-pack/test/functional/services/uptime @elastic/uptime
-/x-pack/test/api_integration/apis/uptime @elastic/uptime
-/x-pack/test/api_integration/apis/synthetics @elastic/uptime
-/x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/uptime
-/x-pack/test/alerting_api_integration/observability/index.ts @elastic/uptime
+/x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/uptime/ @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/apps/uptime @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/es_archives/uptime @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/services/uptime @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/apis/uptime @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/apis/synthetics @elastic/obs-ux-infra_services-team
+/x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
 
-# Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
-/x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
-/x-pack/plugins/apm/public/components/app/rum_dashboard @elastic/uptime
-/x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
+# Logs
+/x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
+/x-pack/test/functional/apps/observability_log_explorer @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
 /x-pack/plugins/observability_shared/public/components/tour @elastic/platform-onboarding
@@ -1118,7 +1172,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 # Response Ops team
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
-/x-pack/test/alerting_api_integration/observability @elastic/actionable-observability
+/x-pack/test/alerting_api_integration/observability @elastic/obs-ux-management-team
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
@@ -1246,6 +1300,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_details @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules @elastic/security-detection-rule-management
 
 /x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
@@ -1365,6 +1420,7 @@ x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-an
 ## Security Solution sub teams - security-engineering-productivity
 /x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
+/x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @oatkiller @maximpn @banderror
 
@@ -1383,9 +1439,9 @@ x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entit
 x-pack/plugins/security_solution/public/explore/components/risk_score @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/overview/pages/entity_analytics.tsx @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/overview/components/entity_analytics
-x-pack/plugins/security_solution/server/lib/risk_engine @elastic/security-entity-analytics
+x-pack/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
-x-pack/test/detection_engine_api_integration/security_and_spaces/group10/risk_engine @elastic/security-entity-analytics
+x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
@@ -1440,10 +1496,10 @@ x-pack/test/detection_engine_api_integration/security_and_spaces/group10/risk_en
 x-pack/plugins/translations/translations
 
 # Profiling api integration testing
-x-pack/test/profiling_api_integration @elastic/profiling-ui
+x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
 
 # Observability shared profiling
-x-pack/plugins/observability_shared/public/components/profiling @elastic/profiling-ui
+x-pack/plugins/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
 
 # Shared UX
 packages/react @elastic/appex-sharedux

@@ -184,7 +184,7 @@ export const LogEntryFlyout = ({
         >
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <LogAIAssistant aiAssistant={observabilityAIAssistant} doc={logEntry} />
+              <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} doc={logEntry} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />

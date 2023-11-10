@@ -49,7 +49,7 @@ describe('<KibanaErrorBoundary>', () => {
     expect(await findByText(strings.recoverable.callout.title())).toBeVisible();
     expect(await findByText(strings.recoverable.callout.pageReloadButton())).toBeVisible();
 
-    (await findByTestId('recoverablePromptReloadBtn')).click();
+    (await findByTestId('errorBoundaryRecoverablePromptReloadBtn')).click();
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
@@ -69,7 +69,7 @@ describe('<KibanaErrorBoundary>', () => {
     expect(await findByText(strings.fatal.callout.showDetailsButton())).toBeVisible();
     expect(await findByText(strings.fatal.callout.pageReloadButton())).toBeVisible();
 
-    (await findByTestId('fatalPromptReloadBtn')).click();
+    (await findByTestId('errorBoundaryFatalPromptReloadBtn')).click();
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
