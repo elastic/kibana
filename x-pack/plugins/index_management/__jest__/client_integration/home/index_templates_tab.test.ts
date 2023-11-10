@@ -222,7 +222,7 @@ describe('Index Templates tab', () => {
       );
     });
 
-    test('should have a button to create a template', () => {
+    test('should have a button to create a template', async () => {
       const { exists } = testBed;
       // Both composable and legacy templates
       expect(exists('createTemplateButton')).toBe(true);
@@ -271,7 +271,7 @@ describe('Index Templates tab', () => {
 
     describe('table row actions', () => {
       describe('composable templates', () => {
-        test('should have an option to delete', () => {
+        test('should have an option to delete', async () => {
           const { actions, findAction } = testBed;
           const [{ name: templateName }] = templates;
 
@@ -281,7 +281,7 @@ describe('Index Templates tab', () => {
           expect(deleteAction.text()).toEqual('Delete');
         });
 
-        test('should have an option to clone', () => {
+        test('should have an option to clone', async () => {
           const { actions, findAction } = testBed;
           const [{ name: templateName }] = templates;
 
@@ -292,7 +292,7 @@ describe('Index Templates tab', () => {
           expect(cloneAction.text()).toEqual('Clone');
         });
 
-        test('should have an option to edit', () => {
+        test('should have an option to edit', async () => {
           const { actions, findAction } = testBed;
           const [{ name: templateName }] = templates;
 
@@ -305,7 +305,7 @@ describe('Index Templates tab', () => {
       });
 
       describe('legacy templates', () => {
-        test('should have an option to delete', () => {
+        test('should have an option to delete', async () => {
           const { actions, findAction } = testBed;
           const [{ name: legacyTemplateName }] = legacyTemplates;
 
@@ -315,7 +315,7 @@ describe('Index Templates tab', () => {
           expect(deleteAction.text()).toEqual('Delete');
         });
 
-        test('should have an option to clone', () => {
+        test('should have an option to clone', async () => {
           const { actions, findAction } = testBed;
           const [{ name: templateName }] = legacyTemplates;
 
@@ -326,7 +326,7 @@ describe('Index Templates tab', () => {
           expect(cloneAction.text()).toEqual('Clone');
         });
 
-        test('should have an option to edit', () => {
+        test('should have an option to edit', async () => {
           const { actions, findAction } = testBed;
           const [{ name: templateName }] = legacyTemplates;
 

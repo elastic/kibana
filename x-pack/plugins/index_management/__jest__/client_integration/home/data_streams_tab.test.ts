@@ -128,7 +128,7 @@ describe('Data Streams tab', () => {
       expect(testBed.find('dataStreamTable').text()).toContain('No data streams found');
     });
 
-    test('updates the breadcrumbs to data streams', () => {
+    test('updates the breadcrumbs to data streams', async () => {
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
         IndexManagementBreadcrumb.dataStreams
       );
@@ -329,7 +329,7 @@ describe('Data Streams tab', () => {
     });
 
     describe('row actions', () => {
-      test('can delete', () => {
+      test('can delete', async () => {
         const { findDeleteActionAt } = testBed;
         const deleteAction = findDeleteActionAt(0);
         expect(deleteAction.length).toBe(1);
@@ -813,7 +813,7 @@ describe('Data Streams tab', () => {
       testBed.component.update();
     });
 
-    test('listed in the table with Fleet-managed label', () => {
+    test('listed in the table with Fleet-managed label', async () => {
       const { table } = testBed;
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
@@ -874,7 +874,7 @@ describe('Data Streams tab', () => {
       testBed.component.update();
     });
 
-    test('show hidden data streams when filter is toggled', () => {
+    test('show hidden data streams when filter is toggled', async () => {
       const { table, actions } = testBed;
 
       actions.toggleViewFilterAt(1);

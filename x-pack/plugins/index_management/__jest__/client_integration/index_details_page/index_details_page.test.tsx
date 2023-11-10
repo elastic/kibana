@@ -221,7 +221,7 @@ describe('<IndexDetailsPage />', () => {
     );
   });
 
-  it('displays index name in the header', () => {
+  it('displays index name in the header', async () => {
     const header = testBed.actions.getHeader();
     // testIndexName is configured in initialEntries of the memory router
     expect(header).toEqual(testIndexName);
@@ -234,14 +234,14 @@ describe('<IndexDetailsPage />', () => {
       );
     });
 
-    it('renders storage details', () => {
+    it('renders storage details', async () => {
       const storageDetails = testBed.actions.overview.getStorageDetailsContent();
       expect(storageDetails).toBe(
         `Storage${testIndexMock.primary_size}Primary${testIndexMock.size}TotalShards${testIndexMock.primary} Primary / ${testIndexMock.replica} Replicas `
       );
     });
 
-    it('renders status details', () => {
+    it('renders status details', async () => {
       const statusDetails = testBed.actions.overview.getStatusDetailsContent();
       expect(statusDetails).toBe(
         `Status${'Open'}${'Healthy'}${testIndexMock.documents} Document / ${
@@ -391,7 +391,7 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.overview.storageDetailsExist()).toBe(false);
     });
 
-    it('renders code block', () => {
+    it('renders code block', async () => {
       expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
     });
 
@@ -568,7 +568,7 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.settings.clickEditModeSwitch();
       });
 
-      it('displays all editable settings (flattened and filtered)', () => {
+      it('displays all editable settings (flattened and filtered)', async () => {
         const editorContent = testBed.actions.settings.getCodeEditorContent();
         expect(editorContent).toEqual(JSON.stringify(testIndexEditableSettingsAll, null, 2));
       });
@@ -635,7 +635,7 @@ describe('<IndexDetailsPage />', () => {
     expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
   });
 
-  it('renders a link to discover', () => {
+  it('renders a link to discover', async () => {
     // we only need to test that the link is rendered since the link component has its own tests for navigation
     expect(testBed.actions.discoverLinkExists()).toBe(true);
   });
@@ -797,7 +797,7 @@ describe('<IndexDetailsPage />', () => {
       });
       testBed.component.update();
     });
-    it('loads the index details with the encoded index name', () => {
+    it('loads the index details with the encoded index name', async () => {
       expect(httpSetup.get).toHaveBeenLastCalledWith(
         `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(percentSignName)}`,
         requestOptions
@@ -874,7 +874,7 @@ describe('<IndexDetailsPage />', () => {
       expect(content).toEqual(testContent);
     });
 
-    it('additional tab is the first in the order', () => {
+    it('additional tab is the first in the order', async () => {
       const tabs = testBed.actions.getIndexDetailsTabs();
       expect(tabs).toEqual(['Test tab', 'Overview', 'Mappings', 'Settings', 'Statistics']);
     });
