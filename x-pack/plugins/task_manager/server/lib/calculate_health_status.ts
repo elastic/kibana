@@ -16,12 +16,12 @@ export function calculateHealthStatus(
   config: TaskManagerConfig,
   shouldRunTasks: boolean,
   logger: Logger
-): { status: HealthStatus; reason?: string; isEmpty?: boolean } {
+): { status: HealthStatus; reason?: string } {
   const now = Date.now();
 
   // if stats are empty, return a warning
   if (isEmpty(summarizedStats.stats)) {
-    return { status: HealthStatus.Warning, reason: `no health stats available`, isEmpty: true };
+    return { status: HealthStatus.Uninitialized, reason: `no health stats available` };
   }
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness

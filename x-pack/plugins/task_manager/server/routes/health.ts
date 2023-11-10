@@ -31,7 +31,6 @@ import { calculateHealthStatus } from '../lib/calculate_health_status';
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;
   reason?: string;
-  isEmpty?: boolean;
   status: HealthStatus;
   timestamp: string;
 };
@@ -89,7 +88,7 @@ export function healthRoute(params: HealthRouteParams): {
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
     const summarizedStats = summarizeMonitoringStats(logger, monitoredStats, config);
-    const { status, reason, isEmpty } = calculateHealthStatus(
+    const { status, reason } = calculateHealthStatus(
       summarizedStats,
       config,
       shouldRunTasks,
@@ -97,7 +96,7 @@ export function healthRoute(params: HealthRouteParams): {
     );
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
-    return { id: taskManagerId, timestamp, status, reason, isEmpty, ...summarizedStats };
+    return { id: taskManagerId, timestamp, status, reason, ...summarizedStats };
   }
 
   const serviceStatus$: Subject<TaskManagerServiceStatus> = new Subject<TaskManagerServiceStatus>();
@@ -116,7 +115,7 @@ export function healthRoute(params: HealthRouteParams): {
       // Only calculate the summarized stats (calculates all running averages and evaluates state)
       // when needed by throttling down to the requiredHotStatsFreshness
       map((stats) => withServiceStatus(getHealthStatus(stats))),
-      filter(([monitoredHealth]) => !monitoredHealth.isEmpty)
+      filter(([monitoredHealth]) => monitoredHealth.status !== HealthStatus.Uninitialized)
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
