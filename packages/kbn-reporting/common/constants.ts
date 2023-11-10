@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as jobTypes from './job_types';
-
-export * from './job_types';
+import { jobTypes } from './job_types';
 
 export const PLUGIN_ID = 'reporting';
 
@@ -18,9 +16,7 @@ export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATO
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
-export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 
-export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 // Licenses
 export const LICENSE_TYPE_TRIAL = 'trial' as const;
 export const LICENSE_TYPE_BASIC = 'basic' as const;

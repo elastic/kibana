@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-export const CSV_JOB_TYPE = 'csv_searchsource';
+import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+import { PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
-export const PDF_JOB_TYPE = 'printable_pdf';
-export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
-
-export const PNG_JOB_TYPE = 'PNG';
-export const PNG_JOB_TYPE_V2 = 'PNGV2';
+export const jobTypes = [
+  CSV_JOB_TYPE,
+  CSV_JOB_TYPE_V2,
+  PNG_JOB_TYPE,
+  PNG_JOB_TYPE_V2,
+  PDF_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+];

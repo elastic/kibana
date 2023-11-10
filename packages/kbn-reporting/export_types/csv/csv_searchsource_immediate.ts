@@ -14,7 +14,6 @@ import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
 import {
   CancellationToken,
-  CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -23,7 +22,10 @@ import {
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
-import { JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
+import {
+  CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+  JobParamsDownloadCSV,
+} from '@kbn/reporting-export-types-csv-common';
 import type {
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,

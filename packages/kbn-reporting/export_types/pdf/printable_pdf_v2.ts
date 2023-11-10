@@ -22,7 +22,6 @@ import {
 import { Writable } from 'stream';
 
 import { Headers } from '@kbn/core/server';
-import type { TaskRunResult } from '@kbn/reporting-common/types';
 import {
   CancellationToken,
   getFullRedirectAppUrl,
@@ -31,18 +30,22 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  PDF_JOB_TYPE_V2,
-  PDF_REPORT_TYPE_V2,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
+import {
+  JobParamsPDFV2,
+  PDF_JOB_TYPE_V2,
+  PDF_REPORT_TYPE_V2,
+  TaskPayloadPDFV2,
+} from '@kbn/reporting-export-types-pdf-common';
 import {
   decryptJobHeaders,
   ExportType,
   generatePdfObservableV2,
   getCustomLogo,
 } from '@kbn/reporting-server';
-import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 

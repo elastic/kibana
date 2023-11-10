@@ -9,6 +9,8 @@
 import type { BaseParams, BasePayload, LocatorParams } from '@kbn/reporting-common/types';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
+export * from './constants';
+
 interface BaseParamsPNG {
   layout: LayoutParams;
   forceNow?: string;

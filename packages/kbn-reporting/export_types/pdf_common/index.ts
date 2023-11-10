@@ -9,6 +9,8 @@
 import type { BaseParams, BasePayload, LocatorParams } from '@kbn/reporting-common/types';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
+export * from './constants';
+
 /**
  * Structure of stored job data provided by create_job
  */

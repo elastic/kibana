@@ -14,6 +14,8 @@ import type {
   BasePayloadV2,
 } from '@kbn/reporting-common/types';
 
+export * from './constants';
+
 export interface JobParamsDownloadCSV {
   browserTimezone: string;
   title: string;
@@ -40,3 +42,7 @@ export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
   Omit<BaseParamsV2, 'title'> & { title?: string };
 
 export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayloadV2;
+
+export const CSV_REPORTING_ACTION = 'downloadCsvReport';
+
+export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';

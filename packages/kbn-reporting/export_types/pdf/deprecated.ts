@@ -19,12 +19,15 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  PDF_JOB_TYPE,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import { TaskRunResult } from '@kbn/reporting-common/types';
-import { JobParamsPDFDeprecated, TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
+import {
+  JobParamsPDFDeprecated,
+  PDF_JOB_TYPE,
+  TaskPayloadPDF,
+} from '@kbn/reporting-export-types-pdf-common';
 import {
   ExportType,
   decryptJobHeaders,
