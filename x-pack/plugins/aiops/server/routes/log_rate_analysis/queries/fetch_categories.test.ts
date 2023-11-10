@@ -67,6 +67,9 @@ describe('getCategoryRequest', () => {
 
     const query = getCategoryRequest(params, 'the-field-name', randomSamplerWrapper);
 
+    // Because the time range filter is covered by the should clauses that cover both
+    // baseline (10,20) and deviation (30,40), we expect that there is no other
+    // time range filter whatsoever, for example for start/end (0,50).
     expect(query).toEqual({
       index: 'the-index',
       size: 0,
