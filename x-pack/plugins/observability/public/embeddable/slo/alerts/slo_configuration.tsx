@@ -57,6 +57,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
                   slos?.map((slo) => ({
                     id: slo?.id,
                     instanceId: slo?.instanceId,
+                    name: slo?.name,
                   }))
                 );
               }}

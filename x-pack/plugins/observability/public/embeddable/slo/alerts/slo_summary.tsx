@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiText, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiText, EuiFlexItem, EuiPanel, EuiStat, EuiBadge } from '@elastic/eui';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 
 import { EmbeddableSloProps } from './types';
@@ -20,6 +21,9 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
   //     ['9270f550-7b5f-11ee-8f2d-95d71754a584', '*'],
   //   ],
   // });
+  const sloNames = slos.map((slo) => `${slo.name}(${slo.instanceId})`); // TODO hide *
+  console.log(sloNames, '!!names');
+  const more = sloNames.length - 1;
   const { data: activeAlerts } = useFetchActiveAlerts({
     sloIdsAndInstanceIds: slos.map(Object.values),
   });
@@ -49,14 +53,10 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
             </EuiText>
           </EuiFlexItem>
 
-          {/* <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              <FormattedMessage
-                id="xpack.observability.sloSummary.noRulesYetTextLabel"
-                defaultMessage="No rules yet"
-              />
-            </EuiText>
-          </EuiFlexItem> */}
+          <EuiFlexItem>
+            <EuiBadge color="danger">{sloNames[0]}</EuiBadge>
+            <EuiBadge color="danger">{`+${more} more`}</EuiBadge>
+          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="flexEnd">
