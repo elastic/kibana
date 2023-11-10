@@ -29,7 +29,6 @@ import {
 } from '../../types';
 import { LinksModalPage } from './links_modal_page';
 import { EmbedModalPage } from './embed_modal_page';
-import { TabContent } from './tab_content';
 
 export interface ShareModalProps {
   allowEmbed: boolean;
@@ -108,9 +107,12 @@ const getTabs = (props: ShareModalProps) => {
       }),
       content: (
         <>
-          <EmbedModalPage />
-          <TabContent
+          <EmbedModalPage
+            shareableUrlForSavedObject={shareableUrlForSavedObject}
             allowShortUrl={allowShortUrl}
+          />
+          {/* <TabContent
+            
             isEmbedded
             objectId={objectId}
             objectType={objectType}
@@ -122,7 +124,7 @@ const getTabs = (props: ShareModalProps) => {
             anonymousAccess={anonymousAccess}
             showPublicUrlSwitch={showPublicUrlSwitch}
             snapshotShareWarning={snapshotShareWarning}
-          />
+          /> */}
         </>
       ),
     };

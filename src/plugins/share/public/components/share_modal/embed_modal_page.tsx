@@ -6,15 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, Fragment } from 'react';
+import { EuiForm, EuiSwitch } from '@elastic/eui';
+import React, { FC } from 'react';
 
 interface EmbedModalPageProps {
+  allowShortUrl: boolean;
+  shareableUrlForSavedObject?: string;
   // radio: boolean;
   // checkbox: boolean;
   // toggle: boolean;
 }
 
 export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) => {
-  const {} = props;
-  return <Fragment />;
+  const { allowShortUrl, shareableUrlForSavedObject } = props;
+
+  const onChangeHandler = () => {};
+  return (
+    <EuiForm className="kbnShareContextMenu__finalPanel">
+      {allowShortUrl && (
+        <EuiSwitch label={'Shorten Url'} checked={false} onChange={onChangeHandler} />
+      )}
+    </EuiForm>
+  );
 };
