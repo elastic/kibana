@@ -524,7 +524,7 @@ Plugin server-side only. Plugin has three main functions:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/dataset_quality/README.md[datasetQuality]
-|This plugin introduces the concept of dataset health, where users can easily get an overview on the datasets they have.
+|This plugin introduces the concept of dataset quality, where users can easily get an overview on the datasets they have.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
