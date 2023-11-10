@@ -32,8 +32,6 @@
     "@kbn/discover-utils",
     "@kbn/deeplinks-observability",
     "@kbn/field-formats-plugin",
-    "@kbn/core-http-browser",
-    "@kbn/core-notifications-browser",
     "@kbn/kibana-utils-plugin",
     "@kbn/xstate-utils"
   ],
