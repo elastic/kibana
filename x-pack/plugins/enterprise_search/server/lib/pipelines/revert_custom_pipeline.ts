@@ -7,16 +7,14 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
-
-import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
+import { CONNECTORS_INDEX, fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 import { deleteIndexPipelines } from './delete_pipelines';
 
 import { getDefaultPipeline } from './get_default_pipeline';
 
 export const revertCustomPipeline = async (client: IScopedClusterClient, indexName: string) => {
-  const connector = await fetchConnectorByIndexName(client, indexName);
+  const connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
   if (connector) {
     const pipeline = await getDefaultPipeline(client);
     await client.asCurrentUser.update({

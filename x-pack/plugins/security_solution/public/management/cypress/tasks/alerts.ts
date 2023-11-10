@@ -48,7 +48,7 @@ export const waitForEndpointAlerts = (
           return (streamedAlerts.hits.total as estypes.SearchTotalHits).value > 0;
         });
       },
-      { timeout }
+      { timeout, interval: 2000 }
     )
     .then(() => {
       // Stop/start Endpoint rule so that it can pickup and create Detection alerts
@@ -143,7 +143,7 @@ export const waitForDetectionAlerts = (
         return Boolean((alertsResponse.hits.total as estypes.SearchTotalHits)?.value ?? 0);
       });
     },
-    { timeout }
+    { timeout, interval: 2000 }
   );
 };
 
@@ -181,7 +181,7 @@ export const getEndpointDetectionAlertsQueryForAgentId = (endpointAgentId: strin
 
 export const changeAlertsFilter = (text: string) => {
   cy.getByTestSubj('filters-global-container').within(() => {
-    cy.getByTestSubj('queryInput').click().type(text);
+    cy.getByTestSubj('queryInput').type(text);
     cy.getByTestSubj('querySubmitButton').click();
   });
 };

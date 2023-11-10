@@ -6,8 +6,8 @@ paths:
   /api/detection_engine/tags:
     summary: Aggregates and returns rule tags
     get:
-      operationId: GetTags
-      x-codegen-enabled: false
+      operationId: ReadTags
+      x-codegen-enabled: true
       summary: Aggregates and returns all unique tags from all rules
       tags:
         - Tags API

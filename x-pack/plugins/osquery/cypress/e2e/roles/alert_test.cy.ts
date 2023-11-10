@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
@@ -14,6 +15,7 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
   let ruleId: string;
 
   before(() => {
+    initializeDataViews();
     loadRule().then((data) => {
       ruleName = data.name;
       ruleId = data.id;
@@ -29,7 +31,7 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
       cy.getBySel('expand-event').first().click({ force: true });
 
       cy.wait(500);
-      cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
+      cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
       cy.contains('Get processes').click();
     });
 

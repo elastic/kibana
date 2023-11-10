@@ -7,9 +7,6 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Inspect, KpiHistogramData, Maybe } from '../../../../common';
-import type { RequestBasicOptions } from '../../..';
-
-export type UsersKpiAuthenticationsRequestOptions = RequestBasicOptions;
 
 export interface UsersKpiAuthenticationsStrategyResponse extends IEsSearchResponse {
   authenticationsSuccess: Maybe<number>;

@@ -9,9 +9,10 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitSecurityDetectionRulesPage } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
-import { goToTheRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
+import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -26,7 +27,7 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 
-describe('Exceptions viewer read only', { tags: '@ess' }, () => {
+describe('Exceptions viewer read only', { tags: ['@ess'] }, () => {
   const exceptionList = getExceptionList();
 
   beforeEach(() => {
@@ -53,9 +54,9 @@ describe('Exceptions viewer read only', { tags: '@ess' }, () => {
       );
     });
 
-    login(ROLES.reader);
-    visitSecurityDetectionRulesPage(ROLES.reader);
-    goToTheRuleDetailsOf('Test exceptions rule');
+    login(ROLES.t1_analyst);
+    visitRulesManagementTable(ROLES.t1_analyst);
+    goToRuleDetailsOf('Test exceptions rule');
     goToExceptionsTab();
   });
 

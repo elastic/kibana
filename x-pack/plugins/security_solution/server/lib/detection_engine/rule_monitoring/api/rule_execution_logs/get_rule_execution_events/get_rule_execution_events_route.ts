@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
@@ -36,8 +36,8 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidation(GetRuleExecutionEventsRequestParams),
-            query: buildRouteValidation(GetRuleExecutionEventsRequestQuery),
+            params: buildRouteValidationWithZod(GetRuleExecutionEventsRequestParams),
+            query: buildRouteValidationWithZod(GetRuleExecutionEventsRequestQuery),
           },
         },
       },
@@ -54,8 +54,11 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
           const executionLog = ctx.securitySolution.getRuleExecutionLog();
           const executionEventsResponse = await executionLog.getExecutionEvents({
             ruleId: params.ruleId,
+            searchTerm: query.search_term,
             eventTypes: query.event_types,
             logLevels: query.log_levels,
+            dateStart: query.date_start,
+            dateEnd: query.date_end,
             sortOrder: query.sort_order,
             page: query.page,
             perPage: query.per_page,

@@ -460,6 +460,35 @@ describe('IndexPatterns', () => {
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
   });
 
+  describe('defaultDataViewExists', () => {
+    beforeEach(() => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+    });
+
+    test('return true if exists', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(true);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('return false if no default data view found', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(false);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+  });
+
   describe('getDefaultDataView', () => {
     beforeEach(() => {
       indexPatterns.clearCache();
@@ -470,8 +499,10 @@ describe('IndexPatterns', () => {
       uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
       savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
       savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      jest.spyOn(indexPatterns, 'refreshFields');
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      expect(indexPatterns.refreshFields).not.toBeCalled();
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);
@@ -629,38 +660,6 @@ describe('IndexPatterns', () => {
       indexPatterns.refreshFields(indexPattern);
       // @ts-expect-error
       expect(apiClient.getFieldsForWildcard.mock.calls[0][0].allowNoIndex).toBe(true);
-    });
-  });
-
-  describe('getExistingIndices', () => {
-    test('getExistingIndices returns the valid matched indices', async () => {
-      apiClient.getFieldsForWildcard = jest
-        .fn()
-        .mockResolvedValueOnce({ fields: ['length'] })
-        .mockResolvedValue({ fields: [] });
-      const patternList = await indexPatterns.getExistingIndices(['packetbeat-*', 'filebeat-*']);
-      expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
-      expect(patternList.length).toBe(1);
-    });
-
-    test('getExistingIndices checks the positive pattern if provided with a negative pattern', async () => {
-      const mockFn = jest.fn().mockResolvedValue({ fields: ['length'] });
-      apiClient.getFieldsForWildcard = mockFn;
-      const patternList = await indexPatterns.getExistingIndices(['-filebeat-*', 'filebeat-*']);
-      expect(mockFn.mock.calls[0][0].pattern).toEqual('filebeat-*');
-      expect(mockFn.mock.calls[1][0].pattern).toEqual('filebeat-*');
-      expect(patternList).toEqual(['-filebeat-*', 'filebeat-*']);
-    });
-
-    test('getExistingIndices handles an error', async () => {
-      apiClient.getFieldsForWildcard = jest
-        .fn()
-        .mockImplementationOnce(async () => {
-          throw new DataViewMissingIndices('Catch me if you can!');
-        })
-        .mockImplementation(() => Promise.resolve({ fields: ['length'] }));
-      const patternList = await indexPatterns.getExistingIndices(['packetbeat-*', 'filebeat-*']);
-      expect(patternList).toEqual(['filebeat-*']);
     });
   });
 });

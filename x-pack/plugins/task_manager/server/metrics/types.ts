@@ -11,5 +11,5 @@ export interface ITaskMetricsAggregator<T> {
   initialMetric: () => T;
   collect: () => T;
   reset: () => void;
-  processTaskLifecycleEvent: (taskEvent: TaskLifecycleEvent) => void;
+  processTaskLifecycleEvent: (event: TaskLifecycleEvent) => void;
 }

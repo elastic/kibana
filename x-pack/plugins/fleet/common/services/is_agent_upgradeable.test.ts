@@ -7,7 +7,7 @@
 
 import type { Agent } from '../types/models/agent';
 
-import { isAgentUpgradeable } from './is_agent_upgradeable';
+import { getRecentUpgradeInfoForAgent, isAgentUpgradeable } from './is_agent_upgradeable';
 
 const getAgent = ({
   version,
@@ -15,14 +15,14 @@ const getAgent = ({
   unenrolling = false,
   unenrolled = false,
   updating = false,
-  upgraded = false,
+  minutesSinceUpgrade,
 }: {
   version: string;
   upgradeable?: boolean;
   unenrolling?: boolean;
   unenrolled?: boolean;
   updating?: boolean;
-  upgraded?: boolean;
+  minutesSinceUpgrade?: number;
 }): Agent => {
   const agent: Agent = {
     id: 'de9006e1-54a7-4320-b24e-927e6fe518a8',
@@ -101,27 +101,27 @@ const getAgent = ({
   if (updating) {
     agent.upgrade_started_at = new Date(Date.now()).toISOString();
   }
-  if (upgraded) {
-    agent.upgraded_at = new Date(Date.now()).toISOString();
+  if (minutesSinceUpgrade) {
+    agent.upgraded_at = new Date(Date.now() - minutesSinceUpgrade * 6e4).toISOString();
   }
   return agent;
 };
 describe('Fleet - isAgentUpgradeable', () => {
-  it('returns false if agent reports not upgradeable with agent version < kibana version', () => {
+  it('returns false if agent reports not upgradeable with agent version < latest agent version', () => {
     expect(isAgentUpgradeable(getAgent({ version: '7.9.0' }), '8.0.0')).toBe(false);
   });
-  it('returns false if agent reports not upgradeable with agent version > kibana version', () => {
+  it('returns false if agent reports not upgradeable with agent version > latest agent version', () => {
     expect(isAgentUpgradeable(getAgent({ version: '8.0.0' }), '7.9.0')).toBe(false);
   });
-  it('returns false if agent reports not upgradeable with agent version === kibana version', () => {
+  it('returns false if agent reports not upgradeable with agent version === latest agent version', () => {
     expect(isAgentUpgradeable(getAgent({ version: '8.0.0' }), '8.0.0')).toBe(false);
   });
-  it('returns false if agent reports upgradeable, with agent version === kibana version', () => {
+  it('returns false if agent reports upgradeable, with agent version === latest agent version', () => {
     expect(isAgentUpgradeable(getAgent({ version: '8.0.0', upgradeable: true }), '8.0.0')).toBe(
       false
     );
   });
-  it('returns false if agent reports upgradeable, with agent version > kibana version', () => {
+  it('returns false if agent reports upgradeable, with agent version > latest agent version', () => {
     expect(isAgentUpgradeable(getAgent({ version: '8.0.0', upgradeable: true }), '7.9.0')).toBe(
       false
     );
@@ -142,58 +142,33 @@ describe('Fleet - isAgentUpgradeable', () => {
       )
     ).toBe(false);
   });
-  it('returns true if agent reports upgradeable, with agent version < kibana version', () => {
+  it('returns true if agent reports upgradeable, with agent version < latest agent version', () => {
     expect(isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0')).toBe(
       true
     );
   });
-  it('returns false if agent reports upgradeable, with agent snapshot version === kibana version', () => {
+  it('returns false if agent reports upgradeable, with agent snapshot version === latest agent version', () => {
     expect(
       isAgentUpgradeable(getAgent({ version: '7.9.0-SNAPSHOT', upgradeable: true }), '7.9.0')
     ).toBe(false);
   });
-  it('returns false if agent reports upgradeable, with agent version === kibana snapshot version', () => {
-    expect(
-      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '7.9.0-SNAPSHOT')
-    ).toBe(false);
-  });
-  it('returns true if agent reports upgradeable, with agent snapshot version < kibana snapshot version', () => {
+  it('returns true if agent reports upgradeable, with upgrade to agent snapshot version newer than latest agent version', () => {
     expect(
       isAgentUpgradeable(
-        getAgent({ version: '7.9.0-SNAPSHOT', upgradeable: true }),
-        '8.0.0-SNAPSHOT'
+        getAgent({ version: '8.10.2', upgradeable: true }),
+        '8.10.2',
+        '8.11.0-SNAPSHOT'
       )
-    ).toBe(true);
-  });
-  it('returns false if agent reports upgradeable, with agent snapshot version === kibana snapshot version', () => {
-    expect(
-      isAgentUpgradeable(
-        getAgent({ version: '8.0.0-SNAPSHOT', upgradeable: true }),
-        '8.0.0-SNAPSHOT'
-      )
-    ).toBe(false);
-  });
-  it('returns true if agent reports upgradeable, with agent version < kibana snapshot version', () => {
-    expect(
-      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0-SNAPSHOT')
     ).toBe(true);
   });
   it('returns false if agent reports upgradeable, with target version < current agent version ', () => {
     expect(
-      isAgentUpgradeable(
-        getAgent({ version: '7.9.0', upgradeable: true }),
-        '8.0.0-SNAPSHOT',
-        '7.8.0'
-      )
+      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0', '7.8.0')
     ).toBe(false);
   });
   it('returns false if agent reports upgradeable, with target version == current agent version ', () => {
     expect(
-      isAgentUpgradeable(
-        getAgent({ version: '7.9.0', upgradeable: true }),
-        '8.0.0-SNAPSHOT',
-        '7.9.0'
-      )
+      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0', '7.9.0')
     ).toBe(false);
   });
   it('returns false if agent reports upgradeable, but is already updating', () => {
@@ -201,9 +176,42 @@ describe('Fleet - isAgentUpgradeable', () => {
       isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true, updating: true }), '8.0.0')
     ).toBe(false);
   });
-  it('returns true if agent was recently upgraded', () => {
+  it('returns false if the agent reports upgradeable but was upgraded less than 10 minutes ago', () => {
     expect(
-      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true, upgraded: true }), '8.0.0')
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 9 }),
+        '8.0.0'
+      )
+    ).toBe(false);
+  });
+  it('returns true if agent reports upgradeable and was upgraded more than 10 minutes ago', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 11 }),
+        '8.0.0'
+      )
     ).toBe(true);
+  });
+});
+
+describe('hasAgentBeenUpgradedRecently', () => {
+  it('returns true if the agent was upgraded less than 10 minutes ago', () => {
+    expect(
+      getRecentUpgradeInfoForAgent(getAgent({ version: '7.9.0', minutesSinceUpgrade: 9 }))
+        .hasBeenUpgradedRecently
+    ).toBe(true);
+  });
+
+  it('returns false if the agent was upgraded more than 10 minutes ago', () => {
+    expect(
+      getRecentUpgradeInfoForAgent(getAgent({ version: '7.9.0', minutesSinceUpgrade: 11 }))
+        .hasBeenUpgradedRecently
+    ).toBe(false);
+  });
+
+  it('returns false if the agent does not have an upgrade_at field', () => {
+    expect(
+      getRecentUpgradeInfoForAgent(getAgent({ version: '7.9.0' })).hasBeenUpgradedRecently
+    ).toBe(false);
   });
 });

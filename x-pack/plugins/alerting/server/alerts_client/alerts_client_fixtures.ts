@@ -72,8 +72,8 @@ export const getParamsByTimeQuery: GetSummarizedAlertsParams = {
   ruleId: 'ruleId',
   spaceId: 'default',
   excludedAlertInstanceIds: [],
-  end: new Date(),
-  start: new Date(),
+  end: new Date('2023-09-06T00:01:00.000'),
+  start: new Date('2023-09-06T00:00:00.000'),
 };
 
 export const getExpectedQueryByExecutionUuid = ({
@@ -258,7 +258,7 @@ export const getExpectedQueryByTimeRange = ({
         {
           range: {
             'kibana.alert.start': {
-              lt: end,
+              lt: start,
             },
           },
         },

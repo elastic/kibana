@@ -48,6 +48,7 @@ const IndexTemplate = (namespace: string = 'default', useDataStream: boolean = f
                 rollover_alias: `.alerts-test.alerts-${namespace}`,
               },
             }),
+        'index.mapping.ignore_malformed': true,
         'index.mapping.total_fields.limit': 2500,
       },
     },

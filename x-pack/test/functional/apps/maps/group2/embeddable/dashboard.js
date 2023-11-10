@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }) {
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
         [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.dashboard.waitForRenderComplete();
     });
@@ -164,7 +164,7 @@ export default function ({ getPageObjects, getService }) {
 
     // see https://github.com/elastic/kibana/issues/61596 on why it is specific to maps
     it("dashboard's back button should navigate to previous page", async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.dashboard.waitForRenderComplete();

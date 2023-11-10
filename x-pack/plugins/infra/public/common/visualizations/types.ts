@@ -10,11 +10,6 @@ import type {
   XYLayerConfig,
   XYReferenceLinesLayerConfig,
 } from '@kbn/lens-embeddable-utils';
-import { hostLensFormulas } from './constants';
-
-export type HostsLensFormulas = keyof typeof hostLensFormulas;
-export type HostsLensMetricChartFormulas = Exclude<HostsLensFormulas, 'diskIORead' | 'diskIOWrite'>;
-export type HostsLensLineChartFormulas = Exclude<HostsLensFormulas, 'hostCount'>;
 
 export type XYChartLayerParams =
   | (XYLayerConfig & { type: 'visualization' })

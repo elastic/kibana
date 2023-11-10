@@ -147,22 +147,4 @@ describe('rule_event_log_list_cell_renderer', () => {
 
     window.location = savedLocation;
   });
-
-  it('calls onRuleNameClick if the function is provided', () => {
-    const onRuleNameClick = jest.fn();
-
-    const wrapper1 = shallow(
-      <EventLogListCellRenderer
-        columnId="rule_name"
-        value="Rule"
-        ruleId="1"
-        spaceIds={['space1']}
-        onRuleNameClick={onRuleNameClick}
-      />
-    );
-
-    wrapper1.find(EuiLink).simulate('click');
-
-    expect(onRuleNameClick).toHaveBeenCalledWith('1');
-  });
 });

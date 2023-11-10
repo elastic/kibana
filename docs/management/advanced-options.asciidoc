@@ -288,8 +288,8 @@ in the current data view is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover:enableSql]]`discover:enableSql`::
-experimental[] Allows SQL queries for search.
+[[discover:enableESQL]]`discover:enableESQL`::
+experimental[] Allows ES|QL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
@@ -462,6 +462,8 @@ A custom image to use in the footer of the PDF.
 [float]
 [[kibana-rollups-settings]]
 ==== Rollup
+
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
 
 [horizontal]
 [[rollups-enableindexpatterns]]`rollups:enableIndexPatterns`::

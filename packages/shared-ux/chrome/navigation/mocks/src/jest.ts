@@ -29,18 +29,23 @@ export const getServicesMock = ({
     navigateToUrl,
     onProjectNavigationChange: jest.fn(),
     activeNodes$: of(activeNodes),
+    isSideNavCollapsed: false,
     cloudLinks: {
       billingAndSub: {
         title: 'Mock Billing & Subscriptions',
-        href: 'https://cloud.elastic.co/account/billing',
+        href: 'https://cloud.elastic.co/account/billing/',
       },
       performance: {
         title: 'Mock Performance',
-        href: 'https://cloud.elastic.co/deployments/123456789/performance',
+        href: 'https://cloud.elastic.co/deployments/123456789/performance/',
       },
       userAndRoles: {
         title: 'Mock Users & Roles',
-        href: 'https://cloud.elastic.co/deployments/123456789/security/users',
+        href: 'https://cloud.elastic.co/deployments/123456789/security/users/',
+      },
+      deployment: {
+        title: 'Mock Deployment',
+        href: 'https://cloud.elastic.co/deployments/123456789/',
       },
     },
   };

@@ -44,6 +44,7 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
             hits,
           });
         }),
+        findById: jest.fn(),
         findByIds: jest.fn().mockImplementation(() =>
           Promise.resolve([
             {

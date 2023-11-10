@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { MAX_COMMENT_LENGTH } from '@kbn/security-solution-plugin/common/constants';
 import { getNewRule } from '../../../objects/rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
   addExceptionFlyoutItemName,
@@ -18,8 +21,10 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
   deleteFirstExceptionItemInListDetailPage,
+  addExceptionHugeComment,
+  editExceptionComment,
 } from '../../../tasks/exceptions';
-import { DETECTIONS_RULE_MANAGEMENT_URL, EXCEPTIONS_URL } from '../../../urls/navigation';
+import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
 import {
   CONFIRM_BTN,
@@ -29,29 +34,25 @@ import {
   EXECPTION_ITEM_CARD_HEADER_TITLE,
   EMPTY_EXCEPTIONS_VIEWER,
 } from '../../../screens/exceptions';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { goToExceptionsTab } from '../../../tasks/rule_details';
 import {
   addExceptionListFromSharedExceptionListHeaderMenu,
   createSharedExceptionList,
   findSharedExceptionListItemsByName,
-  waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
+import { visitRuleDetailsPage } from '../../../tasks/rule_details';
+import { deleteEndpointExceptionList, deleteExceptionLists } from '../../../tasks/common';
 
 describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cy.task('esArchiverResetKibana');
-    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
-
-    createRule(getNewRule());
-  });
-
   beforeEach(() => {
     login();
-    visitWithoutDateRange(EXCEPTIONS_URL);
-    waitForExceptionsTableToBeLoaded();
+    deleteExceptionLists();
+    deleteEndpointExceptionList();
+    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
+    createRule(getNewRule()).as('createdRule');
+    visit(EXCEPTIONS_URL);
   });
-  after(() => {
+
+  afterEach(() => {
     cy.task('esArchiverUnload', 'exceptions');
   });
 
@@ -83,11 +84,10 @@ describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, ()
 
       submitNewExceptionItem();
 
-      // Navigate to Rule page
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
-
-      goToExceptionsTab();
+      // Navigate to Rule details page
+      cy.get<Cypress.Response<RuleResponse>>('@createdRule').then((rule) =>
+        visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' })
+      );
 
       // Only one Exception should generated
       cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
@@ -106,7 +106,7 @@ describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, ()
       cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
 
       // Go back to Shared Exception List
-      visitWithoutDateRange(EXCEPTIONS_URL);
+      visit(EXCEPTIONS_URL);
 
       // Click on "Create shared exception list" button on the header
       // Click on "Create exception item"
@@ -143,6 +143,52 @@ describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, ()
       deleteFirstExceptionItemInListDetailPage();
 
       cy.get(EMPTY_EXCEPTIONS_VIEWER).should('exist');
+    });
+
+    it('should not allow to add huge text as a comment', function () {
+      createSharedExceptionList(
+        { name: 'Newly created list', description: 'This is my list.' },
+        true
+      );
+
+      // After creation - directed to list detail page
+      cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
+
+      // Go back to Shared Exception List
+      visit(EXCEPTIONS_URL);
+
+      // Click on "Create shared exception list" button on the header
+      // Click on "Create exception item"
+      addExceptionListFromSharedExceptionListHeaderMenu();
+
+      // Add exception item name
+      addExceptionFlyoutItemName(exceptionName);
+
+      // Add Condition
+      editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
+
+      // select shared list radio option and select the first one
+      linkFirstSharedListOnExceptionFlyout();
+
+      // add exception comment which is super long
+      addExceptionHugeComment(
+        [...new Array(MAX_COMMENT_LENGTH + 1).keys()].map((_) => 'a').join('')
+      );
+
+      // submit button should be disabled due to comment length
+      cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+
+      // update exception comment to a reasonable (length wise) text
+      editExceptionComment('Exceptional comment');
+
+      // submit button should be enabled
+      cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
+
+      // submit
+      submitNewExceptionItem();
+
+      // New exception is added to the new List
+      findSharedExceptionListItemsByName(`${EXCEPTION_LIST_NAME}`, [exceptionName]);
     });
   });
 });

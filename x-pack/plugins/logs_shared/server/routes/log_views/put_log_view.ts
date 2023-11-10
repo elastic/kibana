@@ -8,16 +8,9 @@
 import { logViewsV1 } from '../../../common/http_api';
 import { LOG_VIEW_URL } from '../../../common/http_api/log_views';
 import { createValidationFunction } from '../../../common/runtime_types';
-import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
-import type { LogsSharedPluginStartServicesAccessor } from '../../types';
+import { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
 
-export const initPutLogViewRoute = ({
-  framework,
-  getStartServices,
-}: {
-  framework: KibanaFramework;
-  getStartServices: LogsSharedPluginStartServicesAccessor;
-}) => {
+export const initPutLogViewRoute = ({ framework, getStartServices }: LogsSharedBackendLibs) => {
   framework
     .registerVersionedRoute({
       access: 'internal',

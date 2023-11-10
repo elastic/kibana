@@ -24,6 +24,14 @@ export const registerCreateTagRoute = (router: TagsPluginRouter) => {
     router.handleLegacyErrors(async (ctx, req, res) => {
       try {
         const { tagsClient } = await ctx.tags;
+
+        const existingTag = await tagsClient.findByName(req.body.name, { exact: true });
+        if (existingTag) {
+          return res.conflict({
+            body: `A tag with the name "${req.body.name}" already exists.`,
+          });
+        }
+
         const tag = await tagsClient.create(req.body);
         return res.ok({
           body: {

@@ -13,6 +13,7 @@ import { RuleResultServiceResults, RuleResultService } from '../monitoring/rule_
 const getMetrics = ({
   hasReachedAlertLimit = false,
   triggeredActionsStatus = ActionsCompletion.COMPLETE,
+  hasReachedQueuedActionsLimit = false,
 }): RuleRunMetrics => {
   return {
     triggeredActionsStatus,
@@ -25,6 +26,7 @@ const getMetrics = ({
     numberOfTriggeredActions: 5,
     totalSearchDurationMs: 2,
     hasReachedAlertLimit,
+    hasReachedQueuedActionsLimit,
   };
 };
 
@@ -126,6 +128,31 @@ describe('lastRunFromState', () => {
     });
   });
 
+  it('returns warning if rules actions completition is partial and queued action circuit breaker opens', () => {
+    const result = lastRunFromState(
+      {
+        metrics: getMetrics({
+          triggeredActionsStatus: ActionsCompletion.PARTIAL,
+          hasReachedQueuedActionsLimit: true,
+        }),
+      },
+      getRuleResultService({})
+    );
+
+    expect(result.lastRun.outcome).toEqual('warning');
+    expect(result.lastRun.outcomeMsg).toEqual([
+      'The maximum number of queued actions was reached; excess actions were not triggered.',
+    ]);
+    expect(result.lastRun.warning).toEqual('maxQueuedActions');
+
+    expect(result.lastRun.alertsCount).toEqual({
+      active: 10,
+      new: 12,
+      recovered: 11,
+      ignored: 0,
+    });
+  });
+
   it('overwrites rule execution warning if rule has reached alert limit; outcome messages are merged', () => {
     const ruleExecutionOutcomeMessage = 'Rule execution reported a warning';
     const frameworkOutcomeMessage =
@@ -175,6 +202,38 @@ describe('lastRunFromState', () => {
       ruleExecutionOutcomeMessage,
     ]);
     expect(result.lastRun.warning).toEqual('maxExecutableActions');
+
+    expect(result.lastRun.alertsCount).toEqual({
+      active: 10,
+      new: 12,
+      recovered: 11,
+      ignored: 0,
+    });
+  });
+
+  it('overwrites rule execution warning if rule has reached queued action limit; outcome messages are merged', () => {
+    const ruleExecutionOutcomeMessage = 'Rule execution reported a warning';
+    const frameworkOutcomeMessage =
+      'The maximum number of queued actions was reached; excess actions were not triggered.';
+    const result = lastRunFromState(
+      {
+        metrics: getMetrics({
+          triggeredActionsStatus: ActionsCompletion.PARTIAL,
+          hasReachedQueuedActionsLimit: true,
+        }),
+      },
+      getRuleResultService({
+        warnings: ['MOCK_WARNING'],
+        outcomeMessage: 'Rule execution reported a warning',
+      })
+    );
+
+    expect(result.lastRun.outcome).toEqual('warning');
+    expect(result.lastRun.outcomeMsg).toEqual([
+      frameworkOutcomeMessage,
+      ruleExecutionOutcomeMessage,
+    ]);
+    expect(result.lastRun.warning).toEqual('maxQueuedActions');
 
     expect(result.lastRun.alertsCount).toEqual({
       active: 10,

@@ -44,6 +44,10 @@ export interface DatePickerDependencies {
    * Internationalisation service
    */
   i18n: I18nStart;
+  /**
+   * Optional flag to disable the frozen data tier choice.
+   */
+  showFrozenDataTierChoice?: boolean;
 }
 
 /**

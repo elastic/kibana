@@ -12,8 +12,7 @@ import {
   EuiSelectable,
   EuiSelectableListItem,
 } from '@elastic/eui';
-import { act, waitFor } from '@testing-library/react';
-import { shallow } from 'enzyme';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 
@@ -70,7 +69,7 @@ describe('NavControlPopover', () => {
   it('renders without crashing', () => {
     const spacesManager = spacesManagerMock.create();
 
-    const wrapper = shallow(
+    const { baseElement } = render(
       <NavControlPopover
         spacesManager={spacesManager as unknown as SpacesManager}
         serverBasePath={'/server-base-path'}
@@ -80,7 +79,7 @@ describe('NavControlPopover', () => {
         navigateToUrl={jest.fn()}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(baseElement).toMatchSnapshot();
   });
 
   it('renders a SpaceAvatar with the active space', async () => {

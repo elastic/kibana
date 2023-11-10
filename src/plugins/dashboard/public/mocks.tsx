@@ -66,9 +66,23 @@ export function setupIntersectionObserverMock({
   });
 }
 
-export function buildMockDashboard(overrides?: Partial<DashboardContainerInput>) {
+export function buildMockDashboard({
+  overrides,
+  savedObjectId,
+}: {
+  overrides?: Partial<DashboardContainerInput>;
+  savedObjectId?: string;
+} = {}) {
   const initialInput = getSampleDashboardInput(overrides);
-  const dashboardContainer = new DashboardContainer(initialInput, mockedReduxEmbeddablePackage);
+  const dashboardContainer = new DashboardContainer(
+    initialInput,
+    mockedReduxEmbeddablePackage,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    { lastSavedInput: initialInput, lastSavedId: savedObjectId }
+  );
   return dashboardContainer;
 }
 

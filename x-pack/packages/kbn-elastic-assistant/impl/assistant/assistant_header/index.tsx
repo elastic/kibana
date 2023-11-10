@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConversationSelector } from '../conversations/conversation_selector';

@@ -31,6 +31,9 @@ export interface PackageSpecManifest {
     RegistryElasticsearch,
     'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
   >;
+  agent?: {
+    privileges?: { root?: boolean };
+  };
   asset_tags?: PackageSpecTags[];
 }
 export interface PackageSpecTags {

@@ -34,10 +34,10 @@ export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
 export * from './rrule_type';
-export * from './default_rule_aggregation';
 export * from './rule_tags_aggregation';
 export * from './iso_weekdays';
 export * from './saved_objects/rules/mappings';
+export * from './rule_circuit_breaker_error_message';
 
 export type {
   MaintenanceWindowModificationMetadata,

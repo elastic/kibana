@@ -11,7 +11,7 @@ import {
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
-import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
+import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';
 import { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
@@ -70,20 +70,15 @@ export class TLSRuleExecutor {
     const {
       allIds,
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       monitorLocationMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
-    } = await processMonitors(
-      this.monitors,
-      this.server,
-      this.soClient,
-      this.syntheticsMonitorClient
-    );
+    } = processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
 
     return {
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       allIds,
       monitorLocationMap,
       projectMonitorsCount,
@@ -193,7 +188,7 @@ export class TLSRuleExecutor {
                   config_id: configIds,
                 },
               },
-              SUMMARY_FILTER,
+              FINAL_SUMMARY_FILTER,
             ],
             must_not: {
               bool: {

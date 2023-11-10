@@ -7,13 +7,21 @@
 
 import { createMemoryHistory } from 'history';
 import { IBasePath } from '@kbn/core/public';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import {
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
 import {
   apmRouter as apmRouterBase,
   ApmRouter,
 } from '../../routing/apm_route_config';
-import { infraLocatorsMock } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import {
+  infraLocatorsMock,
+  observabilityLogExplorerLocatorsMock,
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 const apmRouter = {
   ...apmRouterBase,
@@ -21,11 +29,12 @@ const apmRouter = {
     `some-basepath/app/apm${apmRouterBase.link(...args)}`,
 } as ApmRouter;
 
-const infraLocators = infraLocatorsMock;
+const { allDatasetsLocator } = observabilityLogExplorerLocatorsMock;
+const { nodeLogsLocator, logsLocator } = infraLocatorsMock;
 
 const expectInfraLocatorsToBeCalled = () => {
-  expect(infraLocators.nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
-  expect(infraLocators.logsLocator.getRedirectUrl).toBeCalledTimes(1);
+  expect(nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
+  expect(logsLocator.getRedirectUrl).toBeCalledTimes(1);
 };
 
 describe('Transaction action menu', () => {
@@ -60,7 +69,10 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        infraLocators,
+        allDatasetsLocator,
+        logsLocator: logsLocator as unknown as LocatorPublic<LogsLocatorParams>,
+        nodeLogsLocator:
+          nodeLogsLocator as unknown as LocatorPublic<NodeLogsLocatorParams>,
         infraLinksAvailable: false,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
@@ -125,7 +137,10 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        infraLocators,
+        logsLocator: logsLocator as unknown as LocatorPublic<LogsLocatorParams>,
+        nodeLogsLocator:
+          nodeLogsLocator as unknown as LocatorPublic<NodeLogsLocatorParams>,
+        allDatasetsLocator,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
@@ -209,7 +224,10 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        infraLocators,
+        logsLocator: logsLocator as unknown as LocatorPublic<LogsLocatorParams>,
+        nodeLogsLocator:
+          nodeLogsLocator as unknown as LocatorPublic<NodeLogsLocatorParams>,
+        allDatasetsLocator,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
         rangeTo: 'now',

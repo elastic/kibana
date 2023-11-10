@@ -72,6 +72,7 @@ interface CustomUrlEditorProps {
   dataViewListItems: DataViewListItem[];
   showCustomTimeRangeSelector: boolean;
   job: Job | DataFrameAnalyticsConfig;
+  isPartialDFAJob?: boolean;
 }
 
 /*
@@ -85,6 +86,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   dataViewListItems,
   showCustomTimeRangeSelector,
   job,
+  isPartialDFAJob,
 }) => {
   const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
   const [hasTimefield, setHasTimefield] = useState<boolean>(false);
@@ -111,7 +113,12 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       if (dataViewToUse && dataViewToUse.timeFieldName) {
         setHasTimefield(true);
       }
-      const dropDownOptions = await getDropDownOptions(isFirst.current, job, dataViewToUse);
+      const dropDownOptions = await getDropDownOptions(
+        isFirst.current,
+        job,
+        dataViewToUse,
+        isPartialDFAJob
+      );
       setQueryEntityFieldNames(dropDownOptions);
 
       if (isFirst.current) {
@@ -122,7 +129,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     if (job !== undefined) {
       getQueryEntityDropdownOptions();
     }
-  }, [dataViews, job, customUrl?.kibanaSettings?.discoverIndexPatternId]);
+  }, [dataViews, job, customUrl?.kibanaSettings?.discoverIndexPatternId, isPartialDFAJob]);
 
   useEffect(() => {
     if (addIntervalTimerange === false) {

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { request } from './common';
+
 // Create a Fleet server policy
 export function setUISettings(settingsKey: string, settingsValue: any) {
-  cy.request({
+  request({
     method: 'POST',
     url: '/internal/kibana/settings',
     headers: { 'kbn-xsrf': 'xx' },

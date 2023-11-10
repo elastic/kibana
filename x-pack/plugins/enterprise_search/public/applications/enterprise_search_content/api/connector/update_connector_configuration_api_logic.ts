@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorConfiguration } from '../../../../../common/types/connectors';
+import { ConnectorConfiguration } from '@kbn/search-connectors';
+
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 

@@ -6,42 +6,42 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type AssetDetailsProps, FlyoutTabIds, type Tab } from '../../../types';
+import { type AssetDetailsProps, ContentTabIds, type Tab } from '../../../types';
 
 const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices'];
 const tabs: Tab[] = [
   {
-    id: FlyoutTabIds.OVERVIEW,
+    id: ContentTabIds.OVERVIEW,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
       defaultMessage: 'Overview',
     }),
   },
   {
-    id: FlyoutTabIds.LOGS,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
-      defaultMessage: 'Logs',
-    }),
-  },
-  {
-    id: FlyoutTabIds.METADATA,
+    id: ContentTabIds.METADATA,
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
       defaultMessage: 'Metadata',
     }),
   },
   {
-    id: FlyoutTabIds.PROCESSES,
+    id: ContentTabIds.PROCESSES,
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
       defaultMessage: 'Processes',
     }),
   },
   {
-    id: FlyoutTabIds.ANOMALIES,
+    id: ContentTabIds.LOGS,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
+      defaultMessage: 'Logs',
+    }),
+  },
+  {
+    id: ContentTabIds.ANOMALIES,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.anomalies', {
       defaultMessage: 'Anomalies',
     }),
   },
   {
-    id: FlyoutTabIds.LINK_TO_APM,
+    id: ContentTabIds.LINK_TO_APM,
     name: i18n.translate('xpack.infra.infra.nodeDetails.apmTabLabel', {
       defaultMessage: 'APM',
     }),
@@ -49,10 +49,8 @@ const tabs: Tab[] = [
 ];
 
 export const assetDetailsProps: AssetDetailsProps = {
-  asset: {
-    name: 'host1',
-    id: 'host1',
-  },
+  assetName: 'host1',
+  assetId: 'host1',
   overrides: {
     metadata: {
       showActionsColumn: true,

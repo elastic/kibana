@@ -20,6 +20,155 @@
     "classes": [
       {
         "parentPluginId": "@kbn/mapbox-gl",
+        "id": "def-common.AJAXError",
+        "type": "Class",
+        "tags": [],
+        "label": "AJAXError",
+        "description": [],
+        "signature": [
+          "maplibregl.AJAXError extends Error"
+        ],
+        "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.status",
+            "type": "number",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nThe response's HTTP status code."
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.statusText",
+            "type": "string",
+            "tags": [],
+            "label": "statusText",
+            "description": [
+              "\nThe response's HTTP status text."
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "\nThe request's URL."
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "\nThe response's body."
+            ],
+            "signature": [
+              "Blob"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.AJAXError.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.AJAXError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "statusText",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.AJAXError.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.AJAXError.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "body",
+                "description": [],
+                "signature": [
+                  "Blob"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mapbox-gl",
         "id": "def-common.GeoJSONSource",
         "type": "Class",
         "tags": [],
@@ -9443,7 +9592,7 @@
         "label": "MapEvent",
         "description": [],
         "signature": [
-          "\"error\" | \"remove\" | \"data\" | \"rotate\" | \"render\" | \"resize\" | \"zoom\" | \"move\" | \"idle\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"load\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"terrain\" | \"dataabort\" | \"sourcedataabort\""
+          "\"error\" | \"remove\" | \"data\" | \"render\" | \"rotate\" | \"resize\" | \"zoom\" | \"load\" | \"move\" | \"idle\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"terrain\" | \"dataabort\" | \"sourcedataabort\""
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,

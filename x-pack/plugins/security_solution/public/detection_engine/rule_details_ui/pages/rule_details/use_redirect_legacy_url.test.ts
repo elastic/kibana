@@ -10,11 +10,12 @@ import { renderHook, cleanup } from '@testing-library/react-hooks';
 import type { UseLegacyUrlRedirectParams } from './use_redirect_legacy_url';
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import type { Rule } from '../../../rule_management/logic';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
 
-const mockSpacesApi = {
+const mockSpacesApi: SpacesApi = {
   getActiveSpace$: jest.fn(),
   getActiveSpace: jest.fn(),
   ui: {
@@ -30,6 +31,7 @@ const mockSpacesApi = {
     redirectLegacyUrl: mockRedirectLegacyUrl,
     useSpaces: jest.fn(),
   },
+  hasOnlyDefaultSpace: false,
 };
 
 describe('useLegacyUrlRedirect', () => {
@@ -101,8 +103,9 @@ const mockRule: Rule = {
   max_signals: 100,
   tags: [],
   threat: [],
-  throttle: null,
   version: 1,
+  revision: 1,
+  language: 'kuery',
   exceptions_list: [],
   created_at: '2020-04-09T09:43:51.778Z',
   created_by: 'elastic',

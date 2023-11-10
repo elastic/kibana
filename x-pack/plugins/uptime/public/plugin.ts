@@ -226,7 +226,7 @@ export class UptimePlugin
 
 function registerUptimeRoutesWithNavigation(coreStart: CoreStart, plugins: ClientPluginsStart) {
   async function getUptimeSections() {
-    if (coreStart.application.capabilities.uptime.show) {
+    if (coreStart.application.capabilities.uptime?.show) {
       return [
         {
           label: 'Uptime',

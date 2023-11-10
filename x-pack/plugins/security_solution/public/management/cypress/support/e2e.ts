@@ -23,11 +23,13 @@
 // ***********************************************************
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+// @ts-ignore
+import registerCypressGrep from '@cypress/grep';
 
-// force ESM in this module
-export {};
+import { login, ROLE } from '../tasks/login';
+import { loadPage } from '../tasks/common';
 
-import 'cypress-react-selector';
+registerCypressGrep();
 
 Cypress.Commands.addQuery<'getByTestSubj'>(
   'getByTestSubj',
@@ -98,3 +100,10 @@ Cypress.Commands.add(
 );
 
 Cypress.on('uncaught:exception', () => false);
+
+// Login as a SOC_MANAGER to properly initialize Security Solution App
+before(() => {
+  login(ROLE.soc_manager);
+  loadPage('/app/security/alerts');
+  cy.getByTestSubj('manage-alert-detection-rules').should('exist');
+});

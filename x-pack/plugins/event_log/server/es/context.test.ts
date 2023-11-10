@@ -36,7 +36,6 @@ describe('createEsContext', () => {
       logger,
       shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test0',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
@@ -51,16 +50,15 @@ describe('createEsContext', () => {
       logger,
       shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test-index',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
     const esNames = context.esNames;
     expect(esNames).toStrictEqual({
       base: 'test-index',
-      dataStream: 'test-index-event-log-1.2.3',
+      dataStream: 'test-index-event-log-ds',
       indexPattern: 'test-index-event-log-*',
-      indexTemplate: 'test-index-event-log-1.2.3-template',
+      indexTemplate: 'test-index-event-log-template',
     });
   });
 
@@ -69,7 +67,6 @@ describe('createEsContext', () => {
       logger,
       shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test1',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
@@ -91,7 +88,6 @@ describe('createEsContext', () => {
       logger,
       shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test2',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     elasticsearchClient.indices.existsTemplate.mockResponse(true);
@@ -123,7 +119,6 @@ describe('createEsContext', () => {
       logger,
       shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test2',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     expect(mockCreateReadySignal).toBeCalledTimes(1);
@@ -141,7 +136,6 @@ describe('createEsContext', () => {
       logger,
       shouldSetExistingAssetsToHidden: true,
       indexNameRoot: 'test2',
-      kibanaVersion: '1.2.3',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     context.initialize();

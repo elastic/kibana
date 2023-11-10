@@ -15,8 +15,6 @@ import {
   IRouter,
   KibanaRequest,
   DEFAULT_APP_CATEGORIES,
-  IClusterClient,
-  CoreStart,
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
@@ -51,7 +49,6 @@ import {
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
-import { ConnectorsService } from './api/connectors_service';
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
@@ -90,40 +87,37 @@ interface PluginsSetup {
   customIntegrations?: CustomIntegrationsPluginSetup;
   features: FeaturesPluginSetup;
   globalSearch: GlobalSearchPluginSetup;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
-interface PluginsStart {
+export interface PluginsStart {
   data: DataPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
 
-export interface EnterpriseSearchPluginStart {
-  connectorsService: ConnectorsService;
-}
-
 export interface RouteDependencies {
   config: ConfigType;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
+
   getSavedObjectsService?(): SavedObjectsServiceStart;
+
   log: Logger;
   ml?: MlPluginSetup;
   router: IRouter;
 }
 
-export class EnterpriseSearchPlugin implements Plugin<void, EnterpriseSearchPluginStart> {
+export class EnterpriseSearchPlugin implements Plugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
-  private clusterClient?: IClusterClient;
+
   /**
    * Exposed services
    */
-  private connectorsService?: ConnectorsService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigType>();
@@ -186,42 +180,47 @@ export class EnterpriseSearchPlugin implements Plugin<void, EnterpriseSearchPlug
     /**
      * Register user access to the Enterprise Search plugins
      */
-    capabilities.registerSwitcher(async (request: KibanaRequest) => {
-      const [, { spaces }] = await getStartServices();
+    capabilities.registerSwitcher(
+      async (request: KibanaRequest) => {
+        const [, { spaces }] = await getStartServices();
 
-      const dependencies = { config, security, spaces, request, log, ml };
+        const dependencies = { config, security, spaces, request, log, ml };
 
-      const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-      const showEnterpriseSearch =
-        hasAppSearchAccess || hasWorkplaceSearchAccess || !config.canDeployEntSearch;
+        const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
+        const showEnterpriseSearch =
+          hasAppSearchAccess || hasWorkplaceSearchAccess || !config.canDeployEntSearch;
 
-      return {
-        navLinks: {
-          enterpriseSearch: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
-          enterpriseSearchAnalytics: showEnterpriseSearch,
-          enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchEsre: showEnterpriseSearch,
-          enterpriseSearchVectorSearch: showEnterpriseSearch,
-          enterpriseSearchElasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-          searchExperiences: showEnterpriseSearch,
-        },
-        catalogue: {
-          enterpriseSearch: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
-          enterpriseSearchAnalytics: showEnterpriseSearch,
-          enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchEsre: showEnterpriseSearch,
-          enterpriseSearchVectorSearch: showEnterpriseSearch,
-          enterpriseSearchElasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-          searchExperiences: showEnterpriseSearch,
-        },
-      };
-    });
+        return {
+          navLinks: {
+            enterpriseSearch: showEnterpriseSearch,
+            enterpriseSearchContent: showEnterpriseSearch,
+            enterpriseSearchAnalytics: showEnterpriseSearch,
+            enterpriseSearchApplications: showEnterpriseSearch,
+            enterpriseSearchAISearch: showEnterpriseSearch,
+            enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchElasticsearch: showEnterpriseSearch,
+            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
+            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+            searchExperiences: showEnterpriseSearch,
+          },
+          catalogue: {
+            enterpriseSearch: showEnterpriseSearch,
+            enterpriseSearchContent: showEnterpriseSearch,
+            enterpriseSearchAnalytics: showEnterpriseSearch,
+            enterpriseSearchApplications: showEnterpriseSearch,
+            enterpriseSearchAISearch: showEnterpriseSearch,
+            enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchElasticsearch: showEnterpriseSearch,
+            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
+            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+            searchExperiences: showEnterpriseSearch,
+          },
+        };
+      },
+      {
+        capabilityPath: ['navLinks.*', 'catalogue.*'],
+      }
+    );
 
     /**
      * Register routes
@@ -259,7 +258,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, EnterpriseSearchPlug
     let savedObjectsStarted: SavedObjectsServiceStart;
 
     getStartServices().then(([coreStart]) => {
-      this.clusterClient = coreStart.elasticsearch.client;
       savedObjectsStarted = coreStart.savedObjects;
 
       if (usageCollection) {
@@ -304,13 +302,13 @@ export class EnterpriseSearchPlugin implements Plugin<void, EnterpriseSearchPlug
      * Register a config for the search guide
      */
     if (config.canDeployEntSearch) {
-      guidedOnboarding.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
     }
     if (config.hasWebCrawler) {
-      guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
     if (config.hasConnectors) {
-      guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }
 
     /**
@@ -322,26 +320,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, EnterpriseSearchPlug
     }
   }
 
-  public start(core: CoreStart) {
-    /**
-     * Create exposed plugin services
-     */
-    if (!this.clusterClient) {
-      this.clusterClient = core.elasticsearch.client;
-    }
-    if (!this.connectorsService) {
-      this.connectorsService = new ConnectorsService({
-        clusterClient: this.clusterClient,
-        http: core.http,
-      });
-    }
-    if (!this.connectorsService) {
-      this.logger.warn('Enterprise Search connectors service has not been initialized');
-    }
-    return Object.freeze<EnterpriseSearchPluginStart>({
-      connectorsService: this.connectorsService,
-    });
-  }
+  public start() {}
 
   public stop() {}
 }

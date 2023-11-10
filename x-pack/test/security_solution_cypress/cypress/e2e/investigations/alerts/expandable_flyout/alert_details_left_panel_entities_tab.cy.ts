@@ -18,8 +18,8 @@ import { openEntitiesTab } from '../../../../tasks/expandable_flyout/alert_detai
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { cleanKibana } from '../../../../tasks/common';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -27,10 +27,9 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout left panel entities',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
       login();
       createRule(getNewRule());
       visit(ALERTS_URL);

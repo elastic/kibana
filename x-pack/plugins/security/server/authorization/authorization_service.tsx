@@ -9,6 +9,7 @@ import querystring from 'querystring';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import type { Observable, Subscription } from 'rxjs';
+import { switchMap } from 'rxjs';
 
 import type {
   CapabilitiesSetup,
@@ -63,8 +64,11 @@ interface AuthorizationServiceSetupParams {
   loggers: LoggerFactory;
   features: FeaturesPluginSetup;
   kibanaIndexName: string;
+
   getSpacesService(): SpacesService | undefined;
+
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
+
   customBranding: CustomBrandingSetup;
 }
 
@@ -173,6 +177,9 @@ export class AuthorizationService {
         }
 
         return await disableUICapabilities.usingPrivileges(uiCapabilities);
+      },
+      {
+        capabilityPath: '*',
       }
     );
 
@@ -209,18 +216,22 @@ export class AuthorizationService {
     validateFeaturePrivileges(allFeatures);
     validateReservedPrivileges(allFeatures);
 
-    this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
-      try {
-        await registerPrivilegesWithCluster(
-          this.logger,
-          this.privileges,
-          this.applicationName,
-          clusterClient
-        );
-      } catch (err) {
-        scheduleRetry();
-      }
-    });
+    this.statusSubscription = online$
+      .pipe(
+        switchMap(async ({ scheduleRetry }) => {
+          try {
+            await registerPrivilegesWithCluster(
+              this.logger,
+              this.privileges,
+              this.applicationName,
+              clusterClient
+            );
+          } catch (err) {
+            scheduleRetry();
+          }
+        })
+      )
+      .subscribe();
   }
 
   stop() {

@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactRouterDom from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { fireEvent, screen } from '@testing-library/dom';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import { EuiButtonIcon } from '@elastic/eui';

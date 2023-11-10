@@ -7,8 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
-import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import { filter, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
@@ -44,6 +43,7 @@ export const createActionHandler = async (
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
+
   const { soClient, metadata, alertData, error } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
 
@@ -85,7 +85,7 @@ export const createActionHandler = async (
     pack_id: params.pack_id,
     pack_name: packSO?.attributes?.name,
     pack_prebuilt: params.pack_id
-      ? !!some(packSO?.references, ['type', 'osquery-pack-asset'])
+      ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
@@ -131,12 +131,7 @@ export const createActionHandler = async (
     : [];
 
   if (fleetActions.length) {
-    await esClientInternal.bulk({
-      refresh: 'wait_for',
-      body: flatten(
-        fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
-      ),
-    });
+    await osqueryContext.service.getFleetActionsClient()?.bulkCreate(fleetActions);
   }
 
   const actionsComponentTemplateExists = await esClientInternal.indices.exists({
@@ -146,7 +141,7 @@ export const createActionHandler = async (
   if (actionsComponentTemplateExists) {
     await esClientInternal.bulk({
       refresh: 'wait_for',
-      body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
+      operations: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
     });
   }
 

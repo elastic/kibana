@@ -85,8 +85,8 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
               <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
                 <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
                   <FormattedMessage
-                    id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
-                    defaultMessage="Benchmark Integrations"
+                    id="xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel"
+                    defaultMessage="Benchmark Rules"
                   />
                 </EuiButtonEmpty>
               </Link>

@@ -47,11 +47,13 @@ beforeEach(async () => {
     .fn()
     .mockReturnValue(mockEmbeddableFactory);
   container = buildMockDashboard({
-    panels: {
-      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Kibanana', id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+    overrides: {
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Kibanana', id: '123' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
 

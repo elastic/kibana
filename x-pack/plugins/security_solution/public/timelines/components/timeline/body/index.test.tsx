@@ -131,19 +131,6 @@ jest.mock('../../../../common/components/links', () => {
   };
 });
 
-jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_open_alert_details',
-  () => {
-    return {
-      useOpenAlertDetailsAction: () => {
-        return {
-          alertDetailsActionItems: [],
-        };
-      },
-    };
-  }
-);
-
 // Prevent Resolver from rendering
 jest.mock('../../graph_overlay');
 

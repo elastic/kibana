@@ -18,6 +18,7 @@ import type {
 import type {
   IndexPatternArray,
   InvestigationGuide,
+  InvestigationFields,
   RuleDescription,
   RuleFalsePositiveArray,
   RuleQuery,
@@ -30,6 +31,7 @@ interface RuleFields {
   defaultIndexPatterns: IndexPatternArray;
   falsePositives: RuleFalsePositiveArray;
   investigationGuide: InvestigationGuide;
+  investigationFields: InvestigationFields;
   referenceUrls: RuleReferenceArray;
   riskScore: RiskScore;
   ruleDescription: RuleDescription;
@@ -58,6 +60,9 @@ export const ruleFields: RuleFields = {
   ],
   falsePositives: ['False1', 'False2'],
   investigationGuide: '# test markdown',
+  investigationFields: {
+    field_names: ['agent.hostname'],
+  },
   referenceUrls: ['http://example.com/', 'https://example.com/'],
   riskScore: 17,
   ruleDescription: 'The rule description',

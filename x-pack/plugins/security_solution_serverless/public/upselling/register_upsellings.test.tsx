@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { UpsellingService } from '@kbn/security-solution-plugin/public';
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-plugin/common';
 import {
   registerUpsellings,
   upsellingMessages,
@@ -15,6 +13,9 @@ import {
 } from './register_upsellings';
 import { ProductLine, ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { mockServices } from '../common/services/__mocks__/services.mock';
 
 const mockGetProductAppFeatures = jest.fn();
 jest.mock('../../common/pli/pli_features', () => ({
@@ -40,7 +41,7 @@ describe('registerUpsellings', () => {
       setMessages,
     } as unknown as UpsellingService;
 
-    registerUpsellings(upselling, allProductTypes);
+    registerUpsellings(upselling, allProductTypes, mockServices);
 
     expect(setPages).toHaveBeenCalledTimes(1);
     expect(setPages).toHaveBeenCalledWith({});
@@ -65,7 +66,7 @@ describe('registerUpsellings', () => {
       setMessages,
     } as unknown as UpsellingService;
 
-    registerUpsellings(upselling, allProductTypes);
+    registerUpsellings(upselling, allProductTypes, mockServices);
 
     const expectedPagesObject = Object.fromEntries(
       upsellingPages.map(({ pageName }) => [pageName, expect.anything()])

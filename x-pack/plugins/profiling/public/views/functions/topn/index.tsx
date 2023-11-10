@@ -6,7 +6,7 @@
  */
 import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { TopNFunctionSortField } from '../../../../common/functions';
+import { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';
@@ -29,14 +29,14 @@ export function TopNFunctionsView() {
     ({ http }) => {
       return fetchTopNFunctions({
         http,
-        timeFrom: timeRange.inSeconds.start,
-        timeTo: timeRange.inSeconds.end,
+        timeFrom: new Date(timeRange.start).getTime(),
+        timeTo: new Date(timeRange.end).getTime(),
         startIndex: 0,
         endIndex: 100000,
         kuery,
       });
     },
-    [timeRange.inSeconds.start, timeRange.inSeconds.end, kuery, fetchTopNFunctions]
+    [fetchTopNFunctions, timeRange.start, timeRange.end, kuery]
   );
 
   const profilingRouter = useProfilingRouter();

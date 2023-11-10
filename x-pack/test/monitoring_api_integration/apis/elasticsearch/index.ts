@@ -6,9 +6,12 @@
  */
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { installPackage } from '../../packages';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Elasticsearch', () => {
+    before(() => installPackage(getService('supertest'), 'elasticsearch'));
+
     loadTestFile(require.resolve('./ccr'));
     loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./ml_jobs'));

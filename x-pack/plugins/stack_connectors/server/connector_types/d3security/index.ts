@@ -26,7 +26,7 @@ export function getConnectorType(): D3SecurityConnectorType {
     id: D3_SECURITY_CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
     name: D3_SECURITY_TITLE,
-    Service: D3SecurityConnector,
+    getService: (params) => new D3SecurityConnector(params),
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     schema: {
       config: D3SecurityConfigSchema,

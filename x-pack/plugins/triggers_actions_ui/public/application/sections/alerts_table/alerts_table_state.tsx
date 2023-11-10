@@ -12,7 +12,6 @@ import {
   EuiProgress,
   EuiDataGridSorting,
   EuiEmptyPrompt,
-  EuiFlyoutSize,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
@@ -45,7 +44,6 @@ import {
   TableUpdateHandlerArgs,
 } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
-import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
@@ -53,6 +51,7 @@ import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
+import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -60,14 +59,12 @@ const DefaultPagination = {
 };
 
 export type AlertsTableStateProps = {
-  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
-  flyoutSize?: EuiFlyoutSize;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
-  showExpandToDetails: boolean;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
   runtimeMappings?: MappingRuntimeFields;
@@ -148,10 +145,8 @@ const AlertsTableStateWithQueryProvider = ({
   configurationId,
   id,
   featureIds,
-  flyoutSize,
   query,
   pageSize,
-  showExpandToDetails,
   leadingControlColumns,
   rowHeightsOptions,
   renderCellValue,
@@ -262,6 +257,14 @@ const AlertsTableStateWithQueryProvider = ({
     sort,
     skip: false,
   });
+
+  useEffect(() => {
+    alertsTableConfigurationRegistry.update(configurationId, {
+      ...alertsTableConfiguration,
+      actions: { toggleColumn: onToggleColumn },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onToggleColumn]);
 
   useEffect(() => {
     if (onUpdate) {
@@ -378,12 +381,10 @@ const AlertsTableStateWithQueryProvider = ({
       bulkActions: [],
       deletedEventIds: [],
       disabledCellActions: [],
-      flyoutSize,
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
       id,
       leadingControlColumns: leadingControlColumns ?? [],
-      showExpandToDetails,
       showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
@@ -403,17 +404,16 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      featureIds,
     }),
     [
       alertsTableConfiguration,
       memoizedCases,
       memoizedMaintenanceWindows,
       columns,
-      flyoutSize,
       pagination.pageSize,
       id,
       leadingControlColumns,
-      showExpandToDetails,
       showAlertStatusWithFlapping,
       useFetchAlertsData,
       visibleColumns,
@@ -431,6 +431,7 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      featureIds,
     ]
   );
 

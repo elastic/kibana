@@ -56,10 +56,13 @@ describe('useFetchSecurityTags', () => {
     mockGet.mockResolvedValue([]);
     await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockGet).toHaveBeenCalledWith(INTERNAL_TAGS_URL, {
-      query: { name: SECURITY_TAG_NAME },
-      signal: mockAbortSignal,
-    });
+    expect(mockGet).toHaveBeenCalledWith(
+      INTERNAL_TAGS_URL,
+      expect.objectContaining({
+        query: { name: SECURITY_TAG_NAME },
+        signal: mockAbortSignal,
+      })
+    );
   });
 
   test('should create a Security Solution tag if no Security Solution tags were found', async () => {

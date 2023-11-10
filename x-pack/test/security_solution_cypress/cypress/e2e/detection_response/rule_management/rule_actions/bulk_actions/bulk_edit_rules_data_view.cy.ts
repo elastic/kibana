@@ -13,8 +13,7 @@ import {
 import { DATA_VIEW_DETAILS, INDEX_PATTERNS_DETAILS } from '../../../../../screens/rule_details';
 
 import {
-  goToRuleDetails,
-  goToTheRuleDetailsOf,
+  goToRuleDetailsOf,
   expectManagementTableRules,
   selectAllRules,
   getRulesManagementTableRows,
@@ -36,10 +35,11 @@ import {
   getDetails,
   assertDetailsNotExist,
 } from '../../../../../tasks/rule_details';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteDataView, postDataView } from '../../../../../tasks/common';
 
 import {
   getEqlRule,
@@ -55,85 +55,76 @@ const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
 describe(
   'Bulk editing index patterns of rules with a data view only',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
-    before(() => {
-      cleanKibana();
+    const TESTED_CUSTOM_QUERY_RULE_DATA = getNewRule({
+      index: undefined,
+      data_view_id: DATA_VIEW_ID,
+      rule_id: '1',
+      name: 'New Rule Test 1',
+      enabled: false,
+    });
+    const TESTED_CUSTOM_QUERY_RULE_DATA_2 = getNewRule({
+      index: undefined,
+      data_view_id: DATA_VIEW_ID,
+      saved_id: 'mocked',
+      rule_id: '6',
+      name: 'New Rule Test 2',
+      enabled: false,
+    });
+    const TESTED_EQL_RULE_DATA = getEqlRule({
+      index: undefined,
+      data_view_id: DATA_VIEW_ID,
+      rule_id: '2',
+      name: 'New EQL Rule',
+      enabled: false,
+    });
+    const TESTED_THREAT_INDICATOR_RULE_DATA = getNewThreatIndicatorRule({
+      index: undefined,
+      data_view_id: DATA_VIEW_ID,
+      rule_id: '3',
+      name: 'Threat Indicator Rule Test',
+      enabled: false,
+    });
+    const TESTED_THRESHOLD_RULE_DATA = getNewThresholdRule({
+      index: undefined,
+      data_view_id: DATA_VIEW_ID,
+      rule_id: '4',
+      name: 'Threshold Rule',
+      enabled: false,
+    });
+    const TESTED_TERMS_RULE_DATA = getNewTermsRule({
+      index: undefined,
+      data_view_id: DATA_VIEW_ID,
+      rule_id: '5',
+      name: 'New Terms Rule',
+      enabled: false,
     });
 
     beforeEach(() => {
       deleteAlertsAndRules();
-      cy.task('esArchiverResetKibana');
-      login();
+      deleteDataView(DATA_VIEW_ID);
 
+      login();
       postDataView(DATA_VIEW_ID);
 
-      createRule(
-        getNewRule({
-          index: undefined,
-          data_view_id: DATA_VIEW_ID,
-          rule_id: '1',
-          name: 'New Rule Test 1',
-          enabled: false,
-        })
-      );
-      createRule(
-        getEqlRule({
-          index: undefined,
-          data_view_id: DATA_VIEW_ID,
-          rule_id: '2',
-          name: 'New EQL Rule',
-          enabled: false,
-        })
-      );
-      createRule(
-        getNewThreatIndicatorRule({
-          index: undefined,
-          data_view_id: DATA_VIEW_ID,
-          rule_id: '3',
-          name: 'Threat Indicator Rule Test',
-          enabled: false,
-        })
-      );
-      createRule(
-        getNewThresholdRule({
-          index: undefined,
-          data_view_id: DATA_VIEW_ID,
-          rule_id: '4',
-          name: 'Threshold Rule',
-          enabled: false,
-        })
-      );
-      createRule(
-        getNewTermsRule({
-          index: undefined,
-          data_view_id: DATA_VIEW_ID,
-          rule_id: '5',
-          name: 'New Terms Rule',
-          enabled: false,
-        })
-      );
-      createRule(
-        getNewRule({
-          index: undefined,
-          data_view_id: DATA_VIEW_ID,
-          saved_id: 'mocked',
-          rule_id: '6',
-          name: 'New Rule Test 2',
-          enabled: false,
-        })
-      );
+      createRule(TESTED_CUSTOM_QUERY_RULE_DATA);
+      createRule(TESTED_EQL_RULE_DATA);
+      createRule(TESTED_THREAT_INDICATOR_RULE_DATA);
+      createRule(TESTED_THRESHOLD_RULE_DATA);
+      createRule(TESTED_TERMS_RULE_DATA);
+      createRule(TESTED_CUSTOM_QUERY_RULE_DATA_2);
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
 
       expectManagementTableRules([
-        'New Rule Test 1',
-        'New EQL Rule',
-        'Threat Indicator Rule Test',
-        'Threshold Rule',
-        'New Terms Rule',
-        'New Rule Test 2',
+        TESTED_CUSTOM_QUERY_RULE_DATA.name,
+        TESTED_EQL_RULE_DATA.name,
+        TESTED_THREAT_INDICATOR_RULE_DATA.name,
+        TESTED_THRESHOLD_RULE_DATA.name,
+        TESTED_TERMS_RULE_DATA.name,
+        TESTED_CUSTOM_QUERY_RULE_DATA_2.name,
       ]);
     });
 
@@ -151,7 +142,7 @@ describe(
         });
 
         // check if rule still has data view and index patterns field does not exist
-        goToRuleDetails();
+        goToRuleDetailsOf(TESTED_CUSTOM_QUERY_RULE_DATA.name);
         getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
         assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
       });
@@ -174,7 +165,7 @@ describe(
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
         // check if rule has been updated with index patterns and data view does not exist
-        goToRuleDetails();
+        goToRuleDetailsOf(TESTED_CUSTOM_QUERY_RULE_DATA.name);
         hasIndexPatterns(expectedIndexPatterns.join(''));
         assertDetailsNotExist(DATA_VIEW_DETAILS);
       });
@@ -195,7 +186,7 @@ describe(
         });
 
         // check if rule still has data view and index patterns field does not exist
-        goToRuleDetails();
+        goToRuleDetailsOf(TESTED_CUSTOM_QUERY_RULE_DATA.name);
         getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
         assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
       });
@@ -215,7 +206,7 @@ describe(
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
         // check if rule has been overwritten with index patterns and data view does not exist
-        goToRuleDetails();
+        goToRuleDetailsOf(TESTED_CUSTOM_QUERY_RULE_DATA.name);
         hasIndexPatterns(expectedIndexPatterns.join(''));
         assertDetailsNotExist(DATA_VIEW_DETAILS);
       });
@@ -239,7 +230,7 @@ describe(
         });
 
         // check if rule still has data view and index patterns field does not exist
-        goToRuleDetails();
+        goToRuleDetailsOf(TESTED_CUSTOM_QUERY_RULE_DATA.name);
         getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
       });
     });
@@ -248,28 +239,37 @@ describe(
 
 describe(
   'Bulk editing index patterns of rules with index patterns and rules with a data view',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
-    before(() => {
-      cleanKibana();
+    const TESTED_CUSTOM_QUERY_RULE_DATA_WITH_DATAVIEW = getNewRule({
+      name: 'with dataview',
+      index: [],
+      data_view_id: DATA_VIEW_ID,
+      rule_id: '1',
+    });
+    const TESTED_CUSTOM_QUERY_RULE_DATA_WITHOUT_DATAVIEW = getNewRule({
+      name: 'no data view',
+      index: ['test-index-1-*'],
+      rule_id: '2',
     });
 
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      cy.task('esArchiverResetKibana');
 
       postDataView(DATA_VIEW_ID);
 
-      createRule(
-        getNewRule({ name: 'with dataview', index: [], data_view_id: DATA_VIEW_ID, rule_id: '1' })
-      );
-      createRule(getNewRule({ name: 'no data view', index: ['test-index-1-*'], rule_id: '2' }));
+      createRule(TESTED_CUSTOM_QUERY_RULE_DATA_WITH_DATAVIEW);
+      createRule(TESTED_CUSTOM_QUERY_RULE_DATA_WITHOUT_DATAVIEW);
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
 
       expectManagementTableRules(['with dataview', 'no data view']);
+    });
+
+    afterEach(() => {
+      deleteDataView(DATA_VIEW_ID);
     });
 
     it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {
@@ -286,7 +286,7 @@ describe(
       });
 
       // check if rule still has data view and index patterns field does not exist
-      goToTheRuleDetailsOf('with dataview');
+      goToRuleDetailsOf(TESTED_CUSTOM_QUERY_RULE_DATA_WITH_DATAVIEW.name);
       getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
       assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
     });
@@ -304,7 +304,7 @@ describe(
       });
 
       // check if rule still has data view and index patterns field does not exist
-      goToRuleDetails();
+      goToRuleDetailsOf(TESTED_CUSTOM_QUERY_RULE_DATA_WITH_DATAVIEW.name);
       assertDetailsNotExist(DATA_VIEW_DETAILS);
     });
   }

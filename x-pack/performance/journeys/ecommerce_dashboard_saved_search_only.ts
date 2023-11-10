@@ -20,5 +20,5 @@ export const journey = new Journey({
 
   .step('Go to Ecommerce Dashboard with Saved Search only', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Saved-Search-Dashboard'));
-    await kibanaPage.waitForVisualizations(1);
+    await kibanaPage.waitForVisualizations({ count: 1 });
   });

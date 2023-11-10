@@ -5,61 +5,55 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import datemath from '@kbn/datemath';
-import {
-  dateRt,
-  inRangeFromStringRt,
-  datemathStringRt,
-  createRouteValidationFunction,
-  createLiteralValueFromUndefinedRT,
-} from '@kbn/io-ts-utils';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import {
+  GetServiceAssetsQueryOptions,
+  getServiceAssetsQueryOptionsRT,
+} from '../../../common/types_api';
 import { debug } from '../../../common/debug_log';
 import { SetupRouteOptions } from '../types';
-import { ASSET_MANAGER_API_BASE } from '../../constants';
-import { getEsClientFromContext } from '../utils';
-
-const sizeRT = rt.union([inRangeFromStringRt(1, 100), createLiteralValueFromUndefinedRT(10)]);
-const assetDateRT = rt.union([dateRt, datemathStringRt]);
-const getServiceAssetsQueryOptionsRT = rt.exact(
-  rt.partial({
-    from: assetDateRT,
-    to: assetDateRT,
-    size: sizeRT,
-    parent: rt.string,
-  })
-);
-
-export type GetServiceAssetsQueryOptions = rt.TypeOf<typeof getServiceAssetsQueryOptionsRT>;
+import * as routePaths from '../../../common/constants_routes';
+import { getClientsFromContext } from '../utils';
+import { AssetsValidationError } from '../../lib/validators/validation_error';
 
 export function servicesRoutes<T extends RequestHandlerContext>({
   router,
-  assetAccessor,
+  assetClient,
 }: SetupRouteOptions<T>) {
   // GET /assets/services
   router.get<unknown, GetServiceAssetsQueryOptions, unknown>(
     {
-      path: `${ASSET_MANAGER_API_BASE}/assets/services`,
+      path: routePaths.GET_SERVICES,
       validate: {
         query: createRouteValidationFunction(getServiceAssetsQueryOptionsRT),
       },
     },
     async (context, req, res) => {
       const { from = 'now-24h', to = 'now', parent } = req.query || {};
-      const esClient = await getEsClientFromContext(context);
-
+      const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
       try {
-        const response = await assetAccessor.getServices({
-          from: datemath.parse(from)!.toISOString(),
-          to: datemath.parse(to)!.toISOString(),
+        const response = await assetClient.getServices({
+          from,
+          to,
           parent,
-          esClient,
+          elasticsearchClient,
+          savedObjectsClient,
         });
 
         return res.ok({ body: response });
       } catch (error: unknown) {
         debug('Error while looking up SERVICE asset records', error);
+
+        if (error instanceof AssetsValidationError) {
+          return res.customError({
+            statusCode: error.statusCode,
+            body: {
+              message: `Error while looking up service asset records - ${error.message}`,
+            },
+          });
+        }
+
         return res.customError({
           statusCode: 500,
           body: { message: 'Error while looking up service asset records - ' + `${error}` },

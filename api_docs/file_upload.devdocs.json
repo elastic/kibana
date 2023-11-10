@@ -1124,48 +1124,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fileUpload",
-        "id": "def-common.Mappings",
-        "type": "Interface",
-        "tags": [],
-        "label": "Mappings",
-        "description": [],
-        "path": "x-pack/plugins/file_upload/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.Mappings._meta",
-            "type": "Object",
-            "tags": [],
-            "label": "_meta",
-            "description": [],
-            "signature": [
-              "{ created_by: string; } | undefined"
-            ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.Mappings.properties",
-            "type": "Object",
-            "tags": [],
-            "label": "properties",
-            "description": [],
-            "signature": [
-              "{ [key: string]: any; }"
-            ],
-            "path": "x-pack/plugins/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],

@@ -59,6 +59,7 @@ export const useDiscoverHistogram = ({
    */
 
   const [unifiedHistogram, ref] = useState<UnifiedHistogramApi | null>();
+  const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
 
   const getCreationOptions = useCallback(() => {
     const {
@@ -243,6 +244,26 @@ export const useDiscoverHistogram = ({
     columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
   });
 
+  useEffect(() => {
+    if (!isPlainRecord) {
+      return;
+    }
+
+    const fetchStart = stateContainer.dataState.fetch$.subscribe(() => {
+      if (!skipRefetch.current) {
+        setIsSuggestionLoading(true);
+      }
+    });
+    const fetchComplete = textBasedFetchComplete$.subscribe(() => {
+      setIsSuggestionLoading(false);
+    });
+
+    return () => {
+      fetchStart.unsubscribe();
+      fetchComplete.unsubscribe();
+    };
+  }, [isPlainRecord, stateContainer.dataState.fetch$, textBasedFetchComplete$]);
+
   /**
    * Data fetching
    */
@@ -319,6 +340,7 @@ export const useDiscoverHistogram = ({
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
+    isChartLoading: isSuggestionLoading,
   };
 };
 

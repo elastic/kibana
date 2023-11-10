@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { savedSearches, dashboards } from './test_resources_data';
 import { getCommonRequestHeader } from './common_api';
 import { MlApi } from './api';
@@ -59,9 +60,9 @@ export function MachineLearningTestResourcesProvider(
       objectType: SavedObjectType,
       space?: string
     ): Promise<boolean> {
-      const response = await supertest.get(
-        `${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`
-      );
+      const response = await supertest
+        .get(`${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`)
+        .set(getCommonRequestHeader('1'));
       return response.status === 200;
     },
 
@@ -567,7 +568,7 @@ export function MachineLearningTestResourcesProvider(
       await retry.tryForTime(2 * 60 * 1000, async () => {
         const { body, status } = await supertest
           .post(`/api/fleet/setup`)
-          .set(getCommonRequestHeader('1'));
+          .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });
       log.debug(` > Setup done`);
@@ -581,7 +582,7 @@ export function MachineLearningTestResourcesProvider(
       await retry.tryForTime(30 * 1000, async () => {
         const { body, status } = await supertest
           .post(`/api/fleet/epm/packages/${packageName}/${version}`)
-          .set(getCommonRequestHeader('1'));
+          .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });
 
@@ -595,7 +596,7 @@ export function MachineLearningTestResourcesProvider(
       await retry.tryForTime(30 * 1000, async () => {
         const { body, status } = await supertest
           .delete(`/api/fleet/epm/packages/${packageName}/${version}`)
-          .set(getCommonRequestHeader('1'));
+          .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
       });
 
@@ -609,7 +610,7 @@ export function MachineLearningTestResourcesProvider(
       await retry.tryForTime(10 * 1000, async () => {
         const { body, status } = await supertest
           .get(`/api/fleet/epm/packages?experimental=true`)
-          .set(getCommonRequestHeader('1'));
+          .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
 
         packageVersion =
@@ -639,6 +640,12 @@ export function MachineLearningTestResourcesProvider(
 
     async clearAdvancedSettingProperty(propertyName: string) {
       await kibanaServer.uiSettings.unset(propertyName);
+    },
+
+    async assertModuleExists(moduleId: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await mlApi.getModule(moduleId);
+      });
     },
   };
 }

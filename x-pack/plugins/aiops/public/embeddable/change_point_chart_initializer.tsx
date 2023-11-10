@@ -205,7 +205,7 @@ export const FormControls: FC<{
         return;
       }
 
-      if (metricFieldOptions === prevMetricFieldOptions) return;
+      if (!prevMetricFieldOptions || metricFieldOptions === prevMetricFieldOptions) return;
 
       onChange({
         fn: formInput.fn,

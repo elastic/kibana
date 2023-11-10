@@ -10,6 +10,8 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../../../../../shared/doc_links';
 
+import { ingestKeysToPHP } from './helpers';
+
 export const phpDefinition: LanguageDefinition = {
   buildSearchQuery: ({ indexName }) => `$params = [
   'index' => '${indexName}',
@@ -33,7 +35,9 @@ print_r($response->asArray());`,
   },
   iconType: 'php.svg',
   id: Languages.PHP,
-  ingestData: ({ indexName }) => `$params = [
+  ingestData: ({ indexName, ingestPipeline, extraIngestDocumentValues }) => {
+    const ingestDocumentKeys = ingestPipeline ? ingestKeysToPHP(extraIngestDocumentValues) : '';
+    return `$params = [${ingestPipeline ? `\n  'pipeline' => '${ingestPipeline}',` : ''}
   'body' => [
   [
     'index' => [
@@ -45,7 +49,7 @@ print_r($response->asArray());`,
     'name' => 'Snow Crash',
     'author' => 'Neal Stephenson',
     'release_date' => '1992-06-01',
-    'page_count' => 470,
+    'page_count' => 470,${ingestDocumentKeys}
   ],
   [
     'index' => [
@@ -57,7 +61,7 @@ print_r($response->asArray());`,
     'name' => 'Revelation Space',
     'author' => 'Alastair Reynolds',
     'release_date' => '2000-03-15',
-    'page_count' => 585,
+    'page_count' => 585,${ingestDocumentKeys}
   ],
   [
     'index' => [
@@ -69,7 +73,7 @@ print_r($response->asArray());`,
     'name' => '1984',
     'author' => 'George Orwell',
     'release_date' => '1985-06-01',
-    'page_count' => 328,
+    'page_count' => 328,${ingestDocumentKeys}
   ],
   [
     'index' => [
@@ -81,7 +85,7 @@ print_r($response->asArray());`,
     'name' => 'Fahrenheit 451',
     'author' => 'Ray Bradbury',
     'release_date' => '1953-10-15',
-    'page_count' => 227,
+    'page_count' => 227,${ingestDocumentKeys}
   ],
   [
     'index' => [
@@ -93,7 +97,7 @@ print_r($response->asArray());`,
     'name' => 'Brave New World',
     'author' => 'Aldous Huxley',
     'release_date' => '1932-06-01',
-    'page_count' => 268,
+    'page_count' => 268,${ingestDocumentKeys}
   ],
   [
     'index' => [
@@ -102,17 +106,18 @@ print_r($response->asArray());`,
     ],
   ],
   [
-    'name' => 'The Handmaid\'s Tale',
+    'name' => 'The Handmaid\\'s Tale',
     'author' => 'Margaret Atwood',
     'release_date' => '1985-06-01',
-    'page_count' => 311,
+    'page_count' => 311,${ingestDocumentKeys}
   ],
   ],
   ];
 
   $response = $client->bulk($params);
   echo $response->getStatusCode();
-  echo (string) $response->getBody();`,
+  echo (string) $response->getBody();`;
+  },
   ingestDataIndex: '',
   installClient: 'composer require elasticsearch/elasticsearch',
   name: i18n.translate('xpack.enterpriseSearch.languages.php', {

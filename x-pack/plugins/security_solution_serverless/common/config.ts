@@ -33,21 +33,24 @@ export const productTypes = schema.arrayOf<SecurityProductType>(productType, {
 });
 export type SecurityProductTypes = TypeOf<typeof productTypes>;
 
-/**
- * Developer only options that can be set in `serverless.security.dev.yml`
- */
-export const developerConfigSchema = schema.object({
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  productTypes,
   /**
-   * Disables the redirect in the UI for kibana management pages (ex. users, roles, etc).
+   * For internal use. A list of string values (comma delimited) that will enable experimental
+   * type of functionality that is not yet released. Valid values for this settings need to
+   * be defined in:
+   * `x-pack/plugins/security_solution_serverless/common/experimental_features.ts`
+   * under the `allowedExperimentalValues` object
    *
-   * NOTE:  you likely will also need to add the following to your `serverless.security.dev.yml`
-   *        file if wanting to access the user, roles and role mapping pages via URL
-   *
-   * xpack.security.ui.userManagementEnabled: true
-   * xpack.security.ui.roleManagementEnabled: true
-   * xpack.security.ui.roleMappingManagementEnabled: true
+   * @example
+   * xpack.securitySolutionServerless.enableExperimental:
+   *   - someCrazyFeature
+   *   - someEvenCrazierFeature
    */
-  disableManagementUrlRedirect: schema.boolean({ defaultValue: false }),
+  enableExperimental: schema.arrayOf(schema.string(), {
+    defaultValue: () => [],
+  }),
 });
 
-export type DeveloperConfig = TypeOf<typeof developerConfigSchema>;
+export type ServerlessSecurityConfigSchema = TypeOf<typeof configSchema>;

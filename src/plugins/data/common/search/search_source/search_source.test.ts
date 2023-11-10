@@ -919,7 +919,7 @@ describe('SearchSource', () => {
       const localDataView = {
         id: 'local-123',
         isPersisted: () => false,
-        toSpec: () => ({ id: 'local-123' }),
+        toMinimalSpec: () => ({ id: 'local-123' }),
       } as DataView;
       searchSource.setField('index', localDataView);
       const { searchSourceJSON, references } = searchSource.serialize();
@@ -1029,7 +1029,7 @@ describe('SearchSource', () => {
     const indexPattern123 = {
       id: '123',
       isPersisted: jest.fn(() => true),
-      toSpec: jest.fn(),
+      toMinimalSpec: jest.fn(),
     } as unknown as DataView;
 
     test('should return serialized fields', () => {
@@ -1038,7 +1038,7 @@ describe('SearchSource', () => {
         return filter;
       });
       const serializedFields = searchSource.getSerializedFields();
-      expect(indexPattern123.toSpec).toHaveBeenCalledTimes(0);
+      expect(indexPattern123.toMinimalSpec).toHaveBeenCalledTimes(0);
       expect(serializedFields).toMatchSnapshot();
     });
 
@@ -1048,18 +1048,18 @@ describe('SearchSource', () => {
       const childSearchSource = searchSource.createChild();
       childSearchSource.setField('timeout', '100');
       const serializedFields = childSearchSource.getSerializedFields(true);
-      expect(indexPattern123.toSpec).toHaveBeenCalledTimes(0);
+      expect(indexPattern123.toMinimalSpec).toHaveBeenCalledTimes(0);
       expect(serializedFields).toMatchObject({
         timeout: '100',
         parent: { index: '123', from: 123 },
       });
     });
 
-    test('should use spec', () => {
+    test('should use minimal spec for ad hoc data view', () => {
       indexPattern123.isPersisted = jest.fn(() => false);
       searchSource.setField('index', indexPattern123);
-      searchSource.getSerializedFields(true, false);
-      expect(indexPattern123.toSpec).toHaveBeenCalledWith(false);
+      searchSource.getSerializedFields(true);
+      expect(indexPattern123.toMinimalSpec).toHaveBeenCalledTimes(1);
     });
   });
 

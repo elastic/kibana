@@ -9,15 +9,17 @@ import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { MlCoreSetup } from '../plugin';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import { PLUGIN_ID } from '../../common/constants/app';
+import { ML_APP_ROUTE, PLUGIN_ID } from '../../common/constants/app';
 import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { validateLookbackInterval, validateTopNBucket } from './validators';
 import { registerJobsHealthAlertingRule } from './jobs_health_rule';
 
 export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
+  getStartServices: MlCoreSetup['getStartServices'],
   alerting?: AlertingSetup
 ) {
   triggersActionsUi.ruleTypeRegistry.register({
@@ -137,6 +139,13 @@ export function registerMlAlerts(
   if (alerting) {
     registerNavigation(alerting);
   }
+
+  // Async import to prevent a bundle size increase
+  Promise.all([getStartServices(), import('./anomaly_detection_alerts_table')]).then(
+    ([[_, mlStartDependencies], { registerAlertsTableConfiguration }]) => {
+      registerAlertsTableConfiguration(triggersActionsUi, mlStartDependencies.fieldFormats);
+    }
+  );
 }
 
 export function registerNavigation(alerting: AlertingSetup) {
@@ -149,6 +158,6 @@ export function registerNavigation(alerting: AlertingSetup) {
       ]),
     ];
 
-    return formatExplorerUrl('/app/ml', { jobIds });
+    return formatExplorerUrl(ML_APP_ROUTE, { jobIds });
   });
 }

@@ -6,8 +6,7 @@
  */
 
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { EnterpriseSearchPluginStart } from '@kbn/enterprise-search-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
@@ -15,9 +14,8 @@ export interface ServerlessSearchPluginSetup {}
 export interface ServerlessSearchPluginStart {}
 
 export interface StartDependencies {
-  enterpriseSearch: EnterpriseSearchPluginStart;
   security: SecurityPluginStart;
 }
 export interface SetupDependencies {
-  ml: MlPluginSetup;
+  serverless: ServerlessPluginSetup;
 }

@@ -31,17 +31,11 @@
     "@kbn/object-versioning",
     "@kbn/config-schema",
     "@kbn/content-management-plugin",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/event-annotation-components",
     "@kbn/event-annotation-common",
-    "@kbn/kibana-react-plugin",
-    "@kbn/content-management-table-list-view-table",
-    "@kbn/content-management-tabbed-table-list-view",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/dom-drag-drop",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/content-management-utils"
+    "@kbn/content-management-utils",
+    "@kbn/logging",
+    "@kbn/core-plugins-server"
   ],
   "exclude": [
     "target/**/*",

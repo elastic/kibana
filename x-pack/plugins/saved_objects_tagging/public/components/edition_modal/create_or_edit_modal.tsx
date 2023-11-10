@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback, useMemo } from 'react';
+import React, { FC, useState, useCallback, useMemo, useRef } from 'react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   TagAttributes,
   TagValidation,
@@ -40,16 +41,23 @@ import { getRandomColor, useIfMounted } from './utils';
 interface CreateOrEditModalProps {
   onClose: () => void;
   onSubmit: () => Promise<void>;
+  onNameChange: (
+    name: string,
+    options?: { debounced?: boolean; hasBeenModified?: boolean }
+  ) => Promise<void>;
   mode: 'create' | 'edit';
   tag: TagAttributes;
   validation: TagValidation;
+  isValidating: boolean;
   setField: <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => void;
 }
 
 export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   onClose,
   onSubmit,
+  onNameChange,
   validation,
+  isValidating,
   setField,
   tag,
   mode,
@@ -57,6 +65,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   const optionalMessageId = htmlIdGenerator()();
   const ifMounted = useIfMounted();
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const lastNameValue = useRef(tag.name);
 
   // we don't want this value to change when the user edits the tag
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,6 +77,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
       tag.description !== initialTag.description,
     [initialTag, tag]
   );
+  const nameHasBeenModified = tag.name !== lastNameValue.current;
+
   const setName = useMemo(() => setField('name'), [setField]);
   const setColor = useMemo(() => setField('color'), [setField]);
   const setDescription = useMemo(() => setField('description'), [setField]);
@@ -90,6 +101,15 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
       setSubmitting(false);
     });
   }, [ifMounted, onSubmit]);
+
+  useDebounce(
+    () => {
+      onNameChange(tag.name, { debounced: true, hasBeenModified: nameHasBeenModified });
+      lastNameValue.current = tag.name;
+    },
+    300,
+    [tag.name, nameHasBeenModified]
+  );
 
   return (
     <EuiModal onClose={onClose} initialFocus="[name=name]" style={{ minWidth: '600px' }}>
@@ -125,11 +145,12 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 error={validation.errors.name}
               >
                 <EuiFieldText
-                  name="name"
+                  name="tag-name"
                   fullWidth={true}
                   maxLength={tagNameMaxLength}
                   value={tag.name}
                   onChange={(e) => setName(e.target.value)}
+                  isLoading={isValidating}
                   data-test-subj="createModalField-name"
                 />
               </EuiFormRow>
@@ -238,6 +259,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   fill
                   data-test-subj="createModalConfirmButton"
                   onClick={onFormSubmit}
+                  isLoading={submitting}
                   isDisabled={submitting || (isEdit && !tagHasBeenModified)}
                 >
                   {isEdit ? (

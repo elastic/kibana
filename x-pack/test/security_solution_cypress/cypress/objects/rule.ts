@@ -9,6 +9,7 @@ import type { SeverityMappingItem, Threat } from '@kbn/securitysolution-io-ts-al
 import { getMockThreatData } from '@kbn/security-solution-plugin/public/detections/mitre/mitre_tactics_techniques';
 import type {
   EqlRuleCreateProps,
+  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
@@ -400,6 +401,27 @@ export const getEqlRule = (
   ...rewrites,
 });
 
+export const getEsqlRule = (
+  rewrites?: CreateRulePropsRewrites<EsqlRuleCreateProps>
+): EsqlRuleCreateProps => ({
+  type: 'esql',
+  language: 'esql',
+  query: 'from auditbeat-* [metadata _id, _version, _index] | keep agent.*,_id | eval test_id=_id',
+  name: 'ES|QL Rule',
+  description: 'The new rule description.',
+  severity: 'high',
+  risk_score: 17,
+  tags: ['test', 'newRule'],
+  references: ['http://example.com/', 'https://example.com/'],
+  false_positives: ['False1', 'False2'],
+  threat: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  interval: '100m',
+  from: 'now-50000h',
+  max_signals: 100,
+  ...rewrites,
+});
+
 export const getCCSEqlRule = (
   rewrites?: CreateRulePropsRewrites<EqlRuleCreateProps>
 ): EqlRuleCreateProps => ({
@@ -490,8 +512,6 @@ export const indicatorRuleMatchingDoc = {
   matchedId: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
   matchedIndex: 'logs-ti_abusech.malware',
 };
-
-export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicate]`;
 
 export const getSeveritiesOverride = (): string[] => ['Low', 'Medium', 'High', 'Critical'];
 

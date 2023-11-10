@@ -37,5 +37,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_date_nanos'));
     loadTestFile(require.resolve('./_date_nanos_mixed'));
+    loadTestFile(require.resolve('./_url_state'));
   });
 }

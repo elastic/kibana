@@ -6,6 +6,7 @@
  */
 
 export const SLO_RESOURCES_VERSION = 2;
+export const SLO_SUMMARY_TRANSFORMS_VERSION = 3;
 
 export const SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.sli-mappings';
 export const SLO_COMPONENT_TEMPLATE_SETTINGS_NAME = '.slo-observability.sli-settings';

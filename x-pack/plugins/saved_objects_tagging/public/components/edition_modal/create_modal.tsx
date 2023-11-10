@@ -6,17 +6,22 @@
  */
 
 import React, { FC, useState, useCallback } from 'react';
+import { first, lastValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import type { NotificationsStart } from '@kbn/core/public';
+
 import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
-import { TagValidation } from '../../../common/validation';
 import { isServerValidationError } from '../../services/tags';
 import { getRandomColor, validateTag } from './utils';
 import { CreateOrEditModal } from './create_or_edit_modal';
+import { useValidation } from './use_validation';
 
 interface CreateTagModalProps {
   defaultValues?: Partial<TagAttributes>;
   onClose: () => void;
   onSave: (tag: Tag) => void;
   tagClient: ITagsClient;
+  notifications: NotificationsStart;
 }
 
 const getDefaultAttributes = (providedDefaults?: Partial<TagAttributes>): TagAttributes => ({
@@ -26,22 +31,21 @@ const getDefaultAttributes = (providedDefaults?: Partial<TagAttributes>): TagAtt
   ...providedDefaults,
 });
 
-const initialValidation: TagValidation = {
-  valid: true,
-  warnings: [],
-  errors: {},
-};
-
 export const CreateTagModal: FC<CreateTagModalProps> = ({
   defaultValues,
   tagClient,
+  notifications,
   onClose,
   onSave,
 }) => {
-  const [validation, setValidation] = useState<TagValidation>(initialValidation);
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(
     getDefaultAttributes(defaultValues)
   );
+  const { validation, setValidation, onNameChange, validation$, isValidating } = useValidation({
+    tagAttributes,
+    tagClient,
+    validateDuplicateNameOnMount: true,
+  });
 
   const setField = useCallback(
     <T extends keyof TagAttributes>(field: T) =>
@@ -55,6 +59,14 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
   );
 
   const onSubmit = useCallback(async () => {
+    const { hasDuplicateNameError } = await lastValueFrom(
+      validation$.pipe(first((v) => v.isValidating === false))
+    );
+
+    if (hasDuplicateNameError) {
+      return;
+    }
+
     const clientValidation = validateTag(tagAttributes);
     setValidation(clientValidation);
     if (!clientValidation.valid) {
@@ -68,18 +80,27 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
       // if e is IHttpFetchError, actual server error payload is in e.body
       if (isServerValidationError(e.body)) {
         setValidation(e.body.attributes);
+      } else {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.savedObjectsTagging.saveTagErrorTitle', {
+            defaultMessage: 'An error occurred creating tag',
+          }),
+          text: e.body.message,
+        });
       }
     }
-  }, [tagAttributes, tagClient, onSave]);
+  }, [validation$, tagAttributes, setValidation, tagClient, onSave, notifications.toasts]);
 
   return (
     <CreateOrEditModal
       onClose={onClose}
       onSubmit={onSubmit}
+      onNameChange={onNameChange}
       mode={'create'}
       tag={tagAttributes}
       setField={setField}
       validation={validation}
+      isValidating={isValidating}
     />
   );
 };

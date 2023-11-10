@@ -525,6 +525,40 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-server",
+            "id": "def-common.UiSettingsServiceSetup.setAllowlist",
+            "type": "Function",
+            "tags": [],
+            "label": "setAllowlist",
+            "description": [
+              "\nSets an allowlist of setting keys."
+            ],
+            "signature": [
+              "(keys: string[]) => void"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server",
+                "id": "def-common.UiSettingsServiceSetup.setAllowlist.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "keys",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

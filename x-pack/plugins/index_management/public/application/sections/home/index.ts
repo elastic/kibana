@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { IndexManagementHome, Section, homeSections } from './home';
+export { IndexManagementHome, homeSections } from './home';

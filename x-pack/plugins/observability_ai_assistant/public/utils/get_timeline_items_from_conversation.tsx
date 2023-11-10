@@ -53,16 +53,20 @@ function FunctionName({ name: functionName }: { name: string }) {
   return <span style={{ fontFamily: euiTheme.font.familyCode, fontSize: 13 }}>{functionName}</span>;
 }
 
+export type StartedFrom = 'contextualInsight' | 'appTopNavbar' | 'conversationView';
+
 export function getTimelineItemsfromConversation({
-  currentUser,
-  messages,
-  hasConnector,
   chatService,
+  currentUser,
+  hasConnector,
+  messages,
+  startedFrom,
 }: {
-  currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
-  messages: Message[];
-  hasConnector: boolean;
   chatService: ObservabilityAIAssistantChatService;
+  currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
+  hasConnector: boolean;
+  messages: Message[];
+  startedFrom?: StartedFrom;
 }): ChatTimelineItem[] {
   return [
     {
@@ -88,7 +92,7 @@ export function getTimelineItemsfromConversation({
           ? messages[index - 1].message.function_call
           : undefined;
 
-      const role = message.message.function_call?.trigger || message.message.role;
+      let role = message.message.function_call?.trigger || message.message.role;
 
       const actions = {
         canCopy: false,
@@ -155,8 +159,12 @@ export function getTimelineItemsfromConversation({
 
             content = !element ? convertMessageToMarkdownCodeBlock(message.message) : undefined;
 
+            if (prevFunctionCall?.trigger === MessageRole.Assistant) {
+              role = MessageRole.Assistant;
+            }
+
             actions.canEdit = false;
-            display.collapsed = !isError && !element;
+            display.collapsed = !element;
           } else if (message.message.function_call) {
             // User suggested a function
             title = (
@@ -180,6 +188,14 @@ export function getTimelineItemsfromConversation({
 
             actions.canEdit = hasConnector;
             display.collapsed = false;
+
+            if (startedFrom === 'contextualInsight') {
+              const firstUserMessageIndex = messages.findIndex(
+                (el) => el.message.role === MessageRole.User
+              );
+
+              display.collapsed = index === firstUserMessageIndex;
+            }
           }
 
           break;

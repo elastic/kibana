@@ -20,6 +20,7 @@ import { renderWithTheme } from '../../../utils/test_helpers';
 import { fromQuery } from '../links/url_helpers';
 import { CoreStart } from '@kbn/core/public';
 import { SearchBar } from './search_bar';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 function setup({
   urlParams,
@@ -36,8 +37,12 @@ function setup({
   });
 
   const KibanaReactContext = createKibanaReactContext({
-    usageCollection: { reportUiCounter: () => {} },
-    dataViews: { get: async () => {} },
+    usageCollection: {
+      reportUiCounter: () => {},
+    },
+    dataViews: {
+      get: async () => {},
+    },
     data: {
       query: {
         queryString: {
@@ -75,9 +80,11 @@ function setup({
     <KibanaReactContext.Provider>
       <MockApmPluginContextWrapper history={history}>
         <UrlParamsProvider>
-          <ApmServiceContextProvider>
-            <SearchBar showTransactionTypeSelector />
-          </ApmServiceContextProvider>
+          <ApmTimeRangeMetadataContextProvider>
+            <ApmServiceContextProvider>
+              <SearchBar showTransactionTypeSelector />
+            </ApmServiceContextProvider>
+          </ApmTimeRangeMetadataContextProvider>
         </UrlParamsProvider>
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>

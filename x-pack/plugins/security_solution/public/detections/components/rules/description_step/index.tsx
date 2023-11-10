@@ -9,7 +9,6 @@ import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
-import { css } from '@emotion/css';
 import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -17,7 +16,7 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -60,28 +59,18 @@ import type { LicenseService } from '../../../../../common/license';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
-  &.euiDescriptionList--column .euiDescriptionList__title {
-    width: 30%;
-  }
-  &.euiDescriptionList--column .euiDescriptionList__description {
-    width: 70%;
+  .euiDescriptionList__description {
     overflow-wrap: anywhere;
   }
 `;
 
-const panelViewStyle = css`
-  dt {
-    font-size: 90% !important;
-  }
-  text-overflow: ellipsis;
-`;
+const DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['50%', '50%'];
 
 interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: DataViewBase;
   schema: FormSchema<T>;
-  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 export const StepRuleDescriptionComponent = <T,>({
@@ -89,7 +78,6 @@ export const StepRuleDescriptionComponent = <T,>({
   columns = 'multi',
   indexPatterns,
   schema,
-  isInPanelView,
 }: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
   const license = useLicense();
@@ -136,16 +124,6 @@ export const StepRuleDescriptionComponent = <T,>({
     );
   }
 
-  if (isInPanelView) {
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="listItemColumnStepRuleDescriptionPanel">
-          <EuiDescriptionList listItems={listItems} className={panelViewStyle} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem data-test-subj="listItemColumnStepRuleDescription">
@@ -155,6 +133,8 @@ export const StepRuleDescriptionComponent = <T,>({
           <DescriptionListContainer
             data-test-subj="singleSplitStepRuleDescriptionList"
             type="column"
+            columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+            rowGutterSize="m"
             listItems={listItems}
           />
         )}

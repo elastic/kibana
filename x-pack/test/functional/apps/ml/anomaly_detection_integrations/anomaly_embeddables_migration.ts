@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         testDataList.map((d) => d.dashboardSavedObject)
       );
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     after(async () => {
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const { dashboardSavedObject, panelTitle, type } = testData;
       describe(`for ${panelTitle}`, function () {
         before(async () => {
-          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.navigateToApp();
         });
 
         after(async () => {

@@ -118,10 +118,12 @@ export function getBeforeSetup(
     async executor() {
       return { state: {} };
     },
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(
     eventLogClient ?? eventLogClientMock.create()

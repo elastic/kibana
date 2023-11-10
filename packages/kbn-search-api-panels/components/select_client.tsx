@@ -66,7 +66,7 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
         <p>
           {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.description', {
             defaultMessage:
-              'With Console, you can get started right away with our REST API’s. No installation required. ',
+              'With Console, you can get started right away with our REST APIs. No installation required.',
           })}
 
           <span>

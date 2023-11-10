@@ -8,6 +8,8 @@
 
 import { LanguageDefinition } from '../types';
 
+const INDEX_NAME_PLACEHOLDER = 'index_name';
+
 export const consoleDefinition: Partial<LanguageDefinition> = {
   buildSearchQuery: `POST /books/_search?pretty
 {
@@ -30,4 +32,8 @@ export const consoleDefinition: Partial<LanguageDefinition> = {
 {"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268}
 { "index" : { "_index" : "books" } }
 {"name": "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}`,
+  ingestDataIndex: ({ indexName }) => `POST _bulk?pretty
+{ "index" : { "_index" : "${indexName ?? INDEX_NAME_PLACEHOLDER}" } }
+{"name": "foo", "title": "bar"}
+`,
 };

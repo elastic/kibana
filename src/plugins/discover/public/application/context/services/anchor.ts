@@ -12,12 +12,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import {
-  getSearchResponseInterceptedWarnings,
-  type SearchResponseInterceptedWarning,
-} from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DiscoverServices } from '../../../build_services';
-import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 
 export async function fetchAnchor(
   anchorId: string,
@@ -28,14 +24,14 @@ export async function fetchAnchor(
   services: DiscoverServices
 ): Promise<{
   anchorRow: DataTableRecord;
-  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+  interceptedWarnings: SearchResponseWarning[];
 }> {
   updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
 
   const adapter = new RequestAdapter();
   const { rawResponse } = await lastValueFrom(
     searchSource.fetch$({
-      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      disableWarningToasts: true,
       inspector: {
         adapter,
         title: 'anchor',
@@ -51,15 +47,16 @@ export async function fetchAnchor(
       })
     );
   }
+
+  const interceptedWarnings: SearchResponseWarning[] = [];
+  services.data.search.showWarnings(adapter, (warning) => {
+    interceptedWarnings.push(warning);
+    return true; // suppress the default behaviour
+  });
+
   return {
     anchorRow: buildDataTableRecord(doc, dataView, true),
-    interceptedWarnings: getSearchResponseInterceptedWarnings({
-      services,
-      adapter,
-      options: {
-        disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
-      },
-    }),
+    interceptedWarnings,
   };
 }
 

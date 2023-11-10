@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { useMemo, type FC } from 'react';
+
 import { Stat, StatsBarStat } from './stat';
 
 interface Stats {
@@ -17,10 +18,10 @@ export interface TransformStatsBarStats extends Stats {
   batch: StatsBarStat;
   continuous: StatsBarStat;
   started: StatsBarStat;
+  nodes?: StatsBarStat;
 }
 
 type StatsBarStats = TransformStatsBarStats;
-type StatsKey = keyof StatsBarStats;
 
 interface StatsBarProps {
   stats: StatsBarStats;
@@ -28,7 +29,8 @@ interface StatsBarProps {
 }
 
 export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
-  const statsList = Object.keys(stats).map((k) => stats[k as StatsKey]);
+  const statsList = useMemo(() => Object.values(stats), [stats]);
+
   return (
     <div className="transformStatsBar" data-test-subj={dataTestSub}>
       {statsList

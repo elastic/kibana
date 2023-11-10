@@ -7,7 +7,7 @@
 
 import type { ProductLine } from '../../common/product';
 import { setupActiveSections, updateActiveSections } from './helpers';
-import type { ReducerActions } from './types';
+import type { ExpandedCardSteps, ReducerActions } from './types';
 import { type CardId, type StepId, type TogglePanelReducer, GetStartedPageActions } from './types';
 
 export const reducer = (state: TogglePanelReducer, action: ReducerActions): TogglePanelReducer => {
@@ -42,9 +42,7 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
         : new Set(),
     };
 
-    if (action.type === GetStartedPageActions.AddFinishedStep) {
-      finishedSteps[action.payload.cardId].add(action.payload.stepId);
-    }
+    finishedSteps[action.payload.cardId].add(action.payload.stepId);
 
     const { activeSections, totalStepsLeft, totalActiveSteps } = updateActiveSections({
       activeProducts: state.activeProducts,
@@ -71,9 +69,7 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
         : new Set(),
     };
 
-    if (action.type === GetStartedPageActions.RemoveFinishedStep) {
-      finishedSteps[action.payload.cardId].delete(action.payload.stepId);
-    }
+    finishedSteps[action.payload.cardId].delete(action.payload.stepId);
 
     const { activeSections, totalStepsLeft, totalActiveSteps } = updateActiveSections({
       activeProducts: state.activeProducts,
@@ -112,26 +108,44 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
     action.type === GetStartedPageActions.ToggleExpandedCardStep &&
     action.payload.isStepExpanded != null
   ) {
-    const expandedSteps = new Set(
-      [...state.expandedCardSteps[action.payload.cardId]?.expandedSteps] ?? []
-    );
-    if (action.payload.isStepExpanded === true && action.payload.stepId) {
-      expandedSteps.add(action.payload.stepId);
+    // It allows Only One step open at a time
+    const expandedSteps = new Set<StepId>();
+    if (action.payload.isStepExpanded === true && action.payload.stepId != null) {
+      return {
+        ...state,
+        expandedCardSteps: Object.entries(state.expandedCardSteps).reduce((acc, [cardId, card]) => {
+          if (action.payload.stepId != null && cardId === action.payload.cardId) {
+            expandedSteps.add(action.payload.stepId);
+
+            acc[action.payload.cardId] = {
+              expandedSteps: [...expandedSteps],
+              isExpanded: state.expandedCardSteps[action.payload.cardId]?.isExpanded,
+            };
+          } else {
+            // Remove all other expanded steps in other cards
+            acc[cardId as CardId] = {
+              expandedSteps: [],
+              isExpanded: card.isExpanded,
+            };
+          }
+          return acc;
+        }, {} as ExpandedCardSteps),
+      };
     }
 
     if (action.payload.isStepExpanded === false && action.payload.stepId) {
       expandedSteps.delete(action.payload.stepId);
-    }
-    return {
-      ...state,
-      expandedCardSteps: {
-        ...state.expandedCardSteps,
-        [action.payload.cardId]: {
-          expandedSteps: [...expandedSteps],
-          isExpanded: state.expandedCardSteps[action.payload.cardId]?.isExpanded,
+      return {
+        ...state,
+        expandedCardSteps: {
+          ...state.expandedCardSteps,
+          [action.payload.cardId]: {
+            expandedSteps: [...expandedSteps],
+            isExpanded: state.expandedCardSteps[action.payload.cardId]?.isExpanded,
+          },
         },
-      },
-    };
+      };
+    }
   }
 
   return state;

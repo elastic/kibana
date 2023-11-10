@@ -15,11 +15,26 @@ export const PostActionsConnectorExecutePathParams = t.type({
 /** Validates the body of a POST request to the `/actions/connector/{connector_id}/_execute` endpoint */
 export const PostActionsConnectorExecuteBody = t.type({
   params: t.type({
-    subActionParams: t.type({
-      body: t.string,
-    }),
+    subActionParams: t.intersection([
+      t.type({
+        messages: t.array(
+          t.type({
+            // must match ConversationRole from '@kbn/elastic-assistant
+            role: t.union([t.literal('system'), t.literal('user'), t.literal('assistant')]),
+            content: t.string,
+          })
+        ),
+      }),
+      t.partial({
+        model: t.string,
+        n: t.number,
+        stop: t.union([t.string, t.array(t.string), t.null]),
+        temperature: t.number,
+      }),
+    ]),
     subAction: t.string,
   }),
+  assistantLangChain: t.boolean,
 });
 
 export type PostActionsConnectorExecuteBodyInputs = t.TypeOf<

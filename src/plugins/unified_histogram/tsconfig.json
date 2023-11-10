@@ -24,6 +24,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/visualizations-plugin",
+    "@kbn/discover-utils",
+    "@kbn/resizable-layout",
   ],
   "exclude": [
     "target/**/*",

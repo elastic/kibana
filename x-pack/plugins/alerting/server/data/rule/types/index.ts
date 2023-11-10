@@ -12,7 +12,6 @@ export type {
   RuleExecutionStatusValuesAttributes,
   RuleExecutionStatusErrorReasonAttributes,
   RuleExecutionStatusWarningReasonAttributes,
-  RRuleAttributes,
   RuleSnoozeScheduleAttributes,
   RuleExecutionStatusAttributes,
   RuleLastRunAttributes,

@@ -39,6 +39,7 @@ export const OptionsListPopoverActionBar = ({
   const totalCardinality =
     optionsList.select((state) => state.componentState.totalCardinality) ?? 0;
   const searchString = optionsList.select((state) => state.componentState.searchString);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
 
   const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
@@ -50,29 +51,22 @@ export const OptionsListPopoverActionBar = ({
 
   return (
     <div className="optionsList__actions">
-      <EuiFormRow fullWidth>
-        <EuiFlexGroup className="optionsList__searchSortRow" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={true}>
-            <EuiFieldSearch
-              isInvalid={!searchString.valid}
-              compressed
-              disabled={showOnlySelected}
-              fullWidth
-              onChange={(event) => updateSearchString(event.target.value)}
-              value={searchString.value}
-              data-test-subj="optionsList-control-search-input"
-              placeholder={OptionsListStrings.popover.searchPlaceholder[
-                searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE
-              ].getPlaceholderText()}
-            />
-          </EuiFlexItem>
-          {!hideSort && (
-            <EuiFlexItem className="optionsList__sortButtonWrapper" grow={false}>
-              <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFormRow>
+      {fieldSpec?.type !== 'date' && (
+        <EuiFormRow className="optionsList__searchRow" fullWidth>
+          <EuiFieldSearch
+            isInvalid={!searchString.valid}
+            compressed
+            disabled={showOnlySelected}
+            fullWidth
+            onChange={(event) => updateSearchString(event.target.value)}
+            value={searchString.value}
+            data-test-subj="optionsList-control-search-input"
+            placeholder={OptionsListStrings.popover.searchPlaceholder[
+              searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE
+            ].getPlaceholderText()}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow className="optionsList__actionsRow" fullWidth>
         <EuiFlexGroup
           justifyContent="spaceBetween"
@@ -133,6 +127,11 @@ export const OptionsListPopoverActionBar = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
+              {!hideSort && (
+                <EuiFlexItem grow={false}>
+                  <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

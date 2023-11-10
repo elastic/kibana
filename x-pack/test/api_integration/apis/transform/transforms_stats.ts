@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import type { GetTransformsStatsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms_stats';
-import { isGetTransformsStatsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/type_guards';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
@@ -39,7 +38,6 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   function assertTransformsStatsResponseBody(body: GetTransformsStatsResponseSchema) {
-    expect(isGetTransformsStatsResponseSchema(body)).to.eql(true);
     expect(body.count).to.eql(expected.apiTransformTransforms.count);
     expect(body.transforms).to.have.length(expected.apiTransformTransforms.count);
 

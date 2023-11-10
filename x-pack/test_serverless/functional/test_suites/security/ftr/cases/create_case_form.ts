@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../shared/lib/cases';
@@ -15,18 +15,27 @@ import { navigateToCasesApp } from '../../../../../shared/lib/cases';
 const owner = SECURITY_SOLUTION_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
-  describe('Create case', function () {
+  describe('Create Case', function () {
     const find = getService('find');
     const cases = getService('cases');
+    const svlCases = getService('svlCases');
     const testSubjects = getService('testSubjects');
     const config = getService('config');
+    const svlCommonPage = getPageObject('svlCommonPage');
+    const header = getPageObject('header');
+
+    before(async () => {
+      await svlCommonPage.login();
+    });
 
     beforeEach(async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
+      await svlCommonPage.forceLogout();
     });
 
     it('creates a case', async () => {
@@ -65,74 +74,61 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       expect(await button.getVisibleText()).equal('Add connector');
     });
 
-    it('displays errors correctly while creating a case', async () => {
-      const caseTitle = Array(161).fill('x').toString();
-      const longTag = Array(256).fill('a').toString();
-      const longCategory = Array(51).fill('x').toString();
+    describe('customFields', () => {
+      it('creates a case with custom fields', async () => {
+        const customFields = [
+          {
+            key: 'valid_key_1',
+            label: 'Summary',
+            type: CustomFieldTypes.TEXT,
+            required: true,
+          },
+          {
+            key: 'valid_key_2',
+            label: 'Sync',
+            type: CustomFieldTypes.TOGGLE,
+            required: true,
+          },
+        ];
 
-      await cases.create.openCreateCasePage();
-      await cases.create.createCase({
-        title: caseTitle,
-        description: '',
-        tag: longTag,
-        severity: CaseSeverity.HIGH,
-        category: longCategory,
+        await cases.api.createConfigWithCustomFields({ customFields, owner });
+
+        const caseTitle = 'test-' + uuidv4();
+        await cases.create.openCreateCasePage();
+
+        // verify custom fields on create case page
+        await testSubjects.existOrFail('create-case-custom-fields');
+
+        await cases.create.setTitle(caseTitle);
+        await cases.create.setDescription('this is a test description');
+
+        // set custom field values
+        const textCustomField = await testSubjects.find(
+          `${customFields[0].key}-text-create-custom-field`
+        );
+        await textCustomField.type('This is a sample text!');
+
+        const toggleCustomField = await testSubjects.find(
+          `${customFields[1].key}-toggle-create-custom-field`
+        );
+        await toggleCustomField.click();
+
+        await cases.create.submitCase();
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('case-view-title');
+
+        // validate custom fields
+        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+
+        expect(await summary.getVisibleText()).equal('This is a sample text!');
+
+        const sync = await testSubjects.find(
+          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        );
+        expect(await sync.getAttribute('aria-checked')).equal('true');
       });
-
-      await testSubjects.click('create-case-submit');
-
-      const title = await find.byCssSelector('[data-test-subj="caseTitle"]');
-      expect(await title.getVisibleText()).contain(
-        'The length of the name is too long. The maximum length is 160 characters.'
-      );
-
-      const description = await testSubjects.find('caseDescription');
-      expect(await description.getVisibleText()).contain('A description is required.');
-
-      const tags = await testSubjects.find('caseTags');
-      expect(await tags.getVisibleText()).contain(
-        'The length of the tag is too long. The maximum length is 256 characters.'
-      );
-
-      const category = await testSubjects.find('case-create-form-category');
-      expect(await category.getVisibleText()).contain(
-        'The length of the category is too long. The maximum length is 50 characters.'
-      );
-    });
-
-    it('trims fields correctly while creating a case', async () => {
-      const titleWithSpace = 'This is a title with spaces       ';
-      const descriptionWithSpace =
-        'This is a case description with empty spaces at the end!!             ';
-      const categoryWithSpace = 'security        ';
-      const tagWithSpace = 'coke     ';
-
-      await cases.create.openCreateCasePage();
-      await cases.create.createCase({
-        title: titleWithSpace,
-        description: descriptionWithSpace,
-        tag: tagWithSpace,
-        severity: CaseSeverity.HIGH,
-        category: categoryWithSpace,
-      });
-
-      await testSubjects.click('create-case-submit');
-
-      // validate title is trimmed
-      const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-      expect(await title.getVisibleText()).equal(titleWithSpace.trim());
-
-      // validate description is trimmed
-      const description = await testSubjects.find('scrollable-markdown');
-      expect(await description.getVisibleText()).equal(descriptionWithSpace.trim());
-
-      // validate tag exists and is trimmed
-      const tag = await testSubjects.find(`tag-${tagWithSpace.trim()}`);
-      expect(await tag.getVisibleText()).equal(tagWithSpace.trim());
-
-      // validate category exists and is trimmed
-      const category = await testSubjects.find(`category-viewer-${categoryWithSpace.trim()}`);
-      expect(await category.getVisibleText()).equal(categoryWithSpace.trim());
     });
   });
 };

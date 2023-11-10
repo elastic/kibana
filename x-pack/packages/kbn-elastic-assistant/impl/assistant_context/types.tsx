@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 export type ConversationRole = 'system' | 'user' | 'assistant';
 
@@ -15,8 +15,10 @@ export interface MessagePresentation {
 }
 export interface Message {
   role: ConversationRole;
-  content: string;
+  reader?: ReadableStreamDefaultReader<Uint8Array>;
+  content?: string;
   timestamp: string;
+  isError?: boolean;
   presentation?: MessagePresentation;
 }
 
@@ -45,6 +47,7 @@ export interface ConversationTheme {
 export interface Conversation {
   apiConfig: {
     connectorId?: string;
+    connectorTypeTitle?: string;
     defaultSystemPromptId?: string;
     provider?: OpenAiProviderType;
     model?: string;

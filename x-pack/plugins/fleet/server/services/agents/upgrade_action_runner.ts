@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
-import { isAgentUpgradeable } from '../../../common/services';
+import { getRecentUpgradeInfoForAgent, isAgentUpgradeable } from '../../../common/services';
 
 import type { Agent } from '../../types';
 
@@ -26,6 +26,7 @@ import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getCancelledActions } from './action_status';
+import { getLatestAvailableVersion } from './versions';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -72,12 +73,13 @@ export async function upgradeBatch(
       ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
       : givenAgents;
 
-  const kibanaVersion = appContextService.getKibanaVersion();
+  const latestAgentVersion = await getLatestAvailableVersion();
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
-      // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
+      // Filter out agents currently unenrolling, unenrolled, recently upgraded or not upgradeable b/c of version check
       const isNotAllowed =
-        !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
+        getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently ||
+        (!options.force && !isAgentUpgradeable(agent, latestAgentVersion, options.version));
       if (isNotAllowed) {
         throw new FleetError(`Agent ${agent.id} is not upgradeable`);
       }

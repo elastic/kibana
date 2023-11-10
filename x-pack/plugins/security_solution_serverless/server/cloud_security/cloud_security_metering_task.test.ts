@@ -6,40 +6,33 @@
  */
 import Chance from 'chance';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  CNVM_POLICY_TEMPLATE,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
-import { CLOUD_SECURITY_TASK_TYPE, getCloudProductTier } from './cloud_security_metering';
+
+import { getCloudProductTier } from './cloud_security_metering';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 
 import type { ServerlessSecurityConfig } from '../config';
-import type { PostureType } from './types';
+import type { CloudSecuritySolutions } from './types';
 import type { ProductTier } from '../../common/product';
+import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM } from './constants';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const chance = new Chance();
 
-const postureTypes: PostureType[] = [
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  CNVM_POLICY_TEMPLATE,
-];
+const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM];
 
 describe('getCloudSecurityUsageRecord', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  it('should return undefined if postureType is missing', async () => {
+  it('should return undefined if cloudSecuritySolution is missing', async () => {
     // Mock Elasticsearch search to throw an error
     mockEsClient.search.mockRejectedValue({});
 
     const projectId = chance.guid();
     const taskId = chance.guid();
-    const postureType = CSPM_POLICY_TEMPLATE;
+    const cloudSecuritySolution = CSPM;
 
     const tier = 'essentials' as ProductTier;
 
@@ -49,16 +42,16 @@ describe('getCloudSecurityUsageRecord', () => {
       logger,
       taskId,
       lastSuccessfulReport: new Date(),
-      postureType,
+      cloudSecuritySolution,
       tier,
     });
 
     expect(result).toBeUndefined();
   });
 
-  test.each(postureTypes)(
-    'should return usageRecords with correct values for cspm and kspm when Elasticsearch response has aggregations',
-    async (postureType) => {
+  test.each(cloudSecuritySolutions)(
+    'should return usageRecords with correct values for cspm, kspm, and cnvm when Elasticsearch response has aggregations',
+    async (cloudSecuritySolution) => {
       // @ts-ignore
       mockEsClient.search.mockResolvedValueOnce({
         hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
@@ -87,28 +80,32 @@ describe('getCloudSecurityUsageRecord', () => {
         logger,
         taskId,
         lastSuccessfulReport: new Date(),
-        postureType,
+        cloudSecuritySolution,
         tier,
       });
 
-      expect(result).toEqual({
-        id: expect.stringContaining(`${CLOUD_SECURITY_TASK_TYPE}_${postureType}_${projectId}`),
-        usage_timestamp: '2023-07-30T15:11:41.738Z',
-        creation_timestamp: expect.any(String), // Expect a valid ISO string
-        usage: {
-          type: CLOUD_SECURITY_TASK_TYPE,
-          sub_type: postureType,
-          quantity: 10,
-          period_seconds: expect.any(Number),
-        },
-        source: {
-          id: taskId,
-          instance_group_id: projectId,
-          metadata: {
-            tier: 'essentials',
+      expect(result).toEqual([
+        {
+          id: expect.stringContaining(
+            `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}`
+          ),
+          usage_timestamp: '2023-07-30T15:11:41.738Z',
+          creation_timestamp: expect.any(String), // Expect a valid ISO string
+          usage: {
+            type: CLOUD_SECURITY_TASK_TYPE,
+            sub_type: cloudSecuritySolution,
+            quantity: 10,
+            period_seconds: expect.any(Number),
+          },
+          source: {
+            id: taskId,
+            instance_group_id: projectId,
+            metadata: {
+              tier: 'essentials',
+            },
           },
         },
-      });
+      ]);
     }
   );
 
@@ -118,7 +115,7 @@ describe('getCloudSecurityUsageRecord', () => {
 
     const projectId = chance.guid();
     const taskId = chance.guid();
-    const postureType = CSPM_POLICY_TEMPLATE;
+    const cloudSecuritySolution = CSPM;
 
     const tier = 'essentials' as ProductTier;
 
@@ -128,7 +125,7 @@ describe('getCloudSecurityUsageRecord', () => {
       logger,
       taskId,
       lastSuccessfulReport: new Date(),
-      postureType,
+      cloudSecuritySolution,
       tier,
     });
 
@@ -141,7 +138,7 @@ describe('getCloudSecurityUsageRecord', () => {
 
     const projectId = chance.guid();
     const taskId = chance.guid();
-    const postureType = CSPM_POLICY_TEMPLATE;
+    const cloudSecuritySolution = CSPM;
 
     const tier = 'essentials' as ProductTier;
 
@@ -151,7 +148,7 @@ describe('getCloudSecurityUsageRecord', () => {
       logger,
       taskId,
       lastSuccessfulReport: new Date(),
-      postureType,
+      cloudSecuritySolution,
       tier,
     });
 
@@ -173,6 +170,100 @@ describe('should return the relevant product tier', () => {
     const tier = getCloudProductTier(serverlessSecurityConfig);
 
     expect(tier).toBe('complete');
+  });
+
+  it('should return usageRecords with correct values for cloud defend', async () => {
+    const cloudSecuritySolution = 'cloud_defend';
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({
+      hits: { hits: [{ _id: 'someRecord', _index: 'mockIndex' }] }, // mocking for indexHasDataInDateRange
+    });
+
+    // @ts-ignore
+    mockEsClient.search.mockResolvedValueOnce({
+      aggregations: {
+        asset_count_groups: {
+          buckets: [
+            {
+              key_as_string: 'true',
+              unique_assets: {
+                value: 10,
+              },
+              min_timestamp: {
+                value_as_string: '2023-07-30T15:11:41.738Z',
+              },
+            },
+            {
+              key_as_string: 'false',
+              unique_assets: {
+                value: 5,
+              },
+              min_timestamp: {
+                value_as_string: '2023-07-30T15:11:41.738Z',
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const projectId = chance.guid();
+    const taskId = chance.guid();
+
+    const tier = 'essentials' as ProductTier;
+
+    const result = await getCloudSecurityUsageRecord({
+      esClient: mockEsClient,
+      projectId,
+      logger,
+      taskId,
+      lastSuccessfulReport: new Date(),
+      cloudSecuritySolution,
+      tier,
+    });
+
+    expect(result).toEqual([
+      {
+        id: expect.stringContaining(
+          `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}`
+        ),
+        usage_timestamp: '2023-07-30T15:11:41.738Z',
+        creation_timestamp: expect.any(String), // Expect a valid ISO string
+        usage: {
+          type: CLOUD_SECURITY_TASK_TYPE,
+          sub_type: `${cloudSecuritySolution}_block_action_enabled_true`,
+          quantity: 10,
+          period_seconds: expect.any(Number),
+        },
+        source: {
+          id: taskId,
+          instance_group_id: projectId,
+          metadata: {
+            tier: 'essentials',
+          },
+        },
+      },
+      {
+        id: expect.stringContaining(
+          `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}`
+        ),
+        usage_timestamp: '2023-07-30T15:11:41.738Z',
+        creation_timestamp: expect.any(String), // Expect a valid ISO string
+        usage: {
+          type: CLOUD_SECURITY_TASK_TYPE,
+          sub_type: `${cloudSecuritySolution}_block_action_enabled_false`,
+          quantity: 5,
+          period_seconds: expect.any(Number),
+        },
+        source: {
+          id: taskId,
+          instance_group_id: projectId,
+          metadata: {
+            tier: 'essentials',
+          },
+        },
+      },
+    ]);
   });
 
   it('should return none tier in case cloud product line is missing ', async () => {

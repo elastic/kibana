@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
-import React, { FC, useEffect, useMemo } from 'react';
+import { BehaviorSubject, type Observable, combineLatest } from 'rxjs';
+import { map, distinctUntilChanged } from 'rxjs/operators';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { ReloadContextProvider } from '../hooks/use_reload';
-import type {
-  ChangePointAnnotation,
-  ChangePointDetectionRequestParams,
+import {
+  type ChangePointAnnotation,
+  ChangePointDetectionControlsContextProvider,
+  type ChangePointDetectionRequestParams,
 } from '../components/change_point_detection/change_point_detection_context';
 import type {
   EmbeddableChangePointChartInput,
@@ -55,23 +57,50 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
 }) => {
   const input = useObservable(input$, initialInput);
 
+  const [manualReload$] = useState<BehaviorSubject<number>>(
+    new BehaviorSubject<number>(initialInput.lastReloadRequestTime ?? Date.now())
+  );
+
+  useEffect(
+    function updateManualReloadSubject() {
+      if (
+        input.lastReloadRequestTime === initialInput.lastReloadRequestTime ||
+        !input.lastReloadRequestTime
+      )
+        return;
+      manualReload$.next(input.lastReloadRequestTime);
+    },
+    [input.lastReloadRequestTime, initialInput.lastReloadRequestTime, manualReload$]
+  );
+
+  const resultObservable$ = useMemo<Observable<number>>(() => {
+    return combineLatest([reload$, manualReload$]).pipe(
+      map(([reload, manualReload]) => Math.max(reload, manualReload)),
+      distinctUntilChanged()
+    );
+  }, [manualReload$, reload$]);
+
   return (
-    <ReloadContextProvider reload$={reload$}>
+    <ReloadContextProvider reload$={resultObservable$}>
       <DataSourceContextProvider dataViewId={input.dataViewId}>
-        <FilterQueryContextProvider timeRange={input.timeRange}>
-          <ChartGridEmbeddableWrapper
-            timeRange={input.timeRange}
-            fn={input.fn}
-            metricField={input.metricField}
-            splitField={input.splitField}
-            maxSeriesToPlot={input.maxSeriesToPlot}
-            dataViewId={input.dataViewId}
-            partitions={input.partitions}
-            onLoading={onLoading}
-            onRenderComplete={onRenderComplete}
-            onError={onError}
-          />
-        </FilterQueryContextProvider>
+        <ChangePointDetectionControlsContextProvider>
+          <FilterQueryContextProvider timeRange={input.timeRange}>
+            <ChartGridEmbeddableWrapper
+              timeRange={input.timeRange}
+              fn={input.fn}
+              metricField={input.metricField}
+              splitField={input.splitField}
+              maxSeriesToPlot={input.maxSeriesToPlot}
+              dataViewId={input.dataViewId}
+              partitions={input.partitions}
+              onLoading={onLoading}
+              onRenderComplete={onRenderComplete}
+              onError={onError}
+              onChange={input.onChange}
+              emptyState={input.emptyState}
+            />
+          </FilterQueryContextProvider>
+        </ChangePointDetectionControlsContextProvider>
       </DataSourceContextProvider>
     </ReloadContextProvider>
   );
@@ -103,6 +132,8 @@ export const ChartGridEmbeddableWrapper: FC<
   onError,
   onLoading,
   onRenderComplete,
+  onChange,
+  emptyState,
 }) => {
   const { filters, query, timeRange } = useFilerQueryUpdates();
 
@@ -139,7 +170,7 @@ export const ChartGridEmbeddableWrapper: FC<
       },
     });
 
-    if (partitions && fieldConfig.splitField) {
+    if (Array.isArray(partitions) && partitions.length > 0 && fieldConfig.splitField) {
       mergedQuery.bool?.filter.push({
         terms: {
           [fieldConfig.splitField]: partitions,
@@ -189,8 +220,12 @@ export const ChartGridEmbeddableWrapper: FC<
       resultChangePoints = resultChangePoints.slice(0, maxSeriesToPlot);
     }
 
+    if (onChange) {
+      onChange(resultChangePoints);
+    }
+
     return resultChangePoints;
-  }, [results, maxSeriesToPlot]);
+  }, [results, maxSeriesToPlot, onChange]);
 
   return (
     <div
@@ -205,6 +240,8 @@ export const ChartGridEmbeddableWrapper: FC<
           interval={requestParams.interval}
           onRenderComplete={onRenderComplete}
         />
+      ) : emptyState ? (
+        emptyState
       ) : (
         <NoChangePointsWarning />
       )}

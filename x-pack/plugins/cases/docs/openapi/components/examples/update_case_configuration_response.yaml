@@ -1,0 +1,43 @@
+summary: This is an example response when the case configuration was updated.
+value: 
+  closure_type: close-by-user
+  customFields:
+    - key: d312efda-ec2b-42ec-9e2c-84981795c581
+      label: my-text-field
+      required: true
+      type: text
+    - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+      label: my-toggle
+      required: false
+      type: toggle
+  owner: cases
+  created_at: 2023-10-01T17:07:17.767Z
+  created_by:
+    username: elastic
+    email: null,
+    full_name: null
+    profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+  updated_at: 2023-10-19T00:52:42.401Z
+  updated_by:
+    username: elastic
+    full_name: null
+    email: null
+    profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+  connector:
+    id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+    name: my-jira-connector
+    type: .jira
+    fields: null
+  mappings:
+    - source: title
+      target: summary
+      action_type: overwrite
+    - source: description
+      target: description
+      action_type: overwrite
+    - source: comments
+      target: comments
+      action_type: append
+  version: zEzNSw1XQ==
+  error: null
+  id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6

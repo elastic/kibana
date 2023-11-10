@@ -20,7 +20,7 @@ import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../policy_s
 import { cloneDeep, set } from 'lodash';
 import { ProtectionModes } from '../../../../../../common/endpoint/types';
 import { waitFor, cleanup } from '@testing-library/react';
-import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy';
 import { getDeferred } from '../../../../mocks/utils';
 
@@ -133,6 +133,7 @@ describe('When rendering PolicySettingsLayout', () => {
       expect(apiMocks.responseProvider.updateEndpointPolicy).toHaveBeenCalledWith({
         path: packagePolicyRouteService.getUpdatePath(policyData.id),
         body: JSON.stringify(getPolicyDataForUpdate(expectedUpdatedPolicy)),
+        version: API_VERSIONS.public.v1,
       });
     });
 

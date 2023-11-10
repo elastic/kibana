@@ -24,6 +24,7 @@ import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
@@ -34,6 +35,7 @@ export interface ProfilingPluginPublicSetupDeps {
   charts: ChartsPluginSetup;
   licensing: LicensingPluginSetup;
   share: SharePluginSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ProfilingPluginPublicStartDeps {

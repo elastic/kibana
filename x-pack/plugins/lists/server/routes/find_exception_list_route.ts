@@ -19,54 +19,61 @@ import {
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
 export const findExceptionListRoute = (router: ListsPluginRouter): void => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       options: {
         tags: ['access:lists-read'],
       },
       path: `${EXCEPTION_LIST_URL}/_find`,
-      validate: {
-        query: buildRouteValidation<
-          typeof findExceptionListRequestQuery,
-          FindExceptionListRequestQueryDecoded
-        >(findExceptionListRequestQuery),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            query: buildRouteValidation<
+              typeof findExceptionListRequestQuery,
+              FindExceptionListRequestQueryDecoded
+            >(findExceptionListRequestQuery),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const exceptionLists = await getExceptionListClient(context);
-        const {
-          filter,
-          page,
-          namespace_type: namespaceType,
-          per_page: perPage,
-          sort_field: sortField,
-          sort_order: sortOrder,
-        } = request.query;
-        const exceptionListItems = await exceptionLists.findExceptionList({
-          filter,
-          namespaceType,
-          page,
-          perPage,
-          pit: undefined,
-          searchAfter: undefined,
-          sortField,
-          sortOrder,
-        });
-        const [validated, errors] = validate(exceptionListItems, findExceptionListResponse);
-        if (errors != null) {
-          return siemResponse.error({ body: errors, statusCode: 500 });
-        } else {
-          return response.ok({ body: validated ?? {} });
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const exceptionLists = await getExceptionListClient(context);
+          const {
+            filter,
+            page,
+            namespace_type: namespaceType,
+            per_page: perPage,
+            sort_field: sortField,
+            sort_order: sortOrder,
+          } = request.query;
+          const exceptionListItems = await exceptionLists.findExceptionList({
+            filter,
+            namespaceType,
+            page,
+            perPage,
+            pit: undefined,
+            searchAfter: undefined,
+            sortField,
+            sortOrder,
+          });
+          const [validated, errors] = validate(exceptionListItems, findExceptionListResponse);
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

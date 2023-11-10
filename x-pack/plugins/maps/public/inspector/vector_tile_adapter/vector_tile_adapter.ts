@@ -22,6 +22,10 @@ export class VectorTileAdapter extends EventEmitter {
     this._onChange();
   }
 
+  hasLayers() {
+    return Object.keys(this._layers).length > 0;
+  }
+
   setTiles(tiles: Array<{ x: number; y: number; z: number }>) {
     this._tiles = tiles;
     this._onChange();

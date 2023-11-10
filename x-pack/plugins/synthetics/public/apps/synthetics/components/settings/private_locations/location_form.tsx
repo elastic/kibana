@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+
+import React, { Ref } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFieldText,
@@ -14,6 +15,7 @@ import {
   EuiCallOut,
   EuiCode,
   EuiLink,
+  EuiFieldTextProps,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
@@ -21,14 +23,14 @@ import { useFormContext, useFormState } from 'react-hook-form';
 import { TagsField } from '../components/tags_field';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
-import { PolicyHostsField } from './policy_hosts';
+import { PolicyHostsField, AGENT_POLICY_FIELD_NAME } from './policy_hosts';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);
-  const { control, register, watch } = useFormContext<PrivateLocation>();
+  const { control, register, getValues } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
-  const selectedPolicyId = watch('agentPolicyId');
+  const selectedPolicyId = getValues(AGENT_POLICY_FIELD_NAME);
   const selectedPolicy = data?.find((item) => item.id === selectedPolicyId);
 
   const tagsList = privateLocations.reduce((acc, item) => {
@@ -46,7 +48,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
           isInvalid={Boolean(errors?.label)}
           error={errors?.label?.message}
         >
-          <EuiFieldText
+          <FieldText
             data-test-subj="syntheticsLocationFormFieldText"
             fullWidth
             aria-label={LOCATION_NAME_LABEL}
@@ -64,7 +66,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
           />
         </EuiFormRow>
         <EuiSpacer />
-        <PolicyHostsField errors={errors} control={control} privateLocations={privateLocations} />
+        <PolicyHostsField privateLocations={privateLocations} />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
         <EuiSpacer />
@@ -132,6 +134,12 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
     </>
   );
 };
+
+const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
+  (props, ref: Ref<HTMLInputElement>) => (
+    <EuiFieldText data-test-subj="syntheticsFieldTextFieldText" {...props} inputRef={ref} />
+  )
+);
 
 export const AGENT_CALLOUT_TITLE = i18n.translate(
   'xpack.synthetics.monitorManagement.agentCallout.title',

@@ -31,6 +31,7 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
         <EuiCopy textToCopy={val ?? ''}>
           {(copy) => (
             <EuiButtonIcon
+              data-test-subj="syntheticsShaComponentButton"
               aria-label={COPY_FINGERPRINT}
               onClick={copy}
               iconType="copy"

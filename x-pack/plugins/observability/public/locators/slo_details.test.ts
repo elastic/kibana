@@ -5,19 +5,35 @@
  * 2.0.
  */
 
-import { SloDetailsLocatorDefinition, getSloDetailsPath } from './slo_details';
+import { SloDetailsLocatorDefinition } from './slo_details';
 
 describe('SloDetailsLocator', () => {
   const locator = new SloDetailsLocatorDefinition();
 
-  it('should return correct url when empty params are provided', async () => {
+  it('returns correct url when empty params are provided', async () => {
     const location = await locator.getLocation({});
     expect(location.app).toEqual('observability');
-    expect(location.path).toEqual(`${getSloDetailsPath('')}`);
+    expect(location.path).toEqual('/slos');
   });
 
-  it('should return correct url when sloId is provided', async () => {
+  it('returns correct url when sloId is provided', async () => {
     const location = await locator.getLocation({ sloId: 'foo' });
-    expect(location.path).toEqual(`${getSloDetailsPath('foo')}`);
+    expect(location.path).toEqual('/slos/foo');
+  });
+
+  it('returns correct url when sloId and instanceId are provided', async () => {
+    const location = await locator.getLocation({
+      sloId: 'some-slo_id',
+      instanceId: 'another-instance_id',
+    });
+    expect(location.path).toEqual('/slos/some-slo_id?instanceId=another-instance_id');
+  });
+
+  it("returns correct url when sloId and instanceId='*' is provided", async () => {
+    const location = await locator.getLocation({
+      sloId: 'some-slo_id',
+      instanceId: '*',
+    });
+    expect(location.path).toEqual('/slos/some-slo_id');
   });
 });

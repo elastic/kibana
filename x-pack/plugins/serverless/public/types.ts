@@ -12,7 +12,6 @@ import type {
   SideNavComponent,
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
-import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
 
@@ -31,11 +30,9 @@ export interface ServerlessPluginStart {
 }
 
 export interface ServerlessPluginSetupDependencies {
-  management: ManagementSetup;
   cloud: CloudSetup;
 }
 
 export interface ServerlessPluginStartDependencies {
-  management: ManagementStart;
   cloud: CloudStart;
 }

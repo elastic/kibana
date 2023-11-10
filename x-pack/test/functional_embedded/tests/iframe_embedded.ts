@@ -6,8 +6,6 @@
  */
 
 import Url from 'url';
-import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -17,12 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  // FLAKY https://github.com/elastic/kibana/issues/70928
-  describe.skip('in iframe', () => {
+  describe('in iframe', () => {
     it('should open Kibana for logged-in user', async () => {
-      const isChromeHiddenBefore = await PageObjects.common.isChromeHidden();
-      expect(isChromeHiddenBefore).to.be(true);
-
       await PageObjects.security.login();
 
       const { protocol, hostname, port } = config.get('servers.kibana');

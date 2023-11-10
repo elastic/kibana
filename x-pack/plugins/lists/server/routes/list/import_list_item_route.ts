@@ -18,8 +18,9 @@ import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
 import { getListClient } from '..';
 
 export const importListItemRoute = (router: ListsPluginRouter, config: ConfigType): void => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       options: {
         body: {
           accepts: ['multipart/form-data'],
@@ -32,103 +33,109 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
         },
       },
       path: `${LIST_ITEM_URL}/_import`,
-      validate: {
-        body: schema.buffer(),
-        query: buildRouteValidation(importListItemRequestQuery),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            body: schema.buffer(),
+            query: buildRouteValidation(importListItemRequestQuery),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const stream = createStreamFromBuffer(request.body);
-        const { deserializer, list_id: listId, serializer, type } = request.query;
-        const lists = await getListClient(context);
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const stream = createStreamFromBuffer(request.body);
+          const { deserializer, list_id: listId, serializer, type } = request.query;
+          const lists = await getListClient(context);
 
-        const listDataExists = await lists.getListDataStreamExists();
-        if (!listDataExists) {
-          const listIndexExists = await lists.getListIndexExists();
-          if (!listIndexExists) {
-            return siemResponse.error({
-              body: `To import a list item, the data steam must exist first. Data stream "${lists.getListName()}" does not exist`,
-              statusCode: 400,
-            });
+          const listDataExists = await lists.getListDataStreamExists();
+          if (!listDataExists) {
+            const listIndexExists = await lists.getListIndexExists();
+            if (!listIndexExists) {
+              return siemResponse.error({
+                body: `To import a list item, the data steam must exist first. Data stream "${lists.getListName()}" does not exist`,
+                statusCode: 400,
+              });
+            }
+            // otherwise migration is needed
+            await lists.migrateListIndexToDataStream();
           }
-          // otherwise migration is needed
-          await lists.migrateListIndexToDataStream();
-        }
 
-        const listItemDataExists = await lists.getListItemDataStreamExists();
-        if (!listItemDataExists) {
-          const listItemIndexExists = await lists.getListItemIndexExists();
-          if (!listItemIndexExists) {
-            return siemResponse.error({
-              body: `To import a list item, the data steam must exist first. Data stream "${lists.getListItemName()}" does not exist`,
-              statusCode: 400,
-            });
+          const listItemDataExists = await lists.getListItemDataStreamExists();
+          if (!listItemDataExists) {
+            const listItemIndexExists = await lists.getListItemIndexExists();
+            if (!listItemIndexExists) {
+              return siemResponse.error({
+                body: `To import a list item, the data steam must exist first. Data stream "${lists.getListItemName()}" does not exist`,
+                statusCode: 400,
+              });
+            }
+            // otherwise migration is needed
+            await lists.migrateListItemIndexToDataStream();
           }
-          // otherwise migration is needed
-          await lists.migrateListItemIndexToDataStream();
-        }
 
-        if (listId != null) {
-          const list = await lists.getList({ id: listId });
-          if (list == null) {
-            return siemResponse.error({
-              body: `list id: "${listId}" does not exist`,
-              statusCode: 409,
+          if (listId != null) {
+            const list = await lists.getList({ id: listId });
+            if (list == null) {
+              return siemResponse.error({
+                body: `list id: "${listId}" does not exist`,
+                statusCode: 409,
+              });
+            }
+            await lists.importListItemsToStream({
+              deserializer: list.deserializer,
+              listId,
+              meta: undefined,
+              serializer: list.serializer,
+              stream,
+              type: list.type,
+              version: 1,
             });
-          }
-          await lists.importListItemsToStream({
-            deserializer: list.deserializer,
-            listId,
-            meta: undefined,
-            serializer: list.serializer,
-            stream,
-            type: list.type,
-            version: 1,
-          });
 
-          const [validated, errors] = validate(list, importListItemResponse);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
+            const [validated, errors] = validate(list, importListItemResponse);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
+          } else if (type != null) {
+            const importedList = await lists.importListItemsToStream({
+              deserializer,
+              listId: undefined,
+              meta: undefined,
+              serializer,
+              stream,
+              type,
+              version: 1,
+            });
+            if (importedList == null) {
+              return siemResponse.error({
+                body: 'Unable to parse a valid fileName during import',
+                statusCode: 400,
+              });
+            }
+            const [validated, errors] = validate(importedList, importListItemResponse);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           } else {
-            return response.ok({ body: validated ?? {} });
-          }
-        } else if (type != null) {
-          const importedList = await lists.importListItemsToStream({
-            deserializer,
-            listId: undefined,
-            meta: undefined,
-            serializer,
-            stream,
-            type,
-            version: 1,
-          });
-          if (importedList == null) {
             return siemResponse.error({
-              body: 'Unable to parse a valid fileName during import',
+              body: 'Either type or list_id need to be defined in the query',
               statusCode: 400,
             });
           }
-          const [validated, errors] = validate(importedList, importListItemResponse);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
-        } else {
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            body: 'Either type or list_id need to be defined in the query',
-            statusCode: 400,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

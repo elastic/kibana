@@ -19,18 +19,12 @@ import { getPackagePolicyWithSourceMap } from './get_package_policy_decorators';
 
 const doUnzip = promisify(unzip);
 
-interface ApmMapArtifactBody {
+interface ApmSourceMapArtifactBody {
   serviceName: string;
   serviceVersion: string;
   bundleFilepath: string;
-  sourceMap: string;
-}
-
-interface ApmSourceMapArtifactBody
-  extends Omit<ApmMapArtifactBody, 'sourceMap'> {
   sourceMap: SourceMap;
 }
-
 export type ArtifactSourceMap = Omit<Artifact, 'body'> & {
   body: ApmSourceMapArtifactBody;
 };
@@ -102,23 +96,6 @@ export async function createFleetSourceMapArtifact({
 }) {
   const apmArtifactClient = getApmArtifactClient(fleetPluginStart);
   const identifier = `${apmArtifactBody.serviceName}-${apmArtifactBody.serviceVersion}`;
-
-  return apmArtifactClient.createArtifact({
-    type: 'sourcemap',
-    identifier,
-    content: JSON.stringify(apmArtifactBody),
-  });
-}
-
-export async function createFleetAndroidMapArtifact({
-  apmArtifactBody,
-  fleetPluginStart,
-}: {
-  apmArtifactBody: ApmMapArtifactBody;
-  fleetPluginStart: FleetPluginStart;
-}) {
-  const apmArtifactClient = getApmArtifactClient(fleetPluginStart);
-  const identifier = `${apmArtifactBody.serviceName}-${apmArtifactBody.serviceVersion}-android`;
 
   return apmArtifactClient.createArtifact({
     type: 'sourcemap',

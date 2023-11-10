@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
 import { defaultsDeep } from 'lodash';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { Cluster } from '@kbn/es';
-import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { esTestConfig } from '@kbn/test';
 import { CliArgs } from '@kbn/config';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
@@ -26,6 +26,8 @@ export interface TestServerlessUtils {
   startKibana: (abortSignal?: AbortSignal) => Promise<TestServerlessKibanaUtils>;
 }
 
+const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
+
 /**
  * See docs in {@link TestUtils}. This function provides the same utilities but
  * configured for serverless.
@@ -37,9 +39,11 @@ export function createTestServerlessInstances({
 }: {
   adjustTimeout: (timeout: number) => void;
 }): TestServerlessUtils {
+  adjustTimeout?.(150_000);
+
   const esUtils = createServerlessES();
   const kbUtils = createServerlessKibana();
-  adjustTimeout?.(120_000);
+
   return {
     startES: async () => {
       const { stop, getClient } = await esUtils.start();
@@ -70,45 +74,35 @@ function createServerlessES() {
     writeTo: process.stdout,
   });
   const es = new Cluster({ log });
+  const esPort = esTestConfig.getPort();
   return {
     es,
     start: async () => {
       await es.runServerless({
-        basePath: Path.join(REPO_ROOT, '.es/es_test_serverless'),
+        basePath: ES_BASE_PATH_DIR,
+        port: esPort,
+        background: true,
+        clean: true,
+        kill: true,
+        waitForReady: true,
+        // security is enabled by default, if needed kibana requires serviceAccountToken
+        esArgs: ['xpack.security.enabled=false'],
       });
-      // runServerless doesn't wait until the nodes are up
-      await waitUntilClusterReady(getServerlessESClient());
+      const client = getServerlessESClient({ port: esPort });
+
       return {
-        getClient: getServerlessESClient,
+        getClient: () => client,
         stop: async () => {
-          // hack to stop the ES cluster
-          await execa('docker', ['container', 'stop', 'es01', 'es02', 'es03']);
+          await es.stop();
         },
       };
     },
   };
 }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const waitUntilClusterReady = async (client: Client, timeoutMs = 60 * 1000) => {
-  const started = Date.now();
-
-  while (started + timeoutMs > Date.now()) {
-    try {
-      await client.info();
-      break;
-    } catch (e) {
-      await delay(1000);
-      /* trap to continue */
-    }
-  }
-};
-
-const getServerlessESClient = () => {
+const getServerlessESClient = ({ port }: { port: number }) => {
   return new Client({
-    // node ports not configurable from
-    node: 'http://localhost:9200',
+    node: `http://localhost:${port}`,
     Connection: HttpConnection,
   });
 };
@@ -121,6 +115,9 @@ const getServerlessDefault = () => {
         versionResolution: 'newest',
         strictClientVersionCheck: false,
       },
+    },
+    elasticsearch: {
+      hosts: [`http://localhost:${esTestConfig.getPort()}`],
     },
     migrations: {
       algorithm: 'zdt',
@@ -148,6 +145,7 @@ const getServerlessDefault = () => {
     },
   };
 };
+
 function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
   return createRoot(defaultsDeep(settings, getServerlessDefault()), {
     ...cliArgs,

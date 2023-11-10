@@ -8,17 +8,22 @@
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import { EuiDataGridColumn } from '@elastic/eui';
 
 interface TestQueryResponse {
   result: string | null;
   error: string | null;
   isLoading: boolean;
+  rawResults: { cols: EuiDataGridColumn[]; rows: Array<Record<string, string | null>> } | null;
+  alerts: string[] | null;
 }
 
 const TEST_QUERY_INITIAL_RESPONSE: TestQueryResponse = {
   result: null,
   error: null,
   isLoading: false,
+  rawResults: null,
+  alerts: null,
 };
 
 /**
@@ -30,6 +35,7 @@ export function useTestQuery(
     testResults: ParsedAggregationResults;
     isGrouped: boolean;
     timeWindow: string;
+    rawResults?: { cols: EuiDataGridColumn[]; rows: Array<Record<string, string | null>> };
   }>
 ) {
   const [testQueryResponse, setTestQueryResponse] = useState<TestQueryResponse>(
@@ -46,10 +52,12 @@ export function useTestQuery(
       result: null,
       error: null,
       isLoading: true,
+      rawResults: null,
+      alerts: null,
     });
 
     try {
-      const { testResults, isGrouped, timeWindow } = await fetch();
+      const { testResults, isGrouped, timeWindow, rawResults } = await fetch();
 
       if (isGrouped) {
         setTestQueryResponse({
@@ -62,6 +70,11 @@ export function useTestQuery(
           }),
           error: null,
           isLoading: false,
+          rawResults: rawResults ?? null,
+          alerts:
+            testResults.results.length > 0
+              ? testResults.results.map((result) => result.group)
+              : null,
         });
       } else {
         const ungroupedQueryResponse =
@@ -73,6 +86,8 @@ export function useTestQuery(
           }),
           error: null,
           isLoading: false,
+          rawResults: rawResults ?? null,
+          alerts: ungroupedQueryResponse.count > 0 ? ['query matched'] : null,
         });
       }
     } catch (err) {
@@ -85,6 +100,8 @@ export function useTestQuery(
           values: { message: message ? `${err.message}: ${message}` : err.message },
         }),
         isLoading: false,
+        rawResults: null,
+        alerts: null,
       });
     }
   }, [fetch]);
@@ -94,5 +111,7 @@ export function useTestQuery(
     testQueryResult: testQueryResponse.result,
     testQueryError: testQueryResponse.error,
     testQueryLoading: testQueryResponse.isLoading,
+    testQueryRawResults: testQueryResponse.rawResults,
+    testQueryAlerts: testQueryResponse.alerts,
   };
 }

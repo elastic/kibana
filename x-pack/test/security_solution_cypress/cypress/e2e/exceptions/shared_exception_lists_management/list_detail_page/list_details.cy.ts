@@ -8,7 +8,8 @@
 import { getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { EXCEPTIONS_URL, exceptionsListDetailsUrl } from '../../../../urls/navigation';
 import {
@@ -41,8 +42,7 @@ const getExceptionList1 = () => ({
 const EXCEPTION_LIST_NAME = 'Newly created list';
 
 describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cy.task('esArchiverResetKibana');
+  beforeEach(() => {
     login();
 
     // Create exception list associated with a rule
@@ -61,15 +61,11 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
       )
     );
     createRule(getNewRule({ name: 'Rule to link to shared list' }));
-  });
-
-  beforeEach(() => {
-    login();
-    visitWithoutDateRange(EXCEPTIONS_URL);
+    visit(EXCEPTIONS_URL);
   });
 
   it('Should edit list details', () => {
-    visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
+    visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
     waitForExceptionListDetailToBeLoaded();
     // Check list details are loaded
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', LIST_NAME);
@@ -86,7 +82,7 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', UPDATED_LIST_DESCRIPTION);
 
     // Ensure that list details changes persisted
-    visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
+    visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', UPDATED_LIST_NAME);
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', UPDATED_LIST_DESCRIPTION);
 
@@ -97,11 +93,12 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
 
     // Ensure description removal persisted
-    visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
+    visit(exceptionsListDetailsUrl(getExceptionList1().list_id));
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
   });
 
-  it('Should create a new list and link it to two rules', () => {
+  // TODO: Flaky in ESS and Serverless: https://github.com/elastic/kibana/pull/169182#issuecomment-1792597980
+  it.skip('Should create a new list and link it to two rules', () => {
     createSharedExceptionList(
       { name: 'Newly created list', description: 'This is my list.' },
       true

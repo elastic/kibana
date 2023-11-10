@@ -26,112 +26,122 @@ import { buildRouteValidation, buildSiemResponse } from '../utils';
 import { getExceptionListClient, getListClient } from '..';
 
 export const deleteListRoute = (router: ListsPluginRouter): void => {
-  router.delete(
-    {
+  router.versioned
+    .delete({
+      access: 'public',
       options: {
         tags: ['access:lists-all'],
       },
       path: LIST_URL,
-      validate: {
-        query: buildRouteValidation(deleteListRequestQuery),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            query: buildRouteValidation(deleteListRequestQuery),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const lists = await getListClient(context);
-        const exceptionLists = await getExceptionListClient(context);
-        const { id, deleteReferences, ignoreReferences } = request.query;
-        let deleteExceptionItemResponses;
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const lists = await getListClient(context);
+          const exceptionLists = await getExceptionListClient(context);
+          const { id, deleteReferences, ignoreReferences } = request.query;
+          let deleteExceptionItemResponses;
 
-        // ignoreReferences=true maintains pre-7.11 behavior of deleting value list without performing any additional checks
-        if (!ignoreReferences) {
-          // Stream the results from the Point In Time (PIT) finder into this array
-          let referencedExceptionListItems: ExceptionListItemSchema[] = [];
-          const executeFunctionOnStream = (foundResponse: FoundExceptionListItemSchema): void => {
-            referencedExceptionListItems = [...referencedExceptionListItems, ...foundResponse.data];
-          };
+          // ignoreReferences=true maintains pre-7.11 behavior of deleting value list without performing any additional checks
+          if (!ignoreReferences) {
+            // Stream the results from the Point In Time (PIT) finder into this array
+            let referencedExceptionListItems: ExceptionListItemSchema[] = [];
+            const executeFunctionOnStream = (foundResponse: FoundExceptionListItemSchema): void => {
+              referencedExceptionListItems = [
+                ...referencedExceptionListItems,
+                ...foundResponse.data,
+              ];
+            };
 
-          await exceptionLists.findValueListExceptionListItemsPointInTimeFinder({
-            executeFunctionOnStream,
-            maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
-            perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
-            sortField: undefined,
-            sortOrder: undefined,
-            valueListId: id,
-          });
-          if (referencedExceptionListItems.length) {
-            // deleteReferences=false to perform dry run and identify referenced exception lists/items
-            if (deleteReferences) {
-              // Delete referenced exception list items
-              // TODO: Create deleteListItems to delete in batch
-              deleteExceptionItemResponses = await Promise.all(
-                referencedExceptionListItems.map(async (listItem) => {
-                  // Ensure only the single entry is deleted as there could be a separate value list referenced that is okay to keep // TODO: Add API to delete single entry
-                  const remainingEntries = listItem.entries.filter(
-                    (e) => e.type === 'list' && e.list.id !== id
-                  );
-                  if (remainingEntries.length === 0) {
-                    // All entries reference value list specified in request, delete entire exception list item
-                    return deleteExceptionListItem(exceptionLists, listItem);
-                  } else {
-                    // Contains more entries than just value list specified in request , patch (doesn't exist yet :) exception list item to remove entry
-                    return updateExceptionListItems(exceptionLists, listItem, remainingEntries);
-                  }
-                })
-              );
-            } else {
-              const referencedExceptionLists = await getReferencedExceptionLists(
-                exceptionLists,
-                referencedExceptionListItems
-              );
-              const refError = `Value list '${id}' is referenced in existing exception list(s)`;
-              const references = referencedExceptionListItems.map((item) => ({
-                exception_item: item,
-                exception_list: referencedExceptionLists.find((l) => l.list_id === item.list_id),
-              }));
+            await exceptionLists.findValueListExceptionListItemsPointInTimeFinder({
+              executeFunctionOnStream,
+              maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
+              perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+              sortField: undefined,
+              sortOrder: undefined,
+              valueListId: id,
+            });
+            if (referencedExceptionListItems.length) {
+              // deleteReferences=false to perform dry run and identify referenced exception lists/items
+              if (deleteReferences) {
+                // Delete referenced exception list items
+                // TODO: Create deleteListItems to delete in batch
+                deleteExceptionItemResponses = await Promise.all(
+                  referencedExceptionListItems.map(async (listItem) => {
+                    // Ensure only the single entry is deleted as there could be a separate value list referenced that is okay to keep // TODO: Add API to delete single entry
+                    const remainingEntries = listItem.entries.filter(
+                      (e) => e.type === 'list' && e.list.id !== id
+                    );
+                    if (remainingEntries.length === 0) {
+                      // All entries reference value list specified in request, delete entire exception list item
+                      return deleteExceptionListItem(exceptionLists, listItem);
+                    } else {
+                      // Contains more entries than just value list specified in request , patch (doesn't exist yet :) exception list item to remove entry
+                      return updateExceptionListItems(exceptionLists, listItem, remainingEntries);
+                    }
+                  })
+                );
+              } else {
+                const referencedExceptionLists = await getReferencedExceptionLists(
+                  exceptionLists,
+                  referencedExceptionListItems
+                );
+                const refError = `Value list '${id}' is referenced in existing exception list(s)`;
+                const references = referencedExceptionListItems.map((item) => ({
+                  exception_item: item,
+                  exception_list: referencedExceptionLists.find((l) => l.list_id === item.list_id),
+                }));
 
-              return siemResponse.error({
-                body: {
-                  error: {
-                    message: refError,
-                    references,
-                    value_list_id: id,
+                return siemResponse.error({
+                  body: {
+                    error: {
+                      message: refError,
+                      references,
+                      value_list_id: id,
+                    },
                   },
+                  statusCode: 409,
+                });
+              }
+            }
+          }
+
+          const deleted = await lists.deleteList({ id });
+          if (deleted == null) {
+            return siemResponse.error({
+              body: `list id: "${id}" was not found`,
+              statusCode: 404,
+            });
+          } else {
+            const [validated, errors] = validate(deleted, deleteListResponse);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              return response.ok({
+                body: validated ?? {
+                  deleteItemResponses: deleteExceptionItemResponses,
                 },
-                statusCode: 409,
               });
             }
           }
-        }
-
-        const deleted = await lists.deleteList({ id });
-        if (deleted == null) {
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            body: `list id: "${id}" was not found`,
-            statusCode: 404,
+            body: error.message,
+            statusCode: error.statusCode,
           });
-        } else {
-          const [validated, errors] = validate(deleted, deleteListResponse);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({
-              body: validated ?? {
-                deleteItemResponses: deleteExceptionItemResponses,
-              },
-            });
-          }
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };
 
 /**

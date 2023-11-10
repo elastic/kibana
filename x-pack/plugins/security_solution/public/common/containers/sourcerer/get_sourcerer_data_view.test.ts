@@ -6,7 +6,7 @@
  */
 
 import { getSourcererDataView } from './get_sourcerer_data_view';
-import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 
 const dataViewId = 'test-id';
 const dataViewsService = {
@@ -20,7 +20,7 @@ const dataViewsService = {
     fields: {},
   }),
   getExistingIndices: jest.fn().mockResolvedValue(['test-pattern']),
-} as unknown as jest.Mocked<DataViewsService>;
+} as unknown as jest.Mocked<DataViewsServicePublic>;
 describe('getSourcererDataView', () => {
   beforeEach(() => {
     jest.clearAllMocks();

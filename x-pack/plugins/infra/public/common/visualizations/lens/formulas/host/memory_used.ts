@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const memoryUsed: FormulaValueConfig = {
-  label: 'used',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.metric.label.used', {
+    defaultMessage: 'used',
+  }),
   value: 'average(system.memory.actual.used.bytes)',
   format: {
     id: 'bytes',

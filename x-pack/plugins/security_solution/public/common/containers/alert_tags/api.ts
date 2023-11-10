@@ -23,6 +23,7 @@ export const setAlertTags = async ({
     DETECTION_ENGINE_ALERT_TAGS_URL,
     {
       method: 'POST',
+      version: '2023-10-31',
       body: JSON.stringify({ tags, ids }),
       signal,
     }

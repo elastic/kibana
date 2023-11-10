@@ -134,6 +134,11 @@ export interface ApplicationStart {
    * An observable that emits the current application id and each subsequent id update.
    */
   currentAppId$: Observable<string | undefined>;
+
+  /**
+   * An observable that emits the current path#hash and each subsequent update using the global history instance
+   */
+  currentLocation$: Observable<string>;
 }
 
 /**

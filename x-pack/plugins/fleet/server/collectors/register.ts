@@ -22,6 +22,8 @@ import { getAgentPoliciesUsage } from './agent_policies';
 import type { AgentPanicLogsData } from './agent_logs_panics';
 import { getPanicLogsLastHour } from './agent_logs_panics';
 import { getAgentLogsTopErrors } from './agent_logs_top_errors';
+import type { AgentsPerOutputType } from './agents_per_output';
+import { getAgentsPerOutput } from './agents_per_output';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -36,6 +38,7 @@ export interface FleetUsage extends Usage, AgentData {
   agent_logs_panics_last_hour: AgentPanicLogsData['agent_logs_panics_last_hour'];
   agent_logs_top_errors?: string[];
   fleet_server_logs_top_errors?: string[];
+  agents_per_output_type: AgentsPerOutputType[];
 }
 
 export const fetchFleetUsage = async (
@@ -57,6 +60,7 @@ export const fetchFleetUsage = async (
     agent_policies: await getAgentPoliciesUsage(soClient),
     ...(await getPanicLogsLastHour(esClient)),
     ...(await getAgentLogsTopErrors(esClient)),
+    agents_per_output_type: await getAgentsPerOutput(soClient, esClient),
   };
   return usage;
 };

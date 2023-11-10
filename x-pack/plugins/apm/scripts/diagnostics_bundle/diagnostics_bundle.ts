@@ -9,7 +9,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { getDiagnosticsBundle } from '../../server/routes/diagnostics/get_diagnostics_bundle';
@@ -39,7 +39,7 @@ export async function initDiagnosticsBundle({
 }) {
   const auth = username && password ? { username, password } : undefined;
   const apiKeyHeader = apiKey ? { Authorization: `ApiKey ${apiKey}` } : {};
-  const { kibanaHost } = parseCloudId(cloudId);
+  const parsedCloudId = parseCloudId(cloudId);
 
   const esClient = new Client({
     ...(esHost ? { node: esHost } : {}),
@@ -48,13 +48,17 @@ export async function initDiagnosticsBundle({
     headers: { ...apiKeyHeader },
   });
 
-  const kibanaClient = axios.create({
-    baseURL: kbHost ?? kibanaHost,
+  const kibanaClientOpts = {
+    baseURL: kbHost ?? parsedCloudId.kibanaHost,
     auth,
-    // @ts-expect-error
-    headers: { 'kbn-xsrf': 'true', ...apiKeyHeader },
-  });
-  const apmIndices = await getApmIndices(kibanaClient);
+    headers: {
+      'kbn-xsrf': 'true',
+      'elastic-api-version': '2023-10-31',
+      ...apiKeyHeader,
+    },
+  };
+
+  const apmIndices = await getApmIndices(kibanaClientOpts);
 
   const bundle = await getDiagnosticsBundle({
     esClient,
@@ -63,8 +67,8 @@ export async function initDiagnosticsBundle({
     end,
     kuery,
   });
-  const fleetPackageInfo = await getFleetPackageInfo(kibanaClient);
-  const kibanaVersion = await getKibanaVersion(kibanaClient);
+  const fleetPackageInfo = await getFleetPackageInfo(kibanaClientOpts);
+  const kibanaVersion = await getKibanaVersion(kibanaClientOpts);
 
   await saveReportToFile({ ...bundle, fleetPackageInfo, kibanaVersion });
 }
@@ -80,7 +84,7 @@ async function saveReportToFile(combinedReport: DiagnosticsBundle) {
   console.log(`Diagnostics report written to "${filename}"`);
 }
 
-async function getApmIndices(kibanaClient: AxiosInstance) {
+async function getApmIndices(kbnClientOpts: AxiosRequestConfig) {
   interface Response {
     apmIndexSettings: Array<{
       configurationName: string;
@@ -89,8 +93,9 @@ async function getApmIndices(kibanaClient: AxiosInstance) {
     }>;
   }
 
-  const res = await kibanaClient.get<Response>(
-    '/internal/apm/settings/apm-index-settings'
+  const res = await axios.get<Response>(
+    '/internal/apm/settings/apm-index-settings',
+    kbnClientOpts
   );
 
   return Object.fromEntries(
@@ -103,16 +108,16 @@ async function getApmIndices(kibanaClient: AxiosInstance) {
   ) as APMIndices;
 }
 
-async function getFleetPackageInfo(kibanaClient: AxiosInstance) {
-  const res = await kibanaClient.get('/api/fleet/epm/packages/apm');
+async function getFleetPackageInfo(kbnClientOpts: AxiosRequestConfig) {
+  const res = await axios.get('/api/fleet/epm/packages/apm', kbnClientOpts);
   return {
     version: res.data.response.version,
     isInstalled: res.data.response.status,
   };
 }
 
-async function getKibanaVersion(kibanaClient: AxiosInstance) {
-  const res = await kibanaClient.get('/api/status');
+async function getKibanaVersion(kbnClientOpts: AxiosRequestConfig) {
+  const res = await axios.get('/api/status', kbnClientOpts);
   return res.data.version.number;
 }
 

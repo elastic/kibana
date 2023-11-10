@@ -15,12 +15,24 @@ import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './lib/action_execution_source';
+import { actionsConfigMock } from './actions_config.mock';
 
 const mockTaskManager = taskManagerMock.createStart();
 const savedObjectsClient = savedObjectsClientMock.create();
 const request = {} as KibanaRequest;
+const mockActionsConfig = actionsConfigMock.create();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  mockTaskManager.aggregate.mockResolvedValue({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    aggregations: {},
+  });
+  mockActionsConfig.getMaxQueued.mockReturnValue(10);
+});
 
 describe('bulkExecute()', () => {
   test('schedules the action with all given parameters', async () => {
@@ -30,6 +42,7 @@ describe('bulkExecute()', () => {
       actionTypeRegistry,
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -63,6 +76,7 @@ describe('bulkExecute()', () => {
         executionId: '123abc',
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -118,6 +132,7 @@ describe('bulkExecute()', () => {
       actionTypeRegistry,
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -153,6 +168,7 @@ describe('bulkExecute()', () => {
         consumer: 'test-consumer',
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -209,6 +225,7 @@ describe('bulkExecute()', () => {
       actionTypeRegistry,
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -248,6 +265,7 @@ describe('bulkExecute()', () => {
             typeId: 'some-typeId',
           },
         ],
+        actionTypeId: 'mock-action',
       },
     ]);
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -304,6 +322,7 @@ describe('bulkExecute()', () => {
           secrets: {},
         },
       ],
+      configurationUtilities: mockActionsConfig,
     });
     const source = { type: 'alert', id: uuidv4() };
 
@@ -339,6 +358,7 @@ describe('bulkExecute()', () => {
         executionId: '123abc',
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
+        actionTypeId: 'mock-action',
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -401,6 +421,7 @@ describe('bulkExecute()', () => {
           isSystemAction: true,
         },
       ],
+      configurationUtilities: mockActionsConfig,
     });
     const source = { type: 'alert', id: uuidv4() };
 
@@ -436,6 +457,7 @@ describe('bulkExecute()', () => {
         executionId: 'system-connector-.casesabc',
         apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
+        actionTypeId: 'mock-action',
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -498,6 +520,7 @@ describe('bulkExecute()', () => {
           secrets: {},
         },
       ],
+      configurationUtilities: mockActionsConfig,
     });
     const source = { type: 'alert', id: uuidv4() };
 
@@ -541,6 +564,7 @@ describe('bulkExecute()', () => {
             typeId: 'some-typeId',
           },
         ],
+        actionTypeId: 'mock-action',
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -616,6 +640,7 @@ describe('bulkExecute()', () => {
           isSystemAction: true,
         },
       ],
+      configurationUtilities: mockActionsConfig,
     });
     const source = { type: 'alert', id: uuidv4() };
 
@@ -659,6 +684,7 @@ describe('bulkExecute()', () => {
             typeId: 'some-typeId',
           },
         ],
+        actionTypeId: 'mock-action',
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -723,6 +749,7 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
     });
     await expect(
       executeFn(savedObjectsClient, [
@@ -733,6 +760,7 @@ describe('bulkExecute()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -746,6 +774,7 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -770,6 +799,7 @@ describe('bulkExecute()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -784,6 +814,7 @@ describe('bulkExecute()', () => {
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
     });
     mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
@@ -810,6 +841,7 @@ describe('bulkExecute()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
@@ -833,6 +865,7 @@ describe('bulkExecute()', () => {
           isSystemAction: false,
         },
       ],
+      configurationUtilities: mockActionsConfig,
     });
     mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -868,6 +901,7 @@ describe('bulkExecute()', () => {
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
       },
     ]);
 
@@ -892,6 +926,7 @@ describe('bulkExecute()', () => {
           isSystemAction: true,
         },
       ],
+      configurationUtilities: mockActionsConfig,
     });
     mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -927,9 +962,64 @@ describe('bulkExecute()', () => {
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
       },
     ]);
 
     expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
+  });
+
+  test('returns queuedActionsLimitError response when the max number of queued actions has been reached', async () => {
+    mockTaskManager.aggregate.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 2, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: {},
+    });
+    mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [],
+    });
+    expect(
+      await executeFn(savedObjectsClient, [
+        {
+          id: '123',
+          params: { baz: false },
+          spaceId: 'default',
+          executionId: '123abc',
+          apiKey: null,
+          source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
+        },
+      ])
+    ).toMatchInlineSnapshot(`
+      Object {
+        "errors": true,
+        "items": Array [
+          Object {
+            "actionTypeId": "mock-action",
+            "id": "123",
+            "response": "queuedActionsLimitError",
+          },
+        ],
+      }
+    `);
+    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [],
+      ]
+    `);
   });
 });

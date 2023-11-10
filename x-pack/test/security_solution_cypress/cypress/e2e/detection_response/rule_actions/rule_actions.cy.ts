@@ -8,14 +8,9 @@
 import { getIndexConnector } from '../../../objects/connector';
 import { getSimpleCustomQueryRule } from '../../../objects/rule';
 
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { deleteIndex, waitForNewDocumentToBeIndexed } from '../../../tasks/api_calls/elasticsearch';
-import {
-  cleanKibana,
-  deleteAlertsAndRules,
-  deleteConnectors,
-  deleteDataView,
-} from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors, deleteDataView } from '../../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -23,19 +18,17 @@ import {
   fillRuleAction,
   fillScheduleRuleAndContinue,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
-
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Rule actions during detection rule creation',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     const indexConnector = getIndexConnector();
-
-    before(() => {
-      cleanKibana();
-    });
 
     beforeEach(() => {
       login();
@@ -51,14 +44,16 @@ describe(
     const initialNumberOfDocuments = 0;
     const expectedJson = JSON.parse(actions.connectors[0].document);
 
-    it('Indexes a new document after the index action is triggered ', function () {
-      visit(RULE_CREATION);
+    it('Indexes a new document after the index action is triggered', function () {
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       fillRuleAction(actions);
       createAndEnableRule();
-      goToRuleDetails();
+      openRuleManagementPageViaBreadcrumbs();
+
+      goToRuleDetailsOf(rule.name);
 
       /* When the rule is executed, the action is triggered. We wait for the new document to be indexed */
       waitForNewDocumentToBeIndexed(index, initialNumberOfDocuments);

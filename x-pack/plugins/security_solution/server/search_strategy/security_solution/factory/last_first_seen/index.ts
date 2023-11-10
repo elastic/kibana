@@ -8,6 +8,7 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { firstLastSeenRequestOptionsSchema } from '../../../../../common/api/search_strategy';
 import type {
   FactoryQueryTypes,
   FirstLastSeenStrategyResponse,
@@ -17,14 +18,15 @@ import { FirstLastSeenQuery } from '../../../../../common/search_strategy/securi
 import { inspectStringifyObject } from '../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../types';
 import { buildFirstOrLastSeenQuery } from './query.first_or_last_seen.dsl';
-import { parseOptions } from './parse_options';
 
 export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery> = {
-  buildDsl: (options: unknown) => buildFirstOrLastSeenQuery(options),
+  buildDsl: (options) => buildFirstOrLastSeenQuery(options),
   parse: async (
-    options: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<FirstLastSeenStrategyResponse> => {
+    firstLastSeenRequestOptionsSchema.parse(options);
+
     // First try to get the formatted field if it exists or not.
     const formattedField: string | null = getOr(
       null,
@@ -36,7 +38,7 @@ export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery>
       dsl: [inspectStringifyObject(buildFirstOrLastSeenQuery(options))],
     };
 
-    const { order } = parseOptions(options);
+    const { order } = options;
 
     if (order === 'asc') {
       return {

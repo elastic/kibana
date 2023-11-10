@@ -45,11 +45,54 @@ export const CLIENT_DEFAULTS = {
 };
 
 export const EXCLUDE_RUN_ONCE_FILTER = { bool: { must_not: { exists: { field: 'run_once' } } } };
-export const SUMMARY_FILTER = {
-  exists: {
-    field: 'summary',
+export const FINAL_SUMMARY_FILTER = {
+  bool: {
+    filter: [
+      {
+        exists: {
+          field: 'summary',
+        },
+      },
+      {
+        bool: {
+          should: [
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'summary.final_attempt': true,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                must_not: {
+                  bool: {
+                    should: [
+                      {
+                        exists: {
+                          field: 'summary.final_attempt',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ],
   },
 };
+
+export const SUMMARY_FILTER = { exists: { field: 'summary' } };
 
 export const getLocationFilter = ({
   locationName,

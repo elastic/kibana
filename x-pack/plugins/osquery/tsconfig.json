@@ -1,12 +1,10 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "exclude": [
-    "cypress.config.ts",
-    "serverless_cypress.config.ts",
-    "target/**/*",
+    "target/**/*"
   ],
   "include": [
     // add all the folders contains files to be compiled
@@ -15,8 +13,6 @@
     "scripts/**/*",
     "scripts/**/**.json",
     "server/**/*",
-    "cypress.config.ts",
-    "serverless_cypress.config.ts",
     "../../../typings/**/*",
     // ECS and Osquery schema files
     "public/common/schemas/*/**.json",
@@ -77,5 +73,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/monaco",
     "@kbn/io-ts-utils",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/openapi-generator"
   ]
 }

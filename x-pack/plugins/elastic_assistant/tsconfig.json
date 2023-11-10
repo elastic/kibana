@@ -7,6 +7,7 @@
     "common/**/*",
     "server/lib/**/*",
     "server/**/*",
+    "scripts/**/*.ts",
     // must declare *.json explicitly per https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "../../../typings/**/*"
@@ -20,6 +21,17 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/actions-plugin",
     "@kbn/elastic-assistant",
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/utility-types-jest",
+    "@kbn/utility-types",
+    "@kbn/tooling-log",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging",
+    "@kbn/std",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/ml-plugin",
   ],
   "exclude": [
     "target/**/*",

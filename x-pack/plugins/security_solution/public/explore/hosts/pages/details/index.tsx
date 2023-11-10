@@ -115,7 +115,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const { indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
+  const { indexPattern, indicesExist, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
@@ -172,7 +173,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper

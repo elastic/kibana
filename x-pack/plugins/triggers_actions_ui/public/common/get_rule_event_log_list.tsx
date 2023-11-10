@@ -20,7 +20,7 @@ export const getRuleEventLogListLazy = <T extends RuleEventLogListOptions = 'def
 ) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <RuleEventLogList {...props} />;
+      <RuleEventLogList {...props} />
     </QueryClientProvider>
   );
 };

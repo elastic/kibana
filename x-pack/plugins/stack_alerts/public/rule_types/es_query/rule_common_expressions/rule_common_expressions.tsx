@@ -52,6 +52,7 @@ export interface RuleCommonExpressionsProps extends CommonRuleParams {
   onTestFetch: TestQueryRowProps['fetch'];
   onCopyQuery?: TestQueryRowProps['copyQuery'];
   onChangeExcludeHitsFromPreviousRun: (exclude: boolean) => void;
+  canSelectMultiTerms?: boolean;
 }
 
 export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
@@ -82,6 +83,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   onCopyQuery,
   excludeHitsFromPreviousRun,
   onChangeExcludeHitsFromPreviousRun,
+  canSelectMultiTerms,
 }) => {
   const [isExcludeHitsDisabled, setIsExcludeHitsDisabled] = useState<boolean>(false);
 
@@ -127,6 +129,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         errors={errors}
         fields={esFields}
         display="fullWidth"
+        canSelectMultiTerms={canSelectMultiTerms}
         onChangeSelectedGroupBy={onChangeSelectedGroupBy}
         onChangeSelectedTermField={onChangeSelectedTermField}
         onChangeSelectedTermSize={onChangeSelectedTermSize}

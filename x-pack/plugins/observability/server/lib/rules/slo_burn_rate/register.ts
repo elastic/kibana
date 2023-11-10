@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
@@ -61,6 +62,7 @@ export function sloBurnRateRuleType(
     },
     defaultActionGroupId: ALERT_ACTION.id,
     actionGroups: [ALERT_ACTION, HIGH_PRIORITY_ACTION, MEDIUM_PRIORITY_ACTION, LOW_PRIORITY_ACTION],
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: sloFeatureId,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,

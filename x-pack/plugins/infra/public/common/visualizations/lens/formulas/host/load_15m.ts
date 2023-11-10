@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const load15m: FormulaValueConfig = {
-  label: 'Load (15m)',
+  label: i18n.translate('xpack.infra.assetDetails.formulas.load15m', {
+    defaultMessage: 'Load (15m)',
+  }),
   value: 'average(system.load.15)',
   format: {
     id: 'number',

@@ -275,6 +275,7 @@ export async function getApmServiceSummary({
         start,
         end,
         serviceName,
+        environment,
       }),
       getAnomalies({
         serviceName,

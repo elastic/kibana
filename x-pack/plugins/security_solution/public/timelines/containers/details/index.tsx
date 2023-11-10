@@ -11,15 +11,14 @@ import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
-import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
 import type {
   SearchHit,
   TimelineEventsDetailsItem,
-  TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
@@ -35,7 +34,7 @@ export interface UseTimelineEventsDetailsProps {
   entityType?: EntityType;
   indexName: string;
   eventId: string;
-  runtimeMappings: RunTimeMappings;
+  runtimeMappings: TimelineEventsDetailsRequestOptionsInput['runtimeMappings'];
   skip: boolean;
 }
 
@@ -61,7 +60,7 @@ export const useTimelineEventsDetails = ({
   // loading = false initial state causes flashes of empty tables
   const [loading, setLoading] = useState(true);
   const [timelineDetailsRequest, setTimelineDetailsRequest] =
-    useState<TimelineEventsDetailsRequestOptions | null>(null);
+    useState<TimelineEventsDetailsRequestOptionsInput | null>(null);
   const { addError } = useAppToasts();
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] =
@@ -70,7 +69,7 @@ export const useTimelineEventsDetails = ({
 
   const [rawEventData, setRawEventData] = useState<SearchHit | undefined>(undefined);
   const timelineDetailsSearch = useCallback(
-    (request: TimelineEventsDetailsRequestOptions | null) => {
+    (request: TimelineEventsDetailsRequestOptionsInput | null) => {
       if (request == null || skip || isEmpty(request.eventId)) {
         return;
       }
@@ -80,7 +79,7 @@ export const useTimelineEventsDetails = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
+          .search<TimelineEventsDetailsRequestOptionsInput, TimelineEventsDetailsStrategyResponse>(
             request,
             {
               strategy: 'timelineSearchStrategy',
@@ -89,7 +88,7 @@ export const useTimelineEventsDetails = ({
           )
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 Promise.resolve().then(() => {
                   ReactDOM.unstable_batchedUpdates(() => {
                     setLoading(false);
@@ -125,7 +124,7 @@ export const useTimelineEventsDetails = ({
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
         runtimeMappings,
-      };
+      } as const;
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }

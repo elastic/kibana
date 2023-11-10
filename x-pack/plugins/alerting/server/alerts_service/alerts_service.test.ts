@@ -53,7 +53,7 @@ interface EsError extends Error {
 }
 
 const GetAliasResponse = {
-  real_index: {
+  '.internal.alerts-test.alerts-default-000001': {
     aliases: {
       alias_1: {
         is_hidden: true,
@@ -141,6 +141,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
                   rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
                 },
               }),
+          'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': 2500,
         },
         mappings: {
@@ -195,6 +196,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
@@ -202,6 +204,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   validate: {
     params: { validate: (params) => params },
   },
+  validLegacyConsumers: [],
 };
 
 const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
@@ -808,6 +811,7 @@ describe('Alerts Service', () => {
                           rollover_alias: `.alerts-empty.alerts-default`,
                         },
                       }),
+                  'index.mapping.ignore_malformed': true,
                   'index.mapping.total_fields.limit': 2500,
                 },
                 mappings: {
@@ -893,6 +897,18 @@ describe('Alerts Service', () => {
             });
           }).toThrowErrorMatchingInlineSnapshot(
             `"test has already been registered with different options"`
+          );
+        });
+
+        test('should allow same context with different "shouldWrite" option', async () => {
+          alertsService.register(TestRegistrationContext);
+          alertsService.register({
+            ...TestRegistrationContext,
+            shouldWrite: false,
+          });
+
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Resources for context "test" have already been registered.`
           );
         });
 
@@ -2354,10 +2370,10 @@ describe('Alerts Service', () => {
             dataStreamAdapter,
           });
 
-          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          await retryUntil('debug logger called', async () => logger.debug.mock.calls.length > 0);
 
-          expect(logger.error).toHaveBeenCalledWith(
-            new Error(`Server is stopping; must stop all async operations`)
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Server is stopping; must stop all async operations`
           );
         });
       });

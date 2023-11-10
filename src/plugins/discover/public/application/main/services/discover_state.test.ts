@@ -468,8 +468,8 @@ describe('Test discover state actions', () => {
     );
   });
 
-  test('loadSavedSearch without id containing sql, adding no warning toast with an invalid index', async () => {
-    const url = "/#?_a=(index:abcde,query:(sql:'Select * from test'))&_g=()";
+  test('loadSavedSearch without id containing ES|QL, adding no warning toast with an invalid index', async () => {
+    const url = "/#?_a=(index:abcde,query:(esql:'FROM test'))&_g=()";
     const { state } = await getState(url, { savedSearch: savedSearchMock, isEmptyUrl: false });
     await state.actions.loadSavedSearch();
     expect(discoverServiceMock.toastNotifications.addWarning).not.toHaveBeenCalled();

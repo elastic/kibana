@@ -14,6 +14,7 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { MlFeatures } from '../../../../common/constants/app';
 import type { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
@@ -25,6 +26,8 @@ const renderApp = (
   share: SharePluginStart,
   data: DataPublicPluginStart,
   fieldFormats: FieldFormatsStart,
+  isServerless: boolean,
+  mlFeatures: MlFeatures,
   spacesApi?: SpacesPluginStart,
   usageCollection?: UsageCollectionSetup
 ) => {
@@ -37,6 +40,8 @@ const renderApp = (
       spacesApi,
       usageCollection,
       fieldFormats,
+      isServerless,
+      mlFeatures,
     }),
     element
   );
@@ -48,7 +53,9 @@ const renderApp = (
 export async function mountApp(
   core: CoreSetup<MlStartDependencies>,
   params: ManagementAppMountParams,
-  deps: { usageCollection?: UsageCollectionSetup }
+  deps: { usageCollection?: UsageCollectionSetup },
+  isServerless: boolean,
+  mlFeatures: MlFeatures
 ) {
   const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -60,6 +67,8 @@ export async function mountApp(
     pluginsStart.share,
     pluginsStart.data,
     pluginsStart.fieldFormats,
+    isServerless,
+    mlFeatures,
     pluginsStart.spaces,
     deps.usageCollection
   );

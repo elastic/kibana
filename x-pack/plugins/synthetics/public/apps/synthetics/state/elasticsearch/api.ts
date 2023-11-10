@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
-} from '@kbn/data-plugin/common';
+import { IKibanaSearchResponse, isRunningResponse } from '@kbn/data-plugin/common';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '@kbn/es-types';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
@@ -40,7 +36,7 @@ export const executeEsQueryAPI = async ({
       )
       .subscribe({
         next: (result) => {
-          if (isCompleteResponse(result)) {
+          if (!isRunningResponse(result)) {
             if (addInspectorRequest) {
               addInspectorRequest({
                 data: {
@@ -70,33 +66,31 @@ export const executeEsQueryAPI = async ({
           }
         },
         error: (err) => {
-          if (isErrorResponse(err)) {
-            // eslint-disable-next-line no-console
-            console.error(err);
-            reject(err);
-            if (addInspectorRequest) {
-              addInspectorRequest({
-                data: {
-                  _inspect: [
-                    getInspectResponse({
-                      startTime,
-                      esRequestParams: params,
-                      esResponse: null,
-                      esError: { originalError: err, name: err.name, message: err.message },
-                      esRequestStatus: 2,
-                      operationName: name,
-                      kibanaRequest: {
-                        route: {
-                          path: '/internal/bsearch',
-                          method: 'POST',
-                        },
-                      } as any,
-                    }),
-                  ],
-                },
-                status: FETCH_STATUS.SUCCESS,
-              });
-            }
+          // eslint-disable-next-line no-console
+          console.error(err);
+          reject(err);
+          if (addInspectorRequest) {
+            addInspectorRequest({
+              data: {
+                _inspect: [
+                  getInspectResponse({
+                    startTime,
+                    esRequestParams: params,
+                    esResponse: null,
+                    esError: { originalError: err, name: err.name, message: err.message },
+                    esRequestStatus: 2,
+                    operationName: name,
+                    kibanaRequest: {
+                      route: {
+                        path: '/internal/bsearch',
+                        method: 'POST',
+                      },
+                    } as any,
+                  }),
+                ],
+              },
+              status: FETCH_STATUS.SUCCESS,
+            });
           }
         },
       });

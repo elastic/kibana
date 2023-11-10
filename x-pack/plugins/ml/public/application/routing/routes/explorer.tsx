@@ -103,7 +103,7 @@ interface ExplorerUrlStateManagerProps {
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const {
-    services: { cases },
+    services: { cases, presentationUtil },
   } = useMlKibana();
 
   const [globalState] = useUrlState('_g');
@@ -253,6 +253,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }
 
   const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
+  const PresentationContextProvider = presentationUtil?.ContextProvider ?? React.Fragment;
 
   const casesPermissions = cases?.helpers.canUseCases();
 
@@ -277,25 +278,27 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       </MlPageHeader>
       <StyledComponentsThemeProvider>
         <CasesContext owner={[]} permissions={casesPermissions!}>
-          {jobsWithTimeRange.length === 0 ? (
-            <AnomalyDetectionEmptyState />
-          ) : (
-            <Explorer
-              {...{
-                explorerState,
-                overallSwimlaneData,
-                showCharts,
-                severity: tableSeverity.val,
-                stoppedPartitions,
-                invalidTimeRangeError,
-                selectedJobsRunning,
-                timeBuckets,
-                timefilter,
-                selectedCells,
-                swimLaneSeverity,
-              }}
-            />
-          )}
+          <PresentationContextProvider>
+            {jobsWithTimeRange.length === 0 ? (
+              <AnomalyDetectionEmptyState />
+            ) : (
+              <Explorer
+                {...{
+                  explorerState,
+                  overallSwimlaneData,
+                  showCharts,
+                  severity: tableSeverity.val,
+                  stoppedPartitions,
+                  invalidTimeRangeError,
+                  selectedJobsRunning,
+                  timeBuckets,
+                  timefilter,
+                  selectedCells,
+                  swimLaneSeverity,
+                }}
+              />
+            )}
+          </PresentationContextProvider>
         </CasesContext>
       </StyledComponentsThemeProvider>
     </div>

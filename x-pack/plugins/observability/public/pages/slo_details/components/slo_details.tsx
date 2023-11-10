@@ -13,19 +13,19 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { useLocation } from 'react-router-dom';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import { BurnRates } from './burn_rates';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
-import { BurnRates } from './burn_rates';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -42,6 +42,7 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
   const { search } = useLocation();
   const { data: activeAlerts } = useFetchActiveAlerts({
     sloIdsAndInstanceIds: [[slo.id, slo.instanceId ?? ALL_VALUE]],
+    shouldRefetch: isAutoRefreshing,
   });
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({

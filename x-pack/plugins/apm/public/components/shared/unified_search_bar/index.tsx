@@ -22,7 +22,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 import { UIProcessorEvent } from '../../../../common/processor_event';
 import { TimePickerTimeDefaults } from '../date_picker/typings';
-import { ApmPluginStartDeps } from '../../../plugin';
+import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { useProcessorEvent } from '../../../hooks/use_processor_event';
@@ -36,6 +36,8 @@ import {
   toBoolean,
   toNumber,
 } from '../../../context/url_params_context/helpers';
+import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
+import { SearchQueryActions } from '../../../services/telemetry';
 
 export const DEFAULT_REFRESH_INTERVAL = 60000;
 
@@ -121,6 +123,7 @@ export function UnifiedSearchBar({
   placeholder,
   value,
   showDatePicker = true,
+  showQueryInput = true,
   showSubmitButton = true,
   isClearable = true,
   boolFilter,
@@ -128,6 +131,7 @@ export function UnifiedSearchBar({
   placeholder?: string;
   value?: string;
   showDatePicker?: boolean;
+  showQueryInput?: boolean;
   showSubmitButton?: boolean;
   isClearable?: boolean;
   boolFilter?: QueryDslQueryContainer[];
@@ -138,11 +142,12 @@ export function UnifiedSearchBar({
     },
     core,
   } = useApmPluginContext();
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const {
     data: {
       query: { queryString: queryStringService, timefilter: timeFilterService },
     },
+    telemetry,
   } = services;
 
   const {
@@ -241,6 +246,7 @@ export function UnifiedSearchBar({
     payload: { dateRange: TimeRange; query?: Query },
     isUpdate?: boolean
   ) => {
+    let action = SearchQueryActions.Submit;
     if (dataView == null) {
       return;
     }
@@ -256,6 +262,9 @@ export function UnifiedSearchBar({
       if (!res) {
         return;
       }
+      const kueryFields = getKueryFields([
+        fromKueryExpression(query?.query as string),
+      ]);
 
       const existingQueryParams = toQuery(location.search);
       const updatedQueryWithTime = {
@@ -274,8 +283,14 @@ export function UnifiedSearchBar({
           search: fromQuery(newSearchParams),
         });
       } else {
+        action = SearchQueryActions.Refresh;
         onRefresh();
       }
+      telemetry.reportSearchQuerySubmitted({
+        kueryFields,
+        action,
+        timerange: `${rangeFrom} - ${rangeTo}`,
+      });
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
@@ -290,7 +305,7 @@ export function UnifiedSearchBar({
       placeholder={searchbarPlaceholder}
       useDefaultBehaviors={true}
       indexPatterns={dataView ? [dataView] : undefined}
-      showQueryInput={true}
+      showQueryInput={showQueryInput}
       showQueryMenu={false}
       showFilterBar={false}
       showDatePicker={showDatePicker}

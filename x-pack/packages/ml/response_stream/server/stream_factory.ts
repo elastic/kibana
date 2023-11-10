@@ -19,6 +19,7 @@ function isCompressedSream(arg: unknown): arg is zlib.Gzip {
   return typeof arg === 'object' && arg !== null && typeof (arg as zlib.Gzip).flush === 'function';
 }
 
+const FLUSH_KEEP_ALIVE_INTERVAL_MS = 500;
 const FLUSH_PAYLOAD_SIZE = 4 * 1024;
 
 class UncompressedResponseStream extends Stream.PassThrough {}
@@ -76,6 +77,7 @@ export function streamFactory<T = unknown>(
   const flushPayload = flushFix
     ? crypto.randomBytes(FLUSH_PAYLOAD_SIZE).toString('hex')
     : undefined;
+  let responseSizeSinceLastKeepAlive = 0;
 
   const stream = isCompressed ? zlib.createGzip() : new UncompressedResponseStream();
 
@@ -132,6 +134,25 @@ export function streamFactory<T = unknown>(
     // otherwise check the integrity of the data to be pushed.
     if (streamType === undefined) {
       streamType = typeof d === 'string' ? 'string' : 'ndjson';
+
+      // This is a fix for ndjson streaming with proxy configurations
+      // that buffer responses up to 4KB in size. We keep track of the
+      // size of the response sent so far and if it's still smaller than
+      // FLUSH_PAYLOAD_SIZE then we'll push an additional keep-alive object
+      // that contains the flush fix payload.
+      if (flushFix && streamType === 'ndjson') {
+        function repeat() {
+          if (!tryToEnd) {
+            if (responseSizeSinceLastKeepAlive < FLUSH_PAYLOAD_SIZE) {
+              push({ flushPayload } as unknown as T);
+            }
+            responseSizeSinceLastKeepAlive = 0;
+            setTimeout(repeat, FLUSH_KEEP_ALIVE_INTERVAL_MS);
+          }
+        }
+
+        repeat();
+      }
     } else if (streamType === 'string' && typeof d !== 'string') {
       logger.error('Must not push non-string chunks to a string based stream.');
       return;
@@ -148,13 +169,11 @@ export function streamFactory<T = unknown>(
 
     try {
       const line =
-        streamType === 'ndjson'
-          ? `${JSON.stringify({
-              ...d,
-              // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
-              ...(flushFix ? { flushPayload } : {}),
-            })}${DELIMITER}`
-          : d;
+        streamType === 'ndjson' ? `${JSON.stringify(d)}${DELIMITER}` : (d as unknown as string);
+
+      if (streamType === 'ndjson') {
+        responseSizeSinceLastKeepAlive += new Blob([line]).size;
+      }
 
       waitForCallbacks.push(1);
       const writeOk = stream.write(line, () => {
@@ -211,6 +230,7 @@ export function streamFactory<T = unknown>(
       // This disables response buffering on proxy servers (Nginx, uwsgi, fastcgi, etc.)
       // Otherwise, those proxies buffer responses up to 4/8 KiB.
       'X-Accel-Buffering': 'no',
+      'X-Content-Type-Options': 'nosniff',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',

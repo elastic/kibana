@@ -47,21 +47,22 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../tasks/common';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { getDetails } from '../../../tasks/rule_details';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
 
-import { RULE_CREATION } from '../../../urls/navigation';
-
-describe('Detection rules, override', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Rules override', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewOverrideRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');
@@ -71,14 +72,16 @@ describe('Detection rules, override', { tags: ['@ess', '@brokenInServerless'] },
 
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
   });
 
   it('Creates and enables a new custom rule with override option', function () {
-    visitWithoutDateRange(RULE_CREATION);
+    visit(CREATE_RULE_URL);
     fillDefineCustomRuleAndContinue(rule);
     fillAboutRuleWithOverrideAndContinue(rule);
     fillScheduleRuleAndContinue(rule);
     createAndEnableRule();
+    openRuleManagementPageViaBreadcrumbs();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -89,7 +92,7 @@ describe('Detection rules, override', { tags: ['@ess', '@brokenInServerless'] },
     cy.get(SEVERITY).should('have.text', 'High');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    goToRuleDetails();
+    goToRuleDetailsOf(rule.name);
 
     cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
@@ -143,8 +146,8 @@ describe('Detection rules, override', { tags: ['@ess', '@brokenInServerless'] },
     cy.get(ALERTS_COUNT)
       .invoke('text')
       .should('match', /^[1-9].+$/); // Any number of alerts
-    cy.get(ALERT_GRID_CELL).contains('auditbeat');
-    cy.get(ALERT_GRID_CELL).contains('critical');
+    cy.get(ALERT_GRID_CELL).contains('winlogbeat');
+    cy.get(ALERT_GRID_CELL).contains('high');
     cy.get(ALERT_GRID_CELL).contains('80');
   });
 });

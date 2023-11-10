@@ -18,9 +18,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import type { PluginManifest } from '@kbn/core-plugins-server';
-import { PluginWrapper } from './plugin';
 import { PluginType } from '@kbn/core-base-common';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { createRuntimePluginContractResolverMock } from './test_helpers';
+import { PluginWrapper } from './plugin';
 
 import {
   createPluginInitializerContext,
@@ -57,6 +58,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredPlugins: ['some-required-dep'],
     optionalPlugins: ['some-optional-dep'],
     requiredBundles: [],
+    runtimePluginDependencies: ['some-runtime-dep'],
     server: true,
     ui: true,
     owner: { name: 'Core' },
@@ -72,6 +74,7 @@ let env: Env;
 let coreContext: CoreContext;
 let instanceInfo: InstanceInfo;
 let nodeInfo: NodeInfo;
+let runtimeResolver: ReturnType<typeof createRuntimePluginContractResolverMock>;
 
 const setupDeps = coreInternalLifecycleMock.createInternalSetup();
 
@@ -82,7 +85,7 @@ beforeEach(() => {
     uuid: 'instance-uuid',
   };
   nodeInfo = nodeServiceMock.createInternalPrebootContract();
-
+  runtimeResolver = createRuntimePluginContractResolverMock();
   coreContext = { coreId, env, logger, configService: configService as any };
 });
 
@@ -112,6 +115,7 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.source).toBe('external'); // see below for test cases for non-external sources (OSS and X-Pack)
   expect(plugin.requiredPlugins).toEqual(['some-required-dep']);
   expect(plugin.optionalPlugins).toEqual(['some-optional-dep']);
+  expect(plugin.runtimePluginDependencies).toEqual(['some-runtime-dep']);
 });
 
 describe('`constructor` correctly sets non-external source', () => {
@@ -170,7 +174,7 @@ test('`setup` fails if `plugin` initializer is not exported', () => {
   });
 
   expect(() =>
-    plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
+    plugin.setup(createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver }), {})
   ).toThrowErrorMatchingInlineSnapshot(
     `"Plugin \\"some-plugin-id\\" does not export \\"plugin\\" definition (plugin-without-initializer-path)."`
   );
@@ -193,7 +197,7 @@ test('`setup` fails if plugin initializer is not a function', () => {
   });
 
   expect(() =>
-    plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
+    plugin.setup(createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver }), {})
   ).toThrowErrorMatchingInlineSnapshot(
     `"Definition of plugin \\"some-plugin-id\\" should be a function (plugin-with-wrong-initializer-path)."`
   );
@@ -218,7 +222,7 @@ test('`setup` fails if initializer does not return object', () => {
   mockPluginInitializer.mockReturnValue(null);
 
   expect(() =>
-    plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
+    plugin.setup(createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver }), {})
   ).toThrowErrorMatchingInlineSnapshot(
     `"Initializer for plugin \\"some-plugin-id\\" is expected to return plugin instance, but returned \\"null\\"."`
   );
@@ -244,7 +248,7 @@ test('`setup` fails if object returned from initializer does not define `setup` 
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
 
   expect(() =>
-    plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
+    plugin.setup(createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver }), {})
   ).toThrowErrorMatchingInlineSnapshot(
     `"Instance of plugin \\"some-plugin-id\\" does not define \\"setup\\" function."`
   );
@@ -270,7 +274,7 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
   const mockPluginInstance = { setup: jest.fn().mockResolvedValue({ contract: 'yes' }) };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
 
-  const setupContext = createPluginSetupContext(coreContext, setupDeps, plugin);
+  const setupContext = createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver });
   const setupDependencies = { 'some-required-dep': { contract: 'no' } };
   await expect(plugin.setup(setupContext, setupDependencies)).resolves.toEqual({ contract: 'yes' });
 
@@ -450,7 +454,7 @@ test('`stop` does nothing if plugin does not define `stop` function', async () =
   });
 
   mockPluginInitializer.mockReturnValue({ setup: jest.fn() });
-  await plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {});
+  await plugin.setup(createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver }), {});
 
   await expect(plugin.stop()).resolves.toBeUndefined();
 });
@@ -473,7 +477,7 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
 
   const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
-  await plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {});
+  await plugin.setup(createPluginSetupContext({ deps: setupDeps, plugin, runtimeResolver }), {});
 
   await expect(plugin.stop()).resolves.toBeUndefined();
   expect(mockPluginInstance.stop).toHaveBeenCalledTimes(1);

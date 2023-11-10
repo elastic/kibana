@@ -10,9 +10,10 @@ import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useKibanaVersion } from '../../../../hooks';
+import { useAgentVersion, useAuthz } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -33,7 +34,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
   const hasFleetAllPrivileges = useAuthz().fleet.all;
-  const kibanaVersion = useKibanaVersion();
+  const latestAgentVersion = useAgentVersion();
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
@@ -41,6 +42,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
   const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState<boolean>(false);
   const isUnenrolling = agent.status === 'unenrolling';
+  const isAgentUpdating = isStuckInUpdating(agent);
 
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const onContextMenuChange = useCallback(
@@ -100,15 +102,34 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         icon="refresh"
-        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        disabled={!!latestAgentVersion && !isAgentUpgradeable(agent, latestAgentVersion)}
         onClick={() => {
           setIsUpgradeModalOpen(true);
         }}
         key="upgradeAgent"
+        data-test-subj="upgradeBtn"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.upgradeOneButton"
           defaultMessage="Upgrade agent"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
+  if (isAgentUpdating) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="refresh"
+        onClick={() => {
+          setIsUpgradeModalOpen(true);
+        }}
+        key="restartUpgradeAgent"
+        data-test-subj="restartUpgradeBtn"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.restartUpgradeOneButton"
+          defaultMessage="Restart upgrade"
         />
       </EuiContextMenuItem>
     );
@@ -180,6 +201,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               setIsUpgradeModalOpen(false);
               refreshAgent();
             }}
+            isUpdating={isAgentUpdating}
           />
         </EuiPortal>
       )}

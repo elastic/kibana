@@ -11,8 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
 
+import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
+
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
+import { useAuthz, useLink, useAgentVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -40,7 +42,7 @@ export const TableRowActions: React.FunctionComponent<{
   const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const isUnenrolling = agent.status === 'unenrolling';
-  const kibanaVersion = useKibanaVersion();
+  const latestAgentVersion = useAgentVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { diagnosticFileUploadEnabled, agentTamperProtectionEnabled } =
     ExperimentalFeaturesService.get();
@@ -105,10 +107,11 @@ export const TableRowActions: React.FunctionComponent<{
       <EuiContextMenuItem
         key="agentUpgradeBtn"
         icon="refresh"
-        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        disabled={!!latestAgentVersion && !isAgentUpgradeable(agent, latestAgentVersion)}
         onClick={() => {
           onUpgradeClick();
         }}
+        data-test-subj="upgradeBtn"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.upgradeOneButton"
@@ -116,6 +119,24 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>
     );
+
+    if (isStuckInUpdating(agent)) {
+      menuItems.push(
+        <EuiContextMenuItem
+          key="agentRestartUpgradeBtn"
+          icon="refresh"
+          onClick={() => {
+            onUpgradeClick();
+          }}
+          data-test-subj="restartUpgradeBtn"
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.restartUpgradeOneButton"
+            defaultMessage="Restart upgrade"
+          />
+        </EuiContextMenuItem>
+      );
+    }
 
     if (agentTamperProtectionEnabled && agent.policy_id) {
       menuItems.push(

@@ -27,7 +27,7 @@ import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
 import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { fetchSql } from './fetch_sql';
+import { fetchTextBased } from './fetch_text_based';
 import { InternalState } from '../services/discover_internal_state_container';
 
 export interface FetchDeps {
@@ -61,6 +61,7 @@ export function fetchAll(
     services,
     inspectorAdapters,
     savedSearch,
+    abortController,
   } = fetchDeps;
   const { data } = services;
   const searchSource = savedSearch.searchSource.createChild();
@@ -70,10 +71,10 @@ export function fetchAll(
     const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
     const recordRawType = getRawRecordType(query);
+    const useTextbased = recordRawType === RecordRawType.PLAIN;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus, recordRawType);
     }
-    const useSql = recordRawType === RecordRawType.PLAIN;
 
     if (recordRawType === RecordRawType.DOCUMENT) {
       // Update the base searchSource, base for all child fetches
@@ -92,14 +93,21 @@ export function fetchAll(
 
     // Start fetching all required requests
     const response =
-      useSql && query
-        ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
+      useTextbased && query
+        ? fetchTextBased(
+            query,
+            dataView,
+            data,
+            services.expressions,
+            inspectorAdapters,
+            abortController.signal
+          )
         : fetchDocuments(searchSource, fetchDeps);
-    const fetchType = useSql && query ? 'fetchSql' : 'fetchDocuments';
+    const fetchType = useTextbased && query ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, textBasedQueryColumns, interceptedWarnings }) => {
+      .then(({ records, textBasedQueryColumns, interceptedWarnings, textBasedHeaderWarning }) => {
         if (services.analytics) {
           const duration = window.performance.now() - startTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -125,7 +133,7 @@ export function fetchAll(
          * So it takes too long, a bad user experience, also a potential flakniess in tests
          */
         const fetchStatus =
-          useSql && (!prevQuery || !isEqual(query, prevQuery))
+          useTextbased && (!prevQuery || !isEqual(query, prevQuery))
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
 
@@ -133,12 +141,17 @@ export function fetchAll(
           fetchStatus,
           result: records,
           textBasedQueryColumns,
+          textBasedHeaderWarning,
           interceptedWarnings,
           recordRawType,
           query,
         });
 
         checkHitCount(dataSubjects.main$, records.length);
+      })
+      // In the case that the request was aborted (e.g. a refresh), swallow the abort error
+      .catch((e) => {
+        if (!abortController.signal.aborted) throw e;
       })
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out

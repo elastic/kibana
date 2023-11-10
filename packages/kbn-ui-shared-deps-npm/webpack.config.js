@@ -84,6 +84,10 @@ module.exports = (_, argv) => {
         '@emotion/cache',
         '@emotion/react',
         '@hello-pangea/dnd/dist/dnd.js',
+        '@reduxjs/toolkit',
+        'redux',
+        'react-redux',
+        'immer',
         '@tanstack/react-query',
         '@tanstack/react-query-devtools',
         'classnames',
@@ -103,6 +107,7 @@ module.exports = (_, argv) => {
         'react-router-dom-v5-compat',
         'react-router',
         'react',
+        'reselect',
         'rxjs',
         'rxjs/operators',
         'styled-components',
@@ -134,19 +139,6 @@ module.exports = (_, argv) => {
               loader: UiSharedDepsNpm.publicPathLoader,
               options: {
                 key: 'kbn-ui-shared-deps-npm',
-              },
-            },
-          ],
-        },
-        // @hello-pangea/dnd emits optional chaining that confuses webpack.
-        // We need to transform it using babel before going further
-        {
-          test: /@hello-pangea\/dnd\/dist\/dnd\.js$/,
-          use: [
-            {
-              loader: 'babel-loader',
-              options: {
-                plugins: [require.resolve('@babel/plugin-proposal-optional-chaining')],
               },
             },
           ],

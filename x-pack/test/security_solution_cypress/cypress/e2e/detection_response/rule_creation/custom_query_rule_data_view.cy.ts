@@ -50,9 +50,9 @@ import {
 
 import {
   getRulesManagementTableRows,
-  goToRuleDetails,
+  goToRuleDetailsOf,
 } from '../../../tasks/alerts_detection_rules';
-import { postDataView } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteDataView, postDataView } from '../../../tasks/common';
 import {
   createAndEnableRule,
   createRuleWithoutEnabling,
@@ -60,15 +60,16 @@ import {
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 
-import { login, visit } from '../../../tasks/login';
-import { getDetails } from '../../../tasks/rule_details';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../tasks/rules_management';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');
@@ -79,23 +80,26 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
-      /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we
-      are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
-      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive
-      cleaning in all the other tests. */
-      cy.task('esArchiverResetKibana');
       if (rule.data_view_id != null) {
         postDataView(rule.data_view_id);
       }
+      deleteAlertsAndRules();
       login();
     });
 
+    afterEach(() => {
+      if (rule.data_view_id != null) {
+        deleteDataView(rule.data_view_id);
+      }
+    });
+
     it('Creates and enables a new rule', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
+      openRuleManagementPageViaBreadcrumbs();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -105,7 +109,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
       cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-      goToRuleDetails();
+      goToRuleDetailsOf(rule.name);
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
@@ -149,7 +153,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
     });
 
     it('Creates and edits a new rule with a data view', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       cy.get(RULE_NAME_INPUT).clear();
       cy.get(RULE_NAME_INPUT).type(rule.name);
@@ -160,8 +164,9 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
 
       fillScheduleRuleAndContinue(rule);
       createRuleWithoutEnabling();
+      openRuleManagementPageViaBreadcrumbs();
 
-      goToRuleDetails();
+      goToRuleDetailsOf(rule.name);
 
       cy.get(EDIT_RULE_SETTINGS_LINK).click();
 

@@ -42,6 +42,10 @@ interface BaseProps {
    * The CSS class(es) for the root element.
    */
   className?: string;
+  /**
+   * CSS class to apply when the item is being dragged
+   */
+  dragClassName?: string;
 
   /**
    * The event handler that fires when an item
@@ -212,6 +216,7 @@ const removeSelection = () => {
 const DragInner = memo(function DragInner({
   dataTestSubj,
   className,
+  dragClassName,
   value,
   children,
   dndDispatch,
@@ -305,6 +310,18 @@ const DragInner = memo(function DragInner({
       // so we know we have DraggableProps if we reach this code.
       if (e && 'dataTransfer' in e) {
         e.dataTransfer.setData('text', value.humanData.label);
+
+        // Apply an optional class to the element being dragged so the ghost
+        // can be styled. We must add it to the actual element for a single
+        // frame before removing it so the ghost picks up the styling.
+        const current = e.currentTarget;
+
+        if (dragClassName && !current.classList.contains(dragClassName)) {
+          current.classList.add(dragClassName);
+          requestAnimationFrame(() => {
+            current.classList.remove(dragClassName);
+          });
+        }
       }
 
       // Chrome causes issues if you try to render from within a

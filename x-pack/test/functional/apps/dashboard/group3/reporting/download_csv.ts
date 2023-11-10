@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const navigateToDashboardApp = async () => {
     log.debug('in navigateToDashboardApp');
-    await PageObjects.common.navigateToApp('dashboard');
+    await PageObjects.dashboard.navigateToApp();
     await retry.tryForTime(10000, async () => {
       expect(await PageObjects.dashboard.onDashboardLandingPage()).to.be(true);
     });

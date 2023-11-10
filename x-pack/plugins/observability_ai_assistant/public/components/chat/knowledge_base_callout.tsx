@@ -89,6 +89,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
   } else if (!knowledgeBase.status.value?.ready && !knowledgeBase.status.error) {
     content = (
       <EuiLink
+        data-test-subj="observabilityAiAssistantKnowledgeBaseCalloutLink"
         onClick={() => {
           knowledgeBase.install();
         }}

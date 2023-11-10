@@ -83,6 +83,7 @@ export function OpenTelemetryInstructions({
           </EuiText>
           {value && (
             <EuiButtonIcon
+              data-test-subj="apmColumnsButton"
               aria-label={i18n.translate(
                 'xpack.apm.tutorial.config_otel.column.value.copyIconText',
                 {

@@ -13,6 +13,7 @@ export const ALERTS_PATH = '/alerts' as const;
 export const ALERT_DETAIL_PATH = '/alerts/:alertId' as const;
 export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been moved to its own app. Keeping around for redirecting purposes.
 export const RULES_PATH = '/alerts/rules' as const;
+export const RULES_LOGS_PATH = '/alerts/rules/logs' as const;
 export const RULE_DETAIL_PATH = '/alerts/rules/:ruleId' as const;
 export const SLOS_PATH = '/slos' as const;
 export const SLOS_WELCOME_PATH = '/slos/welcome' as const;
@@ -34,11 +35,19 @@ export const paths = {
     sloCreateWithEncodedForm: (encodedParams: string) =>
       `${OBSERVABILITY_BASE_PATH}${SLO_CREATE_PATH}?_a=${encodedParams}`,
     sloEdit: (sloId: string) => `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}`,
+    sloEditWithEncodedForm: (sloId: string, encodedParams: string) =>
+      `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/edit/${encodeURI(sloId)}?_a=${encodedParams}`,
     sloDetails: (sloId: string, instanceId?: string) =>
       !!instanceId
         ? `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}?instanceId=${encodeURI(
             instanceId
           )}`
         : `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}/${encodeURI(sloId)}`,
+  },
+};
+
+export const relativePaths = {
+  observability: {
+    ruleDetails: (ruleId: string) => `${RULES_PATH}/${encodeURI(ruleId)}`,
   },
 };

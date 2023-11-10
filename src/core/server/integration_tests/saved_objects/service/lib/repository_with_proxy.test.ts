@@ -30,6 +30,7 @@ import {
   declarePostPitRoute,
   declarePostUpdateByQueryRoute,
   declarePassthroughRoute,
+  declareIndexRoute,
   setProxyInterrupt,
   allCombinationsPermutations,
 } from './repository_with_proxy_utils';
@@ -113,6 +114,7 @@ describe('404s from proxies', () => {
         declarePostSearchRoute(hapiServer, esHostname, esPort, kbnIndexPath);
         declarePostPitRoute(hapiServer, esHostname, esPort, kbnIndexPath);
         declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort, kbnIndexPath);
+        declareIndexRoute(hapiServer, esHostname, esPort, kbnIndexPath);
       });
 
     // register index-agnostic routes
@@ -396,7 +398,9 @@ describe('404s from proxies', () => {
       expect(genericNotFoundEsUnavailableError(myError, 'my_type', 'myTypeId1'));
     });
 
-    it('returns an EsUnavailable error on `update` requests that are interrupted', async () => {
+    it('returns an EsUnavailable error on `update` requests that are interrupted during index', async () => {
+      setProxyInterrupt('update');
+
       let updateError;
       try {
         await repository.update('my_type', 'myTypeToUpdate', {
@@ -406,7 +410,24 @@ describe('404s from proxies', () => {
       } catch (err) {
         updateError = err;
       }
+
       expect(genericNotFoundEsUnavailableError(updateError));
+    });
+
+    it('returns an EsUnavailable error on `update` requests that are interrupted during preflight', async () => {
+      setProxyInterrupt('updatePreflight');
+
+      let updateError;
+      try {
+        await repository.update('my_type', 'myTypeToUpdate', {
+          title: 'updated title',
+        });
+        expect(false).toBe(true); // Should not get here (we expect the call to throw)
+      } catch (err) {
+        updateError = err;
+      }
+
+      expect(genericNotFoundEsUnavailableError(updateError, 'my_type', 'myTypeToUpdate'));
     });
 
     it('returns an EsUnavailable error on `bulkCreate` requests with a 404 proxy response and wrong product header', async () => {

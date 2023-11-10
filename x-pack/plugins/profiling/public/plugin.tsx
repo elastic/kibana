@@ -16,13 +16,12 @@ import { i18n } from '@kbn/i18n';
 import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
-import { FlamegraphLocatorDefinition } from './locators/flamegraph_locator';
-import { StacktracesLocatorDefinition } from './locators/stacktraces_locator';
-import { TopNFunctionsLocatorDefinition } from './locators/topn_functions_locator';
+import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
+import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
 
-export type ProfilingPluginSetup = ReturnType<ProfilingPlugin['setup']>;
+export type ProfilingPluginSetup = void;
 export type ProfilingPluginStart = void;
 
 export class ProfilingPlugin implements Plugin {
@@ -83,6 +82,8 @@ export class ProfilingPlugin implements Plugin {
 
     pluginsSetup.observabilityShared.navigation.registerSections(section$);
 
+    const profilingFetchServices = getServices();
+
     coreSetup.application.register({
       id: 'profiling',
       title: 'Universal Profiling',
@@ -97,7 +98,6 @@ export class ProfilingPlugin implements Plugin {
           unknown
         ];
 
-        const profilingFetchServices = getServices();
         const { renderApp } = await import('./app');
 
         function pushKueryToSubject(location: Location) {
@@ -130,26 +130,25 @@ export class ProfilingPlugin implements Plugin {
       },
     });
 
-    return {
-      locators: {
-        flamegraphLocator: pluginsSetup.share.url.locators.create(
-          new FlamegraphLocatorDefinition()
-        ),
-        topNFunctionsLocator: pluginsSetup.share.url.locators.create(
-          new TopNFunctionsLocatorDefinition()
-        ),
-        stacktracesLocator: pluginsSetup.share.url.locators.create(
-          new StacktracesLocatorDefinition()
-        ),
-      },
-      hasSetup: async () => {
-        const response = (await coreSetup.http.get('/internal/profiling/setup/es_resources')) as {
-          has_setup: boolean;
-          has_data: boolean;
+    const getProfilingEmbeddableDependencies =
+      async (): Promise<ProfilingEmbeddablesDependencies> => {
+        const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
+          CoreStart,
+          ProfilingPluginPublicStartDeps,
+          unknown
+        ];
+        return {
+          coreStart,
+          coreSetup,
+          pluginsStart,
+          pluginsSetup,
+          profilingFetchServices,
         };
-        return response.has_setup;
-      },
-    };
+      };
+
+    registerEmbeddables(pluginsSetup.embeddable, getProfilingEmbeddableDependencies);
+
+    return {};
   }
 
   public start(core: CoreStart) {

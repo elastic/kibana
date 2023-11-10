@@ -22,8 +22,9 @@ import {
 } from '@elastic/eui';
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
-import { INDEX_OPEN } from '../../../../../../common/constants';
-import { AppContextConsumer, AppContext } from '../../../../app_context';
+import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
+import { getIndexDetailsLink } from '../../../../services/routing';
+import { AppContext } from '../../../../app_context';
 
 export class IndexActionsContextMenu extends Component {
   static contextType = AppContext;
@@ -46,8 +47,11 @@ export class IndexActionsContextMenu extends Component {
   confirmAction = (isActionConfirmed) => {
     this.setState({ isActionConfirmed });
   };
-  panels({ services: { extensionsService }, core: { getUrlForApp } }) {
+  panels() {
     const {
+      services: { extensionsService },
+      core: { getUrlForApp },
+      history,
       config: { enableIndexActions },
     } = this.context;
 
@@ -57,10 +61,6 @@ export class IndexActionsContextMenu extends Component {
       flushIndices,
       refreshIndices,
       clearCacheIndices,
-      editIndex,
-      showMapping,
-      showStats,
-      showSettings,
       isOnListView,
       indexNames,
       indexStatusByName,
@@ -77,49 +77,43 @@ export class IndexActionsContextMenu extends Component {
     const items = [];
     if (isOnListView && selectedIndexCount === 1) {
       items.push({
-        'data-test-subj': 'showSettingsIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel', {
-          defaultMessage:
-            'Show {selectedIndexCount, plural, one {index} other {indices} } settings',
-          values: { selectedIndexCount },
+        'data-test-subj': 'showOverviewIndexMenuButton',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexOverviewLabel', {
+          defaultMessage: 'Show index overview',
         }),
         onClick: () => {
-          this.closePopoverAndExecute(showSettings);
+          history.push(getIndexDetailsLink(indexNames[0], IndexDetailsSection.Overview));
+        },
+      });
+      items.push({
+        'data-test-subj': 'showSettingsIndexMenuButton',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel', {
+          defaultMessage: 'Show index settings',
+        }),
+        onClick: () => {
+          history.push(getIndexDetailsLink(indexNames[0], IndexDetailsSection.Settings));
         },
       });
       items.push({
         'data-test-subj': 'showMappingsIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexMappingLabel', {
-          defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } mapping',
-          values: { selectedIndexCount },
+          defaultMessage: 'Show index mapping',
         }),
         onClick: () => {
-          this.closePopoverAndExecute(showMapping);
+          history.push(getIndexDetailsLink(indexNames[0], IndexDetailsSection.Mappings));
         },
       });
       if (allOpen && enableIndexActions) {
         items.push({
           'data-test-subj': 'showStatsIndexMenuButton',
           name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel', {
-            defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } stats',
-            values: { selectedIndexCount },
+            defaultMessage: 'Show index stats',
           }),
           onClick: () => {
-            this.closePopoverAndExecute(showStats);
+            history.push(getIndexDetailsLink(indexNames[0], IndexDetailsSection.Stats));
           },
         });
       }
-      items.push({
-        'data-test-subj': 'editIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.editIndexSettingsLabel', {
-          defaultMessage:
-            'Edit {selectedIndexCount, plural, one {index} other {indices} } settings',
-          values: { selectedIndexCount },
-        }),
-        onClick: () => {
-          this.closePopoverAndExecute(editIndex);
-        },
-      });
     }
     if (allOpen && enableIndexActions) {
       items.push({
@@ -451,68 +445,57 @@ export class IndexActionsContextMenu extends Component {
   };
 
   render() {
+    const { indexNames } = this.props;
+    const selectedIndexCount = indexNames.length;
+    const {
+      iconSide = 'right',
+      anchorPosition = 'rightUp',
+      label = i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonLabel', {
+        defaultMessage:
+          'Manage {selectedIndexCount, plural, one {index} other {{selectedIndexCount} indices}}',
+        values: { selectedIndexCount },
+      }),
+      iconType = 'arrowDown',
+      fill = true,
+      isLoading = false,
+    } = this.props;
+
+    const panels = this.panels();
+
+    const button = (
+      <EuiButton
+        data-test-subj="indexActionsContextMenuButton"
+        iconSide={iconSide}
+        aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel', {
+          defaultMessage: '{selectedIndexCount, plural, one {index} other {indices} } options',
+          values: { selectedIndexCount },
+        })}
+        onClick={this.onButtonClick}
+        iconType={iconType}
+        fill={fill}
+        isLoading={isLoading}
+      >
+        {label}
+      </EuiButton>
+    );
+
     return (
-      <AppContextConsumer>
-        {(appDependencies) => {
-          const { indexNames } = this.props;
-          const selectedIndexCount = indexNames.length;
-          const {
-            iconSide = 'right',
-            anchorPosition = 'rightUp',
-            label = i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonLabel', {
-              defaultMessage:
-                'Manage {selectedIndexCount, plural, one {index} other {{selectedIndexCount} indices}}',
-              values: { selectedIndexCount },
-            }),
-            iconType = 'arrowDown',
-            fill = true,
-            isLoading = false,
-          } = this.props;
-
-          const panels = this.panels(appDependencies);
-
-          const button = (
-            <EuiButton
-              data-test-subj="indexActionsContextMenuButton"
-              iconSide={iconSide}
-              aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel', {
-                defaultMessage:
-                  '{selectedIndexCount, plural, one {index} other {indices} } options',
-                values: { selectedIndexCount },
-              })}
-              onClick={this.onButtonClick}
-              iconType={iconType}
-              fill={fill}
-              isLoading={isLoading}
-            >
-              {label}
-            </EuiButton>
-          );
-
-          return (
-            <div>
-              {this.state.renderConfirmModal
-                ? this.state.renderConfirmModal(this.closeConfirmModal)
-                : null}
-              <EuiPopover
-                id="contextMenuIndices"
-                button={button}
-                isOpen={this.state.isPopoverOpen}
-                closePopover={this.closePopover}
-                panelPaddingSize="none"
-                anchorPosition={anchorPosition}
-                repositionOnScroll
-              >
-                <EuiContextMenu
-                  data-test-subj="indexContextMenu"
-                  initialPanelId={0}
-                  panels={panels}
-                />
-              </EuiPopover>
-            </div>
-          );
-        }}
-      </AppContextConsumer>
+      <div>
+        {this.state.renderConfirmModal
+          ? this.state.renderConfirmModal(this.closeConfirmModal)
+          : null}
+        <EuiPopover
+          id="contextMenuIndices"
+          button={button}
+          isOpen={this.state.isPopoverOpen}
+          closePopover={this.closePopover}
+          panelPaddingSize="none"
+          anchorPosition={anchorPosition}
+          repositionOnScroll
+        >
+          <EuiContextMenu data-test-subj="indexContextMenu" initialPanelId={0} panels={panels} />
+        </EuiPopover>
+      </div>
     );
   }
 }

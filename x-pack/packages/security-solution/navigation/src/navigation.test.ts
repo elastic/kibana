@@ -7,6 +7,7 @@
 import { useGetAppUrl, useNavigateTo } from './navigation';
 import { mockGetUrlForApp, mockNavigateToApp, mockNavigateToUrl } from '../mocks/context';
 import { renderHook } from '@testing-library/react-hooks';
+import { fireEvent } from '@testing-library/react';
 
 jest.mock('./context');
 
@@ -60,6 +61,23 @@ describe('yourFile', () => {
       // Verify dependencies were called with correct parameters
       expect(mockNavigateToApp).not.toHaveBeenCalled();
       expect(mockNavigateToUrl).toHaveBeenCalledWith(URL);
+    });
+
+    it('navigates restoring the scroll', async () => {
+      const { result } = renderHook(useNavigateTo);
+      const { navigateTo } = result.current;
+
+      const currentScrollY = 100;
+      window.scrollY = currentScrollY;
+      window.scrollTo = jest.fn();
+
+      navigateTo({ url: URL, restoreScroll: true });
+
+      // Simulates the browser scroll reset event
+      fireEvent(window, new Event('scroll'));
+
+      expect(window.scrollTo).toHaveBeenCalledTimes(1);
+      expect(window.scrollTo).toHaveBeenCalledWith(0, currentScrollY);
     });
   });
 });

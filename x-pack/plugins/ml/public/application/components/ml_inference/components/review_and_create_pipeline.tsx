@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { useMlKibana } from '../../../contexts/kibana';
+import { ReindexWithPipeline } from './reindex_with_pipeline';
 
 const MANAGEMENT_APP_ID = 'management';
 
@@ -33,6 +34,7 @@ interface Props {
   pipelineName: string;
   pipelineCreated: boolean;
   pipelineError?: string;
+  sourceIndex?: string;
 }
 
 export const ReviewAndCreatePipeline: FC<Props> = ({
@@ -41,6 +43,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
   pipelineName,
   pipelineCreated,
   pipelineError,
+  sourceIndex,
 }) => {
   const {
     services: {
@@ -48,6 +51,10 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
       docLinks: { links },
     },
   } = useMlKibana();
+
+  const [isNextStepsAccordionOpen, setIsNextStepsAccordionOpen] = useState<'open' | 'closed'>(
+    'closed'
+  );
 
   const inferenceProcessorLink =
     modelType === 'regression'
@@ -112,11 +119,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                     defaultMessage="You can use this pipeline to infer against new data or infer against existing data by {reindexLink} with the pipeline."
                     values={{
                       reindexLink: (
-                        <EuiLink
-                          href={links.upgradeAssistant.reindexWithPipeline}
-                          target="_blank"
-                          external
-                        >
+                        <EuiLink onClick={() => setIsNextStepsAccordionOpen('open')}>
                           {'reindexing'}
                         </EuiLink>
                       ),
@@ -197,6 +200,28 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
               ) : null}
             </p>
           </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          {pipelineCreated && sourceIndex ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiAccordion
+                id={accordionId}
+                buttonContent={
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.nextStepsLabel"
+                    defaultMessage="Next steps"
+                  />
+                }
+                forceState={isNextStepsAccordionOpen}
+                onToggle={(isOpen) => {
+                  setIsNextStepsAccordionOpen(isOpen ? 'open' : 'closed');
+                }}
+              >
+                <ReindexWithPipeline pipelineName={pipelineName} sourceIndex={sourceIndex} />
+              </EuiAccordion>
+            </>
+          ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow>
           {pipelineCreated ? (

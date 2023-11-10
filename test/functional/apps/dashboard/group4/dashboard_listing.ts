@@ -14,8 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
   const listingTable = getService('listingTable');
-  const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard listing page', function describeIndexTests() {
@@ -217,12 +215,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await listingTable.searchForItemWithName(`${dashboardName}-editMetaData`);
-        await testSubjects.click('inspect-action');
-        await testSubjects.setValue('nameInput', 'new title');
-        await testSubjects.setValue('descriptionInput', 'new description');
-        await retry.try(async () => {
-          await testSubjects.click('saveButton');
-          await testSubjects.missingOrFail('flyoutTitle');
+        await listingTable.inspectVisualization();
+        await listingTable.editVisualizationDetails({
+          title: 'new title',
+          description: 'new description',
         });
 
         await listingTable.searchAndExpectItemsCount('dashboard', 'new title', 1);

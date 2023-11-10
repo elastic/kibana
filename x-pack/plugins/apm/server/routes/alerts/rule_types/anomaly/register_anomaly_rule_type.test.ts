@@ -103,7 +103,11 @@ describe('Transaction duration anomaly alert', () => {
         ml,
       });
 
-      const params = { anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR };
+      const params = {
+        anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
+        windowSize: 5,
+        windowUnit: 'm',
+      };
 
       await executor({ params });
 

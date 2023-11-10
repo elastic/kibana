@@ -47,6 +47,7 @@ export const casesQueriesKeys = {
   categories: () => [...casesQueriesKeys.all, 'categories'] as const,
   alertFeatureIds: (alertRegistrationContexts: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
+  configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
 };
 
 export const casesMutationsKeys = {
@@ -59,4 +60,5 @@ export const casesMutationsKeys = {
   deleteComment: ['delete-comment'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
+  persistCaseConfiguration: ['persist-case-configuration'] as const,
 };

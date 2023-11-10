@@ -10,8 +10,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../lib/kibana';
 
 export const LandingPageComponent = memo(() => {
-  const { getStartedComponent$ } = useKibana().services;
-  const GetStartedComponent = useObservable(getStartedComponent$);
+  const { getComponent$ } = useKibana().services;
+  const GetStartedComponent = useObservable(getComponent$('getStarted'));
   return <>{GetStartedComponent}</>;
 });
 

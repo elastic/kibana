@@ -106,6 +106,16 @@ export interface CloudSetup {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectId?: string;
+    /**
+     * The serverless project name.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectName?: string;
+    /**
+     * The serverless project type.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectType?: string;
   };
 }
 
@@ -142,13 +152,19 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
-    const isServerlessEnabled = !!this.config.serverless?.project_id;
+    const projectId = this.config.serverless?.project_id;
+    const projectType = this.config.serverless?.project_type;
+    const isServerlessEnabled = !!projectId;
+    const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
 
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
     registerCloudUsageCollector(usageCollection, {
       isCloudEnabled,
       trialEndDate: this.config.trial_end_date,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
+      deploymentId,
+      projectId,
+      projectType,
     });
 
     let decodedId: DecodedCloudId | undefined;
@@ -160,7 +176,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
       instanceSizeMb: readInstanceSizeMb(),
-      deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
+      deploymentId,
       elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
@@ -174,7 +190,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       },
       isServerlessEnabled,
       serverless: {
-        projectId: this.config.serverless?.project_id,
+        projectId,
+        projectName: this.config.serverless?.project_name,
+        projectType,
       },
     };
   }

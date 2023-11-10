@@ -12,17 +12,12 @@ import {
   LicensingPluginSetup,
   LicensingApiRequestHandlerContext,
 } from '@kbn/licensing-plugin/server';
-import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
-import {
-  ApmRuleType,
-  APM_SERVER_FEATURE_ID,
-} from '../common/rules/apm_rule_types';
 
-const ruleTypes = [
-  ...Object.values(ApmRuleType),
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-];
+import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
+
+const ruleTypes = Object.values(ApmRuleType);
 
 export const APM_FEATURE = {
   id: APM_SERVER_FEATURE_ID,

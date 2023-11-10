@@ -67,7 +67,7 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: createOptionsSchema, // same schema as "create"
+        schema: createOptionsSchema, // same as create
       },
       data: {
         schema: mapAttributesSchema,

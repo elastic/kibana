@@ -7,12 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { defer, from } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { rateLimitingForkJoin } from './utils';
 import { PersistenceAPI } from '../types';
 
 import { createDataViewCache } from '.';
@@ -241,12 +239,6 @@ export interface DataViewsServicePublicMethods {
    */
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
   /**
-   * Get existing index pattern list by providing string array index pattern list.
-   * @param indices - index pattern list
-   * @returns index pattern list of index patterns that match indices
-   */
-  getExistingIndices: (indices: string[]) => Promise<string[]>;
-  /**
    * Get list of data view ids.
    * @param refresh - clear cache and fetch from server
    */
@@ -294,6 +286,11 @@ export interface DataViewsServicePublicMethods {
     ignoreErrors?: boolean,
     displayErrors?: boolean
   ) => Promise<DataView | void | Error>;
+
+  /**
+   * Returns whether a default data view exists.
+   */
+  defaultDataViewExists: () => Promise<boolean>;
 }
 
 /**
@@ -517,41 +514,6 @@ export class DataViewsService {
       metaFields,
     });
     return fields;
-  };
-
-  /**
-   * Get existing index pattern list by providing string array index pattern list.
-   * @param indices index pattern list
-   * @returns index pattern list
-   */
-  getExistingIndices = async (indices: string[]): Promise<string[]> => {
-    const indicesObs = indices.map((pattern) => {
-      // when checking a negative pattern, check if the positive pattern exists
-      const indexToQuery = pattern.trim().startsWith('-')
-        ? pattern.trim().substring(1)
-        : pattern.trim();
-      return defer(() =>
-        from(
-          this.getFieldsForWildcard({
-            // check one field to keep request fast/small
-            fields: ['_id'],
-            // true so no errors thrown in browser
-            allowNoIndex: true,
-            pattern: indexToQuery,
-          })
-        )
-      );
-    });
-
-    return new Promise<boolean[]>((resolve) => {
-      rateLimitingForkJoin(indicesObs, 3, []).subscribe((value) => {
-        resolve(value.map((v) => v.length > 0));
-      });
-    })
-      .then((allPatterns: boolean[]) =>
-        indices.filter((pattern, i, self) => self.indexOf(pattern) === i && allPatterns[i])
-      )
-      .catch(() => indices);
   };
 
   /**
@@ -1184,24 +1146,7 @@ export class DataViewsService {
     return this.savedObjectsClient.delete(indexPatternId);
   }
 
-  /**
-   * Returns the default data view as an object.
-   * If no default is found, or it is missing
-   * another data view is selected as default and returned.
-   * If no possible data view found to become a default returns null.
-   *
-   * @param {Object} options
-   * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
-   * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
-   * @returns default data view
-   */
-  async getDefaultDataView(
-    options: {
-      displayErrors?: boolean;
-      refreshFields?: boolean;
-    } = {}
-  ): Promise<DataView | null> {
-    const { displayErrors = true, refreshFields } = options;
+  private async getDefaultDataViewId() {
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
@@ -1220,6 +1165,36 @@ export class DataViewsService {
         await this.config.set('defaultIndex', defaultId);
       }
     }
+
+    return defaultId;
+  }
+
+  /**
+   * Returns whether a default data view exists.
+   */
+  async defaultDataViewExists() {
+    return !!(await this.getDefaultDataViewId());
+  }
+
+  /**
+   * Returns the default data view as an object.
+   * If no default is found, or it is missing
+   * another data view is selected as default and returned.
+   * If no possible data view found to become a default returns null.
+   *
+   * @param {Object} options
+   * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
+   * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
+   * @returns default data view
+   */
+  async getDefaultDataView(
+    options: {
+      displayErrors?: boolean;
+      refreshFields?: boolean;
+    } = {}
+  ): Promise<DataView | null> {
+    const { displayErrors = true, refreshFields } = options;
+    const defaultId = await this.getDefaultDataViewId();
 
     if (defaultId) {
       return this.get(defaultId, displayErrors, refreshFields);

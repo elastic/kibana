@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useCloneSlo() {
   const {
@@ -21,7 +24,7 @@ export function useCloneSlo() {
 
   return useMutation<
     CreateSLOResponse,
-    string,
+    ServerError,
     { slo: CreateSLOInput; originalSloId?: string },
     { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
@@ -47,7 +50,7 @@ export function useCloneSlo() {
           total: previousData?.total ? previousData.total + 1 : 1,
           results: [
             ...(previousData?.results ?? []),
-            { ...originalSlo, name: slo.name, id: uuidv1(), summary: undefined },
+            { ...originalSlo, name: slo.name, id: uuidv4(), summary: undefined },
           ],
         };
 
@@ -58,16 +61,17 @@ export function useCloneSlo() {
         return { queryKey, previousData };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, { slo }, context) => {
+      onError: (error, { slo }, context) => {
         if (context?.previousData && context?.queryKey) {
           queryClient.setQueryData(context.queryKey, context.previousData);
         }
-        toasts.addDanger(
-          i18n.translate('xpack.observability.slo.clone.errorNotification', {
+
+        toasts.addError(new Error(error.body?.message ?? error.message), {
+          title: i18n.translate('xpack.observability.slo.clone.errorNotification', {
             defaultMessage: 'Failed to clone {name}',
             values: { name: slo.name },
-          })
-        );
+          }),
+        });
       },
       onSuccess: (_data, { slo }) => {
         toasts.addSuccess(

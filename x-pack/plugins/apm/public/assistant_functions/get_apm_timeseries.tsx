@@ -140,9 +140,8 @@ export function registerGetApmTimeseriesFunction({
                   description: 'The name of the service',
                 },
                 'service.environment': {
-                  ...NON_EMPTY_STRING,
                   description:
-                    'The environment that the service is running in.',
+                    'The environment that the service is running in. If undefined, all environments will be included. Only use this if you have confirmed the environment that the service is running in.',
                 },
                 filter: {
                   type: 'string',
@@ -160,12 +159,7 @@ export function registerGetApmTimeseriesFunction({
                     'The offset. Right: 15m. 8h. 1d. Wrong: -15m. -8h. -1d.',
                 },
               },
-              required: [
-                'service.name',
-                'service.environment',
-                'timeseries',
-                'title',
-              ],
+              required: ['service.name', 'timeseries', 'title'],
             },
           },
         },

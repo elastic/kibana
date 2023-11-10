@@ -45,7 +45,7 @@ describe('RuleActionsOverflow', () => {
     jest.clearAllMocks();
   });
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('rules details menu panel', () => {

@@ -17,6 +17,7 @@ import {
 import DateMath from '@kbn/datemath';
 import { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -27,7 +28,6 @@ import {
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { useNodeDetailsRedirect } from '../../../link_to';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 
 export interface Props {
@@ -105,12 +105,13 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
     : [];
 
   const nodeType = source && options.groupBy && fieldToNodeType(source, options.groupBy);
+
   const nodeDetailLinkProps = useLinkProps({
     app: 'metrics',
     ...(nodeType
       ? getNodeDetailUrl({
-          nodeType,
-          nodeId: series.id,
+          assetType: nodeType,
+          assetId: series.id,
           search: {
             from: dateMathExpressionToEpoch(timeRange.from),
             to: dateMathExpressionToEpoch(timeRange.to, true),

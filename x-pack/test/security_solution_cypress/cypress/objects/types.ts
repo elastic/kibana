@@ -12,3 +12,16 @@ export type CreateRulePropsRewrites<CreateRuleProps> = Partial<Exclude<CreateRul
 export interface Actions {
   connectors: Connectors[];
 }
+
+export interface SecurityEvent {
+  [field: string]: unknown;
+  '@timestamp': number;
+  ecs: {
+    version: string;
+  };
+  event: {
+    kind: 'event';
+    category: string;
+    type: string;
+  };
+}

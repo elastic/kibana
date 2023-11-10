@@ -36,6 +36,7 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
       css={{ top: 4 }}
       button={
         <EuiButtonIcon
+          data-test-subj="syntheticsWaterfallMarkerIconButton"
           css={{ color: euiTheme.colors.mediumShade }}
           aria-label={i18n.translate(
             'xpack.synthetics.synthetics.markers.openEmbeddableButton.label',

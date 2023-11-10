@@ -9,6 +9,7 @@ import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../common/constants';
+import { escapeLuceneChars } from '../utils/escape_lucene_chars';
 
 export const fetchSearchResults = async (
   client: IScopedClusterClient,
@@ -21,7 +22,7 @@ export const fetchSearchResults = async (
     from,
     index: indexName,
     size,
-    ...(!!query ? { q: query.replace(/"/g, '\\"') } : {}),
+    ...(!!query ? { q: escapeLuceneChars(query) } : {}),
   });
   return results;
 };

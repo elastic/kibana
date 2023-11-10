@@ -6,13 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { EsQuerySortValue, SortOptions } from './types';
+import { EsQuerySortValue } from './types';
+
+type FieldSortOptions = estypes.FieldSort &
+  estypes.ScoreSort &
+  estypes.GeoDistanceSort &
+  Omit<estypes.ScriptSort, 'script'> & {
+    script?: estypes.ScriptSort['script'];
+  };
 
 export function normalizeSortRequest(
   sortObject: EsQuerySortValue | EsQuerySortValue[],
   indexPattern: DataView | string | undefined,
-  defaultSortOptions: SortOptions = {}
+  defaultSortOptions: FieldSortOptions | string = {}
 ) {
   const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
   return sortArray.map(function (sortable) {
@@ -28,7 +36,7 @@ export function normalizeSortRequest(
 function normalize(
   sortable: EsQuerySortValue,
   indexPattern: DataView | string | undefined,
-  defaultSortOptions: any
+  defaultSortOptions: FieldSortOptions | string
 ) {
   const [[sortField, sortOrder]] = Object.entries(sortable);
   const order = typeof sortOrder === 'object' ? sortOrder : { order: sortOrder };
@@ -52,13 +60,16 @@ function normalize(
   // FIXME: for unknown reason on the server this setting is serialized
   // https://github.com/elastic/kibana/issues/89902
   if (typeof defaultSortOptions === 'string') {
-    defaultSortOptions = JSON.parse(defaultSortOptions);
+    defaultSortOptions = JSON.parse(defaultSortOptions) as FieldSortOptions;
   }
   // Don't include unmapped_type for _score field
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { unmapped_type, ...otherSortOptions } = defaultSortOptions;
   return {
-    [sortField]: { ...order, ...(sortField === '_score' ? otherSortOptions : defaultSortOptions) },
+    [sortField]: {
+      ...order,
+      ...(sortField === '_score' ? otherSortOptions : defaultSortOptions),
+    },
   };
 }
 

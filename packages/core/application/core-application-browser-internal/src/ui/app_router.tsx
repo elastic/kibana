@@ -16,11 +16,14 @@ import useObservable from 'react-use/lib/useObservable';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
 
 interface Props {
+  analytics: AnalyticsServiceStart;
   mounters: Map<string, Mounter>;
   history: History;
   theme$: Observable<CoreTheme>;
@@ -37,6 +40,7 @@ interface Params {
 
 export const AppRouter: FunctionComponent<Props> = ({
   history,
+  analytics,
   mounters,
   theme$,
   setAppLeaveHandler,
@@ -54,61 +58,65 @@ export const AppRouter: FunctionComponent<Props> = ({
   const showPlainSpinner = useObservable(hasCustomBranding$ ?? EMPTY, false);
 
   return (
-    <Router history={history}>
-      <Routes>
-        {[...mounters].map(([appId, mounter]) => (
-          <Route
-            key={mounter.appRoute}
-            path={mounter.appRoute}
-            exact={mounter.exactRoute}
-            render={({ match: { path } }) => (
-              <AppContainer
-                appPath={path}
-                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                createScopedHistory={createScopedHistory}
-                {...{
-                  appId,
-                  mounter,
-                  setAppLeaveHandler,
-                  setAppActionMenu,
-                  setIsMounting,
-                  theme$,
-                  showPlainSpinner,
-                }}
+    <KibanaErrorBoundaryProvider analytics={analytics}>
+      <KibanaErrorBoundary>
+        <Router history={history}>
+          <Routes>
+            {[...mounters].map(([appId, mounter]) => (
+              <Route
+                key={mounter.appRoute}
+                path={mounter.appRoute}
+                exact={mounter.exactRoute}
+                render={({ match: { path } }) => (
+                  <AppContainer
+                    appPath={path}
+                    appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                    createScopedHistory={createScopedHistory}
+                    {...{
+                      appId,
+                      mounter,
+                      setAppLeaveHandler,
+                      setAppActionMenu,
+                      setIsMounting,
+                      theme$,
+                      showPlainSpinner,
+                    }}
+                  />
+                )}
               />
-            )}
-          />
-        ))}
-        {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
-        <Route
-          path="/app/:appId"
-          render={({
-            match: {
-              params: { appId },
-              url,
-            },
-          }: RouteComponentProps<Params>) => {
-            // the id/mounter retrieval can be removed once #76348 is addressed
-            const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
-            return (
-              <AppContainer
-                appPath={url}
-                appId={id ?? appId}
-                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                createScopedHistory={createScopedHistory}
-                {...{
-                  mounter,
-                  setAppLeaveHandler,
-                  setAppActionMenu,
-                  setIsMounting,
-                  theme$,
-                  showPlainSpinner,
-                }}
-              />
-            );
-          }}
-        />
-      </Routes>
-    </Router>
+            ))}
+            {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
+            <Route
+              path="/app/:appId"
+              render={({
+                match: {
+                  params: { appId },
+                  url,
+                },
+              }: RouteComponentProps<Params>) => {
+                // the id/mounter retrieval can be removed once #76348 is addressed
+                const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
+                return (
+                  <AppContainer
+                    appPath={url}
+                    appId={id ?? appId}
+                    appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                    createScopedHistory={createScopedHistory}
+                    {...{
+                      mounter,
+                      setAppLeaveHandler,
+                      setAppActionMenu,
+                      setIsMounting,
+                      theme$,
+                      showPlainSpinner,
+                    }}
+                  />
+                );
+              }}
+            />
+          </Routes>
+        </Router>
+      </KibanaErrorBoundary>
+    </KibanaErrorBoundaryProvider>
   );
 };

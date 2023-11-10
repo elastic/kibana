@@ -15,11 +15,13 @@ import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { DocLinks } from '@kbn/doc-links';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { isObject } from 'lodash';
 import {
   ALERTS_PATH,
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
+  DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   RULES_PATH,
   SERVER_APP_ID,
@@ -157,7 +159,10 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   response: StrategyResponseType<T> | TimelineEqlResponse | undefined,
   prevResponse: InspectResponse
 ): InspectResponse => ({
-  dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
+  dsl:
+    isObject(response?.inspect) && response?.inspect.dsl
+      ? response.inspect.dsl
+      : prevResponse?.dsl || [],
   response:
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });
@@ -168,6 +173,13 @@ export const isDetectionsPath = (pathname: string): boolean => {
     strict: false,
   });
 };
+
+export const isDashboardViewPath = (pathname: string): boolean =>
+  matchPath(pathname, {
+    path: `/${DASHBOARDS_PATH}/:id`,
+    exact: false,
+    strict: false,
+  }) != null;
 
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {

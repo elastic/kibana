@@ -10,14 +10,14 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import type { NetworkKpiUniquePrivateIpsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   NetworkKpiHistogramData,
-  NetworkKpiUniquePrivateIpsRequestOptions,
   NetworkKpiUniquePrivateIpsStrategyResponse,
 } from '../../../../../../common/search_strategy';
 import { NetworkKpiQueries } from '../../../../../../common/search_strategy';
@@ -61,7 +61,7 @@ export const useNetworkKpiUniquePrivateIps = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [networkKpiUniquePrivateIpsRequest, setNetworkKpiUniquePrivateIpsRequest] =
-    useState<NetworkKpiUniquePrivateIpsRequestOptions | null>(null);
+    useState<NetworkKpiUniquePrivateIpsRequestOptionsInput | null>(null);
 
   const [networkKpiUniquePrivateIpsResponse, setNetworkKpiUniquePrivateIpsResponse] =
     useState<NetworkKpiUniquePrivateIpsArgs>({
@@ -80,7 +80,7 @@ export const useNetworkKpiUniquePrivateIps = ({
   const { addError } = useAppToasts();
 
   const networkKpiUniquePrivateIpsSearch = useCallback(
-    (request: NetworkKpiUniquePrivateIpsRequestOptions | null) => {
+    (request: NetworkKpiUniquePrivateIpsRequestOptionsInput | null) => {
       if (request == null || skip) {
         return;
       }
@@ -91,7 +91,7 @@ export const useNetworkKpiUniquePrivateIps = ({
 
         searchSubscription$.current = data.search
           .search<
-            NetworkKpiUniquePrivateIpsRequestOptions,
+            NetworkKpiUniquePrivateIpsRequestOptionsInput,
             NetworkKpiUniquePrivateIpsStrategyResponse
           >(request, {
             strategy: 'securitySolutionSearchStrategy',
@@ -99,7 +99,7 @@ export const useNetworkKpiUniquePrivateIps = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 setLoading(false);
                 setNetworkKpiUniquePrivateIpsResponse((prevResponse) => ({
                   ...prevResponse,
@@ -133,7 +133,7 @@ export const useNetworkKpiUniquePrivateIps = ({
 
   useEffect(() => {
     setNetworkKpiUniquePrivateIpsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkKpiUniquePrivateIpsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.uniquePrivateIps,

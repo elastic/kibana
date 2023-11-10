@@ -6,27 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   TimeSeriesQuery,
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
-import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
-import { Params, ParamsSchema } from './rule_type_params';
-import { ActionContext, BaseActionContext, addMessages } from './action_context';
+import { StackAlert } from '@kbn/alerts-as-data-utils';
 import {
-  ComparatorFns,
-  getComparatorScript,
-  getHumanReadableComparator,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
   STACK_ALERTS_FEATURE_ID,
-} from '../../../common';
+} from '@kbn/rule-data-utils';
+import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
+import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
+import { ActionContext, BaseActionContext, addMessages } from './action_context';
+import { Params, ParamsSchema } from './rule_type_params';
+import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
 
 export function getRuleType(
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
+): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId, never, StackAlert> {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -202,22 +205,25 @@ export function getRuleType(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor,
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
+    alerts: STACK_ALERTS_AAD_CONFIG,
   };
 
   async function executor(
-    options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
+    options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId, StackAlert>
   ) {
     const {
       rule: { id: ruleId, name },
       services,
       params,
       logger,
+      getTimeRange,
     } = options;
-    const { alertFactory, scopedClusterClient } = services;
+    const { alertsClient, scopedClusterClient } = services;
 
-    const alertLimit = alertFactory.alertLimit.getValue();
+    const alertLimit = alertsClient!.getAlertLimitValue();
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -232,7 +238,8 @@ export function getRuleType(
     }
 
     const esClient = scopedClusterClient.asCurrentUser;
-    const date = new Date().toISOString();
+    const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
+
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
       index: params.index,
@@ -242,8 +249,8 @@ export function getRuleType(
       groupBy: params.groupBy,
       termField: params.termField,
       termSize: params.termSize,
-      dateStart: date,
-      dateEnd: date,
+      dateStart,
+      dateEnd,
       timeWindowSize: params.timeWindowSize,
       timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
@@ -264,6 +271,7 @@ export function getRuleType(
           TIME_SERIES_BUCKET_SELECTOR_FIELD
         ),
       },
+      useCalculatedDateRange: false,
     });
     logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
 
@@ -304,25 +312,36 @@ export function getRuleType(
       )} ${params.threshold.join(' and ')}`;
 
       const baseContext: BaseActionContext = {
-        date,
+        date: dateEnd,
         group: alertId,
         value,
         conditions: humanFn,
       };
       const actionContext = addMessages(name, baseContext, params);
-      const alert = alertFactory.create(alertId);
-      alert.scheduleActions(ActionGroupId, actionContext);
+
+      alertsClient!.report({
+        id: alertId,
+        actionGroup: ActionGroupId,
+        state: {},
+        context: actionContext,
+        payload: {
+          [ALERT_REASON]: actionContext.message,
+          [ALERT_TITLE]: actionContext.title,
+          [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
+          [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
+        },
+      });
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 
-    alertFactory.alertLimit.setLimitReached(result.truncated);
+    alertsClient!.setAlertLimitReached(result.truncated);
 
     const { getRecoveredAlerts } = services.alertFactory.done();
     for (const recoveredAlert of getRecoveredAlerts()) {
       const alertId = recoveredAlert.getId();
       logger.debug(`setting context for recovered alert ${alertId}`);
       const baseContext: BaseActionContext = {
-        date,
+        date: dateEnd,
         value: unmetGroupValues[alertId] ?? 'unknown',
         group: alertId,
         conditions: `${agg} is NOT ${getHumanReadableComparator(
@@ -330,7 +349,16 @@ export function getRuleType(
         )} ${params.threshold.join(' and ')}`,
       };
       const recoveryContext = addMessages(name, baseContext, params, true);
-      recoveredAlert.setContext(recoveryContext);
+      alertsClient?.setAlertData({
+        id: alertId,
+        context: recoveryContext,
+        payload: {
+          [ALERT_REASON]: recoveryContext.message,
+          [ALERT_TITLE]: recoveryContext.title,
+          [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
+          [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
+        },
+      });
     }
 
     return { state: {} };

@@ -273,7 +273,7 @@ describe('policy details: ', () => {
                   meta: {
                     license: '',
                     cloud: false,
-                    license_uid: '',
+                    license_uuid: '',
                     cluster_name: '',
                     cluster_uuid: '',
                     serverless: false,

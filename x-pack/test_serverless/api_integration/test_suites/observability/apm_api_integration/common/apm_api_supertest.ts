@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
-import { format, UrlObject } from 'url';
+import { format } from 'url';
 import supertest from 'supertest';
 import request from 'superagent';
 import type {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { kbnTestConfig } from '@kbn/test';
+import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
 import { InheritedFtrProviderContext } from '../../../../services';
@@ -93,19 +92,19 @@ Body: ${JSON.stringify(res.body)}`
   }
 }
 
-async function getApmApiClient({
-  kibanaServer,
-  username,
-}: {
-  kibanaServer: UrlObject;
-  username: ApmUsername | 'elastic';
-}) {
+async function getApmApiClient({ svlSharedConfig }: { svlSharedConfig: Config }) {
+  const kibanaServer = svlSharedConfig.get('servers.kibana');
+  const cAuthorities = svlSharedConfig.get('servers.kibana.certificateAuthorities');
+
+  const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username;
+  const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password;
+
   const url = format({
     ...kibanaServer,
-    auth: `${username}:${kbnTestConfig.getUrlParts().password}`,
+    auth: `${username}:${password}`,
   });
 
-  return createApmApiClient(supertest(url));
+  return createApmApiClient(supertest.agent(url, { ca: cAuthorities }));
 }
 
 export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
@@ -120,12 +119,10 @@ export async function getApmApiClientService({
   getService,
 }: InheritedFtrProviderContext): Promise<ApmApiClient> {
   const svlSharedConfig = getService('config');
-  const kibanaServer = svlSharedConfig.get('servers.kibana');
 
   return {
     slsUser: await getApmApiClient({
-      kibanaServer,
-      username: 'elastic',
+      svlSharedConfig,
     }),
   };
 }

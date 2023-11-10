@@ -57,6 +57,8 @@ export type {
   ImportListParams,
 } from './types';
 
+const version = '2023-10-31';
+
 const findLists = async ({
   http,
   cursor,
@@ -79,6 +81,7 @@ const findLists = async ({
       sort_order,
     },
     signal,
+    version,
   });
 };
 
@@ -117,6 +120,7 @@ const findListsBySize = async ({
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListsBySizeSchema> => {
   return http.fetch(`${INTERNAL_FIND_LISTS_BY_SIZE}`, {
     method: 'GET',
+    version: '1',
     query: {
       cursor,
       page,
@@ -166,6 +170,7 @@ const importList = async ({
     method: 'POST',
     query: { list_id, type },
     signal,
+    version,
   });
 };
 
@@ -206,6 +211,7 @@ const deleteList = async ({
     method: 'DELETE',
     query: { deleteReferences, id, ignoreReferences },
     signal,
+    version,
   });
 
 const deleteListWithValidation = async ({
@@ -235,6 +241,7 @@ const exportList = async ({
     method: 'POST',
     query: { list_id },
     signal,
+    version,
   });
 
 const exportListWithValidation = async ({
@@ -255,6 +262,7 @@ const readListIndex = async ({ http, signal }: ApiParams): Promise<ListItemIndex
   http.fetch<ListItemIndexExistSchema>(LIST_INDEX, {
     method: 'GET',
     signal,
+    version,
   });
 
 const readListIndexWithValidation = async ({
@@ -274,12 +282,14 @@ export const readListPrivileges = async ({ http, signal }: ApiParams): Promise<u
   http.fetch<unknown>(LIST_PRIVILEGES_URL, {
     method: 'GET',
     signal,
+    version,
   });
 
 const createListIndex = async ({ http, signal }: ApiParams): Promise<AcknowledgeSchema> =>
   http.fetch<AcknowledgeSchema>(LIST_INDEX, {
     method: 'POST',
     signal,
+    version,
   });
 
 const createListIndexWithValidation = async ({

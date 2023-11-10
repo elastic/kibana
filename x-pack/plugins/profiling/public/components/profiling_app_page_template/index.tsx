@@ -70,6 +70,7 @@ export function ProfilingAppPageTemplate({
         'data-test-subj': 'profilingPageTemplate',
         rightSideItems: [
           <EuiButton
+            data-test-subj="profilingProfilingAppPageTemplateGiveFeedbackButton"
             href={PROFILING_FEEDBACK_LINK}
             target="_blank"
             color="warning"
@@ -134,6 +135,7 @@ export function ProfilingAppPageTemplate({
                 })}
               </p>
               <EuiButton
+                data-test-subj="profilingProfilingAppPageTemplateDismissButton"
                 onClick={() => {
                   setPrivilegesWarningDismissed(true);
                 }}

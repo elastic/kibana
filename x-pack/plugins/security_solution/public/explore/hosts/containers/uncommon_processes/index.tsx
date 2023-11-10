@@ -8,6 +8,7 @@
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { HostUncommonProcessesRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import type { inputsModel, State } from '../../../../common/store';
 
 import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
@@ -18,7 +19,6 @@ import type {
   SortField,
   PageInfoPaginated,
   HostsUncommonProcessesEdges,
-  HostsUncommonProcessesRequestOptions,
 } from '../../../../../common/search_strategy';
 import { HostsQueries } from '../../../../../common/search_strategy';
 
@@ -66,7 +66,7 @@ export const useUncommonProcesses = ({
     getUncommonProcessesSelector(state, type)
   );
   const [uncommonProcessesRequest, setUncommonProcessesRequest] =
-    useState<HostsUncommonProcessesRequestOptions | null>(null);
+    useState<HostUncommonProcessesRequestOptionsInput | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -121,7 +121,7 @@ export const useUncommonProcesses = ({
 
   useEffect(() => {
     setUncommonProcessesRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: HostUncommonProcessesRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: HostsQueries.uncommonProcesses,

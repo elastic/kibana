@@ -37,6 +37,7 @@ jest.mock('./alerts_service/alerts_service', () => ({
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { generateAlertingConfig } from './test_utils';
+import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 
 const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {
   id: 'test',
@@ -45,6 +46,7 @@ const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recov
   isExportable: true,
   actionGroups: [],
   defaultActionGroupId: 'default',
+  category: 'test',
   producer: 'test',
   async executor() {
     return { state: {} };
@@ -73,8 +75,9 @@ describe('Alerting Plugin', () => {
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
           unifiedSearch: autocompletePluginMock.createSetupContract(),
-          // serverless setup is currently empty, and there is no mock
-          ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+          ...(useDataStreamForAlerts
+            ? { serverless: serverlessPluginMock.createSetupContract() }
+            : {}),
         };
 
         let plugin: AlertingPlugin;
@@ -129,6 +132,23 @@ describe('Alerting Plugin', () => {
           expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
         });
 
+        it('should not initialize AlertsService if node.roles.migrator is true', async () => {
+          const context = coreMock.createPluginInitializerContext<AlertingConfig>({
+            ...generateAlertingConfig(),
+            enableFrameworkAlerts: true,
+          });
+          context.node.roles.migrator = true;
+          plugin = new AlertingPlugin(context);
+
+          // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
+          const setupContract = plugin.setup(setupMocks, mockPlugins);
+          await waitForSetupComplete(setupMocks);
+
+          expect(AlertsService).not.toHaveBeenCalled();
+
+          expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
+        });
+
         it(`exposes configured minimumScheduleInterval()`, async () => {
           const context = coreMock.createPluginInitializerContext<AlertingConfig>(
             generateAlertingConfig()
@@ -139,6 +159,7 @@ describe('Alerting Plugin', () => {
           await waitForSetupComplete(setupMocks);
 
           expect(setupContract.getConfig()).toEqual({
+            maxScheduledPerMinute: 10000,
             isUsingSecurity: false,
             minimumScheduleInterval: { value: '1m', enforce: false },
           });
@@ -241,7 +262,9 @@ describe('Alerting Plugin', () => {
               data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
               features: featuresPluginMock.createSetup(),
               unifiedSearch: autocompletePluginMock.createSetupContract(),
-              ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+              ...(useDataStreamForAlerts
+                ? { serverless: serverlessPluginMock.createSetupContract() }
+                : {}),
             });
 
             const startContract = plugin.start(coreMock.createStart(), {
@@ -291,7 +314,9 @@ describe('Alerting Plugin', () => {
               data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
               features: featuresPluginMock.createSetup(),
               unifiedSearch: autocompletePluginMock.createSetupContract(),
-              ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+              ...(useDataStreamForAlerts
+                ? { serverless: serverlessPluginMock.createSetupContract() }
+                : {}),
             });
 
             const startContract = plugin.start(coreMock.createStart(), {
@@ -352,7 +377,9 @@ describe('Alerting Plugin', () => {
             data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
             features: featuresPluginMock.createSetup(),
             unifiedSearch: autocompletePluginMock.createSetupContract(),
-            ...(useDataStreamForAlerts ? { serverless: {} } : {}),
+            ...(useDataStreamForAlerts
+              ? { serverless: serverlessPluginMock.createSetupContract() }
+              : {}),
           });
 
           const startContract = plugin.start(coreMock.createStart(), {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface Exception {
   field: string;
@@ -58,8 +58,8 @@ export const getException = (): Exception => ({
 });
 
 export const expectedExportedExceptionList = (
-  exceptionListResponse: Cypress.Response<ExceptionListItemSchema>
+  exceptionListResponse: Cypress.Response<ExceptionListSchema>
 ): string => {
-  const jsonrule = exceptionListResponse.body;
-  return `{"_version":"${jsonrule._version}","created_at":"${jsonrule.created_at}","created_by":"system_indices_superuser","description":"${jsonrule.description}","id":"${jsonrule.id}","immutable":false,"list_id":"${jsonrule.list_id}","name":"${jsonrule.name}","namespace_type":"single","os_types":[],"tags":[],"tie_breaker_id":"${jsonrule.tie_breaker_id}","type":"${jsonrule.type}","updated_at":"${jsonrule.updated_at}","updated_by":"system_indices_superuser","version":1}\n{"exported_exception_list_count":1,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n`;
+  const jsonRule = exceptionListResponse.body;
+  return `{"_version":"${jsonRule._version}","created_at":"${jsonRule.created_at}","created_by":"system_indices_superuser","description":"${jsonRule.description}","id":"${jsonRule.id}","immutable":false,"list_id":"${jsonRule.list_id}","name":"${jsonRule.name}","namespace_type":"single","os_types":[],"tags":[],"tie_breaker_id":"${jsonRule.tie_breaker_id}","type":"${jsonRule.type}","updated_at":"${jsonRule.updated_at}","updated_by":"system_indices_superuser","version":1}\n{"exported_exception_list_count":1,"exported_exception_list_item_count":0,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}\n`;
 };

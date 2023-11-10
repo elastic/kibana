@@ -19,6 +19,8 @@ const QuickPromptsFlexGroup = styled(EuiFlexGroup)`
   margin: 16px;
 `;
 
+export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
+
 const COUNT_BEFORE_OVERFLOW = 5;
 interface QuickPromptsProps {
   setInput: (input: string) => void;
@@ -33,10 +35,15 @@ interface QuickPromptsProps {
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
   ({ setInput, setIsSettingsModalVisible, trackPrompt }) => {
-    const { allQuickPrompts, promptContexts, setSelectedSettingsTab } = useAssistantContext();
+    const { allQuickPrompts, knowledgeBase, promptContexts, setSelectedSettingsTab } =
+      useAssistantContext();
 
     const contextFilteredQuickPrompts = useMemo(() => {
       const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
+      // If KB is enabled, include KNOWLEDGE_BASE_CATEGORY so KB dependent quick prompts are shown
+      if (knowledgeBase.assistantLangChain) {
+        registeredPromptContextTitles.push(KNOWLEDGE_BASE_CATEGORY);
+      }
       return allQuickPrompts.filter((quickPrompt) => {
         // Return quick prompt as match if it has no categories, otherwise ensure category exists in registered prompt contexts
         if (quickPrompt.categories == null || quickPrompt.categories.length === 0) {
@@ -47,7 +54,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
           });
         }
       });
-    }, [allQuickPrompts, promptContexts]);
+    }, [allQuickPrompts, knowledgeBase.assistantLangChain, promptContexts]);
 
     // Overflow state
     const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);

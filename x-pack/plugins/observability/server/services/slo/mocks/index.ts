@@ -28,6 +28,7 @@ const createSummaryTransformInstallerMock = (): jest.Mocked<SummaryTransformInst
 const createTransformManagerMock = (): jest.Mocked<TransformManager> => {
   return {
     install: jest.fn(),
+    preview: jest.fn(),
     uninstall: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),

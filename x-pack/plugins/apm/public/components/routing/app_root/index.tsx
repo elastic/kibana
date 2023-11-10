@@ -32,7 +32,7 @@ import { BreadcrumbsContextProvider } from '../../../context/breadcrumbs/context
 import { LicenseProvider } from '../../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../../context/time_range_id/time_range_id_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
-import { ApmPluginStartDeps } from '../../../plugin';
+import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { ApmErrorBoundary } from '../apm_error_boundary';
 import { apmRouter } from '../apm_route_config';
 import { TrackPageview } from '../track_pageview';
@@ -49,9 +49,11 @@ const storage = new Storage(localStorage);
 export function ApmAppRoot({
   apmPluginContextValue,
   pluginsStart,
+  apmServices,
 }: {
   apmPluginContextValue: ApmPluginContextValue;
   pluginsStart: ApmPluginStartDeps;
+  apmServices: ApmServices;
 }) {
   const { appMountParameters, core } = apmPluginContextValue;
   const { history } = appMountParameters;
@@ -65,7 +67,9 @@ export function ApmAppRoot({
       role="main"
     >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
+        <KibanaContextProvider
+          services={{ ...core, ...pluginsStart, storage, ...apmServices }}
+        >
           <i18nCore.Context>
             <ObservabilityAIAssistantProvider
               value={apmPluginContextValue.observabilityAIAssistant}

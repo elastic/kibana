@@ -76,7 +76,11 @@ function runTests() {
 
   return childProcess.spawnSync('node', spawnArgs, {
     cwd: e2eDir,
-    env: { ...process.env, CYPRESS_CLI_ARGS: JSON.stringify(cypressCliArgs) },
+    env: {
+      ...process.env,
+      CYPRESS_CLI_ARGS: JSON.stringify(cypressCliArgs),
+      NODE_OPTIONS: '--openssl-legacy-provider',
+    },
     encoding: 'utf8',
     stdio: 'inherit',
   });

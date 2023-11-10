@@ -713,6 +713,36 @@ describe('DocumentMigrator', () => {
         ]);
       });
 
+      it('does not lose namespaces in documents with undefined namespace and defined namespaces property', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+            // no migration transforms are defined, the typeMigrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
+          ),
+        });
+        migrator.prepareMigrations();
+        const obj = {
+          id: 'mischievous',
+          type: 'dog',
+          attributes: { name: 'Ann' },
+          coreMigrationVersion: kibanaVersion,
+          typeMigrationVersion: '0.1.0',
+          namespaces: ['something'],
+        } as SavedObjectUnsanitizedDoc;
+        const actual = migrator.migrateAndConvert(obj);
+        expect(actual).toEqual([
+          {
+            id: 'mischievous',
+            type: 'dog',
+            attributes: { name: 'Ann' },
+            coreMigrationVersion: kibanaVersion,
+            typeMigrationVersion: '1.0.0',
+            namespaces: ['something'],
+          },
+        ]);
+      });
+
       it('does not fail when encountering documents with coreMigrationVersion higher than the latest known', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),

@@ -52,7 +52,11 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       } else {
         // only user with write permissions can decrypt the monitor
         const canSave =
-          (await coreStart?.capabilities.resolveCapabilities(request)).uptime.save ?? false;
+          (
+            await coreStart?.capabilities.resolveCapabilities(request, {
+              capabilityPath: 'uptime.*',
+            })
+          ).uptime.save ?? false;
         if (!canSave) {
           return response.forbidden();
         }
@@ -91,7 +95,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       locations: queriedLocations,
     } = request.query as MonitorsQuery;
 
-    const filtersStr = await getMonitorFilters({
+    const { filtersStr } = await getMonitorFilters({
       ...request.query,
       context: routeContext,
     });

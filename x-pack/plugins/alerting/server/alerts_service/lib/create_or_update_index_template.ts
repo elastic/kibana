@@ -68,6 +68,7 @@ export const getIndexTemplate = ({
             : {
                 'index.lifecycle': indexLifecycle,
               }),
+          'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': totalFieldsLimit,
         },
         mappings: {

@@ -40,6 +40,7 @@ export function WindowsInstallStep({
           href={docsLink}
           target="_blank"
           style={{ width: 'fit-content' }}
+          data-test-subj="obltOnboardingInstallElasticAgentWindowsDocsLink"
         >
           {i18n.translate(
             'xpack.observability_onboarding.windows.installStep.link.label',

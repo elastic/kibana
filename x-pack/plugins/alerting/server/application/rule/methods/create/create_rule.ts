@@ -8,7 +8,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { parseDuration } from '../../../../../common/parse_duration';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,
@@ -36,6 +36,7 @@ import { RuleAttributes } from '../../../../data/rule/types';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
+import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -62,6 +63,25 @@ export async function createRule<Params extends RuleParams = never>(
     createRuleDataSchema.validate(data);
   } catch (error) {
     throw Boom.badRequest(`Error validating create data - ${error.message}`);
+  }
+
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (data.enabled) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      updatedInterval: data.schedule.interval,
+    });
+  }
+
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name: data.name,
+        interval: validationPayload!.interval,
+        intervalAvailable: validationPayload!.intervalAvailable,
+        action: 'create',
+      })
+    );
   }
 
   try {

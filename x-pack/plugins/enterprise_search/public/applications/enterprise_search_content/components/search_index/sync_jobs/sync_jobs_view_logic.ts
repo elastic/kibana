@@ -9,10 +9,12 @@ import { kea, MakeLogicType } from 'kea';
 
 import moment from 'moment';
 
+import { Pagination } from '@elastic/eui';
+import { ConnectorSyncJob, pageToPagination } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../common/types/api';
 
-import { ConnectorSyncJob } from '../../../../../../common/types/connectors';
-import { Page, Paginate } from '../../../../../../common/types/pagination';
+import { Paginate } from '../../../../../../common/types/pagination';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   FetchSyncJobsApiLogic,
@@ -37,7 +39,7 @@ export interface IndexViewValues {
   syncJobs: SyncJobView[];
   syncJobsData: Paginate<ConnectorSyncJob> | null;
   syncJobsLoading: boolean;
-  syncJobsPagination: Page;
+  syncJobsPagination: Pagination;
   syncJobsStatus: Status;
 }
 
@@ -68,12 +70,12 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
         data?.data.map((syncJob) => {
           return {
             ...syncJob,
-            duration: syncJob.completed_at
-              ? moment.duration(moment(syncJob.completed_at).diff(moment(syncJob.created_at)))
-              : syncJob.started_at
-              ? moment.duration(moment(new Date()).diff(moment(syncJob.started_at)))
+            duration: syncJob.started_at
+              ? moment.duration(
+                  moment(syncJob.completed_at || new Date()).diff(moment(syncJob.started_at))
+                )
               : undefined,
-            lastSync: syncJob.completed_at ?? syncJob.created_at,
+            lastSync: syncJob.completed_at,
           };
         }) ?? [],
     ],
@@ -83,14 +85,13 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
     ],
     syncJobsPagination: [
       () => [selectors.syncJobsData],
-      (data?: Paginate<ConnectorSyncJob>) =>
+      (data?: Paginate<ConnectorSyncJob>): Pagination =>
         data
-          ? data._meta.page
+          ? pageToPagination(data._meta.page)
           : {
-              from: 0,
-              has_more_hits_than_total: false,
-              size: 10,
-              total: 0,
+              pageIndex: 0,
+              pageSize: 10,
+              totalItemCount: 0,
             },
     ],
   }),

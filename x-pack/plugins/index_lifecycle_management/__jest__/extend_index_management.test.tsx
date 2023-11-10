@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import React from 'react';
 import moment from 'moment-timezone';
 
 import { init } from '../integration_tests/helpers/http_requests';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { Index } from '../common/types';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
   addLifecyclePolicyActionExtension,
   ilmBannerExtension,
   ilmFilterExtension,
-  ilmSummaryExtension,
 } from '../public/extend_index_management';
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
+import { indexLifecycleTab } from '../public/extend_index_management/components/index_lifecycle_summary';
+import { Index } from '@kbn/index-management-plugin/common';
 
 const { httpSetup } = init();
 
@@ -112,6 +113,7 @@ const indexWithLifecycleError: Index = {
     },
     phase_execution: {
       policy: 'testy',
+      // @ts-expect-error ILM type is incorrect https://github.com/elastic/elasticsearch-specification/issues/2326
       phase_definition: { min_age: '0s', actions: { rollover: { max_size: '1gb' } } },
       version: 1,
       modified_date_in_millis: 1544031699844,
@@ -242,23 +244,31 @@ describe('extend index management', () => {
   });
 
   describe('ilm summary extension', () => {
-    test('should render null when index has no index lifecycle policy', () => {
-      const extension = ilmSummaryExtension(indexWithoutLifecyclePolicy, getUrlForApp);
-      const rendered = mountWithIntl(extension);
-      expect(rendered.isEmptyRender()).toBeTruthy();
+    const IlmComponent = indexLifecycleTab.renderTabContent;
+    test('should not render the tab when index has no index lifecycle policy', () => {
+      const shouldRenderTab =
+        indexLifecycleTab.shouldRenderTab &&
+        indexLifecycleTab.shouldRenderTab({
+          index: indexWithoutLifecyclePolicy,
+        });
+      expect(shouldRenderTab).toBeFalsy();
     });
 
     test('should return extension when index has lifecycle policy', () => {
-      const extension = ilmSummaryExtension(indexWithLifecyclePolicy, getUrlForApp);
-      expect(extension).toBeDefined();
-      const rendered = mountWithIntl(extension);
+      const ilmContent = (
+        <IlmComponent index={indexWithLifecyclePolicy} getUrlForApp={getUrlForApp} />
+      );
+      expect(ilmContent).toBeDefined();
+      const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();
     });
 
     test('should return extension when index has lifecycle error', () => {
-      const extension = ilmSummaryExtension(indexWithLifecycleError, getUrlForApp);
-      expect(extension).toBeDefined();
-      const rendered = mountWithIntl(extension);
+      const ilmContent = (
+        <IlmComponent index={indexWithLifecycleError} getUrlForApp={getUrlForApp} />
+      );
+      expect(ilmContent).toBeDefined();
+      const rendered = mountWithIntl(ilmContent);
       expect(rendered.render()).toMatchSnapshot();
     });
   });

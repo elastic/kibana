@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { camelCase } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -22,7 +21,7 @@ import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
-import type { MitreSubtechniquesOptions } from '../../../mitre/types';
+import type { MitreSubTechnique } from '../../../mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -57,12 +56,12 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   onFieldChange,
 }): JSX.Element => {
   const values = field.value as Threats;
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>([]);
+  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
+      setSubtechniquesOptions(mitreConfig.subtechniques);
     }
     getMitre();
   }, []);
@@ -110,9 +109,9 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   }, [field, onFieldChange, techniqueIndex, technique, threatIndex]);
 
   const updateSubtechnique = useCallback(
-    (index: number, value: string) => {
+    (index: number, optionId: string) => {
       const threats = [...(field.value as Threats)];
-      const { id, reference, name } = subtechniquesOptions.find((t) => t.value === value) || {
+      const { id, reference, name } = subtechniquesOptions.find((t) => t.id === optionId) ?? {
         id: '',
         name: '',
         reference: '',
@@ -170,7 +169,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                 : []),
               ...options.map((option) => ({
                 inputDisplay: <>{option.label}</>,
-                value: option.value,
+                value: option.id,
                 disabled,
               })),
             ]}
@@ -178,7 +177,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
             aria-label=""
             onChange={updateSubtechnique.bind(null, index)}
             fullWidth={true}
-            valueOfSelected={camelCase(subtechnique.name)}
+            valueOfSelected={subtechnique.id}
             data-test-subj="mitreAttackSubtechnique"
             disabled={disabled}
             placeholder={i18n.SUBTECHNIQUE_PLACEHOLDER}

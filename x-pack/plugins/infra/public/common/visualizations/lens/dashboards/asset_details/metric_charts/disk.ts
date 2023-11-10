@@ -6,30 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { hostLensFormulas } from '../../../../constants';
+import { hostLensFormulas } from '../../../formulas';
 import { XY_OVERRIDES } from '../../constants';
-import type { XYConfig } from './types';
+import type { XYConfig } from '../../types';
 
 const TOP_VALUES_SIZE = 5;
 
 export const diskSpaceUsageAvailable: XYConfig = {
   id: 'diskSpaceUsageAvailable',
-  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpace', {
-    defaultMessage: 'Disk Space',
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskUsage', {
+    defaultMessage: 'Disk Usage',
   }),
   layers: [
     {
       data: [
         {
-          ...hostLensFormulas.diskSpaceUsage,
-          label: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpace.label.used', {
+          ...hostLensFormulas.diskUsage,
+          label: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskUsage.label.used', {
             defaultMessage: 'Used',
           }),
         },
         {
           ...hostLensFormulas.diskSpaceAvailability,
           label: i18n.translate(
-            'xpack.infra.assetDetails.metricsCharts.diskSpace.label.available',
+            'xpack.infra.assetDetails.metricsCharts.diskUsage.label.available',
             {
               defaultMessage: 'Available',
             }
@@ -49,17 +49,17 @@ export const diskSpaceUsageAvailable: XYConfig = {
   dataViewOrigin: 'metrics',
 };
 
-export const diskSpaceUsageByMountPoint: XYConfig = {
-  id: 'DiskSpaceUsageByMountPoint',
-  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpaceByMountingPoint', {
-    defaultMessage: 'Disk Space by Mount Point',
+export const diskUsageByMountPoint: XYConfig = {
+  id: 'DiskUsageByMountPoint',
+  title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskUsageByMountingPoint', {
+    defaultMessage: 'Disk Usage by Mount Point',
   }),
   layers: [
     {
       data: [
         {
-          ...hostLensFormulas.diskSpaceUsage,
-          label: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskSpace.label.used', {
+          ...hostLensFormulas.diskUsage,
+          label: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskUsage.label.used', {
             defaultMessage: 'Used',
           }),
         },

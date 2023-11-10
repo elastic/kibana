@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../tasks/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getExceptionList } from '../../../../objects/exception';
 import { assertNumberOfExceptionItemsExists } from '../../../../tasks/exceptions';
@@ -14,7 +15,8 @@ import {
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
 } from '../../../../tasks/exceptions_table';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
   createExceptionList,
@@ -42,9 +44,9 @@ const getExceptionList2 = () => ({
 
 describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    cy.task('esArchiverResetKibana');
     login();
-
+    deleteAlertsAndRules();
+    deleteExceptionLists();
     createRule(getNewRule({ name: 'Another rule' }));
 
     // Create exception list associated with a rule
@@ -64,9 +66,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
     );
 
     // Create exception list not used by any rules
-    createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
-      'exceptionListResponse'
-    );
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id);
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id);
 
@@ -106,7 +106,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
       ],
       expire_time: futureDate,
     });
-    visitWithoutDateRange(EXCEPTIONS_URL);
+    visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
   });
 

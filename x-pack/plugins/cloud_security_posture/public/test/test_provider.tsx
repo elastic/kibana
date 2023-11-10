@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 // eslint-disable-next-line no-restricted-imports
 import { Router } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-
+import { MockSubscriptionTrackingProvider } from '@kbn/subscription-tracking/mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -21,11 +21,13 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { sessionStorageMock } from '@kbn/core-http-server-mocks';
 import type { CspClientPluginStartDeps } from '../types';
 
 interface CspAppDeps {
   core: CoreStart;
-  deps: CspClientPluginStartDeps;
+  deps: Partial<CspClientPluginStartDeps>;
   params: AppMountParameters;
 }
 
@@ -38,6 +40,8 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
     discover: discoverPluginMock.createStartContract(),
     fleet: fleetMock.createStartMock(),
     licensing: licensingMock.createStart(),
+    uiActions: uiActionsPluginMock.createStartContract(),
+    storage: sessionStorageMock.create(),
   },
   params = coreMock.createAppMountParameters(),
   children,
@@ -48,9 +52,11 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <I18nProvider>
-            <Routes>
-              <Route path="*" render={() => <>{children}</>} />
-            </Routes>
+            <MockSubscriptionTrackingProvider>
+              <Routes>
+                <Route path="*" render={() => <>{children}</>} />
+              </Routes>
+            </MockSubscriptionTrackingProvider>
           </I18nProvider>
         </Router>
       </QueryClientProvider>

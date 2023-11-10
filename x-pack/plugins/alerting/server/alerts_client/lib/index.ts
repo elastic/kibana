@@ -14,5 +14,5 @@ export {
   getHitsWithCount,
   getLifecycleAlertsQueries,
   getContinualAlertsQuery,
-  expandFlattenedAlert,
 } from './get_summarized_alerts_query';
+export { expandFlattenedAlert } from './format_alert';

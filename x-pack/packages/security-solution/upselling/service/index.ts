@@ -6,6 +6,7 @@
  */
 export { UpsellingService } from './upselling_service';
 export type {
+  MessageUpsellings,
   PageUpsellings,
   SectionUpsellings,
   UpsellingSectionId,

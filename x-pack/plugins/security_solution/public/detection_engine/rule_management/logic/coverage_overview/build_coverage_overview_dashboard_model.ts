@@ -30,7 +30,7 @@ export async function buildCoverageOverviewDashboardModel(
   apiResponse: CoverageOverviewResponse
 ): Promise<CoverageOverviewDashboard> {
   const mitreConfig = await lazyMitreConfiguration();
-  const { tactics, technique: techniques, subtechniques } = mitreConfig;
+  const { tactics, techniques, subtechniques } = mitreConfig;
   const mitreTactics = buildCoverageOverviewMitreGraph(tactics, techniques, subtechniques);
 
   for (const tactic of mitreTactics) {
@@ -40,12 +40,16 @@ export async function buildCoverageOverviewDashboardModel(
 
     for (const technique of tactic.techniques) {
       for (const ruleId of apiResponse.coverage[technique.id] ?? []) {
-        addRule(technique, ruleId, apiResponse.rules_data[ruleId]);
+        if (apiResponse.coverage[tactic.id]?.includes(ruleId)) {
+          addRule(technique, ruleId, apiResponse.rules_data[ruleId]);
+        }
       }
 
       for (const subtechnique of technique.subtechniques) {
         for (const ruleId of apiResponse.coverage[subtechnique.id] ?? []) {
-          addRule(subtechnique, ruleId, apiResponse.rules_data[ruleId]);
+          if (apiResponse.coverage[tactic.id]?.includes(ruleId)) {
+            addRule(subtechnique, ruleId, apiResponse.rules_data[ruleId]);
+          }
         }
       }
     }

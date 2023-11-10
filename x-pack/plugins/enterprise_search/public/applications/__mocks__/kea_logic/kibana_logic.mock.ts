@@ -13,6 +13,7 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
@@ -60,8 +61,8 @@ export const mockKibanaValues = {
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
+  ml: mlPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  userProfile: {},
 };
 
 jest.mock('../../shared/kibana', () => ({

@@ -77,7 +77,11 @@ export const eqlSearchStrategyProvider = (
               meta: true,
             });
 
-        return toEqlKibanaSearchResponse(response as TransportResult<EqlSearchResponse>);
+        return toEqlKibanaSearchResponse(
+          response as TransportResult<EqlSearchResponse>,
+          // do not return requestParams on polling calls
+          id ? undefined : (response as TransportResult<EqlSearchResponse>).meta?.request?.params
+        );
       };
 
       const cancel = async () => {

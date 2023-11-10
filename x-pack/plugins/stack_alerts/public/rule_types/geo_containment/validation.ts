@@ -69,7 +69,7 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
   if (!boundaryIndexTitle) {
     errors.boundaryIndexTitle.push(
       i18n.translate('xpack.stackAlerts.geoContainment.error.requiredBoundaryIndexTitleText', {
-        defaultMessage: 'Boundary data view title is required.',
+        defaultMessage: 'Boundary data view is required.',
       })
     );
   }

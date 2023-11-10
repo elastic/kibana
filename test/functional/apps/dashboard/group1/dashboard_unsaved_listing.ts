@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
@@ -102,14 +102,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('does not show unsaved changes on new dashboard when no panels have been added', async () => {
-      await PageObjects.dashboard.expectUnsavedChangesDoesNotExist(unsavedDashboardTitle);
+      await PageObjects.dashboard.expectUnsavedChangesListingDoesNotExist(unsavedDashboardTitle);
     });
 
     it('can discard unsaved changes using the discard link', async () => {
       await PageObjects.dashboard.clickUnsavedChangesDiscard(
         `discard-unsaved-${dashboardTitle.split(' ').join('-')}`
       );
-      await PageObjects.dashboard.expectUnsavedChangesDoesNotExist(dashboardTitle);
+      await PageObjects.dashboard.expectUnsavedChangesListingDoesNotExist(dashboardTitle);
       await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
       await PageObjects.dashboard.switchToEditMode();
       const currentPanelCount = await PageObjects.dashboard.getPanelCount();
@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard(newDashboartTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.expectUnsavedChangesDoesNotExist(unsavedDashboardTitle);
+      await PageObjects.dashboard.expectUnsavedChangesListingDoesNotExist(unsavedDashboardTitle);
     });
 
     it('does not list unsaved changes when unsaved version of the dashboard is the same', async () => {
@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Check that it now does not exist
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.expectUnsavedChangesDoesNotExist(newDashboartTitle);
+      await PageObjects.dashboard.expectUnsavedChangesListingDoesNotExist(newDashboartTitle);
     });
   });
 }

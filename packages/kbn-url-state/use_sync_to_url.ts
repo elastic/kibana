@@ -55,10 +55,15 @@ export const useSyncToUrl = <TValueToSerialize>(
         searchParams.delete(key);
       }
 
-      const newSearch = searchParams.toString();
+      const stringifiedSearchParams = searchParams.toString();
+      const newSearch = stringifiedSearchParams.length > 0 ? `?${stringifiedSearchParams}` : '';
+
+      if (window.location.search === newSearch) {
+        return;
+      }
 
       // Update query string without unnecessary re-render
-      const newUrl = `${window.location.pathname}?${newSearch}`;
+      const newUrl = `${window.location.pathname}${window.location.hash}${newSearch}`;
       window.history.replaceState({ path: newUrl }, '', newUrl);
     },
     [key]

@@ -14,17 +14,17 @@ Array [
 }
 
 <dl
-    class="euiDescriptionList emotion-euiDescriptionList-column-left"
+    class="euiDescriptionList emotion-euiDescriptionList-column-left-s-s"
     data-type="column"
     style="width:300px"
   >
     <dt
-      class="euiDescriptionList__title c0 eui-textNoWrap emotion-euiDescriptionList__title-column-m-reverse"
+      class="euiDescriptionList__title c0 eui-textNoWrap emotion-euiDescriptionList__title-column-reverse"
     >
       Average page load duration
     </dt>
     <dd
-      class="euiDescriptionList__description c1 emotion-euiDescriptionList__description-column-compressed-m"
+      class="euiDescriptionList__description c1 emotion-euiDescriptionList__description-column-compressed"
     />
   </dl>,
 ]

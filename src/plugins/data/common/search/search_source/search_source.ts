@@ -103,13 +103,7 @@ import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
-import {
-  getEsQueryConfig,
-  IKibanaSearchResponse,
-  isPartialResponse,
-  isCompleteResponse,
-  UI_SETTINGS,
-} from '../..';
+import { getEsQueryConfig, IKibanaSearchResponse, isRunningResponse, UI_SETTINGS } from '../..';
 import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
 import {
@@ -464,7 +458,9 @@ export class SearchSource {
     const last$ = s$
       .pipe(
         catchError((e) => {
-          requestResponder?.error({ json: e });
+          requestResponder?.error({
+            json: 'attributes' in e ? e.attributes : { message: e.message },
+          });
           return EMPTY;
         }),
         last(undefined, null),
@@ -520,7 +516,7 @@ export class SearchSource {
             options.inspector?.adapter,
             options.abortSignal,
             options.sessionId,
-            options.disableShardFailureWarning
+            options.disableWarningToasts
           );
         }
       }
@@ -546,7 +542,7 @@ export class SearchSource {
         // For testing timeout messages in UI, uncomment the next line
         // response.rawResponse.timed_out = true;
         return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
-          if (isPartialResponse(response)) {
+          if (isRunningResponse(response)) {
             obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
@@ -582,7 +578,7 @@ export class SearchSource {
         });
       }),
       map((response) => {
-        if (!isCompleteResponse(response)) {
+        if (isRunningResponse(response)) {
           return response;
         }
         return onResponse(searchRequest, response, options);
@@ -918,8 +914,12 @@ export class SearchSource {
     };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
-    // For testing shard failure messages in UI, uncomment the next block and switch to `kibana*` data view
-    // body.query = {
+    // For testing shard failure messages in the UI, follow these steps:
+    // 1. Add all three sample data sets (flights, ecommerce, logs) to Kibana.
+    // 2. Create a data view using the index pattern `kibana*` and don't use a timestamp field.
+    // 3. Uncomment the lines below, navigate to Discover,
+    //    and switch to the data view created in step 2.
+    // body.query.bool.must.push({
     //   error_query: {
     //     indices: [
     //       {
@@ -930,7 +930,8 @@ export class SearchSource {
     //       },
     //     ],
     //   },
-    // };
+    // });
+    // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
@@ -947,7 +948,7 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false, includeFields = true): SerializedSearchSourceFields {
+  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
       aggs: searchSourceAggs,
@@ -962,9 +963,7 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.isPersisted()
-        ? index.id
-        : index.toSpec(includeFields);
+      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;

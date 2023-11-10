@@ -13,38 +13,46 @@ import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse, getListClient } from '../utils';
 
 export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       options: {
         tags: ['access:lists-read'],
       },
       path: LIST_PRIVILEGES_URL,
-      validate: false,
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const lists = await getListClient(context);
-        const clusterPrivilegesLists = await readPrivileges(esClient, lists.getListName());
-        const clusterPrivilegesListItems = await readPrivileges(esClient, lists.getListItemName());
-        const privileges = merge(
-          {
-            listItems: clusterPrivilegesListItems,
-            lists: clusterPrivilegesLists,
-          },
-          {
-            is_authenticated: request.auth.isAuthenticated ?? false,
-          }
-        );
-        return response.ok({ body: privileges });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+    })
+    .addVersion(
+      {
+        validate: false,
+        version: '2023-10-31',
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const lists = await getListClient(context);
+          const clusterPrivilegesLists = await readPrivileges(esClient, lists.getListName());
+          const clusterPrivilegesListItems = await readPrivileges(
+            esClient,
+            lists.getListItemName()
+          );
+          const privileges = merge(
+            {
+              listItems: clusterPrivilegesListItems,
+              lists: clusterPrivilegesLists,
+            },
+            {
+              is_authenticated: request.auth.isAuthenticated ?? false,
+            }
+          );
+          return response.ok({ body: privileges });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
