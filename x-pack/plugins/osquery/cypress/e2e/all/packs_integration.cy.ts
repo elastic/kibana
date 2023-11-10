@@ -203,7 +203,10 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
 
       afterEach(() => {
         cleanupPack(globalPackId);
-        cleanupAgentPolicy(agentPolicyId);
+
+        if (agentPolicyId) {
+          cleanupAgentPolicy(agentPolicyId);
+        }
       });
 
       it('add global packs to policies', () => {
