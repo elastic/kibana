@@ -10,6 +10,7 @@ import {
   ALL_VALUE,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
+  SyntheticsAvailabilityIndicator,
   BudgetingMethod,
   HistogramIndicator,
   IndicatorType,
@@ -23,6 +24,7 @@ import {
   BUDGETING_METHOD_TIMESLICES,
   INDICATOR_APM_AVAILABILITY,
   INDICATOR_APM_LATENCY,
+  INDICATOR_SYNTHETICS_AVAILABILITY,
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
   INDICATOR_HISTOGRAM,
@@ -57,6 +59,10 @@ export const SLI_OPTIONS: Array<{
   {
     value: 'sli.apm.transactionErrorRate',
     text: INDICATOR_APM_AVAILABILITY,
+  },
+  {
+    value: 'sli.synthetics.availability',
+    text: INDICATOR_SYNTHETICS_AVAILABILITY,
   },
 ];
 
@@ -185,6 +191,17 @@ export const APM_AVAILABILITY_DEFAULT_VALUES: APMTransactionErrorRateIndicator =
     transactionName: '',
     filter: '',
     index: '',
+  },
+};
+
+export const SYNTHETICS_AVAILABILITY_DEFAULT_VALUES: SyntheticsAvailabilityIndicator = {
+  type: 'sli.synthetics.availability' as const,
+  params: {
+    locations: [],
+    projects: [],
+    tags: [],
+    monitorIds: [],
+    index: 'synthetics-*',
   },
 };
 

@@ -42,6 +42,11 @@ export const INDICATOR_APM_AVAILABILITY = i18n.translate(
   { defaultMessage: 'APM availability' }
 );
 
+export const INDICATOR_SYNTHETICS_AVAILABILITY = i18n.translate(
+  'xpack.observability.slo.indicators.syntheticsAvailability',
+  { defaultMessage: 'Synthetics availability' }
+);
+
 export function toIndicatorTypeLabel(
   indicatorType: SLOWithSummaryResponse['indicator']['type']
 ): string {

@@ -179,6 +179,20 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
           (field) => !getFieldState(field, formState).invalid
         );
       break;
+    case 'sli.synthetics.availability':
+      isIndicatorSectionValid =
+        (
+          [
+            'indicator.params.monitorIds',
+            'indicator.params.location',
+            'indicator.params.tags',
+            'indicator.params.project',
+          ] as const
+        ).every((field) => !getFieldState(field, formState).invalid && getValues(field) !== '') &&
+        (['indicator.params.index'] as const).every(
+          (field) => !getFieldState(field, formState).invalid
+        );
+      break;
     default:
       isIndicatorSectionValid = false;
       break;

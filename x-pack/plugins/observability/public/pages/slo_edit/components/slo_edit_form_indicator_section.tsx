@@ -14,6 +14,7 @@ import { useUnregisterFields } from '../hooks/use_unregister_fields';
 import { CreateSLOForm } from '../types';
 import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
 import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
+import { SyntheticsAvailabilityIndicatorTypeForm } from './synthetics_availability/synthetics_availability_indicator_type_form';
 import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
 import { CustomMetricIndicatorTypeForm } from './custom_metric/custom_metric_type_form';
 import { HistogramIndicatorTypeForm } from './histogram/histogram_indicator_type_form';
@@ -36,6 +37,8 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
         return <ApmLatencyIndicatorTypeForm />;
       case 'sli.apm.transactionErrorRate':
         return <ApmAvailabilityIndicatorTypeForm />;
+      case 'sli.synthetics.availability':
+        return <SyntheticsAvailabilityIndicatorTypeForm />;
       case 'sli.metric.custom':
         return <CustomMetricIndicatorTypeForm />;
       case 'sli.histogram.custom':

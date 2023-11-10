@@ -27,6 +27,7 @@ export enum SYNTHETICS_API_URLS {
   PING_STATUSES = '/internal/synthetics/ping_statuses',
   OVERVIEW_STATUS = `/internal/synthetics/overview_status`,
   INDEX_SIZE = `/internal/synthetics/index_size`,
+  SUGGESTIONS = `/internal/synthetics/suggestions`,
   AGENT_POLICIES = `/internal/synthetics/agent_policies`,
   PRIVATE_LOCATIONS = `/internal/synthetics/private_locations`,
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
