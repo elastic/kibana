@@ -211,6 +211,17 @@ export const schemas: Record<string, FormSchema> = {
                 ),
               };
             }
+
+            if (value % 1 !== 0) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionFieldDecimalError',
+                  {
+                    defaultMessage: `The value should be an integer number.`,
+                  }
+                ),
+              };
+            }
           },
         },
       ],
