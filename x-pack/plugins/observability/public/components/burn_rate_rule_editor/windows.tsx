@@ -117,13 +117,13 @@ function Window({
     return 'N/A';
   };
 
-  const timeWindowInHours = Math.round(
+  const sloTimeWindowInHours = Math.round(
     toMinutes(toDuration(slo?.timeWindow.duration ?? '30d')) / 60
   );
 
   const computeBudgetConsumed = () => {
     if (slo && longWindow.value > 0 && burnRateThreshold > 0) {
-      return (burnRateThreshold * longWindow.value) / timeWindowInHours;
+      return (burnRateThreshold * longWindow.value) / sloTimeWindowInHours;
     }
     return 0;
   };
@@ -157,8 +157,8 @@ function Window({
               initialBurnRate={burnRateThreshold}
               onChange={onBurnRateChange}
               errors={errors.burnRateThreshold}
-              timeWindowInHours={timeWindowInHours}
-              longWindowInHours={longWindow.value}
+              sloTimeWindowInHours={sloTimeWindowInHours}
+              longLookbackWindowInHours={longWindow.value}
             />
           </EuiFlexItem>
         )}

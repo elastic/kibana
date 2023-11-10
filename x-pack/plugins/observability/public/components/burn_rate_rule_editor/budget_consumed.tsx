@@ -14,26 +14,26 @@ interface Props {
   initialBurnRate?: number;
   errors?: string[];
   onChange: (burnRate: number) => void;
-  longWindowInHours: number;
-  timeWindowInHours: number;
+  longLookbackWindowInHours: number;
+  sloTimeWindowInHours: number;
 }
 
 export function BudgetConsumed({
   onChange,
   initialBurnRate = 1,
-  longWindowInHours,
-  timeWindowInHours,
+  longLookbackWindowInHours,
+  sloTimeWindowInHours,
   errors,
 }: Props) {
   const [budgetConsumed, setBudgetConsumed] = useState<number>(
-    ((initialBurnRate * longWindowInHours) / timeWindowInHours) * 100
+    ((initialBurnRate * longLookbackWindowInHours) / sloTimeWindowInHours) * 100
   );
   const hasError = errors !== undefined && errors.length > 0;
 
   const onBudgetConsumedChanged = (event: ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
     setBudgetConsumed(value);
-    const burnRate = timeWindowInHours * (value / 100 / longWindowInHours);
+    const burnRate = sloTimeWindowInHours * (value / 100 / longLookbackWindowInHours);
     onChange(burnRate);
   };
 
