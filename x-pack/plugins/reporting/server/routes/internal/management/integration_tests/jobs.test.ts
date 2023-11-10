@@ -18,6 +18,7 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ExportType } from '@kbn/reporting-server';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
 import { ReportingCore } from '../../../..';
@@ -26,7 +27,6 @@ import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../../lib';
 import { reportingMock } from '../../../../mocks';
 import {
-  createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,

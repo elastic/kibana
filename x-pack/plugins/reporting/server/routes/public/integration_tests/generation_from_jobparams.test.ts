@@ -15,6 +15,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '../../..';
 import { PUBLIC_ROUTES } from '../../../../common/constants';
 import { ReportingStore } from '../../../lib';
@@ -22,7 +23,6 @@ import { ExportTypesRegistry } from '../../../lib/export_types_registry';
 import { Report } from '../../../lib/store';
 import { reportingMock } from '../../../mocks';
 import {
-  createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,

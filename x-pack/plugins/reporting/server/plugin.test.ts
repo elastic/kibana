@@ -14,6 +14,7 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import { setFieldFormats } from '@kbn/reporting-server';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
@@ -24,11 +25,7 @@ import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ExportTypesRegistry } from './lib/export_types_registry';
 import { ReportingPlugin } from './plugin';
-import {
-  createMockConfigSchema,
-  createMockPluginSetup,
-  createMockPluginStart,
-} from './test_helpers';
+import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));

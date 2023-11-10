@@ -7,12 +7,13 @@
 
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
+import rison from '@kbn/rison';
 
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
-import rison from '@kbn/rison';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
 import { ReportingCore } from '../../../..';
@@ -22,7 +23,6 @@ import { ExportTypesRegistry } from '../../../../lib/export_types_registry';
 import { Report } from '../../../../lib/store';
 import { reportingMock } from '../../../../mocks';
 import {
-  createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
