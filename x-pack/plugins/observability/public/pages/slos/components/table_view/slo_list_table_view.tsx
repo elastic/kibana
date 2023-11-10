@@ -66,7 +66,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );
 
-  const { hasWriteCapabilities, hasReadCapabilities } = useCapabilities();
+  const { hasWriteCapabilities } = useCapabilities();
   const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const queryClient = useQueryClient();
@@ -110,7 +110,6 @@ export function SloListTableView({ sloList, loading, error }: Props) {
       description: i18n.translate('xpack.observability.slo.item.actions.details', {
         defaultMessage: 'Details',
       }),
-      isPrimary: true,
       onClick: (slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
           paths.observability.sloDetails(
@@ -262,7 +261,12 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     {
       field: 'sli',
       name: 'SLI value',
-      width: '200px',
+      render: (_, slo: SLOWithSummaryResponse) =>
+        numeral(slo.summary.sliValue).format(percentFormat),
+    },
+    {
+      field: 'historicalSli',
+      name: 'Historical SLI',
       render: (_, slo: SLOWithSummaryResponse) => {
         const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
         const historicalSliData = formatHistoricalData(
@@ -274,33 +278,25 @@ export function SloListTableView({ sloList, loading, error }: Props) {
           'sli_value'
         );
         return (
-          <EuiFlexGroup
-            direction="row"
-            responsive={false}
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="flexStart"
-          >
-            <EuiFlexItem grow={false}>
-              {numeral(slo.summary.sliValue).format(percentFormat)}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SloSparkline
-                chart="line"
-                id="sli_history"
-                state={isSloFailed ? 'error' : 'success'}
-                data={historicalSliData}
-                isLoading={historicalSummaryLoading}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <SloSparkline
+            chart="line"
+            id="sli_history"
+            state={isSloFailed ? 'error' : 'success'}
+            data={historicalSliData}
+            isLoading={historicalSummaryLoading}
+          />
         );
       },
     },
     {
       field: 'errorBudgetRemaining',
-      name: 'Error budget remaining',
-      width: '200px',
+      name: 'Budget remaining',
+      render: (_, slo: SLOWithSummaryResponse) =>
+        numeral(slo.summary.errorBudget.remaining).format(percentFormat),
+    },
+    {
+      field: 'historicalErrorBudgetRemaining',
+      name: 'Historical budget remaining',
       render: (_, slo: SLOWithSummaryResponse) => {
         const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
         const errorBudgetBurnDownData = formatHistoricalData(
@@ -312,30 +308,16 @@ export function SloListTableView({ sloList, loading, error }: Props) {
           'error_budget_remaining'
         );
         return (
-          <EuiFlexGroup
-            direction="row"
-            responsive={false}
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="flexStart"
-          >
-            <EuiFlexItem grow={false}>
-              {numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SloSparkline
-                chart="area"
-                id="error_budget_burn_down"
-                state={isSloFailed ? 'error' : 'success'}
-                data={errorBudgetBurnDownData}
-                isLoading={historicalSummaryLoading}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <SloSparkline
+            chart="area"
+            id="error_budget_burn_down"
+            state={isSloFailed ? 'error' : 'success'}
+            data={errorBudgetBurnDownData}
+            isLoading={historicalSummaryLoading}
+          />
         );
       },
     },
-
     {
       name: 'Actions',
       actions,
