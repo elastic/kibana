@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { rulesLocatorID, sloFeatureId } from '../../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
 import { paths } from '../../../../../common/locators/paths';
@@ -262,7 +263,9 @@ export function SloListTableView({ sloList, loading, error }: Props) {
       field: 'sli',
       name: 'SLI value',
       render: (_, slo: SLOWithSummaryResponse) =>
-        numeral(slo.summary.sliValue).format(percentFormat),
+        slo.summary.status === 'NO_DATA'
+          ? NOT_AVAILABLE_LABEL
+          : numeral(slo.summary.sliValue).format(percentFormat),
     },
     {
       field: 'historicalSli',
@@ -292,7 +295,9 @@ export function SloListTableView({ sloList, loading, error }: Props) {
       field: 'errorBudgetRemaining',
       name: 'Budget remaining',
       render: (_, slo: SLOWithSummaryResponse) =>
-        numeral(slo.summary.errorBudget.remaining).format(percentFormat),
+        slo.summary.status === 'NO_DATA'
+          ? NOT_AVAILABLE_LABEL
+          : numeral(slo.summary.errorBudget.remaining).format(percentFormat),
     },
     {
       field: 'historicalErrorBudgetRemaining',
