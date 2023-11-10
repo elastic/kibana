@@ -6,17 +6,18 @@
  */
 
 import Boom from '@hapi/boom';
+import moment from 'moment';
+
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ReportingRequestHandlerContext } from '@kbn/reporting-server';
 import {
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   JobParamsDownloadCSV,
 } from '@kbn/reporting-export-types-csv-common';
-import moment from 'moment';
 import type { ReportingCore } from '../../..';
 import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { PassThroughStream } from '../../../lib';
+import { ReportingRequestHandlerContext } from '../../../types';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 
 const path = INTERNAL_ROUTES.DOWNLOAD_CSV;

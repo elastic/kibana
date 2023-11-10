@@ -17,11 +17,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import {
-  ExportType,
-  ReportingRequestHandlerContext,
-  ReportingServerPluginSetup,
-} from '@kbn/reporting-server';
+import { ExportType } from '@kbn/reporting-server';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
 import { ReportingCore } from '../../../..';
@@ -35,6 +31,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
+import { ReportingRequestHandlerContext } from '../../../../types';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
@@ -81,7 +78,7 @@ describe(`GET ${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}`, () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => reportingMock.createStart() as unknown as ReportingServerPluginSetup
+      () => reportingMock.createStart()
     );
 
     mockSetupDeps = createMockPluginSetup({

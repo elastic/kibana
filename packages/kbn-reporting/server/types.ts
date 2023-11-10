@@ -12,23 +12,22 @@ import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CancellationToken } from '@kbn/reporting-common';
 import type { BaseParams, BasePayload, TaskRunResult } from '@kbn/reporting-common/types';
+import { ExportType } from './export_type';
 
 export interface ReportingServerPluginSetup {
-  registerExportTypes: () => void;
+  registerExportTypes: (item: ExportType) => void;
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
   usesUiCapabilities: () => boolean;
 }
 
-export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
-  reporting: ReportingServerPluginSetup | null;
-}>;
-
 // standard type for create job function of any ExportType implementation
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
-  context: ReportingRequestHandlerContext,
+  context: CustomRequestHandlerContext<{
+    reporting: ReportingServerPluginSetup | null;
+  }>,
   req: KibanaRequest
 ) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 

@@ -12,7 +12,6 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
-import { ReportingRequestHandlerContext, ReportingServerPluginSetup } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
@@ -28,6 +27,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
+import { ReportingRequestHandlerContext } from '../../../../types';
 import { registerGenerationRoutesInternal } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
@@ -60,7 +60,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => reportingMock.createStart() as unknown as ReportingServerPluginSetup
+      () => reportingMock.createStart()
     );
 
     const mockSetupDeps = createMockPluginSetup({

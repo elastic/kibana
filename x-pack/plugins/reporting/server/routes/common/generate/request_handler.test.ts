@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+
 import rison from '@kbn/rison';
+
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ReportingRequestHandlerContext } from '@kbn/reporting-server/types';
+import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { ReportingCore } from '../../..';
 import { Report, ReportingStore } from '../../../lib/store';
 import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import { ReportingJobResponse } from '../../../types';
+import { ReportingJobResponse, ReportingRequestHandlerContext } from '../../../types';
 import { RequestHandler } from './request_handler';
-import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 
 jest.mock(
   'puid',

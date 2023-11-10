@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { ReportingStart } from '../types';
 
 export const reportingMock = {
-  createStart: (): ReportingServerPluginSetup | ReportingStart => ({
+  createStart: (): ReportingStart => ({
     usesUiCapabilities: () => false,
     registerExportTypes: () => {},
   }),

@@ -12,10 +12,10 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ReportingRequestHandlerContext, setFieldFormats } from '@kbn/reporting-server';
+import { setFieldFormats } from '@kbn/reporting-server';
 import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
-import { registerUiSettings, ReportingConfigType } from './config';
+import { ReportingConfigType, registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
@@ -25,6 +25,7 @@ import type {
   ReportingStart,
   ReportingStartDeps,
 } from './types';
+import { ReportingRequestHandlerContext } from './types';
 import { registerReportingUsageCollector } from './usage';
 
 /*
