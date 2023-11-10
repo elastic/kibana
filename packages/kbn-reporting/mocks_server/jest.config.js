@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../..',
-  roots: ['<rootDir>/packages/kbn-reporting/mocks-server'],
+  roots: ['<rootDir>/packages/kbn-reporting/mocks_server'],
 };

@@ -5272,7 +5272,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-mocks-server@link:packages/kbn-reporting/mocks-server":
+"@kbn/reporting-mocks-server@link:packages/kbn-reporting/mocks_server":
   version "0.0.0"
   uid ""
 
