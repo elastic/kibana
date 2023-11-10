@@ -7,6 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
 import type { SessionViewConfig } from '../../../../common/types';
 import type {
@@ -272,5 +273,10 @@ export const setIsDiscoverSavedSearchLoaded = actionCreator<{
   id: string;
   isDiscoverSavedSearchLoaded: boolean;
 }>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
+
+export const updateSavedSearch = actionCreator<{
+  id: string;
+  savedSearch: SavedSearch;
+}>('SET_SAVED_SEARCH');
 
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');

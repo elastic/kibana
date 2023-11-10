@@ -180,35 +180,55 @@ export const useDiscoverInTimelineActions = (
       savedSearch.timeRange =
         savedSearch.timeRange ?? discoverDataService.query.timefilter.timefilter.getTime();
       savedSearch.tags = ['security-solution-default'];
-
+      console.log('update saved search');
       if (savedSearchId) {
         savedSearch.id = savedSearchId;
-      }
-      try {
-        const response = await persistSavedSearch(savedSearch, {
-          onTitleDuplicate: () => {},
-          copyOnSave: !savedSearchId,
-        });
-
-        if (!response || !response.id) {
-          throw new Error('Unknown Error occured');
-        }
-
-        if (!savedSearchId) {
+        // distinguish between setInitialSavedSearch and updateSavedSearch
+        // to avoud setting the timeline as changed
+        dispatch(
+          timelineActions.updateSavedSearch({
+            id: TimelineId.active,
+            savedSearch,
+          })
+        );
+      } else {
+        try {
           dispatch(
-            timelineActions.updateSavedSearchId({
+            timelineActions.startTimelineSaving({
               id: TimelineId.active,
-              savedSearchId: response.id,
             })
           );
-          // Also save the timeline, this will only happen once, in case there is no saved search id yet
-          dispatch(timelineActions.saveTimeline({ id: TimelineId.active, saveAsNew: false }));
+          const response = await persistSavedSearch(savedSearch, {
+            onTitleDuplicate: () => {},
+            copyOnSave: !savedSearchId,
+          });
+
+          if (!response || !response.id) {
+            throw new Error('Unknown Error occured');
+          }
+
+          if (!savedSearchId) {
+            dispatch(
+              timelineActions.updateSavedSearchId({
+                id: TimelineId.active,
+                savedSearchId: response.id,
+              })
+            );
+            // Also save the timeline, this will only happen once, in case there is no saved search id yet
+            dispatch(timelineActions.saveTimeline({ id: TimelineId.active, saveAsNew: false }));
+          }
+        } catch (err) {
+          addError(DISCOVER_SEARCH_SAVE_ERROR_TITLE, {
+            title: DISCOVER_SEARCH_SAVE_ERROR_TITLE,
+            toastMessage: String(err),
+          });
+        } finally {
+          dispatch(
+            timelineActions.endTimelineSaving({
+              id: TimelineId.active,
+            })
+          );
         }
-      } catch (err) {
-        addError(DISCOVER_SEARCH_SAVE_ERROR_TITLE, {
-          title: DISCOVER_SEARCH_SAVE_ERROR_TITLE,
-          toastMessage: String(err),
-        });
       }
     },
     [persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]
