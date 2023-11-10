@@ -16,6 +16,7 @@ const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalInjectedMetadataSetup> = {
     getBasePath: jest.fn(),
     getServerBasePath: jest.fn(),
+    getAssetsHrefBase: jest.fn(),
     getPublicBaseUrl: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBranch: jest.fn(),
