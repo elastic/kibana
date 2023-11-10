@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
+
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { PerformanceMetrics as ScreenshotMetrics } from '@kbn/screenshotting-plugin/common/types';
 import type { ByteSizeValue } from '@kbn/config-schema';
@@ -90,6 +92,20 @@ export interface ReportingConfigType {
     protocol?: string;
     hostname?: string;
     port?: number;
+  };
+  roles: {
+    enabled: boolean;
+  };
+  export_types: {
+    pdf: { enabled: boolean };
+    png: { enabled: boolean };
+    csv: { enabled: boolean };
+  };
+  queue: {
+    indexInterval: string;
+    pollEnabled: boolean;
+    pollInterval: number | moment.Duration;
+    timeout: number | moment.Duration;
   };
   csv: {
     checkForFormulas: boolean;

@@ -6,6 +6,43 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+import { DeepPartial } from 'utility-types';
+import { ReportingConfigType } from '@kbn/reporting-common/types';
+
+export const createMockConfigSchema = (
+  overrides: DeepPartial<ReportingConfigType> = {}
+): ReportingConfigType => {
+  // deeply merge the defaults and the provided partial schema
+  return {
+    index: '.reporting',
+    encryptionKey: 'cool-encryption-key-where-did-you-find-it',
+    ...overrides,
+    kibanaServer: {
+      hostname: 'localhost',
+      ...overrides.kibanaServer,
+    },
+    queue: {
+      indexInterval: 'week',
+      pollEnabled: true,
+      pollInterval: 3000,
+      timeout: 120000,
+      ...overrides.queue,
+    },
+    csv: {
+      scroll: { size: 500, duration: '30s' },
+      ...overrides.csv,
+    },
+    roles: {
+      enabled: false,
+      ...overrides.roles,
+    },
+    capture: { maxAttempts: 1 },
+    export_types: {
+      pdf: { enabled: true },
+      png: { enabled: true },
+      csv: { enabled: true },
+      ...overrides.export_types,
+    },
+    statefulSettings: { enabled: true },
+  } as ReportingConfigType;
+};

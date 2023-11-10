@@ -13,6 +13,7 @@ import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core
 import { CancellationToken } from '@kbn/reporting-common';
 import type { LocatorParams } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory, generatePdfObservableV2 } from '@kbn/reporting-server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 

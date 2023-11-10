@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { createMockConfigSchema as packageMock } from '@kbn/reporting-mocks-server';
+import { ReportingConfigType } from '../config';
+
+export const createMockConfigSchema = (args?: any) => {
+  return packageMock(args) as ReportingConfigType;
+};
+
 export {
-  createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
