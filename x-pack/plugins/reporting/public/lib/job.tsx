@@ -174,6 +174,7 @@ export class Job {
         return i18n.translate('xpack.reporting.jobType.pngOutputName', {
           defaultMessage: 'PNG',
         });
+      case 'csv_v2':
       case 'csv_searchsource':
         return i18n.translate('xpack.reporting.jobType.csvOutputName', {
           defaultMessage: 'CSV',
