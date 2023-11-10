@@ -155,6 +155,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
+
+      // Alerts search bar (conditional actions)
+      await testSubjects.click('alertsFilterQueryToggle');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('addFilter');
+      await testSubjects.click('filterFieldSuggestionList');
+      await comboBox.set('filterFieldSuggestionList', '_id');
+      await comboBox.set('filterOperatorList', 'is not');
+      await testSubjects.setValue('filterParams', 'fake-rule-id');
+      await testSubjects.click('saveFilter');
+      await testSubjects.setValue('queryInput', '_id: *');
+
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         `Rule '{{rule.name}}' is active for group '{{context.group}}':

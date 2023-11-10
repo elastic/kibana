@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { notifyWhenSchema } from './notify_when_schema';
+import { filterStateStore } from '../constants';
 
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
@@ -14,7 +15,14 @@ const actionAlertsFilterQueryFiltersSchema = schema.arrayOf(
   schema.object({
     query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     meta: schema.recordOf(schema.string(), schema.any()),
-    state$: schema.maybe(schema.object({ store: schema.string() })),
+    $state: schema.maybe(
+      schema.object({
+        store: schema.oneOf([
+          schema.literal(filterStateStore.APP_STATE),
+          schema.literal(filterStateStore.GLOBAL_STATE),
+        ]),
+      })
+    ),
   })
 );
 

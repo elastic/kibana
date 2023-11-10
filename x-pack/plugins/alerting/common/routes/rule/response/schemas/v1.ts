@@ -47,7 +47,7 @@ const actionAlertsFilterSchema = schema.object({
         schema.object({
           query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
           meta: schema.recordOf(schema.string(), schema.any()),
-          state$: schema.maybe(schema.object({ store: schema.string() })),
+          $state: schema.maybe(schema.object({ store: schema.string() })),
         })
       ),
     })
