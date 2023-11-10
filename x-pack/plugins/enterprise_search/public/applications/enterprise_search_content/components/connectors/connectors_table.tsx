@@ -23,9 +23,9 @@ import { Meta } from '../../../../../common/types/pagination';
 
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import {
-  ingestionStatusToColor,
-  ingestionStatusToText,
-} from '../../utils/ingestion_status_helpers';
+  connectorStatusToColor,
+  connectorStatusToText,
+} from '../../utils/connector_status_helpers';
 
 interface ConnectorsTableProps {
   items: Connector[];
@@ -89,9 +89,9 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         }
       ),
       render: (connector: Connector) => {
-        const label = ingestionStatusToText(connector.status);
+        const label = connectorStatusToText(connector.status);
         return (
-          <EuiBadgeTo to={''} label={label} color={ingestionStatusToColor(connector.status)} />
+          <EuiBadgeTo to={''} label={label} color={connectorStatusToColor(connector.status)} />
         );
       },
     },

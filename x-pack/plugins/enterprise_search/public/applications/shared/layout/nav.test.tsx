@@ -406,6 +406,12 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
           id: 'search_indices',
           name: 'Indices',
         },
+        {
+          href: '/app/enterprise_search/content/connectors',
+          id: 'connectors',
+          items: undefined,
+          name: 'Connectors',
+        },
       ],
       name: 'Content',
     },
