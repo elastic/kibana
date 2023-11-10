@@ -25,6 +25,7 @@ interface Props {
   onClickViewAgents?: () => void;
   agentCount: number;
   showLoading?: boolean;
+  isCsp?: boolean;
 }
 
 interface UsePollingAgentCountOptions {
