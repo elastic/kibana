@@ -15,7 +15,6 @@ import type {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
-  EnvironmentMode,
 } from '@kbn/core/public';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -74,10 +73,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   readonly buildFlavor: string;
   /**
-   * Whether the current environment is dev or production mode
-   */
-  readonly envMode: EnvironmentMode;
-  /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
    * when upgrading rules. If not provided, the latest compatible package will be installed,
    * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
@@ -107,7 +102,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
-    this.envMode = initializerContext.env.mode;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
     this.contract = new PluginContract(this.experimentalFeatures);
     this.telemetry = new TelemetryService();
@@ -293,7 +287,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       kibanaBranch: this.kibanaBranch,
       kibanaVersion: this.kibanaVersion,
       buildFlavor: this.buildFlavor,
-      envMode: this.envMode,
       prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
     });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
