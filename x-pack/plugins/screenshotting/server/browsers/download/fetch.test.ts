@@ -8,7 +8,7 @@
 import mockFs from 'mock-fs';
 import axios from 'axios';
 import { createHash } from 'crypto';
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import { resolve as resolvePath } from 'path';
 import { Readable } from 'stream';
 import { fetch } from './fetch';
@@ -38,8 +38,13 @@ describe('fetch', () => {
   test('downloads the url to the path', async () => {
     await fetch('url', TEMP_FILE);
 
-    // Hack: We can't use `readFileSync(TEMP_FILE, 'utf8')` because of https://github.com/tschaub/mock-fs/issues/377
-    expect(readFileSync(TEMP_FILE).toString()).toEqual('foobar');
+    let tempFile = null;
+    try {
+      tempFile = (await readFile(TEMP_FILE)).toString();
+    } catch (e) {
+      // assertion will error
+    }
+    expect(tempFile).toEqual('foobar');
   });
 
   test('returns the md5 hex hash of the http body', async () => {
