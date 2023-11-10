@@ -16,6 +16,7 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/ess/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
+  - x-pack/test/security_solution_endpoint_api_int/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -227,10 +228,6 @@ enabled:
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group5/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group10/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/rule_execution_logic/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/prebuilt_rules/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/bundled_prebuilt_rules_package/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/large_prebuilt_rules_package/config.ts
-  - x-pack/test/detection_engine_api_integration/security_and_spaces/update_prebuilt_rules_package/config.ts
   - x-pack/test/disable_ems/config.ts
   - x-pack/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/test/examples/config.ts
@@ -385,6 +382,7 @@ enabled:
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
+  - x-pack/test/security_solution_endpoint_api_int/serverless.config.ts
   - x-pack/test/security_solution_endpoint/endpoint.config.ts
   - x-pack/test/security_solution_endpoint/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/integrations.config.ts
@@ -462,8 +460,13 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts/configs/ess.config.ts
- 
-
-
-
-
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/management/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/management/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/bundled_prebuilt_rules_package/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/bundled_prebuilt_rules_package/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/large_prebuilt_rules_package/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/large_prebuilt_rules_package/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/update_prebuilt_rules_package/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/update_prebuilt_rules_package/configs/ess.config.ts

@@ -19,6 +19,12 @@ export const templateSchema = schema.object({
       settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       mappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+      lifecycle: schema.maybe(
+        schema.object({
+          enabled: schema.boolean(),
+          data_retention: schema.maybe(schema.string()),
+        })
+      ),
     })
   ),
   composedOf: schema.maybe(schema.arrayOf(schema.string())),
