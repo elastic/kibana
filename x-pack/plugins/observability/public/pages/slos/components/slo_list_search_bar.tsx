@@ -69,6 +69,27 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
   },
 ];
 
+const VIEW_MODE_OPTIONS: Array<EuiComboBoxOptionOption<ViewMode>> = [
+  {
+    value: 'default',
+    label: i18n.translate('xpack.observability.slo.list.viewMode.default', {
+      defaultMessage: 'Default',
+    }),
+  },
+  {
+    value: 'table',
+    label: i18n.translate('xpack.observability.slo.list.viewMode.compact', {
+      defaultMessage: 'Compact',
+    }),
+  },
+  {
+    value: 'card',
+    label: i18n.translate('xpack.observability.slo.list.viewMode.card', {
+      defaultMessage: 'Card',
+    }),
+  },
+];
+
 export type ViewMode = 'default' | 'table' | 'card';
 
 export function SloListSearchBar({
@@ -92,10 +113,9 @@ export function SloListSearchBar({
   );
   const selectedSort = sortOptions.find((option) => option.checked === 'on');
 
-  const [viewModeOption, setViewModeOption] = useState<EuiComboBoxOptionOption<ViewMode>>({
-    value: 'default',
-    label: 'Default',
-  });
+  const [viewModeOption, setViewModeOption] = useState<EuiComboBoxOptionOption<ViewMode>>(
+    VIEW_MODE_OPTIONS.find((opt) => opt.value === initialState.viewMode)!
+  );
 
   const handleToggleSortButton = () => setSortPopoverOpen(!isSortPopoverOpen);
   const handleChangeSort = (newOptions: Array<Item<SortField>>) => {
@@ -187,11 +207,7 @@ export function SloListSearchBar({
               )}
               placeholder="Select a single option"
               singleSelection={{ asPlainText: true }}
-              options={[
-                { value: 'default', label: 'Default' },
-                { value: 'table', label: 'Compact' },
-                { value: 'card', label: 'Card' },
-              ]}
+              options={VIEW_MODE_OPTIONS}
               isClearable={false}
               selectedOptions={[viewModeOption]}
               onChange={(selectedOptions: Array<EuiComboBoxOptionOption<ViewMode>>) => {

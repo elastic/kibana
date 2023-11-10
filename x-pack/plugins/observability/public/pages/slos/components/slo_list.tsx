@@ -25,7 +25,7 @@ export function SloList({ autoRefresh }: Props) {
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
   const [direction] = useState<'asc' | 'desc'>(state.sort.direction);
-  const [viewMode, setViewMode] = useState<ViewMode>('default');
+  const [viewMode, setViewMode] = useState<ViewMode>(state.viewMode);
 
   const {
     isLoading,
@@ -66,6 +66,7 @@ export function SloList({ autoRefresh }: Props) {
 
   const handleChangeViewMode = (newViewMode: ViewMode) => {
     setViewMode(newViewMode);
+    storeState({ viewMode: newViewMode });
   };
 
   return (

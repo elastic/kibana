@@ -262,6 +262,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     {
       field: 'sli',
       name: 'SLI value',
+      width: '200px',
       render: (_, slo: SLOWithSummaryResponse) => {
         const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
         const historicalSliData = formatHistoricalData(
@@ -299,6 +300,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     {
       field: 'errorBudgetRemaining',
       name: 'Error budget remaining',
+      width: '200px',
       render: (_, slo: SLOWithSummaryResponse) => {
         const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
         const errorBudgetBurnDownData = formatHistoricalData(
@@ -333,6 +335,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
         );
       },
     },
+
     {
       name: 'Actions',
       actions,
