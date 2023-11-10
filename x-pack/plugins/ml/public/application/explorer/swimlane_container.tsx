@@ -68,7 +68,7 @@ declare global {
  */
 const RESIZE_THROTTLE_TIME_MS = 500;
 const BORDER_WIDTH = 1;
-const CELL_HEIGHT = 30;
+export const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
 
