@@ -417,18 +417,9 @@ export class CommonPageObject extends FtrService {
    * Clicks cancel button on modal
    * @param overlayWillStay pass in true if your test will show multiple modals in succession
    */
-  async clickCancelOnModal(overlayWillStay = true, ignorePageLeaveWarning = false) {
+  async clickCancelOnModal(overlayWillStay = true) {
     this.log.debug('Clicking modal cancel');
-    await this.testSubjects.exists('confirmModalTitleText');
-
-    await this.retry.try(async () => {
-      const warning = await this.testSubjects.exists('confirmModalTitleText');
-      if (warning) {
-        await this.testSubjects.click(
-          ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-        );
-      }
-    });
+    await this.testSubjects.click('confirmModalCancelButton');
     if (!overlayWillStay) {
       await this.ensureModalOverlayHidden();
     }
