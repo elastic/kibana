@@ -5,17 +5,16 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import { waitFor } from 'xstate/lib/waitFor';
-import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
-import { type BehaviorSubject, combineLatest, from, map, Subscription } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import { dynamic } from '../utils/dynamic';
-import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
+import { type Observable } from 'rxjs';
+import { waitFor } from 'xstate/lib/waitFor';
 import { LogExplorerStateContainer } from '../components/log_explorer';
+import { LogExplorerController } from '../controller';
 import { LogExplorerStartDeps } from '../types';
+import { dynamic } from '../utils/dynamic';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
-import { LogExplorerController } from '../controller/create_controller';
 
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
@@ -24,7 +23,7 @@ const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'))
 export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
   plugins: LogExplorerStartDeps;
-  state$?: BehaviorSubject<LogExplorerStateContainer>;
+  state$?: Observable<LogExplorerStateContainer>;
   controller: LogExplorerController;
 }
 
@@ -32,7 +31,6 @@ export const createLogExplorerProfileCustomizations =
   ({
     core,
     plugins,
-    state$,
     controller,
   }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
@@ -46,20 +44,6 @@ export const createLogExplorerProfileCustomizations =
      * create the DataView and set it in the stateContainer from Discover
      */
     await waitFor(service, (state) => state.matches('initialized'), { timeout: 30000 });
-
-    /**
-     * Subscribe the state$ BehaviorSubject when the consumer app wants to react to state changes.
-     * It emits a combined state of:
-     * - log explorer state machine context
-     * - appState from the discover stateContainer
-     */
-    let stateSubscription: Subscription;
-    if (state$) {
-      stateSubscription = createStateUpdater({
-        logExplorerControllerStateService: service,
-        stateContainer,
-      }).subscribe(state$);
-    }
 
     /**
      * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
@@ -125,27 +109,5 @@ export const createLogExplorerProfileCustomizations =
       },
     });
 
-    return () => {
-      if (stateSubscription) {
-        stateSubscription.unsubscribe();
-      }
-    };
+    return () => {};
   };
-
-const createStateUpdater = ({
-  logExplorerControllerStateService,
-  stateContainer,
-}: {
-  logExplorerControllerStateService: LogExplorerControllerStateService;
-  stateContainer: DiscoverStateContainer;
-}) => {
-  return combineLatest([
-    from(logExplorerControllerStateService),
-    stateContainer.appState.state$,
-  ]).pipe(
-    map(([logExplorerState, appState]) => ({
-      logExplorerState: logExplorerState.context,
-      appState,
-    }))
-  );
-};

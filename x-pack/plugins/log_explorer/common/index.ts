@@ -21,4 +21,5 @@ export type {
   GridColumnDisplayOptions,
   GridRowsDisplayOptions,
   GridDisplayOptions,
+  DisplayOptions,
 } from './display_options';

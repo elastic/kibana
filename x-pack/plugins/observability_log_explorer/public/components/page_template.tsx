@@ -7,19 +7,20 @@
 
 import { EuiPageSectionProps } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
-export const ObservabilityLogExplorerPageTemplate = ({
-  children,
-  observabilityShared,
-}: React.PropsWithChildren<{
-  observabilityShared: ObservabilitySharedPluginStart;
-}>) => (
-  <observabilityShared.navigation.PageTemplate pageSectionProps={pageSectionProps}>
-    {children}
-  </observabilityShared.navigation.PageTemplate>
-);
+export const ObservabilityLogExplorerPageTemplate = ({ children }: React.PropsWithChildren<{}>) => {
+  const {
+    services: { observabilityShared },
+  } = useKibanaContextForPlugin();
+
+  return (
+    <observabilityShared.navigation.PageTemplate pageSectionProps={pageSectionProps}>
+      {children}
+    </observabilityShared.navigation.PageTemplate>
+  );
+};
 
 const fullHeightContentStyles = css`
   display: flex;

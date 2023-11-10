@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { DiscoverAppState } from '@kbn/discover-plugin/public';
 import { isEmpty } from 'lodash';
 import { ActionFunction, actions, InvokeCallback } from 'xstate';
+import {
+  getChartDisplayOptionsFromDiscoverAppState,
+  getDiscoverAppStateFromDisplayOptions,
+  getGridColumnDisplayOptionsFromDiscoverAppState,
+  getGridRowsDisplayOptionsFromDiscoverAppState,
+} from '../../../../utils/convert_discover_app_state';
 import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
 export const subscribeToDiscoverState =
@@ -48,13 +53,10 @@ export const updateGridFromDiscoverAppState = actions.assign<
     return {
       grid: {
         columns:
-          event.appState.columns?.map((field) => ({
-            field,
-            width: event.appState.grid?.columns?.[field]?.width,
-          })) ?? context.grid.columns,
+          getGridColumnDisplayOptionsFromDiscoverAppState(event.appState) ?? context.grid.columns,
         rows: {
-          rowHeight: event.appState.rowHeight ?? context.grid.rows.rowHeight,
-          rowsPerPage: event.appState.rowsPerPage ?? context.grid.rows.rowsPerPage,
+          ...context.grid.rows,
+          ...getGridRowsDisplayOptionsFromDiscoverAppState(event.appState),
         },
       },
     };
@@ -70,7 +72,8 @@ export const updateChartFromDiscoverAppState = actions.assign<
   if ('appState' in event && event.type === 'RECEIVE_DISCOVER_APP_STATE') {
     return {
       chart: {
-        breakdownField: event.appState.breakdownField ?? context.chart.breakdownField,
+        ...context.chart,
+        ...getChartDisplayOptionsFromDiscoverAppState(event.appState),
       },
     };
   }
@@ -86,20 +89,5 @@ export const updateDiscoverAppStateFromContext: ActionFunction<
     return;
   }
 
-  context.discoverStateContainer.appState.update({
-    breakdownField: context.chart.breakdownField,
-    columns: context.grid.columns.map(({ field }) => field),
-    grid: {
-      columns: context.grid.columns.reduce<
-        NonNullable<NonNullable<DiscoverAppState['grid']>['columns']>
-      >((gridColumns, { field, width }) => {
-        if (width != null) {
-          gridColumns[field] = { width };
-        }
-        return gridColumns;
-      }, {}),
-    },
-    rowHeight: context.grid.rows.rowHeight,
-    rowsPerPage: context.grid.rows.rowsPerPage,
-  });
+  context.discoverStateContainer.appState.update(getDiscoverAppStateFromDisplayOptions(context));
 };

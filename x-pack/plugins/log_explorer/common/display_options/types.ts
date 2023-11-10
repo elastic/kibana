@@ -23,3 +23,8 @@ export interface GridDisplayOptions {
   columns: GridColumnDisplayOptions[];
   rows: GridRowsDisplayOptions;
 }
+
+export interface DisplayOptions {
+  grid: GridDisplayOptions;
+  chart: ChartDisplayOptions;
+}

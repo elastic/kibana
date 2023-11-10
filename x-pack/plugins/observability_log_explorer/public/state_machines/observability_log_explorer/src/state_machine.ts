@@ -144,7 +144,7 @@ export const createObservabilityLogExplorerStateMachine = ({
       initializeFromTimeFilterService: initializeFromTimeFilterService({ timeFilterService }),
       listenForLogExplorerStateChanges: (context, event) => {
         return 'controller' in context
-          ? context.controller?.logExplorerState$.pipe(
+          ? context.controller?.state$.pipe(
               map((value) => ({ type: 'LOG_EXPLORER_STATE_CHANGED', state: value }))
             )
           : throwError(

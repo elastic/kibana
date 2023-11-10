@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import deepEqual from 'fast-deep-equal';
-import useObservable from 'react-use/lib/useObservable';
-import { type BehaviorSubject, distinctUntilChanged, filter, take } from 'rxjs';
-import styled from '@emotion/styled';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -20,17 +14,25 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
-import { LogExplorerStateContainer } from '@kbn/log-explorer-plugin/public';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import {
-  OBSERVABILITY_ONBOARDING_LOCATOR,
   ObservabilityOnboardingLocatorParams,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability/locators';
 import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { css } from '@emotion/react';
+import {
+  getDiscoverColumnsFromDisplayOptions,
+  LogExplorerControllerContext,
+} from '@kbn/log-explorer-plugin/public';
 import { LOG_EXPLORER_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { PluginKibanaContextValue } from '../utils/use_kibana';
+import { useActor } from '@xstate/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { filter, Observable, take } from 'rxjs';
 import {
   betaBadgeDescription,
   betaBadgeTitle,
@@ -38,20 +40,22 @@ import {
   feedbackLinkTitle,
   onboardingLinkTitle,
 } from '../../common/translations';
-import { getRouterLinkProps } from '../utils/get_router_link_props';
+import { ObservabilityLogExplorerService } from '../state_machines/observability_log_explorer/src/state_machine';
 import { ObservabilityLogExplorerAppMountParameters } from '../types';
+import { getRouterLinkProps } from '../utils/get_router_link_props';
+import { PluginKibanaContextValue } from '../utils/use_kibana';
 
 interface LogExplorerTopNavMenuProps {
-  setHeaderActionMenu: ObservabilityLogExplorerAppMountParameters['setHeaderActionMenu'];
+  pageStateService: ObservabilityLogExplorerService;
   services: KibanaReactContextValue<PluginKibanaContextValue>['services'];
-  state$: BehaviorSubject<LogExplorerStateContainer>;
+  setHeaderActionMenu: ObservabilityLogExplorerAppMountParameters['setHeaderActionMenu'];
   theme$: ObservabilityLogExplorerAppMountParameters['theme$'];
 }
 
 export const LogExplorerTopNavMenu = ({
-  setHeaderActionMenu,
+  pageStateService,
   services,
-  state$,
+  setHeaderActionMenu,
   theme$,
 }: LogExplorerTopNavMenuProps) => {
   const { serverless } = services;
@@ -70,14 +74,14 @@ export const LogExplorerTopNavMenu = ({
 
 const ServerlessTopNav = ({
   services,
-  state$,
-}: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
+  pageStateService,
+}: Pick<LogExplorerTopNavMenuProps, 'services' | 'pageStateService'>) => {
   return (
     <EuiHeader data-test-subj="logExplorerHeaderMenu">
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
-            <DiscoverLink services={services} state$={state$} />
+            <DiscoverLink services={services} pageStateService={pageStateService} />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
@@ -111,7 +115,7 @@ const ServerlessTopNav = ({
 const StatefulTopNav = ({
   setHeaderActionMenu,
   services,
-  state$,
+  pageStateService,
   theme$,
 }: LogExplorerTopNavMenuProps) => {
   /**
@@ -166,7 +170,7 @@ const StatefulTopNav = ({
       <EuiHeaderSection data-test-subj="logExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
-            <DiscoverLink services={services} state$={state$} />
+            <DiscoverLink services={services} pageStateService={pageStateService} />
             <OnboardingLink services={services} />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
@@ -175,32 +179,29 @@ const StatefulTopNav = ({
   );
 };
 
-const DiscoverLink = React.memo(
-  ({ services, state$ }: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
-    const { appState, logExplorerState } = useObservable<LogExplorerStateContainer>(
-      state$.pipe(
-        distinctUntilChanged<LogExplorerStateContainer>((prev, curr) => {
-          if (!prev.appState || !curr.appState) return false;
-          return deepEqual(
-            [
-              prev.appState.columns,
-              prev.appState.filters,
-              prev.appState.index,
-              prev.appState.query,
-            ],
-            [curr.appState.columns, curr.appState.filters, curr.appState.index, curr.appState.query]
-          );
-        })
-      ),
-      { appState: {}, logExplorerState: {} }
-    );
+const ConnectedDiscoverLink = {};
 
-    const discoverLinkParams = {
-      columns: appState?.columns,
-      filters: appState?.filters,
-      query: appState?.query,
-      dataViewSpec: logExplorerState?.datasetSelection?.selection.dataset.toDataviewSpec(),
-    };
+const DiscoverLink = React.memo(
+  ({
+    services,
+    pageStateService,
+  }: Pick<LogExplorerTopNavMenuProps, 'services' | 'pageStateService'>) => {
+    const [state] = useActor(pageStateService);
+
+    const logExplorerState = useObservable(state$);
+
+    const discoverLinkParams = useMemo(
+      () => ({
+        columns:
+          logExplorerState != null
+            ? getDiscoverColumnsFromDisplayOptions(logExplorerState)
+            : undefined,
+        // filters: appState?.filters,
+        // query: appState?.query,
+        dataViewSpec: logExplorerState?.datasetSelection?.selection.dataset.toDataviewSpec(),
+      }),
+      [logExplorerState]
+    );
 
     const discoverUrl = services.discover.locator?.getRedirectUrl(discoverLinkParams);
 
