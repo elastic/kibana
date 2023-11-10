@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiText, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 
 import { EmbeddableSloProps } from './types';
@@ -33,5 +35,44 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
       numOfAlerts = numOfAlerts + activeAlerts.get(slo);
     }
   });
-  return <h1>{numOfAlerts}</h1>;
+  return (
+    <EuiPanel color="danger" hasShadow={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" direction="column" style={{ minHeight: '100%' }}>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiText color="default" size="m">
+              <h3>
+                {i18n.translate('xpack.observability.sloSummary.h5.activeAlertsLabel', {
+                  defaultMessage: 'Active Alerts',
+                })}
+              </h3>
+            </EuiText>
+          </EuiFlexItem>
+
+          {/* <EuiFlexItem>
+            <EuiText color="subdued" size="s">
+              <FormattedMessage
+                id="xpack.observability.sloSummary.noRulesYetTextLabel"
+                defaultMessage="No rules yet"
+              />
+            </EuiText>
+          </EuiFlexItem> */}
+        </EuiFlexGroup>
+
+        <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              title={numOfAlerts}
+              titleColor="default"
+              titleSize="l"
+              textAlign="right"
+              isLoading={false}
+              data-test-subj="sloDetailsBurnRateStat"
+              description=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
 }
