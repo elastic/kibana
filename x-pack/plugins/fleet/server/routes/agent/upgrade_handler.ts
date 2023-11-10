@@ -101,7 +101,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       });
     }
 
-    if (isAgentUpgrading(agent)) {
+    if (!force && isAgentUpgrading(agent)) {
       return response.customError({
         statusCode: 400,
         body: {
