@@ -23,7 +23,6 @@ import { Writable } from 'stream';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   CancellationToken,
-  getFullRedirectAppUrl,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -39,7 +38,12 @@ import {
   PNG_REPORT_TYPE_V2,
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
-import { decryptJobHeaders, ExportType, generatePngObservable } from '@kbn/reporting-server';
+import {
+  decryptJobHeaders,
+  getFullRedirectAppUrl,
+  ExportType,
+  generatePngObservable,
+} from '@kbn/reporting-server';
 import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { SerializableRecord } from '@kbn/utility-types';

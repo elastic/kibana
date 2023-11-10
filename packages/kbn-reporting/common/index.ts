@@ -12,4 +12,3 @@ export * from './schema_utils';
 
 export { buildKibanaPath } from './build_kibana_path';
 export { CancellationToken } from './cancellation_token';
-export { getFullRedirectAppUrl } from './get_full_redirect_app_url';

@@ -9,15 +9,12 @@
 import { Observable } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 
-import { getFullRedirectAppUrl } from '@kbn/reporting-common';
-import type {
-  LocatorParams,
-  ReportingConfigType,
-  ReportingServerInfo,
-} from '@kbn/reporting-common/types';
+import type { LocatorParams, ReportingServerInfo } from '@kbn/reporting-common/types';
+import { ReportingConfigType } from '@kbn/reporting-config-server';
 import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import { getFullRedirectAppUrl } from '.';
 
 import { getTracker } from './pdf_tracker';
 

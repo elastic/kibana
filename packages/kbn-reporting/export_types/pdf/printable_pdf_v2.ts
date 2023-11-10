@@ -14,7 +14,6 @@ import { Writable } from 'stream';
 import { Headers } from '@kbn/core/server';
 import {
   CancellationToken,
-  getFullRedirectAppUrl,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -32,6 +31,7 @@ import {
 } from '@kbn/reporting-export-types-pdf-common';
 import {
   decryptJobHeaders,
+  getFullRedirectAppUrl,
   ExportType,
   generatePdfObservableV2,
   getCustomLogo,
