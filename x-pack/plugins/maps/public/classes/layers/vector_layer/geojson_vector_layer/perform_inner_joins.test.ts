@@ -86,7 +86,7 @@ propertiesMap.set('alpha', { [COUNT_PROPERTY_NAME]: 1 });
 
 test('should skip join when no state has changed', async () => {
   const updateSourceData = sinon.spy();
-  const onJoinError = sinon.spy();
+  const setJoinError = sinon.spy();
 
   await performInnerJoins(
     {
@@ -97,19 +97,20 @@ test('should skip join when no state has changed', async () => {
       {
         dataHasChanged: false,
         join: innerJoin,
+        joinIndex: 0,
       },
     ],
     updateSourceData,
-    onJoinError
+    setJoinError
   );
 
   expect(updateSourceData.notCalled);
-  expect(onJoinError.notCalled);
+  expect(setJoinError.notCalled);
 });
 
 test('should perform join when features change', async () => {
   const updateSourceData = sinon.spy();
-  const onJoinError = sinon.spy();
+  const setJoinError = sinon.spy();
 
   await performInnerJoins(
     {
@@ -120,19 +121,20 @@ test('should perform join when features change', async () => {
       {
         dataHasChanged: false,
         join: innerJoin,
+        joinIndex: 0,
       },
     ],
     updateSourceData,
-    onJoinError
+    setJoinError
   );
 
   expect(updateSourceData.calledOnce);
-  expect(onJoinError.notCalled);
+  expect(setJoinError.notCalled);
 });
 
 test('should perform join when join state changes', async () => {
   const updateSourceData = sinon.spy();
-  const onJoinError = sinon.spy();
+  const setJoinError = sinon.spy();
 
   await performInnerJoins(
     {
@@ -143,19 +145,20 @@ test('should perform join when join state changes', async () => {
       {
         dataHasChanged: true,
         join: innerJoin,
+        joinIndex: 0,
       },
     ],
     updateSourceData,
-    onJoinError
+    setJoinError
   );
 
   expect(updateSourceData.calledOnce);
-  expect(onJoinError.notCalled);
+  expect(setJoinError.notCalled);
 });
 
 test('should call updateSourceData with feature collection with updated feature visibility and join properties', async () => {
   const updateSourceData = sinon.spy();
-  const onJoinError = sinon.spy();
+  const setJoinError = sinon.spy();
 
   await performInnerJoins(
     {
@@ -166,11 +169,12 @@ test('should call updateSourceData with feature collection with updated feature 
       {
         dataHasChanged: false,
         join: innerJoin,
+        joinIndex: 0,
         propertiesMap,
       },
     ],
     updateSourceData,
-    onJoinError
+    setJoinError
   );
 
   const firstCallArgs = updateSourceData.args[0];
@@ -203,12 +207,12 @@ test('should call updateSourceData with feature collection with updated feature 
       },
     ],
   });
-  expect(onJoinError.notCalled);
+  expect(setJoinError.notCalled);
 });
 
 test('should call updateSourceData when no results returned from terms aggregation (properties map is undefined)', async () => {
   const updateSourceData = sinon.spy();
-  const onJoinError = sinon.spy();
+  const setJoinError = sinon.spy();
 
   await performInnerJoins(
     {
@@ -219,10 +223,11 @@ test('should call updateSourceData when no results returned from terms aggregati
       {
         dataHasChanged: true,
         join: innerJoin,
+        joinIndex: 0,
       },
     ],
     updateSourceData,
-    onJoinError
+    setJoinError
   );
 
   const firstCallArgs = updateSourceData.args[0];
@@ -255,12 +260,12 @@ test('should call updateSourceData when no results returned from terms aggregati
       },
     ],
   });
-  expect(onJoinError.notCalled);
+  expect(setJoinError.notCalled);
 });
 
 test('should call updateSourceData when no results returned from terms aggregation (properties map is empty)', async () => {
   const updateSourceData = sinon.spy();
-  const onJoinError = sinon.spy();
+  const setJoinError = sinon.spy();
 
   await performInnerJoins(
     {
@@ -271,11 +276,12 @@ test('should call updateSourceData when no results returned from terms aggregati
       {
         dataHasChanged: true,
         join: innerJoin,
+        joinIndex: 0,
         propertiesMap: new Map<string, Record<string | number, unknown>>(),
       },
     ],
     updateSourceData,
-    onJoinError
+    setJoinError
   );
 
   const firstCallArgs = updateSourceData.args[0];
@@ -307,12 +313,12 @@ test('should call updateSourceData when no results returned from terms aggregati
       },
     ],
   });
-  expect(onJoinError.notCalled);
+  expect(setJoinError.notCalled);
 });
 
 test('should call onJoinError when there are no matching features', async () => {
   const updateSourceData = sinon.spy();
-  const onJoinError = sinon.spy();
+  const setJoinError = sinon.spy();
 
   // instead of returning military alphabet like "alpha" or "bravo", mismatched key returns numbers, like '1'
   const propertiesMapFromMismatchedKey = new Map<string, Record<string | number, unknown>>();
@@ -327,13 +333,14 @@ test('should call onJoinError when there are no matching features', async () => 
       {
         dataHasChanged: true,
         join: innerJoin,
+        joinIndex: 0,
         propertiesMap: propertiesMapFromMismatchedKey,
       },
     ],
     updateSourceData,
-    onJoinError
+    setJoinError
   );
 
   expect(updateSourceData.notCalled);
-  expect(onJoinError.calledOnce);
+  expect(setJoinError.calledOnce);
 });

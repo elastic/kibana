@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/logging';
 import type { FieldValuePair, SignificantItem } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis';
+import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 import type { FetchFrequentItemSetsResponse, ItemSet } from '../../../../common/types';
 import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';
 import type { Category } from '../../../../common/api/log_categorization/types';

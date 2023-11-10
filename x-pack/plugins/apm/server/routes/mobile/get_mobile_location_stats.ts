@@ -10,6 +10,7 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getSessionsByLocation } from './get_mobile_sessions_by_location';
 import { getHttpRequestsByLocation } from './get_mobile_http_requests_by_location';
 import { getCrashesByLocation } from './get_mobile_crashes_by_location';
+import { getLaunchesByLocation } from './get_mobile_launches_by_location';
 import { Maybe } from '../../../typings/common';
 
 export type Timeseries = Array<{ x: number; y: number }>;
@@ -26,6 +27,11 @@ interface LocationStats {
     timeseries: Timeseries;
   };
   mostCrashes: {
+    location?: string;
+    value: Maybe<number>;
+    timeseries: Timeseries;
+  };
+  mostLaunches: {
     location?: string;
     value: Maybe<number>;
     timeseries: Timeseries;
@@ -69,16 +75,19 @@ async function getMobileLocationStats({
     offset,
   };
 
-  const [mostSessions, mostRequests, mostCrashes] = await Promise.all([
-    getSessionsByLocation({ ...commonProps }),
-    getHttpRequestsByLocation({ ...commonProps }),
-    getCrashesByLocation({ ...commonProps }),
-  ]);
+  const [mostSessions, mostRequests, mostCrashes, mostLaunches] =
+    await Promise.all([
+      getSessionsByLocation({ ...commonProps }),
+      getHttpRequestsByLocation({ ...commonProps }),
+      getCrashesByLocation({ ...commonProps }),
+      getLaunchesByLocation({ ...commonProps }),
+    ]);
 
   return {
     mostSessions,
     mostRequests,
     mostCrashes,
+    mostLaunches,
   };
 }
 
@@ -117,6 +126,7 @@ export async function getMobileLocationStatsPeriods({
         mostSessions: { value: null, timeseries: [] },
         mostRequests: { value: null, timeseries: [] },
         mostCrashes: { value: null, timeseries: [] },
+        mostLaunches: { value: null, timeseries: [] },
       };
 
   const [currentPeriod, previousPeriod] = await Promise.all([

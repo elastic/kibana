@@ -149,16 +149,9 @@ export interface SignificantItem extends FieldValuePair {
   unique?: boolean;
 }
 
-/**
- * Represents a data item in a significant item histogram.
- * @interface
- */
-export interface SignificantItemHistogramItem {
+interface SignificantItemHistogramItemBase {
   /** The document count for this item in the overall context. */
   doc_count_overall: number;
-
-  /** The document count for this item in the significant item context. */
-  doc_count_significant_item: number;
 
   /** The numeric key associated with this item. */
   key: number;
@@ -166,6 +159,26 @@ export interface SignificantItemHistogramItem {
   /** The string representation of the key. */
   key_as_string: string;
 }
+
+/**
+ * @deprecated since version 2 of internal log rate analysis REST API endpoint
+ */
+interface SignificantItemHistogramItemV1 extends SignificantItemHistogramItemBase {
+  /** The document count for this item in the significant term context. */
+  doc_count_significant_term: number;
+}
+
+interface SignificantItemHistogramItemV2 extends SignificantItemHistogramItemBase {
+  /** The document count for this histogram item in the significant item context. */
+  doc_count_significant_item: number;
+}
+
+/**
+ * Represents a data item in a significant term histogram.
+ */
+export type SignificantItemHistogramItem =
+  | SignificantItemHistogramItemV1
+  | SignificantItemHistogramItemV2;
 
 /**
  * Represents histogram data for a field/value pair.

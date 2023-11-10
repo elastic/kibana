@@ -50,7 +50,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                 <p>
                   {i18n.translate('xpack.serverlessSearch.connectorsEmpty.description', {
                     defaultMessage:
-                      "To set up and deploy a connector you'll be working between the third-party data source, your terminal, and the Kibana UI. The high level process looks like this:",
+                      "To set up and deploy a connector you'll be working between the third-party data source, your terminal, and the Elasticsearch serverless UI. The high level process looks like this:",
                   })}
                 </p>
               </EuiText>

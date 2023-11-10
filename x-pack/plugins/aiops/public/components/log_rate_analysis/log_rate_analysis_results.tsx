@@ -35,7 +35,8 @@ import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
-import type { AiopsApiLogRateAnalysis } from '../../../common/api';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis/schema';
+import type { AiopsLogRateAnalysisSchemaSignificantItem } from '../../../common/api/log_rate_analysis/schema_v2';
 import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
   getGroupTableItems,
@@ -145,9 +146,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const [groupResults, setGroupResults] = useState<boolean>(false);
   const [groupSkipFields, setGroupSkipFields] = useState<string[]>([]);
   const [uniqueFieldNames, setUniqueFieldNames] = useState<string[]>([]);
-  const [overrides, setOverrides] = useState<
-    AiopsApiLogRateAnalysis['body']['overrides'] | undefined
-  >(undefined);
+  const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
+    undefined
+  );
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
 
@@ -164,7 +165,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     setOverrides({
       loaded: 0,
       remainingFieldCandidates: [],
-      significantItems: data.significantItems.filter((d) => !skippedFields.includes(d.fieldName)),
+      significantItems: data.significantItems.filter(
+        (d) => !skippedFields.includes(d.fieldName)
+      ) as AiopsLogRateAnalysisSchemaSignificantItem[],
       regroupOnly: true,
     });
     startHandler(true, false);
@@ -176,10 +179,10 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     data,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream<AiopsApiLogRateAnalysis['body'], typeof streamReducer>(
+  } = useFetchStream<AiopsLogRateAnalysisSchema<'2'>, typeof streamReducer>(
     http,
     '/internal/aiops/log_rate_analysis',
-    '1',
+    '2',
     {
       start: earliest,
       end: latest,
@@ -221,7 +224,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         ((Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
           groupsMissing)
       ) {
-        setOverrides({ loaded, remainingFieldCandidates, significantItems: data.significantItems });
+        setOverrides({
+          loaded,
+          remainingFieldCandidates,
+          significantItems: data.significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
+        });
       } else {
         setOverrides(undefined);
         if (onAnalysisCompleted) {

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
+import type {
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiVersion as ApiVersion,
+} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';
 
-export interface TestData {
+export interface TestData<T extends ApiVersion> {
   testName: string;
   esArchive?: string;
   dataGenerator?: LogRateAnalysisDataGenerator;
-  requestBody: AiopsApiLogRateAnalysis['body'];
+  requestBody: AiopsLogRateAnalysisSchema<T>;
   expected: {
     chunksLength: number;
     chunksLengthGroupOnly: number;
@@ -22,11 +25,6 @@ export interface TestData {
     actionsLengthGroupOnly: number;
     noIndexChunksLength: number;
     noIndexActionsLength: number;
-    significantItemFilter: 'add_significant_items';
-    groupFilter: 'add_significant_items_group';
-    groupHistogramFilter: 'add_significant_items_group_histogram';
-    histogramFilter: 'add_significant_items_histogram';
-    errorFilter: 'add_error';
     significantItems: SignificantItem[];
     groups: SignificantItemGroup[];
     histogramLength: number;
