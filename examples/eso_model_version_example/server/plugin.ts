@@ -6,6 +6,20 @@
  * Side Public License, v 1.
  */
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// This is an example plugin to demonstrate implementation of an encrypted saved object with model versions using   //
+// the new encryptedSavedObjectsPlugin.createModelVersion API.                                                      //
+//                                                                                                                  //
+// A good place to start is by reviewing the definitions in examples/eso_model_version_example/server/types. This   //
+// is where the interfaces and constants that for the examnple saved object are defined.                            //
+//                                                                                                                  //
+// In this file (plugin.ts) the model versions are defined, which include typical changes you might see in a saved  //
+// object over time, only in this case the model version definitions are wrapped by the new createModelVersion API. //
+//                                                                                                                  //
+// Lastly, use the plugin UI to get a sense for how the objects are migrated - you can query the raw documents and  //
+// then decrypted the migrated objects.                                                                             //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 import { CoreSetup, IRouter, Plugin, RequestHandlerContext, SavedObjectsBulkResponse } from '@kbn/core/server';
 
 import {
@@ -18,7 +32,7 @@ import {
   esoModelVersionExampleV2,
   esoModelVersionExampleV3,
   EXAMPLE_SAVED_OBJECT_TYPE,
-} from '../common';
+} from '.';
 
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
@@ -37,8 +51,6 @@ export interface EsoModelVersionExamplePluginSetup {
 export interface EsoModelVersionExamplePluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
-
-// Th
 
 export class EsoModelVersionExample
   implements Plugin<void, void>
@@ -213,10 +225,6 @@ export class EsoModelVersionExample
   }
 
   start() {
-    return {};
-  }
-
-  stop() {
     return {};
   }
 

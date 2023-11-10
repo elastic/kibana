@@ -67,11 +67,26 @@ describe('create ESO model version', () => {
     );
   });
 
-  // ToDo: throws if there are no changes defined
+  it('throws if there are no changes defined', () => {
+    const mvCreator = getCreateEsoModelVersion(encryptionSavedObjectService, () =>
+      encryptedSavedObjectsServiceMock.create()
+    );
+    expect(() =>
+      mvCreator({
+        modelVersion: {
+          changes: []
+        },
+        inputType,
+        outputType,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"No Model Version changes defined. At least one change is required to create an Encrypted Saved Objects Model Version."`
+    );
+  });
 
   it('merges all applicable transforms', () => {
     const instantiateServiceWithLegacyType = jest.fn(() =>
-      encryptedSavedObjectsServiceMock.create()
+      encryptionSavedObjectService
     );
 
     const mvCreator = getCreateEsoModelVersion(
@@ -117,6 +132,8 @@ describe('create ESO model version', () => {
           },
         ],
       },
+      inputType,
+      outputType
     });
 
     const initialAttributes = {
@@ -176,41 +193,45 @@ describe('create ESO model version', () => {
     });
   });
 
-  describe('transformation on an existing type', () => {
-    it('uses the type in the current service for both input and output types when none are specified', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
-        encryptedSavedObjectsServiceMock.create()
-      );
+  it('throws error on decryption failure if shouldTransformIfDecryptionFails is false', () => {
+    const instantiateServiceWithLegacyType = jest.fn(() =>
+      encryptionSavedObjectService
+    );
 
-      const mvCreator = getCreateEsoModelVersion(
-        encryptionSavedObjectService,
-        instantiateServiceWithLegacyType
-      );
+    const mvCreator = getCreateEsoModelVersion(
+      encryptionSavedObjectService,
+      instantiateServiceWithLegacyType
+    );
 
-      const esoModelVersion = mvCreator({
-        modelVersion: {
-          changes: [
-            {
-              type: 'unsafe_transform',
-              transformFn: (document) => {
-                return { document };
-              },
+    const esoModelVersion = mvCreator({
+      modelVersion: {
+        changes: [
+          {
+            type: 'unsafe_transform',
+            transformFn: (document) => {
+              return { document };
             },
-          ],
-        },
-      });
+          },
+        ],
+      },
+      inputType,
+      outputType,
+      shouldTransformIfDecryptionFails: false,
+    });
 
-      const attributes = {
-        firstAttr: 'first_attr',
-      };
+    const attributes = {
+      firstAttr: 'first_attr',
+    };
 
-      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
-      encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
+    encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
+      throw new Error('decryption failed!');
+    });
 
-      const unsafeTransforms = esoModelVersion.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
+    const unsafeTransforms = esoModelVersion.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
+    expect(unsafeTransforms.length === 1);
+    expect(() => {
       unsafeTransforms[0].transformFn(
         {
           id: '123',
@@ -220,519 +241,60 @@ describe('create ESO model version', () => {
         },
         context
       );
+    }).toThrowError(`decryption failed!`);
 
-      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes,
-        { isTypeBeingConverted: false }
-      );
+    expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      attributes,
+      { isTypeBeingConverted: false }
+    );
 
-      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes
-      );
-    });
-
-    it('throws error on decryption failure if shouldTransformIfDecryptionFails is false', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
-        encryptedSavedObjectsServiceMock.create()
-      );
-
-      const mvCreator = getCreateEsoModelVersion(
-        encryptionSavedObjectService,
-        instantiateServiceWithLegacyType
-      );
-
-      const esoModelVersion = mvCreator({
-        modelVersion: {
-          changes: [
-            {
-              type: 'unsafe_transform',
-              transformFn: (document) => {
-                return { document };
-              },
-            },
-          ],
-        },
-        shouldTransformIfDecryptionFails: false,
-      });
-
-      const attributes = {
-        firstAttr: 'first_attr',
-      };
-
-      encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
-        throw new Error('decryption failed!');
-      });
-
-      const unsafeTransforms = esoModelVersion.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
-      expect(() => {
-        unsafeTransforms[0].transformFn(
-          {
-            id: '123',
-            type: 'known-type-1',
-            namespace: 'namespace',
-            attributes,
-          },
-          context
-        );
-      }).toThrowError(`decryption failed!`);
-
-      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes,
-        { isTypeBeingConverted: false }
-      );
-
-      expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
-    });
-
-    it('throws error on decryption failure if shouldTransformIfDecryptionFails is true but error is not encryption error', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
-        encryptedSavedObjectsServiceMock.create()
-      );
-
-      const mvCreator = getCreateEsoModelVersion(
-        encryptionSavedObjectService,
-        instantiateServiceWithLegacyType
-      );
-
-      const esoModelVersion = mvCreator({
-        modelVersion: {
-          changes: [
-            {
-              type: 'unsafe_transform',
-              transformFn: (document) => {
-                return { document };
-              },
-            },
-          ],
-        },
-        shouldTransformIfDecryptionFails: true,
-      });
-
-      const attributes = {
-        firstAttr: 'first_attr',
-      };
-
-      encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
-        throw new Error('decryption failed!');
-      });
-
-      const unsafeTransforms = esoModelVersion.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
-      expect(() => {
-        unsafeTransforms[0].transformFn(
-          {
-            id: '123',
-            type: 'known-type-1',
-            namespace: 'namespace',
-            attributes,
-          },
-          context
-        );
-      }).toThrowError(`decryption failed!`);
-
-      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes,
-        { isTypeBeingConverted: false }
-      );
-
-      expect(encryptionSavedObjectService.stripOrDecryptAttributesSync).not.toHaveBeenCalled();
-      expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
-    });
-
-    it('executes transformation on decryption failure if shouldTransformIfDecryptionFails is true and error is encryption error', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
-        encryptedSavedObjectsServiceMock.create()
-      );
-
-      const mvCreator = getCreateEsoModelVersion(
-        encryptionSavedObjectService,
-        instantiateServiceWithLegacyType
-      );
-
-      const esoModelVersion = mvCreator({
-        modelVersion: {
-          changes: [
-            {
-              type: 'unsafe_transform',
-              transformFn: (document) => {
-                return { document };
-              },
-            },
-          ],
-        },
-        shouldTransformIfDecryptionFails: true,
-      });
-
-      const attributes = {
-        firstAttr: 'first_attr',
-        attrToStrip: 'secret',
-      };
-      const strippedAttributes = {
-        firstAttr: 'first_attr',
-      };
-
-      encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
-        throw new EncryptionError(
-          `Unable to decrypt attribute "'attribute'"`,
-          'attribute',
-          EncryptionErrorOperation.Decryption,
-          new Error('decryption failed')
-        );
-      });
-
-      encryptionSavedObjectService.stripOrDecryptAttributesSync.mockReturnValueOnce({
-        attributes: strippedAttributes,
-      });
-
-      const unsafeTransforms = esoModelVersion.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
-      unsafeTransforms[0].transformFn(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-          attributes,
-        },
-        context
-      );
-
-      expect(encryptionSavedObjectService.stripOrDecryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes,
-        { isTypeBeingConverted: false }
-      );
-
-      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        strippedAttributes
-      );
-    });
-
-    it('throws error on transform failure', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
-        encryptedSavedObjectsServiceMock.create()
-      );
-
-      const mvCreator = getCreateEsoModelVersion(
-        encryptionSavedObjectService,
-        instantiateServiceWithLegacyType
-      );
-
-      const esoModelVersion = mvCreator({
-        modelVersion: {
-          changes: [
-            {
-              type: 'unsafe_transform',
-              transformFn: (document) => {
-                throw new Error('transform failed!');
-              },
-            },
-          ],
-        },
-      });
-
-      const attributes = {
-        firstAttr: 'first_attr',
-      };
-
-      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
-
-      const unsafeTransforms = esoModelVersion.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
-      expect(() => {
-        unsafeTransforms[0].transformFn(
-          {
-            id: '123',
-            type: 'known-type-1',
-            namespace: 'namespace',
-            attributes,
-          },
-          context
-        );
-      }).toThrowError(`transform failed!`);
-
-      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes,
-        { isTypeBeingConverted: false }
-      );
-
-      expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
-    });
-
-    it('throws error on transform failure even if shouldMigrateIfDecryptionFails is true', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
-        encryptedSavedObjectsServiceMock.create()
-      );
-
-      const mvCreator = getCreateEsoModelVersion(
-        encryptionSavedObjectService,
-        instantiateServiceWithLegacyType
-      );
-
-      const esoModelVersion = mvCreator({
-        modelVersion: {
-          changes: [
-            {
-              type: 'unsafe_transform',
-              transformFn: (document) => {
-                throw new Error('transform failed!');
-              },
-            },
-          ],
-        },
-        shouldTransformIfDecryptionFails: true,
-      });
-
-      const attributes = {
-        firstAttr: 'first_attr',
-      };
-
-      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
-
-      const unsafeTransforms = esoModelVersion.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
-      expect(() => {
-        unsafeTransforms[0].transformFn(
-          {
-            id: '123',
-            type: 'known-type-1',
-            namespace: 'namespace',
-            attributes,
-          },
-          context
-        );
-      }).toThrowError(`transform failed!`);
-
-      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes,
-        { isTypeBeingConverted: false }
-      );
-
-      expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
-    });
-
-    it('throws error on encryption failure', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
-        encryptedSavedObjectsServiceMock.create()
-      );
-
-      const mvCreator = getCreateEsoModelVersion(
-        encryptionSavedObjectService,
-        instantiateServiceWithLegacyType
-      );
-
-      const esoModelVersion = mvCreator({
-        modelVersion: {
-          changes: [
-            {
-              type: 'unsafe_transform',
-              transformFn: (document) => {
-                return { document };
-              },
-            },
-          ],
-        },
-      });
-
-      const attributes = {
-        firstAttr: 'first_attr',
-      };
-
-      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
-      encryptionSavedObjectService.encryptAttributesSync.mockImplementationOnce(() => {
-        throw new Error('encryption failed!');
-      });
-
-      const unsafeTransforms = esoModelVersion.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
-      expect(() => {
-        unsafeTransforms[0].transformFn(
-          {
-            id: '123',
-            type: 'known-type-1',
-            namespace: 'namespace',
-            attributes,
-          },
-          context
-        );
-      }).toThrowError(`encryption failed!`);
-
-      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes,
-        { isTypeBeingConverted: false }
-      );
-
-      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes
-      );
-    });
-
-    it('throws error on encryption failure even if shouldMigrateIfDecryptionFails is true', () => {
-      const instantiateServiceWithLegacyType = jest.fn(() =>
-        encryptedSavedObjectsServiceMock.create()
-      );
-
-      const mvCreator = getCreateEsoModelVersion(
-        encryptionSavedObjectService,
-        instantiateServiceWithLegacyType
-      );
-
-      const esoModelVersion = mvCreator({
-        modelVersion: {
-          changes: [
-            {
-              type: 'unsafe_transform',
-              transformFn: (document) => {
-                return { document };
-              },
-            },
-          ],
-        },
-        shouldTransformIfDecryptionFails: true,
-      });
-
-      const attributes = {
-        firstAttr: 'first_attr',
-      };
-
-      encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
-      encryptionSavedObjectService.encryptAttributesSync.mockImplementationOnce(() => {
-        throw new Error('encryption failed!');
-      });
-
-      const unsafeTransforms = esoModelVersion.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
-      expect(() => {
-        unsafeTransforms[0].transformFn(
-          {
-            id: '123',
-            type: 'known-type-1',
-            namespace: 'namespace',
-            attributes,
-          },
-          context
-        );
-      }).toThrowError(`encryption failed!`);
-
-      expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes,
-        { isTypeBeingConverted: false }
-      );
-
-      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes
-      );
-    });
+    expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
   });
 
-  describe('transformation from a legacy type', () => {
-    it('uses the input type for decryption', () => {
-      const serviceWithLegacyType = encryptedSavedObjectsServiceMock.create();
-      const instantiateServiceWithLegacyType = jest.fn(() => serviceWithLegacyType);
+  it('throws error on decryption failure if shouldTransformIfDecryptionFails is true but error is not encryption error', () => {
+    const instantiateServiceWithLegacyType = jest.fn(() =>
+      encryptionSavedObjectService
+    );
 
-      const mvCreator = getCreateEsoModelVersion(
-        encryptionSavedObjectService,
-        instantiateServiceWithLegacyType
-      );
+    const mvCreator = getCreateEsoModelVersion(
+      encryptionSavedObjectService,
+      instantiateServiceWithLegacyType
+    );
 
-      const esoModelVersion = mvCreator({
-        modelVersion: {
-          changes: [
-            {
-              type: 'unsafe_transform',
-              transformFn: (document) => {
-                return { document };
-              },
+    const esoModelVersion = mvCreator({
+      modelVersion: {
+        changes: [
+          {
+            type: 'unsafe_transform',
+            transformFn: (document) => {
+              return { document };
             },
-          ],
-        },
-        inputType,
-      });
+          },
+        ],
+      },
+      inputType,
+      outputType,
+      shouldTransformIfDecryptionFails: true,
+    });
 
-      const attributes = {
-        firstAttr: 'first_attr',
-      };
+    const attributes = {
+      firstAttr: 'first_attr',
+    };
 
-      serviceWithLegacyType.decryptAttributesSync.mockReturnValueOnce(attributes);
-      encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
+    encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
+      throw new Error('decryption failed!');
+    });
 
-      const unsafeTransforms = esoModelVersion.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
+    const unsafeTransforms = esoModelVersion.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
+    expect(unsafeTransforms.length === 1);
+    expect(() => {
       unsafeTransforms[0].transformFn(
         {
           id: '123',
@@ -742,29 +304,366 @@ describe('create ESO model version', () => {
         },
         context
       );
+    }).toThrowError(`decryption failed!`);
 
-      expect(serviceWithLegacyType.decryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes,
-        { isTypeBeingConverted: false }
-      );
+    expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      attributes,
+      { isTypeBeingConverted: false }
+    );
 
-      expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        attributes
-      );
-    });
+    expect(encryptionSavedObjectService.stripOrDecryptAttributesSync).not.toHaveBeenCalled();
+    expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
   });
 
-  describe('transformation across two legacy types', () => {
+  it('executes transformation on decryption failure if shouldTransformIfDecryptionFails is true and error is encryption error', () => {
+    const instantiateServiceWithLegacyType = jest.fn(() =>
+      encryptionSavedObjectService
+    );
+
+    const mvCreator = getCreateEsoModelVersion(
+      encryptionSavedObjectService,
+      instantiateServiceWithLegacyType
+    );
+
+    const esoModelVersion = mvCreator({
+      modelVersion: {
+        changes: [
+          {
+            type: 'unsafe_transform',
+            transformFn: (document) => {
+              return { document };
+            },
+          },
+        ],
+      },
+      inputType,
+      outputType,
+      shouldTransformIfDecryptionFails: true,
+    });
+
+    const attributes = {
+      firstAttr: 'first_attr',
+      attrToStrip: 'secret',
+    };
+    const strippedAttributes = {
+      firstAttr: 'first_attr',
+    };
+
+    encryptionSavedObjectService.decryptAttributesSync.mockImplementationOnce(() => {
+      throw new EncryptionError(
+        `Unable to decrypt attribute "'attribute'"`,
+        'attribute',
+        EncryptionErrorOperation.Decryption,
+        new Error('decryption failed')
+      );
+    });
+
+    encryptionSavedObjectService.stripOrDecryptAttributesSync.mockReturnValueOnce({
+      attributes: strippedAttributes,
+    });
+
+    const unsafeTransforms = esoModelVersion.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
+    expect(unsafeTransforms.length === 1);
+    unsafeTransforms[0].transformFn(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+        attributes,
+      },
+      context
+    );
+
+    expect(encryptionSavedObjectService.stripOrDecryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      attributes,
+      { isTypeBeingConverted: false }
+    );
+
+    expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      strippedAttributes
+    );
+  });
+
+  it('throws error on transform failure', () => {
+    const instantiateServiceWithLegacyType = jest.fn(() =>
+      encryptionSavedObjectService
+    );
+
+    const mvCreator = getCreateEsoModelVersion(
+      encryptionSavedObjectService,
+      instantiateServiceWithLegacyType
+    );
+
+    const esoModelVersion = mvCreator({
+      modelVersion: {
+        changes: [
+          {
+            type: 'unsafe_transform',
+            transformFn: (document) => {
+              throw new Error('transform failed!');
+            },
+          },
+        ],
+      },
+      inputType,
+      outputType,
+    });
+
+    const attributes = {
+      firstAttr: 'first_attr',
+    };
+
+    encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+
+    const unsafeTransforms = esoModelVersion.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
+    expect(unsafeTransforms.length === 1);
+    expect(() => {
+      unsafeTransforms[0].transformFn(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+          attributes,
+        },
+        context
+      );
+    }).toThrowError(`transform failed!`);
+
+    expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      attributes,
+      { isTypeBeingConverted: false }
+    );
+
+    expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
+  });
+
+  it('throws error on transform failure even if shouldMigrateIfDecryptionFails is true', () => {
+    const instantiateServiceWithLegacyType = jest.fn(() =>
+      encryptionSavedObjectService
+    );
+
+    const mvCreator = getCreateEsoModelVersion(
+      encryptionSavedObjectService,
+      instantiateServiceWithLegacyType
+    );
+
+    const esoModelVersion = mvCreator({
+      modelVersion: {
+        changes: [
+          {
+            type: 'unsafe_transform',
+            transformFn: (document) => {
+              throw new Error('transform failed!');
+            },
+          },
+        ],
+      },
+      inputType,
+      outputType,
+      shouldTransformIfDecryptionFails: true,
+    });
+
+    const attributes = {
+      firstAttr: 'first_attr',
+    };
+
+    encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+
+    const unsafeTransforms = esoModelVersion.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
+    expect(unsafeTransforms.length === 1);
+    expect(() => {
+      unsafeTransforms[0].transformFn(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+          attributes,
+        },
+        context
+      );
+    }).toThrowError(`transform failed!`);
+
+    expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      attributes,
+      { isTypeBeingConverted: false }
+    );
+
+    expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
+  });
+
+  it('throws error on encryption failure', () => {
+    const instantiateServiceWithLegacyType = jest.fn(() =>
+      encryptionSavedObjectService
+    );
+
+    const mvCreator = getCreateEsoModelVersion(
+      encryptionSavedObjectService,
+      instantiateServiceWithLegacyType
+    );
+
+    const esoModelVersion = mvCreator({
+      modelVersion: {
+        changes: [
+          {
+            type: 'unsafe_transform',
+            transformFn: (document) => {
+              return { document };
+            },
+          },
+        ],
+      },
+      inputType,
+      outputType,
+    });
+
+    const attributes = {
+      firstAttr: 'first_attr',
+    };
+
+    encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+    encryptionSavedObjectService.encryptAttributesSync.mockImplementationOnce(() => {
+      throw new Error('encryption failed!');
+    });
+
+    const unsafeTransforms = esoModelVersion.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
+    expect(unsafeTransforms.length === 1);
+    expect(() => {
+      unsafeTransforms[0].transformFn(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+          attributes,
+        },
+        context
+      );
+    }).toThrowError(`encryption failed!`);
+
+    expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      attributes,
+      { isTypeBeingConverted: false }
+    );
+
+    expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      attributes
+    );
+  });
+
+  it('throws error on encryption failure even if shouldMigrateIfDecryptionFails is true', () => {
+    const instantiateServiceWithLegacyType = jest.fn(() =>
+      encryptionSavedObjectService
+    );
+
+    const mvCreator = getCreateEsoModelVersion(
+      encryptionSavedObjectService,
+      instantiateServiceWithLegacyType
+    );
+
+    const esoModelVersion = mvCreator({
+      modelVersion: {
+        changes: [
+          {
+            type: 'unsafe_transform',
+            transformFn: (document) => {
+              return { document };
+            },
+          },
+        ],
+      },
+      inputType,
+      outputType,
+      shouldTransformIfDecryptionFails: true,
+    });
+
+    const attributes = {
+      firstAttr: 'first_attr',
+    };
+
+    encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
+    encryptionSavedObjectService.encryptAttributesSync.mockImplementationOnce(() => {
+      throw new Error('encryption failed!');
+    });
+
+    const unsafeTransforms = esoModelVersion.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
+    expect(unsafeTransforms.length === 1);
+    expect(() => {
+      unsafeTransforms[0].transformFn(
+        {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+          attributes,
+        },
+        context
+      );
+    }).toThrowError(`encryption failed!`);
+
+    expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      attributes,
+      { isTypeBeingConverted: false }
+    );
+
+    expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      attributes
+    );
+  });
+
+  it('decrypts with input type, and encrypts with output type', () => {
     const serviceWithInputLegacyType = encryptedSavedObjectsServiceMock.create();
     const serviceWithOutputLegacyType = encryptedSavedObjectsServiceMock.create();
     const instantiateServiceWithLegacyType = jest.fn();
@@ -801,76 +700,73 @@ describe('create ESO model version', () => {
         outputType,
       });
     }
+    const esoMv = createEsoMv();
 
-    it('decrypts with input type, and encrypts with output type', () => {
-      const esoMv = createEsoMv();
+    expect(instantiateServiceWithLegacyType).toHaveBeenCalledWith(inputType);
+    expect(instantiateServiceWithLegacyType).toHaveBeenCalledWith(outputType);
 
-      expect(instantiateServiceWithLegacyType).toHaveBeenCalledWith(inputType);
-      expect(instantiateServiceWithLegacyType).toHaveBeenCalledWith(outputType);
+    serviceWithInputLegacyType.decryptAttributesSync.mockReturnValueOnce({
+      firstAttr: 'first_attr',
+      nonEncryptedAttr: 'non encrypted',
+    });
 
-      serviceWithInputLegacyType.decryptAttributesSync.mockReturnValueOnce({
-        firstAttr: 'first_attr',
-        nonEncryptedAttr: 'non encrypted',
-      });
+    serviceWithOutputLegacyType.encryptAttributesSync.mockReturnValueOnce({
+      firstAttr: `#####`,
+      encryptedAttr: `#####`,
+    });
 
-      serviceWithOutputLegacyType.encryptAttributesSync.mockReturnValueOnce({
-        firstAttr: `#####`,
-        encryptedAttr: `#####`,
-      });
-
-      const unsafeTransforms = esoMv.changes.filter(
-        (change) => change.type === 'unsafe_transform'
-      ) as SavedObjectsModelUnsafeTransformChange[];
-      expect(unsafeTransforms.length === 1);
-      const result = unsafeTransforms[0].transformFn(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-          attributes: {
-            firstAttr: '#####',
-            nonEncryptedAttr: 'non encrypted',
-          },
-        },
-        context
-      );
-
-      expect(result).toMatchObject({
-        document: {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-          attributes: {
-            firstAttr: '#####',
-            encryptedAttr: `#####`,
-          },
-        },
-      });
-
-      expect(serviceWithInputLegacyType.decryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
-        },
-        {
+    const unsafeTransforms = esoMv.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
+    expect(unsafeTransforms.length === 1);
+    const result = unsafeTransforms[0].transformFn(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+        attributes: {
           firstAttr: '#####',
           nonEncryptedAttr: 'non encrypted',
         },
-        { isTypeBeingConverted: false }
-      );
+      },
+      context
+    );
 
-      expect(serviceWithOutputLegacyType.encryptAttributesSync).toHaveBeenCalledWith(
-        {
-          id: '123',
-          type: 'known-type-1',
-          namespace: 'namespace',
+    expect(result).toMatchObject({
+      document: {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+        attributes: {
+          firstAttr: '#####',
+          encryptedAttr: `#####`,
         },
-        {
-          firstAttr: `~~first_attr~~`,
-          encryptedAttr: 'non encrypted',
-        }
-      );
+      },
     });
+
+    expect(serviceWithInputLegacyType.decryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      {
+        firstAttr: '#####',
+        nonEncryptedAttr: 'non encrypted',
+      },
+      { isTypeBeingConverted: false }
+    );
+
+    expect(serviceWithOutputLegacyType.encryptAttributesSync).toHaveBeenCalledWith(
+      {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+      },
+      {
+        firstAttr: `~~first_attr~~`,
+        encryptedAttr: 'non encrypted',
+      }
+    );
   });
 });

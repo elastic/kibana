@@ -33,7 +33,7 @@ export const MyPluginComponent: React.FC = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section grow={false} color="subdued" bottomBorder="extended" title='Create Objects'>
         <EuiText>
-          1. This will create three objects - one for each model version definition (see 'examples/eso_model_version_example/common/types').
+          1. This will create three objects - one for each model version definition (see 'examples/eso_model_version_example/server/types').
         </EuiText>
         <EuiButton onClick={() => { handler('/internal/eso_mv_example/generate', setGenerated) }}>Create Objects</EuiButton>
         <EuiSpacer />

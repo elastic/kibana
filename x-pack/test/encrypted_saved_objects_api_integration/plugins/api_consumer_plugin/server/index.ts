@@ -263,10 +263,11 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
     attributesToEncrypt: new Set(['encryptedAttribute']),
   };
 
-  deps.encryptedSavedObjects.registerType({
+  const latestType = {
     type: SAVED_OBJECT_MV_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
-  });
+  }
+  deps.encryptedSavedObjects.registerType(latestType);
 
   core.savedObjects.registerType({
     name: SAVED_OBJECT_MV_TYPE,
@@ -321,6 +322,7 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
           ],
         },
         inputType: typePriorTo810,
+        outputType: latestType,
         shouldTransformIfDecryptionFails: true,
       }),
     },

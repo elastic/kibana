@@ -19,8 +19,8 @@ import { mapAttributes } from './saved_objects/map_attributes';
 export interface CreateEsoModelVersionFnOpts {
   modelVersion: SavedObjectsModelVersion;
   shouldTransformIfDecryptionFails?: boolean;
-  inputType?: EncryptedSavedObjectTypeRegistration;
-  outputType?: EncryptedSavedObjectTypeRegistration;
+  inputType: EncryptedSavedObjectTypeRegistration;
+  outputType: EncryptedSavedObjectTypeRegistration;
 }
 
 // This function is designed to wrap a Model Version implementation of an Encrypted Saved Object (a Saved Object
@@ -32,11 +32,9 @@ export interface CreateEsoModelVersionFnOpts {
 // For Model Versions, 'data_backfill', 'data_removal', and 'unsafe_transform' changes are leveraged to implement
 // any changes to the object as usual. This funtion returns a Model Version where the changes are merged into a
 // single 'unsafe_transform' transform where the document being transformed is first decrypted via the inputType
-// EncryptedSavedObjectTypeRegistration (or by default, the EncryptedSavedObjectTypeRegistration registered with
-// the ESO Plugin), then transformed based on the changes defined in the the input Model Version, and finally
-// encrypred via the outputType EncryptedSavedObjectTypeRegistration (or by default, the
-// EncryptedSavedObjectTypeRegistration registered with the ESO Plugin). The implementation for this can be found
-// in getCreateEsoModelVersion below.
+// EncryptedSavedObjectTypeRegistration, then transformed based on the changes defined in the the input Model
+// Version, and finally encrypred via the outputType EncryptedSavedObjectTypeRegistration. The implementation for
+// this can be found in getCreateEsoModelVersion below.
 export type CreateEsoModelVersionFn = (
   opts: CreateEsoModelVersionFnOpts
 ) => SavedObjectsModelVersion;
@@ -58,23 +56,23 @@ export const getCreateEsoModelVersion =
       );
     }
 
-    if (inputType && outputType && inputType.type !== outputType.type) {
+    if (inputType.type !== outputType.type) {
       throw new Error(
         `An invalid Encrypted Saved Objects Model Version transformation is trying to transform across types ("${inputType.type}" => "${outputType.type}"), which isn't permitted`
       );
     }
 
-    const inputService = inputType
-      ? instantiateServiceWithLegacyType(inputType)
-      : encryptedSavedObjectsService;
+    const inputService = instantiateServiceWithLegacyType(inputType); // inputType
+      // ? instantiateServiceWithLegacyType(inputType)
+      // : encryptedSavedObjectsService;
 
-    const transformedService = outputType
-      ? instantiateServiceWithLegacyType(outputType)
-      : encryptedSavedObjectsService;
+    const outputService = inputType !== outputType? instantiateServiceWithLegacyType(outputType) : inputService;  // outputType
+      // ? instantiateServiceWithLegacyType(outputType)
+      // : encryptedSavedObjectsService;
 
     const transformFn = createMergedTransformFn(
       inputService,
-      transformedService,
+      outputService,
       shouldTransformIfDecryptionFails,
       incomingChanges
     );
@@ -84,7 +82,7 @@ export const getCreateEsoModelVersion =
 
 function createMergedTransformFn(
   inputService: Readonly<EncryptedSavedObjectsService>,
-  transformedService: Readonly<EncryptedSavedObjectsService>,
+  outputService: Readonly<EncryptedSavedObjectsService>,
   shouldTransformIfDecryptionFails: boolean | undefined,
   modelChanges: SavedObjectsModelChange[]
 ): SavedObjectModelTransformationFn {
@@ -130,7 +128,7 @@ function createMergedTransformFn(
 
     // encrypt
     const transformedDoc = mapAttributes(result.document, (transformedAttributes) => {
-      return transformedService.encryptAttributesSync<any>(
+      return outputService.encryptAttributesSync<any>(
         encryptionDescriptor,
         transformedAttributes
       );
