@@ -27,7 +27,7 @@ const tabs = [
       defaultMessage: 'Crashes',
     }),
     append: <div />,
-    'data-test-subj': 'ErrorsCrashes-tabs-crashes',
+    'data-test-subj': 'apmMobileCrashesTabButton',
   },
 ];
 
