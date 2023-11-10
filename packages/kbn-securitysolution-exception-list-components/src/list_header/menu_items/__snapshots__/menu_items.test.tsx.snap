@@ -16,86 +16,8 @@ Object {
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="LinkedRulesMenuItems"
-            >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
-              >
-                <button
-                  aria-label="Header menu Button Empty"
-                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                  data-test-subj="LinkedRulesMenuEmptyButton"
-                  type="button"
-                >
-                  <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-                  >
-                    <span
-                      class="eui-textTruncate euiButtonEmpty__text"
-                    >
-                      Linked to 1 rules
-                    </span>
-                    <span
-                      color="inherit"
-                      data-euiicon-type="arrowDown"
-                    />
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-          >
-            <div
-              class="euiPopover emotion-euiPopover"
-              data-test-subj="MenuActionsItems"
-            >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
-              >
-                <button
-                  aria-label="Header menu Button Icon"
-                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                  data-test-subj="MenuActionsButtonIcon"
-                  type="button"
-                >
-                  <span
-                    aria-hidden="true"
-                    class="euiButtonIcon__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
-      data-test-subj="Container"
-    >
-      <div
-        class="euiFlexItem emotion-EuiFlexItem"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-        >
-          <div
-            class="euiPopover emotion-euiPopover"
-            data-test-subj="LinkedRulesMenuItems"
-          >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-label="Header menu Button Empty"
@@ -120,19 +42,15 @@ Object {
             </div>
           </div>
         </div>
-      </div>
-      <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1"
-      >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiPopover emotion-euiPopover"
-            data-test-subj="MenuActionsItems"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiPopover__anchor css-16vtueo-render"
+              class="euiPopover emotion-euiPopover-inline-block"
+              data-test-subj="MenuActionsItems"
             >
               <button
                 aria-label="Header menu Button Icon"
@@ -148,6 +66,72 @@ Object {
                 />
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
+      data-test-subj="Container"
+    >
+      <div
+        class="euiFlexItem emotion-EuiFlexItem"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-inline-block"
+            data-test-subj="LinkedRulesMenuItems"
+          >
+            <button
+              aria-label="Header menu Button Empty"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+              data-test-subj="LinkedRulesMenuEmptyButton"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Linked to 1 rules
+                </span>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-inline-block"
+            data-test-subj="MenuActionsItems"
+          >
+            <button
+              aria-label="Header menu Button Icon"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              data-test-subj="MenuActionsButtonIcon"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="boxesHorizontal"
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -252,26 +236,22 @@ Object {
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="MenuActionsItems"
             >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
+              <button
+                aria-label="Header menu Button Icon"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                data-test-subj="MenuActionsButtonIcon"
+                type="button"
               >
-                <button
-                  aria-label="Header menu Button Icon"
-                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                  data-test-subj="MenuActionsButtonIcon"
-                  type="button"
-                >
-                  <span
-                    aria-hidden="true"
-                    class="euiButtonIcon__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                </button>
-              </div>
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                />
+              </button>
             </div>
           </div>
         </div>
@@ -319,26 +299,22 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             data-test-subj="MenuActionsItems"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              aria-label="Header menu Button Icon"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              data-test-subj="MenuActionsButtonIcon"
+              type="button"
             >
-              <button
-                aria-label="Header menu Button Icon"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="MenuActionsButtonIcon"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="boxesHorizontal"
-                />
-              </button>
-            </div>
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="boxesHorizontal"
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -443,26 +419,22 @@ Object {
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="MenuActionsItems"
             >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
+              <button
+                aria-label="Header menu Button Icon"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                data-test-subj="MenuActionsButtonIcon"
+                type="button"
               >
-                <button
-                  aria-label="Header menu Button Icon"
-                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                  data-test-subj="MenuActionsButtonIcon"
-                  type="button"
-                >
-                  <span
-                    aria-hidden="true"
-                    class="euiButtonIcon__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                </button>
-              </div>
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                />
+              </button>
             </div>
           </div>
         </div>
@@ -478,7 +450,7 @@ Object {
           aria-describedby="generated-id"
           aria-live="off"
           aria-modal="true"
-          class="euiPanel euiPanel--plain euiPanel--paddingSmall euiPopover__panel emotion-euiPanel-grow-m-s-plain-euiPopover__panel-hasTransform"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall euiPopover__panel emotion-euiPanel-grow-m-s-plain-euiPopover__panel-light-hasTransform"
           data-popover-panel="true"
           role="dialog"
           style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
@@ -598,26 +570,22 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             data-test-subj="MenuActionsItems"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              aria-label="Header menu Button Icon"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              data-test-subj="MenuActionsButtonIcon"
+              type="button"
             >
-              <button
-                aria-label="Header menu Button Icon"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="MenuActionsButtonIcon"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="boxesHorizontal"
-                />
-              </button>
-            </div>
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="boxesHorizontal"
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -693,33 +661,29 @@ Object {
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="LinkedRulesMenuItems"
             >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
+              <button
+                aria-label="Header menu Button Empty"
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="LinkedRulesMenuEmptyButton"
+                type="button"
               >
-                <button
-                  aria-label="Header menu Button Empty"
-                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                  data-test-subj="LinkedRulesMenuEmptyButton"
-                  type="button"
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
-                    <span
-                      class="eui-textTruncate euiButtonEmpty__text"
-                    >
-                      Linked to 1 rules
-                    </span>
-                    <span
-                      color="inherit"
-                      data-euiicon-type="arrowDown"
-                    />
+                    Linked to 1 rules
                   </span>
-                </button>
-              </div>
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -730,26 +694,22 @@ Object {
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="MenuActionsItems"
             >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
+              <button
+                aria-label="Header menu Button Icon"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                data-test-subj="MenuActionsButtonIcon"
+                type="button"
               >
-                <button
-                  aria-label="Header menu Button Icon"
-                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                  data-test-subj="MenuActionsButtonIcon"
-                  type="button"
-                >
-                  <span
-                    aria-hidden="true"
-                    class="euiButtonIcon__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                </button>
-              </div>
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                />
+              </button>
             </div>
           </div>
         </div>
@@ -765,7 +725,7 @@ Object {
           aria-describedby="generated-id"
           aria-live="off"
           aria-modal="true"
-          class="euiPanel euiPanel--plain euiPanel--paddingSmall euiPopover__panel emotion-euiPanel-grow-m-s-plain-euiPopover__panel-hasTransform"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall euiPopover__panel emotion-euiPanel-grow-m-s-plain-euiPopover__panel-light-hasTransform"
           data-popover-panel="true"
           role="dialog"
           style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
@@ -858,33 +818,29 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             data-test-subj="LinkedRulesMenuItems"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              aria-label="Header menu Button Empty"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+              data-test-subj="LinkedRulesMenuEmptyButton"
+              type="button"
             >
-              <button
-                aria-label="Header menu Button Empty"
-                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                data-test-subj="LinkedRulesMenuEmptyButton"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="eui-textTruncate euiButtonEmpty__text"
-                  >
-                    Linked to 1 rules
-                  </span>
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
+                  Linked to 1 rules
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -895,26 +851,22 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             data-test-subj="MenuActionsItems"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              aria-label="Header menu Button Icon"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              data-test-subj="MenuActionsButtonIcon"
+              type="button"
             >
-              <button
-                aria-label="Header menu Button Icon"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="MenuActionsButtonIcon"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="boxesHorizontal"
-                />
-              </button>
-            </div>
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="boxesHorizontal"
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -990,33 +942,29 @@ Object {
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="LinkedRulesMenuItems"
             >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
+              <button
+                aria-label="Header menu Button Empty"
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                data-test-subj="LinkedRulesMenuEmptyButton"
+                type="button"
               >
-                <button
-                  aria-label="Header menu Button Empty"
-                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                  data-test-subj="LinkedRulesMenuEmptyButton"
-                  type="button"
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
-                    <span
-                      class="eui-textTruncate euiButtonEmpty__text"
-                    >
-                      Linked to 1 rules
-                    </span>
-                    <span
-                      color="inherit"
-                      data-euiicon-type="arrowDown"
-                    />
+                    Linked to 1 rules
                   </span>
-                </button>
-              </div>
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -1046,26 +994,22 @@ Object {
             class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="MenuActionsItems"
             >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
+              <button
+                aria-label="Header menu Button Icon"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                data-test-subj="MenuActionsButtonIcon"
+                type="button"
               >
-                <button
-                  aria-label="Header menu Button Icon"
-                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                  data-test-subj="MenuActionsButtonIcon"
-                  type="button"
-                >
-                  <span
-                    aria-hidden="true"
-                    class="euiButtonIcon__icon"
-                    color="inherit"
-                    data-euiicon-type="boxesHorizontal"
-                  />
-                </button>
-              </div>
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="boxesHorizontal"
+                />
+              </button>
             </div>
           </div>
         </div>
@@ -1084,33 +1028,29 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             data-test-subj="LinkedRulesMenuItems"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              aria-label="Header menu Button Empty"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+              data-test-subj="LinkedRulesMenuEmptyButton"
+              type="button"
             >
-              <button
-                aria-label="Header menu Button Empty"
-                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                data-test-subj="LinkedRulesMenuEmptyButton"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="eui-textTruncate euiButtonEmpty__text"
-                  >
-                    Linked to 1 rules
-                  </span>
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
+                  Linked to 1 rules
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -1140,26 +1080,22 @@ Object {
           class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             data-test-subj="MenuActionsItems"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              aria-label="Header menu Button Icon"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              data-test-subj="MenuActionsButtonIcon"
+              type="button"
             >
-              <button
-                aria-label="Header menu Button Icon"
-                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
-                data-test-subj="MenuActionsButtonIcon"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="boxesHorizontal"
-                />
-              </button>
-            </div>
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="boxesHorizontal"
+              />
+            </button>
           </div>
         </div>
       </div>
