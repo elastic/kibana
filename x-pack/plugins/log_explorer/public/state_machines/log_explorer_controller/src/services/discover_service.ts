@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { DiscoverAppState } from '@kbn/discover-plugin/public';
 import { isEmpty } from 'lodash';
-import { actions, InvokeCallback } from 'xstate';
+import { ActionFunction, actions, InvokeCallback } from 'xstate';
 import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
 export const subscribeToDiscoverState =
@@ -49,7 +50,7 @@ export const updateGridFromDiscoverAppState = actions.assign<
         columns:
           event.appState.columns?.map((field) => ({
             field,
-            width: event.appState.grid?.columns?.[field].width,
+            width: event.appState.grid?.columns?.[field]?.width,
           })) ?? context.grid.columns,
         rows: {
           rowHeight: event.appState.rowHeight ?? context.grid.rows.rowHeight,
@@ -76,3 +77,29 @@ export const updateChartFromDiscoverAppState = actions.assign<
 
   return {};
 });
+
+export const updateDiscoverAppStateFromContext: ActionFunction<
+  LogExplorerControllerContext,
+  LogExplorerControllerEvent
+> = (context, _event) => {
+  if (!('discoverStateContainer' in context)) {
+    return;
+  }
+
+  context.discoverStateContainer.appState.update({
+    breakdownField: context.chart.breakdownField,
+    columns: context.grid.columns.map(({ field }) => field),
+    grid: {
+      columns: context.grid.columns.reduce<
+        NonNullable<NonNullable<DiscoverAppState['grid']>['columns']>
+      >((gridColumns, { field, width }) => {
+        if (width != null) {
+          gridColumns[field] = { width };
+        }
+        return gridColumns;
+      }, {}),
+    },
+    rowHeight: context.grid.rows.rowHeight,
+    rowsPerPage: context.grid.rows.rowsPerPage,
+  });
+};

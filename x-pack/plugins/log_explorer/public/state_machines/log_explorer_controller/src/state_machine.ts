@@ -24,6 +24,7 @@ import {
 import {
   subscribeToDiscoverState,
   updateChartFromDiscoverAppState,
+  updateDiscoverAppStateFromContext,
   updateGridFromDiscoverAppState,
 } from './services/discover_service';
 import { ControlPanelRT } from '../../../../common/control_panels';
@@ -61,10 +62,11 @@ export const createPureLogExplorerControllerStateMachine = (
             src: 'createDataView',
             onDone: {
               target: 'initializingControlPanels',
+              actions: ['updateDiscoverAppStateFromContext'],
             },
             onError: {
               target: 'initialized',
-              actions: ['notifyCreateDataViewFailed'],
+              actions: ['notifyCreateDataViewFailed', 'updateDiscoverAppStateFromContext'],
             },
           },
         },
@@ -215,6 +217,7 @@ export const createPureLogExplorerControllerStateMachine = (
         notifyDataViewUpdate: raise('DATA_VIEW_UPDATED'),
         updateGridFromDiscoverAppState,
         updateChartFromDiscoverAppState,
+        updateDiscoverAppStateFromContext,
       },
       guards: {
         controlGroupAPIExists: (_context, event) => {

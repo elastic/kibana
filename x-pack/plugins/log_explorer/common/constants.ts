@@ -19,15 +19,14 @@ export const DATA_GRID_COLUMN_WIDTH_SMALL = 240;
 export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
 
 // UI preferences
-export const DATA_GRID_DEFAULT_COLUMNS = [SERVICE_NAME_FIELD, HOST_NAME_FIELD, MESSAGE_FIELD];
 export const DEFAULT_COLUMNS = [
-  {
-    field: HOST_NAME_FIELD,
-    width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
-  },
   {
     field: SERVICE_NAME_FIELD,
     width: DATA_GRID_COLUMN_WIDTH_SMALL,
+  },
+  {
+    field: HOST_NAME_FIELD,
+    width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
   },
   {
     field: MESSAGE_FIELD,
