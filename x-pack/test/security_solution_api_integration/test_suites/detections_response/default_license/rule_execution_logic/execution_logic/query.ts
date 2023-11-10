@@ -66,6 +66,7 @@ import {
 } from '../../../utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -86,11 +87,17 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess Query type rules', () => {
+  describe('@ess @serverless Query type rules', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
+      await esArchiver.load(auditbeatPath);
+      if (!isServerless)
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
     });
 
@@ -99,8 +106,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
+      await esArchiver.unload(auditbeatPath);
+      // ASK what could be the alertnative solution here
+      if (!isServerless)
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/alerts/8.1.0'
+        );
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
       await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllRules(supertest, log);
@@ -189,6 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    // Is Rule Preview in Serverless?
     it('should query and get back expected alert structure when it is a alert on a alert', async () => {
       const alertId = '30a75fe46d3dbdfab55982036f77a8d60e2d1112e96f277c3b8c22f9bb57817a';
       const rule: QueryRuleCreateProps = {
@@ -2276,7 +2288,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('legacy investigation_fields', () => {
+    describe('@brokenInServerless legacy investigation_fields', () => {
       let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
 
       beforeEach(async () => {
