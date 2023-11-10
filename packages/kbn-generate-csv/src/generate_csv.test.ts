@@ -117,6 +117,7 @@ describe('CsvGenerator', () => {
       maxSizeBytes: 180000,
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
+      enablePanelActionDownload: true,
     };
 
     searchSourceMock.getField = jest.fn((key: string) => {
@@ -243,6 +244,7 @@ describe('CsvGenerator', () => {
       maxSizeBytes: TEST_MAX_SIZE,
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
+      enablePanelActionDownload: true,
     };
 
     mockDataClient.search = jest.fn().mockImplementation(() =>
@@ -756,6 +758,7 @@ describe('CsvGenerator', () => {
         maxSizeBytes: 180000,
         useByteOrderMarkEncoding: false,
         scroll: { size: 500, duration: '30s' },
+        enablePanelActionDownload: true,
       };
       mockDataClient.search = jest.fn().mockImplementation(() =>
         Rx.of({
