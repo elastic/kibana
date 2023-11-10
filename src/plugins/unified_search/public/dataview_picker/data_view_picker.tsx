@@ -89,6 +89,7 @@ export interface DataViewPickerProps {
    * Makes the picker disabled by disabling the popover trigger
    */
   isDisabled?: boolean;
+  onRefreshFields: (dataView: DataView) => void;
 }
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {
@@ -119,6 +120,7 @@ export const DataViewPicker = ({
   textBasedLanguage,
   onCreateDefaultAdHocDataView,
   isDisabled,
+                                 onRefreshFields,
 }: DataViewPickerPropsExtended) => {
   return (
     <ChangeDataView
@@ -138,6 +140,7 @@ export const DataViewPicker = ({
       onTextLangQuerySubmit={onTextLangQuerySubmit}
       textBasedLanguage={textBasedLanguage}
       isDisabled={isDisabled}
+      onRefreshFields={onRefreshFields}
     />
   );
 };

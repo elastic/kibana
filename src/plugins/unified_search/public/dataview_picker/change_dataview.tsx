@@ -81,6 +81,7 @@ export function ChangeDataView({
   isDisabled,
   onEditDataView,
   onCreateDefaultAdHocDataView,
+  onRefreshFields,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -216,10 +217,32 @@ export function ChangeDataView({
           </EuiContextMenuItem>
         ) : (
           <React.Fragment />
-        ),
-        <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
+        )
       );
     }
+    if (onRefreshFields && !isTextBasedLangSelected) {
+      panelItems.push(
+        <EuiContextMenuItem
+          key="refresh"
+          icon="refresh"
+          data-test-subj="indexPattern-refresh-fields"
+          onClick={async () => {
+            setPopoverIsOpen(false);
+            const dataView = await dataViews.get(currentDataViewId!, false, true);
+            onRefreshFields(dataView!);
+          }}
+        >
+          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.refreshFieldsButton', {
+            defaultMessage: 'Refresh fields of this data view',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    if ((onAddField || onRefreshFields) && !isTextBasedLangSelected) {
+      panelItems.push(<EuiHorizontalRule margin="none" key="dataviewActions-divider" />);
+    }
+
     panelItems.push(
       <React.Fragment key="add-dataview">
         {onDataViewCreated && (

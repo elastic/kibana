@@ -198,6 +198,7 @@ export const DiscoverTopNav = ({
     adHocDataViews,
     savedDataViews,
     onEditDataView,
+    onRefreshFields: stateContainer.actions.onRefreshDataViewFields,
   };
 
   const onTextBasedSavedAndExit = useCallback(

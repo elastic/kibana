@@ -148,6 +148,7 @@ export interface DiscoverStateContainer {
      * @param pattern
      */
     createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
+    onRefreshDataViewFields: (dataView: DataView) => Promise<void>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -341,6 +342,19 @@ export function getDiscoverStateContainer({
     fetchData();
   };
 
+  const onRefreshDataViewFields = async (editedDataView: DataView) => {
+    if (editedDataView.isPersisted()) {
+      // Clear the current data view from the cache and create a new instance
+      // of it, ensuring we have a new object reference to trigger a re-render
+      services.dataViews.clearInstanceCache(editedDataView.id);
+      setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
+    } else {
+      await updateAdHocDataViewId();
+    }
+    addLog('[getDiscoverStateContainer] onRefreshDataViewFields finished');
+    fetchData();
+  };
+
   const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
     return loadSavedSearchFn(params ?? {}, {
       appStateContainer,
@@ -484,6 +498,7 @@ export function getDiscoverStateContainer({
       createAndAppendAdHocDataView,
       onDataViewCreated,
       onDataViewEdited,
+      onRefreshDataViewFields,
       onOpenSavedSearch,
       onUpdateQuery,
       setDataView,
