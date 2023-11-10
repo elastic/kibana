@@ -218,8 +218,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
           'Elastic-Api-Version': API_VERSIONS.internal.v1,
         },
       }).then((response) => {
-        const item = response.body.items.find(
-          (policy: PackagePolicy) => policy.name === `Policy for ${DEFAULT_POLICY}`
+        const item = response.body.items.find((policy: PackagePolicy) =>
+          policy.name.startsWith(`Policy for ${DEFAULT_POLICY}`)
         );
 
         expect(item?.inputs[0].config?.osquery.value.packs[packName].queries).to.deep.equal(

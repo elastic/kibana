@@ -292,8 +292,8 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
             'Elastic-Api-Version': API_VERSIONS.internal.v1,
           },
         }).then((response) => {
-          const shardPolicy = response.body.items.find(
-            (policy: PackagePolicy) => policy.name === `Policy for ${DEFAULT_POLICY}`
+          const shardPolicy = response.body.items.find((policy: PackagePolicy) =>
+            policy.name.startsWith(`Policy for ${DEFAULT_POLICY}`)
           );
 
           expect(shardPolicy?.inputs[0].config?.osquery.value.packs[shardPack]).to.deep.equal({
