@@ -11,7 +11,7 @@ import { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RawRule, IntervalSchedule, SanitizedRule } from '../../types';
+import { RawRule, IntervalSchedule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
@@ -35,7 +35,7 @@ import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRule,
 } from '../../application/rule/transforms';
-import type { RuleParams, RuleDomain } from '../../application/rule/types';
+import type { RuleParams } from '../../application/rule/types';
 import { ruleDomainSchema } from '../../application/rule/schemas';
 
 const getShouldScheduleTask = async (
