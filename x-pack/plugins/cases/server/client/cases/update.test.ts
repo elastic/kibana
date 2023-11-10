@@ -920,7 +920,7 @@ describe('update', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'missing field 1',
               required: true,
             },
             {
@@ -939,7 +939,7 @@ describe('update', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
         {
           key: 'second_key',
@@ -994,7 +994,7 @@ describe('update', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
       ];
 
@@ -1050,7 +1050,7 @@ describe('update', () => {
       const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'first_custom_field_key',
         type: 'text',
-        value: ['this is a text field value', 'this is second'],
+        value: 'this is a text field value',
       });
 
       await expect(
@@ -1084,12 +1084,12 @@ describe('update', () => {
                   {
                     key: 'duplicated_key',
                     type: CustomFieldTypes.TEXT,
-                    value: ['this is a text field value', 'this is second'],
+                    value: 'this is a text field value',
                   },
                   {
                     key: 'duplicated_key',
                     type: CustomFieldTypes.TEXT,
-                    value: ['this is a text field value', 'this is second'],
+                    value: 'this is a text field value',
                   },
                 ],
               },
@@ -1115,7 +1115,7 @@ describe('update', () => {
                   {
                     key: 'first_key',
                     type: CustomFieldTypes.TEXT,
-                    value: ['this is a text field value', 'this is second'],
+                    value: 'this is a text field value',
                   },
                   {
                     key: 'missing_key',
@@ -1156,7 +1156,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields: first_key"`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields: \\"missing field 1\\""`
       );
     });
 
@@ -1177,7 +1177,7 @@ describe('update', () => {
                   {
                     key: 'second_key',
                     type: CustomFieldTypes.TEXT,
-                    value: ['foobar'],
+                    value: 'foobar',
                   },
                 ],
               },

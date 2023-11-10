@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';

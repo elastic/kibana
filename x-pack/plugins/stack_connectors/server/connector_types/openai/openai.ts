@@ -114,6 +114,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       method: 'post',
       responseSchema: RunActionResponseSchema,
       data: sanitizedBody,
+      // give up to 2 minutes for response
+      timeout: 120000,
       ...axiosOptions,
     });
     return response.data;
@@ -192,9 +194,15 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();
-      return result;
+      return { message: result, usage: res.usage };
     }
 
-    return 'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.';
+    return {
+      message:
+        'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.',
+      ...(res.usage
+        ? { usage: res.usage }
+        : { usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 } }),
+    };
   }
 }

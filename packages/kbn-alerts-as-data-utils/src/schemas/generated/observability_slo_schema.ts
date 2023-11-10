@@ -70,6 +70,7 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 const ObservabilitySloAlertRequired = rt.type({
 });
 const ObservabilitySloAlertOptional = rt.partial({
+  'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,

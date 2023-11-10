@@ -125,15 +125,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
       });
+    });
 
-      it('should be able to search by string', async function () {
+    describe('search', function () {
+      beforeEach(async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           INITIAL_FIELD_LIST_SUMMARY
         );
+      });
 
+      afterEach(async () => {
+        const fieldSearch = await testSubjects.find('clearSearchButton');
+        await fieldSearch.click();
+
+        await retry.waitFor('reset', async () => {
+          return (
+            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
+            INITIAL_FIELD_LIST_SUMMARY
+          );
+        });
+      });
+
+      it('should be able to search by string', async function () {
         await PageObjects.unifiedFieldList.findFieldByName('i');
 
         await retry.waitFor('first updates', async () => {
@@ -152,15 +168,54 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
-        const fieldSearch = await testSubjects.find('clearSearchButton');
-        await fieldSearch.click();
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be('clientip, ip, relatedContent.og:description, relatedContent.twitter:description');
+      });
 
-        await retry.waitFor('reset', async () => {
+      it('should be able to search by wildcard', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('relatedContent*image');
+
+        await retry.waitFor('updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            INITIAL_FIELD_LIST_SUMMARY
+            '2 available fields. 0 empty fields. 0 meta fields.'
           );
         });
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be('relatedContent.og:image, relatedContent.twitter:image');
+      });
+
+      it('should be able to search with spaces as wildcard', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('relatedContent image');
+
+        await retry.waitFor('updates', async () => {
+          return (
+            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
+            '4 available fields. 0 empty fields. 0 meta fields.'
+          );
+        });
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be(
+          'relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.twitter:image'
+        );
+      });
+
+      it('should ignore empty search', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('   '); // only spaces
+
+        await retry.waitFor('the clear button', async () => {
+          return await testSubjects.exists('clearSearchButton');
+        });
+
+        // expect no changes in the list
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
+          INITIAL_FIELD_LIST_SUMMARY
+        );
       });
     });
 
@@ -626,7 +681,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_bytes-runtimefield2')).to.be(true);
         expect(allFields.includes('_bytes-runtimefield')).to.be(false);
-
         await PageObjects.discover.removeField('_bytes-runtimefield');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -643,8 +697,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render even when retrieving documents failed with an error', async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await testSubjects.missingOrFail('discoverNoResultsError');
-
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           INITIAL_FIELD_LIST_SUMMARY
         );
@@ -654,7 +706,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         // error in fetching documents because of the invalid runtime field
-        await testSubjects.existOrFail('discoverNoResultsError');
+        await PageObjects.discover.showsErrorCallout();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
@@ -667,7 +719,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('discoverNoResultsError'); // still has error
+        await PageObjects.discover.showsErrorCallout(); // still has error
 
         // check that the sidebar is rendered event after a refresh
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -677,8 +729,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.removeField('_invalid-runtimefield');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-
-        await testSubjects.missingOrFail('discoverNoResultsError');
       });
 
       it('should work correctly when time range is updated', async function () {

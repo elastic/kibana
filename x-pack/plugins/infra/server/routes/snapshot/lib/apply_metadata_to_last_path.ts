@@ -6,7 +6,7 @@
  */
 
 import { get, last, first, isArray } from 'lodash';
-import { findInventoryFields } from '../../../../common/inventory_models';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import {
   SnapshotRequest,
   SnapshotNodePath,

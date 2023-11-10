@@ -69,6 +69,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         indexManagement: {
           pathname: '/app/management/data/index_management',
         },
+        transform: {
+          pathname: '/app/management/data/transform',
+        },
         connectors: {
           pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
         },
@@ -77,6 +80,12 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         },
         login: {
           pathname: '/login',
+        },
+        reportingManagement: {
+          pathname: '/app/management/insightsAndAlerting/reporting',
+        },
+        securitySolution: {
+          pathname: '/app/security',
         },
       },
       // choose where screenshots should be saved

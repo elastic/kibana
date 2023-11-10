@@ -43,7 +43,10 @@ export interface CustomEquationEditorProps {
   dataView: DataViewBase;
 }
 
-const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes };
+const NEW_METRIC = {
+  name: 'A',
+  aggType: Aggregators.COUNT as CustomMetricAggTypes,
+};
 const MAX_VARIABLES = 26;
 const CHAR_CODE_FOR_A = 65;
 const CHAR_CODE_FOR_Z = CHAR_CODE_FOR_A + MAX_VARIABLES;
@@ -164,7 +167,6 @@ export function CustomEquationEditor({
                 { defaultMessage: 'Equation and threshold' }
               )}
               error={[errors.equation]}
-              isInvalid={errors.equation != null}
             >
               <>
                 <EuiSpacer size="xs" />
@@ -179,6 +181,7 @@ export function CustomEquationEditor({
                   onClick={() => {
                     setCustomEqPopoverOpen(true);
                   }}
+                  isInvalid={errors.equation != null}
                 />
               </>
             </EuiFormRow>

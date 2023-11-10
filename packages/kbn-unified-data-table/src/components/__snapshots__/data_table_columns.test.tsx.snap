@@ -956,7 +956,7 @@ Array [
     "displayAsText": "extension",
     "id": "extension",
     "isSortable": false,
-    "schema": "string",
+    "schema": "numeric",
     "visibleCellActions": undefined,
   },
   Object {
@@ -1272,7 +1272,7 @@ Array [
     "displayAsText": "message",
     "id": "message",
     "isSortable": false,
-    "schema": "string",
+    "schema": "kibana-json",
     "visibleCellActions": undefined,
   },
 ]

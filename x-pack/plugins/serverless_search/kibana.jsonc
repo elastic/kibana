@@ -25,7 +25,9 @@
       "share",
       "visualizations"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "indexManagement",
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]

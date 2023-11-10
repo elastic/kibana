@@ -136,6 +136,14 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
 
+    if (
+      GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-security')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
+    }
+
     if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
       pipeline.push(getPipeline('.buildkite/pipelines/artifacts_container_image.yml'));
     }
@@ -162,6 +170,13 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:build-next-docs')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_next_docs.yml'));
+    }
+
+    if (
+      GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cypress_burn.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

@@ -2009,7 +2009,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              "<R>({ url, data, method, responseSchema, headers, ...config }: ",
+              "<R>({ url, data, method, responseSchema, headers, timeout, ...config }: ",
               "SubActionRequestParams",
               "<R>) => Promise<",
               "AxiosResponse",
@@ -2024,7 +2024,7 @@
                 "id": "def-server.SubActionConnector.request.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    ...config\n  }",
+                "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    timeout,\n    ...config\n  }",
                 "description": [],
                 "signature": [
                   "SubActionRequestParams",

@@ -37,7 +37,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { currentSelectedSignificantTerm, currentSelectedGroup } =
+  const { currentSelectedSignificantItem, currentSelectedGroup } =
     useLogRateAnalysisResultsTableRowContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
@@ -88,7 +88,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
     'log_rate_analysis',
     searchQuery,
     setGlobalState,
-    currentSelectedSignificantTerm,
+    currentSelectedSignificantItem,
     currentSelectedGroup
   );
 

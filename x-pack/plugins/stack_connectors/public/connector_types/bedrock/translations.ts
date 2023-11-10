@@ -40,7 +40,7 @@ export const SECRET = i18n.translate('xpack.stackConnectors.components.bedrock.s
 });
 
 export const BEDROCK = i18n.translate('xpack.stackConnectors.components.bedrock.title', {
-  defaultMessage: 'AWS Bedrock',
+  defaultMessage: 'Amazon Bedrock',
 });
 
 export const DOCUMENTATION = i18n.translate(

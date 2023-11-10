@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { CreateSLOInput, Indicator, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
+import { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { RecursivePartial } from '@kbn/utility-types';
+import { cloneDeep } from 'lodash';
 import { toDuration } from '../../../utils/slo/duration';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
@@ -15,11 +16,13 @@ import {
   CUSTOM_KQL_DEFAULT_VALUES,
   CUSTOM_METRIC_DEFAULT_VALUES,
   HISTOGRAM_DEFAULT_VALUES,
+  SLO_EDIT_FORM_DEFAULT_VALUES,
+  TIMESLICE_METRIC_DEFAULT_VALUES,
 } from '../constants';
 import { CreateSLOForm } from '../types';
 
 export function transformSloResponseToCreateSloForm(
-  values: SLOWithSummaryResponse | undefined
+  values?: GetSLOResponse
 ): CreateSLOForm | undefined {
   if (!values) return undefined;
 
@@ -132,18 +135,62 @@ function transformPartialIndicatorState(
         type: 'sli.metric.custom' as const,
         params: Object.assign({}, CUSTOM_METRIC_DEFAULT_VALUES.params, indicator.params ?? {}),
       };
+    case 'sli.metric.timeslice':
+      return {
+        type: 'sli.metric.timeslice' as const,
+        params: Object.assign({}, TIMESLICE_METRIC_DEFAULT_VALUES.params, indicator.params ?? {}),
+      };
     default:
       assertNever(indicatorType);
   }
 }
 
 export function transformPartialUrlStateToFormState(
-  values: RecursivePartial<Pick<CreateSLOInput, 'indicator'>>
-): Partial<CreateSLOForm> | {} {
-  const state: Partial<CreateSLOForm> = {};
+  values: RecursivePartial<CreateSLOInput>
+): CreateSLOForm {
+  const state: CreateSLOForm = cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES);
 
-  const parsedIndicator = transformPartialIndicatorState(values.indicator);
-  if (parsedIndicator !== undefined) state.indicator = parsedIndicator;
+  const indicator = transformPartialIndicatorState(values.indicator);
+  if (indicator !== undefined) {
+    state.indicator = indicator;
+  }
+
+  if (values.name) {
+    state.name = values.name;
+  }
+  if (values.description) {
+    state.description = values.description;
+  }
+  if (!!values.tags) {
+    state.tags = values.tags as string[];
+  }
+
+  if (values.objective) {
+    if (values.objective.target) {
+      state.objective = {
+        target: values.objective.target * 100,
+      };
+
+      if (values.objective.timesliceTarget && values.objective.timesliceWindow) {
+        state.objective.timesliceTarget = values.objective.timesliceTarget * 100;
+        state.objective.timesliceWindow = String(
+          toDuration(values.objective.timesliceWindow).value
+        );
+      }
+    }
+  }
+
+  if (values.budgetingMethod) {
+    state.budgetingMethod = values.budgetingMethod;
+  }
+
+  if (values.groupBy) {
+    state.groupBy = values.groupBy;
+  }
+
+  if (values.timeWindow?.duration && values.timeWindow?.type) {
+    state.timeWindow = { duration: values.timeWindow.duration, type: values.timeWindow.type };
+  }
 
   return state;
 }

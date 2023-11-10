@@ -47,6 +47,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.dropbox,
+    platinumOnly: true,
   },
   github: {
     docsUrl: docLinks.connectorsGithub,
@@ -152,13 +153,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.servicenow,
-  },
-  sharepoint_server: {
-    docsUrl: docLinks.connectorsSharepoint,
-    externalAuthDocsUrl: '',
-    externalDocsUrl: '',
-    icon: CONNECTOR_ICONS.sharepoint,
-    platinumOnly: false,
+    platinumOnly: true,
   },
   sharepoint_online: {
     docsUrl: docLinks.connectorsSharepointOnline,
@@ -166,6 +161,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.sharepoint_online,
     platinumOnly: true,
+  },
+  sharepoint_server: {
+    docsUrl: docLinks.connectorsSharepoint,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.sharepoint,
+    platinumOnly: false,
   },
   slack: {
     docsUrl: docLinks.connectorsSlack,

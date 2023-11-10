@@ -12,7 +12,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import { Comparator } from '../../../common/custom_threshold_rule/types';
+import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { MetricsExplorerMetric } from '../../../common/custom_threshold_rule/metrics_explorer';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -112,6 +112,26 @@ describe('Expression', () => {
         timeSize: 1,
         timeUnit: 'm',
         aggType: 'cardinality',
+      },
+    ]);
+  });
+
+  it('should use default metrics', async () => {
+    const currentOptions = {};
+    const { ruleParams } = await setup(currentOptions);
+    expect(ruleParams.criteria).toEqual([
+      {
+        metrics: [
+          {
+            name: 'A',
+            aggType: Aggregators.COUNT,
+          },
+        ],
+        comparator: Comparator.GT,
+        threshold: [1000],
+        timeSize: 1,
+        timeUnit: 'm',
+        aggType: 'custom',
       },
     ]);
   });

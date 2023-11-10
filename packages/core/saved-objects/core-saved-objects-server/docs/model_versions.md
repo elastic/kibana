@@ -13,6 +13,11 @@
   - [Adding an indexed field without default value](#adding-an-indexed-field-without-default-value)
   - [Adding an indexed field with a default value](#adding-an-indexed-field-with-a-default-value)
   - [Removing an existing field](#removing-an-existing-field)
+- [Testing model versions](#testing-model-versions)
+  - [Tooling for unit tests](#tooling-for-unit-tests)
+    - [Model version test migrator](#model-version-test-migrator)
+  - [Tooling for integration tests](#tooling-for-integration-tests)
+    - [Model version test bed](#model-version-test-bed)
 - [Limitations and edge cases in serverless environments](#limitations-and-edge-cases-in-serverless-environments)
   - [Using the fields option of the find api](#using-the-fields-option-of-the-find-savedobjects-api)
   - [Using update with dynamically backfilled fields](#using-update-with-dynamically-backfilled-fields)
@@ -870,6 +875,148 @@ const myType: SavedObjectsType = {
   },
 };
 ```
+
+## Testing model versions
+
+Model versions definitions are more structured than the legacy migration functions, which makes them harder
+to test without the proper tooling. This is why a set of testing tools and utilities are exposed
+from the `@kbn/core-test-helpers-model-versions` package, to help properly test the logic associated
+with model version and their associated transformations.
+
+### Tooling for unit tests
+
+For unit tests, the package exposes utilities to easily test the impact of transforming documents 
+from a model version to another one, either upward or backward.
+
+#### Model version test migrator
+
+The `createModelVersionTestMigrator` helper allows to create a test migrator that can be used to 
+test model version changes between versions, by transforming documents the same way the migration
+algorithm would during an upgrade.
+
+**Example:**
+
+```ts
+import { 
+  createModelVersionTestMigrator, 
+  type ModelVersionTestMigrator 
+} from '@kbn/core-test-helpers-model-versions';
+
+const mySoTypeDefinition = someSoType();
+
+describe('mySoTypeDefinition model version transformations', () => {
+  let migrator: ModelVersionTestMigrator;
+  
+  beforeEach(() => {
+    migrator = createModelVersionTestMigrator({ type: mySoTypeDefinition });
+  });
+  
+  describe('Model version 2', () => {
+    it('properly backfill the expected fields when converting from v1 to v2', () => {
+      const obj = createSomeSavedObject();
+
+      const migrated = migrator.migrate({
+        document: obj,
+        fromVersion: 1,
+        toVersion: 2,
+      });
+
+      expect(migrated.properties).toEqual(expectedV2Properties);
+    });
+
+    it('properly removes the expected fields when converting from v2 to v1', () => {
+      const obj = createSomeSavedObject();
+
+      const migrated = migrator.migrate({
+        document: obj,
+        fromVersion: 2,
+        toVersion: 1,
+      });
+
+      expect(migrated.properties).toEqual(expectedV1Properties);
+    });
+  });
+});
+```
+
+### Tooling for integration tests
+
+During integration tests, we can boot a real Elasticsearch cluster, allowing us to manipulate SO
+documents in a way almost similar to how it would be done on production runtime. With integration
+tests, we can even simulate the cohabitation of two Kibana instances with different model versions
+to assert the behavior of their interactions. 
+
+#### Model version test bed
+
+The package exposes a `createModelVersionTestBed` function that can be used to fully setup a
+test bed for model version integration testing. It can be used to start and stop the ES server,
+and to initiate the migration between the two versions we're testing.
+
+**Example:**
+
+```ts
+import { 
+  createModelVersionTestBed,
+  type ModelVersionTestKit
+} from '@kbn/core-test-helpers-model-versions';
+
+describe('myIntegrationTest', () => {
+  const testbed = createModelVersionTestBed();
+  let testkit: ModelVersionTestKit;
+
+  beforeAll(async () => {
+    await testbed.startES();
+  });
+
+  afterAll(async () => {
+    await testbed.stopES();
+  });
+
+  beforeEach(async () => {
+    // prepare the test, preparing the index and performing the SO migration
+    testkit = await testbed.prepareTestKit({
+      savedObjectDefinitions: [{
+        definition: mySoTypeDefinition,
+        // the model version that will be used for the "before" version
+        modelVersionBefore: 1,
+        // the model version that will be used for the "after" version
+        modelVersionAfter: 2,
+      }]
+    })
+  });
+
+  afterEach(async () => {
+    if(testkit) {
+      // delete the indices between each tests to perform a migration again
+      await testkit.tearsDown();
+    }
+  });
+
+  it('can be used to test model version cohabitation', async () => {
+    // last registered version is `1` (modelVersionBefore)
+    const repositoryV1 = testkit.repositoryBefore;
+    // last registered version is `2` (modelVersionAfter)
+    const repositoryV2 = testkit.repositoryAfter;
+
+    // do something with the two repositories, e.g
+    await repositoryV1.create(someAttrs, { id });
+    const v2docReadFromV1 = await repositoryV2.get('my-type', id);
+    expect(v2docReadFromV1.attributes).toEqual(whatIExpect);
+  });
+});
+```
+
+**Limitations:**
+
+Because the test bed is only creating the parts of Core required to instantiate the two SO
+repositories, and because we're not able to properly load all plugins (for proper isolation), the integration
+test bed currently has some limitations:
+
+- no extensions are enabled
+  - no security
+  - no encryption
+  - no spaces
+- all SO types will be using the same SO index
 
 ## Limitations and edge cases in serverless environments
 

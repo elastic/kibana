@@ -13,12 +13,12 @@ import {
   TIMELINE_SEARCH_OR_FILTER,
 } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
-import { cleanKibana } from '../../../tasks/common';
 
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
+  addNameToTimelineAndSave,
   changeTimelineQueryLanguage,
   executeTimelineKQL,
   executeTimelineSearch,
@@ -27,11 +27,7 @@ import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { hostsUrl, TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () => {
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
       login();
@@ -70,6 +66,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] 
 
     it('should be able to update timeline kqlMode with filter', () => {
       cy.get(TIMELINE_KQLMODE_FILTER).click();
+      addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
@@ -77,8 +74,9 @@ describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] 
       });
     });
 
-    it.skip('should be able to update timeline kqlMode with search', () => {
+    it('should be able to update timeline kqlMode with search', () => {
       cy.get(TIMELINE_KQLMODE_SEARCH).click();
+      addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');

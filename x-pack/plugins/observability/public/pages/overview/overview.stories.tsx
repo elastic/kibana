@@ -88,7 +88,6 @@ const withCore = makeDecorator({
         },
         thresholdRule: { enabled: false },
       },
-      compositeSlo: { enabled: false },
     };
 
     return (

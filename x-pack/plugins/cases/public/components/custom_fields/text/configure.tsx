@@ -20,6 +20,7 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = ()
         component={CheckBoxField}
         componentProps={{
           label: i18n.FIELD_OPTIONS,
+          'data-test-subj': 'text-custom-field-options-wrapper',
           euiFieldProps: {
             label: i18n.FIELD_OPTION_REQUIRED,
             'data-test-subj': 'text-custom-field-options',

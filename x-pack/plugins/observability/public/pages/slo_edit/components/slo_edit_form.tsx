@@ -15,7 +15,7 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { sloFeatureId } from '../../../../common';
@@ -45,7 +45,7 @@ import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | undefined;
+  slo?: GetSLOResponse;
 }
 
 export const maxWidth = 775;
@@ -63,6 +63,8 @@ export function SloEditForm({ slo }: Props) {
   });
 
   const sloFormValuesFromUrlState = useParseUrlState();
+  const sloFormValuesFromSloResponse = transformSloResponseToCreateSloForm(slo);
+
   const isAddRuleFlyoutOpen = useAddRuleFlyoutState(isEditMode);
   const [isCreateRuleCheckboxChecked, setIsCreateRuleCheckboxChecked] = useState(true);
 
@@ -73,8 +75,8 @@ export function SloEditForm({ slo }: Props) {
   }, [isEditMode, rules, slo]);
 
   const methods = useForm<CreateSLOForm>({
-    defaultValues: Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, sloFormValuesFromUrlState),
-    values: transformSloResponseToCreateSloForm(slo),
+    defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
+    values: sloFormValuesFromUrlState ? sloFormValuesFromUrlState : sloFormValuesFromSloResponse,
     mode: 'all',
   });
   const { watch, getFieldState, getValues, formState, trigger } = methods;
@@ -258,10 +260,11 @@ export function SloEditForm({ slo }: Props) {
         <AddRuleFlyout
           canChangeTrigger={false}
           consumer={sloFeatureId}
-          initialValues={{ name: `${slo.name} burn rate rule`, params: { sloId: slo.id } }}
+          initialValues={{ name: `${watch('name')} burn rate rule`, params: { sloId: slo.id } }}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onClose={handleCloseRuleFlyout}
           onSave={handleCloseRuleFlyout}
+          useRuleProducer
         />
       ) : null}
     </>

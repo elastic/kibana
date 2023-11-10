@@ -146,6 +146,8 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     priority,
     version,
     dataStream,
+    lifecycle,
+    allowAutoCreate,
   }: Partial<TemplateDeserialized> = {}) => {
     const { component, form, find } = testBed;
 
@@ -183,8 +185,27 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       if (version) {
         form.setInputValue('versionField.input', JSON.stringify(version));
       }
+    });
+    component.update();
+
+    if (lifecycle && lifecycle.enabled) {
+      act(() => {
+        form.toggleEuiSwitch('dataRetentionToggle.input');
+      });
+      component.update();
+
+      act(() => {
+        form.setInputValue('valueDataRetentionField', String(lifecycle.value));
+      });
+    }
+
+    await act(async () => {
+      if (allowAutoCreate) {
+        form.toggleEuiSwitch('allowAutoCreateField.input');
+      }
 
       clickNextButton();
+      jest.advanceTimersByTime(0);
     });
 
     component.update();
@@ -210,7 +231,6 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     await act(async () => {
       clickNextButton();
-      jest.advanceTimersByTime(0);
     });
 
     component.update();
@@ -332,6 +352,8 @@ export type TestSubjects =
   | 'orderField.input'
   | 'priorityField.input'
   | 'dataStreamField.input'
+  | 'dataRetentionToggle.input'
+  | 'allowAutoCreateField.input'
   | 'pageTitle'
   | 'previewTab'
   | 'removeFieldButton'
@@ -355,6 +377,7 @@ export type TestSubjects =
   | 'aliasesEditor'
   | 'settingsEditor'
   | 'versionField.input'
+  | 'valueDataRetentionField'
   | 'mappingsEditor.formTab'
   | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle'
   | 'previewIndexTemplate';

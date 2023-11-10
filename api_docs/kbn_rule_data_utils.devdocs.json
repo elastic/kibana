@@ -176,7 +176,20 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ApmRuleType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ApmRuleType",
+        "description": [],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/rule-data-utils",
@@ -1416,7 +1429,7 @@
         "label": "AlertConsumers",
         "description": [],
         "signature": [
-          "\"uptime\" | \"siem\" | \"apm\" | \"observability\" | \"logs\" | \"infrastructure\" | \"slo\""
+          "\"uptime\" | \"siem\" | \"observability\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1575,6 +1588,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"metrics.alert.inventory.threshold\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.OBSERVABILITY_THRESHOLD_RULE_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -1716,7 +1744,7 @@
         "label": "ValidFeatureId",
         "description": [],
         "signature": [
-          "\"uptime\" | \"siem\" | \"apm\" | \"observability\" | \"logs\" | \"infrastructure\" | \"slo\""
+          "\"uptime\" | \"siem\" | \"observability\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

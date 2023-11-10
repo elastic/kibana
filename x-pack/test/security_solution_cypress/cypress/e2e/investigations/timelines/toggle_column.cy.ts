@@ -6,7 +6,6 @@
  */
 
 import { ID_HEADER_FIELD, TIMESTAMP_HEADER_FIELD } from '../../../screens/timeline';
-import { cleanKibana } from '../../../tasks/common';
 
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
@@ -20,34 +19,29 @@ import {
 
 import { hostsUrl } from '../../../urls/navigation';
 
-describe(
-  'toggle column in timeline',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
-  () => {
-    before(() => {
-      cleanKibana();
-      cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
-    });
+describe('toggle column in timeline', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
+  });
 
-    beforeEach(() => {
-      login();
-      visitWithTimeRange(hostsUrl('allHosts'));
-      openTimelineUsingToggle();
-      populateTimeline();
-    });
+  beforeEach(() => {
+    login();
+    visitWithTimeRange(hostsUrl('allHosts'));
+    openTimelineUsingToggle();
+    populateTimeline();
+  });
 
-    it('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {
-      expandFirstTimelineEventDetails();
-      clickTimestampToggleField();
+  it('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {
+    expandFirstTimelineEventDetails();
+    clickTimestampToggleField();
 
-      cy.get(TIMESTAMP_HEADER_FIELD).should('not.exist');
-    });
+    cy.get(TIMESTAMP_HEADER_FIELD).should('not.exist');
+  });
 
-    it('adds the _id field to the timeline when the user checks the field', () => {
-      expandFirstTimelineEventDetails();
-      clickIdToggleField();
+  it('adds the _id field to the timeline when the user checks the field', () => {
+    expandFirstTimelineEventDetails();
+    clickIdToggleField();
 
-      cy.get(ID_HEADER_FIELD).should('exist');
-    });
-  }
-);
+    cy.get(ID_HEADER_FIELD).should('exist');
+  });
+});

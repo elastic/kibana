@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, MouseEvent } from 'react';
 import { useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
@@ -56,12 +56,20 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
         data-test-subj="syntheticsViewDocumentButton"
         iconType="inspect"
         title={INSPECT_DOCUMENT}
-        onClick={() => {
+        onClick={(evt: MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation();
           setIsFlyoutVisible(true);
         }}
       />
       {isFlyoutVisible && (
-        <EuiFlyout onClose={() => setIsFlyoutVisible(false)} ownFocus={true}>
+        <EuiFlyout
+          onClose={() => setIsFlyoutVisible(false)}
+          ownFocus={true}
+          onClick={(evt: MouseEvent) => {
+            // needed to prevent propagation to the table row click
+            evt.stopPropagation();
+          }}
+        >
           <EuiFlyoutHeader>
             <EuiTitle size="m">
               <h4>

@@ -363,6 +363,11 @@ export class DiscoverPageObject extends FtrService {
     return await this.find.byClassName('monaco-editor');
   }
 
+  public async findFieldByNameInDocViewer(name: string) {
+    const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
+    await fieldSearch.type(name);
+  }
+
   public async getMarks() {
     const table = await this.docTable.getTable();
     const marks = await table.findAllByTagName('mark');
@@ -383,15 +388,15 @@ export class DiscoverPageObject extends FtrService {
 
   public async editField(field: string) {
     await this.retry.try(async () => {
-      await this.unifiedFieldList.clickFieldListItem(field);
-      await this.testSubjects.click(`discoverFieldListPanelEdit-${field}`);
+      await this.unifiedFieldList.pressEnterFieldListItemToggle(field);
+      await this.testSubjects.pressEnter(`discoverFieldListPanelEdit-${field}`);
       await this.find.byClassName('indexPatternFieldEditor__form');
     });
   }
 
   public async removeField(field: string) {
-    await this.unifiedFieldList.clickFieldListItem(field);
-    await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
+    await this.unifiedFieldList.pressEnterFieldListItemToggle(field);
+    await this.testSubjects.pressEnter(`discoverFieldListPanelDelete-${field}`);
     await this.retry.waitFor('modal to open', async () => {
       return await this.testSubjects.exists('runtimeFieldDeleteConfirmModal');
     });
@@ -448,12 +453,8 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
-  public noResultsErrorVisible() {
-    return this.testSubjects.exists('discoverNoResultsError');
-  }
-
-  public mainErrorVisible() {
-    return this.testSubjects.exists('discoverMainError');
+  public showsErrorCallout() {
+    return this.testSubjects.existOrFail('discoverErrorCalloutTitle');
   }
 
   public getDiscoverErrorMessage() {
