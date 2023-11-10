@@ -64,8 +64,11 @@ interface AuthorizationServiceSetupParams {
   loggers: LoggerFactory;
   features: FeaturesPluginSetup;
   kibanaIndexName: string;
+
   getSpacesService(): SpacesService | undefined;
+
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
+
   customBranding: CustomBrandingSetup;
 }
 
@@ -174,6 +177,9 @@ export class AuthorizationService {
         }
 
         return await disableUICapabilities.usingPrivileges(uiCapabilities);
+      },
+      {
+        capabilityPath: '*',
       }
     );
 
