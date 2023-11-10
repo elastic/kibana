@@ -27,7 +27,7 @@ export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
     max-width: 800px;
   }
   &:focus-within {
-    flex-grow: 4;
+    flex-grow: 10;
   }
 `;
 
