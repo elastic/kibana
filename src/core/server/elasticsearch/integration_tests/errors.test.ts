@@ -42,8 +42,8 @@ describe('elasticsearch clients errors', () => {
       expect('should have thrown').toEqual('but it did not');
     } catch (e) {
       const stringifiedError = JSON.stringify(e);
-      expect(stringifiedError).not.toContain("headers");
-      expect(stringifiedError).not.toContain("authorization");
+      expect(stringifiedError).not.toContain('headers');
+      expect(stringifiedError).not.toContain('authorization');
     }
   });
 });
