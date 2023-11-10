@@ -113,8 +113,9 @@ Array [
                   >
                     <button
                       aria-label="Update assignees"
-                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
                       data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
+                      disabled=""
                       type="button"
                     >
                       <span
@@ -289,8 +290,9 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                     >
                       <button
                         aria-label="Update assignees"
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
                         data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
+                        disabled=""
                         type="button"
                       >
                         <span
