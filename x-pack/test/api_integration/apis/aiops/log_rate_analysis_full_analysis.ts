@@ -70,8 +70,8 @@ export default ({ getService }: FtrProviderContext) => {
             );
 
             expect(significantItems).to.eql(
-              testData.expected.significantTerms,
-              'Significant terms do not match expected values.'
+              testData.expected.significantItems,
+              'Significant items do not match expected values.'
             );
 
             const histogramActions = getHistogramActions(data, apiVersion);

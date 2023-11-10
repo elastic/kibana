@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
-export const significantTerms: SignificantTerm[] = [
+// Named significantTerms since all these items are of type `keyword`.
+export const significantTerms: SignificantItem[] = [
   {
     key: 'user:Peter',
     type: 'keyword',

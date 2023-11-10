@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
-export function getMissingSignificantTerms(
-  significantTerms: SignificantTerm[],
-  significantTermGroups: SignificantTermGroup[]
+export function getMissingSignificantItems(
+  significantItems: SignificantItem[],
+  significantItemGroups: SignificantItemGroup[]
 ) {
-  return significantTerms.filter((cp) => {
-    return !significantTermGroups.some((cpg) => {
+  return significantItems.filter((cp) => {
+    return !significantItemGroups.some((cpg) => {
       return cpg.group.some((d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue);
     });
   });

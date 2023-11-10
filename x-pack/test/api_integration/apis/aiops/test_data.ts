@@ -10,8 +10,8 @@
 // that also the jest unit tests use mocks that are not outdated.
 import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_terms';
 import { significantLogPatterns as artificialLogSignificantLogPatterns } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_log_patterns';
-import { finalSignificantTermGroups as artificialLogsSignificantTermGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_term_groups';
-import { finalSignificantTermGroupsTextfield as artificialLogsSignificantTermGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_term_groups_textfield';
+import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups';
+import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups_textfield';
 
 import type {
   AiopsLogRateAnalysisSchema,
@@ -45,7 +45,7 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       actionsLengthGroupOnly: 4,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTerms: [
+      significantItems: [
         {
           key: 'day_of_week:Thursday',
           type: 'keyword',
@@ -99,8 +99,8 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTerms: artificialLogSignificantTerms,
-      groups: artificialLogsSignificantTermGroups,
+      significantItems: artificialLogSignificantTerms,
+      groups: artificialLogsSignificantItemGroups,
       histogramLength: 20,
     },
   },
@@ -126,8 +126,8 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTerms: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
-      groups: artificialLogsSignificantTermGroupsTextfield,
+      significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
+      groups: artificialLogsSignificantItemGroupsTextfield,
       histogramLength: 20,
     },
   },
@@ -153,8 +153,8 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTerms: artificialLogSignificantTerms,
-      groups: artificialLogsSignificantTermGroups,
+      significantItems: artificialLogSignificantTerms,
+      groups: artificialLogsSignificantItemGroups,
       histogramLength: 20,
     },
   },
@@ -180,8 +180,8 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      significantTerms: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
-      groups: artificialLogsSignificantTermGroupsTextfield,
+      significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
+      groups: artificialLogsSignificantItemGroupsTextfield,
       histogramLength: 20,
     },
   },
