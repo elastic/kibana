@@ -17,6 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/elastic-agent-utils"
+    "@kbn/elastic-agent-utils",
+    "@kbn/kibana-react-plugin"
   ]
 }
