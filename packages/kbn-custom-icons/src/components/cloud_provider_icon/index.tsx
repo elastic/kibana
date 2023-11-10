@@ -15,7 +15,11 @@ export interface CloudProviderIconProps extends Omit<EuiIconProps, 'type'> {
 }
 
 export function CloudProviderIcon({ cloudProvider, ...props }: CloudProviderIconProps) {
-  const icon = getCloudProviderIcon(cloudProvider);
+  const computedProps: Pick<EuiIconProps, 'type' | 'title'> = {
+    type: getCloudProviderIcon(cloudProvider),
+  };
 
-  return <EuiIcon type={icon} title={cloudProvider} {...props} />;
+  if (cloudProvider) computedProps.title = cloudProvider;
+
+  return <EuiIcon {...computedProps} {...props} />;
 }
