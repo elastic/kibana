@@ -12,14 +12,15 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { getExportSettings } from './get_export_settings';
-import { ReportingConfigType } from '@kbn/reporting-common/types';
+import { ReportingConfigType } from '@kbn/reporting-config-server';
+
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from './constants';
+import { getExportSettings } from './get_export_settings';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
@@ -29,6 +30,7 @@ describe('getExportSettings', () => {
     maxSizeBytes: 180000,
     scroll: { size: 500, duration: '30s' },
     useByteOrderMarkEncoding: false,
+    enablePanelActionDownload: true,
   };
   const logger = loggingSystemMock.createLogger();
 

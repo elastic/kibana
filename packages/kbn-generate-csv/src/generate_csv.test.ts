@@ -24,9 +24,9 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { ReportingConfigType } from '@kbn/reporting-common/types';
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import { CancellationToken } from '@kbn/reporting-common';
+import { ReportingConfigType } from '@kbn/reporting-config-server';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,

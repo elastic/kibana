@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
-
 import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
-import type { ByteSizeValue } from '@kbn/config-schema';
 import type { LocatorParams } from './url';
 
 export * from './url';
@@ -86,39 +83,6 @@ export interface BasePayloadV2 extends BaseParamsV2 {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
-}
-
-export interface ReportingConfigType {
-  encryptionKey?: string;
-  kibanaServer: {
-    protocol?: string;
-    hostname?: string;
-    port?: number;
-  };
-  roles: {
-    enabled: boolean;
-  };
-  export_types: {
-    pdf: { enabled: boolean };
-    png: { enabled: boolean };
-    csv: { enabled: boolean };
-  };
-  queue: {
-    indexInterval: string;
-    pollEnabled: boolean;
-    pollInterval: number | moment.Duration;
-    timeout: number | moment.Duration;
-  };
-  csv: {
-    checkForFormulas: boolean;
-    escapeFormulaValues: boolean;
-    useByteOrderMarkEncoding: boolean;
-    maxSizeBytes: number | ByteSizeValue;
-    scroll: {
-      duration: string;
-      size: number;
-    };
-  };
 }
 
 export interface ReportingServerInfo {

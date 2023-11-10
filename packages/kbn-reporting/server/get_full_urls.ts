@@ -13,7 +13,8 @@ import {
   UrlWithStringQuery,
 } from 'url';
 
-import { ReportingConfigType, ReportingServerInfo } from '@kbn/reporting-common/types';
+import { ReportingServerInfo } from '@kbn/reporting-common/types';
+import { ReportingConfigType } from '@kbn/reporting-config-server';
 import { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
 
 import { getAbsoluteUrlFactory } from './get_absolute_url';

@@ -7,10 +7,14 @@
  */
 
 import { format } from 'url';
+
+import { ReportingConfigType } from '@kbn/reporting-config-server';
+
 import { buildKibanaPath } from './build_kibana_path';
 import { getRedirectAppPath } from './constants';
-import { ReportingConfigType, ReportingServerInfo } from './types';
+import { ReportingServerInfo } from './types';
 
+// FIXME: this is not "common"
 export function getFullRedirectAppUrl(
   config: ReportingConfigType,
   serverInfo: ReportingServerInfo,

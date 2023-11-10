@@ -7,7 +7,7 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import { ReportingConfigType } from '@kbn/reporting-common/types';
+import { ReportingConfigType } from '@kbn/reporting-config-server';
 
 export const createMockConfigSchema = (
   overrides: DeepPartial<ReportingConfigType> = {}
