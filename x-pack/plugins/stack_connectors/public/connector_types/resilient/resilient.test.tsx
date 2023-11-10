@@ -8,13 +8,15 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { registrationServicesMock } from '../../mocks';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const CONNECTOR_TYPE_ID = '.resilient';
 let connectorTypeModel: ConnectorTypeModel;
 
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
+  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
   const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
   if (getResult !== null) {

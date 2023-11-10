@@ -289,8 +289,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
       await queryBar.submitQuery();
-      // check the error state
-      expect(await testSubjects.exists('embeddable-lens-failure')).to.be(true);
+
+      await PageObjects.discover.showsErrorCallout();
 
       // now remove the query
       await queryBar.clearQuery();

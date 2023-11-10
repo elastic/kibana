@@ -467,7 +467,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid value "undefined" supplied to "threshold"',
+            message:
+              '[request body]: type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", saved_id: Required, and 14 more',
             statusCode: 400,
           });
         });
@@ -510,7 +511,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid value "0" supplied to "threshold,value"',
+            message: '[request body]: threshold.value: Number must be greater than or equal to 1',
             statusCode: 400,
           });
         });
@@ -575,7 +576,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body.message).to.eql(
-            '[request body]: Invalid value "["host.name"]" supplied to "investigation_fields"'
+            '[request body]: investigation_fields: Expected object, received array, type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", investigation_fields: Expected object, received array, investigation_fields: Expected object, received array, and 22 more'
           );
         });
       });

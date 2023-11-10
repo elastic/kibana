@@ -36,9 +36,11 @@ export const useTimelineSavePrompt = (
   const history = useHistory();
 
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    getTimelineShowStatus(state, timelineId)
-  );
+  const {
+    status: timelineStatus,
+    updated,
+    changed,
+  } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 
   const showSaveTimelineModal = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: true }));
@@ -80,8 +82,7 @@ export const useTimelineSavePrompt = (
 
       if (
         !getIsTimelineVisible(relativePath) &&
-        timelineStatus === TimelineStatus.draft &&
-        updated != null
+        (changed || (timelineStatus === TimelineStatus.draft && updated != null))
       ) {
         confirmSaveTimeline();
       } else {
@@ -102,6 +103,7 @@ export const useTimelineSavePrompt = (
     getIsTimelineVisible,
     timelineStatus,
     updated,
+    changed,
   ]);
 
   useEffect(() => {
@@ -109,8 +111,7 @@ export const useTimelineSavePrompt = (
       // Confirm when the user has made any changes to a timeline
       if (
         !(nextAppId ?? '').includes(APP_ID) &&
-        timelineStatus === TimelineStatus.draft &&
-        updated != null
+        (changed || (timelineStatus === TimelineStatus.draft && updated != null))
       ) {
         return actions.confirm(
           UNSAVED_TIMELINE_SAVE_PROMPT,

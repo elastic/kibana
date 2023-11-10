@@ -12,6 +12,7 @@ import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../servic
 import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
+import { serializeAsESLifecycle } from '../../../../../../common/lib/data_stream_serialization';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -98,6 +99,19 @@ describe('<ComponentTemplateCreate />', () => {
         expect(exists('metaEditor')).toBe(true);
       });
 
+      test('should toggle the data retention field', async () => {
+        const { exists, component, form } = testBed;
+
+        expect(exists('valueDataRetentionField')).toBe(false);
+
+        await act(async () => {
+          form.toggleEuiSwitch('dataRetentionToggle.input');
+        });
+        component.update();
+
+        expect(exists('valueDataRetentionField')).toBe(true);
+      });
+
       describe('Validation', () => {
         test('should require a name', async () => {
           const { form, actions, component, find } = testBed;
@@ -120,6 +134,11 @@ describe('<ComponentTemplateCreate />', () => {
       const COMPONENT_TEMPLATE_NAME = 'comp-1';
       const SETTINGS = { number_of_shards: 1 };
       const ALIASES = { my_alias: {} };
+      const LIFECYCLE = {
+        enabled: true,
+        value: 2,
+        unit: 'd',
+      };
 
       const BOOLEAN_MAPPING_FIELD = {
         name: 'boolean_datatype',
@@ -136,7 +155,10 @@ describe('<ComponentTemplateCreate />', () => {
         component.update();
 
         // Complete step 1 (logistics)
-        await actions.completeStepLogistics({ name: COMPONENT_TEMPLATE_NAME });
+        await actions.completeStepLogistics({
+          name: COMPONENT_TEMPLATE_NAME,
+          lifecycle: LIFECYCLE,
+        });
 
         // Complete step 2 (index settings)
         await actions.completeStepSettings(SETTINGS);
@@ -199,6 +221,7 @@ describe('<ComponentTemplateCreate />', () => {
                   },
                 },
                 aliases: ALIASES,
+                lifecycle: serializeAsESLifecycle(LIFECYCLE),
               },
               _kbnMeta: { usedBy: [], isManaged: false },
             }),
