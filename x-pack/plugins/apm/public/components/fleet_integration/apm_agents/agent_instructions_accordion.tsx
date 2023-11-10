@@ -17,7 +17,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
 import styled from 'styled-components';
-import { Markdown_DEPRECATED, useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  Markdown_DEPRECATED,
+  useKibana,
+} from '@kbn/kibana-react-plugin/public';
 import {
   AgentRuntimeAttachmentProps,
   CreateAgentInstructions,
