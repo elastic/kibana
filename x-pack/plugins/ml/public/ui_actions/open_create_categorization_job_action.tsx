@@ -16,8 +16,12 @@ import type { MlCoreSetup } from '../plugin';
 
 export const createCategorizationADJobTrigger: Trigger = {
   id: CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
-  title: 'Create categorization anomaly detection job',
-  description: 'Create categorization anomaly detection job',
+  title: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
+    defaultMessage: 'Create categorization anomaly detection job',
+  }),
+  description: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
+    defaultMessage: 'Create categorization anomaly detection job',
+  }),
 };
 
 export function createCategorizationADJobAction(
