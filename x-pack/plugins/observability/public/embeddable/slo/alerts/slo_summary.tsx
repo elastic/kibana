@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 
 import { EmbeddableSloProps } from './types';

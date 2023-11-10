@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
