@@ -6,8 +6,8 @@
  */
 
 import { TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import { BasePayload } from '@kbn/reporting-common/types';
 import { ReportSource } from '../../../common/types';
-import { BasePayload } from '../../types';
 
 export const REPORTING_EXECUTE_TYPE = 'report:execute';
 export const REPORTING_MONITOR_TYPE = 'reports:monitor';

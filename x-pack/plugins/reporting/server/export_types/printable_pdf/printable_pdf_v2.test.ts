@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { CancellationToken } from '@kbn/reporting-common';
-import { LocatorParams } from '@kbn/reporting-common/types';
-import { generatePdfObservableV2, cryptoFactory, TaskPayloadPDFV2 } from '@kbn/reporting-server';
-import { PdfExportType } from '@kbn/reporting-export-types-pdf';
-import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { of } from 'rxjs';
 import type { Writable } from 'stream';
+
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { CancellationToken } from '@kbn/reporting-common';
+import type { LocatorParams } from '@kbn/reporting-common/types';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
+import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { cryptoFactory, generatePdfObservableV2 } from '@kbn/reporting-server';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+
 import { createMockConfigSchema } from '../../test_helpers';
 
 jest.mock('@kbn/reporting-server/generate_pdf_v2');

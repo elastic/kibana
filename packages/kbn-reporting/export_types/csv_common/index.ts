@@ -46,3 +46,8 @@ export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayload
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 
 export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
+
+// This is deprecated because it lacks support for runtime fields
+// but the extension points are still needed for pre-existing scripted automation, until 8.0
+export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
+export const CSV_JOB_TYPE_DEPRECATED = 'csv';

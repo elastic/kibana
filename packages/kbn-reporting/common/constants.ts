@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { jobTypes } from './job_types';
-
 export const PLUGIN_ID = 'reporting';
 
 export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
@@ -24,16 +22,6 @@ export const LICENSE_TYPE_CLOUD_STANDARD = 'standard' as const;
 export const LICENSE_TYPE_GOLD = 'gold' as const;
 export const LICENSE_TYPE_PLATINUM = 'platinum' as const;
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
-
-export const USES_HEADLESS_JOB_TYPES = [
-  jobTypes.PDF_JOB_TYPE,
-  jobTypes.PNG_JOB_TYPE,
-  jobTypes.PDF_JOB_TYPE_V2,
-  jobTypes.PNG_JOB_TYPE_V2,
-];
-
-type JobTypeDeclaration = typeof jobTypes;
-export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
 
 /**
  * A way to get the client side route for the reporting redirect app.

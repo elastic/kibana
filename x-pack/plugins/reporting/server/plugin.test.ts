@@ -11,13 +11,11 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import { setFieldFormats } from '@kbn/reporting-server';
-import {
-  PNG_REPORT_TYPE_V2,
-  PDF_REPORT_TYPE_V2,
-  PDF_REPORT_TYPE,
-  CSV_REPORT_TYPE,
-  CSV_REPORT_TYPE_V2,
-} from '@kbn/reporting-common/report_types';
+
+import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+
 import { CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { Writable } from 'stream';

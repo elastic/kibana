@@ -9,10 +9,13 @@ import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ReportingRequestHandlerContext } from '@kbn/reporting-server';
-import { JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
+import {
+  CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+  JobParamsDownloadCSV,
+} from '@kbn/reporting-export-types-csv-common';
 import moment from 'moment';
 import type { ReportingCore } from '../../..';
-import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE, INTERNAL_ROUTES } from '../../../../common/constants';
+import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { PassThroughStream } from '../../../lib';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 

@@ -6,14 +6,17 @@
  */
 
 import * as Rx from 'rxjs';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
+
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { LocatorParams } from '@kbn/reporting-common/types';
-import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { PngExportType } from '@kbn/reporting-export-types-png';
+import type { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
+import { cryptoFactory, generatePngObservable } from '@kbn/reporting-server';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+
 import { createMockConfigSchema } from '../../test_helpers';
-import { generatePngObservable, cryptoFactory, TaskPayloadPNGV2 } from '@kbn/reporting-server';
 
 jest.mock('@kbn/reporting-server/generate_png');
 

@@ -6,10 +6,25 @@
  */
 
 import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
-import { jobTypes } from '@kbn/reporting-common';
-import * as reportTypes from '@kbn/reporting-common/report_types';
-
-const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
+import {
+  CSV_JOB_TYPE,
+  CSV_JOB_TYPE_DEPRECATED,
+  CSV_JOB_TYPE_V2,
+  CSV_REPORT_TYPE,
+  CSV_REPORT_TYPE_V2,
+} from '@kbn/reporting-export-types-csv-common';
+import {
+  PDF_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+  PDF_REPORT_TYPE,
+  PDF_REPORT_TYPE_V2,
+} from '@kbn/reporting-export-types-pdf-common';
+import {
+  PNG_JOB_TYPE,
+  PNG_JOB_TYPE_V2,
+  PNG_REPORT_TYPE,
+  PNG_REPORT_TYPE_V2,
+} from '@kbn/reporting-export-types-png-common';
 
 export const PLUGIN_ID = 'reporting';
 
@@ -40,18 +55,29 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
 
 export type JobId = string;
 
+export const reportTypes = [
+  CSV_REPORT_TYPE,
+  CSV_REPORT_TYPE_V2,
+  PDF_REPORT_TYPE,
+  PDF_REPORT_TYPE_V2,
+  PNG_REPORT_TYPE,
+  PNG_REPORT_TYPE_V2,
+];
+
+export const jobTypes = [
+  CSV_JOB_TYPE,
+  CSV_JOB_TYPE_V2,
+  PDF_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+  PNG_JOB_TYPE,
+  PNG_JOB_TYPE_V2,
+];
+
 type ReportTypeDeclaration = typeof reportTypes;
 export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
 
 type JobTypeDeclaration = typeof jobTypes;
 export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
-
-export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
-
-// This is deprecated because it lacks support for runtime fields
-// but the extension points are still needed for pre-existing scripted automation, until 8.0
-export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
-export const CSV_JOB_TYPE_DEPRECATED = 'csv';
 
 export const USES_HEADLESS_JOB_TYPES = [
   PDF_JOB_TYPE,
