@@ -53,7 +53,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         );
 
       UsageCollector.countNode(snapshotRequest.nodeType);
-      const client = createSearchClient(requestContext, framework);
+      const client = createSearchClient(requestContext, framework, request);
 
       try {
         const snapshotResponse = await getNodes(

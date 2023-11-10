@@ -62,7 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/165344
+    // failing tests: https://github.com/elastic/kibana/issues/170705
     describe.skip('from Timeline', () => {
       let timeline: TimelineResponse;
 
