@@ -16,7 +16,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../common/types/api';
 
+import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
+import { NEW_INDEX_METHOD_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 import { SelectConnector } from '../new_index/select_connector/select_connector';
 
@@ -37,13 +40,12 @@ export const Connectors: React.FC = () => {
     makeRequest(searchParams);
   }, [searchParams.from, searchParams.size]);
 
+  // TODOS
   // Spinner while loading
-  // get filtered endpoint
-  // fix pagination
   // add docs count
   // add stats
   // make table searchable
-  const isEmpty = (data?.connectors?.length ?? 0) <= 0; 
+  const isEmpty = (data?.connectors?.length ?? 0) <= 0;
   const isLoading = status === Status.IDLE || status === Status.LOADING;
   return (
     <>
@@ -62,19 +64,38 @@ export const Connectors: React.FC = () => {
             rightSideItems: isLoading
               ? []
               : [
-                  <EuiButton color="primary" iconType="plusInCircle" fill>
+                  <EuiButton
+                    color="primary"
+                    iconType="plusInCircle"
+                    fill
+                    onClick={() => {
+                      KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                    }}
+                  >
                     <FormattedMessage
                       id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
                       defaultMessage="New Connector"
                     />
                   </EuiButton>,
-                  <EuiButton>
+                  <EuiButton
+                    onClick={() => {
+                      KibanaLogic.values.navigateToUrl(
+                        generateEncodedPath(NEW_INDEX_METHOD_PATH, { filter: 'native' })
+                      );
+                    }}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
                       { defaultMessage: 'New Native Connector' }
                     )}
                   </EuiButton>,
-                  <EuiButton>
+                  <EuiButton
+                    onClick={() => {
+                      KibanaLogic.values.navigateToUrl(
+                        generateEncodedPath(NEW_INDEX_METHOD_PATH, { filter: 'connector_clients' })
+                      );
+                    }}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
                       { defaultMessage: 'New Connectors Client' }

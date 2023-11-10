@@ -58,8 +58,12 @@ export const SelectConnector: React.FC = () => {
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const hasNativeAccess = isCloud;
-  const { service_type: serviceType } = parseQueryParams(search);
-  const [useNativeFilter, setUseNativeFilter] = useState(false);
+  const { service_type: serviceType, filter } = parseQueryParams(search);
+  const [selectedConnectorFilter, setSelectedConnectorFilter] = useState<string | null>(
+    Array.isArray(filter) ? filter[0] : filter ?? null
+  );
+  const useNativeFilter = selectedConnectorFilter === 'native';
+  const useClientsFilter = selectedConnectorFilter === 'connector_clients';
   const [useNonGAFilter, setUseNonGAFilter] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const filteredConnectors = useMemo(() => {
@@ -179,8 +183,8 @@ export const SelectConnector: React.FC = () => {
                 <EuiFacetGroup>
                   <EuiFacetButton
                     quantity={CONNECTORS.length}
-                    isSelected={!useNativeFilter}
-                    onClick={() => setUseNativeFilter(!useNativeFilter)}
+                    isSelected={!useNativeFilter && !useClientsFilter}
+                    onClick={() => setSelectedConnectorFilter(null)}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.allConnectorsLabel',
@@ -190,11 +194,23 @@ export const SelectConnector: React.FC = () => {
                   <EuiFacetButton
                     quantity={CONNECTORS.filter((connector) => connector.isNative).length}
                     isSelected={useNativeFilter}
-                    onClick={() => setUseNativeFilter(!useNativeFilter)}
+                    onClick={() => setSelectedConnectorFilter(!useNativeFilter ? 'native' : null)}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
                       { defaultMessage: 'Native connectors' }
+                    )}
+                  </EuiFacetButton>
+                  <EuiFacetButton
+                    quantity={CONNECTORS.length}
+                    isSelected={useClientsFilter}
+                    onClick={() =>
+                      setSelectedConnectorFilter(!useClientsFilter ? 'connector_clients' : null)
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.selectConnector.connectorClients',
+                      { defaultMessage: 'Connector clients' }
                     )}
                   </EuiFacetButton>
                 </EuiFacetGroup>
