@@ -341,9 +341,10 @@ ${JSON.stringify(
               fleetServer = await startFleetServer({
                 kbnClient,
                 logger: log,
-                port: config.has('servers.fleetserver.port')
-                  ? (config.get('servers.fleetserver.port') as number)
-                  : undefined,
+                port:
+                  fleetServerPort ?? config.has('servers.fleetserver.port')
+                    ? (config.get('servers.fleetserver.port') as number)
+                    : undefined,
                 // `force` is needed to ensure that any currently running fleet server (perhaps left
                 // over from an interrupted run) is killed and a new one restarted
                 force: true,
