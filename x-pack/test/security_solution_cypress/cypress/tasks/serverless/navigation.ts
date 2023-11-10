@@ -11,7 +11,7 @@ import {
   HOSTS_BREADCRUMB,
 } from '../../screens/serverless_security_breadcrumbs';
 
-export const navigateTo = (page: string) => {
+const navigateTo = (page: string) => {
   cy.get(page).click();
 };
 

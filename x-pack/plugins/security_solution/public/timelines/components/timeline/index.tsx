@@ -7,17 +7,21 @@
 
 import { pick } from 'lodash/fp';
 import { EuiProgress } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, createContext } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
-import { timelineSelectors } from '../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
+import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
 import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
@@ -25,6 +29,7 @@ import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
+import { sourcererSelectors } from '../../../common/store';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -56,17 +61,91 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   rowRenderers,
   timelineId,
 }) => {
+  const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { graphEventId, timelineType, description, sessionViewConfig } = useDeepEqualSelector(
-    (state) =>
-      pick(
-        ['graphEventId', 'timelineType', 'description', 'sessionViewConfig'],
-        getTimeline(state, timelineId) ?? timelineDefaults
-      )
+  const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
+  const {
+    selectedPatterns: selectedPatternsSourcerer,
+    selectedDataViewId: selectedDataViewIdSourcerer,
+  } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
+  const {
+    dataViewId: selectedDataViewIdTimeline,
+    indexNames: selectedPatternsTimeline,
+    graphEventId,
+    savedObjectId,
+    timelineType,
+    description,
+    sessionViewConfig,
+    initialized,
+  } = useDeepEqualSelector((state) =>
+    pick(
+      [
+        'indexNames',
+        'dataViewId',
+        'graphEventId',
+        'savedObjectId',
+        'timelineType',
+        'description',
+        'sessionViewConfig',
+        'initialized',
+      ],
+      getTimeline(state, timelineId) ?? timelineDefaults
+    )
   );
 
   const { timelineFullScreen } = useTimelineFullScreen();
+
+  useEffect(() => {
+    if (!savedObjectId && !initialized) {
+      dispatch(
+        timelineActions.createTimeline({
+          id: timelineId,
+          columns: defaultHeaders,
+          dataViewId: selectedDataViewIdSourcerer,
+          indexNames: selectedPatternsSourcerer,
+          expandedDetail: activeTimeline.getExpandedDetail(),
+          show: false,
+        })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSourcererChange = useCallback(() => {
+    if (
+      // timeline not initialized, so this must be initial state and not user change
+      !savedObjectId ||
+      selectedDataViewIdSourcerer == null ||
+      // initial state will get set on create
+      (selectedDataViewIdTimeline === null && selectedPatternsTimeline.length === 0) ||
+      // don't update if no change
+      (selectedDataViewIdTimeline === selectedDataViewIdSourcerer &&
+        selectedPatternsTimeline.sort().join() === selectedPatternsSourcerer.sort().join())
+    ) {
+      return;
+    }
+    dispatch(
+      timelineActions.updateDataView({
+        dataViewId: selectedDataViewIdSourcerer,
+        id: timelineId,
+        indexNames: selectedPatternsSourcerer,
+      })
+    );
+  }, [
+    dispatch,
+    savedObjectId,
+    selectedDataViewIdSourcerer,
+    selectedDataViewIdTimeline,
+    selectedPatternsSourcerer,
+    selectedPatternsTimeline,
+    timelineId,
+  ]);
+
+  useEffect(() => {
+    onSourcererChange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDataViewIdSourcerer, selectedPatternsSourcerer]);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(

@@ -304,7 +304,7 @@ export const closeOpenTimelineModal = () => {
 
 export const closeTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click();
-  cy.get(QUERY_TAB_BUTTON).should('not.exist');
+  cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
 };
 
 export const removeDataProvider = () => {
@@ -411,7 +411,6 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
 
 export const openActiveTimeline = () => {
   cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click();
-  cy.get(QUERY_TAB_BUTTON).should('exist');
 };
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {

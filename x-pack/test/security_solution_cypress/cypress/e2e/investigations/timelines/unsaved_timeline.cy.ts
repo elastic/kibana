@@ -55,156 +55,173 @@ describe('Save Timeline Prompts', { tags: ['@ess'] }, () => {
     createNewTimeline();
   });
 
-  describe('ESS', { tags: ['@ess'] }, () => {
-    it('unchanged & unsaved timeline should NOT prompt when user navigates away', () => {
-      openKibanaNavigation();
-      navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
-      cy.url().should('not.contain', hostsUrl('allHosts'));
-    });
+  it('unchanged & unsaved timeline should NOT prompt when user navigates away', () => {
+    openKibanaNavigation();
+    navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
+    cy.url().should('not.contain', hostsUrl('allHosts'));
+  });
 
-    it('Changed & unsaved timeline should prompt when user navigates away from security solution', () => {
-      populateTimeline();
-      closeTimelineUsingToggle();
-      openKibanaNavigation();
-      navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-      cy.get(MODAL_CONFIRMATION_BTN).click();
-    });
+  it('Changed & unsaved timeline should prompt when user navigates away from security solution', () => {
+    populateTimeline();
+    closeTimelineUsingToggle();
+    openKibanaNavigation();
+    navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+  });
 
-    it('Changed & unsaved timeline should NOT prompt when user navigates away within security solution where timelines are enabled', () => {
-      populateTimeline();
-      closeTimelineUsingToggle();
-      // navigate to any other page in security solution
-      openKibanaNavigation();
-      cy.get(CASES_PAGE).click();
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    });
+  it('Changed & unsaved timeline should NOT prompt when user navigates away within security solution where timelines are enabled', () => {
+    populateTimeline();
+    closeTimelineUsingToggle();
+    // navigate to any other page in security solution
+    openKibanaNavigation();
+    cy.get(CASES_PAGE).click();
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+  });
 
-    it('Changed & unsaved timeline should prompt when user navigates away within security solution where timelines are disabled eg. admin screen', () => {
-      populateTimeline();
-      openKibanaNavigation();
-      cy.get(MANAGE_PAGE).click();
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-      cy.get(MODAL_CONFIRMATION_BTN).click();
-    });
+  it('Changed & unsaved timeline should prompt when user navigates away within security solution where timelines are disabled eg. admin screen', () => {
+    populateTimeline();
+    openKibanaNavigation();
+    cy.get(MANAGE_PAGE).click();
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+  });
 
-    it('Changed & saved timeline should NOT prompt when user navigates away out of security solution', () => {
-      populateTimeline();
-      addNameToTimelineAndSave('Test');
-      closeTimelineUsingToggle();
-      openKibanaNavigation();
-      navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    });
+  it('Changed & saved timeline should NOT prompt when user navigates away out of security solution', () => {
+    populateTimeline();
+    addNameToTimelineAndSave('Test');
+    closeTimelineUsingToggle();
+    openKibanaNavigation();
+    navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+  });
 
-    it('Changed & saved timeline should NOT prompt when user navigates within security solution where timelines are disabled', () => {
-      populateTimeline();
-      addNameToTimelineAndSave('Test');
-      closeTimelineUsingToggle();
-      openKibanaNavigation();
-      cy.get(MANAGE_PAGE).click();
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    });
+  it('Changed & saved timeline should NOT prompt when user navigates within security solution where timelines are disabled', () => {
+    populateTimeline();
+    addNameToTimelineAndSave('Test');
+    closeTimelineUsingToggle();
+    openKibanaNavigation();
+    cy.get(MANAGE_PAGE).click();
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+  });
 
-    it('When user navigates to the page where timeline is present, Timeline save modal should not exists.', () => {
-      populateTimeline();
-      closeTimelineUsingToggle();
-      openKibanaNavigation();
-      cy.get(MANAGE_PAGE).click();
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-      cy.get(MODAL_CONFIRMATION_BTN).click();
+  it('When user navigates to the page where timeline is present, Timeline save modal should not exists.', () => {
+    populateTimeline();
+    closeTimelineUsingToggle();
+    openKibanaNavigation();
+    cy.get(MANAGE_PAGE).click();
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+    cy.get(MODAL_CONFIRMATION_BTN).click();
 
-      // Navigate back to HOSTS_URL and ensure that
-      // timeline save modal is NOT present
+    // Navigate back to HOSTS_URL and ensure that
+    // timeline save modal is NOT present
 
-      openKibanaNavigation();
-      cy.get(ALERTS_PAGE).click();
-      cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
-    });
+    openKibanaNavigation();
+    cy.get(ALERTS_PAGE).click();
+    cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
+  });
 
-    it('Changed and unsaved timeline should NOT prompt when user navigates from the page where timeline is disabled', () => {
-      populateTimeline();
-      closeTimelineUsingToggle();
-      openKibanaNavigation();
-      cy.get(MANAGE_PAGE).click();
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-      cy.get(MODAL_CONFIRMATION_BTN).click();
-      // now we have come from MANAGE_PAGE where timeline is disabled
-      // to outside app where timeline is not present.
-      // There should be NO confirmation model in that case.
-      openKibanaNavigation();
-      navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
-      // should not be manage page i.e. successfull navigation
-      cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
-      cy.url().should('not.contain', MANAGE_URL);
+  it('Changed and unsaved timeline should NOT prompt when user navigates from the page where timeline is disabled', () => {
+    populateTimeline();
+    closeTimelineUsingToggle();
+    openKibanaNavigation();
+    cy.get(MANAGE_PAGE).click();
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+    // now we have come from MANAGE_PAGE where timeline is disabled
+    // to outside app where timeline is not present.
+    // There should be NO confirmation model in that case.
+    openKibanaNavigation();
+    navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
+    // should not be manage page i.e. successfull navigation
+    cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
+    cy.url().should('not.contain', MANAGE_URL);
+  });
+});
+
+// In serverless it is not possible to use the navigation menu without closing the timeline
+describe('Save Timeline Prompts', { tags: ['@serverless'] }, () => {
+  before(() => {
+    login();
+    /*
+     * When timeline changes are pending, chrome would popup with
+     * a confirm dialog stating that `you can lose unsaved changed.
+     * Below changes will disable that.
+     *
+     * */
+    cy.window().then((win) => {
+      win.onbeforeunload = null;
     });
   });
 
-  // In serverless it is not possible to use the navigation without closing the timeline
-  describe('Serverless', { tags: ['@serverless'] }, () => {
-    it('unchanged & unsaved timeline should NOT prompt when it is closed and navigate to any page', () => {
-      closeTimelineUsingToggle();
+  beforeEach(() => {
+    login();
+    visitWithTimeRange(hostsUrl('allHosts'));
+    createNewTimeline();
+  });
 
-      navigateToAlertsPageInServerless(); // security page with timelines enabled
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-      navigateToExplorePageInServerless(); // security page with timelines disabled
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-      navigateToDiscoverPageInServerless(); // external page
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    });
+  it('unchanged & unsaved timeline should NOT prompt when it is closed and navigate to any page', () => {
+    closeTimelineUsingToggle();
 
-    it('Changed & unsaved timeline should prompt when it is closed and navigate to Security page without timeline', () => {
-      populateTimeline();
-      closeTimelineUsingToggle();
+    navigateToAlertsPageInServerless(); // security page with timelines enabled
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+    navigateToExplorePageInServerless(); // security page with timelines disabled
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+    navigateToDiscoverPageInServerless(); // external page
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+  });
 
-      navigateToAlertsPageInServerless(); // security page with timelines enabled
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-      navigateToExplorePageInServerless(); // security page with timelines disabled
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-      cy.get(MODAL_CONFIRMATION_BTN).click();
-    });
+  it('Changed & unsaved timeline should prompt when it is closed and navigate to Security page without timeline', () => {
+    populateTimeline();
+    closeTimelineUsingToggle();
 
-    it('Changed & unsaved timeline should prompt when it is closed and navigate to external page', () => {
-      populateTimeline();
-      closeTimelineUsingToggle();
+    navigateToAlertsPageInServerless(); // security page with timelines enabled
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+    navigateToExplorePageInServerless(); // security page with timelines disabled
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+  });
 
-      navigateToDiscoverPageInServerless();
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-      cy.get(MODAL_CONFIRMATION_BTN).click();
-    });
+  it('Changed & unsaved timeline should prompt when it is closed and navigate to external page', () => {
+    populateTimeline();
+    closeTimelineUsingToggle();
 
-    it('Changed & saved timeline should NOT prompt when it is closed', () => {
-      populateTimeline();
-      addNameToTimelineAndSave('Test');
-      closeTimelineUsingToggle();
+    navigateToDiscoverPageInServerless();
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+  });
 
-      navigateToAlertsPageInServerless(); // security page with timelines enabled
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-      navigateToExplorePageInServerless(); // security page with timelines disabled
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-      navigateToDiscoverPageInServerless(); // external page
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    });
+  it('Changed & saved timeline should NOT prompt when it is closed', () => {
+    populateTimeline();
+    addNameToTimelineAndSave('Test');
+    closeTimelineUsingToggle();
 
-    it('Changed & unsaved timeline should NOT prompt when navigate to page with timeline using breadcrumbs', () => {
-      populateTimeline();
-      navigateToHostsUsingBreadcrumb(); // hosts has timelines enabled
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    });
+    navigateToAlertsPageInServerless(); // security page with timelines enabled
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+    navigateToExplorePageInServerless(); // security page with timelines disabled
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+    navigateToDiscoverPageInServerless(); // external page
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+  });
 
-    it('Changed & unsaved timeline should NOT prompt when navigate to page without timeline using breadcrumbs', () => {
-      populateTimeline();
-      navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
-      cy.get(MODAL_CONFIRMATION_BTN).click();
-      cy.url().should('contain', EXPLORE_URL);
-    });
+  it('Changed & unsaved timeline should NOT prompt when navigate to page with timeline using breadcrumbs', () => {
+    populateTimeline();
+    navigateToHostsUsingBreadcrumb(); // hosts has timelines enabled
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
+  });
 
-    it('Changed & saved timeline should NOT prompt when user navigates within security solution where timelines are disabled', () => {
-      populateTimeline();
-      addNameToTimelineAndSave('Test');
-      navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
-      cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    });
+  it('Changed & unsaved timeline should NOT prompt when navigate to page without timeline using breadcrumbs', () => {
+    populateTimeline();
+    navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
+    cy.get(MODAL_CONFIRMATION_BTN).click();
+    cy.url().should('contain', EXPLORE_URL);
+  });
+
+  it('Changed & saved timeline should NOT prompt when user navigates within security solution where timelines are disabled', () => {
+    populateTimeline();
+    addNameToTimelineAndSave('Test');
+    navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
+    cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 });

@@ -4,7 +4,11 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   <div
     data-eui="EuiFocusTrap"
-  />
+  >
+    <div
+      data-test-subj="flyout-pane"
+    />
+  </div>
   .c2 {
   display: block;
 }
