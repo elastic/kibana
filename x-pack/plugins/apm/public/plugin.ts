@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { BehaviorSubject, from } from 'rxjs';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
@@ -18,6 +18,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
+  AppUpdater,
 } from '@kbn/core/public';
 import type {
   DataPublicPluginSetup,
@@ -70,8 +71,8 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
@@ -187,6 +188,8 @@ const apmTutorialTitle = i18n.translate(
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => undefined);
+
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
@@ -343,16 +346,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Register APM telemetry based events
     const telemetry = this.telemetry.start();
 
-    core.application.register({
-      id: 'apm',
-      title: 'APM',
-      order: 8300,
-      euiIconType: 'logoObservability',
-      appRoute: '/app/apm',
-      icon: 'plugins/apm/public/icon.svg',
-      category: DEFAULT_APP_CATEGORIES.observability,
-      navLinkStatus: AppNavLinkStatus.visible,
-      deepLinks: [
+    const getDeepLinks = (chromeStyle: ChromeStyle = 'classic') => {
+      const navLinkStatus =
+        chromeStyle === 'project' || config.serverless.enabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.default;
+
+      return [
         {
           id: 'service-groups-list',
           title: serviceGroupsTitle,
@@ -362,29 +362,20 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'services',
           title: servicesTitle,
           path: '/services',
-          navLinkStatus: AppNavLinkStatus.visible,
-          // navLinkStatus: config.serverless.enabled
-          //   ? AppNavLinkStatus.visible
-          //   : AppNavLinkStatus.default,
+          navLinkStatus,
         },
         {
           id: 'traces',
           title: tracesTitle,
           path: '/traces',
-          navLinkStatus: AppNavLinkStatus.visible,
-          // navLinkStatus: config.serverless.enabled
-          //   ? AppNavLinkStatus.visible
-          //   : AppNavLinkStatus.default,
+          navLinkStatus,
         },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
-          navLinkStatus: AppNavLinkStatus.visible,
-          // navLinkStatus: config.serverless.enabled
-          //   ? AppNavLinkStatus.visible
-          //   : AppNavLinkStatus.default,
+          navLinkStatus,
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
         {
@@ -394,7 +385,20 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           searchable: featureFlags.storageExplorerAvailable,
         },
         { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
-      ],
+      ];
+    };
+
+    core.application.register({
+      id: 'apm',
+      title: 'APM',
+      order: 8300,
+      euiIconType: 'logoObservability',
+      appRoute: '/app/apm',
+      icon: 'plugins/apm/public/icon.svg',
+      category: DEFAULT_APP_CATEGORIES.observability,
+      navLinkStatus: AppNavLinkStatus.visible,
+      updater$: this.appStateUpdater,
+      deepLinks: getDeepLinks(),
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
@@ -415,6 +419,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         });
       },
     });
+
+    from(core.getStartServices())
+      .pipe(mergeMap(([{ chrome }]) => chrome.getChromeStyle$()))
+      .subscribe((chromeStyle) => {
+        this.appStateUpdater.next(() => ({
+          deepLinks: getDeepLinks(chromeStyle),
+        }));
+      });
 
     registerApmRuleTypes(observabilityRuleTypeRegistry);
 
