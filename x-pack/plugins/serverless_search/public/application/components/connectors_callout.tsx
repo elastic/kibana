@@ -53,19 +53,21 @@ export const ConnectorsCallout = () => {
           defaultMessage="Sync a range of popular third-party data sources to Elasticsearch, by deploying open code Elastic connectors on your own infrastructure."
         />
       </p>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            fill
-            data-test-subj="connectors-callout-cta"
-            onClick={() => createConnector()}
-            isLoading={isLoading}
-          >
-            {i18n.translate('xpack.serverlessSearch.selectClient.connectorsCallout.cta', {
-              defaultMessage: 'Create a connector',
-            })}
-          </EuiButton>
+          <p>
+            <EuiButton
+              color="primary"
+              fill
+              data-test-subj="connectors-callout-cta"
+              onClick={() => createConnector()}
+              isLoading={isLoading}
+            >
+              {i18n.translate('xpack.serverlessSearch.selectClient.connectorsCallout.cta', {
+                defaultMessage: 'Create a connector',
+              })}
+            </EuiButton>
+          </p>
         </EuiFlexItem>
         <EuiFlexItem />
         {showConnectors &&
@@ -83,12 +85,14 @@ export const ConnectorsCallout = () => {
           ))}
         {showConnectors && (
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="s">
-              <FormattedMessage
-                id="xpack.serverlessSearch.selectClient.connectorsCallout.etc"
-                defaultMessage="and more"
-              />
-            </EuiText>
+            <p>
+              <EuiText color="subdued" size="s">
+                <FormattedMessage
+                  id="xpack.serverlessSearch.selectClient.connectorsCallout.etc"
+                  defaultMessage="and more"
+                />
+              </EuiText>
+            </p>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
