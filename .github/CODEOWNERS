@@ -446,7 +446,7 @@ x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-managemen
 x-pack/plugins/index_management @elastic/platform-deployment-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
-x-pack/plugins/infra @elastic/infra-monitoring-ui
+x-pack/plugins/infra @elastic/infra-monitoring-ui @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
@@ -927,18 +927,11 @@ packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 
 ### Observability Plugins
 
-# Actionable observability
-x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
-x-pack/test/observability_functional @elastic/obs-ux-management-team
-x-pack/plugins/infra/public/alerting @elastic/obs-ux-management-team
-x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
-
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
 /.github/workflows/oblt-github-commands @elastic/observablt-robots
 
 # Infra Monitoring
-/x-pack/plugins/infra @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/plugins/infra/server/routes @elastic/obs-ux-infra_services-team
 /x-pack/plugins/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
 /x-pack/plugins/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
@@ -995,6 +988,12 @@ x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 /x-pack/plugins/infra/public/services @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
+
+# Actionable observability
+x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
+x-pack/test/observability_functional @elastic/obs-ux-management-team
+x-pack/plugins/infra/public/alerting @elastic/obs-ux-management-team
+x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
 /x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team
@@ -1300,6 +1299,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_details @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules @elastic/security-detection-rule-management
 
 /x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
@@ -1419,6 +1419,7 @@ x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-an
 ## Security Solution sub teams - security-engineering-productivity
 /x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
+/x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @oatkiller @maximpn @banderror
 
@@ -1437,9 +1438,9 @@ x-pack/plugins/security_solution/public/entity_analytics @elastic/security-entit
 x-pack/plugins/security_solution/public/explore/components/risk_score @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/overview/pages/entity_analytics.tsx @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/overview/components/entity_analytics
-x-pack/plugins/security_solution/server/lib/risk_engine @elastic/security-entity-analytics
+x-pack/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
-x-pack/test/detection_engine_api_integration/security_and_spaces/group10/risk_engine @elastic/security-entity-analytics
+x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
