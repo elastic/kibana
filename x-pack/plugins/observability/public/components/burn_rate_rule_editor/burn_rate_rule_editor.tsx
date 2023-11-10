@@ -118,21 +118,14 @@ export function BurnRateRuleEditor(props: Props) {
         </>
       )}
       <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h5>
-          {i18n.translate('xpack.observability.burnRateRuleEditor.h5.defineMultipleBurnRateLabel', {
-            defaultMessage: 'Define multiple burn rate windows',
-          })}
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <Windows
-        slo={selectedSlo}
-        windows={windowDefs}
-        onChange={setWindowDefs}
-        errors={errors.windows}
-      />
-      <EuiSpacer size="m" />
+      {selectedSlo && (
+        <Windows
+          slo={selectedSlo}
+          windows={windowDefs}
+          onChange={setWindowDefs}
+          errors={errors.windows}
+        />
+      )}
     </>
   );
 }

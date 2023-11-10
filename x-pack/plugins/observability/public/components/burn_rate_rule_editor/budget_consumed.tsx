@@ -12,33 +12,42 @@ import numeral from '@elastic/numeral';
 
 interface Props {
   initialBurnRate?: number;
-  maxBurnRate: number;
   errors?: string[];
   onChange: (burnRate: number) => void;
+  longWindowInHours: number;
+  timeWindowInHours: number;
 }
 
-export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }: Props) {
-  const [burnRate, setBurnRate] = useState<number>(initialBurnRate);
+export function BudgetConsumed({
+  onChange,
+  initialBurnRate = 1,
+  longWindowInHours,
+  timeWindowInHours,
+  errors,
+}: Props) {
+  const [budgetConsumed, setBudgetConsumed] = useState<number>(
+    ((initialBurnRate * longWindowInHours) / timeWindowInHours) * 100
+  );
   const hasError = errors !== undefined && errors.length > 0;
 
   const onBurnRateChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
-    setBurnRate(value);
-    onChange(value);
+    setBudgetConsumed(value);
+    const burnRate = timeWindowInHours * (value / 100 / longWindowInHours);
+    onChange(burnRate);
   };
 
   return (
     <EuiFormRow
       label={
         <>
-          {i18n.translate('xpack.observability.slo.rules.burnRate.rowLabel', {
-            defaultMessage: 'Burn rate threshold',
+          {i18n.translate('xpack.observability.slo.rules.budgetConsumed.rowLabel', {
+            defaultMessage: '% Budget consumed',
           })}{' '}
           <EuiIconTip
             position="top"
-            content={i18n.translate('xpack.observability.slo.rules.burnRate.tooltip', {
-              defaultMessage:
-                'The burn rate is how fast the service consumes the error budget over the lookback period.',
+            content={i18n.translate('xpack.observability.slo.rules.budgetConsumed.tooltip', {
+              defaultMessage: 'How much budget is consumed before the first alert is fired.',
             })}
           />
         </>
@@ -50,8 +59,8 @@ export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }:
         fullWidth
         step={0.01}
         min={0.01}
-        max={maxBurnRate}
-        value={numeral(burnRate).format('0[.0]')}
+        max={100}
+        value={numeral(budgetConsumed).format('0[.0]')}
         onChange={(event) => onBurnRateChange(event)}
         data-test-subj="burnRate"
       />
