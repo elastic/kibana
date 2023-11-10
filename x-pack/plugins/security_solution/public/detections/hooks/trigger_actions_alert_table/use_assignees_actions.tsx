@@ -6,6 +6,7 @@
  */
 
 import { union } from 'lodash';
+import { useCallback, useMemo } from 'react';
 
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
@@ -13,12 +14,14 @@ import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { useSetAlertAssignees } from '../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import * as i18n from '../translations';
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 export interface UseAssigneesActionItemsProps {
   refetch?: () => void;
 }
 
 export const useAssigneesActionItems = ({ refetch }: UseAssigneesActionItemsProps) => {
+  const { hasIndexWrite } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
 
   const { alertAssigneesItems: basicAssigneesItems, alertAssigneesPanels } =
@@ -26,43 +29,47 @@ export const useAssigneesActionItems = ({ refetch }: UseAssigneesActionItemsProp
       refetch,
     });
 
-  const onActionClick: BulkActionsConfig['onClick'] = async (
-    items,
-    isSelectAllChecked,
-    setAlertLoading,
-    clearSelection,
-    refresh
-  ) => {
-    const ids: string[] | undefined = items.map((item) => item._id);
-    const assignedUserIds = union(
-      ...items.map(
-        (item) => item.data.find((data) => data.field === ALERT_WORKFLOW_ASSIGNEE_IDS)?.value ?? []
-      )
-    );
-    if (!assignedUserIds.length) {
-      return;
-    }
-    const assignees = {
-      assignees_to_add: [],
-      assignees_to_remove: assignedUserIds,
-    };
-    if (setAlertAssignees) {
-      await setAlertAssignees(assignees, ids, refresh, setAlertLoading);
-    }
-  };
+  const onActionClick = useCallback<Required<BulkActionsConfig>['onClick']>(
+    async (items, isSelectAllChecked, setAlertLoading, clearSelection, refresh) => {
+      const ids: string[] | undefined = items.map((item) => item._id);
+      const assignedUserIds = union(
+        ...items.map(
+          (item) =>
+            item.data.find((data) => data.field === ALERT_WORKFLOW_ASSIGNEE_IDS)?.value ?? []
+        )
+      );
+      if (!assignedUserIds.length) {
+        return;
+      }
+      const assignees = {
+        assignees_to_add: [],
+        assignees_to_remove: assignedUserIds,
+      };
+      if (setAlertAssignees) {
+        await setAlertAssignees(assignees, ids, refresh, setAlertLoading);
+      }
+    },
+    [setAlertAssignees]
+  );
 
-  const alertAssigneesItems = [
-    ...basicAssigneesItems,
-    ...[
-      {
-        label: i18n.BULK_REMOVE_ASSIGNEES_CONTEXT_MENU_TITLE,
-        key: 'bulk-alert-assignees-remove-all-action',
-        'data-test-subj': 'bulk-alert-assignees-remove-all-action',
-        disableOnQuery: false,
-        onClick: onActionClick,
-      },
-    ],
-  ];
+  const alertAssigneesItems = useMemo(
+    () =>
+      hasIndexWrite
+        ? [
+            ...basicAssigneesItems,
+            ...[
+              {
+                label: i18n.BULK_REMOVE_ASSIGNEES_CONTEXT_MENU_TITLE,
+                key: 'bulk-alert-assignees-remove-all-action',
+                'data-test-subj': 'bulk-alert-assignees-remove-all-action',
+                disableOnQuery: false,
+                onClick: onActionClick,
+              },
+            ],
+          ]
+        : [],
+    [basicAssigneesItems, hasIndexWrite, onActionClick]
+  );
 
   return {
     alertAssigneesItems,

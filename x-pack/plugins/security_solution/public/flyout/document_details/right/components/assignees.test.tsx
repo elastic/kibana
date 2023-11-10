@@ -23,11 +23,13 @@ import {
   USERS_AVATARS_PANEL_TEST_ID,
   USER_AVATAR_ITEM_TEST_ID,
 } from '../../../../common/components/user_profiles/test_ids';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../../../common/components/user_profiles/use_get_current_user');
 jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'user1', full_name: 'User 1' }, data: {} },
@@ -69,6 +71,7 @@ describe('<Assignees />', () => {
       isLoading: false,
       data: mockUserProfiles,
     });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
 
     setAlertAssigneesMock = jest.fn().mockReturnValue(Promise.resolve());
     (useSetAlertAssignees as jest.Mock).mockReturnValue(setAlertAssigneesMock);
@@ -80,6 +83,7 @@ describe('<Assignees />', () => {
     expect(getByTestId(ASSIGNEES_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(USERS_AVATARS_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeDisabled();
   });
 
   it('should render assignees avatars', () => {
@@ -132,5 +136,15 @@ describe('<Assignees />', () => {
       expect.anything(),
       expect.anything()
     );
+  });
+
+  it('should render add assignees button as disabled if user has readonly priviliges', () => {
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+
+    const assignees = ['user-id-1', 'user-id-2'];
+    const { getByTestId } = renderAssignees('test-event', assignees);
+
+    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
   });
 });

@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
 import type { RenderContentPanelProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import React, { useCallback, useMemo } from 'react';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ASSIGNEES_PANEL_WIDTH } from '../../assignees/constants';
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
 import * as i18n from './translations';
@@ -26,6 +27,7 @@ export interface UseBulkAlertAssigneesPanel {
 }
 
 export const useBulkAlertAssigneesItems = ({ refetch }: UseBulkAlertAssigneesItemsProps) => {
+  const { hasIndexWrite } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
   const handleOnAlertAssigneesSubmit = useCallback(
     async (assignees, ids, onSuccess, setIsLoading) => {
@@ -36,16 +38,22 @@ export const useBulkAlertAssigneesItems = ({ refetch }: UseBulkAlertAssigneesIte
     [setAlertAssignees]
   );
 
-  const alertAssigneesItems = [
-    {
-      key: 'manage-alert-assignees',
-      'data-test-subj': 'alert-assignees-context-menu-item',
-      name: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
-      panel: 2,
-      label: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
-      disableOnQuery: true,
-    },
-  ];
+  const alertAssigneesItems = useMemo(
+    () =>
+      hasIndexWrite
+        ? [
+            {
+              key: 'manage-alert-assignees',
+              'data-test-subj': 'alert-assignees-context-menu-item',
+              name: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+              panel: 2,
+              label: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+              disableOnQuery: true,
+            },
+          ]
+        : [],
+    [hasIndexWrite]
+  );
 
   const TitleContent = useMemo(
     () => (
@@ -84,16 +92,19 @@ export const useBulkAlertAssigneesItems = ({ refetch }: UseBulkAlertAssigneesIte
   );
 
   const alertAssigneesPanels: UseBulkAlertAssigneesPanel[] = useMemo(
-    () => [
-      {
-        id: 2,
-        title: TitleContent,
-        'data-test-subj': 'alert-assignees-context-menu-panel',
-        renderContent,
-        width: ASSIGNEES_PANEL_WIDTH,
-      },
-    ],
-    [TitleContent, renderContent]
+    () =>
+      hasIndexWrite
+        ? [
+            {
+              id: 2,
+              title: TitleContent,
+              'data-test-subj': 'alert-assignees-context-menu-panel',
+              renderContent,
+              width: ASSIGNEES_PANEL_WIDTH,
+            },
+          ]
+        : [],
+    [TitleContent, hasIndexWrite, renderContent]
   );
 
   return {

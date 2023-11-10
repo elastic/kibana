@@ -16,11 +16,13 @@ import { useBulkGetUserProfiles } from '../../../common/components/user_profiles
 import { useSuggestUsers } from '../../../common/components/user_profiles/use_suggest_users';
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { TimelineItem } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/bulk_actions/components/toolbar';
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
 jest.mock('../../../common/components/user_profiles/use_get_current_user');
 jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../common/components/user_profiles/use_suggest_users');
+jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
@@ -46,6 +48,7 @@ describe('useAssigneesActionItems', () => {
       isLoading: false,
       data: mockUserProfiles,
     });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
   });
 
   afterEach(() => {
@@ -109,5 +112,16 @@ describe('useAssigneesActionItems', () => {
       refreshMock,
       setAlertLoadingMock
     );
+  });
+
+  it('should return 0 items for the VIEWER role', () => {
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+
+    const { result } = renderHook(() => useAssigneesActionItems(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.alertAssigneesItems.length).toEqual(0);
+    expect(result.current.alertAssigneesPanels.length).toEqual(0);
   });
 });

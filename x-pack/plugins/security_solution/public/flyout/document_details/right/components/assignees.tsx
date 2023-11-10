@@ -13,6 +13,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { removeNoAssigneesSelection } from '../../../../common/components/assignees/utils';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
@@ -21,24 +22,27 @@ import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/u
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_TITLE_TEST_ID } from './test_ids';
 
-const UpdateAssigneesButton: FC<{ togglePopover: () => void }> = memo(({ togglePopover }) => (
-  <EuiToolTip
-    position="left"
-    content={i18n.translate(
-      'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
-      {
-        defaultMessage: 'Assignees',
-      }
-    )}
-  >
-    <EuiButtonIcon
-      aria-label="Update assignees"
-      data-test-subj={ASSIGNEES_ADD_BUTTON_TEST_ID}
-      iconType={'plusInCircle'}
-      onClick={togglePopover}
-    />
-  </EuiToolTip>
-));
+const UpdateAssigneesButton: FC<{ togglePopover: () => void; isDisabled: boolean }> = memo(
+  ({ togglePopover, isDisabled }) => (
+    <EuiToolTip
+      position="bottom"
+      content={i18n.translate(
+        'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
+        {
+          defaultMessage: 'Assignees',
+        }
+      )}
+    >
+      <EuiButtonIcon
+        aria-label="Update assignees"
+        data-test-subj={ASSIGNEES_ADD_BUTTON_TEST_ID}
+        iconType={'plusInCircle'}
+        onClick={togglePopover}
+        isDisabled={isDisabled}
+      />
+    </EuiToolTip>
+  )
+);
 UpdateAssigneesButton.displayName = 'UpdateAssigneesButton';
 
 export interface AssigneesProps {
@@ -63,6 +67,7 @@ export interface AssigneesProps {
  */
 export const Assignees: FC<AssigneesProps> = memo(
   ({ eventId, assignedUserIds, onAssigneesUpdated }) => {
+    const { hasIndexWrite } = useAlertsPrivileges();
     const setAlertAssignees = useSetAlertAssignees();
 
     const uids = useMemo(() => new Set(assignedUserIds), [assignedUserIds]);
@@ -117,7 +122,9 @@ export const Assignees: FC<AssigneesProps> = memo(
         <EuiFlexItem grow={false}>
           <AssigneesPopover
             assignedUserIds={assignedUserIds}
-            button={<UpdateAssigneesButton togglePopover={togglePopover} />}
+            button={
+              <UpdateAssigneesButton togglePopover={togglePopover} isDisabled={!hasIndexWrite} />
+            }
             isPopoverOpen={isPopoverOpen}
             closePopover={togglePopover}
             onAssigneesApply={onAssigneesApply}

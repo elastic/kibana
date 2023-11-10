@@ -19,11 +19,13 @@ import { useGetCurrentUser } from '../../user_profiles/use_get_current_user';
 import { useBulkGetUserProfiles } from '../../user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('./use_set_alert_assignees');
 jest.mock('../../user_profiles/use_get_current_user');
 jest.mock('../../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../user_profiles/use_suggest_users');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
@@ -66,6 +68,7 @@ describe('useBulkAlertAssigneesItems', () => {
       isLoading: false,
       data: mockUserProfiles,
     });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
   });
 
   afterEach(() => {
@@ -116,5 +119,15 @@ describe('useBulkAlertAssigneesItems', () => {
       fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
     });
     expect(mockSetAlertAssignees).toHaveBeenCalled();
+  });
+
+  it('should return 0 items for the VIEWER role', () => {
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+
+    const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
+      wrapper: TestProviders,
+    });
+    expect(result.current.alertAssigneesItems.length).toEqual(0);
+    expect(result.current.alertAssigneesPanels.length).toEqual(0);
   });
 });
