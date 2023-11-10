@@ -6,26 +6,40 @@
  */
 
 import {
+  DefaultItemAction,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { rulesLocatorID, sloFeatureId } from '../../../../../common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
 import { paths } from '../../../../../common/locators/paths';
+import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
+import { sloKeys } from '../../../../hooks/slo/query_key_factory';
+import { useCapabilities } from '../../../../hooks/slo/use_capabilities';
+import { useCloneSlo } from '../../../../hooks/slo/use_clone_slo';
+import { useDeleteSlo } from '../../../../hooks/slo/use_delete_slo';
 import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/slo/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
+import { RulesParams } from '../../../../locators/rules';
 import { useKibana } from '../../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
+import {
+  transformCreateSLOFormToCreateSLOInput,
+  transformSloResponseToCreateSloForm,
+} from '../../../slo_edit/helpers/process_slo_form_values';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
@@ -38,14 +52,44 @@ export interface Props {
 
 export function SloListTableView({ sloList, loading, error }: Props) {
   const {
+    application: { navigateToUrl },
     http: { basePath },
     uiSettings,
+    share: {
+      url: { locators },
+    },
+    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
-  const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const sloIdsAndInstanceIds = sloList.map(
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );
+
+  const { hasWriteCapabilities, hasReadCapabilities } = useCapabilities();
+  const filteredRuleTypes = useGetFilteredRuleTypes();
+
+  const queryClient = useQueryClient();
+  const { mutate: cloneSlo } = useCloneSlo();
+  const { mutate: deleteSlo } = useDeleteSlo();
+
+  const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
+  const [sloToDelete, setSloToDelete] = useState<SLOWithSummaryResponse | undefined>(undefined);
+
+  const handleDeleteConfirm = () => {
+    if (sloToDelete) {
+      deleteSlo({ id: sloToDelete.id, name: sloToDelete.name });
+    }
+    setSloToDelete(undefined);
+  };
+
+  const handleDeleteCancel = () => {
+    setSloToDelete(undefined);
+  };
+
+  const handleSavedRule = async () => {
+    queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
+  };
 
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
   const { data: rulesBySlo } = useFetchRulesForSlo({
@@ -56,25 +100,106 @@ export function SloListTableView({ sloList, loading, error }: Props) {
       list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
     });
 
-  if (!loading && !error && sloList.length === 0) {
-    return <SloListEmpty />;
-  }
+  const actions: Array<DefaultItemAction<SLOWithSummaryResponse>> = [
+    {
+      type: 'icon',
+      icon: 'inspect',
+      name: i18n.translate('xpack.observability.slo.item.actions.details', {
+        defaultMessage: 'Details',
+      }),
+      description: i18n.translate('xpack.observability.slo.item.actions.details', {
+        defaultMessage: 'Details',
+      }),
+      isPrimary: true,
+      onClick: (slo: SLOWithSummaryResponse) => {
+        const sloDetailsUrl = basePath.prepend(
+          paths.observability.sloDetails(
+            slo.id,
+            slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
+          )
+        );
+        navigateToUrl(sloDetailsUrl);
+      },
+    },
+    {
+      type: 'icon',
+      icon: 'pencil',
+      name: i18n.translate('xpack.observability.slo.item.actions.edit', {
+        defaultMessage: 'Edit',
+      }),
+      description: i18n.translate('xpack.observability.slo.item.actions.edit', {
+        defaultMessage: 'Edit',
+      }),
+      enabled: (_) => hasWriteCapabilities,
+      onClick: (slo: SLOWithSummaryResponse) => {
+        navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+      },
+    },
+    {
+      type: 'icon',
+      icon: 'bell',
+      name: i18n.translate('xpack.observability.slo.item.actions.createRule', {
+        defaultMessage: 'Create new alert rule',
+      }),
+      description: i18n.translate('xpack.observability.slo.item.actions.createRule', {
+        defaultMessage: 'Create new alert rule',
+      }),
+      enabled: (_) => hasWriteCapabilities,
+      onClick: (slo: SLOWithSummaryResponse) => {
+        setSloToAddRule(slo);
+      },
+    },
+    {
+      type: 'icon',
+      icon: 'gear',
+      name: i18n.translate('xpack.observability.slo.item.actions.manageRules', {
+        defaultMessage: 'Manage rules',
+      }),
+      description: i18n.translate('xpack.observability.slo.item.actions.manageRules', {
+        defaultMessage: 'Manage rules',
+      }),
+      enabled: (_) => hasWriteCapabilities,
+      onClick: (slo: SLOWithSummaryResponse) => {
+        const locator = locators.get<RulesParams>(rulesLocatorID);
+        locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
+      },
+    },
+    {
+      type: 'icon',
+      icon: 'copy',
+      name: i18n.translate('xpack.observability.slo.item.actions.clone', {
+        defaultMessage: 'Clone',
+      }),
+      description: i18n.translate('xpack.observability.slo.item.actions.clone', {
+        defaultMessage: 'Clone',
+      }),
+      enabled: (_) => hasWriteCapabilities,
+      onClick: (slo: SLOWithSummaryResponse) => {
+        const newSlo = transformCreateSLOFormToCreateSLOInput(
+          transformSloResponseToCreateSloForm({ ...slo, name: `[Copy] ${slo.name}` })!
+        );
 
-  if (!loading && error) {
-    return <SloListError />;
-  }
-
-  const getRowProps = (slo: SLOWithSummaryResponse) => {
-    const { id, instanceId } = slo;
-    return {
-      'data-test-subj': `row-${id}-${instanceId}`,
-    };
-  };
+        cloneSlo({ slo: newSlo, originalSloId: slo.id });
+      },
+    },
+    {
+      type: 'icon',
+      icon: 'trash',
+      name: i18n.translate('xpack.observability.slo.item.actions.delete', {
+        defaultMessage: 'Delete',
+      }),
+      description: i18n.translate('xpack.observability.slo.item.actions.delete', {
+        defaultMessage: 'Delete',
+      }),
+      enabled: (_) => hasWriteCapabilities,
+      onClick: (slo: SLOWithSummaryResponse) => setSloToDelete(slo),
+    },
+  ];
 
   const columns: Array<EuiBasicTableColumn<SLOWithSummaryResponse>> = [
     {
       field: 'name',
-      name: 'SLO Name',
+      name: 'SLO name',
       render: (_, slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
           paths.observability.sloDetails(
@@ -136,7 +261,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     },
     {
       field: 'sli',
-      name: 'SLI Value',
+      name: 'SLI value',
       render: (_, slo: SLOWithSummaryResponse) => {
         const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
         const historicalSliData = formatHistoricalData(
@@ -153,7 +278,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
             responsive={false}
             gutterSize="s"
             alignItems="center"
-            justifyContent="flexEnd"
+            justifyContent="flexStart"
           >
             <EuiFlexItem grow={false}>
               {numeral(slo.summary.sliValue).format(percentFormat)}
@@ -173,8 +298,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     },
     {
       field: 'errorBudgetRemaining',
-      name: 'Error Budget Remaining',
-
+      name: 'Error budget remaining',
       render: (_, slo: SLOWithSummaryResponse) => {
         const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
         const errorBudgetBurnDownData = formatHistoricalData(
@@ -191,7 +315,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
             responsive={false}
             gutterSize="s"
             alignItems="center"
-            justifyContent="flexEnd"
+            justifyContent="flexStart"
           >
             <EuiFlexItem grow={false}>
               {numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
@@ -209,26 +333,47 @@ export function SloListTableView({ sloList, loading, error }: Props) {
         );
       },
     },
+    {
+      name: 'Actions',
+      actions,
+    },
   ];
 
-  const getCellProps = (
-    slo: SLOWithSummaryResponse,
-    column: EuiTableFieldDataColumnType<SLOWithSummaryResponse>
-  ) => {
-    const { id, instanceId } = slo;
-    const { field } = column;
-    return {
-      'data-test-subj': `cell-${id}-${instanceId}-${String(field)}`,
-      textOnly: true,
-    };
-  };
+  if (!loading && !error && sloList.length === 0) {
+    return <SloListEmpty />;
+  }
+
+  if (!loading && error) {
+    return <SloListError />;
+  }
 
   return (
-    <EuiBasicTable<SLOWithSummaryResponse>
-      items={sloList}
-      columns={columns}
-      rowProps={getRowProps}
-      cellProps={getCellProps}
-    />
+    <>
+      <EuiBasicTable<SLOWithSummaryResponse> items={sloList} columns={columns} />
+      {sloToAddRule ? (
+        <AddRuleFlyout
+          consumer={sloFeatureId}
+          filteredRuleTypes={filteredRuleTypes}
+          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
+          initialValues={{
+            name: `${sloToAddRule.name} Burn Rate rule`,
+            params: { sloId: sloToAddRule.id },
+          }}
+          onSave={handleSavedRule}
+          onClose={() => {
+            setSloToAddRule(undefined);
+          }}
+          useRuleProducer
+        />
+      ) : null}
+
+      {sloToDelete ? (
+        <SloDeleteConfirmationModal
+          slo={sloToDelete}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+        />
+      ) : null}
+    </>
   );
 }
