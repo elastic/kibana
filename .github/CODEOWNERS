@@ -314,6 +314,7 @@ src/plugins/data_view_field_editor @elastic/kibana-data-discovery
 src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
+x-pack/plugins/dataset_quality @elastic/obs-ux-logs-team
 packages/kbn-datemath @elastic/kibana-data-discovery
 packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/devtools @elastic/platform-deployment-management
@@ -481,7 +482,6 @@ packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 x-pack/plugins/lists @elastic/security-detection-engine
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
-x-pack/plugins/dataset_quality @elastic/obs-ux-logs-team
 x-pack/plugins/log_explorer @elastic/obs-ux-logs-team
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
