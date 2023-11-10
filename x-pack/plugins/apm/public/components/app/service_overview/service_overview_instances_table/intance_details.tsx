@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { getAgentIcon, getCloudProviderIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
@@ -36,10 +37,9 @@ import {
 import { isPending } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
 import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
-import { getCloudIcon, getContainerIcon } from '../../../shared/service_icons';
+import { getContainerIcon } from '../../../shared/service_icons';
 import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
 
 type ServiceInstanceDetails =
@@ -175,7 +175,7 @@ export function InstanceDetails({
             'xpack.apm.serviceOverview.instanceTable.details.cloudTitle',
             { defaultMessage: 'Cloud' }
           )}
-          icon={getCloudIcon(data.cloud?.provider)}
+          icon={getCloudProviderIcon(data.cloud?.provider)}
           keyValueList={cloudDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />

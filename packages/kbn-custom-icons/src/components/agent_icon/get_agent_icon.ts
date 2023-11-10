@@ -101,7 +101,7 @@ export function getAgentIconKey(agentName: string) {
   }
 }
 
-export function getAgentIcon(agentName: string | undefined, isDarkMode: boolean) {
+export function getAgentIcon(agentName: string | undefined, isDarkMode: boolean = false) {
   const key = agentName && getAgentIconKey(agentName);
   if (!key) {
     return defaultIcon;
