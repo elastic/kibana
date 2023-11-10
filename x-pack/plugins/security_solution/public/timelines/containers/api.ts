@@ -11,6 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { isEmpty } from 'lodash';
 
 import { throwErrors } from '@kbn/cases-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
 import type {
   TimelineResponse,
@@ -62,6 +63,7 @@ interface RequestPostTimeline {
 interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
   timelineId: T;
   version: T;
+  savedSearch?: SavedSearch | null;
 }
 
 type RequestPersistTimeline = RequestPostTimeline & Partial<RequestPatchTimeline<null | string>>;
@@ -131,6 +133,7 @@ const patchTimeline = async ({
   timelineId,
   timeline,
   version,
+  savedSearch,
 }: RequestPatchTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   let response = null;
   let requestBody = null;
@@ -139,6 +142,16 @@ const patchTimeline = async ({
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
+
+  try {
+    if (timeline.savedSearchId && savedSearch) {
+      const { savedSearch: savedSearchService } = KibanaServices.get();
+      await savedSearchService.save(savedSearch);
+    }
+  } catch (e) {
+    return Promise.reject(new Error(`Failed to copy saved search: ${timeline.savedSearchId}`));
+  }
+
   try {
     response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
       method: 'PATCH',
@@ -161,19 +174,20 @@ const patchTimeline = async ({
 export const copyTimeline = async ({
   timelineId,
   timeline,
+  savedSearch,
 }: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   let response = null;
   let requestBody = null;
   let newSavedSearchId = null;
 
   try {
-    if (timeline.savedSearchId) {
+    if (timeline.savedSearchId && savedSearch) {
       const { savedSearch: savedSearchService } = KibanaServices.get();
-      const savedSearch = await savedSearchService.get(timeline.savedSearchId);
+      const savedSearchCopy = { ...savedSearch };
       // delete the id and change the title to make sure we can copy the saved search
-      delete savedSearch.id;
-      savedSearch.title = `Copy - ${savedSearch.title}`;
-      newSavedSearchId = await savedSearchService.save(savedSearch);
+      delete savedSearchCopy.id;
+      savedSearchCopy.title = `Copy - ${savedSearchCopy.title}`;
+      newSavedSearchId = await savedSearchService.save(savedSearchCopy);
     }
   } catch (e) {
     return Promise.reject(new Error(`Failed to copy saved search: ${timeline.savedSearchId}`));
@@ -207,6 +221,7 @@ export const persistTimeline = async ({
   timelineId,
   timeline,
   version,
+  savedSearch,
 }: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   try {
     if (isEmpty(timelineId) && timeline.status === TimelineStatus.draft && timeline) {
@@ -237,6 +252,7 @@ export const persistTimeline = async ({
           ...templateTimelineInfo,
         },
         version: draftTimeline.data.persistTimeline.timeline.version ?? '',
+        savedSearch,
       });
     }
 
@@ -248,6 +264,7 @@ export const persistTimeline = async ({
       timelineId: timelineId ?? '-1',
       timeline,
       version: version ?? '',
+      savedSearch,
     });
   } catch (err) {
     if (err.status_code === 403 || err.body.status_code === 403) {

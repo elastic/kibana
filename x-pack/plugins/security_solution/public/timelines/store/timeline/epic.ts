@@ -11,6 +11,7 @@ import type { Epic } from 'redux-observable';
 import { from, EMPTY, merge } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { Filter, MatchAllFilter } from '@kbn/es-query';
 import {
   isScriptedRangeFilter,
@@ -171,6 +172,7 @@ export const createTimelineEpic =
             // so we're casting to the correct type here.
             // TODO: fix the ActionTimeline type above
             const saveAction = action as unknown as ReturnType<typeof saveTimeline>;
+            const savedSearch = timeline[action.payload.id].savedSearch;
             return saveAction.payload.saveAsNew && timelineId
               ? saveAsNewEpic(
                   action,
@@ -180,6 +182,7 @@ export const createTimelineEpic =
                     templateTimelineId,
                     templateTimelineVersion,
                   },
+                  savedSearch,
                   timeline$,
                   allTimelineQuery$,
                   kibana$
@@ -193,6 +196,7 @@ export const createTimelineEpic =
                       templateTimelineId,
                       templateTimelineVersion,
                     },
+                    savedSearch,
                   })
                 ).pipe(
                   withLatestFrom(timeline$, allTimelineQuery$, kibana$),
@@ -384,6 +388,7 @@ function saveAsNewEpic<State>(
   action: ActionTimeline,
   timelineId: string,
   timeline: TimelineInput,
+  savedSearch: SavedSearch | null,
   timeline$: Observable<TimelineById>,
   allTimelineQuery$: Observable<inputsModel.GlobalQuery>,
   kibana$: TimelineEpicDependencies<State>['kibana$']
@@ -392,6 +397,7 @@ function saveAsNewEpic<State>(
     copyTimeline({
       timelineId,
       timeline,
+      savedSearch,
     })
   ).pipe(
     withLatestFrom(timeline$, allTimelineQuery$, kibana$),
