@@ -67,6 +67,8 @@ describe('create ESO model version', () => {
     );
   });
 
+  // ToDo: throws if there are no changes defined
+
   it('merges all applicable transforms', () => {
     const instantiateServiceWithLegacyType = jest.fn(() =>
       encryptedSavedObjectsServiceMock.create()
