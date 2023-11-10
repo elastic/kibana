@@ -6,8 +6,40 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiAssistantManagementPluginSetup {}
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type {
+  PluginStartContract as FeaturesPluginStart,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '@kbn/features-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiAssistantManagementPluginStart {}
+export interface AiAssistantManagementObservabilityPluginSetup {
+  taskManager: TaskManagerSetupContract;
+}
+
+export interface AiAssistantManagementObservabilityPluginStart {
+  taskManager: TaskManagerSetupContract;
+}
+
+export interface AiAssistantManagementObservabilityPluginSetupDependencies {
+  actions: ActionsPluginSetup;
+  security: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
+  taskManager: TaskManagerSetupContract;
+}
+
+export interface AiAssistantManagementObservabilityPluginStartDependencies {
+  actions: ActionsPluginStart;
+  security: SecurityPluginStart;
+  features: FeaturesPluginStart;
+  taskManager: TaskManagerStartContract;
+  dataViews: DataViewsServerPluginStart;
+}

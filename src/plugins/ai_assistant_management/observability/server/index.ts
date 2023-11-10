@@ -13,6 +13,6 @@ export const plugin = (context: PluginInitializerContext) =>
   new AiAssistantManagementObservabilityPlugin(context);
 
 export type {
-  AiAssistantManagementPluginSetup as SavedObjectsManagementPluginSetup,
-  AiAssistantManagementPluginStart as SavedObjectsManagementPluginStart,
+  AiAssistantManagementObservabilityPluginSetup,
+  AiAssistantManagementObservabilityPluginStart,
 } from './types';

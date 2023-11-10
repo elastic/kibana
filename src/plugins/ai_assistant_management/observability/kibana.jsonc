@@ -6,8 +6,8 @@
     "id": "aiAssistantManagementObservability",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["management", "data", "dataViews"],
-    "optionalPlugins": ["home", "serverless", "spaces"],
+    "requiredPlugins": ["management"],
+    "optionalPlugins": ["home", "serverless", "spaces", "taskManager"],
     "requiredBundles": ["kibanaReact"]
   }
 }

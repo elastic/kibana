@@ -10,8 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 
@@ -27,8 +25,6 @@ export interface SetupDependencies {
 }
 
 export interface StartDependencies {
-  data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
   serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
 }
@@ -69,7 +65,7 @@ export class AiAssistantManagementObservabilityPlugin
       title: '', // Keep empty to hide from the side navigation
       order: 1,
       mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./management_section/mount_section');
+        const { mountManagementSection } = await import('./app');
 
         return mountManagementSection({
           core,

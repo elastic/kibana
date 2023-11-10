@@ -35,13 +35,14 @@ export interface ChatItemProps extends ChatTimelineItem {
 }
 
 const normalMessageClassName = css`
-  .euiCommentEvent__header {
-    padding: 4px 8px;
-  }
+  // .euiCommentEvent__header {
+  //   padding: 4px 8px;
+  // }
 
   .euiCommentEvent__body {
     padding: 0;
   }
+
   /* targets .*euiTimelineItemEvent-top, makes sure text properly wraps and doesn't overflow */
   > :last-child {
     overflow-x: hidden;

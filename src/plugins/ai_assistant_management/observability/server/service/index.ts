@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import * as Boom from '@hapi/boom';
+import { once } from 'lodash';
+import Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
 import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
-import { once } from 'lodash';
-import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
-import { ObservabilityAIAssistantClient } from './client';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { splitKbText } from './util/split_kb_text';
+import type { ObservabilityAIAssistantResourceNames } from './types';
+import type { AiAssistantManagementObservabilityPluginStartDependencies } from '../types';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './kb_service';
-import type { ObservabilityAIAssistantResourceNames } from './types';
-import { splitKbText } from './util/split_kb_text';
+import { AIAssistantManagementObservabilityClient } from './client';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -39,8 +40,8 @@ type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> }
     }
 );
 
-export class ObservabilityAIAssistantService {
-  private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+export class AIAssistantManagementObservabilityService {
+  private readonly core: CoreSetup<AiAssistantManagementObservabilityPluginStartDependencies>;
   private readonly logger: Logger;
   private kbService?: KnowledgeBaseService;
 
@@ -69,12 +70,56 @@ export class ObservabilityAIAssistantService {
   constructor({
     logger,
     core,
+    taskManager,
   }: {
     logger: Logger;
-    core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+    core: CoreSetup<AiAssistantManagementObservabilityPluginStartDependencies>;
+    taskManager: TaskManagerSetupContract;
   }) {
     this.core = core;
     this.logger = logger;
+
+    taskManager.registerTaskDefinitions({
+      [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
+        title: 'Index queued KB articles',
+        description:
+          'Indexes previously registered entries into the knowledge base when it is ready',
+        timeout: '30m',
+        maxAttempts: 2,
+        createTaskRunner: (context) => {
+          return {
+            run: async () => {
+              if (this.kbService) {
+                await this.kbService.processQueue();
+              }
+            },
+          };
+        },
+      },
+    });
+  }
+
+  async getClient({
+    request,
+  }: {
+    request: KibanaRequest;
+  }): Promise<AIAssistantManagementObservabilityClient> {
+    const [_, [, plugins]] = await Promise.all([
+      this.init(),
+      this.core.getStartServices() as Promise<
+        [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
+      >,
+    ]);
+
+    const user = plugins.security.authc.getCurrentUser(request);
+
+    if (!user) {
+      throw Boom.forbidden(`User not found for current request`);
+    }
+
+    return new AIAssistantManagementObservabilityClient({
+      knowledgeBaseService: this.kbService!,
+    });
   }
 
   init = once(async () => {
@@ -196,41 +241,13 @@ export class ObservabilityAIAssistantService {
     }
   });
 
-  async getClient({
-    request,
-  }: {
-    request: KibanaRequest;
-  }): Promise<ObservabilityAIAssistantClient> {
-    const [_, [coreStart, plugins]] = await Promise.all([
-      this.init(),
-      this.core.getStartServices() as Promise<
-        [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
-      >,
-    ]);
+  getKnowledgeBaseStatus = () => {
+    return this.kbService!.status();
+  };
 
-    const user = plugins.security.authc.getCurrentUser(request);
-
-    if (!user) {
-      throw Boom.forbidden(`User not found for current request`);
-    }
-
-    const basePath = coreStart.http.basePath.get(request);
-
-    const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);
-
-    return new ObservabilityAIAssistantClient({
-      actionsClient: await plugins.actions.getActionsClientWithRequest(request),
-      namespace: spaceId,
-      esClient: coreStart.elasticsearch.client.asInternalUser,
-      resources: this.resourceNames,
-      logger: this.logger,
-      user: {
-        id: user.profile_uid,
-        name: user.username,
-      },
-      knowledgeBaseService: this.kbService!,
-    });
-  }
+  setupKnowledgeBase = () => {
+    return this.kbService!.setup();
+  };
 
   addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {
     this.init()

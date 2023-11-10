@@ -53,3 +53,5 @@ export const plugin: PluginInitializer<
   ObservabilityAIAssistantPluginStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
   new ObservabilityAIAssistantPlugin(pluginInitializerContext);
+
+export { SELECTED_CONNECTOR_LOCAL_STORAGE_KEY } from './hooks/use_genai_connectors';

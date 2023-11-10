@@ -9,15 +9,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { StartDependencies, AiAssistantManagementObservabilityPluginStart } from '../plugin';
-import { aIAssistantManagementObservabilityRouter } from '../routes/config';
-import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
-import { AppContextProvider } from '../app_context';
+import { StartDependencies, AiAssistantManagementObservabilityPluginStart } from './plugin';
+import { aIAssistantManagementObservabilityRouter } from './routes/config';
+import { RedirectToHomeIfUnauthorized } from './routes/components/redirect_to_home_if_unauthorized';
+import { AppContextProvider } from './context/app_context';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>;
@@ -31,9 +32,11 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
 
   coreStart.chrome.docTitle.change(
     i18n.translate('aiAssistantManagementObservability.app.titleBar', {
-      defaultMessage: 'AI Assistants for Observability',
+      defaultMessage: 'AI Assistant for Observability Settings',
     })
   );
+
+  const queryClient = new QueryClient();
 
   ReactDOM.render(
     wrapWithTheme(
@@ -41,17 +44,20 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
         <I18nProvider>
           <AppContextProvider
             value={{
-              ...startDeps,
-              setBreadcrumbs,
+              http: coreStart.http,
               navigateToApp: coreStart.application.navigateToApp,
+              setBreadcrumbs,
+              ...startDeps,
             }}
           >
-            <RouterProvider
-              history={history}
-              router={aIAssistantManagementObservabilityRouter as any}
-            >
-              <RouteRenderer />
-            </RouterProvider>
+            <QueryClientProvider client={queryClient}>
+              <RouterProvider
+                history={history}
+                router={aIAssistantManagementObservabilityRouter as any}
+              >
+                <RouteRenderer />
+              </RouterProvider>
+            </QueryClientProvider>
           </AppContextProvider>
         </I18nProvider>
       </RedirectToHomeIfUnauthorized>,
