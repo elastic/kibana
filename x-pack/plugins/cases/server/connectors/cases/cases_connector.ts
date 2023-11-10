@@ -133,6 +133,11 @@ export class CasesConnector extends SubActionConnector<
     const uniqueGroupingByFields = Array.from(new Set<string>(groupingBy));
     const groupingMap = new Map<string, GroupedAlerts>();
 
+    /**
+     * We are interested in alerts that have a value for any
+     * of the groupingBy fields defined by the users. All other
+     * alerts will not be attached to any case.
+     */
     const filteredAlerts = alerts.filter((alert) =>
       uniqueGroupingByFields.every((groupingByField) => Object.hasOwn(alert, groupingByField))
     );
@@ -205,7 +210,7 @@ export class CasesConnector extends SubActionConnector<
     const nonFoundErrors = bulkGetRecordsErrors.filter((error) => error.statusCode === 404);
 
     for (const error of nonFoundErrors) {
-      if (error.id && error.statusCode === 404 && recordsMap.has(error.id)) {
+      if (error.id && recordsMap.has(error.id)) {
         bulkCreateReq.push({
           recordId: error.id,
           payload: recordsMap.get(error.id) ?? { cases: [], rules: [], grouping: {} },
@@ -284,16 +289,16 @@ export class CasesConnector extends SubActionConnector<
      */
     const nonFoundErrors = errors.filter((error) => error.status === 404);
 
+    if (nonFoundErrors.length === 0) {
+      return casesMap;
+    }
+
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
         const data = groupedAlertsWithCaseId.get(error.caseId) as GroupedAlertsWithCaseId;
 
         bulkCreateReq.push(this.getCreateCaseRequest(params, data));
       }
-    }
-
-    if (bulkCreateReq.length === 0) {
-      return casesMap;
     }
 
     /**
