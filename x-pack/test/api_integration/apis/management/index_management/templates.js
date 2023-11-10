@@ -25,13 +25,31 @@ export default function ({ getService }) {
     cleanUpTemplates,
   } = registerHelpers({ supertest });
 
-  describe('index templates', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/170980
+  describe.skip('index templates', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpTemplates()]));
 
     describe('get all', () => {
-      const templateName = `template-${getRandomString()}`;
-      const indexTemplate = getTemplatePayload(templateName, [getRandomString()]);
-      const legacyTemplate = getTemplatePayload(templateName, [getRandomString()], true);
+      const indexTemplate = getTemplatePayload(`template-${getRandomString()}`, [
+        getRandomString(),
+      ]);
+      const legacyTemplate = getTemplatePayload(
+        `template-${getRandomString()}`,
+        [getRandomString()],
+        true
+      );
+      const tmpTemplate = getTemplatePayload(`template-${getRandomString()}`, [getRandomString()]);
+      const indexTemplateWithLifecycle = {
+        ...tmpTemplate,
+        dataStream: {},
+        template: {
+          ...tmpTemplate.template,
+          lifecycle: {
+            enabled: true,
+            data_retention: '10d',
+          },
+        },
+      };
 
       beforeEach(async () => {
         const res1 = await createTemplate(indexTemplate);
@@ -42,6 +60,11 @@ export default function ({ getService }) {
         const res2 = await createTemplate(legacyTemplate);
         if (res2.status !== 200) {
           throw new Error(res2.body.message);
+        }
+
+        const res3 = await createTemplate(indexTemplateWithLifecycle);
+        if (res3.status !== 200) {
+          throw new Error(res3.body.message);
         }
       });
 
@@ -106,6 +129,36 @@ export default function ({ getService }) {
         ].sort();
 
         expect(Object.keys(legacyTemplateFound).sort()).to.eql(expectedLegacyKeys);
+
+        // Index template with lifecycle
+        const templateWithLifecycle = allTemplates.templates.find(
+          (template) => template.name === indexTemplateWithLifecycle.name
+        );
+
+        if (!templateWithLifecycle) {
+          throw new Error(
+            `Index template with lifecycle "${
+              indexTemplateWithLifecycle.name
+            }" not found in ${JSON.stringify(allTemplates.templates, null, 2)}`
+          );
+        }
+
+        const expectedWithLifecycleKeys = [
+          'name',
+          'indexPatterns',
+          'lifecycle',
+          'hasSettings',
+          'hasAliases',
+          'hasMappings',
+          'ilmPolicy',
+          'priority',
+          'composedOf',
+          'dataStream',
+          'version',
+          '_kbnMeta',
+        ].sort();
+
+        expect(Object.keys(templateWithLifecycle).sort()).to.eql(expectedWithLifecycleKeys);
       });
     });
 
