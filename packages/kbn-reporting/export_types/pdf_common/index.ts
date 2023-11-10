@@ -32,6 +32,12 @@ interface BaseParamsPDFV2 {
 // Job params: structure of incoming user request data, after being parsed from RISON
 export type JobParamsPDFV2 = BaseParamsPDFV2 & BaseParams;
 
+/**
+ * Public-facing interface
+ * Apps should use this interface to build job params.
+ * browserTimezone and version is provided by Reporting
+ * @public
+ */
 export type JobAppParamsPDFV2 = Omit<JobParamsPDFV2, 'browserTimezone' | 'version'>;
 
 // Job payload: structure of stored job data provided by create_job

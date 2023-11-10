@@ -32,7 +32,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { LocatorParams } from '@kbn/reporting-common/url';
 import { JobParamsPDFDeprecated, JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
@@ -105,17 +104,15 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
     };
   };
 
-  const getPNGJobParamsDefaultV2 = (): JobParamsPDFV2 => {
+  const getPNGJobParamsDefaultV2 = (): JobParamsPNGV2 => {
     return {
       version: '8.0.0',
       layout: { id: 'preserve_layout' },
-      locatorParams: [
-        {
-          id: REPORTING_EXAMPLE_LOCATOR_ID,
-          version: '0.5.0',
-          params: { myTestState: {} },
-        },
-      ] as unknown as LocatorParams[],
+      locatorParams: {
+        id: REPORTING_EXAMPLE_LOCATOR_ID,
+        version: '0.5.0',
+        params: { myTestState: {} },
+      },
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
       browserTimezone: moment.tz.guess(),
