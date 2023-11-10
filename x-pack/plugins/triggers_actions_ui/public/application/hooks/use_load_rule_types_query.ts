@@ -13,6 +13,7 @@ import { RuleType, RuleTypeIndex } from '../../types';
 
 interface UseLoadRuleTypesQueryProps {
   filteredRuleTypes: string[];
+  enabled?: boolean;
 }
 
 const getFilteredIndex = (data: Array<RuleType<string, string>>, filteredRuleTypes: string[]) => {
@@ -32,7 +33,7 @@ const getFilteredIndex = (data: Array<RuleType<string, string>>, filteredRuleTyp
 };
 
 export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
-  const { filteredRuleTypes } = props;
+  const { filteredRuleTypes, enabled = true } = props;
   const {
     http,
     notifications: { toasts },
@@ -55,6 +56,7 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
+    enabled,
   });
 
   const filteredIndex = data ? getFilteredIndex(data, filteredRuleTypes) : new Map();
