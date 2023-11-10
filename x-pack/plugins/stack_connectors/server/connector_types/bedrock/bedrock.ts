@@ -164,19 +164,15 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   }: StreamActionParams): Promise<StreamingResponse> {
     // set model on per request basis
     const model = reqModel ? reqModel : this.model;
-    const formattedBody = JSON.stringify(formatBedrockBody(JSON.parse(body)));
-    const signed = this.signRequest(
-      formattedBody,
-      `/model/${model}/invoke-with-response-stream`,
-      true
-    );
+
+    const signed = this.signRequest(body, `/model/${model}/invoke-with-response-stream`, true);
 
     const response = await this.request({
       ...signed,
       url: `${this.url}/model/${model}/invoke-with-response-stream`,
       method: 'post',
       responseSchema: StreamingResponseSchema,
-      data: formattedBody,
+      data: body,
       responseType: 'stream',
     });
 
@@ -185,15 +181,16 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
 
   public async invokeStream(body: InvokeAIActionParams): Promise<Transform> {
     const res = (await this.streamApi({
-      body: JSON.stringify(body),
+      body: JSON.stringify(formatBedrockBody(body)),
       stream: true,
     })) as unknown as IncomingMessage;
-    return res.pipe(new PassThrough()).pipe(transformToString());
+    return res.pipe(transformToString());
   }
 
   /**
    * Deprecated. Use invokeStream instead.
-   * TODO: remove before 8.12 FF
+   * TODO: remove before 8.12 FF in part 3 of streaming work for security solution
+   * tracked here: https://github.com/elastic/security-team/issues/7363
    * No token tracking implemented for this method
    */
   public async invokeAI({

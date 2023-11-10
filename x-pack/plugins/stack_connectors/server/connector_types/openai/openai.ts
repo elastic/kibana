@@ -197,12 +197,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       body: JSON.stringify(body),
       stream: true,
     })) as unknown as IncomingMessage;
-    return res.compose(new PassThrough()).compose(transformToString());
+    return res.pipe(new PassThrough()).pipe(transformToString());
   }
 
   /**
    * Deprecated. Use invokeStream instead.
-   * TODO: remove before 8.12 FF
+   * TODO: remove before 8.12 FF in part 3 of streaming work for security solution
+   * tracked here: https://github.com/elastic/security-team/issues/7363
    */
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({ body: JSON.stringify(body) });

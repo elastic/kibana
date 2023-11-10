@@ -11,6 +11,7 @@ import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_i
 import { getTokenCountFromInvokeStream } from './get_token_count_from_invoke_stream';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 import { IncomingMessage } from 'http';
+import { Socket } from 'net';
 
 jest.mock('./get_token_count_from_bedrock_invoke');
 jest.mock('./get_token_count_from_openai_stream');
@@ -113,8 +114,7 @@ describe('getGenAiTokenTracking', () => {
   });
 
   it('should return the total, prompt, and completion token counts when given a valid OpenAI streamed response', async () => {
-    // @ts-ignore
-    const mockReader = new IncomingMessage(jest.fn());
+    const mockReader = new IncomingMessage(new Socket());
     const actionTypeId = '.gen-ai';
     const result = {
       actionId: '123',
