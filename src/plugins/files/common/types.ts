@@ -20,7 +20,7 @@ import type {
 } from '@kbn/shared-ux-file-types';
 import type { UploadOptions } from '../server/blob_storage_service';
 import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
-import type {SupportedFileHashAlgorithm} from '../server/saved_objects/file';
+import type { SupportedFileHashAlgorithm } from '../server/saved_objects/file';
 
 export type {
   FileKindBase,

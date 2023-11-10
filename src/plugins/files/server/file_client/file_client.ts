@@ -40,9 +40,9 @@ import {
   withReportPerformanceMetric,
   FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
 } from '../performance';
-import {createFileHashTransform} from './stream_transforms/file_hash_transform';
-import {isFileHashTransform} from './stream_transforms/file_hash_transform/file_hash_transform';
-import {SupportedFileHashAlgorithm} from '../saved_objects/file';
+import { createFileHashTransform } from './stream_transforms/file_hash_transform';
+import { isFileHashTransform } from './stream_transforms/file_hash_transform/file_hash_transform';
+import { SupportedFileHashAlgorithm } from '../saved_objects/file';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
@@ -246,7 +246,7 @@ export class FileClientImpl implements FileClient {
       id: file.id,
     });
 
-    const result: UploadResult = {...uploadResult, hashes: []};
+    const result: UploadResult = { ...uploadResult, hashes: [] };
 
     if (transforms && transforms.length) {
       for (const transform of transforms) {
