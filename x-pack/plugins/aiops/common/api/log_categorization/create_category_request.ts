@@ -18,13 +18,13 @@ export function createCategoryRequest(
   index: string,
   field: string,
   timeField: string,
-  from: number | undefined,
-  to: number | undefined,
+  timeRange: { from: number; to: number } | undefined,
   queryIn: QueryDslQueryContainer,
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
-  intervalMs?: number
+  intervalMs?: number,
+  subTimeRange?: { from: number; to: number }
 ) {
-  const query = createCategorizeQuery(queryIn, timeField, from, to);
+  const query = createCategorizeQuery(queryIn, timeField, timeRange?.from, timeRange?.to);
   const aggs = {
     categories: {
       categorize_text: {
@@ -35,7 +35,7 @@ export function createCategoryRequest(
         hit: {
           top_hits: {
             size: EXAMPLE_LIMIT,
-            sort: [timeField],
+            // sort: [timeField],
             _source: field,
           },
         },
@@ -45,6 +45,17 @@ export function createCategoryRequest(
                 date_histogram: {
                   field: timeField,
                   fixed_interval: `${intervalMs}ms`,
+                },
+              },
+            }
+          : {}),
+        ...(subTimeRange
+          ? {
+              sub_time_range: {
+                date_range: {
+                  field: timeField,
+                  format: 'epoch_millis',
+                  ranges: [subTimeRange],
                 },
               },
             }

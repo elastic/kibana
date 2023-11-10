@@ -68,8 +68,7 @@ export function useCategorizeRequest() {
       index: string,
       field: string,
       timeField: string,
-      from: number | undefined,
-      to: number | undefined,
+      timeRange: { from: number; to: number },
       query: QueryDslQueryContainer,
       intervalMs?: number
     ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
@@ -78,7 +77,7 @@ export function useCategorizeRequest() {
       return new Promise((resolve, reject) => {
         data.search
           .search<ReturnType<typeof createCategoryRequest>, CatResponse>(
-            createCategoryRequest(index, field, timeField, from, to, query, wrap, intervalMs),
+            createCategoryRequest(index, field, timeField, timeRange, query, wrap, intervalMs),
             { abortSignal: abortController.current.signal }
           )
           .subscribe({

@@ -73,7 +73,6 @@ export const fetchSignificantCategories = async (
     params,
     fieldNames,
     undefined,
-    undefined,
     baselineOrDeviationFilter,
     logger,
     sampleProbability,

@@ -205,28 +205,30 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     const { getIndexPattern, timeFieldName: timeField } = dataView;
     const index = getIndexPattern();
 
-    if (selectedField === undefined || timeField === undefined) {
+    if (
+      selectedField === undefined ||
+      timeField === undefined ||
+      earliest === undefined ||
+      latest === undefined
+    ) {
       setLoading(false);
       return;
     }
 
     cancelRequest();
 
+    const timeRange = {
+      from: earliest,
+      to: latest,
+    };
+
     try {
       const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(index, selectedField, timeField, earliest, latest, searchQuery, {
+        runValidateFieldRequest(index, selectedField, timeField, timeRange, searchQuery, {
           [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
         }),
 
-        runCategorizeRequest(
-          index,
-          selectedField,
-          timeField,
-          earliest,
-          latest,
-          searchQuery,
-          intervalMs
-        ),
+        runCategorizeRequest(index, selectedField, timeField, timeRange, searchQuery, intervalMs),
       ]);
 
       setFieldValidationResult(validationResult);

@@ -31,8 +31,7 @@ import { getQueryWithParams } from './get_query_with_params';
 export const getCategoryRequest = (
   params: AiopsLogRateAnalysisSchema,
   fieldName: string,
-  from: number | undefined,
-  to: number | undefined,
+  timeRange: { from: number; to: number } | undefined,
   filter: estypes.QueryDslQueryContainer,
   { wrap }: RandomSamplerWrapper
 ): estypes.SearchRequest => {
@@ -46,8 +45,7 @@ export const getCategoryRequest = (
     index,
     fieldName,
     timeFieldName,
-    from,
-    to,
+    timeRange,
     query,
     wrap
   );
@@ -64,8 +62,7 @@ export const fetchCategories = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
   fieldNames: string[],
-  from: number | undefined,
-  to: number | undefined,
+  timeRange: { from: number; to: number } | undefined,
   filter: estypes.QueryDslQueryContainer,
   logger: Logger,
   // The default value of 1 means no sampling will be used
@@ -82,7 +79,13 @@ export const fetchCategories = async (
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) => {
-      const request = getCategoryRequest(params, fieldName, from, to, filter, randomSamplerWrapper);
+      const request = getCategoryRequest(
+        params,
+        fieldName,
+        timeRange,
+        filter,
+        randomSamplerWrapper
+      );
       return esClient.search(request, {
         signal: abortSignal,
         maxRetries: 0,
