@@ -12,6 +12,7 @@ export interface State {
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionItemMeta: { name: string };
   newComment: string;
+  commentErrorExists: boolean;
   bulkCloseAlerts: boolean;
   disableBulkClose: boolean;
   bulkCloseIndex: string[] | undefined;
@@ -28,6 +29,10 @@ export type Action =
   | {
       type: 'setComment';
       comment: string;
+    }
+  | {
+      type: 'setCommentError';
+      errorExists: boolean;
     }
   | {
       type: 'setBulkCloseAlerts';
@@ -79,6 +84,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           newComment: comment,
+        };
+      }
+      case 'setCommentError': {
+        const { errorExists } = action;
+
+        return {
+          ...state,
+          commentErrorExists: errorExists,
         };
       }
       case 'setBulkCloseAlerts': {

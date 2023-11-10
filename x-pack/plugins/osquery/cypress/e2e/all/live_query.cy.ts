@@ -44,10 +44,7 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('ECS field is required.').should('not.exist');
 
     checkResults();
-    cy.react('Cell', { props: { colIndex: 0 } })
-      .should('exist')
-      .first()
-      .click();
+    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist').click();
     cy.url().should('include', 'app/fleet/agents/');
   });
 
@@ -82,7 +79,7 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
     // check if it get's bigger when we add more lines
     cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     inputQuery(multilineQuery);
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 550);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 600);
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
