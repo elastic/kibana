@@ -40,6 +40,9 @@ import {
   withReportPerformanceMetric,
   FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
 } from '../performance';
+import { createFileHashTransform } from './stream_transforms/file_hash_transform';
+import { isFileHashTransform } from './stream_transforms/file_hash_transform/file_hash_transform';
+import { SupportedFileHashAlgorithm } from '../saved_objects/file';
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
@@ -216,8 +219,8 @@ export class FileClientImpl implements FileClient {
     file: FileJSON,
     rs: Readable,
     options?: UploadOptions
-  ): ReturnType<BlobStorageClient['upload']> => {
-    const { maxSizeBytes } = this.fileKindDescriptor;
+  ): Promise<UploadResult> => {
+    const { maxSizeBytes, hashes } = this.fileKindDescriptor;
     const { transforms = [], ...blobOptions } = options || {};
 
     let maxFileSize: number = typeof maxSizeBytes === 'number' ? maxSizeBytes : fourMiB;
@@ -231,11 +234,30 @@ export class FileClientImpl implements FileClient {
 
     transforms.push(enforceMaxByteSizeTransform(maxFileSize));
 
-    return this.blobStorageClient.upload(rs, {
+    if (hashes && hashes.length) {
+      for (const hash of hashes) {
+        transforms.push(createFileHashTransform(hash));
+      }
+    }
+
+    const uploadResult = await this.blobStorageClient.upload(rs, {
       ...blobOptions,
       transforms,
       id: file.id,
     });
+
+    const result: UploadResult = { ...uploadResult, hashes: [] };
+
+    if (transforms && transforms.length) {
+      for (const transform of transforms) {
+        if (isFileHashTransform(transform)) {
+          const fileHash = transform.getFileHash();
+          result.hashes.push(fileHash);
+        }
+      }
+    }
+
+    return result;
   };
 
   public download: BlobStorageClient['download'] = async (args) => {
@@ -299,4 +321,13 @@ export class FileClientImpl implements FileClient {
     }
     return this.internalFileShareService.list(args);
   };
+}
+
+export interface UploadResult {
+  id: string;
+  size: number;
+  hashes: Array<{
+    algorithm: SupportedFileHashAlgorithm;
+    value: string;
+  }>;
 }
