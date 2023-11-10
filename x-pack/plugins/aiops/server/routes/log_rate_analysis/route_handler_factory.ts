@@ -21,22 +21,23 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type {
-  SignificantTerm,
-  SignificantTermGroup,
+  SignificantItem,
+  SignificantItemGroup,
+  SignificantItemHistogramItem,
   NumericChartData,
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
-import { SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+import { SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { RANDOM_SAMPLER_SEED, AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
-  addSignificantTermsAction,
-  addSignificantTermsGroupAction,
-  addSignificantTermsGroupHistogramAction,
-  addSignificantTermsHistogramAction,
+  addSignificantItemsAction,
+  addSignificantItemsGroupAction,
+  addSignificantItemsGroupHistogramAction,
+  addSignificantItemsHistogramAction,
   addErrorAction,
   pingAction,
   resetAllAction,
@@ -44,8 +45,11 @@ import {
   resetGroupsAction,
   updateLoadingStateAction,
   AiopsLogRateAnalysisApiAction,
-  type AiopsLogRateAnalysisSchema,
-} from '../../../common/api/log_rate_analysis';
+} from '../../../common/api/log_rate_analysis/actions';
+import type {
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiVersion as ApiVersion,
+} from '../../../common/api/log_rate_analysis/schema';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
@@ -61,7 +65,7 @@ import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { fetchTerms2CategoriesCounts } from './queries/fetch_terms_2_categories_counts';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
-import { getSignificantTermGroups } from './queries/get_significant_term_groups';
+import { getSignificantItemGroups } from './queries/get_significant_item_groups';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 
 // 10s ping frequency to keep the stream alive.
@@ -74,16 +78,16 @@ const PROGRESS_STEP_GROUPING = 0.1;
 const PROGRESS_STEP_HISTOGRAMS = 0.1;
 const PROGRESS_STEP_HISTOGRAMS_GROUPS = 0.1;
 
-export const routeHandlerFactory: (
+export function routeHandlerFactory<T extends ApiVersion>(
+  version: T,
   license: AiopsLicense,
   logger: Logger,
   coreStart: CoreStart,
   usageCounter?: UsageCounter
-) => RequestHandler<unknown, unknown, AiopsLogRateAnalysisSchema> =
-  (license, logger, coreStart, usageCounter) =>
-  async (
+): RequestHandler<unknown, unknown, AiopsLogRateAnalysisSchema<T>> {
+  return async (
     context: RequestHandlerContext,
-    request: KibanaRequest<unknown, unknown, AiopsLogRateAnalysisSchema>,
+    request: KibanaRequest<unknown, unknown, AiopsLogRateAnalysisSchema<T>>,
     response: KibanaResponseFactory
   ) => {
     const { headers } = request;
@@ -135,7 +139,7 @@ export const routeHandlerFactory: (
         end: streamEnd,
         push,
         responseWithHeaders,
-      } = streamFactory<AiopsLogRateAnalysisApiAction>(
+      } = streamFactory<AiopsLogRateAnalysisApiAction<T>>(
         request.headers,
         logger,
         request.body.compressResponse,
@@ -283,16 +287,32 @@ export const routeHandlerFactory: (
             }
           }
 
-          // Step 2: Significant Categories and Terms
+          // Step 2: Significant Categories and Items
 
           // This will store the combined count of detected significant log patterns and keywords
           let fieldValuePairsCount = 0;
 
-          const significantCategories: SignificantTerm[] = request.body.overrides?.significantTerms
-            ? request.body.overrides?.significantTerms.filter(
-                (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
-              )
-            : [];
+          const significantCategories: SignificantItem[] = [];
+
+          if (version === '1') {
+            significantCategories.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'1'>
+              ).overrides?.significantTerms?.filter(
+                (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
+              ) ?? [])
+            );
+          }
+
+          if (version === '2') {
+            significantCategories.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'2'>
+              ).overrides?.significantItems?.filter(
+                (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
+              ) ?? [])
+            );
+          }
 
           // Get significant categories of text fields
           if (textFieldCandidates.length > 0) {
@@ -309,15 +329,31 @@ export const routeHandlerFactory: (
             );
 
             if (significantCategories.length > 0) {
-              push(addSignificantTermsAction(significantCategories));
+              push(addSignificantItemsAction(significantCategories, version));
             }
           }
 
-          const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
-            ? request.body.overrides?.significantTerms.filter(
-                (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
-              )
-            : [];
+          const significantTerms: SignificantItem[] = [];
+
+          if (version === '1') {
+            significantTerms.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'1'>
+              ).overrides?.significantTerms?.filter(
+                (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
+              ) ?? [])
+            );
+          }
+
+          if (version === '2') {
+            significantTerms.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'2'>
+              ).overrides?.significantItems?.filter(
+                (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
+              ) ?? [])
+            );
+          }
 
           const fieldsToSample = new Set<string>();
 
@@ -375,7 +411,7 @@ export const routeHandlerFactory: (
               });
               significantTerms.push(...pValues);
 
-              push(addSignificantTermsAction(pValues));
+              push(addSignificantItemsAction(pValues, version));
             }
 
             push(
@@ -535,7 +571,7 @@ export const routeHandlerFactory: (
               }
 
               if (fields.length > 0 && itemSets.length > 0) {
-                const significantTermGroups = getSignificantTermGroups(
+                const significantItemGroups = getSignificantItemGroups(
                   itemSets,
                   [...significantTerms, ...significantCategories],
                   fields
@@ -543,10 +579,10 @@ export const routeHandlerFactory: (
 
                 // We'll find out if there's at least one group with at least two items,
                 // only then will we return the groups to the clients and make the grouping option available.
-                const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
+                const maxItems = Math.max(...significantItemGroups.map((g) => g.group.length));
 
                 if (maxItems > 1) {
-                  push(addSignificantTermsGroupAction(significantTermGroups));
+                  push(addSignificantItemsGroupAction(significantItemGroups, version));
                 }
 
                 loaded += PROGRESS_STEP_GROUPING;
@@ -559,9 +595,9 @@ export const routeHandlerFactory: (
                   return;
                 }
 
-                logDebugMessage(`Fetch ${significantTermGroups.length} group histograms.`);
+                logDebugMessage(`Fetch ${significantItemGroups.length} group histograms.`);
 
-                const groupHistogramQueue = queue(async function (cpg: SignificantTermGroup) {
+                const groupHistogramQueue = queue(async function (cpg: SignificantItemGroup) {
                   if (shouldStop) {
                     logDebugMessage('shouldStop abort fetching group histograms.');
                     groupHistogramQueue.kill();
@@ -608,33 +644,46 @@ export const routeHandlerFactory: (
                       }
                       return;
                     }
-                    const histogram =
+                    const histogram: SignificantItemHistogramItem[] =
                       overallTimeSeries.data.map((o) => {
                         const current = cpgTimeSeries.data.find(
                           (d1) => d1.key_as_string === o.key_as_string
                         ) ?? {
                           doc_count: 0,
                         };
+
+                        if (version === '1') {
+                          return {
+                            key: o.key,
+                            key_as_string: o.key_as_string ?? '',
+                            doc_count_significant_term: current.doc_count,
+                            doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                          };
+                        }
+
                         return {
                           key: o.key,
                           key_as_string: o.key_as_string ?? '',
-                          doc_count_significant_term: current.doc_count,
+                          doc_count_significant_item: current.doc_count,
                           doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                         };
                       }) ?? [];
 
                     push(
-                      addSignificantTermsGroupHistogramAction([
-                        {
-                          id: cpg.id,
-                          histogram,
-                        },
-                      ])
+                      addSignificantItemsGroupHistogramAction(
+                        [
+                          {
+                            id: cpg.id,
+                            histogram,
+                          },
+                        ],
+                        version
+                      )
                     );
                   }
                 }, MAX_CONCURRENT_QUERIES);
 
-                groupHistogramQueue.push(significantTermGroups);
+                groupHistogramQueue.push(significantItemGroups);
                 await groupHistogramQueue.drain();
               }
             } catch (e) {
@@ -657,7 +706,7 @@ export const routeHandlerFactory: (
             overallTimeSeries !== undefined &&
             !request.body.overrides?.regroupOnly
           ) {
-            const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
+            const fieldValueHistogramQueue = queue(async function (cp: SignificantItem) {
               if (shouldStop) {
                 logDebugMessage('shouldStop abort fetching field/value histograms.');
                 fieldValueHistogramQueue.kill();
@@ -710,17 +759,26 @@ export const routeHandlerFactory: (
                   return;
                 }
 
-                const histogram =
+                const histogram: SignificantItemHistogramItem[] =
                   overallTimeSeries.data.map((o) => {
                     const current = cpTimeSeries.data.find(
                       (d1) => d1.key_as_string === o.key_as_string
                     ) ?? {
                       doc_count: 0,
                     };
+                    if (version === '1') {
+                      return {
+                        key: o.key,
+                        key_as_string: o.key_as_string ?? '',
+                        doc_count_significant_term: current.doc_count,
+                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                      };
+                    }
+
                     return {
                       key: o.key,
                       key_as_string: o.key_as_string ?? '',
-                      doc_count_significant_term: current.doc_count,
+                      doc_count_significant_item: current.doc_count,
                       doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                     };
                   }) ?? [];
@@ -730,13 +788,16 @@ export const routeHandlerFactory: (
                 loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
                 pushHistogramDataLoadingState();
                 push(
-                  addSignificantTermsHistogramAction([
-                    {
-                      fieldName,
-                      fieldValue,
-                      histogram,
-                    },
-                  ])
+                  addSignificantItemsHistogramAction(
+                    [
+                      {
+                        fieldName,
+                        fieldValue,
+                        histogram,
+                      },
+                    ],
+                    version
+                  )
                 );
               }
             }, MAX_CONCURRENT_QUERIES);
@@ -802,17 +863,27 @@ export const routeHandlerFactory: (
                 return;
               }
 
-              const histogram =
+              const histogram: SignificantItemHistogramItem[] =
                 overallTimeSeries.data.map((o) => {
                   const current = catTimeSeries.data.find(
                     (d1) => d1.key_as_string === o.key_as_string
                   ) ?? {
                     doc_count: 0,
                   };
+
+                  if (version === '1') {
+                    return {
+                      key: o.key,
+                      key_as_string: o.key_as_string ?? '',
+                      doc_count_significant_term: current.doc_count,
+                      doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                    };
+                  }
+
                   return {
                     key: o.key,
                     key_as_string: o.key_as_string ?? '',
-                    doc_count_significant_term: current.doc_count,
+                    doc_count_significant_item: current.doc_count,
                     doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                   };
                 }) ?? [];
@@ -822,13 +893,16 @@ export const routeHandlerFactory: (
               loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
               pushHistogramDataLoadingState();
               push(
-                addSignificantTermsHistogramAction([
-                  {
-                    fieldName,
-                    fieldValue,
-                    histogram,
-                  },
-                ])
+                addSignificantItemsHistogramAction(
+                  [
+                    {
+                      fieldName,
+                      fieldValue,
+                      histogram,
+                    },
+                  ],
+                  version
+                )
               );
             }
           }
@@ -849,3 +923,4 @@ export const routeHandlerFactory: (
       return response.ok(responseWithHeaders);
     });
   };
+}

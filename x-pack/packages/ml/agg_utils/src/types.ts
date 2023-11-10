@@ -88,25 +88,25 @@ export interface HistogramField {
 }
 
 /**
- * Enumeration of significant term types.
+ * Enumeration of significant item types.
  */
-export const SIGNIFICANT_TERM_TYPE = {
+export const SIGNIFICANT_ITEM_TYPE = {
   KEYWORD: 'keyword',
   LOG_PATTERN: 'log_pattern',
 } as const;
 
 /**
- * Type for significant term type keys.
+ * Type for significant item type keys.
  */
-type SignificantTermTypeKeys = keyof typeof SIGNIFICANT_TERM_TYPE;
+type SignificantItemTypeKeys = keyof typeof SIGNIFICANT_ITEM_TYPE;
 
 /**
- * Represents the type of significant term as determined by the SIGNIFICANT_TERM_TYPE enumeration.
+ * Represents the type of significant item as determined by the SIGNIFICANT_ITEM_TYPE enumeration.
  */
-export type SignificantTermType = typeof SIGNIFICANT_TERM_TYPE[SignificantTermTypeKeys];
+export type SignificantItemType = typeof SIGNIFICANT_ITEM_TYPE[SignificantItemTypeKeys];
 
 /**
- * Represents significant term metadata for a field/value pair.
+ * Represents significant item metadata for a field/value pair.
  * This interface is used as a custom type within Log Rate Analysis
  * for a p-value based variant, not related to the generic
  * significant terms aggregation type.
@@ -114,51 +114,44 @@ export type SignificantTermType = typeof SIGNIFICANT_TERM_TYPE[SignificantTermTy
  * @interface
  * @extends FieldValuePair
  */
-export interface SignificantTerm extends FieldValuePair {
-  /** The key associated with the significant term. */
+export interface SignificantItem extends FieldValuePair {
+  /** The key associated with the significant item. */
   key: string;
 
-  /** The type of the significant term. */
-  type: SignificantTermType;
+  /** The type of the significant item. */
+  type: SignificantItemType;
 
-  /** The document count for the significant term. */
+  /** The document count for the significant item. */
   doc_count: number;
 
-  /** The background count for the significant term. */
+  /** The background count for the significant item. */
   bg_count: number;
 
-  /** The total document count for all terms. */
+  /** The total document count for all items. */
   total_doc_count: number;
 
-  /** The total background count for all terms. */
+  /** The total background count for all items. */
   total_bg_count: number;
 
-  /** The score associated with the significant term. */
+  /** The score associated with the significant item. */
   score: number;
 
-  /** The p-value for the significant term, or null if not available. */
+  /** The p-value for the significant item, or null if not available. */
   pValue: number | null;
 
-  /** The normalized score for the significant term. */
+  /** The normalized score for the significant item. */
   normalizedScore: number;
 
-  /** An optional histogram of significant term items. */
-  histogram?: SignificantTermHistogramItem[];
+  /** An optional histogram for the significant item. */
+  histogram?: SignificantItemHistogramItem[];
 
-  /** Indicates if the significant term is unique within a group. */
+  /** Indicates if the significant item is unique within a group. */
   unique?: boolean;
 }
 
-/**
- * Represents a data item in a significant term histogram.
- * @interface
- */
-export interface SignificantTermHistogramItem {
+interface SignificantItemHistogramItemBase {
   /** The document count for this item in the overall context. */
   doc_count_overall: number;
-
-  /** The document count for this item in the significant term context. */
-  doc_count_significant_term: number;
 
   /** The numeric key associated with this item. */
   key: number;
@@ -168,36 +161,56 @@ export interface SignificantTermHistogramItem {
 }
 
 /**
+ * @deprecated since version 2 of internal log rate analysis REST API endpoint
+ */
+interface SignificantItemHistogramItemV1 extends SignificantItemHistogramItemBase {
+  /** The document count for this item in the significant term context. */
+  doc_count_significant_term: number;
+}
+
+interface SignificantItemHistogramItemV2 extends SignificantItemHistogramItemBase {
+  /** The document count for this histogram item in the significant item context. */
+  doc_count_significant_item: number;
+}
+
+/**
+ * Represents a data item in a significant term histogram.
+ */
+export type SignificantItemHistogramItem =
+  | SignificantItemHistogramItemV1
+  | SignificantItemHistogramItemV2;
+
+/**
  * Represents histogram data for a field/value pair.
  * @interface
  */
-export interface SignificantTermHistogram extends FieldValuePair {
-  /** An array of significant term histogram items. */
-  histogram: SignificantTermHistogramItem[];
+export interface SignificantItemHistogram extends FieldValuePair {
+  /** An array of significant item histogram items. */
+  histogram: SignificantItemHistogramItem[];
 }
 
 /**
  * Represents histogram data for a group of field/value pairs.
  * @interface
  */
-export interface SignificantTermGroupHistogram {
+export interface SignificantItemGroupHistogram {
   /** The identifier for the group. */
   id: string;
 
-  /** An array of significant term histogram items. */
-  histogram: SignificantTermHistogramItem[];
+  /** An array of significant item histogram items. */
+  histogram: SignificantItemHistogramItem[];
 }
 
 /**
- * Represents an item in a significant term group.
+ * Represents an item in a significant item group.
  * @interface
  */
-export interface SignificantTermGroupItem extends FieldValuePair {
-  /** The key associated with the significant term. */
+export interface SignificantItemGroupItem extends FieldValuePair {
+  /** The key associated with the significant item. */
   key: string;
 
-  /** The type of the significant term. */
-  type: SignificantTermType;
+  /** The type of the significant item. */
+  type: SignificantItemType;
 
   /** The document count associated with this item. */
   docCount: number;
@@ -210,15 +223,15 @@ export interface SignificantTermGroupItem extends FieldValuePair {
 }
 
 /**
- * Represents a significant term group.
+ * Represents a significant item group.
  * @interface
  */
-export interface SignificantTermGroup {
+export interface SignificantItemGroup {
   /** The identifier for the item. */
   id: string;
 
-  /** An array of significant term group items. */
-  group: SignificantTermGroupItem[];
+  /** An array of significant item group items. */
+  group: SignificantItemGroupItem[];
 
   /** The document count associated with this item. */
   docCount: number;
@@ -226,6 +239,6 @@ export interface SignificantTermGroup {
   /** The p-value for this item, or null if not available. */
   pValue: number | null;
 
-  /** An optional array of significant term histogram items. */
-  histogram?: SignificantTermHistogramItem[];
+  /** An optional array of significant item histogram items. */
+  histogram?: SignificantItemHistogramItem[];
 }
