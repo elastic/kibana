@@ -58,7 +58,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-import { StaticAssets, type IStaticAssets } from './static_assets';
+import { StaticAssets, type InternalStaticAssets } from './static_assets';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -136,7 +136,7 @@ export interface HttpServerSetup {
    * @note Static assets may be served over CDN
    */
   registerStaticDir: (path: string, dirPath: string) => void;
-  staticAssets: IStaticAssets;
+  staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];

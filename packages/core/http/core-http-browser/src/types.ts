@@ -145,11 +145,13 @@ export interface IExternalUrl {
 
 /**
  * APIs for creating hrefs to static assets.
+ *
+ * @public
  */
 export interface IStaticAssets {
   /**
    * Gets the full href to the current plugin's asset,
-   * given it's path relative to the plugin's `public/assets` folder.
+   * given its path relative to the plugin's `public/assets` folder.
    *
    * @example
    * ```ts
