@@ -16,36 +16,44 @@ export interface Suggestion {
 }
 
 export interface UseFetchSyntheticsSuggestions {
-  suggestions: Record<string, Suggestion[]>;
+  suggestions: Suggestion[];
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
 }
 
 export interface Params {
+  fieldName: string;
   filters?: {
     locations: string[];
     monitorIds: string[];
     tags: string[];
     projects: string[];
   };
+  search: string;
 }
 
 type ApiResponse = Record<string, Suggestion[]>;
 
-export function useFetchSyntheticsSuggestions({ filters }: Params): UseFetchSyntheticsSuggestions {
+export function useFetchSyntheticsSuggestions({
+  filters,
+  fieldName,
+  search,
+}: Params): UseFetchSyntheticsSuggestions {
   const { http } = useKibana().services;
+  const { locations, monitorIds, tags, projects } = filters || {};
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: ['fetchSyntheticsSuggestions', filters],
+    queryKey: ['fetchSyntheticsSuggestions', locations, monitorIds, tags, projects, search],
     queryFn: async ({ signal }) => {
       try {
         const suggestions = await http.get<ApiResponse>('/internal/synthetics/suggestions', {
           query: {
-            locations: filters?.locations || [],
-            monitorQueryIds: filters?.monitorIds || [],
-            tags: filters?.tags || [],
-            projects: filters?.projects || [],
+            locations: locations || [],
+            monitorQueryIds: monitorIds || [],
+            tags: tags || [],
+            projects: projects || [],
+            query: search,
           },
           signal,
         });
@@ -60,7 +68,7 @@ export function useFetchSyntheticsSuggestions({ filters }: Params): UseFetchSynt
   });
 
   return {
-    suggestions: isInitialLoading ? {} : data ?? {},
+    suggestions: isInitialLoading ? [] : data?.[fieldName] ?? [],
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,

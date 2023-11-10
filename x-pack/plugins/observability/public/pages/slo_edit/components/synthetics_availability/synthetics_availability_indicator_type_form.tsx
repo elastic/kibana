@@ -15,9 +15,8 @@ import { FieldSelector } from '../synthetics_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
 
 export function SyntheticsAvailabilityIndicatorTypeForm() {
-  const { watch, setValue } = useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
-  const [index, monitorIds = [], projects = [], tags = [], locations = []] = watch([
-    'indicator.params.index',
+  const { watch } = useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
+  const [monitorIds = [], projects = [], tags = [], locations = []] = watch([
     'indicator.params.monitorIds',
     'indicator.params.projects',
     'indicator.params.tags',
@@ -28,10 +27,10 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
   //   useFetchIndexPatternFields('synthetics-*');
   // const partitionByFields = ['project', 'tags', 'location', 'monitor'];
   const filters = {
-    monitorIds: monitorIds.map((id) => id.value),
-    projects: projects.map((project) => project.value),
-    tags: tags.map((tag) => tag.value),
-    locations: locations.map((location) => location.value),
+    monitorIds: monitorIds.map((id) => id.value).filter((id) => id !== '*'),
+    projects: projects.map((project) => project.value).filter((id) => id !== '*'),
+    tags: tags.map((tag) => tag.value).filter((id) => id !== '*'),
+    locations: locations.map((location) => location.value).filter((id) => id !== '*'),
   };
 
   return (

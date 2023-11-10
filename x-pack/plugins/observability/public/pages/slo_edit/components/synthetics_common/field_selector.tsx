@@ -25,7 +25,7 @@ interface Option {
 export interface Props {
   allowAllOption?: boolean;
   dataTestSubj: string;
-  fieldName: string;
+  fieldName: 'monitorIds' | 'projects' | 'tags' | 'locations';
   label: string;
   name: FieldPath<CreateSLOForm<SyntheticsAvailabilityIndicator>>;
   placeholder: string;
@@ -45,31 +45,38 @@ export function FieldSelector({
   tooltip,
   filters,
 }: Props) {
-  const { control, watch, getFieldState } =
+  const { control, getFieldState } =
     useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
-  // const monitorId = watch('indicator.params.monitorIds');
-  // const fieldValue = watch(`indicator.params.${fieldName}`);
-
-  const { suggestions = {}, isLoading } = useFetchSyntheticsSuggestions({
-    filters: omit(filters, fieldName),
-  });
-
   const [search, setSearch] = useState<string>('');
+
+  const { suggestions = [], isLoading } = useFetchSyntheticsSuggestions({
+    filters: omit(filters, fieldName),
+    search,
+    fieldName,
+  });
 
   const debouncedSearch = debounce((value) => setSearch(value), 200);
 
-  const options = (
-    allowAllOption
-      ? [
-          {
-            value: ALL_VALUE,
-            label: i18n.translate('xpack.observability.slo.sloEdit.fieldSelector.all', {
-              defaultMessage: 'All',
-            }),
-          },
-        ]
-      : []
-  ).concat(createOptions(suggestions[fieldName]));
+  const ALL_VALUE_OPTION = {
+    value: ALL_VALUE,
+    label: i18n.translate('xpack.observability.slo.sloEdit.fieldSelector.all', {
+      defaultMessage: 'All',
+    }),
+  };
+
+  const options = (allowAllOption ? [ALL_VALUE_OPTION] : []).concat(createOptions(suggestions));
+
+  // useEffect(() => {
+  //   fieldValue?.forEach((value) => {
+  //     if (!suggestions.some((suggestion) => suggestion.value === value?.value)) {
+  //       console.log('value', value);
+  //       setValue(
+  //         `indicator.params.${fieldName}`,
+  //         fieldValue.filter((v) => v.value !== value.value)
+  //       );
+  //     }
+  //   });
+  // }, [suggestions, fieldValue, fieldName, setValue]);
 
   return (
     <EuiFlexItem>
@@ -100,8 +107,14 @@ export function FieldSelector({
               isInvalid={fieldState.invalid}
               isLoading={isLoading}
               onChange={(selected: EuiComboBoxOptionOption[]) => {
-                if (selected.length) {
-                  field.onChange(selected);
+                // removes ALL value option if a specific value is selected
+                if (selected.length && selected.at(-1)?.value !== ALL_VALUE) {
+                  field.onChange(selected.filter((value) => value.value !== ALL_VALUE));
+                  return;
+                }
+                // removes specific value if ALL value is selected
+                if (selected.length && selected.at(-1)?.value === ALL_VALUE) {
+                  field.onChange([ALL_VALUE_OPTION]);
                   return;
                 }
 

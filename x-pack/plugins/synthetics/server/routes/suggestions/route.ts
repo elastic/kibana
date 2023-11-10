@@ -12,7 +12,7 @@ import {
   EncryptedSyntheticsMonitorAttributes,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { QuerySchema, getMonitorFilters } from '../common';
+import { QuerySchema, getMonitorFilters, SEARCH_FIELDS } from '../common';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 
 type Buckets = Array<{
@@ -21,13 +21,13 @@ type Buckets = Array<{
 }>;
 
 interface AggsResponse {
-  locations: {
+  locationsAggs: {
     buckets: Buckets;
   };
-  tags: {
+  tagsAggs: {
     buckets: Buckets;
   };
-  projects: {
+  projectsAggs: {
     buckets: Buckets;
   };
 }
@@ -42,7 +42,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
   },
   handler: async (route): Promise<any> => {
     const { savedObjectsClient } = route;
-    const { tags, locations, projects, monitorQueryIds } = route.request.query;
+    const { tags, locations, projects, monitorQueryIds, query } = route.request.query;
 
     const { filtersStr } = await getMonitorFilters({
       tags,
@@ -58,6 +58,8 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
       fields: ['name', 'id'],
       filter: filtersStr ? `${filtersStr}` : undefined,
       aggs,
+      search: query ? `${query}*` : undefined,
+      searchFields: SEARCH_FIELDS,
     });
 
     const { tagsAggs, locationsAggs, projectsAggs } = (data?.aggregations as AggsResponse) ?? {};
