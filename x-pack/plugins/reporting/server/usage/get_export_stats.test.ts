@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { createMockReportingCore } from '../test_helpers';
+
 import { ExportTypesRegistry } from '../lib';
-import { createMockReportingCore, createMockConfigSchema } from '../test_helpers';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { ErrorCodeStats, FeatureAvailabilityMap, MetricsStats } from './types';
