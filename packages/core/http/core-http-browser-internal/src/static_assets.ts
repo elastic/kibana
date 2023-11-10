@@ -7,17 +7,20 @@
  */
 
 import { InternalStaticAssets } from './types';
-import { modifyUrl } from '@kbn/std';
 
 export class StaticAssets implements InternalStaticAssets {
   public readonly assetsHrefBase: string;
 
   constructor({ assetsHrefBase }: { assetsHrefBase: string }) {
-    this.assetsHrefBase = assetsHrefBase;
+    this.assetsHrefBase = assetsHrefBase.endsWith('/')
+      ? assetsHrefBase.slice(0, -1)
+      : assetsHrefBase;
   }
 
-  getPluginAssetHref(pluginId: string, assetPath: string): string {
-    // TODO
-    return '';
+  getPluginAssetHref(pluginName: string, assetPath: string): string {
+    if (assetPath.startsWith('/')) {
+      assetPath = assetPath.slice(1);
+    }
+    return `${this.assetsHrefBase}/plugins/${pluginName}/${assetPath}`;
   }
 }
