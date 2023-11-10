@@ -65,7 +65,7 @@ function FilterBadge({
           white-space: normal;
         `}
       >
-        <EuiTextBlockTruncate lines={3}>
+        <EuiTextBlockTruncate lines={10}>
           {!hideAlias && filter.meta.alias !== null ? (
             <>
               <span className={marginLeftLabelCss(euiTheme)}>
