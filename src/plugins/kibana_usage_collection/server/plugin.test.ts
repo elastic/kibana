@@ -34,8 +34,11 @@ describe('kibana_usage_collection', () => {
     return createUsageCollectionSetupMock().makeStatsCollector(opts);
   });
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     pluginInstance = await plugin(coreMock.createPluginInitializerContext({}));
+  });
+
+  beforeEach(() => {
     cloudDetailsMock.mockClear();
   });
 
