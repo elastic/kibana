@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import { streamFactory } from '@kbn/ml-response-stream/server';
-
-import type { AiopsLogRateAnalysisApiAction } from '../../../common/api/log_rate_analysis';
-
 export type LogDebugMessage = (msg: string) => void;
-
-export type StreamPush = ReturnType<typeof streamFactory<AiopsLogRateAnalysisApiAction>>['push'];
 
 export interface StreamState {
   isRunning: boolean;

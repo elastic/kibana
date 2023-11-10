@@ -8,11 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import {
   updateLoadingStateAction,
-  type AiopsLogRateAnalysisSchema,
-} from '../../../../common/api/log_rate_analysis';
+  type AiopsLogRateAnalysisApiAction,
+} from '../../../../common/api/log_rate_analysis/actions';
+import type {
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiVersion as ApiVersion,
+} from '../../../../common/api/log_rate_analysis/schema';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 
@@ -20,10 +25,10 @@ import { fetchIndexInfo } from '../queries/fetch_index_info';
 
 import { LOADED_FIELD_CANDIDATES } from './constants';
 import type { StreamLoaded } from './loaded';
-import type { LogDebugMessage, StreamPush } from './types';
+import type { LogDebugMessage } from './types';
 
 export const indexInfoHandlerFactory =
-  (
+  <T extends ApiVersion>(
     client: ElasticsearchClient,
     abortSignal: AbortSignal,
     params: AiopsLogRateAnalysisSchema,
@@ -31,7 +36,7 @@ export const indexInfoHandlerFactory =
     logDebugMessage: LogDebugMessage,
     end: () => void,
     endWithUpdatedLoadingState: () => void,
-    push: StreamPush,
+    push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'],
     pushPingWithTimeout: () => void,
     pushError: (msg: string) => void,
     loaded: StreamLoaded,

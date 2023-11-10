@@ -28,7 +28,7 @@ const DELIMITER = '\n';
 
 type StreamType = 'string' | 'ndjson';
 
-interface StreamFactoryReturnType<T = unknown> {
+export interface StreamFactoryReturnType<T = unknown> {
   DELIMITER: string;
   end: () => void;
   push: (d: T, drain?: boolean) => void;

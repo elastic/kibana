@@ -5,21 +5,27 @@
  * 2.0.
  */
 
+import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
+
 import {
   resetAllAction,
   resetErrorsAction,
   resetGroupsAction,
-  type AiopsLogRateAnalysisSchema,
-} from '../../../common/api/log_rate_analysis';
+  type AiopsLogRateAnalysisApiAction,
+} from '../../../../common/api/log_rate_analysis/actions';
+import type {
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiVersion as ApiVersion,
+} from '../../../../common/api/log_rate_analysis/schema';
 
 import type { StreamLoaded } from './loaded';
-import type { LogDebugMessage, StreamPush } from './types';
+import type { LogDebugMessage } from './types';
 
 export const overridesHandlerFactory =
-  (
+  <T extends ApiVersion>(
     params: AiopsLogRateAnalysisSchema,
     logDebugMessage: LogDebugMessage,
-    push: StreamPush,
+    push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'],
     loaded: StreamLoaded
   ) =>
   () => {
