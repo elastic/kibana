@@ -24,10 +24,17 @@ import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebui
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
-import { RuleDetailsFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
+import {
+  RuleDetailsFlyout,
+  TabContentPadding,
+} from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import * as i18n from './translations';
 
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
+
+// import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
+import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab_2';
+// import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations.ts';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -257,6 +264,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     actions,
   ]);
 
+  // console.log('ReactDiffViewer pre', ReactDiffViewer);
+
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
       <>
@@ -286,6 +295,25 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                 {i18n.UPDATE_BUTTON_LABEL}
               </EuiButton>
             }
+            getRuleTabs={(rule, defaultTabs) => {
+              const diff = filteredRules.find(({ id }) => rule.id)?.diff;
+
+              if (!diff) {
+                return defaultTabs;
+              }
+
+              const diffTab = {
+                id: 'diff',
+                name: 'ruleDetailsI18n.DIFF_TAB_LABEL',
+                content: (
+                  <TabContentPadding>
+                    <RuleDiffTab fields={diff.fields} />
+                  </TabContentPadding>
+                ),
+              };
+
+              return [diffTab, ...defaultTabs];
+            }}
           />
         )}
       </>

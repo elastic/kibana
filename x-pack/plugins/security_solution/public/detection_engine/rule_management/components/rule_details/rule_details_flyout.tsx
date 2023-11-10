@@ -95,7 +95,7 @@ const tabPaddingClassName = css`
   padding: 0 ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXL} ${euiThemeVars.euiSizeM};
 `;
 
-const TabContentPadding: React.FC = ({ children }) => (
+export const TabContentPadding: React.FC = ({ children }) => (
   <div className={tabPaddingClassName}>{children}</div>
 );
 
@@ -104,6 +104,7 @@ interface RuleDetailsFlyoutProps {
   ruleActions?: React.ReactNode;
   dataTestSubj?: string;
   closeFlyout: () => void;
+  getRuleTabs?: (rule: RuleResponse, defaultTabs: EuiTabbedContentTab[]) => EuiTabbedContentTab[];
 }
 
 export const RuleDetailsFlyout = ({
@@ -111,6 +112,7 @@ export const RuleDetailsFlyout = ({
   ruleActions,
   dataTestSubj,
   closeFlyout,
+  getRuleTabs,
 }: RuleDetailsFlyoutProps) => {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
@@ -145,12 +147,13 @@ export const RuleDetailsFlyout = ({
   );
 
   const tabs = useMemo(() => {
+    const defaultTabs = [overviewTab];
     if (rule.note) {
-      return [overviewTab, investigationGuideTab];
-    } else {
-      return [overviewTab];
+      defaultTabs.push(investigationGuideTab);
     }
-  }, [overviewTab, investigationGuideTab, rule.note]);
+
+    return getRuleTabs ? getRuleTabs(rule, defaultTabs) : defaultTabs;
+  }, [overviewTab, investigationGuideTab, rule, getRuleTabs]);
 
   const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
