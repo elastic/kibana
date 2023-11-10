@@ -25,7 +25,7 @@ export const useStyles = () => {
   const EuiTheme = useEuiTheme();
   const { euiTheme } = EuiTheme;
   return css`
-    // wrap .euiOverlayMask class to make styles take precedence over .euiOverlayMask-aboveHeader
+    // add .euiOverlayMask class to make styles take precedence over .euiOverlayMask-aboveHeader
     &.euiOverlayMask {
       top: var(--euiFixedHeadersOffset, 0);
       z-index: ${euiTheme.levels.flyout};
@@ -42,7 +42,7 @@ export const useStyles = () => {
       background: ${euiBackgroundColor(EuiTheme, 'plain')};
     }
 
-    &:not(.timeline-pane--full-screen) .timeline-flyout {
+    &:not(.timeline-wrapper--full-screen) .timeline-flyout {
       margin: ${euiTheme.size.m};
       border-radius: ${euiTheme.border.radius.medium};
       padding: 0 ${euiTheme.size.s};
@@ -51,17 +51,16 @@ export const useStyles = () => {
 };
 
 const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
-  // const { euiTheme } = useEuiTheme();
   const isFullScreen = useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
 
   const styles = useStyles();
-  const paneClassName = classNames('timeline-pane', styles, {
-    'timeline-pane--full-screen': isFullScreen,
+  const paneClassName = classNames('timeline-wrapper', styles, {
+    'timeline-wrapper--full-screen': isFullScreen,
   });
 
   return (
     <EuiOverlayMask
-      data-test-subj="flyout-pane"
+      data-test-subj="timeline-wrapper"
       headerZindexLocation="above"
       className={paneClassName}
     >

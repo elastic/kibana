@@ -263,7 +263,7 @@ export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
 
-export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
+export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="timeline-wrapper"]';
 
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
