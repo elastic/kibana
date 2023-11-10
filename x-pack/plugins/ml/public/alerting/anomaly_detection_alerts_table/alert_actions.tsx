@@ -47,9 +47,9 @@ export function AlertActions({
   refresh,
   setFlyoutAlert,
 }: AlertActionsProps) {
-  const alertDoc = Object.entries(alert).reduce((acc, curr) => {
-    return { ...acc, [curr[0]]: curr[1][0] };
-  });
+  const alertDoc = Object.entries(alert).reduce((acc, [key, val]) => {
+    return { ...acc, [key]: val?.[0] };
+  }, {});
 
   const {
     cases,
