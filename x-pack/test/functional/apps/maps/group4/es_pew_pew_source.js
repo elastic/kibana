@@ -15,7 +15,11 @@ export default function ({ getPageObjects, getService }) {
 
   describe('point to point source', () => {
     before(async () => {
-      await security.testUser.setRoles(['global_maps_all', 'geoconnections_data_reader']);
+      await security.testUser.setRoles([
+        'global_maps_all',
+        'geoconnections_data_reader',
+        'test_logstash_reader',
+      ]);
       await PageObjects.maps.loadSavedMap('pew pew demo');
     });
 

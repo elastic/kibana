@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
+// import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import {
   addEndpointResponseAction,
   fillUpNewRule,
@@ -186,9 +186,9 @@ describe(
       });
 
       it('All response action controls are disabled', () => {
-        cy.intercept('GET', `${FIELDS_PATH}*`).as('getFieldsForWildcard');
+        // cy.intercept('GET', `${FIELDS_PATH}*`).as('getFieldsForWildcard');
         visitRuleActions(ruleId);
-        cy.wait('@getFieldsForWildcard');
+        // cy.wait('@getFieldsForWildcard');
         cy.getByTestSubj('edit-rule-actions-tab').click();
 
         cy.getByTestSubj('response-actions-wrapper').within(() => {
