@@ -8,7 +8,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTextBlockTruncate } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
@@ -36,6 +36,7 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (prop
       alignItems="center"
       gutterSize="xs"
       css={css`
+        align-items: flex-start;
         .euiDataGridHeaderCell--numeric & {
           justify-content: flex-end;
         }
@@ -44,10 +45,13 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (prop
       {columnToken && <EuiFlexItem grow={false}>{columnToken}</EuiFlexItem>}
       <EuiFlexItem
         grow={false}
-        className="eui-displayInline eui-textTruncate"
         data-test-subj="unifiedDataTableColumnTitle"
+        css={css`
+          white-space: normal;
+          word-break: break-word;
+        `}
       >
-        {columnDisplayName}
+        <EuiTextBlockTruncate lines={3}>{columnDisplayName}</EuiTextBlockTruncate>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

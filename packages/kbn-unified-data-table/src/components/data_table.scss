@@ -40,6 +40,10 @@
     border-bottom: $euiBorderThin;
   }
 
+  .euiDataGridHeaderCell {
+    align-items: baseline;
+  }
+
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
     padding-left: 0;
