@@ -182,6 +182,9 @@ export class ComboBoxService extends FtrService {
     filterValue: string
   ): Promise<void> {
     const input = await comboBoxElement.findByTagName('input');
+
+    // simulate a real user by clicking on the element first
+    await input.click();
     await input.clearValue();
     await this.waitForOptionsListLoading(comboBoxElement);
     await input.type(filterValue);
@@ -343,9 +346,23 @@ export class ComboBoxService extends FtrService {
   ): Promise<boolean> {
     this.log.debug(`comboBox.isOptionSelected, value: ${value}`);
     const $ = await comboBoxElement.parseDomContent();
+
+    const inputWrapper = $('[data-test-subj="comboBoxInput"]');
+    const input = $('input[role="combobox"]');
+
+    const hasValidPlainTextValue = (
+      inputWrapper.hasClass('euiComboBox__inputWrap--plainText') &&
+      input.attr('aria-invalid') === 'false' &&
+      value.toLowerCase().trim() === input.val().toLowerCase().trim()
+    );
+    if (hasValidPlainTextValue) {
+      return true;
+    }
+
     const selectedOptions = $('.euiComboBoxPill')
       .toArray()
       .map((option) => $(option).text());
+
     return (
       selectedOptions.length === 1 &&
       selectedOptions[0].toLowerCase().trim() === value.toLowerCase().trim()
