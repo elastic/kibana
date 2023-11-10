@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
 import styled from 'styled-components';
-import { Markdown, useKibana } from '@kbn/kibana-react-plugin/public';
+import { Markdown_DEPRECATED, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AgentRuntimeAttachmentProps,
   CreateAgentInstructions,
@@ -74,7 +74,7 @@ function AccordionButtonContent({
 
 function InstructionsContent({ markdown }: { markdown: string }) {
   return (
-    <Markdown
+    <Markdown_DEPRECATED
       className="euiText"
       markdown={markdown}
       openLinksInNewTab={true}
