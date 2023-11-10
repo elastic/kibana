@@ -17,7 +17,11 @@ import { getLatestAvailableAgentVersion } from './utils';
 export class FleetManager extends Manager {
   private fleetServer: StartedFleetServer | undefined = undefined;
 
-  constructor(private readonly kbnClient: KbnClient, private readonly log: ToolingLog) {
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: ToolingLog,
+    private readonly port: number
+  ) {
     super();
   }
 
@@ -26,6 +30,7 @@ export class FleetManager extends Manager {
     this.fleetServer = await startFleetServer({
       kbnClient: this.kbnClient,
       logger: this.log,
+      port: this.port,
       force: true,
       version,
     });
