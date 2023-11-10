@@ -9,7 +9,7 @@ import { ScopedHistory } from '@kbn/core-application-browser';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DiscoverAppState } from '@kbn/discover-plugin/public';
+import { APP_STATE_URL_KEY, DiscoverAppState } from '@kbn/discover-plugin/public';
 import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
@@ -114,9 +114,16 @@ const createUiSettingsServiceProxy = (uiSettings: IUiSettingsClient) => {
 /**
  * Create a url state storage that's not connected to the real browser location
  * to isolate the Discover component from these side-effects.
+ *
+ * It is initialized with an application state object, because Discover
+ * radically resets too much when the URL is "empty".
  */
-const createMemoryUrlStateStorage = () =>
-  createKbnUrlStateStorage({
-    history: createMemoryHistory(),
+const createMemoryUrlStateStorage = () => {
+  return createKbnUrlStateStorage({
+    history: createMemoryHistory({
+      initialEntries: [{ search: `?${APP_STATE_URL_KEY}=()` }],
+    }),
     useHash: false,
+    useHashQuery: false,
   });
+};
