@@ -49,6 +49,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/reporting-export-types-png-common",
     "@kbn/reporting-mocks-server",
+    "@kbn/reporting-config-server",
+    "@kbn/core-http-request-handler-context-server",
   ],
   "exclude": [
     "target/**/*",
