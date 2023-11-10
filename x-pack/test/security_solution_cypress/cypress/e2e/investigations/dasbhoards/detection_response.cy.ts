@@ -31,6 +31,7 @@ import {
 import { QUERY_TAB_BUTTON, TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../../screens/timeline';
 import { waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import { investigateDashboardItemInTimeline } from '../../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
@@ -42,10 +43,10 @@ import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../..
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-// FLAKY: https://github.com/elastic/kibana/issues/168772
-// FLAKY: https://github.com/elastic/kibana/issues/168771
-describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
+describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
+    deleteAlertsAndRules();
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     createRule(getNewRule());
   });
 
@@ -67,8 +68,8 @@ describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () =
       kqlSearch(`host.name : ${SIEM_KIBANA_HOST_NAME}{enter}`);
 
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
-      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
-      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
+      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 1);
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '1Open');
     });
 
     it(`filters out the users with KQL search bar query`, () => {
@@ -83,8 +84,8 @@ describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () =
       kqlSearch(`user.name : ${TEST_USER_NAME}{enter}`);
 
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
-      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
-      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
+      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 1);
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '1Open');
     });
   });
 
@@ -229,7 +230,7 @@ describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () =
                 expect(url.pathname.endsWith(ALERTS_URL)).eq(true);
               });
               waitForAlerts();
-              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
+              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alert`);
               cy.get(CONTROL_FRAMES).should('have.length', 2);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
@@ -254,7 +255,7 @@ describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () =
               cy.get(USER_TABLE_ROW_SEV(severityVal)).click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               waitForAlerts();
-              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
+              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alert`);
               cy.get(CONTROL_FRAMES).should('have.length', 3);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');

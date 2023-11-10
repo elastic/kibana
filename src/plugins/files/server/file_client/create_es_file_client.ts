@@ -70,6 +70,7 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
       id: NO_FILE_KIND,
       http: {},
       maxSizeBytes,
+      hashes: ['md5', 'sha1', 'sha256', 'sha512'],
     },
     new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger, indexIsAlias),
     new ElasticsearchBlobStorageClient(
