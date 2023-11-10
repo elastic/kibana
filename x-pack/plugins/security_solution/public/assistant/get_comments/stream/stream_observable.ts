@@ -7,9 +7,8 @@
 
 import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
-import { API_ERROR } from '@kbn/elastic-assistant/impl/assistant/translations';
+import { API_ERROR } from '../translations';
 import type { PromptObservableState } from './types';
-
 const MIN_DELAY = 35;
 
 /**

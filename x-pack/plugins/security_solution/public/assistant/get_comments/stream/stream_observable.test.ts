@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { getStreamObservable } from './stream_observable';
-// import { getReaderValue, mockUint8Arrays } from './mock';
+import { API_ERROR } from '../translations';
+
 import type { PromptObservableState } from './types';
 import { Subject } from 'rxjs';
 describe('getStreamObservable', () => {
@@ -27,41 +28,23 @@ describe('getStreamObservable', () => {
     const expectedStates: PromptObservableState[] = [
       { chunks: [], loading: true },
       {
-        chunks: [
-          {
-            id: '1',
-            object: 'chunk',
-            created: 1635633600000,
-            model: 'model-1',
-            choices: [
-              {
-                index: 0,
-                delta: { role: 'role-1', content: 'content-1' },
-                finish_reason: null,
-              },
-            ],
-          },
-        ],
-        message: 'content-1',
+        chunks: ['one chunk ', 'another chunk', ''],
+        message: 'one chunk ',
         loading: true,
       },
       {
-        chunks: [
-          {
-            id: '1',
-            object: 'chunk',
-            created: 1635633600000,
-            model: 'model-1',
-            choices: [
-              {
-                index: 0,
-                delta: { role: 'role-1', content: 'content-1' },
-                finish_reason: null,
-              },
-            ],
-          },
-        ],
-        message: 'content-1',
+        chunks: ['one chunk ', 'another chunk', ''],
+        message: 'one chunk another chunk',
+        loading: true,
+      },
+      {
+        chunks: ['one chunk ', 'another chunk', ''],
+        message: 'one chunk another chunk',
+        loading: true,
+      },
+      {
+        chunks: ['one chunk ', 'another chunk', ''],
+        message: 'one chunk another chunk',
         loading: false,
       },
     ];
@@ -69,23 +52,67 @@ describe('getStreamObservable', () => {
     mockReader.read
       .mockResolvedValueOnce({
         done: false,
-        value: new Uint8Array(
-          new TextEncoder().encode(`data: ${JSON.stringify(expectedStates[1].chunks[0])}`)
-        ),
+        value: new Uint8Array(new TextEncoder().encode(`one chunk `)),
       })
       .mockResolvedValueOnce({
         done: false,
-        value: new Uint8Array(new TextEncoder().encode(``)),
+        value: new Uint8Array(new TextEncoder().encode(`another chunk`)),
       })
       .mockResolvedValueOnce({
         done: false,
-        value: new Uint8Array(new TextEncoder().encode('data: [DONE]\n')),
+        value: new Uint8Array(new TextEncoder().encode('')),
       })
       .mockResolvedValue({
         done: true,
       });
 
-    const source = getStreamObservable(typedReader, setLoading);
+    const source = getStreamObservable(typedReader, setLoading, false);
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => emittedStates.push(state),
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
+
+  it('should stream errors when reader contains errors', (done) => {
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      { chunks: [], loading: true },
+      {
+        chunks: [`${API_ERROR}\n\nis an error`],
+        message: `${API_ERROR}\n\nis an error`,
+        loading: true,
+      },
+      {
+        chunks: [`${API_ERROR}\n\nis an error`],
+        message: `${API_ERROR}\n\nis an error`,
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(JSON.stringify({ message: 'is an error' }))),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
+    const source = getStreamObservable(typedReader, setLoading, true);
     const emittedStates: PromptObservableState[] = [];
 
     source.subscribe({
@@ -111,7 +138,7 @@ describe('getStreamObservable', () => {
     const error = new Error('Test Error');
     // Simulate an error
     mockReader.read.mockRejectedValue(error);
-    const source = getStreamObservable(typedReader, setLoading);
+    const source = getStreamObservable(typedReader, setLoading, false);
 
     source.subscribe({
       next: (state) => {},
