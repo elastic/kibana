@@ -29,8 +29,8 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -43,7 +43,7 @@ interface StartPlugins {
   dataViews: DataViewsPublicPluginStart;
   dataVisualizer?: DataVisualizerPluginStart;
   embeddable: EmbeddableStart;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
   maps?: MapsStartApi;
