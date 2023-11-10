@@ -48,7 +48,7 @@ const configSchema = schema.object({
     }),
     thresholdRule: schema.object({
       enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
         traditional: schema.boolean({ defaultValue: true }),
       }),
     }),
